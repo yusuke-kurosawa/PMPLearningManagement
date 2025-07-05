@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Network, Layers, ArrowRight, BookOpen, Sparkles, TrendingUp, Brain } from 'lucide-react';
+import { Grid, Network, Layers, ArrowRight, BookOpen, Sparkles, TrendingUp, Brain, GraduationCap } from 'lucide-react';
 
 const Home = () => {
   const features = [
@@ -54,6 +54,14 @@ const Home = () => {
       icon: Brain,
       link: '/flashcards',
       color: 'bg-indigo-500',
+      isNew: true
+    },
+    {
+      title: 'PMP模擬試験',
+      description: '新機能！実際のPMP試験形式で練習。180問・230分のフル模擬試験で、詳細な結果分析と弱点把握が可能。',
+      icon: GraduationCap,
+      link: '/mock-exam',
+      color: 'bg-gradient-to-r from-emerald-500 to-teal-500',
       isNew: true
     }
   ];

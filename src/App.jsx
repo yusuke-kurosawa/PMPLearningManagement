@@ -10,6 +10,8 @@ import PMPGlossary from './components/PMPGlossary';
 import VisualizationHub from './components/VisualizationHub';
 import LearningProgressDashboard from './components/LearningProgressDashboard';
 import FlashCardLearning from './components/FlashCardLearning';
+import MockExam from './components/MockExam';
+import ExamResults from './components/ExamResults';
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
             <Route path="/visualizations" element={<VisualizationHub />} />
             <Route path="/progress" element={<LearningProgressDashboard />} />
             <Route path="/flashcards" element={<FlashCardLearning />} />
+            <Route path="/mock-exam" element={<MockExam />} />
+            <Route path="/exam-results" element={<ExamResults />} />
           </Routes>
         </PageTransition>
       </div>

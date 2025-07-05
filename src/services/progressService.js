@@ -201,6 +201,57 @@ class ProgressService {
     };
   }
 
+  // 模擬試験結果の記録
+  recordExamResult(examData) {
+    const progress = this.loadProgress();
+    if (!progress.examResults) {
+      progress.examResults = [];
+    }
+    
+    progress.examResults.push(examData);
+    
+    // 最新20回分の結果のみ保持
+    if (progress.examResults.length > 20) {
+      progress.examResults = progress.examResults.slice(-20);
+    }
+    
+    this.saveProgress(progress);
+  }
+
+  // 模擬試験統計の取得
+  getExamStats() {
+    const progress = this.loadProgress();
+    const examResults = progress.examResults || [];
+    
+    if (examResults.length === 0) {
+      return {
+        totalExams: 0,
+        averageScore: 0,
+        highestScore: 0,
+        passCount: 0,
+        passRate: 0,
+        lastExam: null
+      };
+    }
+    
+    const scores = examResults.map(r => r.results.score);
+    const totalScore = scores.reduce((sum, score) => sum + score, 0);
+    const passCount = scores.filter(score => score >= 61).length;
+    
+    return {
+      totalExams: examResults.length,
+      averageScore: Math.round(totalScore / examResults.length),
+      highestScore: Math.max(...scores),
+      passCount,
+      passRate: Math.round((passCount / examResults.length) * 100),
+      lastExam: examResults[examResults.length - 1].timestamp,
+      recentScores: examResults.slice(-5).map(r => ({
+        score: r.results.score,
+        timestamp: r.timestamp
+      }))
+    };
+  }
+
   // 学習統計の計算
   calculateStudyStats(studySessions, period = 'week') {
     const now = new Date();
