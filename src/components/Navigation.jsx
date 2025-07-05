@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Grid, Network, Layers, Home, Menu, X, BookOpen, Sparkles, TrendingUp, Brain, GraduationCap, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import GlobalSearch from './GlobalSearch';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -30,6 +31,8 @@ const Navigation = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
+            {/* Global Search */}
+            <GlobalSearch />
             {navItems.map(({ path, label, icon: Icon, isNew }) => {
               const isActive = location.pathname === path;
               return (
@@ -67,6 +70,8 @@ const Navigation = () => {
           
           {/* Mobile menu button and dark mode toggle */}
           <div className="flex items-center gap-2 md:hidden">
+            {/* Mobile Global Search */}
+            <GlobalSearch />
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
