@@ -110,3 +110,86 @@
 .card-flip-container {
   perspective: 1000px;
 }
+
+/* ダークモードのスタイル */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 hover:bg-gray-500;
+}
+
+/* 高コントラストモード */
+.high-contrast {
+  filter: contrast(1.2);
+}
+
+.high-contrast button,
+.high-contrast a {
+  @apply ring-2 ring-offset-2 ring-black dark:ring-white;
+}
+
+/* コンパクトモード */
+.compact {
+  @apply text-sm;
+}
+
+.compact h1 {
+  @apply text-2xl;
+}
+
+.compact h2 {
+  @apply text-xl;
+}
+
+.compact h3 {
+  @apply text-lg;
+}
+
+.compact button,
+.compact .card {
+  @apply py-2 px-3;
+}
+
+/* アニメーション無効化 */
+.no-animations * {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+/* カスタムカラーテーマ */
+.theme-primary {
+  @apply bg-blue-600 dark:bg-blue-500;
+}
+
+.theme-primary-hover {
+  @apply hover:bg-blue-700 dark:hover:bg-blue-600;
+}
+
+.theme-secondary {
+  @apply bg-blue-100 dark:bg-blue-900;
+}
+
+.theme-text-primary {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+/* レスポンシブフォントサイズ */
+.text-responsive {
+  @apply text-sm md:text-base lg:text-lg;
+}
+
+/* ダークモード用の影 */
+.dark-shadow {
+  @apply shadow-lg dark:shadow-2xl dark:shadow-gray-900/50;
+}
+
+/* カスタムトランジション */
+.transition-theme {
+  @apply transition-colors duration-300 ease-in-out;
+}
