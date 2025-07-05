@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Network, Layers, ArrowRight } from 'lucide-react';
+import { Grid, Network, Layers, ArrowRight, BookOpen } from 'lucide-react';
 
 const Home = () => {
   const features = [
@@ -24,6 +24,13 @@ const Home = () => {
       icon: Layers,
       link: '/integrated',
       color: 'bg-purple-500'
+    },
+    {
+      title: 'PMP用語集',
+      description: 'PMP試験に必要な重要用語を網羅した検索可能な用語集。カテゴリ別フィルタリング、関連用語の表示、日英対応で効率的な学習をサポート。',
+      icon: BookOpen,
+      link: '/glossary',
+      color: 'bg-orange-500'
     }
   ];
 
@@ -41,7 +48,7 @@ const Home = () => {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
