@@ -15,6 +15,15 @@ const PMBOKMatrix = memo(() => {
     '終結'
   ];
 
+  // モバイル用の短縮名
+  const processGroupsShort = {
+    '立上げ': '立上げ',
+    '計画': '計画',
+    '実行': '実行',
+    '監視・コントロール': '監視',
+    '終結': '終結'
+  };
+
   const knowledgeAreas = [
     { id: 'integration', name: 'プロジェクト統合マネジメント', processes: 7 },
     { id: 'scope', name: 'プロジェクト・スコープ・マネジメント', processes: 6 },
@@ -200,16 +209,16 @@ const PMBOKMatrix = memo(() => {
         </div>
 
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full min-w-[640px]">
+          <table className="w-full min-w-[600px] sm:min-w-[800px]">
             <thead className="bg-gray-50 border-b sticky top-0 z-10">
               <tr>
-                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap w-40 sm:w-60 md:w-80">
                   知識エリア
                 </th>
                 {processGroups.map(group => (
-                  <th key={group} className="px-3 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  <th key={group} className="px-1 sm:px-3 md:px-6 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-tighter sm:tracking-wider">
                     <span className="hidden sm:inline">{group}</span>
-                    <span className="sm:hidden">{group.split(' ')[0]}</span>
+                    <span className="sm:hidden">{processGroupsShort[group]}</span>
                   </th>
                 ))}
               </tr>
@@ -225,7 +234,7 @@ const PMBOKMatrix = memo(() => {
                 return (
                   <React.Fragment key={area.id}>
                     <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <td className="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                         <button
                           onClick={() => toggleArea(area.id)}
                           className="flex items-center space-x-1 sm:space-x-2 text-left w-full"
@@ -247,7 +256,7 @@ const PMBOKMatrix = memo(() => {
                       {processGroups.map(group => {
                         const groupProcesses = filteredProcesses[area.id]?.[group] || [];
                         return (
-                          <td key={group} className="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                          <td key={group} className="px-1 sm:px-3 md:px-6 py-3 sm:py-4 text-center">
                             {groupProcesses.length > 0 && (
                               <span className="inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 text-blue-800 text-xs sm:text-sm font-semibold">
                                 {groupProcesses.length}
