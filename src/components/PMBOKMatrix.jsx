@@ -8,114 +8,114 @@ const PMBOKMatrix = memo(() => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const processGroups = [
-    'Initiating',
-    'Planning',
-    'Executing',
-    'Monitoring & Controlling',
-    'Closing'
+    '立上げ',
+    '計画',
+    '実行',
+    '監視・コントロール',
+    '終結'
   ];
 
   const knowledgeAreas = [
-    { id: 'integration', name: 'Project Integration Management', processes: 7 },
-    { id: 'scope', name: 'Project Scope Management', processes: 6 },
-    { id: 'schedule', name: 'Project Schedule Management', processes: 6 },
-    { id: 'cost', name: 'Project Cost Management', processes: 4 },
-    { id: 'quality', name: 'Project Quality Management', processes: 3 },
-    { id: 'resource', name: 'Project Resource Management', processes: 6 },
-    { id: 'communications', name: 'Project Communications Management', processes: 3 },
-    { id: 'risk', name: 'Project Risk Management', processes: 7 },
-    { id: 'procurement', name: 'Project Procurement Management', processes: 3 },
-    { id: 'stakeholder', name: 'Project Stakeholder Management', processes: 4 }
+    { id: 'integration', name: 'プロジェクト統合マネジメント', processes: 7 },
+    { id: 'scope', name: 'プロジェクト・スコープ・マネジメント', processes: 6 },
+    { id: 'schedule', name: 'プロジェクト・スケジュール・マネジメント', processes: 6 },
+    { id: 'cost', name: 'プロジェクト・コスト・マネジメント', processes: 4 },
+    { id: 'quality', name: 'プロジェクト品質マネジメント', processes: 3 },
+    { id: 'resource', name: 'プロジェクト資源マネジメント', processes: 6 },
+    { id: 'communications', name: 'プロジェクト・コミュニケーション・マネジメント', processes: 3 },
+    { id: 'risk', name: 'プロジェクト・リスク・マネジメント', processes: 7 },
+    { id: 'procurement', name: 'プロジェクト調達マネジメント', processes: 3 },
+    { id: 'stakeholder', name: 'プロジェクト・ステークホルダー・マネジメント', processes: 4 }
   ];
 
   const processes = {
     integration: {
-      'Initiating': ['Develop Project Charter'],
-      'Planning': ['Develop Project Management Plan'],
-      'Executing': ['Direct and Manage Project Work', 'Manage Project Knowledge'],
-      'Monitoring & Controlling': ['Monitor and Control Project Work', 'Perform Integrated Change Control'],
-      'Closing': ['Close Project or Phase']
+      '立上げ': ['プロジェクト憲章の作成'],
+      '計画': ['プロジェクトマネジメント計画書の作成'],
+      '実行': ['プロジェクト作業の指揮・マネジメント', 'プロジェクト知識のマネジメント'],
+      '監視・コントロール': ['プロジェクト作業の監視・コントロール', '統合変更管理'],
+      '終結': ['プロジェクトやフェーズの終結']
     },
     scope: {
-      'Planning': ['Plan Scope Management', 'Collect Requirements', 'Define Scope', 'Create WBS'],
-      'Monitoring & Controlling': ['Validate Scope', 'Control Scope']
+      '計画': ['スコープ・マネジメントの計画', '要求事項の収集', 'スコープの定義', 'WBSの作成'],
+      '監視・コントロール': ['スコープの妥当性確認', 'スコープのコントロール']
     },
     schedule: {
-      'Planning': ['Plan Schedule Management', 'Define Activities', 'Sequence Activities', 'Estimate Activity Durations', 'Develop Schedule'],
-      'Monitoring & Controlling': ['Control Schedule']
+      '計画': ['スケジュール・マネジメントの計画', 'アクティビティの定義', 'アクティビティの順序設定', 'アクティビティの所要期間見積り', 'スケジュールの作成'],
+      '監視・コントロール': ['スケジュールのコントロール']
     },
     cost: {
-      'Planning': ['Plan Cost Management', 'Estimate Costs', 'Determine Budget'],
-      'Monitoring & Controlling': ['Control Costs']
+      '計画': ['コスト・マネジメントの計画', 'コストの見積り', '予算の設定'],
+      '監視・コントロール': ['コストのコントロール']
     },
     quality: {
-      'Planning': ['Plan Quality Management'],
-      'Executing': ['Manage Quality'],
-      'Monitoring & Controlling': ['Control Quality']
+      '計画': ['品質マネジメントの計画'],
+      '実行': ['品質のマネジメント'],
+      '監視・コントロール': ['品質のコントロール']
     },
     resource: {
-      'Planning': ['Plan Resource Management', 'Estimate Activity Resources'],
-      'Executing': ['Acquire Resources', 'Develop Team', 'Manage Team'],
-      'Monitoring & Controlling': ['Control Resources']
+      '計画': ['資源マネジメントの計画', 'アクティビティ資源の見積り'],
+      '実行': ['資源の獲得', 'チームの育成', 'チームのマネジメント'],
+      '監視・コントロール': ['資源のコントロール']
     },
     communications: {
-      'Planning': ['Plan Communications Management'],
-      'Executing': ['Manage Communications'],
-      'Monitoring & Controlling': ['Monitor Communications']
+      '計画': ['コミュニケーション・マネジメントの計画'],
+      '実行': ['コミュニケーションのマネジメント'],
+      '監視・コントロール': ['コミュニケーションの監視']
     },
     risk: {
-      'Planning': ['Plan Risk Management', 'Identify Risks', 'Perform Qualitative Risk Analysis', 'Perform Quantitative Risk Analysis', 'Plan Risk Responses'],
-      'Executing': ['Implement Risk Responses'],
-      'Monitoring & Controlling': ['Monitor Risks']
+      '計画': ['リスク・マネジメントの計画', 'リスクの特定', '定性的リスク分析', '定量的リスク分析', 'リスク対応の計画'],
+      '実行': ['リスク対応策の実行'],
+      '監視・コントロール': ['リスクの監視']
     },
     procurement: {
-      'Planning': ['Plan Procurement Management'],
-      'Executing': ['Conduct Procurements'],
-      'Monitoring & Controlling': ['Control Procurements']
+      '計画': ['調達マネジメントの計画'],
+      '実行': ['調達の実行'],
+      '監視・コントロール': ['調達のコントロール']
     },
     stakeholder: {
-      'Initiating': ['Identify Stakeholders'],
-      'Planning': ['Plan Stakeholder Engagement'],
-      'Executing': ['Manage Stakeholder Engagement'],
-      'Monitoring & Controlling': ['Monitor Stakeholder Engagement']
+      '立上げ': ['ステークホルダーの特定'],
+      '計画': ['ステークホルダー・エンゲージメントの計画'],
+      '実行': ['ステークホルダー・エンゲージメントのマネジメント'],
+      '監視・コントロール': ['ステークホルダー・エンゲージメントの監視']
     }
   };
 
   const processDetails = {
-    'Develop Project Charter': {
-      inputs: ['Business documents', 'Agreements', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Data gathering', 'Interpersonal and team skills', 'Meetings'],
-      outputs: ['Project charter', 'Assumption log']
+    'プロジェクト憲章の作成': {
+      inputs: ['ビジネス文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', '会議'],
+      outputs: ['プロジェクト憲章', '前提条件ログ']
     },
-    'Develop Project Management Plan': {
-      inputs: ['Project charter', 'Outputs from other processes', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Data gathering', 'Interpersonal and team skills', 'Meetings'],
-      outputs: ['Project management plan']
+    'プロジェクトマネジメント計画書の作成': {
+      inputs: ['プロジェクト憲章', '他のプロセスからのアウトプット', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', '会議'],
+      outputs: ['プロジェクトマネジメント計画書']
     },
-    'Direct and Manage Project Work': {
-      inputs: ['Project management plan', 'Project documents', 'Approved change requests', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Project management information system', 'Meetings'],
-      outputs: ['Deliverables', 'Work performance data', 'Issue log', 'Change requests', 'Project management plan updates', 'Project documents updates', 'Organizational process assets updates']
+    'プロジェクト作業の指揮・マネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '承認済み変更要求', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'プロジェクトマネジメント情報システム', '会議'],
+      outputs: ['成果物', '作業パフォーマンス・データ', '課題ログ', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
     },
-    'Manage Project Knowledge': {
-      inputs: ['Project management plan', 'Project documents', 'Deliverables', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Knowledge management', 'Information management', 'Interpersonal and team skills'],
-      outputs: ['Lessons learned register', 'Project management plan updates', 'Organizational process assets updates']
+    'プロジェクト知識のマネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '成果物', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '知識マネジメント', '情報マネジメント', '対人関係とチームに関するスキル'],
+      outputs: ['教訓登録簿', 'プロジェクトマネジメント計画書更新版', '組織のプロセス資産更新版']
     },
-    'Monitor and Control Project Work': {
-      inputs: ['Project management plan', 'Project documents', 'Work performance information', 'Agreements', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Data analysis', 'Decision making', 'Meetings'],
-      outputs: ['Work performance reports', 'Change requests', 'Project management plan updates', 'Project documents updates']
+    'プロジェクト作業の監視・コントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス情報', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '意思決定', '会議'],
+      outputs: ['作業パフォーマンス報告書', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
     },
-    'Perform Integrated Change Control': {
-      inputs: ['Project management plan', 'Project documents', 'Work performance reports', 'Change requests', 'Enterprise environmental factors', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Change control tools', 'Data analysis', 'Decision making', 'Meetings'],
-      outputs: ['Approved change requests', 'Project management plan updates', 'Project documents updates']
+    '統合変更管理': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス報告書', '変更要求', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '変更管理ツール', 'データ分析', '意思決定', '会議'],
+      outputs: ['承認済み変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
     },
-    'Close Project or Phase': {
-      inputs: ['Project charter', 'Project management plan', 'Project documents', 'Accepted deliverables', 'Business documents', 'Agreements', 'Procurement documentation', 'Organizational process assets'],
-      tools: ['Expert judgment', 'Data analysis', 'Meetings'],
-      outputs: ['Project documents updates', 'Final product, service, or result transition', 'Final report', 'Organizational process assets updates']
+    'プロジェクトやフェーズの終結': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '受入済み成果物', 'ビジネス文書', '合意書', '調達文書', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '会議'],
+      outputs: ['プロジェクト文書更新版', '最終プロダクト、サービス、所産の引渡し', '最終報告書', '組織のプロセス資産更新版']
     }
   };
 
@@ -176,13 +176,13 @@ const PMBOKMatrix = memo(() => {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="p-4 sm:p-6 border-b">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
-            PMBOK 6th Edition - Process Matrix (49 Processes)
+            PMBOK 第6版 - プロセス・マトリックス (49プロセス)
           </h1>
           
           <div className="relative">
             <input
               type="text"
-              placeholder="Search processes..."
+              placeholder="プロセスを検索..."
               className="w-full px-3 sm:px-4 py-2 pl-9 sm:pl-10 pr-10 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -204,7 +204,7 @@ const PMBOKMatrix = memo(() => {
             <thead className="bg-gray-50 border-b sticky top-0 z-10">
               <tr>
                 <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Knowledge Area
+                  知識エリア
                 </th>
                 {processGroups.map(group => (
                   <th key={group} className="px-3 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -239,10 +239,9 @@ const PMBOKMatrix = memo(() => {
                             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
                           )}
                           <span className="font-medium text-gray-900 text-sm sm:text-base break-words">
-                            <span className="hidden sm:inline">{area.name}</span>
-                            <span className="sm:hidden">{area.name.replace(' Management', '')}</span>
+                            {area.name}
                           </span>
-                          <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">({processCount})</span>
+                          <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">({processCount}プロセス)</span>
                         </button>
                       </td>
                       {processGroups.map(group => {
@@ -318,7 +317,7 @@ const PMBOKMatrix = memo(() => {
                 ) : (
                   <>
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Inputs</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">インプット</h3>
                       <ul className="list-disc list-inside space-y-1">
                         {processDetails[selectedProcess].inputs.map((input, idx) => (
                           <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{input}</li>
@@ -327,7 +326,7 @@ const PMBOKMatrix = memo(() => {
                     </div>
                     
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Tools & Techniques</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">ツールと技法</h3>
                       <ul className="list-disc list-inside space-y-1">
                         {processDetails[selectedProcess].tools.map((tool, idx) => (
                           <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{tool}</li>
@@ -336,7 +335,7 @@ const PMBOKMatrix = memo(() => {
                     </div>
                     
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Outputs</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">アウトプット</h3>
                       <ul className="list-disc list-inside space-y-1">
                         {processDetails[selectedProcess].outputs.map((output, idx) => (
                           <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{output}</li>

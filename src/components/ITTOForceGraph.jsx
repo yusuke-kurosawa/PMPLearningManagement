@@ -18,26 +18,26 @@ const ITTOForceGraph = React.memo(() => {
 
   // Process groups and knowledge areas for filtering
   const processGroups = useMemo(() => 
-    ['Initiating', 'Planning', 'Executing', 'Monitoring & Controlling', 'Closing'],
+    ['立ち上げ', '計画', '実行', '監視・コントロール', '終結'],
   []);
   
   const knowledgeAreas = useMemo(() => 
-    ['Integration', 'Scope', 'Schedule', 'Cost', 'Quality',
-     'Resource', 'Communications', 'Risk', 'Procurement', 'Stakeholder'],
+    ['統合', 'スコープ', 'スケジュール', 'コスト', '品質',
+     '資源', 'コミュニケーション', 'リスク', '調達', 'ステークホルダー'],
   []);
 
   // Color scales
   const knowledgeAreaColors = useMemo(() => ({
-    'Integration': '#8B5CF6',
-    'Scope': '#3B82F6',
-    'Schedule': '#06B6D4',
-    'Cost': '#10B981',
-    'Quality': '#F59E0B',
-    'Resource': '#EF4444',
-    'Communications': '#EC4899',
-    'Risk': '#6366F1',
-    'Procurement': '#84CC16',
-    'Stakeholder': '#F97316'
+    '統合': '#8B5CF6',
+    'スコープ': '#3B82F6',
+    'スケジュール': '#06B6D4',
+    'コスト': '#10B981',
+    '品質': '#F59E0B',
+    '資源': '#EF4444',
+    'コミュニケーション': '#EC4899',
+    'リスク': '#6366F1',
+    '調達': '#84CC16',
+    'ステークホルダー': '#F97316'
   }), []);
 
   const nodeTypeShapes = useMemo(() => ({
@@ -84,61 +84,61 @@ const ITTOForceGraph = React.memo(() => {
       const data = {
       nodes: [
         // Integration Management Processes
-        { id: 'p1', name: 'Develop Project Charter', type: 'process', group: 'Initiating', area: 'Integration' },
-        { id: 'p2', name: 'Develop Project Management Plan', type: 'process', group: 'Planning', area: 'Integration' },
-        { id: 'p3', name: 'Direct and Manage Project Work', type: 'process', group: 'Executing', area: 'Integration' },
-        { id: 'p4', name: 'Manage Project Knowledge', type: 'process', group: 'Executing', area: 'Integration' },
-        { id: 'p5', name: 'Monitor and Control Project Work', type: 'process', group: 'Monitoring & Controlling', area: 'Integration' },
-        { id: 'p6', name: 'Perform Integrated Change Control', type: 'process', group: 'Monitoring & Controlling', area: 'Integration' },
-        { id: 'p7', name: 'Close Project or Phase', type: 'process', group: 'Closing', area: 'Integration' },
+        { id: 'p1', name: 'プロジェクト憲章の作成', type: 'process', group: '立ち上げ', area: '統合' },
+        { id: 'p2', name: 'プロジェクトマネジメント計画書の作成', type: 'process', group: '計画', area: '統合' },
+        { id: 'p3', name: 'プロジェクト作業の指揮・マネジメント', type: 'process', group: '実行', area: '統合' },
+        { id: 'p4', name: 'プロジェクト知識のマネジメント', type: 'process', group: '実行', area: '統合' },
+        { id: 'p5', name: 'プロジェクト作業の監視・コントロール', type: 'process', group: '監視・コントロール', area: '統合' },
+        { id: 'p6', name: '統合変更管理', type: 'process', group: '監視・コントロール', area: '統合' },
+        { id: 'p7', name: 'プロジェクトやフェーズの終結', type: 'process', group: '終結', area: '統合' },
         
         // Scope Management Processes
-        { id: 'p8', name: 'Plan Scope Management', type: 'process', group: 'Planning', area: 'Scope' },
-        { id: 'p9', name: 'Collect Requirements', type: 'process', group: 'Planning', area: 'Scope' },
-        { id: 'p10', name: 'Define Scope', type: 'process', group: 'Planning', area: 'Scope' },
-        { id: 'p11', name: 'Create WBS', type: 'process', group: 'Planning', area: 'Scope' },
-        { id: 'p12', name: 'Validate Scope', type: 'process', group: 'Monitoring & Controlling', area: 'Scope' },
-        { id: 'p13', name: 'Control Scope', type: 'process', group: 'Monitoring & Controlling', area: 'Scope' },
+        { id: 'p8', name: 'スコープ・マネジメントの計画', type: 'process', group: '計画', area: 'スコープ' },
+        { id: 'p9', name: '要求事項の収集', type: 'process', group: '計画', area: 'スコープ' },
+        { id: 'p10', name: 'スコープの定義', type: 'process', group: '計画', area: 'スコープ' },
+        { id: 'p11', name: 'WBSの作成', type: 'process', group: '計画', area: 'スコープ' },
+        { id: 'p12', name: 'スコープの妥当性確認', type: 'process', group: '監視・コントロール', area: 'スコープ' },
+        { id: 'p13', name: 'スコープのコントロール', type: 'process', group: '監視・コントロール', area: 'スコープ' },
         
         // Stakeholder Management Processes
-        { id: 'p14', name: 'Identify Stakeholders', type: 'process', group: 'Initiating', area: 'Stakeholder' },
-        { id: 'p15', name: 'Plan Stakeholder Engagement', type: 'process', group: 'Planning', area: 'Stakeholder' },
-        { id: 'p16', name: 'Manage Stakeholder Engagement', type: 'process', group: 'Executing', area: 'Stakeholder' },
-        { id: 'p17', name: 'Monitor Stakeholder Engagement', type: 'process', group: 'Monitoring & Controlling', area: 'Stakeholder' },
+        { id: 'p14', name: 'ステークホルダーの特定', type: 'process', group: '立ち上げ', area: 'ステークホルダー' },
+        { id: 'p15', name: 'ステークホルダー・エンゲージメントの計画', type: 'process', group: '計画', area: 'ステークホルダー' },
+        { id: 'p16', name: 'ステークホルダー・エンゲージメントのマネジメント', type: 'process', group: '実行', area: 'ステークホルダー' },
+        { id: 'p17', name: 'ステークホルダー・エンゲージメントの監視', type: 'process', group: '監視・コントロール', area: 'ステークホルダー' },
         
         // Key Inputs
-        { id: 'i1', name: 'Business Documents', type: 'input' },
-        { id: 'i2', name: 'Agreements', type: 'input' },
-        { id: 'i3', name: 'EEF', type: 'input' },
-        { id: 'i4', name: 'OPA', type: 'input' },
-        { id: 'i5', name: 'Project Charter', type: 'input' },
-        { id: 'i6', name: 'Project Management Plan', type: 'input' },
-        { id: 'i7', name: 'Project Documents', type: 'input' },
-        { id: 'i8', name: 'Work Performance Data', type: 'input' },
-        { id: 'i9', name: 'Work Performance Reports', type: 'input' },
-        { id: 'i10', name: 'Change Requests', type: 'input' },
+        { id: 'i1', name: 'ビジネス文書', type: 'input' },
+        { id: 'i2', name: '合意書', type: 'input' },
+        { id: 'i3', name: '組織体の環境要因', type: 'input' },
+        { id: 'i4', name: '組織のプロセス資産', type: 'input' },
+        { id: 'i5', name: 'プロジェクト憲章', type: 'input' },
+        { id: 'i6', name: 'プロジェクトマネジメント計画書', type: 'input' },
+        { id: 'i7', name: 'プロジェクト文書', type: 'input' },
+        { id: 'i8', name: '作業パフォーマンス・データ', type: 'input' },
+        { id: 'i9', name: '作業パフォーマンス報告書', type: 'input' },
+        { id: 'i10', name: '変更要求', type: 'input' },
         
         // Key Tools
-        { id: 't1', name: 'Expert Judgment', type: 'tool' },
-        { id: 't2', name: 'Data Gathering', type: 'tool' },
-        { id: 't3', name: 'Data Analysis', type: 'tool' },
-        { id: 't4', name: 'Decision Making', type: 'tool' },
-        { id: 't5', name: 'Meetings', type: 'tool' },
-        { id: 't6', name: 'Interpersonal Skills', type: 'tool' },
-        { id: 't7', name: 'PMIS', type: 'tool' },
-        { id: 't8', name: 'Decomposition', type: 'tool' },
+        { id: 't1', name: '専門家の判断', type: 'tool' },
+        { id: 't2', name: 'データ収集', type: 'tool' },
+        { id: 't3', name: 'データ分析', type: 'tool' },
+        { id: 't4', name: '意思決定', type: 'tool' },
+        { id: 't5', name: '会議', type: 'tool' },
+        { id: 't6', name: '人間関係とチームに関するスキル', type: 'tool' },
+        { id: 't7', name: 'プロジェクトマネジメント情報システム', type: 'tool' },
+        { id: 't8', name: '要素分解', type: 'tool' },
         
         // Key Outputs
-        { id: 'o1', name: 'Project Charter', type: 'output' },
-        { id: 'o2', name: 'Project Management Plan', type: 'output' },
-        { id: 'o3', name: 'Deliverables', type: 'output' },
-        { id: 'o4', name: 'Work Performance Data', type: 'output' },
-        { id: 'o5', name: 'Work Performance Reports', type: 'output' },
-        { id: 'o6', name: 'Change Requests', type: 'output' },
-        { id: 'o7', name: 'Project Documents Updates', type: 'output' },
-        { id: 'o8', name: 'Stakeholder Register', type: 'output' },
-        { id: 'o9', name: 'Requirements Documentation', type: 'output' },
-        { id: 'o10', name: 'Scope Baseline', type: 'output' }
+        { id: 'o1', name: 'プロジェクト憲章', type: 'output' },
+        { id: 'o2', name: 'プロジェクトマネジメント計画書', type: 'output' },
+        { id: 'o3', name: '成果物', type: 'output' },
+        { id: 'o4', name: '作業パフォーマンス・データ', type: 'output' },
+        { id: 'o5', name: '作業パフォーマンス報告書', type: 'output' },
+        { id: 'o6', name: '変更要求', type: 'output' },
+        { id: 'o7', name: 'プロジェクト文書更新版', type: 'output' },
+        { id: 'o8', name: 'ステークホルダー登録簿', type: 'output' },
+        { id: 'o9', name: '要求事項文書', type: 'output' },
+        { id: 'o10', name: 'スコープ・ベースライン', type: 'output' }
       ],
       links: [
         // Develop Project Charter
@@ -366,7 +366,7 @@ const ITTOForceGraph = React.memo(() => {
     node.append("title")
       .text(d => {
         if (d.type === 'process') {
-          return `${d.name}\nGroup: ${d.group}\nArea: ${d.area}`;
+          return `${d.name}\nプロセス群: ${d.group}\n知識エリア: ${d.area}`;
         }
         return d.name;
       });
@@ -475,7 +475,7 @@ const ITTOForceGraph = React.memo(() => {
         <button
           onClick={togglePanel}
           className="absolute top-4 left-4 z-20 bg-white rounded-lg shadow-lg p-2"
-          aria-label="Toggle menu"
+          aria-label="メニュー切り替え"
         >
           {isPanelOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -490,27 +490,27 @@ const ITTOForceGraph = React.memo(() => {
           : 'w-80'
       } bg-white shadow-lg overflow-y-auto`}>
         <div className="p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-bold mb-4">PMBOK ITTO Force Graph</h2>
+          <h2 className="text-lg md:text-xl font-bold mb-4">PMBOK ITTOフォースグラフ</h2>
         
           {/* Legend */}
           <div className="mb-4 md:mb-6">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Legend</h3>
+            <h3 className="font-semibold mb-2 text-sm md:text-base">凡例</h3>
             <div className="space-y-1 md:space-y-2 text-xs md:text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 md:w-6 md:h-6 bg-blue-500 rounded-full flex-shrink-0"></div>
-                <span>Process (by Knowledge Area)</span>
+                <span>プロセス（知識エリア別）</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 md:w-6 md:h-6 bg-blue-500 transform rotate-45 flex-shrink-0"></div>
-                <span>Input</span>
+                <span>インプット</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 md:w-6 md:h-6 bg-green-500 flex-shrink-0"></div>
-                <span>Tool & Technique</span>
+                <span>ツールと技法</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-0 h-0 border-l-[8px] md:border-l-[12px] border-l-transparent border-r-[8px] md:border-r-[12px] border-r-transparent border-b-[14px] md:border-b-[20px] border-b-amber-500 flex-shrink-0"></div>
-                <span>Output</span>
+                <span>アウトプット</span>
               </div>
             </div>
           </div>
@@ -519,11 +519,11 @@ const ITTOForceGraph = React.memo(() => {
           <div className="mb-4 md:mb-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm md:text-base">
               <Filter className="w-3 h-3 md:w-4 md:h-4" />
-              Filters
+              フィルター
             </h3>
           
             <div className="mb-3 md:mb-4">
-              <h4 className="text-xs md:text-sm font-medium mb-2">Process Groups</h4>
+              <h4 className="text-xs md:text-sm font-medium mb-2">プロセス群</h4>
               <div className="space-y-1">
                 {processGroups.map(group => (
                   <label key={group} className="flex items-center gap-2 text-xs md:text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
@@ -540,7 +540,7 @@ const ITTOForceGraph = React.memo(() => {
             </div>
 
             <div>
-              <h4 className="text-xs md:text-sm font-medium mb-2">Knowledge Areas</h4>
+              <h4 className="text-xs md:text-sm font-medium mb-2">知識エリア</h4>
               <div className="space-y-1">
                 {knowledgeAreas.map(area => (
                   <label key={area} className="flex items-center gap-2 text-xs md:text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
@@ -565,34 +565,34 @@ const ITTOForceGraph = React.memo(() => {
 
           {/* Zoom Controls */}
           <div className="border-t pt-3 md:pt-4">
-            <h3 className="font-semibold mb-2 text-sm md:text-base">Controls</h3>
+            <h3 className="font-semibold mb-2 text-sm md:text-base">コントロール</h3>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => window.zoomIn && window.zoomIn()}
                 className="flex items-center gap-1 px-2 md:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs md:text-sm"
               >
                 <ZoomIn className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden md:inline">Zoom In</span>
+                <span className="hidden md:inline">拡大</span>
               </button>
               <button
                 onClick={() => window.zoomOut && window.zoomOut()}
                 className="flex items-center gap-1 px-2 md:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs md:text-sm"
               >
                 <ZoomOut className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden md:inline">Zoom Out</span>
+                <span className="hidden md:inline">縮小</span>
               </button>
               <button
                 onClick={() => window.resetZoom && window.resetZoom()}
                 className="flex items-center gap-1 px-2 md:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs md:text-sm"
               >
                 <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden md:inline">Reset</span>
+                <span className="hidden md:inline">リセット</span>
               </button>
             </div>
             <p className="text-xs text-gray-600 mt-2">
-              • {isMobile ? 'Touch' : 'Click'} node to focus<br/>
-              • {isMobile ? 'Drag' : 'Drag'} nodes to reposition<br/>
-              • {isMobile ? 'Pinch to zoom, drag to pan' : 'Scroll to zoom, drag to pan'}
+              • ノードを{isMobile ? 'タッチ' : 'クリック'}してフォーカス<br/>
+              • ノードをドラッグして位置変更<br/>
+              • {isMobile ? 'ピンチでズーム、ドラッグでパン' : 'スクロールでズーム、ドラッグでパン'}
             </p>
           </div>
         </div>
@@ -604,7 +604,7 @@ const ITTOForceGraph = React.memo(() => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              <p className="mt-4 text-gray-600">Loading ITTO visualization...</p>
+              <p className="mt-4 text-gray-600">ITTO ビジュアライゼーションを読み込み中...</p>
             </div>
           </div>
         ) : (

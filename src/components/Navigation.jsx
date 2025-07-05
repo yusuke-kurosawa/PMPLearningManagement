@@ -7,10 +7,10 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/matrix', label: 'Matrix View', icon: Grid },
-    { path: '/network', label: 'Network Diagram', icon: Network },
-    { path: '/integrated', label: 'Integrated View', icon: Layers }
+    { path: '/', label: 'ホーム', icon: Home },
+    { path: '/matrix', label: 'マトリックス', icon: Grid },
+    { path: '/network', label: 'ネットワーク図', icon: Network },
+    { path: '/integrated', label: '統合ビュー', icon: Layers }
   ];
 
   return (
@@ -18,7 +18,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-lg md:text-xl font-bold text-gray-800">PMBOK Learning</h1>
+            <h1 className="text-lg md:text-xl font-bold text-gray-800">PMBOK学習システム</h1>
           </div>
           
           {/* Desktop Navigation */}

@@ -124,7 +124,7 @@ const IntegratedView = React.memo(() => {
               </button>
             </div>
           )}
-          <React.Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+          <React.Suspense fallback={<div className="flex items-center justify-center h-full">読み込み中...</div>}>
             <PMBOKMatrix />
           </React.Suspense>
         </div>
@@ -162,7 +162,7 @@ const IntegratedView = React.memo(() => {
               </button>
             </div>
           )}
-          <React.Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+          <React.Suspense fallback={<div className="flex items-center justify-center h-full">読み込み中...</div>}>
             <ITTOForceGraph />
           </React.Suspense>
         </div>
