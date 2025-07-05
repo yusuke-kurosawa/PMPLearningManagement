@@ -87,3 +87,26 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* フラッシュカード用のスタイル */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* カードの3D効果 */
+.card-flip-container {
+  perspective: 1000px;
+}

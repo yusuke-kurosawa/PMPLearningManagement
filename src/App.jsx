@@ -9,6 +9,7 @@ import IntegratedView from './components/IntegratedView';
 import PMPGlossary from './components/PMPGlossary';
 import VisualizationHub from './components/VisualizationHub';
 import LearningProgressDashboard from './components/LearningProgressDashboard';
+import FlashCardLearning from './components/FlashCardLearning';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/glossary" element={<PMPGlossary />} />
             <Route path="/visualizations" element={<VisualizationHub />} />
             <Route path="/progress" element={<LearningProgressDashboard />} />
+            <Route path="/flashcards" element={<FlashCardLearning />} />
           </Routes>
         </PageTransition>
       </div>

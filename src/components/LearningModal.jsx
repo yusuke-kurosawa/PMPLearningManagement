@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Clock, BookOpen, Save, Play, Pause } from 'lucide-react';
-import { useProgress } from '../services/progressService';
+import { useProgress, progressService } from '../services/progressService';
 
 const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, processGroup }) => {
   const { updateProgress, updateStudyTime } = useProgress();
@@ -16,16 +16,12 @@ const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, pro
   useEffect(() => {
     if (isOpen && process) {
       // 既存の進捗データを読み込む
-      const loadProgress = async () => {
-        const service = await import('../services/progressService');
-        const existingProgress = service.progressService.getProcessProgress(processId);
-        setProgress(existingProgress || {
-          completed: false,
-          understanding: 0,
-          notes: ''
-        });
-      };
-      loadProgress();
+      const existingProgress = progressService.getProcessProgress(processId);
+      setProgress(existingProgress || {
+        completed: false,
+        understanding: 0,
+        notes: ''
+      });
     }
   }, [isOpen, processId, process]);
 

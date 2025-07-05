@@ -153,6 +153,54 @@ class ProgressService {
     };
   }
 
+  // フラッシュカード学習セッションの記録
+  recordFlashCardSession(sessionData) {
+    const progress = this.loadProgress();
+    if (!progress.flashCardSessions) {
+      progress.flashCardSessions = [];
+    }
+    
+    progress.flashCardSessions.push({
+      ...sessionData,
+      timestamp: new Date().toISOString()
+    });
+    
+    // 最新100セッションのみ保持
+    if (progress.flashCardSessions.length > 100) {
+      progress.flashCardSessions = progress.flashCardSessions.slice(-100);
+    }
+    
+    this.saveProgress(progress);
+  }
+
+  // フラッシュカード統計の取得
+  getFlashCardStats() {
+    const progress = this.loadProgress();
+    const sessions = progress.flashCardSessions || [];
+    
+    if (sessions.length === 0) {
+      return {
+        totalSessions: 0,
+        totalCards: 0,
+        averageAccuracy: 0,
+        totalStudyTime: 0,
+        lastSession: null
+      };
+    }
+    
+    const totalCards = sessions.reduce((sum, s) => sum + s.totalCards, 0);
+    const totalCorrect = sessions.reduce((sum, s) => sum + s.correctAnswers, 0);
+    const totalTime = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    
+    return {
+      totalSessions: sessions.length,
+      totalCards,
+      averageAccuracy: Math.round((totalCorrect / totalCards) * 100),
+      totalStudyTime: totalTime,
+      lastSession: sessions[sessions.length - 1].timestamp
+    };
+  }
+
   // 学習統計の計算
   calculateStudyStats(studySessions, period = 'week') {
     const now = new Date();
@@ -235,35 +283,6 @@ export const useProgress = () => {
   const [progress, setProgress] = useState(null);
   const [statistics, setStatistics] = useState(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const progressData = await progressService.loadProgress();
-        setProgress(progressData);
-        
-        // 統計情報の計算
-        const stats = calculateStatistics(progressData);
-        setStatistics(stats);
-      } catch (error) {
-        console.error('Error loading progress data:', error);
-        // エラーの場合もデフォルトデータで初期化
-        const defaultProgress = progressService.getDefaultProgress();
-        setProgress(defaultProgress);
-        setStatistics(calculateStatistics(defaultProgress));
-      }
-    };
-    
-    loadData();
-    
-    // LocalStorageの変更を監視
-    const handleStorageChange = () => {
-      loadData();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
   const calculateStatistics = (progressData) => {
     const processes = progressService.getAllProcesses();
     const completedCount = Object.values(progressData.processes || {}).filter(p => p.completed).length;
@@ -296,6 +315,35 @@ export const useProgress = () => {
       lastUpdated: progressData.lastUpdated
     };
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const progressData = await progressService.loadProgress();
+        setProgress(progressData);
+        
+        // 統計情報の計算
+        const stats = calculateStatistics(progressData);
+        setStatistics(stats);
+      } catch (error) {
+        console.error('Error loading progress data:', error);
+        // エラーの場合もデフォルトデータで初期化
+        const defaultData = progressService.getDefaultProgress();
+        setProgress(defaultData);
+        setStatistics(calculateStatistics(defaultData));
+      }
+    };
+    
+    loadData();
+    
+    // LocalStorageの変更を監視
+    const handleStorageChange = () => {
+      loadData();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const updateProgress = async (processId, progressData) => {
     const currentProgress = await progressService.loadProgress();

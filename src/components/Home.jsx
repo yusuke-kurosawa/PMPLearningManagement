@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Network, Layers, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
+import { Grid, Network, Layers, ArrowRight, BookOpen, Sparkles, TrendingUp, Brain } from 'lucide-react';
 
 const Home = () => {
   const features = [
@@ -38,6 +38,22 @@ const Home = () => {
       icon: Sparkles,
       link: '/visualizations',
       color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+      isNew: true
+    },
+    {
+      title: '学習進捗ダッシュボード',
+      description: '新機能！学習の進捗状況を可視化し、知識エリア別・プロセス群別の習熟度を管理。効率的な学習計画をサポート。',
+      icon: TrendingUp,
+      link: '/progress',
+      color: 'bg-teal-500',
+      isNew: true
+    },
+    {
+      title: 'フラッシュカード学習',
+      description: '新機能！ITTOを効率的に暗記するインタラクティブなフラッシュカード。間隔反復学習アルゴリズムで記憶の定着をサポート。',
+      icon: Brain,
+      link: '/flashcards',
+      color: 'bg-indigo-500',
       isNew: true
     }
   ];
