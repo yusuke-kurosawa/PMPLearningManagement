@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, X, Tag, Book, ChevronRight } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { glossaryTerms, glossaryCategories, searchIndex } from '../data/pmpGlossary';
+import { glossaryService } from '../services/glossaryService';
 import { useDebounce } from '../hooks/useDebounce';
 
 const PMPGlossary = React.memo(() => {
@@ -16,7 +16,7 @@ const PMPGlossary = React.memo(() => {
   // リンクから遷移した場合、指定された用語を表示
   useEffect(() => {
     if (location.state?.selectedTermId) {
-      const term = glossaryTerms.find(t => t.id === location.state.selectedTermId);
+      const term = glossaryService.getTermById(location.state.selectedTermId);
       if (term) {
         setSelectedTerm(term);
         // 少し遅延を入れてスクロール
@@ -50,22 +50,18 @@ const PMPGlossary = React.memo(() => {
 
   // フィルタリングされた用語
   const filteredTerms = useMemo(() => {
-    let results = glossaryTerms;
+    let results = glossaryService.getAllTerms();
 
     // カテゴリーフィルター
     if (selectedCategories.size > 0) {
-      results = results.filter(term => 
-        term.categories.some(cat => selectedCategories.has(cat))
-      );
+      results = glossaryService.filterByCategories(Array.from(selectedCategories));
     }
 
     // 検索フィルター
     if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      results = results.filter(term => {
-        const searchText = searchIndex[term.id];
-        return searchText.includes(query);
-      });
+      results = glossaryService.searchTerms(debouncedSearchQuery).filter(term =>
+        selectedCategories.size === 0 || term.categories.some(cat => selectedCategories.has(cat))
+      );
     }
 
     return results;
@@ -92,9 +88,9 @@ const PMPGlossary = React.memo(() => {
 
   // 関連用語を取得
   const getRelatedTerms = useCallback((relatedTermNames) => {
-    return glossaryTerms.filter(term => 
-      relatedTermNames.includes(term.term)
-    );
+    return relatedTermNames
+      .map(name => glossaryService.getTermByName(name))
+      .filter(term => term);
   }, []);
 
   return (
@@ -138,7 +134,7 @@ const PMPGlossary = React.memo(() => {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {glossaryCategories.map(category => {
+              {glossaryService.getAllCategories().map(category => {
                 const isSelected = selectedCategories.has(category.id);
                 return (
                   <button
@@ -192,15 +188,15 @@ const PMPGlossary = React.memo(() => {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {term.categories.map(catId => {
-                            const category = glossaryCategories.find(c => c.id === catId);
-                            return (
+                            const category = glossaryService.getCategoryById(catId);
+                            return category ? (
                               <span
                                 key={catId}
                                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${category.color} text-white`}
                               >
                                 {category.name}
                               </span>
-                            );
+                            ) : null;
                           })}
                         </div>
                       </div>
@@ -251,8 +247,8 @@ const PMPGlossary = React.memo(() => {
                   <h3 className="text-sm font-semibold text-gray-700 mb-1">カテゴリー</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedTerm.categories.map(catId => {
-                      const category = glossaryCategories.find(c => c.id === catId);
-                      return (
+                      const category = glossaryService.getCategoryById(catId);
+                      return category ? (
                         <span
                           key={catId}
                           className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${category.color} text-white`}
@@ -260,7 +256,7 @@ const PMPGlossary = React.memo(() => {
                           <Tag className="w-4 h-4 mr-1" />
                           {category.name}
                         </span>
-                      );
+                      ) : null;
                     })}
                   </div>
                 </div>

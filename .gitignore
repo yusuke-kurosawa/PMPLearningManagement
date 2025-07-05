@@ -28,3 +28,8 @@ dist-ssr
 .env.local
 .env.production.local
 .env.development.local
+
+# Input documents (if containing sensitive/copyrighted data)
+# Uncomment these lines if you have PDF files with copyright content
+# docs/input/references/*.pdf
+# docs/input/pmbok/*.pdf

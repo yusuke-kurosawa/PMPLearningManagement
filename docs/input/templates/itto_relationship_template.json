@@ -1,0 +1,68 @@
+{
+  "template": "ITTO Relationship Definition Template v1.0",
+  "description": "プロセス間のITTO関係性を定義するテンプレート",
+  "relationships": [
+    {
+      "sourceProcess": {
+        "id": "1.1",
+        "name": "プロジェクト憲章の作成"
+      },
+      "output": {
+        "id": "project_charter",
+        "name": "プロジェクト憲章"
+      },
+      "targetProcesses": [
+        {
+          "id": "4.1",
+          "name": "プロジェクトマネジメント計画書の作成",
+          "asInput": "プロジェクト憲章"
+        },
+        {
+          "id": "5.1",
+          "name": "スコープ・マネジメントの計画",
+          "asInput": "プロジェクト憲章"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "totalProcesses": 49,
+    "totalRelationships": 0,
+    "version": "1.0",
+    "lastUpdated": "YYYY-MM-DD"
+  },
+  "validationRules": {
+    "processIdFormat": "X.X (例: 1.1, 10.3)",
+    "requiredFields": ["sourceProcess", "output", "targetProcesses"],
+    "outputMustExistInSourceProcess": true,
+    "inputMustExistInTargetProcess": true
+  },
+  "example": {
+    "description": "プロジェクト憲章の作成プロセスからの出力フロー例",
+    "sourceProcess": "1.1 プロジェクト憲章の作成",
+    "outputs": [
+      {
+        "name": "プロジェクト憲章",
+        "usedBy": [
+          "4.1 プロジェクトマネジメント計画書の作成",
+          "5.1 スコープ・マネジメントの計画",
+          "6.1 スケジュール・マネジメントの計画",
+          "7.1 コスト・マネジメントの計画",
+          "8.1 品質マネジメントの計画",
+          "9.1 資源マネジメントの計画",
+          "10.1 コミュニケーション・マネジメントの計画",
+          "11.1 リスク・マネジメントの計画",
+          "12.1 調達マネジメントの計画",
+          "13.1 ステークホルダーの特定"
+        ]
+      },
+      {
+        "name": "前提条件ログ",
+        "usedBy": [
+          "5.2 要求事項の収集",
+          "11.2 リスクの特定"
+        ]
+      }
+    ]
+  }
+}

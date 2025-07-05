@@ -1,0 +1,19 @@
+ID,TermEN,TermJA,Description,Categories,RelatedTerms
+1,Project,プロジェクト,独自のプロダクト、サービス、所産を創造するために実施する、有期性のある業務,"general",Program;Portfolio
+2,Project Management,プロジェクトマネジメント,プロジェクトの要求事項を満たすために、知識、スキル、ツール、および技法をプロジェクト活動へ適用すること,"general",PMBOK;Project Manager
+3,,,,,
+4,,,,,
+5,,,,,
+# CSVテンプレート説明
+# ID: 一意の識別番号
+# TermEN: 英語の用語
+# TermJA: 日本語の用語
+# Description: 用語の説明（日本語）
+# Categories: カテゴリ（複数の場合はセミコロンで区切る）
+# RelatedTerms: 関連用語（複数の場合はセミコロンで区切る）
+#
+# カテゴリの有効値:
+# general, scope, schedule, cost, quality, resource, communication, risk, procurement, stakeholder, integration, agile
+#
+# 例:
+# 10,Work Breakdown Structure,WBS,プロジェクトチームが実行する作業を成果物指向で階層的に分解したもの,"scope;planning",Scope Baseline;Work Package

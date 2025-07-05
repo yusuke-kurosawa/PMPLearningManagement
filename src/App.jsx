@@ -7,6 +7,7 @@ import PMBOKMatrix from './components/PMBOKMatrix';
 import ITTOForceGraph from './components/ITTOForceGraph';
 import IntegratedView from './components/IntegratedView';
 import PMPGlossary from './components/PMPGlossary';
+import VisualizationHub from './components/VisualizationHub';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/network" element={<ITTOForceGraph />} />
             <Route path="/integrated" element={<IntegratedView />} />
             <Route path="/glossary" element={<PMPGlossary />} />
+            <Route path="/visualizations" element={<VisualizationHub />} />
           </Routes>
         </PageTransition>
       </div>

@@ -1,0 +1,96 @@
+{
+  "template": "PMBOK Process Definition Template v1.0",
+  "description": "PMBOKプロセス定義用のJSONテンプレート",
+  "process": {
+    "processId": "X.X",
+    "processName": {
+      "ja": "日本語プロセス名",
+      "en": "English Process Name"
+    },
+    "knowledgeArea": "knowledge_area_id",
+    "processGroup": "process_group_id",
+    "description": {
+      "ja": "プロセスの説明（日本語）",
+      "en": "Process description (English)"
+    },
+    "inputs": [
+      {
+        "id": "input_1",
+        "name": {
+          "ja": "インプット名（日本語）",
+          "en": "Input Name (English)"
+        },
+        "description": {
+          "ja": "インプットの説明",
+          "en": "Input description"
+        },
+        "source": ["source_process_id"]
+      }
+    ],
+    "tools": [
+      {
+        "id": "tool_1",
+        "name": {
+          "ja": "ツール・技法名（日本語）",
+          "en": "Tool/Technique Name (English)"
+        },
+        "category": "category_id",
+        "description": {
+          "ja": "ツール・技法の説明",
+          "en": "Tool/Technique description"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "id": "output_1",
+        "name": {
+          "ja": "アウトプット名（日本語）",
+          "en": "Output Name (English)"
+        },
+        "description": {
+          "ja": "アウトプットの説明",
+          "en": "Output description"
+        },
+        "usedBy": ["target_process_id"]
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "YYYY-MM-DD",
+    "author": "Author Name",
+    "source": "PMBOK 6th Edition"
+  },
+  "validValues": {
+    "knowledgeArea": [
+      "integration",
+      "scope",
+      "schedule",
+      "cost",
+      "quality",
+      "resource",
+      "communications",
+      "risk",
+      "procurement",
+      "stakeholder"
+    ],
+    "processGroup": [
+      "initiating",
+      "planning",
+      "executing",
+      "monitoring_controlling",
+      "closing"
+    ],
+    "toolCategory": [
+      "data_gathering",
+      "data_analysis",
+      "data_representation",
+      "decision_making",
+      "interpersonal_team_skills",
+      "communication",
+      "project_management_information_system",
+      "other"
+    ]
+  }
+}

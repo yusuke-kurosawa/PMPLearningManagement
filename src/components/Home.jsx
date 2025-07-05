@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Network, Layers, ArrowRight, BookOpen } from 'lucide-react';
+import { Grid, Network, Layers, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 
 const Home = () => {
   const features = [
@@ -31,6 +31,14 @@ const Home = () => {
       icon: BookOpen,
       link: '/glossary',
       color: 'bg-orange-500'
+    },
+    {
+      title: 'ビジュアライゼーションハブ',
+      description: '新機能！プロセスフロー図、ヒートマップなど、様々な視点からPMBOKを理解できる強化されたビジュアライゼーション。',
+      icon: Sparkles,
+      link: '/visualizations',
+      color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+      isNew: true
     }
   ];
 
@@ -48,15 +56,20 @@ const Home = () => {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
               <Link
                 key={feature.link}
                 to={feature.link}
-                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 relative overflow-hidden"
               >
+                {feature.isNew && (
+                  <div className="absolute top-0 right-0 bg-red-500 text-white text-xs px-4 py-1 transform rotate-45 translate-x-8 translate-y-4">
+                    NEW
+                  </div>
+                )}
                 <div className="p-6">
                   <div className={`${feature.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
                     <Icon className="w-6 h-6 text-white" />

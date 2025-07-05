@@ -1,213 +1,246 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルは、Claude Code (claude.ai/code) がこのリポジトリのコードを扱う際のガイダンスを提供します。
 
-## Project Overview
+## プロジェクト概要
 
-PMPLearningManagement is an interactive web application for PMBOK (Project Management Body of Knowledge) 6th Edition learning. It provides visual tools to understand the 49 processes, their relationships, and ITTO (Inputs, Tools & Techniques, Outputs) framework.
+PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体系）第6版の学習用インタラクティブWebアプリケーションです。49のプロセス、それらの関係性、およびITTO（インプット、ツールと技法、アウトプット）フレームワークを視覚的に理解するためのツールを提供します。
 
-### Key Features
-- **PMBOK Matrix View**: Interactive table showing all 49 processes organized by 10 knowledge areas and 5 process groups
-- **ITTO Network Diagram**: Force-directed graph visualization using D3.js to explore process relationships
-- **Integrated View**: Split-screen interface combining both visualizations
-- **Responsive Design**: Fully optimized for desktop and mobile devices
-- **GitHub Pages Deployment**: Automatically deployed via GitHub Actions
+### 主な機能
+- **PMBOKマトリックスビュー**: 10の知識エリアと5つのプロセス群で整理された49プロセスを表示するインタラクティブな表
+- **ITTOネットワーク図**: D3.jsを使用したプロセス関係性を探索する力学的グラフ視覚化
+- **統合ビュー**: 両方の視覚化を組み合わせた分割画面インターフェース
+- **PMP用語集**: カテゴリフィルタリングと検索機能を備えた包括的な用語集
+- **レスポンシブデザイン**: デスクトップとモバイルデバイスに完全最適化
+- **GitHub Pagesデプロイ**: GitHub Actions経由で自動デプロイ
 
-## Technology Stack
+## 技術スタック
 
-- **Frontend Framework**: React 18.2 with React Router v6
-- **Visualization**: D3.js v7 for network diagrams
-- **Styling**: Tailwind CSS v3 with custom utilities
-- **Build Tool**: Vite v5
-- **Deployment**: GitHub Pages with HashRouter
-- **Package Manager**: npm
-- **Icons**: Lucide React
+- **フロントエンドフレームワーク**: React 18.2 + React Router v6
+- **視覚化**: ネットワーク図用のD3.js v7
+- **スタイリング**: カスタムユーティリティ付きTailwind CSS v3
+- **ビルドツール**: Vite v5
+- **デプロイメント**: HashRouter使用のGitHub Pages
+- **パッケージマネージャー**: npm
+- **アイコン**: Lucide React
 
-## Development Setup
+## 開発環境のセットアップ
 
-### Prerequisites
+### 前提条件
 - Node.js 18+ 
 - npm 8+
 
-### Commands
+### コマンド
 ```bash
-# Install dependencies
+# 依存関係のインストール
 npm install
 
-# Start development server
+# 開発サーバーの起動
 npm run dev
 
-# Build for production
+# プロダクションビルド
 npm run build
 
-# Preview production build
+# プロダクションビルドのプレビュー
 npm run preview
 
-# Deploy to GitHub Pages
+# GitHub Pagesへのデプロイ
 npm run deploy
 
-# Run linter
+# リンターの実行
 npm run lint
 
-# Fix linting issues
+# リンティング問題の修正
 npm run lint:fix
 ```
 
-### Environment
-- Development server runs on http://localhost:3000
-- Production URL: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+### 環境
+- 開発サーバー: http://localhost:3000
+- 本番URL: https://yusuke-kurosawa.github.io/PMPLearningManagement/
 
-## Project Structure
+## プロジェクト構造
 
 ```
 PMPLearningManagement/
 ├── src/
 │   ├── components/
-│   │   ├── PMBOKMatrix.jsx         # Main matrix view component
-│   │   ├── ITTOForceGraph.jsx      # D3.js network diagram
-│   │   ├── ITTONetworkDiagram.jsx  # Alternative network view
-│   │   ├── IntegratedView.jsx      # Split-screen container
-│   │   ├── Navigation.jsx          # Top navigation bar
-│   │   ├── Home.jsx                # Landing page
-│   │   └── PageTransition.jsx      # Page animation wrapper
+│   │   ├── PMBOKMatrix.jsx         # メインマトリックスビューコンポーネント
+│   │   ├── ITTOForceGraph.jsx      # D3.jsネットワーク図
+│   │   ├── ITTONetworkDiagram.jsx  # 代替ネットワークビュー
+│   │   ├── IntegratedView.jsx      # 分割画面コンテナ
+│   │   ├── Navigation.jsx          # トップナビゲーションバー
+│   │   ├── Home.jsx                # ランディングページ
+│   │   ├── PageTransition.jsx      # ページアニメーションラッパー
+│   │   └── PMPGlossary.jsx         # PMP用語集
+│   ├── data/
+│   │   └── pmpGlossary.js          # 用語集データとカテゴリ定義
 │   ├── hooks/
-│   │   └── useDebounce.js          # Debounce hook for search
+│   │   └── useDebounce.js          # 検索用デバウンスフック
 │   ├── utils/
-│   │   └── performance.js          # Performance utilities
-│   ├── App.jsx                     # Main app with routing
-│   ├── main.jsx                    # Entry point
-│   └── index.css                   # Global styles & Tailwind
+│   │   └── performance.js          # パフォーマンスユーティリティ
+│   ├── App.jsx                     # ルーティング付きメインアプリ
+│   ├── main.jsx                    # エントリーポイント
+│   └── index.css                   # グローバルスタイルとTailwind
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml              # GitHub Actions deployment
-├── index.html                      # HTML template
-├── vite.config.js                  # Vite configuration
-├── tailwind.config.js              # Tailwind configuration
-├── postcss.config.js               # PostCSS configuration
-└── package.json                    # Dependencies & scripts
+│       └── deploy.yml              # GitHub Actionsデプロイメント
+├── index.html                      # HTMLテンプレート
+├── vite.config.js                  # Vite設定
+├── tailwind.config.js              # Tailwind設定
+├── postcss.config.js               # PostCSS設定
+└── package.json                    # 依存関係とスクリプト
 ```
 
-## Architecture Decisions
+## アーキテクチャの決定事項
 
-### Routing
-- Uses **HashRouter** for GitHub Pages compatibility
-- Routes:
-  - `/` - Home page
-  - `/matrix` - PMBOK Matrix view
-  - `/network` - Force-directed network diagram
-  - `/integrated` - Split-screen view
+### ルーティング
+- GitHub Pages互換性のため**HashRouter**を使用
+- ルート:
+  - `/` - ホームページ
+  - `/matrix` - PMBOKマトリックスビュー
+  - `/network` - 力学的ネットワーク図
+  - `/integrated` - 分割画面ビュー
+  - `/glossary` - PMP用語集
 
-### State Management
-- Local component state with React hooks
-- No global state management needed currently
-- Performance optimized with React.memo and useMemo
+### 状態管理
+- Reactフックによるローカルコンポーネント状態
+- 現在グローバル状態管理は不要
+- React.memoとuseMemoでパフォーマンス最適化
 
-### Styling Approach
-- Tailwind CSS for utility-first styling
-- Custom CSS animations in index.css
-- Responsive breakpoints: sm (640px), md (768px), lg (1024px)
+### スタイリングアプローチ
+- ユーティリティファーストスタイリングのTailwind CSS
+- index.cssのカスタムCSSアニメーション
+- レスポンシブブレークポイント: sm (640px)、md (768px)、lg (1024px)
 
-### Performance Optimizations
-- React.memo on all major components
-- Throttled drag operations in IntegratedView
-- Debounced search inputs
-- Lazy loading with React.Suspense
-- Virtual scrolling utilities (prepared for future use)
+### パフォーマンス最適化
+- すべての主要コンポーネントでReact.memo
+- IntegratedViewでのドラッグ操作のスロットリング
+- デバウンスされた検索入力
+- React.Suspenseによる遅延読み込み
+- 仮想スクロールユーティリティ（将来使用のため準備）
 
-## Component Guidelines
+## コンポーネントガイドライン
 
-### PMBOKMatrix Component
-- Displays all 49 PMBOK processes
-- Features: search, expand/collapse, process details modal
-- Mobile: horizontal scroll, abbreviated text
-- Performance: memoized filtering, loading states
+### PMBOKMatrixコンポーネント
+- 49のPMBOKプロセスすべてを表示
+- 機能: 検索、展開/折りたたみ、プロセス詳細表示、ITTO情報
+- モバイル: 水平スクロール、省略テキスト
+- パフォーマンス: メモ化されたフィルタリング、ローディング状態
+- 用語集リンク: ITTO内の用語をクリックして用語集へ遷移
 
-### ITTOForceGraph Component
-- D3.js force simulation for process relationships
-- Node types: processes (circles), inputs (diamonds), tools (squares), outputs (triangles)
-- Mobile: collapsible control panel, touch gestures
-- Filters by process group and knowledge area
+### ITTOForceGraphコンポーネント
+- プロセス関係性のD3.js力学シミュレーション
+- ノードタイプ: プロセス（円）、インプット（ダイヤモンド）、ツール（正方形）、アウトプット（三角形）
+- モバイル: 折りたたみ可能なコントロールパネル、タッチジェスチャー
+- プロセス群と知識エリアによるフィルター
 
-### IntegratedView Component
-- Resizable split-screen layout
-- Mobile: toggle between views
-- Desktop: drag divider to resize
-- Fullscreen mode for each panel
+### IntegratedViewコンポーネント
+- サイズ変更可能な分割画面レイアウト
+- モバイル: ビュー間の切り替え
+- デスクトップ: ディバイダーをドラッグしてサイズ変更
+- 各パネルのフルスクリーンモード
 
-## Mobile Considerations
+### PMPGlossaryコンポーネント
+- 45以上のPMP用語を収録
+- 12のカテゴリによる分類とタグ付け
+- リアルタイム検索機能（デバウンス付き）
+- 関連用語のリンク
+- PMBOKMatrixからの直接リンク対応
 
-- Touch-friendly tap targets (minimum 44px)
-- Collapsible navigation and panels
-- Responsive text sizing
-- Optimized force graph for touch devices
-- View switching for integrated view on mobile
+## モバイル対応の考慮事項
 
-## Deployment
+- タッチフレンドリーなタップターゲット（最小44px）
+- 折りたたみ可能なナビゲーションとパネル
+- レスポンシブなテキストサイズ
+- タッチデバイス用に最適化されたフォースグラフ
+- モバイルでの統合ビューのビュー切り替え
 
-### GitHub Pages Setup
-- Base path: `/PMPLearningManagement/`
-- Build output: `dist/` directory
-- Automatic deployment on push to main branch
-- Manual deployment: `npm run deploy`
+## デプロイメント
 
-### GitHub Actions Workflow
-- Triggers on push to main branch
-- Builds and deploys to gh-pages branch
-- Uses Node.js 18
-- Caches npm dependencies
+### GitHub Pagesセットアップ
+- ベースパス: `/PMPLearningManagement/`
+- ビルド出力: `dist/`ディレクトリ
+- mainブランチへのプッシュで自動デプロイ
+- 手動デプロイ: `npm run deploy`
 
-## Code Style Guidelines
+### GitHub Actionsワークフロー
+- mainブランチへのプッシュでトリガー
+- gh-pagesブランチへビルドとデプロイ
+- Node.js 18を使用
+- npm依存関係をキャッシュ
 
-- Use functional components with hooks
-- Implement React.memo for performance-critical components
-- Use semantic HTML elements
-- Follow Tailwind CSS best practices
-- Keep components focused and single-purpose
-- Add loading states for better UX
-- Implement proper error boundaries (future enhancement)
+## コードスタイルガイドライン
 
-## Future Enhancements
+- フックを使用した関数コンポーネントを使用
+- パフォーマンスクリティカルなコンポーネントにはReact.memoを実装
+- セマンティックHTML要素を使用
+- Tailwind CSSのベストプラクティスに従う
+- コンポーネントを集中的で単一目的に保つ
+- より良いUXのためローディング状態を追加
+- 適切なエラーバウンダリを実装（今後の機能強化）
 
-1. **Data Management**
-   - External data source for ITTO information
-   - User preferences persistence
-   - Export/import functionality
+## 日本語ローカライゼーション
 
-2. **Features**
-   - Process dependencies visualization
-   - Study mode with flashcards
-   - Progress tracking
-   - Multi-language support
+### 実装状況
+- すべてのUI要素が日本語化済み
+- 技術用語は英語を併記（例: プロジェクト憲章 (Project Charter)）
+- モバイルでは表示領域を考慮して日本語のみ表示
 
-3. **Technical**
-   - Progressive Web App (PWA) support
-   - Offline functionality
-   - Advanced search with filters
-   - Keyboard shortcuts
+### ガイドライン
+- 専門用語は日本語と英語を併記
+- UIラベルは簡潔な日本語表現を使用
+- エラーメッセージは分かりやすい日本語で
 
-## Troubleshooting
+## 今後の機能強化
 
-### Common Issues
+1. **データ管理**
+   - ITTO情報の外部データソース
+   - ユーザー設定の永続化
+   - エクスポート/インポート機能
 
-1. **Build Errors**
-   - Ensure Node.js 18+ is installed
-   - Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-   - Check for ES module syntax in config files
+2. **機能**
+   - プロセス依存関係の視覚化
+   - フラッシュカード付き学習モード
+   - 進捗トラッキング
+   - 多言語サポート（英語版の追加）
+   - PMBOK第7版への対応
+
+3. **技術**
+   - Progressive Web App (PWA)サポート
+   - オフライン機能
+   - フィルター付き高度な検索
+   - キーボードショートカット
+   - アクセシビリティの向上（WCAG 2.1準拠）
+
+## トラブルシューティング
+
+### よくある問題
+
+1. **ビルドエラー**
+   - Node.js 18+がインストールされていることを確認
+   - node_modulesをクリアして再インストール: `rm -rf node_modules && npm install`
+   - 設定ファイルのESモジュール構文を確認
 
 2. **GitHub Pages 404**
-   - Wait 2-5 minutes for deployment propagation
-   - Ensure GitHub Pages is enabled in repository settings
-   - Check base path in vite.config.js
+   - デプロイの伝播に2-5分待つ
+   - リポジトリ設定でGitHub Pagesが有効になっていることを確認
+   - vite.config.jsのベースパスを確認
+   - HashRouterを使用していることを確認
 
-3. **D3.js Performance**
-   - Limit number of visible nodes on mobile
-   - Use throttling for drag operations
-   - Consider WebGL renderer for large datasets
+3. **D3.jsパフォーマンス**
+   - モバイルでは表示ノード数を制限
+   - ドラッグ操作にスロットリングを使用
+   - 大規模データセットにはWebGLレンダラーを検討
 
-## Important Notes
+4. **日本語表示の問題**
+   - UTF-8エンコーディングを確認
+   - 適切なフォントがロードされていることを確認
 
-- Always use HashRouter for GitHub Pages deployment
-- Test mobile responsiveness before deploying
-- Keep bundle size under control (current: ~85KB gzipped)
-- Maintain accessibility standards (WCAG 2.1)
-- Document any breaking changes in commits
+## 重要な注意事項
+
+- GitHub Pagesデプロイには常にHashRouterを使用
+- デプロイ前にモバイルレスポンシブネスをテスト
+- バンドルサイズを制御下に保つ（現在: ~95KB gzip圧縮）
+- アクセシビリティ標準を維持（WCAG 2.1）
+- コミットで破壊的変更を文書化
+- 用語集の更新時は検索インデックスも更新

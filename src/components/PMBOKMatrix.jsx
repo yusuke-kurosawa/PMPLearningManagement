@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
-import { ChevronDown, ChevronRight, Search, X, Loader2, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, X, Loader2, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { glossaryTerms } from '../data/pmpGlossary';
+import GlossaryDialog from './GlossaryDialog';
 
 const PMBOKMatrix = memo(() => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const PMBOKMatrix = memo(() => {
   const [expandedAreas, setExpandedAreas] = useState(new Set());
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState(null);
 
   const processGroups = [
     '立上げ',
@@ -65,12 +67,12 @@ const PMBOKMatrix = memo(() => {
             key={`${term}-${lastIndex}`}
             onClick={(e) => {
               e.stopPropagation();
-              navigate('/glossary', { state: { selectedTermId: termData.id } });
+              setSelectedGlossaryTerm(termData);
             }}
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 underline font-medium"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 underline font-medium group"
           >
             {term}
-            <ExternalLink className="w-3 h-3 ml-0.5" />
+            <Info className="w-3 h-3 ml-0.5 opacity-60 group-hover:opacity-100" />
           </button>
         );
         
@@ -85,7 +87,7 @@ const PMBOKMatrix = memo(() => {
     }
     
     return result.length > 0 ? result : text;
-  }, [termMapping, navigate]);
+  }, [termMapping]);
 
   const knowledgeAreas = [
     { id: 'integration', name: 'プロジェクト統合マネジメント', processes: 7 },
@@ -667,6 +669,17 @@ const PMBOKMatrix = memo(() => {
           </table>
         </div>
       </div>
+
+      {/* 用語集ダイアログ */}
+      {selectedGlossaryTerm && (
+        <GlossaryDialog
+          term={selectedGlossaryTerm}
+          onClose={() => setSelectedGlossaryTerm(null)}
+          onNavigateToGlossary={(termId) => {
+            navigate('/glossary', { state: { selectedTermId: termId } });
+          }}
+        />
+      )}
     </div>
   );
 });

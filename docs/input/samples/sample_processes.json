@@ -1,0 +1,110 @@
+{
+  "processes": [
+    {
+      "processId": "1.1",
+      "processName": {
+        "ja": "プロジェクト憲章の作成",
+        "en": "Develop Project Charter"
+      },
+      "knowledgeArea": "integration",
+      "processGroup": "initiating",
+      "inputs": [
+        {
+          "ja": "ビジネス文書",
+          "en": "Business Documents"
+        },
+        {
+          "ja": "合意書",
+          "en": "Agreements"
+        },
+        {
+          "ja": "組織体の環境要因",
+          "en": "Enterprise Environmental Factors"
+        },
+        {
+          "ja": "組織のプロセス資産",
+          "en": "Organizational Process Assets"
+        }
+      ],
+      "tools": [
+        {
+          "ja": "専門家の判断",
+          "en": "Expert Judgment"
+        },
+        {
+          "ja": "データ収集",
+          "en": "Data Gathering"
+        },
+        {
+          "ja": "対人関係とチームに関するスキル",
+          "en": "Interpersonal and Team Skills"
+        },
+        {
+          "ja": "会議",
+          "en": "Meetings"
+        }
+      ],
+      "outputs": [
+        {
+          "ja": "プロジェクト憲章",
+          "en": "Project Charter"
+        },
+        {
+          "ja": "前提条件ログ",
+          "en": "Assumption Log"
+        }
+      ]
+    },
+    {
+      "processId": "5.1",
+      "processName": {
+        "ja": "スコープ・マネジメントの計画",
+        "en": "Plan Scope Management"
+      },
+      "knowledgeArea": "scope",
+      "processGroup": "planning",
+      "inputs": [
+        {
+          "ja": "プロジェクト憲章",
+          "en": "Project Charter"
+        },
+        {
+          "ja": "プロジェクトマネジメント計画書",
+          "en": "Project Management Plan"
+        },
+        {
+          "ja": "組織体の環境要因",
+          "en": "Enterprise Environmental Factors"
+        },
+        {
+          "ja": "組織のプロセス資産",
+          "en": "Organizational Process Assets"
+        }
+      ],
+      "tools": [
+        {
+          "ja": "専門家の判断",
+          "en": "Expert Judgment"
+        },
+        {
+          "ja": "データ分析",
+          "en": "Data Analysis"
+        },
+        {
+          "ja": "会議",
+          "en": "Meetings"
+        }
+      ],
+      "outputs": [
+        {
+          "ja": "スコープ・マネジメント計画書",
+          "en": "Scope Management Plan"
+        },
+        {
+          "ja": "要求事項マネジメント計画書",
+          "en": "Requirements Management Plan"
+        }
+      ]
+    }
+  ]
+}

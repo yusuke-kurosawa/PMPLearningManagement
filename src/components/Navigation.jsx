@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Grid, Network, Layers, Home, Menu, X, BookOpen } from 'lucide-react';
+import { Grid, Network, Layers, Home, Menu, X, BookOpen, Sparkles } from 'lucide-react';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -11,6 +11,7 @@ const Navigation = () => {
     { path: '/matrix', label: 'マトリックス', icon: Grid },
     { path: '/network', label: 'ネットワーク図', icon: Network },
     { path: '/integrated', label: '統合ビュー', icon: Layers },
+    { path: '/visualizations', label: 'ビジュアル', icon: Sparkles, isNew: true },
     { path: '/glossary', label: '用語集', icon: BookOpen }
   ];
 
@@ -24,14 +25,14 @@ const Navigation = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-1">
-            {navItems.map(({ path, label, icon: Icon }) => {
+            {navItems.map(({ path, label, icon: Icon, isNew }) => {
               const isActive = location.pathname === path;
               return (
                 <Link
                   key={path}
                   to={path}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+                    relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
                     ${isActive 
                       ? 'bg-blue-500 text-white shadow-md' 
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
@@ -40,6 +41,11 @@ const Navigation = () => {
                 >
                   <Icon className="w-4 h-4" />
                   {label}
+                  {isNew && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                      NEW
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -57,7 +63,7 @@ const Navigation = () => {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-2 animate-slide-in">
-            {navItems.map(({ path, label, icon: Icon }) => {
+            {navItems.map(({ path, label, icon: Icon, isNew }) => {
               const isActive = location.pathname === path;
               return (
                 <Link
@@ -65,7 +71,7 @@ const Navigation = () => {
                   to={path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`
-                    flex items-center gap-2 px-4 py-3 rounded-md text-sm font-medium transition-all
+                    relative flex items-center gap-2 px-4 py-3 rounded-md text-sm font-medium transition-all
                     ${isActive 
                       ? 'bg-blue-500 text-white' 
                       : 'text-gray-700 hover:bg-gray-100'
@@ -74,6 +80,11 @@ const Navigation = () => {
                 >
                   <Icon className="w-4 h-4" />
                   {label}
+                  {isNew && (
+                    <span className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                      NEW
+                    </span>
+                  )}
                 </Link>
               );
             })}

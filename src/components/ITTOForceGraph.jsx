@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Filter, RotateCcw, ZoomIn, ZoomOut, Menu, X } from 'lucide-react';
+import { glossaryService } from '../services/glossaryService';
+import GlossaryDialog from './GlossaryDialog';
+import { useNavigate } from 'react-router-dom';
 
 const ITTOForceGraph = React.memo(() => {
+  const navigate = useNavigate();
   const svgRef = useRef(null);
   const containerRef = useRef(null);
   const [selectedFilters, setSelectedFilters] = useState({
@@ -15,6 +19,7 @@ const ITTOForceGraph = React.memo(() => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 800 });
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState(null);
 
   // Process groups and knowledge areas for filtering
   const processGroups = useMemo(() => 
@@ -376,6 +381,12 @@ const ITTOForceGraph = React.memo(() => {
       event.stopPropagation();
       setFocusedNode(d.id);
       
+      // Check if the node name matches a glossary term
+      const term = glossaryService.getTermByName(d.name);
+      if (term) {
+        setSelectedGlossaryTerm(term);
+      }
+      
       // Highlight connected nodes
       const connectedNodes = new Set([d.id]);
       filteredLinks.forEach(link => {
@@ -611,6 +622,17 @@ const ITTOForceGraph = React.memo(() => {
           <svg ref={svgRef} className="w-full h-full"></svg>
         )}
       </div>
+
+      {/* 用語集ダイアログ */}
+      {selectedGlossaryTerm && (
+        <GlossaryDialog
+          term={selectedGlossaryTerm}
+          onClose={() => setSelectedGlossaryTerm(null)}
+          onNavigateToGlossary={(termId) => {
+            navigate('/glossary', { state: { selectedTermId: termId } });
+          }}
+        />
+      )}
     </div>
   );
 });
