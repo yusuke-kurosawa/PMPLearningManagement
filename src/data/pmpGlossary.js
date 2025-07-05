@@ -275,6 +275,128 @@ export const glossaryTerms = [
     description: '受信者が情報にアクセスする必要があるコミュニケーション方法',
     categories: ['communication'],
     relatedTerms: ['Push Communication', 'Interactive Communication']
+  },
+
+  // ITTO関連用語
+  {
+    id: 31,
+    term: 'Project Charter',
+    japanese: 'プロジェクト憲章',
+    description: 'プロジェクトの存在を正式に承認し、プロジェクト・マネジャーに組織の資源をプロジェクト活動に投入する権限を与える文書',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Project Management Plan', 'Business Case']
+  },
+  {
+    id: 32,
+    term: 'Work Performance Data',
+    japanese: '作業パフォーマンス・データ',
+    description: 'プロジェクト作業を実行する中で観察・収集される生の観察結果と測定値',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Work Performance Information', 'Work Performance Reports']
+  },
+  {
+    id: 33,
+    term: 'Work Performance Information',
+    japanese: '作業パフォーマンス情報',
+    description: '様々なコントロール・プロセスから収集・統合された作業パフォーマンス・データ',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Work Performance Data', 'Work Performance Reports']
+  },
+  {
+    id: 34,
+    term: 'Work Performance Reports',
+    japanese: '作業パフォーマンス報告書',
+    description: '意思決定、問題提起、行動、認識を促すために配布される作業パフォーマンス情報の物理的または電子的表現',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Work Performance Data', 'Work Performance Information']
+  },
+  {
+    id: 35,
+    term: 'Change Request',
+    japanese: '変更要求',
+    description: 'ベースラインとなった文書、成果物、プロジェクト計画書を修正するための正式な提案',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Change Control', 'Approved Change Request']
+  },
+  {
+    id: 36,
+    term: 'Organizational Process Assets',
+    japanese: '組織のプロセス資産',
+    description: 'プロジェクトを実行する組織が保有し、プロジェクトに影響を与える可能性のある計画、プロセス、方針、手続き、知識ベース',
+    categories: ['general'],
+    relatedTerms: ['Enterprise Environmental Factors']
+  },
+  {
+    id: 37,
+    term: 'Enterprise Environmental Factors',
+    japanese: '組織体の環境要因',
+    description: 'プロジェクトに影響を与える可能性があるが、プロジェクト・チームの管理下にない内部または外部の条件',
+    categories: ['general'],
+    relatedTerms: ['Organizational Process Assets']
+  },
+  {
+    id: 38,
+    term: 'Expert Judgment',
+    japanese: '専門家の判断',
+    description: '専門教育、知識、スキル、経験、トレーニングを基に提供される判断',
+    categories: ['general'],
+    relatedTerms: []
+  },
+  {
+    id: 39,
+    term: 'Meetings',
+    japanese: '会議',
+    description: 'ステークホルダーが集まり、プロジェクトに関する議論や意思決定を行う場',
+    categories: ['general', 'communication'],
+    relatedTerms: []
+  },
+  {
+    id: 40,
+    term: 'Data Analysis',
+    japanese: 'データ分析',
+    description: 'データを収集、評価、解釈して情報を得るためのプロセス',
+    categories: ['general'],
+    relatedTerms: ['Data Gathering', 'Data Representation']
+  },
+  {
+    id: 41,
+    term: 'Business Documents',
+    japanese: 'ビジネス文書',
+    description: 'ビジネスケースやベネフィット・マネジメント計画書など、プロジェクトの根拠となる文書',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Business Case', 'Benefits Management Plan']
+  },
+  {
+    id: 42,
+    term: 'Agreements',
+    japanese: '合意書',
+    description: '契約、覚書、サービスレベル合意書など、当事者間の意図を定義する文書',
+    categories: ['general', 'procurement'],
+    relatedTerms: ['Contract', 'SLA']
+  },
+  {
+    id: 43,
+    term: 'Project Management Plan',
+    japanese: 'プロジェクトマネジメント計画書',
+    description: 'プロジェクトの実行、監視・コントロール、終結の方法を記述した文書',
+    categories: ['general', 'integration'],
+    relatedTerms: ['Baseline', 'Subsidiary Plans']
+  },
+  {
+    id: 44,
+    term: 'Project Documents',
+    japanese: 'プロジェクト文書',
+    description: 'プロジェクト計画書の一部ではないが、プロジェクトの管理に使用される文書',
+    categories: ['general'],
+    relatedTerms: ['Issue Log', 'Risk Register', 'Stakeholder Register']
+  },
+  {
+    id: 45,
+    term: 'Deliverables',
+    japanese: '成果物',
+    description: 'プロジェクトやプロジェクトのフェーズを完了するために作成される、独自で検証可能なプロダクト、所産、サービス提供能力',
+    categories: ['general'],
+    relatedTerms: ['Work Package', 'Milestone']
   }
 ];
 

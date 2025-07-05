@@ -1,15 +1,34 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, X, Tag, Book, ChevronRight } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { glossaryTerms, glossaryCategories, searchIndex } from '../data/pmpGlossary';
 import { useDebounce } from '../hooks/useDebounce';
 
 const PMPGlossary = React.memo(() => {
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState(new Set());
   const [selectedTerm, setSelectedTerm] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // list or card
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // リンクから遷移した場合、指定された用語を表示
+  useEffect(() => {
+    if (location.state?.selectedTermId) {
+      const term = glossaryTerms.find(t => t.id === location.state.selectedTermId);
+      if (term) {
+        setSelectedTerm(term);
+        // 少し遅延を入れてスクロール
+        setTimeout(() => {
+          const element = document.getElementById(`term-${term.id}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+  }, [location]);
 
   // カテゴリーのトグル
   const toggleCategory = useCallback((categoryId) => {
@@ -156,6 +175,7 @@ const PMPGlossary = React.memo(() => {
                 {groupedTerms[letter].map(term => (
                   <div
                     key={term.id}
+                    id={`term-${term.id}`}
                     className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => setSelectedTerm(term)}
                   >

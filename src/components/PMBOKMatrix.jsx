@@ -1,7 +1,10 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
-import { ChevronDown, ChevronRight, Search, X, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, X, Loader2, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { glossaryTerms } from '../data/pmpGlossary';
 
 const PMBOKMatrix = memo(() => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [expandedAreas, setExpandedAreas] = useState(new Set());
   const [selectedProcess, setSelectedProcess] = useState(null);
@@ -23,6 +26,66 @@ const PMBOKMatrix = memo(() => {
     '監視・コントロール': '監視',
     '終結': '終結'
   };
+
+  // 用語集の用語マッピングを作成
+  const termMapping = useMemo(() => {
+    const mapping = {};
+    glossaryTerms.forEach(term => {
+      // 日本語名でマッピング
+      if (term.japanese) {
+        mapping[term.japanese] = term;
+      }
+      // 英語名でもマッピング
+      mapping[term.term] = term;
+    });
+    return mapping;
+  }, []);
+
+  // テキスト内の用語をリンクに変換する関数
+  const renderTextWithLinks = useCallback((text) => {
+    // 用語集の用語を長い順にソート（より具体的な用語を先にマッチさせるため）
+    const sortedTerms = Object.keys(termMapping).sort((a, b) => b.length - a.length);
+    
+    let result = [];
+    let remainingText = text;
+    let lastIndex = 0;
+    
+    // 各用語をチェック
+    for (const term of sortedTerms) {
+      const index = remainingText.indexOf(term);
+      if (index !== -1) {
+        // マッチした場合
+        if (index > 0) {
+          result.push(remainingText.substring(0, index));
+        }
+        
+        const termData = termMapping[term];
+        result.push(
+          <button
+            key={`${term}-${lastIndex}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate('/glossary', { state: { selectedTermId: termData.id } });
+            }}
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 underline font-medium"
+          >
+            {term}
+            <ExternalLink className="w-3 h-3 ml-0.5" />
+          </button>
+        );
+        
+        remainingText = remainingText.substring(index + term.length);
+        lastIndex += index + term.length;
+      }
+    }
+    
+    // 残りのテキストを追加
+    if (remainingText) {
+      result.push(remainingText);
+    }
+    
+    return result.length > 0 ? result : text;
+  }, [termMapping, navigate]);
 
   const knowledgeAreas = [
     { id: 'integration', name: 'プロジェクト統合マネジメント', processes: 7 },
@@ -125,6 +188,225 @@ const PMBOKMatrix = memo(() => {
       inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '受入済み成果物', 'ビジネス文書', '合意書', '調達文書', '組織のプロセス資産'],
       tools: ['専門家の判断', 'データ分析', '会議'],
       outputs: ['プロジェクト文書更新版', '最終プロダクト、サービス、所産の引渡し', '最終報告書', '組織のプロセス資産更新版']
+    },
+    // スコープ・マネジメント
+    'スコープ・マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '会議'],
+      outputs: ['スコープ・マネジメント計画書', '要求事項マネジメント計画書']
+    },
+    '要求事項の収集': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', 'ビジネス文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', '意思決定', 'データ表現', '対人関係とチームに関するスキル', 'コンテキスト図', 'プロトタイプ'],
+      outputs: ['要求事項文書', '要求事項トレーサビリティ・マトリックス']
+    },
+    'スコープの定義': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '意思決定', '対人関係とチームに関するスキル', 'プロダクト分析'],
+      outputs: ['プロジェクト・スコープ記述書', 'プロジェクト文書更新版']
+    },
+    'WBSの作成': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '分解'],
+      outputs: ['スコープ・ベースライン', 'プロジェクト文書更新版']
+    },
+    'スコープの妥当性確認': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '検証済み成果物', '作業パフォーマンス・データ'],
+      tools: ['検査', '意思決定'],
+      outputs: ['受入済み成果物', '作業パフォーマンス情報', '変更要求', 'プロジェクト文書更新版']
+    },
+    'スコープのコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '組織のプロセス資産'],
+      tools: ['データ分析'],
+      outputs: ['作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // スケジュール・マネジメント
+    'スケジュール・マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '会議'],
+      outputs: ['スケジュール・マネジメント計画書']
+    },
+    'アクティビティの定義': {
+      inputs: ['プロジェクトマネジメント計画書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '分解', '段階的詳細化', '会議'],
+      outputs: ['アクティビティ・リスト', 'アクティビティ属性', 'マイルストーン・リスト', '変更要求', 'プロジェクトマネジメント計画書更新版']
+    },
+    'アクティビティの順序設定': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['プレシデンス・ダイアグラム法', '依存関係の決定と統合', 'リード・ラグ', 'プロジェクトマネジメント情報システム'],
+      outputs: ['プロジェクト・スケジュール・ネットワーク図', 'プロジェクト文書更新版']
+    },
+    'アクティビティ所要期間の見積り': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '類推見積り', 'パラメトリック見積り', '三点見積り', 'ボトムアップ見積り', 'データ分析', '意思決定', '会議'],
+      outputs: ['所要期間見積り', '見積りの根拠', 'プロジェクト文書更新版']
+    },
+    'スケジュールの作成': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['スケジュール・ネットワーク分析', 'クリティカル・パス法', '資源最適化', 'データ分析', 'リード・ラグ', 'スケジュール短縮', 'プロジェクトマネジメント情報システム', 'アジャイル・リリース計画'],
+      outputs: ['スケジュール・ベースライン', 'プロジェクト・スケジュール', 'スケジュール・データ', 'プロジェクト・カレンダー', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    'スケジュールのコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '組織のプロセス資産'],
+      tools: ['データ分析', 'クリティカル・パス法', 'プロジェクトマネジメント情報システム', '資源最適化', 'リード・ラグ', 'スケジュール短縮'],
+      outputs: ['作業パフォーマンス情報', 'スケジュール予測', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // ステークホルダー・マネジメント
+    'ステークホルダーの特定': {
+      inputs: ['プロジェクト憲章', 'ビジネス文書', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', 'データ表現', '会議'],
+      outputs: ['ステークホルダー登録簿', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    'ステークホルダー・エンゲージメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', 'データ表現', '意思決定', '会議'],
+      outputs: ['ステークホルダー・エンゲージメント計画書']
+    },
+    'ステークホルダー・エンゲージメントのマネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'コミュニケーション・スキル', '対人関係とチームに関するスキル', '基本ルール', '会議'],
+      outputs: ['変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    'ステークホルダー・エンゲージメントの監視': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['データ分析', '意思決定', 'データ表現', 'コミュニケーション・スキル', '対人関係とチームに関するスキル', '会議'],
+      outputs: ['作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // コスト・マネジメント
+    'コスト・マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '会議'],
+      outputs: ['コスト・マネジメント計画書']
+    },
+    'コストの見積り': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '類推見積り', 'パラメトリック見積り', 'ボトムアップ見積り', '三点見積り', 'データ分析', 'プロジェクトマネジメント情報システム', '意思決定'],
+      outputs: ['コスト見積り', '見積りの根拠', 'プロジェクト文書更新版']
+    },
+    '予算の設定': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', 'ビジネス文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'コスト集計', 'データ分析', '過去の情報のレビュー', '資金限度額の調整', '財務'],
+      outputs: ['コスト・ベースライン', 'プロジェクト資金要求事項', 'プロジェクト文書更新版']
+    },
+    'コストのコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', 'プロジェクト資金要求事項', '作業パフォーマンス・データ', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '完成時総コスト予測', 'プロジェクトマネジメント情報システム'],
+      outputs: ['作業パフォーマンス情報', 'コスト予測', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // 品質マネジメント
+    '品質マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', '意思決定', 'データ表現', 'テストおよび検査の計画', '会議'],
+      outputs: ['品質マネジメント計画書', '品質測定指標', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    '品質のマネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織のプロセス資産'],
+      tools: ['データ収集', '製品の分析とテスト', 'データ表現', '問題解決', '品質改善手法'],
+      outputs: ['品質報告書', 'テストおよび評価文書', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    '品質のコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '承認済み変更要求', '成果物', '作業パフォーマンス・データ', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['データ収集', '検査', 'テスト・製品評価', 'データ分析', '会議', 'データ表現'],
+      outputs: ['品質管理測定結果', '検証済み成果物', '作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // 資源マネジメント
+    '資源マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ表現', '組織論', '会議'],
+      outputs: ['資源マネジメント計画書', 'チーム憲章', 'プロジェクト文書更新版']
+    },
+    'アクティビティ資源の見積り': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'ボトムアップ見積り', '類推見積り', 'パラメトリック見積り', 'データ分析', 'プロジェクトマネジメント情報システム', '会議'],
+      outputs: ['資源要求事項', '見積りの根拠', '資源ブレークダウン・ストラクチャー', 'プロジェクト文書更新版']
+    },
+    '資源の獲得': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['意思決定', '対人関係とチームに関するスキル', '事前割当て', 'バーチャル・チーム'],
+      outputs: ['物的資源割当て', 'プロジェクト・チーム任命', '資源カレンダー', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織体の環境要因更新版', '組織のプロセス資産更新版']
+    },
+    'チームの育成': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['コロケーション', 'バーチャル・チーム', 'コミュニケーション技術', '対人関係とチームに関するスキル', '表彰と報奨', 'トレーニング', '個人とチームのアセスメント', '会議'],
+      outputs: ['チーム・パフォーマンス評価', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織体の環境要因更新版', '組織のプロセス資産更新版']
+    },
+    'チームのマネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス報告書', 'チーム・パフォーマンス評価', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['対人関係とチームに関するスキル', 'プロジェクトマネジメント情報システム'],
+      outputs: ['変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織体の環境要因更新版']
+    },
+    '資源のコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '合意書', '組織のプロセス資産'],
+      tools: ['データ分析', '問題解決', '対人関係とチームに関するスキル', 'プロジェクトマネジメント情報システム'],
+      outputs: ['作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // コミュニケーション・マネジメント
+    'コミュニケーション・マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'コミュニケーション要求事項分析', 'コミュニケーション技術', 'コミュニケーション・モデル', 'コミュニケーション方法', '対人関係とチームに関するスキル', 'データ表現', '会議'],
+      outputs: ['コミュニケーション・マネジメント計画書', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    'コミュニケーションのマネジメント': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス報告書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['コミュニケーション技術', 'コミュニケーション方法', 'コミュニケーション・スキル', 'プロジェクトマネジメント情報システム', 'プロジェクト報告', '対人関係とチームに関するスキル', '会議'],
+      outputs: ['プロジェクト・コミュニケーション', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
+    },
+    'コミュニケーションの監視': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'プロジェクトマネジメント情報システム', 'データ表現', '対人関係とチームに関するスキル', '会議'],
+      outputs: ['作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    // リスク・マネジメント
+    'リスク・マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ分析', '会議'],
+      outputs: ['リスク・マネジメント計画書']
+    },
+    'リスクの特定': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '合意書', '調達文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', '対人関係とチームに関するスキル', 'プロンプト・リスト', '会議'],
+      outputs: ['リスク登録簿', 'リスク報告書', 'プロジェクト文書更新版']
+    },
+    '定性的リスク分析': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', 'データ分析', '対人関係とチームに関するスキル', 'リスク・カテゴリー化', 'データ表現', '会議'],
+      outputs: ['プロジェクト文書更新版']
+    },
+    '定量的リスク分析': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', 'リスクの不確実性の表現', 'データ分析'],
+      outputs: ['プロジェクト文書更新版']
+    },
+    'リスク対応の計画': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', '脅威への戦略', '好機への戦略', 'コンティンジェンシー対応戦略', '全体的プロジェクト・リスクへの戦略', 'データ分析', '意思決定'],
+      outputs: ['変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版']
+    },
+    'リスク対応策の実行': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '組織のプロセス資産'],
+      tools: ['専門家の判断', '対人関係とチームに関するスキル', 'プロジェクトマネジメント情報システム'],
+      outputs: ['変更要求', 'プロジェクト文書更新版']
+    },
+    'リスクの監視': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '作業パフォーマンス・データ', '作業パフォーマンス報告書'],
+      tools: ['データ分析', '監査', '会議'],
+      outputs: ['作業パフォーマンス情報', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
+    },
+    // 調達マネジメント
+    '調達マネジメントの計画': {
+      inputs: ['プロジェクト憲章', 'ビジネス文書', 'プロジェクトマネジメント計画書', 'プロジェクト文書', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '市場調査', 'データ収集', 'データ分析', 'ソース選定分析', '会議'],
+      outputs: ['調達マネジメント計画書', '調達戦略', '入札文書', '調達作業範囲記述書', 'ソース選定基準', '内外製分析', '独立見積り', '変更要求', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
+    },
+    '調達の実行': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '調達文書', '納入者からのプロポーザル', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', '広告', '入札者会議', 'データ分析', '対人関係とチームに関するスキル'],
+      outputs: ['選定された納入者', '合意書', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
+    },
+    '調達のコントロール': {
+      inputs: ['プロジェクトマネジメント計画書', 'プロジェクト文書', '合意書', '調達文書', '承認済み変更要求', '作業パフォーマンス・データ', '組織体の環境要因', '組織のプロセス資産'],
+      tools: ['専門家の判断', 'クレーム処理', 'データ分析', '検査', '監査'],
+      outputs: ['完了した調達', '作業パフォーマンス情報', '調達文書更新版', '変更要求', 'プロジェクトマネジメント計画書更新版', 'プロジェクト文書更新版', '組織のプロセス資産更新版']
     }
   };
 
@@ -302,82 +584,78 @@ const PMBOKMatrix = memo(() => {
                           </div>
                           
                           {/* ITTO詳細表示 */}
-                          {selectedProcess && processDetails[selectedProcess] && (
-                            <>
-                              {processGroups.map(group => {
-                                const processes = filteredProcesses[area.id][group];
-                                if (!processes) return null;
+                          {selectedProcess && processDetails[selectedProcess] && (() => {
+                            // 選択されたプロセスが現在の知識エリアに属しているかチェック
+                            const currentAreaProcesses = processes[area.id];
+                            if (!currentAreaProcesses) return false;
+                            
+                            const isInCurrentArea = Object.values(currentAreaProcesses).some(
+                              groupProcesses => groupProcesses && groupProcesses.includes(selectedProcess)
+                            );
+                            
+                            return isInCurrentArea;
+                          })() && (
+                            <div className="mt-4 border-t pt-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <h3 className="text-sm sm:text-base font-bold text-gray-800">{selectedProcess}</h3>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedProcess(null);
+                                  }}
+                                  className="text-gray-400 hover:text-gray-600"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                                <div className="bg-blue-50 rounded-lg p-3">
+                                  <h4 className="text-xs sm:text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                                    <ChevronRight className="w-4 h-4 mr-1" />
+                                    インプット
+                                  </h4>
+                                  <ul className="space-y-1">
+                                    {processDetails[selectedProcess].inputs.map((input, idx) => (
+                                      <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
+                                        <span className="text-blue-600 mr-1">•</span>
+                                        <span>{renderTextWithLinks(input)}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
                                 
-                                return processes.map(process => {
-                                  if (selectedProcess === process && processDetails[process]) {
-                                  return (
-                                    <div key={`itto-${process}`} className="mt-4 border-t pt-4 animate-fade-in">
-                                      <div className="flex justify-between items-start mb-3">
-                                        <h3 className="text-sm sm:text-base font-bold text-gray-800">{process}</h3>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedProcess(null);
-                                          }}
-                                          className="text-gray-400 hover:text-gray-600"
-                                        >
-                                          <X className="h-4 w-4" />
-                                        </button>
-                                      </div>
-                                      
-                                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                                        <div className="bg-blue-50 rounded-lg p-3">
-                                          <h4 className="text-xs sm:text-sm font-semibold text-blue-800 mb-2 flex items-center">
-                                            <ChevronRight className="w-4 h-4 mr-1" />
-                                            インプット
-                                          </h4>
-                                          <ul className="space-y-1">
-                                            {processDetails[process].inputs.map((input, idx) => (
-                                              <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
-                                                <span className="text-blue-600 mr-1">•</span>
-                                                <span>{input}</span>
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        </div>
-                                        
-                                        <div className="bg-green-50 rounded-lg p-3">
-                                          <h4 className="text-xs sm:text-sm font-semibold text-green-800 mb-2 flex items-center">
-                                            <ChevronRight className="w-4 h-4 mr-1" />
-                                            ツールと技法
-                                          </h4>
-                                          <ul className="space-y-1">
-                                            {processDetails[process].tools.map((tool, idx) => (
-                                              <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
-                                                <span className="text-green-600 mr-1">•</span>
-                                                <span>{tool}</span>
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        </div>
-                                        
-                                        <div className="bg-amber-50 rounded-lg p-3">
-                                          <h4 className="text-xs sm:text-sm font-semibold text-amber-800 mb-2 flex items-center">
-                                            <ChevronRight className="w-4 h-4 mr-1" />
-                                            アウトプット
-                                          </h4>
-                                          <ul className="space-y-1">
-                                            {processDetails[process].outputs.map((output, idx) => (
-                                              <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
-                                                <span className="text-amber-600 mr-1">•</span>
-                                                <span>{output}</span>
-                                              </li>
-                                            ))}
-                                          </ul>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                  }
-                                  return null;
-                                });
-                              })}
-                            </>
+                                <div className="bg-green-50 rounded-lg p-3">
+                                  <h4 className="text-xs sm:text-sm font-semibold text-green-800 mb-2 flex items-center">
+                                    <ChevronRight className="w-4 h-4 mr-1" />
+                                    ツールと技法
+                                  </h4>
+                                  <ul className="space-y-1">
+                                    {processDetails[selectedProcess].tools.map((tool, idx) => (
+                                      <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
+                                        <span className="text-green-600 mr-1">•</span>
+                                        <span>{renderTextWithLinks(tool)}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                
+                                <div className="bg-amber-50 rounded-lg p-3">
+                                  <h4 className="text-xs sm:text-sm font-semibold text-amber-800 mb-2 flex items-center">
+                                    <ChevronRight className="w-4 h-4 mr-1" />
+                                    アウトプット
+                                  </h4>
+                                  <ul className="space-y-1">
+                                    {processDetails[selectedProcess].outputs.map((output, idx) => (
+                                      <li key={idx} className="text-xs sm:text-sm text-gray-700 flex items-start">
+                                        <span className="text-amber-600 mr-1">•</span>
+                                        <span>{renderTextWithLinks(output)}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
                           )}
                         </td>
                       </tr>
