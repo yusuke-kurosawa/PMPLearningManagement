@@ -15,11 +15,12 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "d3": "^7.8.5",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
-    "d3": "^7.8.5",
-    "lucide-react": "^0.294.0"
+    "recharts": "^3.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",

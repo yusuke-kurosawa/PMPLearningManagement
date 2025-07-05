@@ -8,6 +8,7 @@ import ITTOForceGraph from './components/ITTOForceGraph';
 import IntegratedView from './components/IntegratedView';
 import PMPGlossary from './components/PMPGlossary';
 import VisualizationHub from './components/VisualizationHub';
+import LearningProgressDashboard from './components/LearningProgressDashboard';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/integrated" element={<IntegratedView />} />
             <Route path="/glossary" element={<PMPGlossary />} />
             <Route path="/visualizations" element={<VisualizationHub />} />
+            <Route path="/progress" element={<LearningProgressDashboard />} />
           </Routes>
         </PageTransition>
       </div>

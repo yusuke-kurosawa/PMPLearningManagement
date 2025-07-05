@@ -1,16 +1,22 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
-import { ChevronDown, ChevronRight, Search, X, Loader2, Info } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, X, Loader2, Info, CheckCircle2, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { glossaryTerms } from '../data/pmpGlossary';
 import GlossaryDialog from './GlossaryDialog';
+import LearningModal from './LearningModal';
+import { useProgress } from '../services/progressService';
+import { generateProcessId } from '../utils/processUtils';
 
 const PMBOKMatrix = memo(() => {
   const navigate = useNavigate();
+  const { progress } = useProgress();
   const [loading, setLoading] = useState(false);
   const [expandedAreas, setExpandedAreas] = useState(new Set());
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState(null);
+  const [learningModalOpen, setLearningModalOpen] = useState(false);
+  const [selectedLearningProcess, setSelectedLearningProcess] = useState(null);
 
   const processGroups = [
     '立上げ',
@@ -464,6 +470,30 @@ const PMBOKMatrix = memo(() => {
     return Object.values(areaProcesses).reduce((sum, group) => sum + group.length, 0);
   };
 
+  const getAreaProgress = (areaId) => {
+    const areaProcesses = processes[areaId];
+    if (!areaProcesses || !progress?.processes) return { completed: 0, total: 0, percentage: 0 };
+    
+    let completed = 0;
+    let total = 0;
+    
+    Object.entries(areaProcesses).forEach(([group, processList]) => {
+      processList.forEach((process, index) => {
+        const processId = generateProcessId(areaId, group, index);
+        if (progress.processes[processId]?.completed) {
+          completed++;
+        }
+        total++;
+      });
+    });
+    
+    return {
+      completed,
+      total,
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+    };
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -512,6 +542,7 @@ const PMBOKMatrix = memo(() => {
                 const isExpanded = expandedAreas.has(area.id);
                 const processCount = getProcessCount(area.id);
                 const hasFilteredProcesses = processCount > 0;
+                const areaProgress = getAreaProgress(area.id);
 
                 if (!hasFilteredProcesses && searchQuery) return null;
 
@@ -532,11 +563,41 @@ const PMBOKMatrix = memo(() => {
                             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
                           )}
                           <div className="min-w-0 flex-1">
-                            <span className="font-medium text-gray-900 text-[11px] sm:text-sm md:text-base block truncate">
-                              <span className="sm:hidden">{area.name.replace('プロジェクト・', '').replace('プロジェクト', '').replace('マネジメント', '')}</span>
-                              <span className="hidden sm:inline">{area.name}</span>
-                            </span>
-                            <span className="text-[10px] sm:text-xs text-gray-500">({processCount})</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-gray-900 text-[11px] sm:text-sm md:text-base block truncate">
+                                <span className="sm:hidden">{area.name.replace('プロジェクト・', '').replace('プロジェクト', '').replace('マネジメント', '')}</span>
+                                <span className="hidden sm:inline">{area.name}</span>
+                              </span>
+                              {areaProgress.percentage > 0 && (
+                                <span className={`text-[10px] sm:text-xs font-medium ml-2 ${
+                                  areaProgress.percentage === 100 ? 'text-green-600' :
+                                  areaProgress.percentage >= 50 ? 'text-blue-600' :
+                                  'text-gray-600'
+                                }`}>
+                                  {areaProgress.percentage}%
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[10px] sm:text-xs text-gray-500">({processCount})</span>
+                              {areaProgress.completed > 0 && (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                                    <div
+                                      className={`h-1.5 rounded-full transition-all duration-500 ${
+                                        areaProgress.percentage === 100 ? 'bg-green-600' :
+                                        areaProgress.percentage >= 50 ? 'bg-blue-600' :
+                                        'bg-gray-400'
+                                      }`}
+                                      style={{ width: `${areaProgress.percentage}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] text-gray-500">
+                                    {areaProgress.completed}/{areaProgress.total}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </button>
                       </td>
@@ -566,20 +627,54 @@ const PMBOKMatrix = memo(() => {
                                   <h4 className="font-semibold text-gray-700 text-xs sm:text-sm sticky top-0 bg-gray-50 py-1">
                                     {group}
                                   </h4>
-                                  {groupProcesses.map(process => (
-                                    <button
-                                      key={process}
-                                      onClick={() => handleProcessClick(process)}
-                                      disabled={loading}
-                                      className={`block w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                                        selectedProcess === process
-                                          ? 'bg-blue-100 border-blue-400 font-semibold'
-                                          : 'bg-white hover:bg-blue-50 hover:border-blue-300'
-                                      }`}
-                                    >
-                                      {process}
-                                    </button>
-                                  ))}
+                                  {groupProcesses.map((process, index) => {
+                                    const processId = generateProcessId(area.id, group, index);
+                                    const processProgress = progress?.processes?.[processId];
+                                    const isCompleted = processProgress?.completed || false;
+                                    const understanding = processProgress?.understanding || 0;
+                                    
+                                    return (
+                                      <div key={process} className="flex items-center gap-1">
+                                        <button
+                                          onClick={() => handleProcessClick(process)}
+                                          disabled={loading}
+                                          className={`flex-1 text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                            selectedProcess === process
+                                              ? 'bg-blue-100 border-blue-400 font-semibold'
+                                              : isCompleted
+                                              ? 'bg-green-50 hover:bg-green-100 border-green-300'
+                                              : 'bg-white hover:bg-blue-50 hover:border-blue-300'
+                                          }`}
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <span className="flex items-center gap-1">
+                                              {isCompleted && <CheckCircle2 className="w-3 h-3 text-green-600 flex-shrink-0" />}
+                                              {process}
+                                            </span>
+                                            {understanding > 0 && (
+                                              <span className="text-[10px] text-gray-500 ml-2">{understanding}%</span>
+                                            )}
+                                          </div>
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setSelectedLearningProcess({
+                                              id: processId,
+                                              name: process,
+                                              knowledgeArea: area.name,
+                                              processGroup: group,
+                                              ...processDetails[process]
+                                            });
+                                            setLearningModalOpen(true);
+                                          }}
+                                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                          title="学習する"
+                                        >
+                                          <BookOpen className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               );
                             })}
@@ -680,6 +775,19 @@ const PMBOKMatrix = memo(() => {
           }}
         />
       )}
+
+      {/* 学習モーダル */}
+      <LearningModal
+        isOpen={learningModalOpen}
+        onClose={() => {
+          setLearningModalOpen(false);
+          setSelectedLearningProcess(null);
+        }}
+        process={selectedLearningProcess}
+        processId={selectedLearningProcess?.id}
+        knowledgeArea={selectedLearningProcess?.knowledgeArea}
+        processGroup={selectedLearningProcess?.processGroup}
+      />
     </div>
   );
 });

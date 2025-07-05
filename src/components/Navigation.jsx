@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Grid, Network, Layers, Home, Menu, X, BookOpen, Sparkles } from 'lucide-react';
+import { Grid, Network, Layers, Home, Menu, X, BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -12,7 +12,8 @@ const Navigation = () => {
     { path: '/network', label: 'ネットワーク図', icon: Network },
     { path: '/integrated', label: '統合ビュー', icon: Layers },
     { path: '/visualizations', label: 'ビジュアル', icon: Sparkles, isNew: true },
-    { path: '/glossary', label: '用語集', icon: BookOpen }
+    { path: '/glossary', label: '用語集', icon: BookOpen },
+    { path: '/progress', label: '学習進捗', icon: TrendingUp, isNew: true }
   ];
 
   return (
