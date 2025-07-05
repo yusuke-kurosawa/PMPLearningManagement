@@ -1,0 +1,45 @@
+{
+  "name": "pmp-learning-management",
+  "version": "1.0.0",
+  "description": "PMBOK 6th Edition Learning Management System with interactive visualizations",
+  "homepage": "https://yusuke-kurosawa.github.io/PMPLearningManagement",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.{js,jsx}",
+    "lint:fix": "eslint src/**/*.{js,jsx} --fix",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "d3": "^7.8.5",
+    "lucide-react": "^0.294.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "gh-pages": "^6.1.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.4"
+  },
+  "keywords": [
+    "pmbok",
+    "project-management",
+    "pmp",
+    "itto",
+    "learning",
+    "visualization"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,86 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Grid, Network, Layers, Home, Menu, X } from 'lucide-react';
+
+const Navigation = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const location = useLocation();
+
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/matrix', label: 'Matrix View', icon: Grid },
+    { path: '/network', label: 'Network Diagram', icon: Network },
+    { path: '/integrated', label: 'Integrated View', icon: Layers }
+  ];
+
+  return (
+    <nav className="bg-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <h1 className="text-lg md:text-xl font-bold text-gray-800">PMBOK Learning</h1>
+          </div>
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex space-x-1">
+            {navItems.map(({ path, label, icon: Icon }) => {
+              const isActive = location.pathname === path;
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+                    ${isActive 
+                      ? 'bg-blue-500 text-white shadow-md' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+          
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+        
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden py-2 animate-slide-in">
+            {navItems.map(({ path, label, icon: Icon }) => {
+              const isActive = location.pathname === path;
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 rounded-md text-sm font-medium transition-all
+                    ${isActive 
+                      ? 'bg-blue-500 text-white' 
+                      : 'text-gray-700 hover:bg-gray-100'
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default Navigation;
