@@ -147,6 +147,13 @@ const PMBOKMatrix = memo(() => {
     setTimeout(() => {
       setSelectedProcess(process);
       setLoading(false);
+      // ITTO詳細表示にスクロール
+      setTimeout(() => {
+        const element = document.getElementById('itto-details');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
     }, 100);
   }, []);
 
@@ -287,7 +294,11 @@ const PMBOKMatrix = memo(() => {
                                       key={process}
                                       onClick={() => handleProcessClick(process)}
                                       disabled={loading}
-                                      className="block w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-white rounded border hover:bg-blue-50 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`block w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                        selectedProcess === process
+                                          ? 'bg-blue-100 border-blue-400 font-semibold'
+                                          : 'bg-white hover:bg-blue-50 hover:border-blue-300'
+                                      }`}
                                     >
                                       {process}
                                     </button>
@@ -307,57 +318,72 @@ const PMBOKMatrix = memo(() => {
         </div>
       </div>
 
+      {/* ITTO詳細表示 */}
       {selectedProcess && processDetails[selectedProcess] && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="p-4 sm:p-6 border-b flex justify-between items-start">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 pr-4">{selectedProcess}</h2>
-              <button
-                onClick={() => setSelectedProcess(null)}
-                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-              >
-                <X className="h-5 w-5 sm:h-6 sm:w-6" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
-              <div className="space-y-4 sm:space-y-6">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">インプット</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {processDetails[selectedProcess].inputs.map((input, idx) => (
-                          <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{input}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">ツールと技法</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {processDetails[selectedProcess].tools.map((tool, idx) => (
-                          <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{tool}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">アウトプット</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {processDetails[selectedProcess].outputs.map((output, idx) => (
-                          <li key={idx} className="text-gray-600 text-sm sm:text-base ml-2">{output}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </>
-                )}
+        <div id="itto-details" className="mt-6 bg-white rounded-lg shadow-lg p-4 sm:p-6 animate-fade-in">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">{selectedProcess}</h2>
+            <button
+              onClick={() => setSelectedProcess(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {loading ? (
+              <div className="col-span-3 flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                    <ChevronRight className="w-5 h-5 mr-1" />
+                    インプット
+                  </h3>
+                  <ul className="space-y-2">
+                    {processDetails[selectedProcess].inputs.map((input, idx) => (
+                      <li key={idx} className="text-gray-700 text-sm sm:text-base flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span>{input}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-3 flex items-center">
+                    <ChevronRight className="w-5 h-5 mr-1" />
+                    ツールと技法
+                  </h3>
+                  <ul className="space-y-2">
+                    {processDetails[selectedProcess].tools.map((tool, idx) => (
+                      <li key={idx} className="text-gray-700 text-sm sm:text-base flex items-start">
+                        <span className="text-green-600 mr-2">•</span>
+                        <span>{tool}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="bg-amber-50 rounded-lg p-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-amber-800 mb-3 flex items-center">
+                    <ChevronRight className="w-5 h-5 mr-1" />
+                    アウトプット
+                  </h3>
+                  <ul className="space-y-2">
+                    {processDetails[selectedProcess].outputs.map((output, idx) => (
+                      <li key={idx} className="text-gray-700 text-sm sm:text-base flex items-start">
+                        <span className="text-amber-600 mr-2">•</span>
+                        <span>{output}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
