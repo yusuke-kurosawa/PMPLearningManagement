@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オフライン - PMP Learning</title>
+  <link rel="manifest" href="/PMPLearningManagement/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      background: rgba(255,255,255,0.1);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.8; }
+    h1 { font-size: 2rem; margin-bottom: 20px; font-weight: 600; }
+    p { margin: 15px 0; line-height: 1.6; opacity: 0.9; }
+    .btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📚</div>
+    <h1>オフライン状態です</h1>
+    <p>インターネット接続を確認してから、もう一度お試しください。</p>
+    <p>一部の機能はオフラインでも利用できます。</p>
+    <button class="btn" onclick="handleRetry()">再試行</button>
+  </div>
+  <script>
+    function handleRetry() {
+      if (navigator.onLine) {
+        window.location.reload();
+      } else {
+        alert('まだオフライン状態です。インターネット接続を確認してください。');
+      }
+    }
+    window.addEventListener('online', function() {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

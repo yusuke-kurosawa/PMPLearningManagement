@@ -6,9 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PMBOK学習管理システム</title>
     <meta name="description" content="PMBOK第6版のプロセス、ITTO関係、プロジェクトマネジメント知識エリアのインタラクティブな可視化ツール" />
-    <script type="module" crossorigin src="/PMPLearningManagement/assets/index-C2x1aLQn.js"></script>
-    <link rel="stylesheet" crossorigin href="/PMPLearningManagement/assets/index-DM-2lFU5.css">
-  </head>
+    <link rel="manifest" href="/PMPLearningManagement/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="apple-touch-icon" href="/PMPLearningManagement/icon-192x192.png" />
+    <script type="module" crossorigin src="/PMPLearningManagement/assets/index-DmzGiiSP.js"></script>
+    <link rel="modulepreload" crossorigin href="/PMPLearningManagement/assets/vendor-lbtS60_Z.js">
+    <link rel="modulepreload" crossorigin href="/PMPLearningManagement/assets/ui-CBR5GOMz.js">
+    <link rel="stylesheet" crossorigin href="/PMPLearningManagement/assets/index-Cregb8Tz.css">
+  
+  <script>
+    // GitHub Pages SPA routing support
+    (function(l) {
+      if (l.search) {
+        var q = {};
+        l.search.slice(1).split('&').forEach(function(v) {
+          var a = v.split('=');
+          q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
+        });
+        if (q.p !== undefined) {
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + (q.p || '') +
+            (q.q ? ('?' + q.q) : '') +
+            l.hash
+          );
+        }
+      }
+    }(window.location))
+    
+    // Handle offline redirect from sessionStorage
+    if (sessionStorage.redirect) {
+      var redirect = sessionStorage.redirect;
+      delete sessionStorage.redirect;
+      history.replaceState(null, null, redirect);
+    }
+  </script>
+</head>
   <body>
     <div id="root"></div>
   </body>
