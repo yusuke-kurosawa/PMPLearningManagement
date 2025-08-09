@@ -23,29 +23,29 @@ export interface CustomMetrics {
   httpRequestsTotal: Counter<string>
   httpRequestSize: Histogram<string>
   httpResponseSize: Histogram<string>
-  
+
   // アプリケーション関連メトリクス
   activeUsers: Gauge<string>
   userSessions: Gauge<string>
   learningProgress: Gauge<string>
   examAttempts: Counter<string>
   examScore: Histogram<string>
-  
+
   // データベース関連メトリクス
   databaseConnections: Gauge<string>
   databaseQueryDuration: Histogram<string>
   databaseQueriesTotal: Counter<string>
-  
+
   // キャッシュ関連メトリクス
   cacheHits: Counter<string>
   cacheMisses: Counter<string>
   cacheOperationDuration: Histogram<string>
-  
+
   // システム関連メトリクス
   errorRate: Counter<string>
   backgroundJobs: Gauge<string>
   memoryUsage: Gauge<string>
-  
+
   // ビジネスメトリクス
   userRegistrations: Counter<string>
   examCompletions: Counter<string>
@@ -63,7 +63,7 @@ export class MetricsCollector {
 
   constructor(config?: Partial<MetricsConfig>) {
     this.config = MetricsConfigSchema.parse(config || {})
-    
+
     // デフォルトメトリクスの収集開始
     if (this.config.collectDefaultMetrics) {
       collectDefaultMetrics({
@@ -501,17 +501,13 @@ export class MetricsCollector {
    * レジストリからメトリクス一覧を取得
    */
   getRegisteredMetrics(): string[] {
-    return register.getMetricsAsArray().map(metric => metric.name)
+    return register.getMetricsAsArray().map((metric) => metric.name)
   }
 
   /**
    * カスタムメトリクスの追加
    */
-  addCustomCounter(
-    name: string,
-    help: string,
-    labelNames: string[] = []
-  ): Counter<string> {
+  addCustomCounter(name: string, help: string, labelNames: string[] = []): Counter<string> {
     return new Counter({
       name: `${this.config.prefix}${name}`,
       help,
@@ -519,11 +515,7 @@ export class MetricsCollector {
     })
   }
 
-  addCustomGauge(
-    name: string,
-    help: string,
-    labelNames: string[] = []
-  ): Gauge<string> {
+  addCustomGauge(name: string, help: string, labelNames: string[] = []): Gauge<string> {
     return new Gauge({
       name: `${this.config.prefix}${name}`,
       help,
@@ -564,11 +556,7 @@ export class MetricsCollector {
  * メトリクス収集用ミドルウェア
  */
 export function createMetricsMiddleware(collector: MetricsCollector) {
-  return function metricsMiddleware(
-    req: any,
-    res: any,
-    next: () => void
-  ): void {
+  return function metricsMiddleware(req: any, res: any, next: () => void): void {
     const startTime = Date.now()
     const originalSend = res.send
     const originalJson = res.json
@@ -577,13 +565,13 @@ export function createMetricsMiddleware(collector: MetricsCollector) {
     let responseSize = 0
 
     // res.send をオーバーライド
-    res.send = function(data: any) {
+    res.send = function (data: any) {
       responseSize = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data || '', 'utf8')
       return originalSend.call(this, data)
     }
 
     // res.json をオーバーライド
-    res.json = function(data: any) {
+    res.json = function (data: any) {
       const jsonStr = JSON.stringify(data)
       responseSize = Buffer.byteLength(jsonStr, 'utf8')
       return originalJson.call(this, data)
@@ -682,7 +670,6 @@ export class SystemMetricsCollector {
         )
         eventLoopLagGauge.set(eventLoopLag)
       })
-
     } catch (error) {
       console.error('System metrics collection error:', error)
     }
