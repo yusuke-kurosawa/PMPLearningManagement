@@ -1,0 +1,162 @@
+{
+  "teams": {
+    "backend": {
+      "name": "Backend Development Team",
+      "members": [
+        {
+          "github_handle": "backend-lead",
+          "name": "Backend Lead Developer",
+          "skills": {
+            "primary": ["node.js", "express", "postgresql", "redis", "docker"],
+            "secondary": ["aws", "microservices", "api-design", "database-design"],
+            "learning": ["kubernetes", "graphql"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 13,
+            "availability": "full-time",
+            "timezone": "JST"
+          },
+          "expertise_areas": ["authentication", "data-architecture", "performance"],
+          "leadership_role": true
+        },
+        {
+          "github_handle": "backend-dev-1",
+          "name": "Senior Backend Developer",
+          "skills": {
+            "primary": ["python", "django", "fastapi", "postgresql"],
+            "secondary": ["celery", "redis", "docker", "pytest"],
+            "learning": ["asyncio", "machine-learning"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 10,
+            "availability": "full-time",
+            "timezone": "JST"
+          },
+          "expertise_areas": ["api-development", "testing", "data-processing"]
+        },
+        {
+          "github_handle": "backend-dev-2", 
+          "name": "Backend Developer",
+          "skills": {
+            "primary": ["node.js", "typescript", "mongodb", "express"],
+            "secondary": ["jest", "docker", "aws-lambda"],
+            "learning": ["postgresql", "microservices"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 8,
+            "availability": "full-time",
+            "timezone": "JST"
+          },
+          "expertise_areas": ["real-time", "integrations", "nosql"]
+        }
+      ]
+    },
+    "ai_ml": {
+      "name": "AI/ML Team",
+      "members": [
+        {
+          "github_handle": "ml-engineer-1",
+          "name": "Senior ML Engineer",
+          "skills": {
+            "primary": ["python", "tensorflow", "pytorch", "scikit-learn"],
+            "secondary": ["numpy", "pandas", "jupyter", "mlflow"],
+            "learning": ["llm-fine-tuning", "vector-databases"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 10,
+            "availability": "full-time",
+            "timezone": "PST"
+          },
+          "expertise_areas": ["nlp", "recommendation-systems", "model-deployment"]
+        },
+        {
+          "github_handle": "ai-researcher",
+          "name": "AI Research Engineer",
+          "skills": {
+            "primary": ["python", "pytorch", "transformers", "openai-api"],
+            "secondary": ["langchain", "vector-db", "fine-tuning"],
+            "learning": ["rag-systems", "agent-frameworks"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 8,
+            "availability": "part-time",
+            "timezone": "EST"
+          },
+          "expertise_areas": ["llm-integration", "chatbots", "knowledge-graphs"]
+        }
+      ]
+    },
+    "frontend": {
+      "name": "Frontend Development Team", 
+      "members": [
+        {
+          "github_handle": "yusuke-kurosawa",
+          "name": "Full-Stack Lead",
+          "skills": {
+            "primary": ["react", "typescript", "tailwind", "vite"],
+            "secondary": ["node.js", "d3.js", "testing-library", "cypress"],
+            "learning": ["next.js", "react-query"]
+          },
+          "capacity": {
+            "story_points_per_sprint": 15,
+            "availability": "full-time",
+            "timezone": "JST"
+          },
+          "expertise_areas": ["data-visualization", "ui-architecture", "performance"],
+          "leadership_role": true
+        }
+      ]
+    }
+  },
+  "skill_categories": {
+    "backend_languages": ["node.js", "python", "java", "go", "rust"],
+    "frontend_frameworks": ["react", "vue", "angular", "svelte"],
+    "databases": ["postgresql", "mongodb", "redis", "elasticsearch"],
+    "cloud_platforms": ["aws", "azure", "gcp", "docker", "kubernetes"],
+    "ai_ml_tools": ["tensorflow", "pytorch", "scikit-learn", "openai-api"],
+    "testing_tools": ["jest", "pytest", "cypress", "playwright"],
+    "devops_tools": ["docker", "kubernetes", "jenkins", "github-actions"],
+    "specializations": ["security", "performance", "accessibility", "mobile"]
+  },
+  "assignment_rules": {
+    "skill_match_weight": 0.4,
+    "capacity_weight": 0.3,
+    "expertise_weight": 0.2,
+    "learning_opportunity_weight": 0.1,
+    "minimum_skill_overlap": 2,
+    "max_learning_items_per_sprint": 1,
+    "leadership_required_for": ["critical", "architectural", "security"]
+  },
+  "issue_complexity_mapping": {
+    "spike": {
+      "required_skills": 1,
+      "story_points": "2-5",
+      "expertise_level": "any",
+      "notes": "Good for learning opportunities"
+    },
+    "feature": {
+      "required_skills": 2,
+      "story_points": "3-8", 
+      "expertise_level": "intermediate",
+      "notes": "Match primary skills"
+    },
+    "epic": {
+      "required_skills": 3,
+      "story_points": "13+",
+      "expertise_level": "senior",
+      "notes": "Requires leadership and architecture skills"
+    },
+    "security": {
+      "required_skills": 2,
+      "story_points": "5-13",
+      "expertise_level": "expert",
+      "notes": "Must have security specialization"
+    },
+    "performance": {
+      "required_skills": 2,
+      "story_points": "3-8",
+      "expertise_level": "intermediate", 
+      "notes": "Performance expertise preferred"
+    }
+  }
+}

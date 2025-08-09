@@ -1,80 +1,43 @@
 ---
 name: Feature Request
-about: Suggest an idea for this project
+about: Suggest a new feature for PMPLearningManagement
 title: '[FEATURE] '
-labels: 'enhancement'
+labels: 'enhancement, idd-required'
 assignees: ''
 ---
 
-## Feature Summary
+## 📋 Feature Description
+<!-- Provide a clear and concise description of the feature -->
 
-A clear and concise description of the feature you'd like to see.
+## 🎯 Problem Statement
+<!-- What problem does this feature solve? Why is it needed? -->
 
-## Problem Statement
+## 💡 Proposed Solution
+<!-- Describe your proposed solution in detail -->
 
-Is your feature request related to a problem? Please describe.
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-
-## Proposed Solution
-
-A clear and concise description of what you want to happen.
-
-## Alternative Solutions
-
-A clear and concise description of any alternative solutions or features you've considered.
-
-## Use Cases
-
-Describe specific scenarios where this feature would be useful:
-
-1. As a [type of user], I want [goal] so that [benefit]
-2. When [situation], I need [capability] to [outcome]
-
-## Acceptance Criteria
-
-Define what "done" looks like for this feature:
-
+## 📊 Acceptance Criteria
+<!-- List the specific criteria that must be met for this feature to be considered complete -->
 - [ ] Criterion 1
 - [ ] Criterion 2
 - [ ] Criterion 3
 
-## Component/Area
+## 🔗 Related Issues
+<!-- Link any related issues or PRs -->
+- Related to #
+- Blocks #
+- Blocked by #
 
-- [ ] Home Page
-- [ ] PMBOK Matrix
-- [ ] Network Diagrams
-- [ ] Flashcards
-- [ ] Mock Exam
-- [ ] Visualizations
-- [ ] Glossary
-- [ ] Progress Dashboard
-- [ ] Mobile Experience
-- [ ] Infrastructure/DevOps
-- [ ] Testing
-- [ ] Documentation
-- [ ] Other (specify): \_\_\_
+## 📸 Mockups / Examples
+<!-- If applicable, add mockups, diagrams, or examples -->
 
-## Priority
+## 🏷️ IDD Tracking
+<!-- DO NOT REMOVE - Required for IDD compliance -->
+- [ ] This issue will be referenced in all related commits
+- [ ] All PRs for this feature will reference this issue number
+- [ ] Progress will be tracked through commit messages
 
-- [ ] Must Have (critical for next release)
-- [ ] Should Have (important but not critical)
-- [ ] Could Have (nice to have)
-- [ ] Won't Have (future consideration)
+## 📝 Additional Context
+<!-- Add any other context about the feature request here -->
 
-## Technical Considerations
-
-Any technical aspects to consider:
-
-- Dependencies on other features
-- Performance implications
-- Browser compatibility
-- Mobile considerations
-- Accessibility requirements
-
-## Mockups/Examples
-
-If applicable, add sketches, mockups, or examples to help explain your feature request.
-
-## Additional Context
-
-Add any other context or screenshots about the feature request here.
+---
+*This issue template ensures IDD (Issue-Driven Development) compliance. All commits related to this feature must reference this issue number.*

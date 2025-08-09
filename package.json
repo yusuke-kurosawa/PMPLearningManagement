@@ -46,7 +46,15 @@
     "context:update": "npm run sync-context",
     "context:view": "cat .claude/context/current-status.md",
     "context:consolidate": "node scripts/consolidate-docs.js",
-    "context:cleanup": "npm run context:consolidate && rm -rf dist playwright-report test-results* *.log *.tsbuildinfo"
+    "context:cleanup": "npm run context:consolidate && rm -rf dist playwright-report test-results* *.log *.tsbuildinfo",
+    "idd:setup": "bash scripts/setup-idd-automation.sh",
+    "idd:hooks:install": "bash .github/hooks/install.sh",
+    "idd:hooks:uninstall": "bash .github/hooks/uninstall.sh",
+    "idd:check": "git log --oneline -10 | grep -E '#[0-9]+' || echo 'Non-compliant commits found!'",
+    "idd:status": "git log --oneline -10 | while read line; do if echo \"$line\" | grep -qE '#[0-9]+'; then echo \"✓ $line\"; else echo \"✗ $line\"; fi; done",
+    "idd:report": "node scripts/issue-report-generator.js",
+    "idd:metrics": "node scripts/issue-kpi-analyzer.js",
+    "idd:quality": "node scripts/issue-quality-checker.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

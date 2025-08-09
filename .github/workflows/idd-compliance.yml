@@ -1,0 +1,360 @@
+name: IDD Compliance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main, develop]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '0 9 * * 1' # 毎週月曜日9時に実行
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  check-pr-compliance:
+    name: PR IDD Compliance Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check PR Title for Issue Reference
+        id: check-title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if echo "$PR_TITLE" | grep -qE '#[0-9]+'; then
+            echo "✅ PR title contains issue reference"
+            echo "has_issue_ref=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ PR title missing issue reference"
+            echo "has_issue_ref=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check PR Body for Issue Reference
+        id: check-body
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if echo "$PR_BODY" | grep -qE '(closes|fixes|resolves|references) #[0-9]+'; then
+            echo "✅ PR body contains issue reference"
+            echo "has_issue_ref=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ PR body missing issue reference"
+            echo "has_issue_ref=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Commits for Issue References
+        id: check-commits
+        run: |
+          echo "Checking commits for issue references..."
+          
+          # PRのコミットを取得
+          COMMITS=$(git log --format="%H %s" origin/${{ github.base_ref }}..HEAD 2>/dev/null || git log --format="%H %s" -n 20)
+          
+          TOTAL_COMMITS=0
+          COMPLIANT_COMMITS=0
+          NON_COMPLIANT_COMMITS=""
+          
+          while IFS= read -r commit_line; do
+            if [ -z "$commit_line" ]; then continue; fi
+            
+            TOTAL_COMMITS=$((TOTAL_COMMITS + 1))
+            COMMIT_SHA=$(echo "$commit_line" | cut -d' ' -f1)
+            COMMIT_MSG=$(echo "$commit_line" | cut -d' ' -f2-)
+            
+            # マージコミットはスキップ
+            if echo "$COMMIT_MSG" | grep -qE '^(Merge|Revert)'; then
+              COMPLIANT_COMMITS=$((COMPLIANT_COMMITS + 1))
+              continue
+            fi
+            
+            if echo "$COMMIT_MSG" | grep -qE '#[0-9]+'; then
+              echo "✅ Commit $COMMIT_SHA has issue reference"
+              COMPLIANT_COMMITS=$((COMPLIANT_COMMITS + 1))
+            else
+              echo "❌ Commit $COMMIT_SHA missing issue reference: $COMMIT_MSG"
+              NON_COMPLIANT_COMMITS="$NON_COMPLIANT_COMMITS\n- $COMMIT_SHA: $COMMIT_MSG"
+            fi
+          done <<< "$COMMITS"
+          
+          if [ $TOTAL_COMMITS -gt 0 ]; then
+            COMPLIANCE_RATE=$((COMPLIANT_COMMITS * 100 / TOTAL_COMMITS))
+          else
+            COMPLIANCE_RATE=100
+          fi
+          
+          echo "compliance_rate=$COMPLIANCE_RATE" >> $GITHUB_OUTPUT
+          echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+          echo "compliant_commits=$COMPLIANT_COMMITS" >> $GITHUB_OUTPUT
+          echo "non_compliant_list=$NON_COMPLIANT_COMMITS" >> $GITHUB_OUTPUT
+
+      - name: Generate Compliance Report
+        id: generate-report
+        run: |
+          cat << EOF > compliance-report.md
+          ## 📊 IDD Compliance Report
+          
+          ### Pull Request Information
+          - **PR Number:** #${{ github.event.pull_request.number }}
+          - **Title:** ${{ github.event.pull_request.title }}
+          - **Author:** @${{ github.event.pull_request.user.login }}
+          
+          ### Compliance Status
+          
+          | Check | Status | Details |
+          |-------|--------|---------|
+          | PR Title | ${{ steps.check-title.outputs.has_issue_ref == 'true' && '✅ Compliant' || '❌ Non-compliant' }} | Issue reference in title |
+          | PR Body | ${{ steps.check-body.outputs.has_issue_ref == 'true' && '✅ Compliant' || '⚠️ Warning' }} | Issue reference in body |
+          | Commits | ${{ steps.check-commits.outputs.compliance_rate }}% | ${{ steps.check-commits.outputs.compliant_commits }}/${{ steps.check-commits.outputs.total_commits }} compliant |
+          
+          ### Commit Analysis
+          - **Total Commits:** ${{ steps.check-commits.outputs.total_commits }}
+          - **Compliant Commits:** ${{ steps.check-commits.outputs.compliant_commits }}
+          - **Compliance Rate:** ${{ steps.check-commits.outputs.compliance_rate }}%
+          
+          ${{ steps.check-commits.outputs.compliance_rate < 100 && '### ⚠️ Non-compliant Commits\n\nThe following commits do not reference any issue:' || '### ✅ All commits are IDD compliant!' }}
+          ${{ steps.check-commits.outputs.non_compliant_list }}
+          
+          ### Recommendations
+          
+          ${{ steps.check-title.outputs.has_issue_ref != 'true' && '- 📝 Add issue reference to PR title (e.g., "feat: Add feature (#123)")' || '' }}
+          ${{ steps.check-body.outputs.has_issue_ref != 'true' && '- 📝 Add issue reference to PR body (e.g., "Closes #123")' || '' }}
+          ${{ steps.check-commits.outputs.compliance_rate < 100 && '- 🔧 Amend non-compliant commits to include issue references' || '' }}
+          ${{ steps.check-commits.outputs.compliance_rate == 100 && steps.check-title.outputs.has_issue_ref == 'true' && '- ✨ Excellent IDD compliance! Keep up the good work!' || '' }}
+          
+          ---
+          
+          📚 **Learn more:** [IDD Guidelines](https://github.com/${{ github.repository }}/blob/main/docs/IDD_AGENT_GUIDELINES.md)
+          EOF
+          
+          # 判定結果を出力
+          if [ "${{ steps.check-title.outputs.has_issue_ref }}" != "true" ] || [ "${{ steps.check-commits.outputs.compliance_rate }}" -lt "95" ]; then
+            echo "status=failed" >> $GITHUB_OUTPUT
+          else
+            echo "status=passed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('compliance-report.md', 'utf8');
+            
+            // 既存のボットコメントを探す
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('IDD Compliance Report')
+            );
+            
+            if (botComment) {
+              // 既存のコメントを更新
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report
+              });
+            } else {
+              // 新しいコメントを作成
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }
+
+      - name: Set PR Status Check
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.generate-report.outputs.status }}';
+            const state = status === 'passed' ? 'success' : 'failure';
+            const description = status === 'passed' 
+              ? 'All IDD compliance checks passed' 
+              : 'IDD compliance issues detected';
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: state,
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: description,
+              context: 'IDD Compliance'
+            });
+
+      - name: Block PR if Non-compliant
+        if: steps.generate-report.outputs.status == 'failed'
+        run: |
+          echo "::error::IDD compliance check failed. PR cannot be merged until all issues are resolved."
+          exit 1
+
+  weekly-compliance-report:
+    name: Weekly IDD Compliance Report
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Weekly Report
+        id: weekly-report
+        run: |
+          # 過去1週間のコミットを分析
+          WEEK_AGO=$(date -d '7 days ago' '+%Y-%m-%d')
+          
+          echo "Analyzing commits since $WEEK_AGO..."
+          
+          COMMITS=$(git log --since="$WEEK_AGO" --format="%H|%s|%an|%ae" --no-merges)
+          
+          TOTAL=0
+          COMPLIANT=0
+          AUTHORS=""
+          
+          while IFS='|' read -r sha subject author email; do
+            if [ -z "$sha" ]; then continue; fi
+            
+            TOTAL=$((TOTAL + 1))
+            
+            if echo "$subject" | grep -qE '#[0-9]+'; then
+              COMPLIANT=$((COMPLIANT + 1))
+            fi
+            
+            # ユニークな著者を追跡
+            if ! echo "$AUTHORS" | grep -q "$email"; then
+              AUTHORS="$AUTHORS\n- $author ($email)"
+            fi
+          done <<< "$COMMITS"
+          
+          if [ $TOTAL -gt 0 ]; then
+            RATE=$((COMPLIANT * 100 / TOTAL))
+          else
+            RATE=100
+          fi
+          
+          # レポートを生成
+          cat << EOF > weekly-report.md
+          # 📊 Weekly IDD Compliance Report
+          
+          **Period:** $(date -d '7 days ago' '+%Y-%m-%d') to $(date '+%Y-%m-%d')
+          
+          ## Summary
+          - **Total Commits:** $TOTAL
+          - **Compliant Commits:** $COMPLIANT
+          - **Compliance Rate:** $RATE%
+          
+          ## Authors
+          $AUTHORS
+          
+          ## Trend
+          \`\`\`
+          Week Compliance: $RATE%
+          Target:          95%
+          Status:          $( [ $RATE -ge 95 ] && echo "✅ Meeting target" || echo "⚠️ Below target" )
+          \`\`\`
+          
+          ## Recommendations
+          $( [ $RATE -lt 95 ] && echo "- Increase awareness of IDD requirements\n- Review commit hooks installation\n- Provide additional training" || echo "- Continue current practices\n- Share success with team" )
+          
+          ---
+          Generated on $(date '+%Y-%m-%d %H:%M:%S UTC')
+          EOF
+          
+          echo "compliance_rate=$RATE" >> $GITHUB_OUTPUT
+
+      - name: Create Issue with Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('weekly-report.md', 'utf8');
+            const date = new Date().toISOString().split('T')[0];
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[IDD Report] Weekly Compliance Report - ${date}`,
+              body: report,
+              labels: ['idd-compliance', 'report', 'automated']
+            });
+
+  auto-create-issue-prompt:
+    name: Prompt for Issue Creation
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR has Issue Reference
+        id: check-issue
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          if echo "$PR_TITLE $PR_BODY" | grep -qE '#[0-9]+'; then
+            echo "has_issue=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_issue=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Suggest Issue Creation
+        if: steps.check-issue.outputs.has_issue == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            const prAuthor = context.payload.pull_request.user.login;
+            
+            const comment = `
+            ## 📋 Issue Creation Reminder
+            
+            Hi @${prAuthor}! 👋
+            
+            I noticed this PR doesn't reference an issue yet. Following our IDD (Issue-Driven Development) practices, all changes should be tracked through issues.
+            
+            ### Quick Issue Creation
+            
+            You can create an issue directly from this PR by clicking the button below:
+            
+            [**Create Issue**](https://github.com/${context.repo.owner}/${context.repo.repo}/issues/new?title=${encodeURIComponent(prTitle)}&body=${encodeURIComponent(`Related PR: #${context.payload.pull_request.number}\n\n## Description\n\n## Acceptance Criteria\n\n## Additional Context`)})
+            
+            ### Or use GitHub CLI:
+            \`\`\`bash
+            gh issue create --title "${prTitle}" --body "Related PR: #${context.payload.pull_request.number}"
+            \`\`\`
+            
+            Once created, please update your PR title or description to include the issue number (e.g., \`#123\`).
+            
+            ---
+            📚 Learn more about IDD: [IDD Guidelines](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/IDD_AGENT_GUIDELINES.md)
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

@@ -1,136 +1,226 @@
-# Pull Request
+# 📝 Pull Request
 
-## Description
+## 📋 概要・変更内容
+<!-- 
+この PR で何を変更したのか、なぜ変更したのかを簡潔に説明してください。
+ビジネス価値や技術的な改善点も含めて記載してください。
+-->
 
-A clear and concise description of what this PR does and why.
+### 🎯 変更の目的
+<!-- 解決する問題や追加する機能について -->
 
-## Type of Change
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Code refactoring
-- [ ] Performance improvement
-- [ ] Test improvement
-- [ ] CI/CD improvement
+### 📊 変更の種類
+<!-- 該当する項目にチェックを入れてください -->
+- [ ] 🐛 **Bug Fix** - 既存機能の不具合修正
+- [ ] ✨ **New Feature** - 新機能の追加  
+- [ ] 🔧 **Enhancement** - 既存機能の改善・拡張
+- [ ] 🎨 **UI/UX** - デザイン・ユーザーインターフェース改善
+- [ ] ⚡ **Performance** - パフォーマンス改善・最適化
+- [ ] 🔒 **Security** - セキュリティ関連の改善
+- [ ] 🧹 **Refactoring** - コード構造の改善（機能変更なし）
+- [ ] 📚 **Documentation** - ドキュメントの更新
+- [ ] 🧪 **Tests** - テストの追加・修正
+- [ ] 🔧 **Configuration** - 設定ファイル・ビルドプロセスの変更
+- [ ] 📱 **Mobile/PWA** - モバイル・PWA機能の改善
+- [ ] 🌐 **i18n** - 国際化・多言語対応
 
-## Related Issues
+## 🔗 関連Issue・参照
+<!-- 
+関連するIssueがあれば以下の形式で記載してください：
+- Closes #123 (このPRでIssueが解決される場合)
+- Related to #456 (関連するIssue)
+- Part of Epic #789 (エピックの一部の場合)
+-->
 
-Fixes #(issue number)
-Related to #(issue number)
+- Closes #
+- Related to #
+- Part of Epic #
 
-## Changes Made
+## 🧪 テスト内容
+<!-- 
+どのような方法で動作確認を行ったかを詳細に記載してください。
+手動テスト、自動テストの両方を含めて。
+-->
 
-### Added
+### ✅ 実施したテスト
+- [ ] **Unit Tests** - 単体テストの実行・追加
+- [ ] **Integration Tests** - 統合テストの確認
+- [ ] **E2E Tests** - エンドツーエンドテストの実行
+- [ ] **Manual Testing** - 手動での動作確認
+- [ ] **Regression Testing** - 既存機能への影響確認
+- [ ] **Performance Testing** - パフォーマンスへの影響確認
+- [ ] **Security Testing** - セキュリティ観点での確認
+- [ ] **Accessibility Testing** - アクセシビリティの確認
+- [ ] **Mobile Testing** - モバイル環境での動作確認
+- [ ] **Cross-browser Testing** - 複数ブラウザでの確認
 
-- New feature or capability
+### 🔄 テスト手順
+<!-- 具体的なテスト手順を記載 -->
+1. 
+2. 
+3. 
 
-### Changed
+### 📊 テスト結果
+<!-- テスト結果のサマリー -->
+- **テストケース数**: 
+- **通過率**: 
+- **カバレッジ**: 
 
-- Modified existing functionality
+## 📱 動作環境・互換性
+<!-- 
+動作確認を行った環境を記載してください。
+特にモバイル対応やブラウザ互換性に影響がある場合は必須。
+-->
 
-### Removed
+### 🖥️ 確認済み環境
+- [ ] **Chrome** (バージョン: )
+- [ ] **Firefox** (バージョン: )
+- [ ] **Safari** (バージョン: )
+- [ ] **Edge** (バージョン: )
+- [ ] **Mobile Chrome** (Android)
+- [ ] **Mobile Safari** (iOS)
+- [ ] **PWA Mode** (インストール版)
 
-- Deleted functionality or code
+### 📐 画面サイズ・デバイス
+- [ ] **Desktop** (1920x1080)
+- [ ] **Laptop** (1366x768)
+- [ ] **Tablet** (768x1024)
+- [ ] **Mobile** (375x667)
+- [ ] **Large Mobile** (414x896)
 
-### Fixed
+## 🚀 パフォーマンス影響
+<!-- 
+パフォーマンスに影響がある場合は記載してください。
+バンドルサイズ、読み込み時間、Core Web Vitalsなど。
+-->
 
-- Bug fixes
+### 📦 Bundle Size
+- **Before**: 
+- **After**: 
+- **Difference**: 
 
-## Testing
+### ⚡ Performance Metrics
+- **LCP (Largest Contentful Paint)**: 
+- **FID (First Input Delay)**: 
+- **CLS (Cumulative Layout Shift)**: 
 
-### Test Coverage
+## 🔒 セキュリティ考慮事項
+<!-- 
+セキュリティに関連する変更がある場合は記載してください。
+認証、認可、データ保護、XSS対策など。
+-->
 
-- [ ] Unit tests added/updated
-- [ ] E2E tests added/updated
-- [ ] Manual testing completed
-- [ ] Accessibility testing completed
-- [ ] Performance testing completed
+- [ ] **認証・認可**: 適切な権限チェックを実装
+- [ ] **入力値検証**: ユーザー入力の適切な検証・サニタイズ
+- [ ] **XSS対策**: クロスサイトスクリプティング対策実装
+- [ ] **CSRF対策**: クロスサイトリクエストフォージェリ対策
+- [ ] **データ暗号化**: 機密データの適切な暗号化
+- [ ] **アクセスログ**: 適切なログ記録とモニタリング
+- [ ] **依存関係**: セキュリティ脆弱性のない依存関係使用
 
-### Test Results
-
-- [ ] All existing tests pass
-- [ ] New tests pass
-- [ ] No regression issues identified
-
-### Manual Testing Steps
-
-1. Step 1
-2. Step 2
-3. Step 3
-
-## Screenshots/Demo
-
-If applicable, add screenshots or a demo video showing the changes.
+## 🎨 スクリーンショット・デモ
+<!-- 
+UI/UX変更がある場合は、変更前後のスクリーンショットや
+動作確認用の画面録画を添付してください。
+-->
 
 ### Before
+<!-- 変更前のスクリーンショット -->
 
-[Screenshot or description of before state]
+### After  
+<!-- 変更後のスクリーンショット -->
 
-### After
+### Mobile View
+<!-- モバイル表示のスクリーンショット -->
 
-[Screenshot or description of after state]
+## 📝 その他の変更・注意事項
+<!-- 
+上記に含まれない重要な情報があれば記載してください。
+破壊的変更、設定変更の必要性、ドキュメント更新など。
+-->
 
-## Performance Impact
+### ⚠️ Breaking Changes
+<!-- 破壊的変更がある場合は詳細を記載 -->
+- None / 以下に記載
 
-- [ ] No performance impact
-- [ ] Minor performance improvement
-- [ ] Major performance improvement
-- [ ] Performance degradation (justified by benefits)
-- [ ] Not applicable
+### 🔧 Required Configuration Changes
+<!-- 必要な設定変更があれば記載 -->
+- None / 以下に記載
 
-### Bundle Size Changes
+### 📚 Documentation Updates
+<!-- ドキュメント更新が必要な場合 -->
+- [ ] README.md
+- [ ] API Documentation  
+- [ ] User Guide
+- [ ] Developer Guide
+- [ ] CLAUDE.md
 
-- Bundle size increase/decrease: +/- X KB
-- Justification if increased: \_\_\_
+## ✅ PR チェックリスト
+<!-- PRレビュー前に以下をチェックしてください -->
 
-## Browser Testing
+### 📋 基本チェック
+- [ ] **コードの整合性**: ESLint/Prettier の規則に準拠
+- [ ] **型安全性**: TypeScript エラーがない
+- [ ] **テストカバレッジ**: 新機能に対するテストが追加されている
+- [ ] **コメント・ドキュメント**: 複雑な処理に適切なコメント
+- [ ] **Git履歴**: 意味のあるコミットメッセージ
+- [ ] **不要ファイル**: デバッグコード・コンソールログの削除
 
-- [ ] Chrome
-- [ ] Firefox
-- [ ] Safari
-- [ ] Edge
-- [ ] Mobile Chrome
-- [ ] Mobile Safari
+### 🎯 プロジェクト準拠
+- [ ] **CLAUDE.md準拠**: プロジェクトガイドラインに従って実装
+- [ ] **アーキテクチャ**: 既存のパターン・構造に合致
+- [ ] **命名規則**: 一貫した命名規則の使用
+- [ ] **エラーハンドリング**: 適切なエラー処理とユーザーフィードバック
 
-## Accessibility
+### 🌐 アクセシビリティ・互換性
+- [ ] **アクセシビリティ**: WCAG 2.1 AA基準への準拠
+- [ ] **多言語対応**: 国際化対応（必要に応じて）
+- [ ] **PWA対応**: オフライン動作・プッシュ通知対応（該当機能）
+- [ ] **レスポンシブ**: モバイル・タブレット対応
 
-- [ ] Screen reader tested
-- [ ] Keyboard navigation tested
-- [ ] Color contrast verified
-- [ ] ARIA attributes added/updated
-- [ ] Not applicable
+### 🔒 セキュリティ・品質
+- [ ] **セキュリティ**: 脆弱性の確認と対策
+- [ ] **パフォーマンス**: Core Web Vitals基準のクリア
+- [ ] **メモリリーク**: 適切なクリーンアップ処理
+- [ ] **API設計**: RESTful/GraphQL設計原則への準拠
 
-## Breaking Changes
+## 🤖 AI Review Request
+<!-- 
+Claude AIによる詳細レビューが必要な場合は、以下のコマンドを使用してください：
+-->
 
-If this is a breaking change, describe:
+**特定の観点でのレビューが必要な場合は、以下をコメントしてください：**
 
-1. What will break?
-2. Migration path for users
-3. Documentation updates needed
+- `@claude review` - 包括的なコードレビュー
+- `@claude security` - セキュリティ重点レビュー  
+- `@claude performance` - パフォーマンス分析
+- `@claude architecture` - アーキテクチャ準拠チェック
+- `@claude accessibility` - アクセシビリティレビュー
+- `@claude mobile` - モバイル対応チェック
 
-## Deployment Notes
+## 📞 レビュアーへのメッセージ
+<!-- 
+レビュアーに特に注意して見てほしい点や、
+判断に迷った箇所があれば記載してください。
+-->
 
-Any special deployment considerations:
+**特に注意してレビューしてほしい点：**
+- 
 
-- [ ] Database migrations needed
-- [ ] Environment variables added/changed
-- [ ] Third-party service configuration needed
-- [ ] Cache clearing needed
-- [ ] No special deployment requirements
+**検討・相談したい点：**  
+- 
 
-## Checklist
+**既知の課題・制約：**
+- 
 
-- [ ] My code follows the project's style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published
+---
 
-## Additional Notes
+### 🎉 準備完了
+<!-- 最終確認 -->
+- [ ] 上記のチェックリストをすべて確認した
+- [ ] CI/CDパイプラインが正常に通過している
+- [ ] レビュアーが適切にアサインされている
+- [ ] 適切なラベルが設定されている
 
-Any additional information or context for the reviewers.
+**このPRはレビューの準備が整っています！** 🚀
