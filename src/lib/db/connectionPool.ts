@@ -98,7 +98,7 @@ export class EnhancedPrismaClient extends PrismaClient {
     // クエリイベント
     this.$on('query', (e) => {
       this.recordQueryStats(e.query, e.duration)
-      
+
       if (e.duration > this.slowQueryThreshold) {
         console.warn(`Slow query detected (${e.duration}ms):`, {
           query: e.query.substring(0, 200),
@@ -131,7 +131,7 @@ export class EnhancedPrismaClient extends PrismaClient {
     // 接続統計記録
     this.$use(async (params, next) => {
       const start = Date.now()
-      
+
       try {
         const result = await next(params)
         this.incrementStat('successful_queries')
@@ -207,18 +207,20 @@ export class EnhancedPrismaClient extends PrismaClient {
    */
   async getConnectionStats(): Promise<DatabaseStats> {
     try {
-      const poolInfo = await this.$queryRaw<Array<{
-        state: string
-        count: number
-      }>>`
+      const poolInfo = await this.$queryRaw<
+        Array<{
+          state: string
+          count: number
+        }>
+      >`
         SELECT state, COUNT(*) as count
         FROM pg_stat_activity 
         WHERE datname = current_database()
         GROUP BY state
       `
 
-      const activeConnections = poolInfo.find(p => p.state === 'active')?.count || 0
-      const idleConnections = poolInfo.find(p => p.state === 'idle')?.count || 0
+      const activeConnections = poolInfo.find((p) => p.state === 'active')?.count || 0
+      const idleConnections = poolInfo.find((p) => p.state === 'idle')?.count || 0
       const totalConnections = activeConnections + idleConnections
 
       return {
@@ -234,8 +236,10 @@ export class EnhancedPrismaClient extends PrismaClient {
         minPoolSize: 10, // From config
         maxPoolSize: 100, // From config
         avgConnectionTime: this.calculateAvgConnectionTime(),
-        slowQueries: Array.from(this.queryStats.values())
-          .reduce((sum, stat) => sum + (stat.avgDuration > this.slowQueryThreshold ? stat.count : 0), 0),
+        slowQueries: Array.from(this.queryStats.values()).reduce(
+          (sum, stat) => sum + (stat.avgDuration > this.slowQueryThreshold ? stat.count : 0),
+          0
+        ),
       }
     } catch (error) {
       console.error('Failed to get connection stats:', error)
@@ -282,7 +286,7 @@ export class EnhancedPrismaClient extends PrismaClient {
    */
   getSlowQueries(limit: number = 10): QueryStats[] {
     return Array.from(this.queryStats.values())
-      .filter(stat => stat.avgDuration > this.slowQueryThreshold)
+      .filter((stat) => stat.avgDuration > this.slowQueryThreshold)
       .sort((a, b) => b.avgDuration - a.avgDuration)
       .slice(0, limit)
   }
@@ -310,7 +314,7 @@ export class EnhancedPrismaClient extends PrismaClient {
     }
   }> {
     const start = Date.now()
-    
+
     try {
       // 接続テスト
       await this.$queryRaw`SELECT 1 as test`
@@ -322,14 +326,16 @@ export class EnhancedPrismaClient extends PrismaClient {
 
       const responseTime = Date.now() - start
       const stats = await this.getConnectionStats()
-      
-      const totalQueries = this.connectionStats.get('successful_queries') || 0 + 
-                          this.connectionStats.get('failed_queries') || 0
+
+      const totalQueries =
+        this.connectionStats.get('successful_queries') ||
+        0 + this.connectionStats.get('failed_queries') ||
+        0
       const failedQueries = this.connectionStats.get('failed_queries') || 0
       const errorRate = totalQueries > 0 ? failedQueries / totalQueries : 0
 
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-      
+
       if (responseTime > 1000 || errorRate > 0.05) {
         status = 'degraded'
       }
@@ -371,7 +377,7 @@ export class EnhancedPrismaClient extends PrismaClient {
     vacuumCleaned: number
   }> {
     let tablesAnalyzed = 0
-    let indexesRebuilt = 0
+    const indexesRebuilt = 0
     let vacuumCleaned = 0
 
     try {
@@ -403,8 +409,10 @@ export class EnhancedPrismaClient extends PrismaClient {
         }
       }
 
-      console.log(`Database optimization completed: ${tablesAnalyzed} tables analyzed, ${vacuumCleaned} tables vacuumed`)
-      
+      console.log(
+        `Database optimization completed: ${tablesAnalyzed} tables analyzed, ${vacuumCleaned} tables vacuumed`
+      )
+
       return { tablesAnalyzed, indexesRebuilt, vacuumCleaned }
     } catch (error) {
       console.error('Database optimization failed:', error)
@@ -423,7 +431,7 @@ class DatabaseManager {
   static async getInstance(config?: ConnectionPoolConfig): Promise<EnhancedPrismaClient> {
     if (!DatabaseManager.instance && !DatabaseManager.connecting) {
       DatabaseManager.connecting = true
-      
+
       try {
         DatabaseManager.instance = new EnhancedPrismaClient(config)
         await DatabaseManager.instance.$connect()
@@ -439,7 +447,7 @@ class DatabaseManager {
 
     // 接続中の場合は待機
     while (DatabaseManager.connecting) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     if (!DatabaseManager.instance) {
@@ -501,7 +509,6 @@ export class DatabaseMonitor {
       this.metrics.set('slow_queries', stats.slowQueries)
       this.metrics.set('successful_queries', stats.acquiredCount)
       this.metrics.set('failed_queries', stats.failedCount)
-
     } catch (error) {
       console.error('Failed to collect database metrics:', error)
     }

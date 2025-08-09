@@ -107,7 +107,8 @@ export class SubscriptionService {
         plan: user.subscriptionPlan,
         status: subscription?.status || 'active',
         currentPeriodStart: subscription?.currentPeriodStart || user.createdAt,
-        currentPeriodEnd: subscription?.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        currentPeriodEnd:
+          subscription?.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd || false,
         stripeSubscriptionId: subscription?.stripeSubscriptionId || null,
         features: plan.features,
@@ -170,7 +171,7 @@ export class SubscriptionService {
       } else {
         // 有料プラン間の変更
         const subscription = await StripeService.updateSubscription(userId, options.newPlan)
-        
+
         // アクティビティログ記録
         await this.recordSubscriptionActivity(userId, 'PLAN_CHANGED', {
           fromPlan: currentUser.subscriptionPlan,
@@ -223,8 +224,8 @@ export class SubscriptionService {
 
       return {
         success: true,
-        message: immediate 
-          ? 'フリープランにダウングレードしました' 
+        message: immediate
+          ? 'フリープランにダウングレードしました'
           : '期間終了後にフリープランにダウングレードされます',
       }
     } catch (error) {
@@ -297,20 +298,18 @@ export class SubscriptionService {
         })
       }
 
-      const studyHours = studySessions.reduce(
-        (total, session) => total + session.duration,
-        0
-      ) / 3600
+      const studyHours =
+        studySessions.reduce((total, session) => total + session.duration, 0) / 3600
 
       const examAttempts = examResults.length
       const aiQueries = 0 // 実装に応じて調整
 
       const limits = USAGE_LIMITS[user.subscriptionPlan]
       const remainingQuota = {
-        exams: limits.examAttemptsPerMonth 
+        exams: limits.examAttemptsPerMonth
           ? Math.max(0, limits.examAttemptsPerMonth - examAttempts)
           : null,
-        aiQueries: limits.aiQueriesPerMonth 
+        aiQueries: limits.aiQueriesPerMonth
           ? Math.max(0, limits.aiQueriesPerMonth - aiQueries)
           : null,
       }
@@ -357,7 +356,7 @@ export class SubscriptionService {
           if (limits.examAttemptsPerMonth === null) {
             return { allowed: true } // 無制限
           }
-          
+
           const examRemaining = limits.examAttemptsPerMonth - usage.examAttempts
           return {
             allowed: examRemaining > 0,
@@ -369,7 +368,7 @@ export class SubscriptionService {
           if (limits.aiQueriesPerMonth === null) {
             return { allowed: true } // 無制限
           }
-          
+
           const aiRemaining = limits.aiQueriesPerMonth - usage.aiQueries
           return {
             allowed: aiRemaining > 0,
@@ -381,7 +380,7 @@ export class SubscriptionService {
           if (limits.dataExportsPerMonth === null) {
             return { allowed: true } // 無制限
           }
-          
+
           // データエクスポート回数は別途追跡が必要（実装に応じて調整）
           return { allowed: true }
 
@@ -399,7 +398,7 @@ export class SubscriptionService {
     try {
       // プレミアム機能データの無効化や制限（実装に応じて調整）
       // 例: AI学習履歴の制限、高度な分析データの非表示など
-      
+
       await prisma.userSettings.updateMany({
         where: { userId },
         data: {
@@ -447,12 +446,14 @@ export class SubscriptionService {
   static async getSubscriptionHistory(
     userId: string,
     limit: number = 20
-  ): Promise<Array<{
-    id: string
-    action: string
-    details: any
-    createdAt: Date
-  }>> {
+  ): Promise<
+    Array<{
+      id: string
+      action: string
+      details: any
+      createdAt: Date
+    }>
+  > {
     try {
       const activities = await prisma.userActivity.findMany({
         where: {
@@ -473,7 +474,7 @@ export class SubscriptionService {
         take: limit,
       })
 
-      return activities.map(activity => ({
+      return activities.map((activity) => ({
         id: activity.id,
         action: activity.action,
         details: activity.details,

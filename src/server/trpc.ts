@@ -30,8 +30,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     }
   },
@@ -52,12 +51,12 @@ export const publicProcedure = t.procedure
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now()
-  
+
   const result = await next()
-  
+
   const duration = Date.now() - start
   console.log(`[tRPC] ${path} took ${duration}ms`)
-  
+
   return result
 })
 
@@ -87,9 +86,9 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
 
   if (ctx.session.user.role !== 'ADMIN') {
-    throw new TRPCError({ 
+    throw new TRPCError({
       code: 'FORBIDDEN',
-      message: 'Admin access required' 
+      message: 'Admin access required',
     })
   }
 
@@ -110,9 +109,9 @@ export const premiumProcedure = t.procedure.use(async ({ ctx, next }) => {
   }
 
   if (!['PREMIUM', 'ADMIN'].includes(ctx.session.user.role)) {
-    throw new TRPCError({ 
+    throw new TRPCError({
       code: 'FORBIDDEN',
-      message: 'Premium access required' 
+      message: 'Premium access required',
     })
   }
 
@@ -132,13 +131,13 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 export const rateLimitedProcedure = t.procedure.use(async ({ ctx, next, path }) => {
   const identifier = ctx.session?.user?.id || ctx.req.headers['x-forwarded-for'] || 'anonymous'
   const key = `${identifier}:${path}`
-  
+
   const limit = 100 // requests
   const window = 60 * 1000 // 1 minute
-  
+
   const now = Date.now()
   const userLimit = rateLimitMap.get(key)
-  
+
   if (!userLimit || now > userLimit.resetTime) {
     rateLimitMap.set(key, { count: 1, resetTime: now + window })
   } else {
@@ -150,7 +149,7 @@ export const rateLimitedProcedure = t.procedure.use(async ({ ctx, next, path }) 
     }
     userLimit.count++
   }
-  
+
   return next()
 })
 

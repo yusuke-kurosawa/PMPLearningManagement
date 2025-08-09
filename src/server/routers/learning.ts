@@ -7,15 +7,12 @@
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure } from '@/server/trpc'
-import { 
-  LearningService, 
-  studySessionSchema, 
-  learningGoalSchema 
+import {
+  LearningService,
+  studySessionSchema,
+  learningGoalSchema,
 } from '@/server/services/learningService'
-import { 
-  ProgressService, 
-  progressFilterSchema 
-} from '@/server/services/progressService'
+import { ProgressService, progressFilterSchema } from '@/server/services/progressService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { prisma } from '@/lib/db'
 
@@ -71,89 +68,79 @@ export const learningRouter = createTRPCRouter({
     }),
 
   // 学習セッション記録
-  recordSession: protectedProcedure
-    .input(studySessionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const session = await LearningService.recordStudySession(
-        ctx.session.user.id,
-        input
-      )
+  recordSession: protectedProcedure.input(studySessionSchema).mutation(async ({ ctx, input }) => {
+    const session = await LearningService.recordStudySession(ctx.session.user.id, input)
 
-      // 学習セッション記録のアクティビティログ
-      await prisma.userActivity.create({
-        data: {
-          userId: ctx.session.user.id,
-          action: 'STUDY_SESSION_COMPLETED',
-          details: {
-            processId: input.processId,
-            processName: input.processName,
-            duration: input.duration,
-            completed: input.completed,
-          },
+    // 学習セッション記録のアクティビティログ
+    await prisma.userActivity.create({
+      data: {
+        userId: ctx.session.user.id,
+        action: 'STUDY_SESSION_COMPLETED',
+        details: {
+          processId: input.processId,
+          processName: input.processName,
+          duration: input.duration,
+          completed: input.completed,
         },
-      })
+      },
+    })
 
-      return {
-        session,
-        message: '学習セッションが記録されました',
-      }
-    }),
+    return {
+      session,
+      message: '学習セッションが記録されました',
+    }
+  }),
 
   // 学習履歴取得
-  getHistory: protectedProcedure
-    .input(studyHistorySchema)
-    .query(async ({ ctx, input }) => {
-      const history = await LearningService.getStudyHistory(ctx.session.user.id, {
-        limit: input.limit,
-        offset: input.offset,
-        knowledgeArea: input.knowledgeArea,
-        processGroup: input.processGroup,
-        dateFrom: input.dateFrom,
-        dateTo: input.dateTo,
-      })
+  getHistory: protectedProcedure.input(studyHistorySchema).query(async ({ ctx, input }) => {
+    const history = await LearningService.getStudyHistory(ctx.session.user.id, {
+      limit: input.limit,
+      offset: input.offset,
+      knowledgeArea: input.knowledgeArea,
+      processGroup: input.processGroup,
+      dateFrom: input.dateFrom,
+      dateTo: input.dateTo,
+    })
 
-      // 完了済みセッションのみフィルタ
-      if (input.completedOnly) {
-        history.sessions = history.sessions.filter(session => session.completed)
-      }
+    // 完了済みセッションのみフィルタ
+    if (input.completedOnly) {
+      history.sessions = history.sessions.filter((session) => session.completed)
+    }
 
-      return history
-    }),
+    return history
+  }),
 
   // 学習目標設定
-  setGoal: protectedProcedure
-    .input(learningGoalSchema)
-    .mutation(async ({ ctx, input }) => {
-      const goal = await LearningService.setLearningGoal(ctx.session.user.id, input)
+  setGoal: protectedProcedure.input(learningGoalSchema).mutation(async ({ ctx, input }) => {
+    const goal = await LearningService.setLearningGoal(ctx.session.user.id, input)
 
-      await prisma.userActivity.create({
-        data: {
-          userId: ctx.session.user.id,
-          action: 'LEARNING_GOAL_SET',
-          details: {
-            goalType: input.type,
-            target: input.target,
-            deadline: input.deadline,
-          },
+    await prisma.userActivity.create({
+      data: {
+        userId: ctx.session.user.id,
+        action: 'LEARNING_GOAL_SET',
+        details: {
+          goalType: input.type,
+          target: input.target,
+          deadline: input.deadline,
         },
-      })
+      },
+    })
 
-      return {
-        goal,
-        message: '学習目標が設定されました',
-      }
-    }),
+    return {
+      goal,
+      message: '学習目標が設定されました',
+    }
+  }),
 
   // 学習目標取得
   getGoals: protectedProcedure
-    .input(z.object({
-      activeOnly: z.boolean().optional().default(false),
-    }))
+    .input(
+      z.object({
+        activeOnly: z.boolean().optional().default(false),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      return await LearningService.getLearningGoals(
-        ctx.session.user.id,
-        input.activeOnly
-      )
+      return await LearningService.getLearningGoals(ctx.session.user.id, input.activeOnly)
     }),
 
   // 学習目標更新
@@ -163,7 +150,7 @@ export const learningRouter = createTRPCRouter({
       const { id, ...updateData } = input
 
       const goal = await prisma.learningGoal.update({
-        where: { 
+        where: {
           id,
           userId: ctx.session.user.id, // セキュリティ: 自分の目標のみ更新可能
         },
@@ -192,12 +179,14 @@ export const learningRouter = createTRPCRouter({
 
   // 学習目標削除
   deleteGoal: protectedProcedure
-    .input(z.object({
-      id: z.string().cuid(),
-    }))
+    .input(
+      z.object({
+        id: z.string().cuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       await prisma.learningGoal.delete({
-        where: { 
+        where: {
           id: input.id,
           userId: ctx.session.user.id,
         },
@@ -215,12 +204,14 @@ export const learningRouter = createTRPCRouter({
 
   // 学習統計取得
   getStats: protectedProcedure
-    .input(z.object({
-      period: z.enum(['week', 'month', 'quarter', 'year', 'all']).default('month'),
-    }))
+    .input(
+      z.object({
+        period: z.enum(['week', 'month', 'quarter', 'year', 'all']).default('month'),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.LEARNING_ANALYTICS)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -228,20 +219,19 @@ export const learningRouter = createTRPCRouter({
         })
       }
 
-      return await ProgressService.calculateUserMetrics(
-        ctx.session.user.id,
-        input.period
-      )
+      return await ProgressService.calculateUserMetrics(ctx.session.user.id, input.period)
     }),
 
   // 進捗比較分析
   getComparison: protectedProcedure
-    .input(z.object({
-      period: z.enum(['week', 'month', 'quarter', 'year', 'all']).default('month'),
-    }))
+    .input(
+      z.object({
+        period: z.enum(['week', 'month', 'quarter', 'year', 'all']).default('month'),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.LEARNING_ANALYTICS)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -249,16 +239,13 @@ export const learningRouter = createTRPCRouter({
         })
       }
 
-      return await ProgressService.compareWithCohort(
-        ctx.session.user.id,
-        input.period
-      )
+      return await ProgressService.compareWithCohort(ctx.session.user.id, input.period)
     }),
 
   // 予測分析取得
   getPredictions: protectedProcedure.query(async ({ ctx }) => {
     const checker = createPermissionChecker(ctx.session.user)
-    
+
     if (!checker.hasPermission(Permission.LEARNING_ANALYTICS)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -276,9 +263,11 @@ export const learningRouter = createTRPCRouter({
 
   // 学習進捗リセット
   resetProgress: protectedProcedure
-    .input(z.object({
-      confirmReset: z.boolean().refine(val => val === true, '進捗リセットの確認が必要です'),
-    }))
+    .input(
+      z.object({
+        confirmReset: z.boolean().refine((val) => val === true, '進捗リセットの確認が必要です'),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       await LearningService.resetProgress(ctx.session.user.id)
 
@@ -298,50 +287,47 @@ export const learningRouter = createTRPCRouter({
     }),
 
   // 学習データエクスポート
-  exportData: protectedProcedure
-    .input(exportDataSchema)
-    .mutation(async ({ ctx, input }) => {
-      const checker = createPermissionChecker(ctx.session.user)
-      
-      if (!checker.hasPermission(Permission.LEARNING_EXPORT)) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'データエクスポート権限がありません',
-        })
-      }
+  exportData: protectedProcedure.input(exportDataSchema).mutation(async ({ ctx, input }) => {
+    const checker = createPermissionChecker(ctx.session.user)
 
-      const exportData = await LearningService.exportLearningData(
-        ctx.session.user.id,
-        input.format
-      )
-
-      await prisma.userActivity.create({
-        data: {
-          userId: ctx.session.user.id,
-          action: 'LEARNING_DATA_EXPORTED',
-          details: {
-            format: input.format,
-            exportedAt: new Date(),
-          },
-        },
+    if (!checker.hasPermission(Permission.LEARNING_EXPORT)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'データエクスポート権限がありません',
       })
+    }
 
-      return {
-        data: exportData,
-        filename: `learning-data-${ctx.session.user.id}-${new Date().toISOString().split('T')[0]}.${input.format}`,
-        contentType: input.format === 'json' ? 'application/json' : 'text/csv',
-      }
-    }),
+    const exportData = await LearningService.exportLearningData(ctx.session.user.id, input.format)
+
+    await prisma.userActivity.create({
+      data: {
+        userId: ctx.session.user.id,
+        action: 'LEARNING_DATA_EXPORTED',
+        details: {
+          format: input.format,
+          exportedAt: new Date(),
+        },
+      },
+    })
+
+    return {
+      data: exportData,
+      filename: `learning-data-${ctx.session.user.id}-${new Date().toISOString().split('T')[0]}.${input.format}`,
+      contentType: input.format === 'json' ? 'application/json' : 'text/csv',
+    }
+  }),
 
   // プロセス完了マーク
   markProcessCompleted: protectedProcedure
-    .input(z.object({
-      processId: z.string().min(1),
-      processName: z.string().min(1),
-      knowledgeArea: z.string().min(1),
-      processGroup: z.string().min(1),
-      notes: z.string().max(500).optional(),
-    }))
+    .input(
+      z.object({
+        processId: z.string().min(1),
+        processName: z.string().min(1),
+        knowledgeArea: z.string().min(1),
+        processGroup: z.string().min(1),
+        notes: z.string().max(500).optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       // 学習セッションとして記録（完了フラグ付き）
       const session = await LearningService.recordStudySession(ctx.session.user.id, {
@@ -388,7 +374,7 @@ export const learningRouter = createTRPCRouter({
       : 999
 
     let streakStatus: 'active' | 'at_risk' | 'broken' | 'inactive'
-    
+
     if (daysSinceLastActivity === 0) {
       streakStatus = 'active'
     } else if (daysSinceLastActivity === 1) {
@@ -420,32 +406,43 @@ export const learningRouter = createTRPCRouter({
     ])
 
     const knowledgeAreas = [
-      'Integration', 'Scope', 'Schedule', 'Cost', 'Quality',
-      'Resource', 'Communications', 'Risk', 'Procurement', 'Stakeholder'
+      'Integration',
+      'Scope',
+      'Schedule',
+      'Cost',
+      'Quality',
+      'Resource',
+      'Communications',
+      'Risk',
+      'Procurement',
+      'Stakeholder',
     ]
 
-    const progress = knowledgeAreas.map(area => {
-      const areaSessions = sessions.filter(s => s.knowledgeArea === area)
-      const areaExams = examResults.filter(e => 
-        e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
+    const progress = knowledgeAreas.map((area) => {
+      const areaSessions = sessions.filter((s) => s.knowledgeArea === area)
+      const areaExams = examResults.filter(
+        (e) => e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
       )
-      
-      const completedSessions = areaSessions.filter(s => s.completed)
+
+      const completedSessions = areaSessions.filter((s) => s.completed)
       const totalStudyTime = areaSessions.reduce((sum, s) => sum + s.duration, 0)
-      const averageScore = areaExams.length > 0
-        ? areaExams.reduce((sum, e) => sum + ((e.knowledgeAreaScores as any)[area] || 0), 0) / areaExams.length
-        : 0
+      const averageScore =
+        areaExams.length > 0
+          ? areaExams.reduce((sum, e) => sum + ((e.knowledgeAreaScores as any)[area] || 0), 0) /
+            areaExams.length
+          : 0
 
       return {
         knowledgeArea: area,
         totalSessions: areaSessions.length,
         completedSessions: completedSessions.length,
-        totalStudyTime: Math.round(totalStudyTime / 3600 * 10) / 10, // 時間単位
+        totalStudyTime: Math.round((totalStudyTime / 3600) * 10) / 10, // 時間単位
         averageScore: Math.round(averageScore),
         examAttempts: areaExams.length,
-        completionRate: areaSessions.length > 0 
-          ? Math.round((completedSessions.length / areaSessions.length) * 100)
-          : 0,
+        completionRate:
+          areaSessions.length > 0
+            ? Math.round((completedSessions.length / areaSessions.length) * 100)
+            : 0,
       }
     })
 
@@ -464,32 +461,38 @@ export const learningRouter = createTRPCRouter({
     ])
 
     const processGroups = [
-      'Initiating', 'Planning', 'Executing', 
-      'Monitoring and Controlling', 'Closing'
+      'Initiating',
+      'Planning',
+      'Executing',
+      'Monitoring and Controlling',
+      'Closing',
     ]
 
-    const progress = processGroups.map(group => {
-      const groupSessions = sessions.filter(s => s.processGroup === group)
-      const groupExams = examResults.filter(e => 
-        e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
+    const progress = processGroups.map((group) => {
+      const groupSessions = sessions.filter((s) => s.processGroup === group)
+      const groupExams = examResults.filter(
+        (e) => e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
       )
-      
-      const completedSessions = groupSessions.filter(s => s.completed)
+
+      const completedSessions = groupSessions.filter((s) => s.completed)
       const totalStudyTime = groupSessions.reduce((sum, s) => sum + s.duration, 0)
-      const averageScore = groupExams.length > 0
-        ? groupExams.reduce((sum, e) => sum + ((e.processGroupScores as any)[group] || 0), 0) / groupExams.length
-        : 0
+      const averageScore =
+        groupExams.length > 0
+          ? groupExams.reduce((sum, e) => sum + ((e.processGroupScores as any)[group] || 0), 0) /
+            groupExams.length
+          : 0
 
       return {
         processGroup: group,
         totalSessions: groupSessions.length,
         completedSessions: completedSessions.length,
-        totalStudyTime: Math.round(totalStudyTime / 3600 * 10) / 10,
+        totalStudyTime: Math.round((totalStudyTime / 3600) * 10) / 10,
         averageScore: Math.round(averageScore),
         examAttempts: groupExams.length,
-        completionRate: groupSessions.length > 0 
-          ? Math.round((completedSessions.length / groupSessions.length) * 100)
-          : 0,
+        completionRate:
+          groupSessions.length > 0
+            ? Math.round((completedSessions.length / groupSessions.length) * 100)
+            : 0,
       }
     })
 
@@ -498,9 +501,11 @@ export const learningRouter = createTRPCRouter({
 
   // 最近のアクティビティ取得
   getRecentActivity: protectedProcedure
-    .input(z.object({
-      limit: z.number().min(1).max(50).default(10),
-    }))
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(10),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const [sessions, examResults, goals] = await Promise.all([
         prisma.studySession.findMany({
@@ -514,7 +519,7 @@ export const learningRouter = createTRPCRouter({
           take: input.limit,
         }),
         prisma.learningGoal.findMany({
-          where: { 
+          where: {
             userId: ctx.session.user.id,
             achieved: true,
           },
@@ -525,7 +530,7 @@ export const learningRouter = createTRPCRouter({
 
       // アクティビティを統合してソート
       const activities = [
-        ...sessions.map(session => ({
+        ...sessions.map((session) => ({
           type: 'study_session' as const,
           id: session.id,
           title: `${session.processName}を学習`,
@@ -537,7 +542,7 @@ export const learningRouter = createTRPCRouter({
             knowledgeArea: session.knowledgeArea,
           },
         })),
-        ...examResults.map(exam => ({
+        ...examResults.map((exam) => ({
           type: 'exam_result' as const,
           id: exam.id,
           title: '模擬試験完了',
@@ -549,7 +554,7 @@ export const learningRouter = createTRPCRouter({
             duration: exam.duration,
           },
         })),
-        ...goals.map(goal => ({
+        ...goals.map((goal) => ({
           type: 'goal_achieved' as const,
           id: goal.id,
           title: '学習目標達成',
@@ -562,9 +567,7 @@ export const learningRouter = createTRPCRouter({
         })),
       ]
 
-      return activities
-        .sort((a, b) => b.date.getTime() - a.date.getTime())
-        .slice(0, input.limit)
+      return activities.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, input.limit)
     }),
 })
 

@@ -35,11 +35,11 @@ const premiumRateLimiter = new RateLimiterMemory({
 const getClientIP = (request: NextRequest): string => {
   const forwarded = request.headers.get('x-forwarded-for')
   const real = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
-  
+
   return real || request.ip || 'unknown'
 }
 
@@ -49,12 +49,12 @@ const setSecurityHeaders = (response: NextResponse): NextResponse => {
   response.headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: https:; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "connect-src 'self' https://api.stripe.com wss:; " +
-    "frame-src https://js.stripe.com;"
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
+      "connect-src 'self' https://api.stripe.com wss:; " +
+      'frame-src https://js.stripe.com;'
   )
 
   // その他のセキュリティヘッダー
@@ -62,10 +62,7 @@ const setSecurityHeaders = (response: NextResponse): NextResponse => {
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('X-XSS-Protection', '1; mode=block')
-  response.headers.set(
-    'Strict-Transport-Security',
-    'max-age=31536000; includeSubDomains; preload'
-  )
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
 
   return response
@@ -82,31 +79,17 @@ const protectedRoutes = [
 ]
 
 // 管理者専用ルートの定義
-const adminRoutes = [
-  '/admin',
-  '/api/admin',
-]
+const adminRoutes = ['/admin', '/api/admin']
 
 // プレミアム機能ルートの定義
-const premiumRoutes = [
-  '/api/ai',
-  '/api/analytics/advanced',
-  '/collaboration/advanced',
-]
+const premiumRoutes = ['/api/ai', '/api/analytics/advanced', '/collaboration/advanced']
 
 // 認証不要なルートの定義
-const publicRoutes = [
-  '/',
-  '/auth',
-  '/pmbok',
-  '/glossary',
-  '/api/health',
-  '/api/auth',
-]
+const publicRoutes = ['/', '/auth', '/pmbok', '/glossary', '/api/health', '/api/auth']
 
 // ルートマッチング関数
 const matchRoute = (pathname: string, routes: string[]): boolean => {
-  return routes.some(route => pathname.startsWith(route))
+  return routes.some((route) => pathname.startsWith(route))
 }
 
 // レート制限チェック
@@ -117,7 +100,7 @@ const checkRateLimit = async (
 ): Promise<{ success: boolean; resetTime?: Date }> => {
   try {
     let rateLimiter = apiRateLimiter
-    
+
     // プレミアムユーザーはより多くのリクエストを許可
     if (isAuthenticated && isPremium) {
       rateLimiter = premiumRateLimiter
@@ -145,7 +128,7 @@ const checkAuthFailureLimit = async (ip: string): Promise<boolean> => {
 export async function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const clientIP = getClientIP(request)
-  
+
   try {
     // Enhanced JWT トークン取得と検証
     const token = await getToken({
@@ -178,7 +161,7 @@ export async function authMiddleware(request: NextRequest) {
     // レート制限チェック（認証失敗時は別途チェック）
     if (!matchRoute(pathname, ['/api/auth/signin', '/api/auth/signup'])) {
       const rateLimitResult = await checkRateLimit(clientIP, isAuthenticated, isPremium)
-      
+
       if (!rateLimitResult.success) {
         const response = NextResponse.json(
           {
@@ -276,7 +259,7 @@ export async function authMiddleware(request: NextRequest) {
     return setSecurityHeaders(response)
   } catch (error) {
     console.error('認証ミドルウェアエラー:', error)
-    
+
     const response = NextResponse.json(
       {
         error: 'Internal Server Error',
@@ -284,15 +267,14 @@ export async function authMiddleware(request: NextRequest) {
       },
       { status: 500 }
     )
-    
+
     return setSecurityHeaders(response)
   }
 }
 
 // CSRFトークン生成
 export const generateCSRFToken = (): string => {
-  return Math.random().toString(36).substring(2, 15) +
-         Math.random().toString(36).substring(2, 15)
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 }
 
 // CSRFトークン検証
@@ -334,9 +316,8 @@ export const withAuth = (
 
     // プレミアム権限チェック
     if (options.requirePremium) {
-      const isPremium = token?.subscriptionPlan !== 'FREE' && 
-                       token?.subscriptionActive
-      
+      const isPremium = token?.subscriptionPlan !== 'FREE' && token?.subscriptionActive
+
       if (!isPremium) {
         return NextResponse.json(
           { error: 'Subscription Required', message: 'プレミアムプランが必要です' },
@@ -348,14 +329,16 @@ export const withAuth = (
     // コンテキストにユーザー情報を追加
     const enrichedContext = {
       ...context,
-      user: token ? {
-        id: token.sub,
-        email: token.email,
-        name: token.name,
-        role: token.role,
-        subscriptionPlan: token.subscriptionPlan,
-        subscriptionActive: token.subscriptionActive,
-      } : null,
+      user: token
+        ? {
+            id: token.sub,
+            email: token.email,
+            name: token.name,
+            role: token.role,
+            subscriptionPlan: token.subscriptionPlan,
+            subscriptionActive: token.subscriptionActive,
+          }
+        : null,
     }
 
     return handler(req, enrichedContext)
@@ -385,8 +368,9 @@ interface JWTValidation {
 export const validateJWT = async (request: NextRequest): Promise<JWTValidation> => {
   try {
     const authHeader = request.headers.get('authorization')
-    const cookieToken = request.cookies.get('next-auth.session-token')?.value ||
-                       request.cookies.get('__Secure-next-auth.session-token')?.value
+    const cookieToken =
+      request.cookies.get('next-auth.session-token')?.value ||
+      request.cookies.get('__Secure-next-auth.session-token')?.value
 
     let token: string | undefined
 
@@ -416,7 +400,7 @@ export const validateJWT = async (request: NextRequest): Promise<JWTValidation> 
     // 追加のセキュリティチェック
     if (typeof decoded === 'object' && decoded !== null) {
       const now = Math.floor(Date.now() / 1000)
-      
+
       // 期限切れチェック（念のため）
       if (decoded.exp && decoded.exp < now) {
         return { isValid: false, reason: 'Token expired' }
@@ -446,7 +430,7 @@ export const validateJWT = async (request: NextRequest): Promise<JWTValidation> 
     if (error instanceof jwt.NotBeforeError) {
       return { isValid: false, reason: 'Token not active yet' }
     }
-    
+
     console.error('JWT validation error:', error)
     return { isValid: false, reason: 'Token validation failed' }
   }
@@ -464,11 +448,8 @@ export const verifyHMACSignature = (
   secret: string
 ): boolean => {
   try {
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex')
-    
+    const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+
     // タイミング攻撃防止のための定数時間比較
     return crypto.timingSafeEqual(
       Buffer.from(signature, 'hex'),

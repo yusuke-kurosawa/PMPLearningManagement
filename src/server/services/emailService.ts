@@ -36,11 +36,15 @@ export const emailDataSchema = z.object({
   data: z.record(z.any()).optional().default({}),
   html: z.string().optional(),
   text: z.string().optional(),
-  attachments: z.array(z.object({
-    filename: z.string(),
-    content: z.union([z.string(), z.instanceof(Buffer)]),
-    contentType: z.string().optional(),
-  })).optional(),
+  attachments: z
+    .array(
+      z.object({
+        filename: z.string(),
+        content: z.union([z.string(), z.instanceof(Buffer)]),
+        contentType: z.string().optional(),
+      })
+    )
+    .optional(),
   priority: z.enum(['low', 'normal', 'high']).optional().default('normal'),
   trackingEnabled: z.boolean().optional().default(true),
 })
@@ -89,11 +93,11 @@ class EmailTemplateLoader {
 
     try {
       const templatePath = path.join(this.templateDir, templateName)
-      
+
       // HTMLテンプレート読み込み
       const htmlPath = path.join(templatePath, 'template.html')
       const htmlContent = await fs.readFile(htmlPath, 'utf-8')
-      
+
       // テキストテンプレート読み込み（任意）
       let textContent: string | undefined
       try {
@@ -122,7 +126,7 @@ class EmailTemplateLoader {
 
       // キャッシュに保存
       templateCache.set(templateName, template)
-      
+
       return template
     } catch (error) {
       console.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
@@ -232,11 +236,8 @@ export class EmailService {
 
       // テンプレートを使用する場合
       if (validatedData.template) {
-        const template = await this.renderTemplate(
-          validatedData.template,
-          validatedData.data
-        )
-        
+        const template = await this.renderTemplate(validatedData.template, validatedData.data)
+
         htmlContent = template.html
         textContent = template.text
         subject = template.subject || validatedData.subject
@@ -259,14 +260,14 @@ export class EmailService {
       })
 
       console.log(`メール送信成功: ${result.messageId}`)
-      
+
       return {
         success: true,
         messageId: result.messageId,
       }
     } catch (error) {
       console.error('メール送信エラー:', error)
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -287,7 +288,9 @@ export class EmailService {
         template = await EmailTemplateLoader.loadTemplate(templateName)
       } catch {
         // テンプレートが見つからない場合はデフォルトを使用
-        console.warn(`テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`)
+        console.warn(
+          `テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`
+        )
         template = EmailTemplateLoader.getDefaultTemplate()
       }
 
@@ -328,7 +331,7 @@ export class EmailService {
     // バッチサイズを制限（SMTP制限を考慮）
     const batchSize = 10
     const batches = []
-    
+
     for (let i = 0; i < recipients.length; i += batchSize) {
       batches.push(recipients.slice(i, i + batchSize))
     }
@@ -340,7 +343,7 @@ export class EmailService {
             ...emailData,
             to: email,
           })
-          
+
           if (result.success) {
             successCount++
           } else {
@@ -358,10 +361,10 @@ export class EmailService {
 
       // バッチ内並行処理
       await Promise.allSettled(promises)
-      
+
       // レート制限を考慮した間隔
       if (batches.indexOf(batch) < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
 
@@ -438,7 +441,7 @@ export const sendWelcomeEmail = async (
       actionUrl: userData.verificationLink,
       actionText: 'メールアドレスを確認',
       message: 'PMP Learning Management にご登録いただき、ありがとうございます。',
-      additionalInfo: userData.verificationLink 
+      additionalInfo: userData.verificationLink
         ? 'アカウントを有効化するため、上記ボタンをクリックしてメールアドレスを確認してください。'
         : '今すぐ学習を開始できます！',
     },
@@ -476,7 +479,7 @@ export const sendLearningReminderEmail = async (
       message: `現在の学習ストリーク: ${userData.streakCount}日`,
       actionUrl: `${process.env.NEXTAUTH_URL}/dashboard`,
       actionText: '学習を続ける',
-      additionalInfo: userData.nextGoal 
+      additionalInfo: userData.nextGoal
         ? `次の目標: ${userData.nextGoal}`
         : '今日も頑張りましょう！',
     },

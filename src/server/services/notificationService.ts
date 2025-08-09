@@ -86,12 +86,15 @@ export interface NotificationData {
 }
 
 // 通知テンプレート定義
-export const NOTIFICATION_TEMPLATES: Record<NotificationType, {
-  title: string
-  message: string
-  emailTemplate?: string
-  pushTemplate?: string
-}> = {
+export const NOTIFICATION_TEMPLATES: Record<
+  NotificationType,
+  {
+    title: string
+    message: string
+    emailTemplate?: string
+    pushTemplate?: string
+  }
+> = {
   [NotificationType.LEARNING_REMINDER]: {
     title: '学習リマインダー',
     message: '今日の学習を始めませんか？継続的な学習で目標達成に近づきましょう！',
@@ -172,7 +175,7 @@ export class NotificationService {
 
     // ユーザーの通知設定を取得
     const userSettings = await this.getUserNotificationSettings(notificationData.userId)
-    
+
     if (!userSettings) {
       throw new TRPCError({
         code: 'NOT_FOUND',
@@ -225,7 +228,7 @@ export class NotificationService {
     // 通知履歴を記録
     await this.recordNotificationHistory(notificationData, results)
 
-    const success = results.some(r => r.success)
+    const success = results.some((r) => r.success)
     return { success, results }
   }
 
@@ -291,7 +294,7 @@ export class NotificationService {
   ): Promise<NotificationSettings> {
     try {
       const currentSettings = await this.getUserNotificationSettings(userId)
-      
+
       if (!currentSettings) {
         throw new TRPCError({
           code: 'NOT_FOUND',
@@ -354,33 +357,29 @@ export class NotificationService {
     // 通知タイプ別の設定チェック
     switch (type) {
       case NotificationType.LEARNING_REMINDER:
-        return channel === 'email' 
-          ? settings.email.learningReminders 
+        return channel === 'email'
+          ? settings.email.learningReminders
           : settings.push.learningReminders
-      
+
       case NotificationType.EXAM_REMINDER:
-        return channel === 'email' 
-          ? settings.email.examReminders 
-          : settings.push.examReminders
-      
+        return channel === 'email' ? settings.email.examReminders : settings.push.examReminders
+
       case NotificationType.ACHIEVEMENT_EARNED:
-        return channel === 'email' 
-          ? settings.email.achievements 
-          : settings.push.achievements
-      
+        return channel === 'email' ? settings.email.achievements : settings.push.achievements
+
       case NotificationType.WEEKLY_PROGRESS:
         return channel === 'email' && settings.email.weeklyProgress
-      
+
       case NotificationType.SYSTEM_ANNOUNCEMENT:
-        return channel === 'email' 
-          ? settings.email.systemAnnouncements 
+        return channel === 'email'
+          ? settings.email.systemAnnouncements
           : settings.push.systemAnnouncements
-      
+
       case NotificationType.COLLABORATION_INVITE:
       case NotificationType.DISCUSSION_REPLY:
       case NotificationType.STUDY_GROUP_UPDATE:
         return channel === 'email' && settings.email.collaborationUpdates
-      
+
       default:
         return true
     }
@@ -397,7 +396,7 @@ export class NotificationService {
     }
 
     const template = NOTIFICATION_TEMPLATES[notificationData.type]
-    
+
     await sendEmail({
       to: user.email,
       subject: notificationData.title || template.title,
@@ -412,7 +411,9 @@ export class NotificationService {
   }
 
   // プッシュ通知送信
-  private static async sendPushNotificationInternal(notificationData: NotificationData): Promise<void> {
+  private static async sendPushNotificationInternal(
+    notificationData: NotificationData
+  ): Promise<void> {
     await sendPushNotification({
       userId: notificationData.userId,
       title: notificationData.title,
@@ -510,7 +511,7 @@ export class NotificationService {
           processed++
         } catch (error) {
           console.error(`スケジュール通知送信エラー (${scheduled.id}):`, error)
-          
+
           // 失敗回数更新
           await prisma.scheduledNotification.update({
             where: { id: scheduled.id },
@@ -558,10 +559,7 @@ export class NotificationService {
       const where = {
         userId,
         ...(unreadOnly && { read: false }),
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       }
 
       const [notifications, unreadCount, totalCount] = await Promise.all([
@@ -587,7 +585,7 @@ export class NotificationService {
       ])
 
       return {
-        notifications: notifications.map(n => ({
+        notifications: notifications.map((n) => ({
           ...n,
           type: n.type as NotificationType,
           data: n.data as Record<string, any>,
@@ -605,10 +603,7 @@ export class NotificationService {
   }
 
   // 通知既読マーク
-  static async markNotificationAsRead(
-    userId: string,
-    notificationId: string
-  ): Promise<void> {
+  static async markNotificationAsRead(userId: string, notificationId: string): Promise<void> {
     try {
       await prisma.notification.updateMany({
         where: {

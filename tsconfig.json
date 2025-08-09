@@ -54,10 +54,5 @@
     "prisma/**/*",
     "config/**/*"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".next",
-    "tests/helpers/index.ts"
-  ]
+  "exclude": ["node_modules", "dist", ".next", "tests/helpers/index.ts"]
 }

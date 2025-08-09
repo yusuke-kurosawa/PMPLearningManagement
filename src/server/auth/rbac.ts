@@ -10,7 +10,7 @@ import { z } from 'zod'
 // サブスクリプションプラン定義
 export enum SubscriptionPlan {
   FREE = 'FREE',
-  BASIC = 'BASIC', 
+  BASIC = 'BASIC',
   PREMIUM = 'PREMIUM',
   ENTERPRISE = 'ENTERPRISE',
 }
@@ -18,7 +18,7 @@ export enum SubscriptionPlan {
 // 新しいユーザーロール（既存のPrismaに追加したいロール）
 export enum ExtendedUserRole {
   USER = 'USER',
-  INSTRUCTOR = 'INSTRUCTOR', 
+  INSTRUCTOR = 'INSTRUCTOR',
   ADMIN = 'ADMIN',
 }
 
@@ -102,62 +102,62 @@ export enum Action {
 const rolePermissions: Record<UserRole | 'INSTRUCTOR', Permission[]> = {
   [UserRole.ADMIN]: [
     // 全権限
-    ...Object.values(Permission)
+    ...Object.values(Permission),
   ],
-  
+
   ['INSTRUCTOR']: [
     // ユーザー管理
     Permission.USER_READ,
-    
+
     // 学習機能
     Permission.LEARNING_READ,
     Permission.LEARNING_WRITE,
     Permission.LEARNING_PROGRESS,
     Permission.LEARNING_ANALYTICS,
     Permission.LEARNING_EXPORT,
-    
+
     // 試験機能
     Permission.EXAM_TAKE,
     Permission.EXAM_CREATE,
     Permission.EXAM_ANALYTICS,
-    
+
     // コラボレーション
     Permission.COLLAB_READ,
     Permission.COLLAB_WRITE,
     Permission.COLLAB_MODERATE,
-    
+
     // AI機能
     Permission.AI_BASIC,
     Permission.AI_ADVANCED,
-    
+
     // 分析・レポート
     Permission.ANALYTICS_VIEW,
     Permission.ANALYTICS_ADVANCED,
-    
+
     // コンテンツ管理
     Permission.CONTENT_READ,
     Permission.CONTENT_WRITE,
-    
+
     // システム
     Permission.SYSTEM_HEALTH,
   ],
-  
+
   [UserRole.USER]: [
     // ユーザー管理
     Permission.USER_READ,
-    
+
     // 学習機能
     Permission.LEARNING_READ,
     Permission.LEARNING_WRITE,
     Permission.LEARNING_PROGRESS,
-    
+
     // 試験機能
     Permission.EXAM_TAKE,
-    
+
     // コラボレーション
     Permission.COLLAB_READ,
     Permission.COLLAB_WRITE,
-    
+
     // コンテンツ
     Permission.CONTENT_READ,
   ],
@@ -173,7 +173,7 @@ const subscriptionPermissions: Record<SubscriptionPlan, Permission[]> = {
     Permission.CONTENT_READ,
     Permission.COLLAB_READ,
   ],
-  
+
   [SubscriptionPlan.BASIC]: [
     // 基本 + 分析機能
     ...subscriptionPermissions[SubscriptionPlan.FREE],
@@ -183,7 +183,7 @@ const subscriptionPermissions: Record<SubscriptionPlan, Permission[]> = {
     Permission.AI_BASIC,
     Permission.COLLAB_WRITE,
   ],
-  
+
   [SubscriptionPlan.PREMIUM]: [
     // 基本 + 高度な機能
     ...subscriptionPermissions[SubscriptionPlan.BASIC],
@@ -192,7 +192,7 @@ const subscriptionPermissions: Record<SubscriptionPlan, Permission[]> = {
     Permission.EXAM_ANALYTICS,
     Permission.COLLAB_MODERATE,
   ],
-  
+
   [SubscriptionPlan.ENTERPRISE]: [
     // プレミアム + 企業向け機能
     ...subscriptionPermissions[SubscriptionPlan.PREMIUM],
@@ -231,12 +231,12 @@ export class PermissionChecker {
 
   // 複数権限チェック（AND条件）
   hasAllPermissions(permissions: Permission[]): boolean {
-    return permissions.every(permission => this.hasPermission(permission))
+    return permissions.every((permission) => this.hasPermission(permission))
   }
 
   // 複数権限チェック（OR条件）
   hasAnyPermission(permissions: Permission[]): boolean {
-    return permissions.some(permission => this.hasPermission(permission))
+    return permissions.some((permission) => this.hasPermission(permission))
   }
 
   // リソース・アクションベースの権限チェック
@@ -265,8 +265,10 @@ export class PermissionChecker {
 
   // インストラクター権限チェック
   isInstructor(): boolean {
-    return [UserRole.ADMIN].includes(this.userContext.role) || 
-           this.userContext.role === 'INSTRUCTOR' as any
+    return (
+      [UserRole.ADMIN].includes(this.userContext.role) ||
+      this.userContext.role === ('INSTRUCTOR' as any)
+    )
   }
 
   // プレミアムユーザーチェック
@@ -305,7 +307,7 @@ export class PermissionChecker {
       ? subscriptionPermissions[this.userContext.subscriptionPlan] || []
       : subscriptionPermissions[SubscriptionPlan.FREE]
 
-    return rolePerms.filter(perm => subscriptionPerms.includes(perm))
+    return rolePerms.filter((perm) => subscriptionPerms.includes(perm))
   }
 }
 
@@ -329,9 +331,9 @@ export const requirePermission = (
 
     const checker = createPermissionChecker(userContext)
     const permissions = Array.isArray(permission) ? permission : [permission]
-    
+
     let hasPermission = false
-    
+
     if (options.mode === 'any') {
       hasPermission = checker.hasAnyPermission(permissions)
     } else {
@@ -358,7 +360,7 @@ export const requireOwnership = (resourceOwnerId: string) => {
     }
 
     const checker = createPermissionChecker(userContext)
-    
+
     if (!checker.canAccessOwnResource(resourceOwnerId)) {
       throw new Error('リソースへのアクセス権限がありません')
     }
@@ -392,7 +394,7 @@ export class PermissionError extends Error {
 // 権限デバッグ情報
 export const getPermissionDebugInfo = (userContext: UserContext) => {
   const checker = createPermissionChecker(userContext)
-  
+
   return {
     user: {
       id: userContext.id,

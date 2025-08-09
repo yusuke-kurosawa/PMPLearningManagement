@@ -8,10 +8,10 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure } from '@/server/trpc'
 import { StripeService, paymentMethodSchema } from '@/server/services/stripeService'
-import { 
-  SubscriptionService, 
+import {
+  SubscriptionService,
   planChangeSchema,
-  USAGE_LIMITS 
+  USAGE_LIMITS,
 } from '@/server/services/subscriptionService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { SubscriptionPlan } from '@prisma/client'
@@ -19,10 +19,9 @@ import { prisma } from '@/lib/db'
 
 // 入力検証スキーマ
 const createSubscriptionSchema = z.object({
-  planId: z.nativeEnum(SubscriptionPlan).refine(
-    plan => plan !== SubscriptionPlan.FREE,
-    '有料プランを選択してください'
-  ),
+  planId: z
+    .nativeEnum(SubscriptionPlan)
+    .refine((plan) => plan !== SubscriptionPlan.FREE, '有料プランを選択してください'),
   paymentMethodId: z.string().min(1, '支払い方法を選択してください').optional(),
 })
 
@@ -47,7 +46,7 @@ export const paymentRouter = createTRPCRouter({
   // サブスクリプション情報取得
   getSubscription: protectedProcedure.query(async ({ ctx }) => {
     const checker = createPermissionChecker(ctx.session.user)
-    
+
     if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -68,7 +67,7 @@ export const paymentRouter = createTRPCRouter({
     .input(createSubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -78,7 +77,7 @@ export const paymentRouter = createTRPCRouter({
 
       // 既存のアクティブなサブスクリプションがある場合はエラー
       const existingSubscription = await prisma.subscription.findUnique({
-        where: { 
+        where: {
           userId: ctx.session.user.id,
         },
       })
@@ -116,30 +115,30 @@ export const paymentRouter = createTRPCRouter({
     }),
 
   // プラン変更
-  changePlan: protectedProcedure
-    .input(planChangeSchema)
-    .mutation(async ({ ctx, input }) => {
-      const checker = createPermissionChecker(ctx.session.user)
-      
-      if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'プランを変更する権限がありません',
-        })
-      }
+  changePlan: protectedProcedure.input(planChangeSchema).mutation(async ({ ctx, input }) => {
+    const checker = createPermissionChecker(ctx.session.user)
 
-      return await SubscriptionService.changePlan(ctx.session.user.id, input)
-    }),
+    if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'プランを変更する権限がありません',
+      })
+    }
+
+    return await SubscriptionService.changePlan(ctx.session.user.id, input)
+  }),
 
   // サブスクリプションキャンセル
   cancelSubscription: protectedProcedure
-    .input(z.object({
-      immediate: z.boolean().optional().default(false),
-      reason: z.string().max(500).optional(),
-    }))
+    .input(
+      z.object({
+        immediate: z.boolean().optional().default(false),
+        reason: z.string().max(500).optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -167,8 +166,8 @@ export const paymentRouter = createTRPCRouter({
 
       return {
         subscription,
-        message: input.immediate 
-          ? 'サブスクリプションをキャンセルしました' 
+        message: input.immediate
+          ? 'サブスクリプションをキャンセルしました'
           : '期間終了後にキャンセルされます',
       }
     }),
@@ -176,7 +175,7 @@ export const paymentRouter = createTRPCRouter({
   // サブスクリプション再開
   reactivateSubscription: protectedProcedure.mutation(async ({ ctx }) => {
     const checker = createPermissionChecker(ctx.session.user)
-    
+
     if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -192,7 +191,7 @@ export const paymentRouter = createTRPCRouter({
     .input(paymentMethodSchema)
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -223,7 +222,7 @@ export const paymentRouter = createTRPCRouter({
   // 支払い方法一覧取得
   getPaymentMethods: protectedProcedure.query(async ({ ctx }) => {
     const checker = createPermissionChecker(ctx.session.user)
-    
+
     if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -236,12 +235,14 @@ export const paymentRouter = createTRPCRouter({
 
   // 支払い方法削除
   removePaymentMethod: protectedProcedure
-    .input(z.object({
-      paymentMethodId: z.string().min(1, '支払い方法IDが必要です'),
-    }))
+    .input(
+      z.object({
+        paymentMethodId: z.string().min(1, '支払い方法IDが必要です'),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -275,37 +276,34 @@ export const paymentRouter = createTRPCRouter({
     }),
 
   // 請求書履歴取得
-  getInvoices: protectedProcedure
-    .input(invoiceQuerySchema)
-    .query(async ({ ctx, input }) => {
-      const checker = createPermissionChecker(ctx.session.user)
-      
-      if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: '請求書を表示する権限がありません',
-        })
-      }
+  getInvoices: protectedProcedure.input(invoiceQuerySchema).query(async ({ ctx, input }) => {
+    const checker = createPermissionChecker(ctx.session.user)
 
-      return await StripeService.getInvoices(ctx.session.user.id, input.limit)
-    }),
+    if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: '請求書を表示する権限がありません',
+      })
+    }
+
+    return await StripeService.getInvoices(ctx.session.user.id, input.limit)
+  }),
 
   // 使用量制限チェック
   checkUsageLimit: protectedProcedure
-    .input(z.object({
-      action: z.enum(['exam_attempt', 'ai_query', 'data_export']),
-    }))
+    .input(
+      z.object({
+        action: z.enum(['exam_attempt', 'ai_query', 'data_export']),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      return await SubscriptionService.checkUsageLimits(
-        ctx.session.user.id,
-        input.action
-      )
+      return await SubscriptionService.checkUsageLimits(ctx.session.user.id, input.action)
     }),
 
   // 使用量統計取得
   getUsageStats: protectedProcedure.query(async ({ ctx }) => {
     const checker = createPermissionChecker(ctx.session.user)
-    
+
     if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -320,10 +318,10 @@ export const paymentRouter = createTRPCRouter({
       usage,
       limits,
       utilizationRates: {
-        exams: limits.examAttemptsPerMonth 
+        exams: limits.examAttemptsPerMonth
           ? (usage.examAttempts / limits.examAttemptsPerMonth) * 100
           : 0,
-        aiQueries: limits.aiQueriesPerMonth 
+        aiQueries: limits.aiQueriesPerMonth
           ? (usage.aiQueries / limits.aiQueriesPerMonth) * 100
           : 0,
       },
@@ -335,7 +333,7 @@ export const paymentRouter = createTRPCRouter({
     .input(usageReportSchema)
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       // エンタープライズプランユーザーのみ
       if (!checker.isEnterpriseUser()) {
         throw new TRPCError({
@@ -366,12 +364,14 @@ export const paymentRouter = createTRPCRouter({
 
   // サブスクリプション履歴取得
   getSubscriptionHistory: protectedProcedure
-    .input(z.object({
-      limit: z.number().min(1).max(50).default(20),
-    }))
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(20),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -379,10 +379,7 @@ export const paymentRouter = createTRPCRouter({
         })
       }
 
-      return await SubscriptionService.getSubscriptionHistory(
-        ctx.session.user.id,
-        input.limit
-      )
+      return await SubscriptionService.getSubscriptionHistory(ctx.session.user.id, input.limit)
     }),
 
   // PaymentIntent作成（単発決済用）
@@ -390,7 +387,7 @@ export const paymentRouter = createTRPCRouter({
     .input(paymentIntentSchema)
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -432,13 +429,15 @@ export const paymentRouter = createTRPCRouter({
 
   // プランの機能詳細取得
   getPlanFeatures: protectedProcedure
-    .input(z.object({
-      planId: z.nativeEnum(SubscriptionPlan).optional(),
-    }))
+    .input(
+      z.object({
+        planId: z.nativeEnum(SubscriptionPlan).optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const targetPlan = input.planId || ctx.session.user.subscriptionPlan
       const limits = USAGE_LIMITS[targetPlan]
-      
+
       return {
         planId: targetPlan,
         limits,
@@ -446,8 +445,12 @@ export const paymentRouter = createTRPCRouter({
           unlimitedExams: limits.examAttemptsPerMonth === null,
           unlimitedAI: limits.aiQueriesPerMonth === null,
           unlimitedExports: limits.dataExportsPerMonth === null,
-          advancedAnalytics: [SubscriptionPlan.PREMIUM, SubscriptionPlan.ENTERPRISE].includes(targetPlan),
-          prioritySupport: [SubscriptionPlan.PREMIUM, SubscriptionPlan.ENTERPRISE].includes(targetPlan),
+          advancedAnalytics: [SubscriptionPlan.PREMIUM, SubscriptionPlan.ENTERPRISE].includes(
+            targetPlan
+          ),
+          prioritySupport: [SubscriptionPlan.PREMIUM, SubscriptionPlan.ENTERPRISE].includes(
+            targetPlan
+          ),
           teamManagement: targetPlan === SubscriptionPlan.ENTERPRISE,
           apiAccess: targetPlan === SubscriptionPlan.ENTERPRISE,
         },
@@ -456,12 +459,14 @@ export const paymentRouter = createTRPCRouter({
 
   // 請求書PDF生成
   generateInvoicePDF: protectedProcedure
-    .input(z.object({
-      invoiceId: z.string().min(1, '請求書IDが必要です'),
-    }))
+    .input(
+      z.object({
+        invoiceId: z.string().min(1, '請求書IDが必要です'),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_VIEW)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -489,7 +494,9 @@ export const paymentRouter = createTRPCRouter({
           invoiceNumber: invoice.number,
           amount: invoice.amount_paid,
           currency: invoice.currency,
-          paidAt: invoice.status_transitions?.paid_at ? new Date(invoice.status_transitions.paid_at * 1000) : null,
+          paidAt: invoice.status_transitions?.paid_at
+            ? new Date(invoice.status_transitions.paid_at * 1000)
+            : null,
         }
       } catch (error) {
         console.error('請求書PDF生成エラー:', error)
@@ -503,7 +510,7 @@ export const paymentRouter = createTRPCRouter({
   // サブスクリプション状態同期
   syncSubscriptionStatus: protectedProcedure.mutation(async ({ ctx }) => {
     await SubscriptionService.syncSubscriptionStatus(ctx.session.user.id)
-    
+
     return {
       message: 'サブスクリプション状態を同期しました',
     }
@@ -511,12 +518,14 @@ export const paymentRouter = createTRPCRouter({
 
   // プロモーションコード適用
   applyPromoCode: protectedProcedure
-    .input(z.object({
-      promoCode: z.string().min(1, 'プロモーションコードを入力してください'),
-    }))
+    .input(
+      z.object({
+        promoCode: z.string().min(1, 'プロモーションコードを入力してください'),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const checker = createPermissionChecker(ctx.session.user)
-      
+
       if (!checker.hasPermission(Permission.PAYMENT_MANAGE)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -540,7 +549,7 @@ export const paymentRouter = createTRPCRouter({
         }
 
         const promoCode = promotionCodes.data[0]
-        
+
         // 適用可能性チェック（実装に応じて詳細を調整）
         // - 使用回数制限
         // - 有効期限

@@ -19,16 +19,22 @@ export interface LearningProgressWithStats extends LearningProgress {
     monthlyHours: number
     totalExams: number
     passedExams: number
-    knowledgeAreas: Record<string, {
-      completed: number
-      total: number
-      averageScore: number
-    }>
-    processGroups: Record<string, {
-      completed: number
-      total: number
-      averageScore: number
-    }>
+    knowledgeAreas: Record<
+      string,
+      {
+        completed: number
+        total: number
+        averageScore: number
+      }
+    >
+    processGroups: Record<
+      string,
+      {
+        completed: number
+        total: number
+        averageScore: number
+      }
+    >
   }
 }
 
@@ -59,12 +65,18 @@ export type LearningGoalData = z.infer<typeof learningGoalSchema>
 // PMBOKプロセス定義
 export const PMBOK_PROCESSES = {
   knowledgeAreas: [
-    'Integration', 'Scope', 'Schedule', 'Cost', 'Quality', 
-    'Resource', 'Communications', 'Risk', 'Procurement', 'Stakeholder'
+    'Integration',
+    'Scope',
+    'Schedule',
+    'Cost',
+    'Quality',
+    'Resource',
+    'Communications',
+    'Risk',
+    'Procurement',
+    'Stakeholder',
   ],
-  processGroups: [
-    'Initiating', 'Planning', 'Executing', 'Monitoring and Controlling', 'Closing'
-  ],
+  processGroups: ['Initiating', 'Planning', 'Executing', 'Monitoring and Controlling', 'Closing'],
   totalProcesses: 49,
 }
 
@@ -76,63 +88,75 @@ export class LearningStatsCalculator {
 
   static calculateWeeklyHours(sessions: StudySession[]): number {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    return sessions
-      .filter(session => session.createdAt >= oneWeekAgo)
-      .reduce((total, session) => total + (session.duration || 0), 0) / 3600 // 秒を時間に変換
+    return (
+      sessions
+        .filter((session) => session.createdAt >= oneWeekAgo)
+        .reduce((total, session) => total + (session.duration || 0), 0) / 3600
+    ) // 秒を時間に変換
   }
 
   static calculateMonthlyHours(sessions: StudySession[]): number {
     const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    return sessions
-      .filter(session => session.createdAt >= oneMonthAgo)
-      .reduce((total, session) => total + (session.duration || 0), 0) / 3600
+    return (
+      sessions
+        .filter((session) => session.createdAt >= oneMonthAgo)
+        .reduce((total, session) => total + (session.duration || 0), 0) / 3600
+    )
   }
 
   static calculateKnowledgeAreaStats(
-    sessions: StudySession[], 
+    sessions: StudySession[],
     examResults: ExamResult[]
   ): Record<string, { completed: number; total: number; averageScore: number }> {
     const stats: Record<string, { completed: number; total: number; averageScore: number }> = {}
-    
-    PMBOK_PROCESSES.knowledgeAreas.forEach(area => {
-      const areaSessions = sessions.filter(s => s.knowledgeArea === area)
-      const areaExams = examResults.filter(e => 
-        e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
+
+    PMBOK_PROCESSES.knowledgeAreas.forEach((area) => {
+      const areaSessions = sessions.filter((s) => s.knowledgeArea === area)
+      const areaExams = examResults.filter(
+        (e) => e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
       )
-      
+
       stats[area] = {
-        completed: areaSessions.filter(s => s.completed).length,
+        completed: areaSessions.filter((s) => s.completed).length,
         total: Math.ceil(PMBOK_PROCESSES.totalProcesses / PMBOK_PROCESSES.knowledgeAreas.length),
-        averageScore: areaExams.length > 0 
-          ? areaExams.reduce((sum, exam) => sum + ((exam.knowledgeAreaScores as any)[area] || 0), 0) / areaExams.length
-          : 0
+        averageScore:
+          areaExams.length > 0
+            ? areaExams.reduce(
+                (sum, exam) => sum + ((exam.knowledgeAreaScores as any)[area] || 0),
+                0
+              ) / areaExams.length
+            : 0,
       }
     })
-    
+
     return stats
   }
 
   static calculateProcessGroupStats(
-    sessions: StudySession[], 
+    sessions: StudySession[],
     examResults: ExamResult[]
   ): Record<string, { completed: number; total: number; averageScore: number }> {
     const stats: Record<string, { completed: number; total: number; averageScore: number }> = {}
-    
-    PMBOK_PROCESSES.processGroups.forEach(group => {
-      const groupSessions = sessions.filter(s => s.processGroup === group)
-      const groupExams = examResults.filter(e => 
-        e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
+
+    PMBOK_PROCESSES.processGroups.forEach((group) => {
+      const groupSessions = sessions.filter((s) => s.processGroup === group)
+      const groupExams = examResults.filter(
+        (e) => e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
       )
-      
+
       stats[group] = {
-        completed: groupSessions.filter(s => s.completed).length,
+        completed: groupSessions.filter((s) => s.completed).length,
         total: Math.ceil(PMBOK_PROCESSES.totalProcesses / PMBOK_PROCESSES.processGroups.length),
-        averageScore: groupExams.length > 0 
-          ? groupExams.reduce((sum, exam) => sum + ((exam.processGroupScores as any)[group] || 0), 0) / groupExams.length
-          : 0
+        averageScore:
+          groupExams.length > 0
+            ? groupExams.reduce(
+                (sum, exam) => sum + ((exam.processGroupScores as any)[group] || 0),
+                0
+              ) / groupExams.length
+            : 0,
       }
     })
-    
+
     return stats
   }
 }
@@ -189,23 +213,24 @@ export class LearningService {
       const completionRate = LearningStatsCalculator.calculateCompletionRate(
         progress.completedProcesses as string[]
       )
-      
-      const averageScore = examResults.length > 0 
-        ? examResults.reduce((sum, exam) => sum + exam.score, 0) / examResults.length
-        : 0
 
-      const passedExams = examResults.filter(exam => exam.passed).length
+      const averageScore =
+        examResults.length > 0
+          ? examResults.reduce((sum, exam) => sum + exam.score, 0) / examResults.length
+          : 0
+
+      const passedExams = examResults.filter((exam) => exam.passed).length
 
       const weeklyHours = LearningStatsCalculator.calculateWeeklyHours(sessions)
       const monthlyHours = LearningStatsCalculator.calculateMonthlyHours(sessions)
 
       const knowledgeAreas = LearningStatsCalculator.calculateKnowledgeAreaStats(
-        sessions, 
+        sessions,
         examResults
       )
 
       const processGroups = LearningStatsCalculator.calculateProcessGroupStats(
-        sessions, 
+        sessions,
         examResults
       )
 
@@ -234,7 +259,7 @@ export class LearningService {
 
   // 学習セッション記録
   static async recordStudySession(
-    userId: string, 
+    userId: string,
     sessionData: StudySessionData
   ): Promise<StudySession> {
     try {
@@ -267,7 +292,7 @@ export class LearningService {
         }
 
         const completedProcesses = progress.completedProcesses as string[]
-        let updatedCompletedProcesses = [...completedProcesses]
+        const updatedCompletedProcesses = [...completedProcesses]
 
         // プロセス完了の場合、完了リストに追加
         if (sessionData.completed && !completedProcesses.includes(sessionData.processId)) {
@@ -277,8 +302,8 @@ export class LearningService {
         // ストリーク計算
         const today = new Date()
         const lastActivity = progress.lastActivityDate
-        const isConsecutiveDay = lastActivity && 
-          Math.abs(today.getTime() - lastActivity.getTime()) <= 24 * 60 * 60 * 1000
+        const isConsecutiveDay =
+          lastActivity && Math.abs(today.getTime() - lastActivity.getTime()) <= 24 * 60 * 60 * 1000
 
         const newStreak = isConsecutiveDay ? progress.currentStreak + 1 : 1
         const longestStreak = Math.max(progress.longestStreak, newStreak)
@@ -331,14 +356,7 @@ export class LearningService {
     }
   }> {
     try {
-      const {
-        limit = 20,
-        offset = 0,
-        knowledgeArea,
-        processGroup,
-        dateFrom,
-        dateTo,
-      } = options
+      const { limit = 20, offset = 0, knowledgeArea, processGroup, dateFrom, dateTo } = options
 
       const where: any = { userId }
 
@@ -384,10 +402,7 @@ export class LearningService {
   }
 
   // 学習目標設定
-  static async setLearningGoal(
-    userId: string,
-    goalData: LearningGoalData
-  ): Promise<any> {
+  static async setLearningGoal(userId: string, goalData: LearningGoalData): Promise<any> {
     try {
       return await prisma.learningGoal.create({
         data: {
@@ -409,19 +424,13 @@ export class LearningService {
   }
 
   // 学習目標取得
-  static async getLearningGoals(
-    userId: string,
-    activeOnly: boolean = false
-  ): Promise<any[]> {
+  static async getLearningGoals(userId: string, activeOnly: boolean = false): Promise<any[]> {
     try {
       const where: any = { userId }
-      
+
       if (activeOnly) {
         where.achieved = false
-        where.OR = [
-          { deadline: null },
-          { deadline: { gte: new Date() } },
-        ]
+        where.OR = [{ deadline: null }, { deadline: { gte: new Date() } }]
       }
 
       return await prisma.learningGoal.findMany({
@@ -447,13 +456,14 @@ export class LearningService {
     try {
       const progress = await this.getLearningProgress(userId)
       const completedProcesses = progress.completedProcesses as string[]
-      
+
       // 未完了プロセスの抽出
-      const allProcesses = Array.from({ length: PMBOK_PROCESSES.totalProcesses }, (_, i) => 
-        `process_${i + 1}`
+      const allProcesses = Array.from(
+        { length: PMBOK_PROCESSES.totalProcesses },
+        (_, i) => `process_${i + 1}`
       )
-      const incompleteProcesses = allProcesses.filter(p => !completedProcesses.includes(p))
-      
+      const incompleteProcesses = allProcesses.filter((p) => !completedProcesses.includes(p))
+
       // 弱点エリアの特定（スコアが低い知識エリア）
       const weakAreas = Object.entries(progress.stats.knowledgeAreas)
         .filter(([_, stats]) => stats.averageScore < 70)
@@ -463,8 +473,8 @@ export class LearningService {
 
       // 優先エリア（完了率が低いプロセスグループ）
       const priorityAreas = Object.entries(progress.stats.processGroups)
-        .filter(([_, stats]) => (stats.completed / stats.total) < 0.5)
-        .sort(([_, a], [__, b]) => (a.completed / a.total) - (b.completed / b.total))
+        .filter(([_, stats]) => stats.completed / stats.total < 0.5)
+        .sort(([_, a], [__, b]) => a.completed / a.total - b.completed / b.total)
         .slice(0, 2)
         .map(([group]) => group)
 
@@ -554,24 +564,26 @@ export class LearningService {
 
       // CSV形式の場合はセッションデータのみ
       const csvHeaders = [
-        'Date', 'Process', 'Knowledge Area', 'Process Group', 
-        'Duration (min)', 'Completed', 'Notes'
+        'Date',
+        'Process',
+        'Knowledge Area',
+        'Process Group',
+        'Duration (min)',
+        'Completed',
+        'Notes',
       ]
-      
-      const csvRows = sessions.sessions.map(session => [
+
+      const csvRows = sessions.sessions.map((session) => [
         session.createdAt.toISOString().split('T')[0],
         session.processName,
         session.knowledgeArea,
         session.processGroup,
         Math.round(session.duration / 60),
         session.completed ? 'Yes' : 'No',
-        (session.notes || '').replace(/[,\n\r]/g, ' ')
+        (session.notes || '').replace(/[,\n\r]/g, ' '),
       ])
 
-      return [csvHeaders, ...csvRows]
-        .map(row => row.join(','))
-        .join('\n')
-
+      return [csvHeaders, ...csvRows].map((row) => row.join(',')).join('\n')
     } catch (error) {
       console.error('学習データエクスポートエラー:', error)
       throw new TRPCError({

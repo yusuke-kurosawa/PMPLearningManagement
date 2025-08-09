@@ -30,17 +30,17 @@ interface UserState {
     image: string | null
     role: string
   } | null
-  
+
   // Preferences
   preferences: UserPreferences
-  
+
   // Study session
   currentSession: {
     startTime: Date | null
     processId: string | null
     duration: number // minutes
   } | null
-  
+
   // Actions
   setCurrentUser: (user: UserState['currentUser']) => void
   clearCurrentUser: () => void
@@ -75,23 +75,23 @@ export const useUserStore = create<UserState>()(
       currentUser: null,
       preferences: defaultPreferences,
       currentSession: null,
-      
+
       setCurrentUser: (user) =>
         set((state) => {
           state.currentUser = user
         }),
-      
+
       clearCurrentUser: () =>
         set((state) => {
           state.currentUser = null
           state.currentSession = null
         }),
-      
+
       updatePreferences: (preferences) =>
         set((state) => {
           state.preferences = { ...state.preferences, ...preferences }
         }),
-      
+
       startStudySession: (processId) =>
         set((state) => {
           state.currentSession = {
@@ -100,12 +100,12 @@ export const useUserStore = create<UserState>()(
             duration: 0,
           }
         }),
-      
+
       endStudySession: () =>
         set((state) => {
           state.currentSession = null
         }),
-      
+
       updateSessionDuration: (minutes) =>
         set((state) => {
           if (state.currentSession) {

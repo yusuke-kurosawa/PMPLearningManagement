@@ -68,7 +68,13 @@ export interface UserFilterOptions {
 }
 
 // ソートオプション
-export type UserSortField = 'name' | 'email' | 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'totalStudyTime'
+export type UserSortField =
+  | 'name'
+  | 'email'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'lastLoginAt'
+  | 'totalStudyTime'
 export type SortOrder = 'asc' | 'desc'
 
 export interface UserSortOptions {
@@ -111,7 +117,7 @@ export class UserRepository {
   static async findByEmail(email: string, options?: UserQueryOptions): Promise<User | null> {
     try {
       return await prisma.user.findUnique({
-        where: { 
+        where: {
           email: email.toLowerCase(),
           deletedAt: null, // 論理削除されていないユーザーのみ
         },
@@ -169,11 +175,8 @@ export class UserRepository {
         } else {
           where.AND = [
             { subscriptionPlan: { not: SubscriptionPlan.FREE } },
-            { 
-              OR: [
-                { subscription: null },
-                { subscription: { status: { not: 'active' } } },
-              ]
+            {
+              OR: [{ subscription: null }, { subscription: { status: { not: 'active' } } }],
             },
           ]
         }
@@ -208,7 +211,7 @@ export class UserRepository {
 
       // ソート条件構築
       let orderBy: Prisma.UserOrderByWithRelationInput = {}
-      
+
       switch (sort.field) {
         case 'totalStudyTime':
           orderBy = { learningProgress: { totalStudyTime: sort.order } }
@@ -276,7 +279,7 @@ export class UserRepository {
           })
         }
       }
-      
+
       console.error('ユーザー作成エラー:', error)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -312,7 +315,7 @@ export class UserRepository {
           })
         }
       }
-      
+
       console.error('ユーザー更新エラー:', error)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -347,7 +350,7 @@ export class UserRepository {
       if (error instanceof TRPCError) {
         throw error
       }
-      
+
       console.error('ユーザー削除エラー:', error)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -391,7 +394,7 @@ export class UserRepository {
       if (error instanceof TRPCError) {
         throw error
       }
-      
+
       console.error('ユーザー復元エラー:', error)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -404,7 +407,7 @@ export class UserRepository {
   static async exists(id: string): Promise<boolean> {
     try {
       const user = await prisma.user.findUnique({
-        where: { 
+        where: {
           id,
           deletedAt: null,
         },
@@ -424,7 +427,7 @@ export class UserRepository {
         email: email.toLowerCase(),
         deletedAt: null,
       }
-      
+
       if (excludeId) {
         where.id = { not: excludeId }
       }
@@ -433,7 +436,7 @@ export class UserRepository {
         where,
         select: { id: true },
       })
-      
+
       return !!user
     } catch (error) {
       console.error('メールアドレス存在確認エラー:', error)
@@ -518,62 +521,62 @@ export class UserRepository {
 
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
 
-      const [
-        total,
-        roleStats,
-        subscriptionStats,
-        verified,
-        active,
-        newThisMonth,
-      ] = await Promise.all([
-        prisma.user.count({ where: { deletedAt: null } }),
-        
-        prisma.user.groupBy({
-          by: ['role'],
-          where: { deletedAt: null },
-          _count: { role: true },
-        }),
-        
-        prisma.user.groupBy({
-          by: ['subscriptionPlan'],
-          where: { deletedAt: null },
-          _count: { subscriptionPlan: true },
-        }),
-        
-        prisma.user.count({
-          where: {
-            deletedAt: null,
-            emailVerified: { not: null },
-          },
-        }),
-        
-        prisma.user.count({
-          where: {
-            deletedAt: null,
-            lastLoginAt: { gte: thirtyDaysAgo },
-          },
-        }),
-        
-        prisma.user.count({
-          where: {
-            deletedAt: null,
-            createdAt: { gte: currentMonth },
-          },
-        }),
-      ])
+      const [total, roleStats, subscriptionStats, verified, active, newThisMonth] =
+        await Promise.all([
+          prisma.user.count({ where: { deletedAt: null } }),
+
+          prisma.user.groupBy({
+            by: ['role'],
+            where: { deletedAt: null },
+            _count: { role: true },
+          }),
+
+          prisma.user.groupBy({
+            by: ['subscriptionPlan'],
+            where: { deletedAt: null },
+            _count: { subscriptionPlan: true },
+          }),
+
+          prisma.user.count({
+            where: {
+              deletedAt: null,
+              emailVerified: { not: null },
+            },
+          }),
+
+          prisma.user.count({
+            where: {
+              deletedAt: null,
+              lastLoginAt: { gte: thirtyDaysAgo },
+            },
+          }),
+
+          prisma.user.count({
+            where: {
+              deletedAt: null,
+              createdAt: { gte: currentMonth },
+            },
+          }),
+        ])
 
       // 統計データ整形
-      const byRole = Object.values(UserRole).reduce((acc, role) => {
-        const found = roleStats.find(item => item.role === role)
-        acc[role] = found?._count.role || 0
-        return acc
-      }, {} as Record<UserRole, number>)
+      const byRole = Object.values(UserRole).reduce(
+        (acc, role) => {
+          const found = roleStats.find((item) => item.role === role)
+          acc[role] = found?._count.role || 0
+          return acc
+        },
+        {} as Record<UserRole, number>
+      )
 
-      const bySubscription = Object.values(SubscriptionPlan).reduce((acc, plan) => {
-        const found = subscriptionStats.find(item => item.subscriptionPlan === plan)
-        acc[plan] = found?._count.subscriptionPlan || 0
-        return acc
-      }, {} as Record<SubscriptionPlan, number>)
+      const bySubscription = Object.values(SubscriptionPlan).reduce(
+        (acc, plan) => {
+          const found = subscriptionStats.find((item) => item.subscriptionPlan === plan)
+          acc[plan] = found?._count.subscriptionPlan || 0
+          return acc
+        },
+        {} as Record<SubscriptionPlan, number>
+      )
 
       return {
         total,

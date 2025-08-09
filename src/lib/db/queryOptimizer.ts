@@ -91,8 +91,8 @@ export class QueryOptimizer {
     const searchFields = fields.join(" || ' ' || ")
     const searchQuery = searchTerm
       .split(' ')
-      .filter(term => term.length > 0)
-      .map(term => `${term}:*`)
+      .filter((term) => term.length > 0)
+      .map((term) => `${term}:*`)
       .join(' & ')
 
     return Prisma.sql`
@@ -194,14 +194,14 @@ export class QueryOptimizer {
     if (filters) {
       if (filters.knowledgeAreas && filters.knowledgeAreas.length > 0) {
         where.process = {
-          knowledgeArea: { in: filters.knowledgeAreas }
+          knowledgeArea: { in: filters.knowledgeAreas },
         }
       }
 
       if (filters.processGroups && filters.processGroups.length > 0) {
         where.process = {
           ...where.process,
-          processGroup: { in: filters.processGroups }
+          processGroup: { in: filters.processGroups },
         }
       }
 
@@ -234,13 +234,10 @@ export class QueryOptimizer {
             nameJa: true,
             knowledgeArea: true,
             processGroup: true,
-          }
-        }
+          },
+        },
       },
-      orderBy: [
-        { lastStudied: 'desc' as const },
-        { masteryLevel: 'asc' as const },
-      ],
+      orderBy: [{ lastStudied: 'desc' as const }, { masteryLevel: 'asc' as const }],
     }
   }
 
@@ -302,10 +299,10 @@ export class QueryOptimizer {
                 knowledgeArea: true,
                 processGroup: true,
                 difficulty: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       orderBy: { startTime: 'desc' as const },
     }
@@ -328,12 +325,12 @@ export class QueryOptimizer {
         },
         groupBy: ['status'],
       },
-      
+
       // 試験結果サマリー
       examResults: {
-        where: { 
+        where: {
           userId,
-          status: 'COMPLETED'
+          status: 'COMPLETED',
         },
         _count: {
           _all: true,
@@ -359,10 +356,10 @@ export class QueryOptimizer {
               name: true,
               nameJa: true,
               knowledgeArea: true,
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     }
   }
 
@@ -393,21 +390,18 @@ export class QueryOptimizer {
   /**
    * 重複除去クエリ
    */
-  static buildDistinctQuery(
-    field: string | string[],
-    additionalFields?: string[]
-  ) {
+  static buildDistinctQuery(field: string | string[], additionalFields?: string[]) {
     const distinct = Array.isArray(field) ? field : [field]
-    
+
     return {
       distinct,
-      select: [
-        ...distinct,
-        ...(additionalFields || [])
-      ].reduce((acc, fieldName) => {
-        acc[fieldName] = true
-        return acc
-      }, {} as Record<string, boolean>)
+      select: [...distinct, ...(additionalFields || [])].reduce(
+        (acc, fieldName) => {
+          acc[fieldName] = true
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
     }
   }
 }
@@ -461,7 +455,7 @@ export class QueryCache {
    */
   invalidate(pattern: string): number {
     let invalidated = 0
-    
+
     for (const [key, _] of this.cache) {
       if (key.includes(pattern)) {
         this.cache.delete(key)
@@ -528,14 +522,18 @@ export class IndexOptimizer {
     orderBy?: Record<string, 'asc' | 'desc'>
   ): string[] {
     const suggestions: string[] = []
-    
+
     // WHERE条件からインデックス候補を生成
     const whereFields = Object.keys(whereConditions)
     if (whereFields.length > 0) {
       if (whereFields.length === 1) {
-        suggestions.push(`CREATE INDEX idx_${tableName}_${whereFields[0]} ON "${tableName}" ("${whereFields[0]}");`)
+        suggestions.push(
+          `CREATE INDEX idx_${tableName}_${whereFields[0]} ON "${tableName}" ("${whereFields[0]}");`
+        )
       } else {
-        suggestions.push(`CREATE INDEX idx_${tableName}_${whereFields.join('_')} ON "${tableName}" (${whereFields.map(f => `"${f}"`).join(', ')});`)
+        suggestions.push(
+          `CREATE INDEX idx_${tableName}_${whereFields.join('_')} ON "${tableName}" (${whereFields.map((f) => `"${f}"`).join(', ')});`
+        )
       }
     }
 
@@ -543,8 +541,12 @@ export class IndexOptimizer {
     if (orderBy) {
       const orderFields = Object.keys(orderBy)
       if (orderFields.length > 0) {
-        const orderClause = orderFields.map(field => `"${field}" ${orderBy[field].toUpperCase()}`).join(', ')
-        suggestions.push(`CREATE INDEX idx_${tableName}_order_${orderFields.join('_')} ON "${tableName}" (${orderClause});`)
+        const orderClause = orderFields
+          .map((field) => `"${field}" ${orderBy[field].toUpperCase()}`)
+          .join(', ')
+        suggestions.push(
+          `CREATE INDEX idx_${tableName}_order_${orderFields.join('_')} ON "${tableName}" (${orderClause});`
+        )
       }
     }
 
@@ -553,9 +555,11 @@ export class IndexOptimizer {
       const orderFields = Object.keys(orderBy)
       const allFields = [...whereFields, ...orderFields]
       const uniqueFields = Array.from(new Set(allFields))
-      
+
       if (uniqueFields.length > whereFields.length) {
-        suggestions.push(`CREATE INDEX idx_${tableName}_composite_${uniqueFields.join('_')} ON "${tableName}" (${uniqueFields.map(f => `"${f}"`).join(', ')});`)
+        suggestions.push(
+          `CREATE INDEX idx_${tableName}_composite_${uniqueFields.join('_')} ON "${tableName}" (${uniqueFields.map((f) => `"${f}"`).join(', ')});`
+        )
       }
     }
 
@@ -577,9 +581,12 @@ export class IndexOptimizer {
 export const queryCache = new QueryCache()
 
 // 定期的なキャッシュクリーンアップ
-setInterval(() => {
-  queryCache.cleanup()
-}, 10 * 60 * 1000) // 10分ごと
+setInterval(
+  () => {
+    queryCache.cleanup()
+  },
+  10 * 60 * 1000
+) // 10分ごと
 
 export default {
   QueryOptimizer,

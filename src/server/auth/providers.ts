@@ -118,7 +118,7 @@ const createUserWithDefaults = async (userData: {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
-  
+
   providers: [
     // Google OAuth Provider
     GoogleProvider({
@@ -133,7 +133,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    // GitHub OAuth Provider  
+    // GitHub OAuth Provider
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
@@ -185,8 +185,9 @@ export const authOptions: NextAuthOptions = {
           }
 
           // サブスクリプション状態確認
-          const subscriptionActive = user.subscription?.status === 'active' || 
-                                   user.subscriptionPlan === SubscriptionPlan.FREE
+          const subscriptionActive =
+            user.subscription?.status === 'active' ||
+            user.subscriptionPlan === SubscriptionPlan.FREE
 
           return {
             id: user.id,
@@ -209,7 +210,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30日
-    updateAge: 24 * 60 * 60,   // 24時間
+    updateAge: 24 * 60 * 60, // 24時間
   },
 
   jwt: {
@@ -272,8 +273,8 @@ export const authOptions: NextAuthOptions = {
           if (dbUser) {
             token.role = dbUser.role
             token.subscriptionPlan = dbUser.subscriptionPlan
-            token.subscriptionActive = 
-              dbUser.subscription?.status === 'active' || 
+            token.subscriptionActive =
+              dbUser.subscription?.status === 'active' ||
               dbUser.subscriptionPlan === SubscriptionPlan.FREE
             token.profileComplete = dbUser.profileComplete
           }
@@ -339,7 +340,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   debug: process.env.NODE_ENV === 'development',
-  
+
   logger: {
     error(code, metadata) {
       console.error(`NextAuth Error [${code}]:`, metadata)

@@ -24,11 +24,7 @@ export const SUBSCRIPTION_PLANS = {
     amount: 0,
     currency: 'jpy',
     interval: null,
-    features: [
-      '基本的な学習機能',
-      '模擬試験（制限付き）',
-      'コミュニティフォーラム',
-    ],
+    features: ['基本的な学習機能', '模擬試験（制限付き）', 'コミュニティフォーラム'],
   },
   [SubscriptionPlan.BASIC]: {
     name: 'ベーシックプラン',
@@ -117,7 +113,7 @@ export class StripeService {
 
       if (existingCustomers.data.length > 0) {
         const customer = existingCustomers.data[0]
-        
+
         // メタデータでユーザーIDを確認・更新
         if (customer.metadata.userId !== userId) {
           await stripe.customers.update(customer.id, {
@@ -183,11 +179,7 @@ export class StripeService {
       }
 
       // Stripe顧客作成
-      const customer = await this.createOrGetCustomer(
-        userId,
-        user.email,
-        user.name || undefined
-      )
+      const customer = await this.createOrGetCustomer(userId, user.email, user.name || undefined)
 
       // 支払い方法が提供された場合は添付
       if (paymentMethodId) {
@@ -277,22 +269,19 @@ export class StripeService {
       )
 
       // 現在のアイテムを新しいプランに更新
-      const updatedSubscription = await stripe.subscriptions.update(
-        subscription.id,
-        {
-          items: [
-            {
-              id: subscription.items.data[0].id,
-              price: newPlan.priceId,
-            },
-          ],
-          proration_behavior: 'create_prorations',
-          metadata: {
-            userId,
-            planId: newPlanId,
+      const updatedSubscription = await stripe.subscriptions.update(subscription.id, {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            price: newPlan.priceId,
           },
-        }
-      )
+        ],
+        proration_behavior: 'create_prorations',
+        metadata: {
+          userId,
+          planId: newPlanId,
+        },
+      })
 
       // データベース更新
       await this.syncSubscriptionToDatabase(updatedSubscription, userId)
@@ -370,11 +359,7 @@ export class StripeService {
       }
 
       // Stripe顧客作成または取得
-      const customer = await this.createOrGetCustomer(
-        userId,
-        user.email,
-        user.name || undefined
-      )
+      const customer = await this.createOrGetCustomer(userId, user.email, user.name || undefined)
 
       // 支払い方法作成
       const paymentMethod = await stripe.paymentMethods.create({
@@ -399,10 +384,7 @@ export class StripeService {
   }
 
   // 請求書履歴取得
-  static async getInvoices(
-    userId: string,
-    limit: number = 10
-  ): Promise<Stripe.Invoice[]> {
+  static async getInvoices(userId: string, limit: number = 10): Promise<Stripe.Invoice[]> {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -455,10 +437,7 @@ export class StripeService {
   }
 
   // WebHook署名検証
-  static verifyWebhookSignature(
-    payload: string,
-    signature: string
-  ): Stripe.Event {
+  static verifyWebhookSignature(payload: string, signature: string): Stripe.Event {
     try {
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
       return stripe.webhooks.constructEvent(payload, signature, endpointSecret)
@@ -569,10 +548,8 @@ export class StripeService {
         Promise.resolve([]),
       ])
 
-      const studyHours = studySessions.reduce(
-        (total, session) => total + session.duration,
-        0
-      ) / 3600
+      const studyHours =
+        studySessions.reduce((total, session) => total + session.duration, 0) / 3600
 
       const user = await prisma.user.findUnique({
         where: { id: userId },
