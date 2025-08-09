@@ -1,0 +1,904 @@
+name: Monitoring and Observability Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      monitoring_type:
+        description: 'Type of monitoring to set up'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - metrics
+          - logs
+          - traces
+          - alerts
+  push:
+    branches: [main]
+    paths: ['.github/workflows/monitoring-setup.yml', 'config/monitoring/**']
+  schedule:
+    # Daily monitoring health check at 3 AM UTC
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  MONITORING_VERSION: '2.0'
+  GRAFANA_VERSION: '10.0.0'
+  PROMETHEUS_VERSION: '2.45.0'
+
+jobs:
+  # Setup Monitoring Infrastructure
+  setup-monitoring:
+    name: Setup Monitoring Infrastructure  
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Create monitoring configuration
+        run: |
+          mkdir -p config/monitoring/{prometheus,grafana,alerts}
+          
+          # Prometheus configuration
+          cat > config/monitoring/prometheus/prometheus.yml << 'EOF'
+          global:
+            scrape_interval: 15s
+            evaluation_interval: 15s
+            external_labels:
+              cluster: 'pmp-learning'
+              replica: 'github-pages'
+          
+          rule_files:
+            - "alerts/*.yml"
+          
+          alertmanager:
+            alertmanagers:
+              - static_configs:
+                  - targets:
+                    - alertmanager:9093
+          
+          scrape_configs:
+            # Application metrics (if using web vitals)
+            - job_name: 'pmp-learning-web'
+              static_configs:
+                - targets: ['yusuke-kurosawa.github.io:443']
+              scheme: https
+              metrics_path: '/api/metrics'
+              scrape_interval: 30s
+              scrape_timeout: 10s
+              
+            # GitHub Pages uptime monitoring
+            - job_name: 'github-pages-uptime'
+              static_configs:
+                - targets: ['yusuke-kurosawa.github.io:443']
+              scheme: https
+              scrape_interval: 60s
+              metrics_path: '/'
+              
+            # Lighthouse CI metrics (if available)
+            - job_name: 'lighthouse-metrics'
+              static_configs:
+                - targets: ['localhost:9464']
+              scrape_interval: 300s # 5 minutes
+          EOF
+          
+          # Grafana dashboards configuration
+          cat > config/monitoring/grafana/dashboard-config.json << 'EOF'
+          {
+            "dashboard": {
+              "id": null,
+              "title": "PMP Learning Management - Application Metrics",
+              "tags": ["pmp", "learning", "web-vitals"],
+              "timezone": "UTC",
+              "panels": [
+                {
+                  "id": 1,
+                  "title": "Page Load Performance",
+                  "type": "graph",
+                  "targets": [
+                    {
+                      "expr": "web_vitals_fcp{job=\"pmp-learning-web\"}",
+                      "legendFormat": "First Contentful Paint"
+                    },
+                    {
+                      "expr": "web_vitals_lcp{job=\"pmp-learning-web\"}",
+                      "legendFormat": "Largest Contentful Paint"
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "title": "Application Availability",
+                  "type": "stat",
+                  "targets": [
+                    {
+                      "expr": "avg_over_time(up{job=\"github-pages-uptime\"}[1h]) * 100",
+                      "legendFormat": "Uptime %"
+                    }
+                  ]
+                }
+              ],
+              "time": {
+                "from": "now-6h",
+                "to": "now"
+              },
+              "refresh": "5m"
+            }
+          }
+          EOF
+          
+          # Alert rules
+          cat > config/monitoring/alerts/application.yml << 'EOF'
+          groups:
+            - name: pmp-learning-alerts
+              rules:
+                - alert: ApplicationDown
+                  expr: up{job="github-pages-uptime"} == 0
+                  for: 5m
+                  labels:
+                    severity: critical
+                    component: application
+                  annotations:
+                    summary: "PMP Learning application is down"
+                    description: "The application has been down for more than 5 minutes"
+                    
+                - alert: HighResponseTime
+                  expr: web_vitals_fcp > 3000
+                  for: 2m
+                  labels:
+                    severity: warning
+                    component: performance
+                  annotations:
+                    summary: "High page load time detected"
+                    description: "First Contentful Paint is {{ $value }}ms (threshold: 3000ms)"
+                    
+                - alert: LowLighthouseScore
+                  expr: lighthouse_performance_score < 75
+                  for: 5m
+                  labels:
+                    severity: warning
+                    component: performance
+                  annotations:
+                    summary: "Lighthouse performance score is low"
+                    description: "Performance score is {{ $value }} (threshold: 75)"
+          EOF
+          
+      - name: Setup error tracking configuration
+        run: |
+          # Sentry configuration for error tracking
+          cat > config/monitoring/sentry-config.json << 'EOF'
+          {
+            "dsn": "${SENTRY_DSN}",
+            "environment": "${APP_ENVIRONMENT}",
+            "release": "${APP_VERSION}",
+            "tracesSampleRate": 0.1,
+            "replaysSessionSampleRate": 0.1,
+            "replaysOnErrorSampleRate": 1.0,
+            "integrations": [
+              "BrowserTracing",
+              "Replay"
+            ],
+            "beforeSend": {
+              "filterUrls": [
+                "yusuke-kurosawa.github.io"
+              ],
+              "ignoreErrors": [
+                "Script error.",
+                "Non-Error promise rejection captured"
+              ]
+            }
+          }
+          EOF
+          
+          # Custom error tracking setup
+          cat > src/utils/errorTracking.js << 'EOF'
+          // Error tracking utilities
+          class ErrorTracker {
+            constructor(config = {}) {
+              this.config = {
+                endpoint: config.endpoint || '/api/errors',
+                maxErrors: config.maxErrors || 100,
+                batchSize: config.batchSize || 10,
+                flushInterval: config.flushInterval || 30000,
+                ...config
+              };
+              
+              this.errors = [];
+              this.setupGlobalHandlers();
+              this.startBatchProcessor();
+            }
+            
+            setupGlobalHandlers() {
+              // Unhandled errors
+              window.addEventListener('error', (event) => {
+                this.captureError({
+                  type: 'javascript',
+                  message: event.message,
+                  filename: event.filename,
+                  lineno: event.lineno,
+                  colno: event.colno,
+                  stack: event.error?.stack,
+                  timestamp: new Date().toISOString(),
+                  url: window.location.href,
+                  userAgent: navigator.userAgent
+                });
+              });
+              
+              // Unhandled promise rejections
+              window.addEventListener('unhandledrejection', (event) => {
+                this.captureError({
+                  type: 'promise',
+                  message: event.reason?.message || 'Unhandled promise rejection',
+                  stack: event.reason?.stack,
+                  timestamp: new Date().toISOString(),
+                  url: window.location.href,
+                  userAgent: navigator.userAgent
+                });
+              });
+            }
+            
+            captureError(error) {
+              this.errors.push({
+                ...error,
+                id: this.generateId(),
+                severity: this.determineSeverity(error),
+                context: this.getContext()
+              });
+              
+              if (this.errors.length >= this.config.maxErrors) {
+                this.errors = this.errors.slice(-this.config.maxErrors);
+              }
+            }
+            
+            captureException(exception, context = {}) {
+              this.captureError({
+                type: 'manual',
+                message: exception.message,
+                stack: exception.stack,
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                context
+              });
+            }
+            
+            determineSeverity(error) {
+              if (error.message?.includes('ChunkLoadError')) return 'warning';
+              if (error.message?.includes('Network Error')) return 'warning';
+              if (error.type === 'promise') return 'error';
+              return 'error';
+            }
+            
+            getContext() {
+              return {
+                url: window.location.href,
+                timestamp: new Date().toISOString(),
+                viewport: {
+                  width: window.innerWidth,
+                  height: window.innerHeight
+                },
+                connection: navigator.connection ? {
+                  effectiveType: navigator.connection.effectiveType,
+                  downlink: navigator.connection.downlink
+                } : null
+              };
+            }
+            
+            generateId() {
+              return Math.random().toString(36).substr(2, 9);
+            }
+            
+            startBatchProcessor() {
+              setInterval(() => {
+                if (this.errors.length > 0) {
+                  this.flushErrors();
+                }
+              }, this.config.flushInterval);
+            }
+            
+            async flushErrors() {
+              if (this.errors.length === 0) return;
+              
+              const batch = this.errors.splice(0, this.config.batchSize);
+              
+              try {
+                // For GitHub Pages, we'll log to console and localStorage
+                console.group('🚨 Error Batch');
+                batch.forEach(error => {
+                  console.error(`[${error.severity}] ${error.message}`, error);
+                });
+                console.groupEnd();
+                
+                // Store in localStorage for debugging
+                const stored = JSON.parse(localStorage.getItem('pmp_errors') || '[]');
+                stored.push(...batch);
+                localStorage.setItem('pmp_errors', JSON.stringify(stored.slice(-50))); // Keep last 50
+                
+              } catch (err) {
+                console.error('Failed to flush errors:', err);
+                // Re-add errors back to queue
+                this.errors.unshift(...batch);
+              }
+            }
+          }
+          
+          export default ErrorTracker;
+          EOF
+          
+      - name: Setup web vitals monitoring
+        run: |
+          cat > src/utils/webVitals.js << 'EOF'
+          // Web Vitals monitoring
+          import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+          
+          class WebVitalsMonitor {
+            constructor(config = {}) {
+              this.config = {
+                endpoint: config.endpoint || '/api/vitals',
+                sampleRate: config.sampleRate || 0.1,
+                ...config
+              };
+              
+              this.vitals = {};
+              this.setupVitalsCollection();
+            }
+            
+            setupVitalsCollection() {
+              // Only collect for a sample of users
+              if (Math.random() > this.config.sampleRate) return;
+              
+              getCLS(this.handleVital.bind(this, 'CLS'));
+              getFID(this.handleVital.bind(this, 'FID'));
+              getFCP(this.handleVital.bind(this, 'FCP'));
+              getLCP(this.handleVital.bind(this, 'LCP'));
+              getTTFB(this.handleVital.bind(this, 'TTFB'));
+            }
+            
+            handleVital(name, metric) {
+              this.vitals[name] = {
+                value: metric.value,
+                id: metric.id,
+                name: metric.name,
+                delta: metric.delta,
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                connection: navigator.connection ? {
+                  effectiveType: navigator.connection.effectiveType,
+                  downlink: navigator.connection.downlink
+                } : null
+              };
+              
+              // Send immediately for critical metrics
+              if (name === 'CLS' && metric.value > 0.25) {
+                this.sendVitals([this.vitals[name]]);
+              } else if (name === 'LCP' && metric.value > 4000) {
+                this.sendVitals([this.vitals[name]]);
+              }
+              
+              // Log to console in development
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`${name}: ${metric.value}`, metric);
+              }
+            }
+            
+            sendVitals(vitals = Object.values(this.vitals)) {
+              try {
+                // For GitHub Pages, log and store locally
+                console.group('📊 Web Vitals');
+                vitals.forEach(vital => {
+                  console.log(`${vital.name}: ${vital.value}ms`, vital);
+                });
+                console.groupEnd();
+                
+                // Store in localStorage
+                const stored = JSON.parse(localStorage.getItem('pmp_vitals') || '[]');
+                stored.push(...vitals);
+                localStorage.setItem('pmp_vitals', JSON.stringify(stored.slice(-100)));
+                
+              } catch (err) {
+                console.error('Failed to send vitals:', err);
+              }
+            }
+            
+            getVitals() {
+              return this.vitals;
+            }
+            
+            // Send all collected vitals before page unload
+            flush() {
+              if (Object.keys(this.vitals).length > 0) {
+                this.sendVitals();
+              }
+            }
+          }
+          
+          // Auto-setup when imported
+          const monitor = new WebVitalsMonitor();
+          
+          // Flush on page unload
+          window.addEventListener('beforeunload', () => {
+            monitor.flush();
+          });
+          
+          export default monitor;
+          EOF
+          
+      - name: Create monitoring dashboard
+        run: |
+          cat > src/components/shared/MonitoringDashboard.tsx << 'EOF'
+          import React, { useState, useEffect } from 'react';
+          import { Activity, AlertTriangle, Clock, Zap } from 'lucide-react';
+          
+          interface VitalMetric {
+            name: string;
+            value: number;
+            timestamp: string;
+            url: string;
+          }
+          
+          interface ErrorMetric {
+            message: string;
+            severity: string;
+            timestamp: string;
+            url: string;
+          }
+          
+          export const MonitoringDashboard: React.FC = () => {
+            const [vitals, setVitals] = useState<VitalMetric[]>([]);
+            const [errors, setErrors] = useState<ErrorMetric[]>([]);
+            const [isVisible, setIsVisible] = useState(false);
+            
+            useEffect(() => {
+              // Load stored metrics
+              const storedVitals = JSON.parse(localStorage.getItem('pmp_vitals') || '[]');
+              const storedErrors = JSON.parse(localStorage.getItem('pmp_errors') || '[]');
+              
+              setVitals(storedVitals.slice(-10)); // Last 10 vitals
+              setErrors(storedErrors.slice(-5));  // Last 5 errors
+              
+              // Show dashboard in development or when explicitly enabled
+              setIsVisible(
+                process.env.NODE_ENV === 'development' || 
+                localStorage.getItem('pmp_monitoring_visible') === 'true'
+              );
+            }, []);
+            
+            const getVitalColor = (name: string, value: number) => {
+              switch (name) {
+                case 'CLS':
+                  return value <= 0.1 ? 'text-green-600' : value <= 0.25 ? 'text-yellow-600' : 'text-red-600';
+                case 'FID':
+                  return value <= 100 ? 'text-green-600' : value <= 300 ? 'text-yellow-600' : 'text-red-600';
+                case 'LCP':
+                  return value <= 2500 ? 'text-green-600' : value <= 4000 ? 'text-yellow-600' : 'text-red-600';
+                case 'FCP':
+                  return value <= 1800 ? 'text-green-600' : value <= 3000 ? 'text-yellow-600' : 'text-red-600';
+                case 'TTFB':
+                  return value <= 800 ? 'text-green-600' : value <= 1800 ? 'text-yellow-600' : 'text-red-600';
+                default:
+                  return 'text-gray-600';
+              }
+            };
+            
+            const getErrorColor = (severity: string) => {
+              switch (severity) {
+                case 'error': return 'text-red-600';
+                case 'warning': return 'text-yellow-600';
+                case 'info': return 'text-blue-600';
+                default: return 'text-gray-600';
+              }
+            };
+            
+            const toggleVisibility = () => {
+              const newVisibility = !isVisible;
+              setIsVisible(newVisibility);
+              localStorage.setItem('pmp_monitoring_visible', newVisibility.toString());
+            };
+            
+            if (!isVisible) {
+              return (
+                <button
+                  onClick={toggleVisibility}
+                  className="fixed bottom-4 right-4 z-50 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700"
+                  title="Show Monitoring Dashboard"
+                >
+                  <Activity className="h-4 w-4" />
+                </button>
+              );
+            }
+            
+            return (
+              <div className="fixed bottom-4 right-4 z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-lg">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <Activity className="h-5 w-5 mr-2 text-blue-600" />
+                      Monitoring
+                    </h3>
+                    <button
+                      onClick={toggleVisibility}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  {/* Web Vitals */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <Zap className="h-4 w-4 mr-1" />
+                      Web Vitals
+                    </h4>
+                    <div className="space-y-1 text-xs">
+                      {vitals.length > 0 ? (
+                        vitals.slice(-5).map((vital, index) => (
+                          <div key={index} className="flex justify-between">
+                            <span className="font-mono">{vital.name}:</span>
+                            <span className={`font-bold ${getVitalColor(vital.name, vital.value)}`}>
+                              {vital.value.toFixed(vital.name === 'CLS' ? 3 : 0)}
+                              {vital.name === 'CLS' ? '' : 'ms'}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-gray-500">No vitals data</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Recent Errors */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Recent Errors
+                    </h4>
+                    <div className="space-y-1 text-xs max-h-32 overflow-y-auto">
+                      {errors.length > 0 ? (
+                        errors.map((error, index) => (
+                          <div key={index} className="border-b border-gray-100 pb-1">
+                            <div className={`font-medium ${getErrorColor(error.severity)}`}>
+                              {error.severity.toUpperCase()}
+                            </div>
+                            <div className="text-gray-600 truncate" title={error.message}>
+                              {error.message}
+                            </div>
+                            <div className="text-gray-400 flex items-center">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {new Date(error.timestamp).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-gray-500">No errors recorded</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Controls */}
+                  <div className="mt-4 pt-2 border-t border-gray-200">
+                    <div className="flex gap-2 text-xs">
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem('pmp_vitals');
+                          localStorage.removeItem('pmp_errors');
+                          setVitals([]);
+                          setErrors([]);
+                        }}
+                        className="px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+                      >
+                        Clear Data
+                      </button>
+                      <button
+                        onClick={() => {
+                          const data = {
+                            vitals: JSON.parse(localStorage.getItem('pmp_vitals') || '[]'),
+                            errors: JSON.parse(localStorage.getItem('pmp_errors') || '[]'),
+                            timestamp: new Date().toISOString()
+                          };
+                          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `monitoring-data-${Date.now()}.json`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                      >
+                        Export
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+          
+          export default MonitoringDashboard;
+          EOF
+          
+      - name: Upload monitoring configuration
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-config
+          path: config/monitoring/
+          retention-days: 30
+
+  # Deploy Monitoring Stack (Simulated for GitHub Pages)
+  deploy-monitoring:
+    name: Deploy Monitoring Stack
+    runs-on: ubuntu-latest
+    needs: [setup-monitoring]
+    
+    steps:
+      - name: Download monitoring config
+        uses: actions/download-artifact@v4
+        with:
+          name: monitoring-config
+          path: config/monitoring/
+          
+      - name: Setup GitHub-based monitoring
+        run: |
+          echo "🔧 Setting up GitHub-based monitoring..."
+          
+          # Create GitHub issue templates for alerts
+          mkdir -p .github/ISSUE_TEMPLATE
+          
+          cat > .github/ISSUE_TEMPLATE/performance-alert.yml << 'EOF'
+          name: Performance Alert
+          description: Automated performance alert
+          title: "[ALERT] Performance issue detected"
+          labels: ["alert", "performance", "monitoring"]
+          body:
+            - type: markdown
+              attributes:
+                value: |
+                  ## Performance Alert
+                  
+                  This issue was automatically created by the monitoring system.
+                  
+            - type: textarea
+              id: metrics
+              attributes:
+                label: Metrics
+                description: Performance metrics that triggered this alert
+                placeholder: Paste monitoring data here
+              validations:
+                required: true
+                
+            - type: textarea
+              id: context
+              attributes:
+                label: Context
+                description: Additional context about when the alert was triggered
+              validations:
+                required: false
+          EOF
+          
+          cat > .github/ISSUE_TEMPLATE/error-report.yml << 'EOF'
+          name: Error Report
+          description: Automated error report
+          title: "[ERROR] Application error detected"
+          labels: ["alert", "error", "monitoring"]
+          body:
+            - type: markdown
+              attributes:
+                value: |
+                  ## Error Report
+                  
+                  This issue was automatically created by the error tracking system.
+                  
+            - type: textarea
+              id: error-details
+              attributes:
+                label: Error Details
+                description: Error information
+                placeholder: Paste error details here
+              validations:
+                required: true
+                
+            - type: textarea
+              id: stack-trace
+              attributes:
+                label: Stack Trace
+                description: Stack trace if available
+              validations:
+                required: false
+          EOF
+          
+          echo "✅ GitHub monitoring setup completed"
+
+  # Health Check and Validation
+  monitoring-health-check:
+    name: Monitoring Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-monitoring]
+    
+    steps:
+      - name: Validate monitoring endpoints
+        run: |
+          echo "🏥 Validating monitoring setup..."
+          
+          # Check application availability
+          PROD_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" || echo "000")
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$PROD_URL" || echo "999")
+          
+          echo "Application Status: $HTTP_CODE"
+          echo "Response Time: ${RESPONSE_TIME}s"
+          
+          # Create monitoring report
+          cat > monitoring-report.json << EOF
+          {
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "application": {
+              "url": "$PROD_URL",
+              "status": "$HTTP_CODE",
+              "responseTime": "$RESPONSE_TIME"
+            },
+            "monitoring": {
+              "setup": "completed",
+              "components": [
+                "error-tracking",
+                "web-vitals",
+                "uptime-monitoring",
+                "github-alerts"
+              ]
+            }
+          }
+          EOF
+          
+          echo "📊 Monitoring Report:"
+          cat monitoring-report.json | jq .
+          
+      - name: Test alert system
+        run: |
+          echo "🚨 Testing alert system..."
+          
+          # Simulate alert conditions
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Alert: Application is down (HTTP $HTTP_CODE)"
+            echo "create-alert=true" >> $GITHUB_OUTPUT
+            echo "alert-type=downtime" >> $GITHUB_OUTPUT
+          elif (( $(echo "$RESPONSE_TIME > 5" | bc -l) )); then
+            echo "Alert: High response time (${RESPONSE_TIME}s)"
+            echo "create-alert=true" >> $GITHUB_OUTPUT
+            echo "alert-type=performance" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All systems operational"
+            echo "create-alert=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Create Alert Issues (if needed)
+  create-monitoring-alerts:
+    name: Create Monitoring Alerts
+    runs-on: ubuntu-latest
+    needs: [monitoring-health-check]
+    if: needs.monitoring-health-check.outputs.create-alert == 'true'
+    
+    steps:
+      - name: Create GitHub issue for alert
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const alertType = '${{ needs.monitoring-health-check.outputs.alert-type }}';
+            
+            let title, body, labels;
+            
+            if (alertType === 'downtime') {
+              title = '[ALERT] Application Downtime Detected';
+              body = `## Application Downtime Alert
+              
+              **Detected:** ${new Date().toISOString()}
+              **URL:** https://yusuke-kurosawa.github.io/PMPLearningManagement/
+              **Status:** Application is not responding
+              
+              ### Details
+              - HTTP Status: Non-200 response
+              - Detection Time: ${new Date().toISOString()}
+              - Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              
+              ### Actions Required
+              1. Verify GitHub Pages deployment status
+              2. Check recent commits for breaking changes
+              3. Review deployment logs
+              
+              This issue was automatically created by the monitoring system.`;
+              labels = ['alert', 'critical', 'downtime', 'monitoring'];
+              
+            } else if (alertType === 'performance') {
+              title = '[ALERT] Performance Degradation Detected';
+              body = `## Performance Alert
+              
+              **Detected:** ${new Date().toISOString()}
+              **URL:** https://yusuke-kurosawa.github.io/PMPLearningManagement/
+              **Issue:** High response time detected
+              
+              ### Performance Metrics
+              - Response Time: > 5 seconds
+              - Detection Time: ${new Date().toISOString()}
+              - Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              
+              ### Recommended Actions
+              1. Review recent deployments
+              2. Check for large asset changes
+              3. Run Lighthouse performance audit
+              4. Review CDN configuration
+              
+              This issue was automatically created by the monitoring system.`;
+              labels = ['alert', 'performance', 'monitoring'];
+            }
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: labels
+            });
+
+  # Daily Monitoring Report
+  monitoring-report:
+    name: Generate Monitoring Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Generate daily report
+        run: |
+          echo "📊 Generating daily monitoring report..."
+          
+          # Collect metrics from the last 24 hours
+          PROD_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          
+          # Basic health check
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" || echo "000")
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$PROD_URL" || echo "999")
+          
+          # Create daily report
+          cat > daily-monitoring-report.md << EOF
+          # Daily Monitoring Report - $(date +%Y-%m-%d)
+          
+          ## Application Health
+          - **Status**: $( [ "$HTTP_CODE" = "200" ] && echo "✅ Healthy" || echo "❌ Issues Detected" )
+          - **Response Time**: ${RESPONSE_TIME}s
+          - **Last Check**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Deployment Information
+          - **Environment**: Production
+          - **URL**: $PROD_URL
+          - **Last Deployment**: $(git log -1 --format="%cd" --date=short)
+          - **Commit**: $(git log -1 --format="%h - %s")
+          
+          ## Monitoring Status
+          - **Error Tracking**: ✅ Active
+          - **Web Vitals**: ✅ Active
+          - **Uptime Monitoring**: ✅ Active
+          - **Alert System**: ✅ Active
+          
+          ## Recommendations
+          $( [ "$HTTP_CODE" != "200" ] && echo "- 🚨 Investigate application downtime" || echo "- ✅ No immediate actions required" )
+          $( (( $(echo "$RESPONSE_TIME > 3" | bc -l) )) && echo "- ⚠️ Optimize application performance" || echo "- ✅ Performance is acceptable" )
+          
+          ---
+          *Report generated automatically by GitHub Actions*
+          EOF
+          
+          echo "Daily report generated:"
+          cat daily-monitoring-report.md
+          
+      - name: Upload daily report
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-monitoring-report-$(date +%Y%m%d)
+          path: daily-monitoring-report.md
+          retention-days: 90

@@ -1,0 +1,191 @@
+name: 'Setup PMP Learning Project'
+description: 'Sets up the complete development environment for PMP Learning Management System'
+author: 'DevOps Team'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '18'
+  install-deps:
+    description: 'Whether to install npm dependencies'
+    required: false
+    default: 'true'
+  setup-cache:
+    description: 'Whether to setup npm cache'
+    required: false
+    default: 'true'
+  install-browsers:
+    description: 'Whether to install Playwright browsers'
+    required: false
+    default: 'false'
+  run-health-check:
+    description: 'Whether to run project health check'
+    required: false
+    default: 'true'
+
+outputs:
+  node-version:
+    description: 'The Node.js version that was installed'
+    value: ${{ steps.setup-node.outputs.node-version }}
+  npm-cache-hit:
+    description: 'Whether npm cache was hit'
+    value: ${{ steps.setup-node.outputs.cache-hit }}
+  project-status:
+    description: 'Overall project setup status'
+    value: ${{ steps.health-check.outputs.status }}
+  setup-time:
+    description: 'Time taken for setup in seconds'
+    value: ${{ steps.timing.outputs.setup-time }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Record start time
+      id: start-time
+      shell: bash
+      run: echo "start-time=$(date +%s)" >> $GITHUB_OUTPUT
+
+    - name: Setup Node.js
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.setup-cache == 'true' && 'npm' || '' }}
+        cache-dependency-path: package-lock.json
+
+    - name: Verify Node.js installation
+      shell: bash
+      run: |
+        echo "🚀 Node.js Setup Complete"
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        echo "Cache hit: ${{ steps.setup-node.outputs.cache-hit }}"
+
+    - name: Install dependencies
+      if: inputs.install-deps == 'true'
+      shell: bash
+      run: |
+        echo "📦 Installing dependencies..."
+        npm ci --prefer-offline --no-audit
+        echo "✅ Dependencies installed successfully"
+
+    - name: Install Playwright browsers
+      if: inputs.install-browsers == 'true'
+      shell: bash
+      run: |
+        echo "🎭 Installing Playwright browsers..."
+        npx playwright install --with-deps chromium firefox
+        echo "✅ Playwright browsers installed"
+
+    - name: Project health check
+      id: health-check
+      if: inputs.run-health-check == 'true'
+      shell: bash
+      run: |
+        echo "🏥 Running project health check..."
+        
+        STATUS="healthy"
+        ISSUES=""
+        
+        # Check package.json exists
+        if [ ! -f "package.json" ]; then
+          STATUS="unhealthy"
+          ISSUES="$ISSUES- Missing package.json\n"
+        fi
+        
+        # Check if dependencies are installed
+        if [ "${{ inputs.install-deps }}" == "true" ] && [ ! -d "node_modules" ]; then
+          STATUS="unhealthy" 
+          ISSUES="$ISSUES- Dependencies not installed\n"
+        fi
+        
+        # Check if main source directory exists
+        if [ ! -d "src" ]; then
+          STATUS="warning"
+          ISSUES="$ISSUES- Source directory not found\n"
+        fi
+        
+        # Check if essential config files exist
+        for file in "package.json" "vite.config.mjs" "tsconfig.json"; do
+          if [ ! -f "$file" ]; then
+            STATUS="warning"
+            ISSUES="$ISSUES- Missing $file\n"
+          fi
+        done
+        
+        # Try to run a quick lint check if dependencies are installed
+        if [ "${{ inputs.install-deps }}" == "true" ] && [ "$STATUS" != "unhealthy" ]; then
+          if npm run lint --silent > /dev/null 2>&1; then
+            echo "✅ Linting check passed"
+          else
+            STATUS="warning"
+            ISSUES="$ISSUES- Linting issues detected\n"
+          fi
+        fi
+        
+        echo "status=$STATUS" >> $GITHUB_OUTPUT
+        
+        if [ "$STATUS" == "healthy" ]; then
+          echo "✅ Project health check: HEALTHY"
+        elif [ "$STATUS" == "warning" ]; then
+          echo "⚠️ Project health check: WARNING"
+          echo -e "Issues found:\n$ISSUES"
+        else
+          echo "❌ Project health check: UNHEALTHY"
+          echo -e "Critical issues:\n$ISSUES"
+        fi
+
+    - name: Setup development tools
+      shell: bash
+      run: |
+        echo "🛠️ Setting up development tools..."
+        
+        # Create useful aliases and functions
+        cat >> ~/.bashrc << 'EOF'
+        # PMP Learning Management aliases
+        alias pmp-dev="npm run dev"
+        alias pmp-build="npm run build"
+        alias pmp-test="npm run test"
+        alias pmp-e2e="npm run test:e2e"
+        alias pmp-lint="npm run lint"
+        alias pmp-format="npm run format"
+        
+        # Quick project info
+        pmp-info() {
+          echo "🎯 PMP Learning Management System"
+          echo "📁 Project: $(basename $(pwd))"
+          echo "🟢 Node: $(node --version)"
+          echo "📦 npm: $(npm --version)"
+          echo "🎭 Playwright: $(npx playwright --version 2>/dev/null || echo 'Not installed')"
+        }
+        EOF
+        
+        echo "✅ Development tools configured"
+
+    - name: Create project summary
+      shell: bash
+      run: |
+        echo "📋 Project Setup Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Node.js | ✅ v${{ steps.setup-node.outputs.node-version }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Dependencies | ${{ inputs.install-deps == 'true' && '✅ Installed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Cache | ${{ steps.setup-node.outputs.cache-hit == 'true' && '✅ Hit' || '❌ Miss' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Browsers | ${{ inputs.install-browsers == 'true' && '✅ Installed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Health Check | ${{ steps.health-check.outputs.status == 'healthy' && '✅ Healthy' || steps.health-check.outputs.status == 'warning' && '⚠️ Warning' || '❌ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+
+    - name: Calculate setup timing
+      id: timing
+      shell: bash
+      run: |
+        START_TIME="${{ steps.start-time.outputs.start-time }}"
+        END_TIME=$(date +%s)
+        SETUP_TIME=$((END_TIME - START_TIME))
+        
+        echo "setup-time=$SETUP_TIME" >> $GITHUB_OUTPUT
+        echo "⏱️ Setup completed in ${SETUP_TIME} seconds"
+
+branding:
+  icon: 'settings'
+  color: 'blue'

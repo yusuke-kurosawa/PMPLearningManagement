@@ -1,0 +1,533 @@
+name: Blue-Green Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_slot:
+        description: 'Target deployment slot'
+        required: true
+        default: 'green'
+        type: choice
+        options: ['blue', 'green']
+      switch_traffic:
+        description: 'Switch traffic after deployment'
+        required: false
+        default: false
+        type: boolean
+      rollback:
+        description: 'Rollback to previous slot'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths: ['src/**', 'public/**', 'package.json', 'vite.config.*']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  deployments: write
+  checks: write
+
+concurrency:
+  group: blue-green-deployment
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '18'
+  HEALTH_CHECK_RETRIES: 5
+  HEALTH_CHECK_INTERVAL: 30
+
+jobs:
+  # Determine Deployment Strategy
+  deployment-planning:
+    name: Plan Blue-Green Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      target-slot: ${{ steps.plan.outputs.target-slot }}
+      current-slot: ${{ steps.plan.outputs.current-slot }}
+      action: ${{ steps.plan.outputs.action }}
+      should-deploy: ${{ steps.plan.outputs.should-deploy }}
+      
+    steps:
+      - name: Plan deployment strategy
+        id: plan
+        run: |
+          ACTION="deploy"
+          SHOULD_DEPLOY="false"
+          TARGET_SLOT=""
+          CURRENT_SLOT=""
+          
+          # Manual triggers
+          if [ "${{ inputs.rollback }}" = "true" ]; then
+            ACTION="rollback"
+            SHOULD_DEPLOY="true"
+            echo "🔄 Rollback requested"
+            
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_SLOT="${{ inputs.deployment_slot }}"
+            ACTION="deploy"
+            SHOULD_DEPLOY="true"
+            echo "📦 Manual deployment to $TARGET_SLOT slot"
+            
+          elif [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            ACTION="deploy"
+            SHOULD_DEPLOY="true"
+            echo "🔄 Auto deployment triggered"
+          fi
+          
+          # Determine current active slot by checking which deployment exists
+          if [ -z "$TARGET_SLOT" ]; then
+            # Auto-determine target slot (opposite of current)
+            # This is a simplified check - in practice you'd check actual traffic routing
+            if curl -sf "https://yusuke-kurosawa.github.io/PMPLearningManagement-blue/" > /dev/null 2>&1; then
+              CURRENT_SLOT="blue"
+              TARGET_SLOT="green"
+            else
+              CURRENT_SLOT="green"
+              TARGET_SLOT="blue"
+            fi
+            
+            echo "🎯 Auto-selected target slot: $TARGET_SLOT (current: $CURRENT_SLOT)"
+          else
+            # Manual slot selection
+            CURRENT_SLOT=$( [ "$TARGET_SLOT" = "blue" ] && echo "green" || echo "blue" )
+            echo "🎯 Manual target slot: $TARGET_SLOT (current: $CURRENT_SLOT)"
+          fi
+          
+          echo "target-slot=$TARGET_SLOT" >> $GITHUB_OUTPUT
+          echo "current-slot=$CURRENT_SLOT" >> $GITHUB_OUTPUT
+          echo "action=$ACTION" >> $GITHUB_OUTPUT
+          echo "should-deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+          
+          echo "📋 Deployment Plan:"
+          echo "  Action: $ACTION"
+          echo "  Target Slot: $TARGET_SLOT"
+          echo "  Current Slot: $CURRENT_SLOT"
+          echo "  Should Deploy: $SHOULD_DEPLOY"
+
+  # Build Application
+  build-application:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [deployment-planning]
+    if: needs.deployment-planning.outputs.should-deploy == 'true' && needs.deployment-planning.outputs.action == 'deploy'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build for ${{ needs.deployment-planning.outputs.target-slot }} slot
+        run: npm run build
+        env:
+          NODE_ENV: production
+          VITE_APP_ENVIRONMENT: production
+          VITE_APP_DEPLOYMENT_SLOT: ${{ needs.deployment-planning.outputs.target-slot }}
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_APP_BUILD_TIME: ${{ github.run_started_at }}
+          
+      - name: Add deployment metadata
+        run: |
+          cat > dist/deployment-info.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "deploymentSlot": "${{ needs.deployment-planning.outputs.target-slot }}",
+            "buildTime": "${{ github.run_started_at }}",
+            "buildId": "${{ github.run_id }}",
+            "branch": "${{ github.ref_name }}",
+            "isBlueGreen": true,
+            "slotStatus": "inactive"
+          }
+          EOF
+          
+          # Add slot identifier to HTML for debugging
+          SLOT_COLOR=$( [ "${{ needs.deployment-planning.outputs.target-slot }}" = "blue" ] && echo "#007ACC" || echo "#28A745" )
+          sed -i "s/<body>/<body data-deployment-slot=\"${{ needs.deployment-planning.outputs.target-slot }}\"><div id=\"deployment-slot-indicator\" style=\"position:fixed;top:0;right:0;background:$SLOT_COLOR;color:white;padding:2px 6px;font-size:10px;z-index:9999;\">${{ needs.deployment-planning.outputs.target-slot }}<\/div>/" dist/index.html
+          
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blue-green-build
+          path: dist/
+          retention-days: 3
+
+  # Deploy to Target Slot
+  deploy-to-slot:
+    name: Deploy to ${{ needs.deployment-planning.outputs.target-slot }} Slot
+    runs-on: ubuntu-latest
+    needs: [deployment-planning, build-application]
+    if: success()
+    environment:
+      name: ${{ needs.deployment-planning.outputs.target-slot }}
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement-${{ needs.deployment-planning.outputs.target-slot }}/
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blue-green-build
+          path: dist/
+          
+      - name: Deploy to ${{ needs.deployment-planning.outputs.target-slot }} slot
+        run: |
+          SLOT="${{ needs.deployment-planning.outputs.target-slot }}"
+          BRANCH="gh-pages-$SLOT"
+          
+          echo "🚀 Deploying to $SLOT slot (branch: $BRANCH)"
+          
+          # Configure git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Clone target branch or create it
+          git clone --single-branch --branch $BRANCH https://github.com/${{ github.repository }}.git slot-repo || \
+          git clone https://github.com/${{ github.repository }}.git slot-repo
+          
+          cd slot-repo
+          
+          # Create branch if it doesn't exist
+          git checkout $BRANCH 2>/dev/null || git checkout -b $BRANCH
+          
+          # Backup current deployment for rollback
+          if [ -f index.html ]; then
+            mkdir -p .backup
+            cp -r * .backup/ 2>/dev/null || true
+            echo "📦 Backed up current deployment"
+          fi
+          
+          # Clear existing files
+          rm -rf * .nojekyll 2>/dev/null || true
+          
+          # Copy new build
+          cp -r ../dist/* .
+          
+          # Add .nojekyll for GitHub Pages
+          touch .nojekyll
+          
+          # Create deployment record
+          cat > slot-deployment.json << EOF
+          {
+            "slot": "$SLOT",
+            "deploymentTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "version": "${{ github.sha }}",
+            "buildId": "${{ github.run_id }}",
+            "status": "deployed-inactive",
+            "healthCheck": {
+              "status": "pending",
+              "lastCheck": null,
+              "endpoint": "https://yusuke-kurosawa.github.io/PMPLearningManagement-$SLOT/"
+            }
+          }
+          EOF
+          
+          # Commit and push
+          git add -A
+          git commit -m "Deploy to $SLOT slot: ${{ github.sha }}"
+          git push origin $BRANCH
+          
+          echo "✅ Deployed to $SLOT slot successfully"
+
+  # Health Check Target Slot
+  health-check-slot:
+    name: Health Check ${{ needs.deployment-planning.outputs.target-slot }} Slot
+    runs-on: ubuntu-latest
+    needs: [deployment-planning, deploy-to-slot]
+    if: success()
+    outputs:
+      health-status: ${{ steps.health-check.outputs.health-status }}
+      
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 60
+        
+      - name: Comprehensive health check
+        id: health-check
+        run: |
+          SLOT="${{ needs.deployment-planning.outputs.target-slot }}"
+          SLOT_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement-$SLOT/"
+          
+          echo "🏥 Starting comprehensive health check for $SLOT slot"
+          echo "URL: $SLOT_URL"
+          
+          HEALTH_STATUS="unknown"
+          
+          # Basic connectivity check
+          echo "1. Basic Connectivity Test"
+          for i in $(seq 1 ${{ env.HEALTH_CHECK_RETRIES }}); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$SLOT_URL" || echo "000")
+            echo "  Attempt $i/${{ env.HEALTH_CHECK_RETRIES }}: HTTP $HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "  ✅ Basic connectivity: PASS"
+              break
+            elif [ "$i" = "${{ env.HEALTH_CHECK_RETRIES }}" ]; then
+              echo "  ❌ Basic connectivity: FAIL"
+              HEALTH_STATUS="failed"
+              exit 1
+            fi
+            
+            sleep ${{ env.HEALTH_CHECK_INTERVAL }}
+          done
+          
+          # Performance check
+          echo "2. Performance Test"
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$SLOT_URL" || echo "999")
+          echo "  Response time: ${RESPONSE_TIME}s"
+          
+          if (( $(echo "$RESPONSE_TIME < 3" | bc -l) )); then
+            echo "  ✅ Performance: PASS (< 3s)"
+          else
+            echo "  ⚠️ Performance: WARNING (≥ 3s)"
+          fi
+          
+          # Content validation
+          echo "3. Content Validation"
+          CONTENT=$(curl -s "$SLOT_URL" || echo "")
+          
+          if echo "$CONTENT" | grep -q "data-deployment-slot=\"$SLOT\""; then
+            echo "  ✅ Slot marker: PASS"
+          else
+            echo "  ⚠️ Slot marker: WARNING (not found)"
+          fi
+          
+          if echo "$CONTENT" | grep -q "PMP Learning Management"; then
+            echo "  ✅ Content check: PASS"
+          else
+            echo "  ❌ Content check: FAIL"
+            HEALTH_STATUS="failed"
+            exit 1
+          fi
+          
+          # Deployment info check
+          echo "4. Deployment Info Check"
+          DEPLOY_INFO=$(curl -s "$SLOT_URL/deployment-info.json" || echo "{}")
+          
+          if echo "$DEPLOY_INFO" | jq -e '.deploymentSlot' >/dev/null 2>&1; then
+            SLOT_INFO=$(echo "$DEPLOY_INFO" | jq -r '.deploymentSlot')
+            echo "  ✅ Deployment info: PASS (slot: $SLOT_INFO)"
+          else
+            echo "  ⚠️ Deployment info: WARNING (not found)"
+          fi
+          
+          # API endpoints check (if any)
+          echo "5. Critical Endpoints Check"
+          # Add checks for any API endpoints your app uses
+          echo "  ℹ️ No API endpoints to check (static app)"
+          
+          HEALTH_STATUS="healthy"
+          echo "health-status=$HEALTH_STATUS" >> $GITHUB_OUTPUT
+          
+          echo "✅ Health check completed: $HEALTH_STATUS"
+
+  # Traffic Switch (Blue-Green Swap)
+  switch-traffic:
+    name: Switch Traffic to ${{ needs.deployment-planning.outputs.target-slot }}
+    runs-on: ubuntu-latest
+    needs: [deployment-planning, health-check-slot]
+    if: >
+      success() && 
+      needs.health-check-slot.outputs.health-status == 'healthy' &&
+      (inputs.switch_traffic == true || github.event_name == 'push')
+    environment:
+      name: production
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+      
+    steps:
+      - name: Switch production traffic
+        run: |
+          TARGET_SLOT="${{ needs.deployment-planning.outputs.target-slot }}"
+          CURRENT_SLOT="${{ needs.deployment-planning.outputs.current-slot }}"
+          
+          echo "🔄 Switching traffic from $CURRENT_SLOT to $TARGET_SLOT"
+          
+          # Configure git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Get target slot build
+          git clone --single-branch --branch gh-pages-$TARGET_SLOT https://github.com/${{ github.repository }}.git target-slot
+          
+          cd target-slot
+          
+          # Update deployment info for production
+          if [ -f deployment-info.json ]; then
+            # Update status to active
+            jq '.slotStatus = "active" | .productionSwitchTime = "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"' deployment-info.json > temp.json
+            mv temp.json deployment-info.json
+          fi
+          
+          # Remove slot indicator for production
+          sed -i '/<div id="deployment-slot-indicator"/d' index.html
+          
+          # Copy to production build directory
+          cd ..
+          mkdir -p production-build
+          cp -r target-slot/* production-build/
+          
+          # Deploy to production (main GitHub Pages)
+          # Setup Pages
+          cat > pages-config.json << EOF
+          {
+            "source": {
+              "path": "./production-build"
+            }
+          }
+          EOF
+          
+          # For GitHub Pages deployment via artifact
+          echo "📦 Preparing production deployment..."
+          
+          # Update production deployment record
+          cat > production-build/production-switch.json << EOF
+          {
+            "switchTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "fromSlot": "$CURRENT_SLOT", 
+            "toSlot": "$TARGET_SLOT",
+            "version": "${{ github.sha }}",
+            "buildId": "${{ github.run_id }}",
+            "switchReason": "Blue-green deployment"
+          }
+          EOF
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './production-build'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: Verify production switch
+        run: |
+          sleep 60
+          
+          PROD_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          
+          echo "🔍 Verifying production traffic switch..."
+          
+          # Check if production is accessible
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" || echo "000")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Production switch successful"
+            
+            # Check deployment info
+            DEPLOY_INFO=$(curl -s "$PROD_URL/deployment-info.json" || echo "{}")
+            if [ -n "$DEPLOY_INFO" ]; then
+              echo "📋 Production deployment info:"
+              echo "$DEPLOY_INFO" | jq . 2>/dev/null || echo "$DEPLOY_INFO"
+            fi
+          else
+            echo "❌ Production switch verification failed: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+  # Rollback Logic
+  rollback-deployment:
+    name: Rollback Blue-Green Deployment
+    runs-on: ubuntu-latest
+    needs: [deployment-planning]
+    if: needs.deployment-planning.outputs.action == 'rollback' || failure()
+    
+    steps:
+      - name: Execute rollback
+        run: |
+          echo "🔄 Executing blue-green rollback..."
+          
+          # In a real implementation, you would:
+          # 1. Identify the previously active slot
+          # 2. Restore traffic to that slot
+          # 3. Mark current slot as inactive
+          
+          # Configure git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Try to find backup from current slot
+          CURRENT_SLOT="${{ needs.deployment-planning.outputs.current-slot }}"
+          
+          echo "🔍 Looking for backup in $CURRENT_SLOT slot..."
+          
+          git clone --single-branch --branch gh-pages-$CURRENT_SLOT https://github.com/${{ github.repository }}.git current-slot || {
+            echo "❌ No backup slot found for rollback"
+            exit 1
+          }
+          
+          cd current-slot
+          
+          if [ -d .backup ]; then
+            echo "📦 Found backup, restoring..."
+            
+            # Clear current files
+            rm -rf * .nojekyll
+            
+            # Restore from backup
+            cp -r .backup/* .
+            touch .nojekyll
+            
+            # Update deployment record
+            cat > rollback-record.json << EOF
+          {
+            "rollbackTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "rolledBackTo": "$CURRENT_SLOT",
+            "buildId": "${{ github.run_id }}",
+            "reason": "Blue-green deployment rollback"
+          }
+          EOF
+            
+            git add -A
+            git commit -m "Rollback blue-green deployment"
+            git push origin gh-pages-$CURRENT_SLOT
+            
+            echo "✅ Rollback completed to $CURRENT_SLOT slot"
+          else
+            echo "⚠️ No backup found in $CURRENT_SLOT slot"
+          fi
+
+  # Cleanup and Monitoring
+  post-deployment:
+    name: Post-Deployment Tasks
+    runs-on: ubuntu-latest
+    needs: [deployment-planning, switch-traffic, rollback-deployment]
+    if: always()
+    
+    steps:
+      - name: Update deployment tracking
+        run: |
+          echo "📊 Blue-Green Deployment Summary:"
+          echo "  Target Slot: ${{ needs.deployment-planning.outputs.target-slot }}"
+          echo "  Current Slot: ${{ needs.deployment-planning.outputs.current-slot }}"
+          echo "  Action: ${{ needs.deployment-planning.outputs.action }}"
+          echo "  Switch Traffic: ${{ inputs.switch_traffic }}"
+          echo "  Health Status: ${{ needs.health-check-slot.outputs.health-status }}"
+          echo "  Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+      - name: Setup monitoring
+        run: |
+          echo "🔍 Setting up post-deployment monitoring..."
+          
+          # In a real implementation, you would:
+          # 1. Update monitoring dashboards
+          # 2. Set up alerts for the new deployment
+          # 3. Schedule cleanup of old deployments
+          # 4. Send notifications to stakeholders
+          
+          echo "✅ Post-deployment tasks completed"

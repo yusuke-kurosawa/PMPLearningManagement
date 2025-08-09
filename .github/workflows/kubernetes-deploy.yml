@@ -1,0 +1,432 @@
+# Kubernetes Deployment Pipeline
+name: Kubernetes Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'deployment/k8s/**'
+      - 'Dockerfile*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      force_deploy:
+        description: 'Force deployment without quality gates'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  CLUSTER_NAME: pmp-learning-cluster
+  CLUSTER_ZONE: us-central1-a
+
+jobs:
+  # Build and Push Container Images
+  build-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      image-digest: ${{ steps.build-frontend.outputs.digest }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push frontend image
+        id: build-frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deployment/docker/Dockerfile.frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and push backend image
+        id: build-backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deployment/docker/Dockerfile.backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.meta-frontend.outputs.tags }}
+          format: spdx-json
+          output-file: sbom-frontend.spdx.json
+
+      - name: Scan images for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta-frontend.outputs.tags }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Pre-deployment Security and Quality Checks
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: ${{ !inputs.force_deploy }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Kubernetes Security Scan
+        run: |
+          # Install kubesec
+          curl -sSX GET "https://api.github.com/repos/controlplaneio/kubesec/releases/latest" \
+          | grep "browser_download_url.*linux" \
+          | cut -d '"' -f 4 \
+          | xargs curl -sSL -o kubesec
+          chmod +x kubesec
+          
+          # Scan Kubernetes manifests
+          ./kubesec scan deployment/k8s/*.yaml > kubesec-results.json
+          
+          # Check for critical issues
+          CRITICAL_ISSUES=$(jq '.[] | select(.score < 5) | .message' kubesec-results.json)
+          if [ -n "$CRITICAL_ISSUES" ]; then
+            echo "Critical security issues found:"
+            echo "$CRITICAL_ISSUES"
+            exit 1
+          fi
+
+      - name: OPA Policy Check
+        run: |
+          # Install Conftest
+          LATEST=$(curl --silent "https://api.github.com/repos/open-policy-agent/conftest/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          wget "https://github.com/open-policy-agent/conftest/releases/download/${LATEST}/conftest_${LATEST##v}_Linux_x86_64.tar.gz"
+          tar xzf conftest_${LATEST##v}_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin
+          
+          # Create basic security policies
+          mkdir -p policy
+          cat << 'EOF' > policy/security.rego
+          package main
+          
+          deny[msg] {
+            input.kind == "Deployment"
+            input.spec.template.spec.containers[_].securityContext.runAsRoot == true
+            msg := "Containers should not run as root"
+          }
+          
+          deny[msg] {
+            input.kind == "Deployment"
+            not input.spec.template.spec.containers[_].securityContext.readOnlyRootFilesystem
+            msg := "Containers should have read-only root filesystem"
+          }
+          
+          deny[msg] {
+            input.kind == "Deployment"
+            not input.spec.template.spec.containers[_].resources.limits.memory
+            msg := "Memory limits should be set"
+          }
+          EOF
+          
+          # Test policies
+          conftest test deployment/k8s/*.yaml
+
+      - name: Resource Validation
+        run: |
+          # Validate resource requests and limits
+          python3 << 'EOF'
+          import yaml
+          import sys
+          import glob
+          
+          total_cpu_requests = 0
+          total_memory_requests = 0
+          
+          for file_path in glob.glob("deployment/k8s/*deployment.yaml"):
+              with open(file_path, 'r') as file:
+                  documents = yaml.safe_load_all(file)
+                  for doc in documents:
+                      if doc and doc.get('kind') == 'Deployment':
+                          containers = doc.get('spec', {}).get('template', {}).get('spec', {}).get('containers', [])
+                          for container in containers:
+                              resources = container.get('resources', {})
+                              requests = resources.get('requests', {})
+                              if 'cpu' in requests:
+                                  cpu_val = requests['cpu'].rstrip('m')
+                                  total_cpu_requests += int(cpu_val)
+                              if 'memory' in requests:
+                                  memory_val = requests['memory'].rstrip('Mi')
+                                  total_memory_requests += int(memory_val)
+          
+          print(f"Total CPU requests: {total_cpu_requests}m")
+          print(f"Total Memory requests: {total_memory_requests}Mi")
+          
+          # Check if resources exceed cluster capacity (adjust as needed)
+          if total_cpu_requests > 10000:  # 10 cores
+              print("ERROR: Total CPU requests exceed cluster capacity")
+              sys.exit(1)
+          if total_memory_requests > 20480:  # 20GB
+              print("ERROR: Total memory requests exceed cluster capacity") 
+              sys.exit(1)
+          EOF
+
+  # Deploy to Staging Environment
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [build-images, pre-deployment-checks]
+    if: always() && (needs.pre-deployment-checks.result == 'success' || inputs.force_deploy)
+    environment: 
+      name: staging
+      url: https://staging.pmp-learning.com
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          # Configure kubectl for your cluster (adjust for your cloud provider)
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          kubectl version --client
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.12.0'
+
+      - name: Deploy with Helm
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Create namespace if it doesn't exist
+          kubectl create namespace pmp-learning --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Apply ConfigMaps and Secrets first
+          kubectl apply -f deployment/k8s/configmap.yaml
+          
+          # Deploy infrastructure components
+          kubectl apply -f deployment/k8s/namespace.yaml
+          kubectl apply -f deployment/k8s/frontend-deployment.yaml
+          kubectl apply -f deployment/k8s/backend-deployment.yaml
+          kubectl apply -f deployment/k8s/hpa-vpa.yaml
+          kubectl apply -f deployment/k8s/istio-gateway.yaml
+          
+          # Wait for deployments to be ready
+          kubectl rollout status deployment/pmp-learning-frontend -n pmp-learning --timeout=600s
+          kubectl rollout status deployment/pmp-learning-backend -n pmp-learning --timeout=600s
+
+      - name: Run Smoke Tests
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Wait for services to be ready
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=pmp-learning-frontend -n pmp-learning --timeout=300s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=pmp-learning-backend -n pmp-learning --timeout=300s
+          
+          # Port forward for testing
+          kubectl port-forward -n pmp-learning service/pmp-learning-frontend-service 8080:80 &
+          sleep 10
+          
+          # Basic health checks
+          curl -f http://localhost:8080/health || exit 1
+          
+          # Kill port forward
+          pkill -f "kubectl port-forward"
+
+      - name: Update Deployment Status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Staging deployment successful"
+          else
+            echo "❌ Staging deployment failed"
+          fi
+
+  # Deploy to Production Environment
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' && needs.deploy-staging.result == 'success'
+    environment: 
+      name: production
+      url: https://pmp-learning.com
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for Production
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Blue-Green Deployment Strategy
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Get current deployment version
+          CURRENT_VERSION=$(kubectl get deployment pmp-learning-frontend -n pmp-learning -o jsonpath='{.metadata.labels.version}' || echo "v1")
+          
+          if [ "$CURRENT_VERSION" == "v1" ]; then
+            NEW_VERSION="v2"
+          else
+            NEW_VERSION="v1"
+          fi
+          
+          echo "Deploying version: $NEW_VERSION"
+          
+          # Update deployment with new version
+          sed -i "s/version: v1/version: $NEW_VERSION/g" deployment/k8s/frontend-deployment.yaml
+          sed -i "s/version: v1/version: $NEW_VERSION/g" deployment/k8s/backend-deployment.yaml
+          
+          # Deploy new version
+          kubectl apply -f deployment/k8s/frontend-deployment.yaml
+          kubectl apply -f deployment/k8s/backend-deployment.yaml
+          
+          # Wait for new version to be ready
+          kubectl rollout status deployment/pmp-learning-frontend -n pmp-learning --timeout=600s
+          kubectl rollout status deployment/pmp-learning-backend -n pmp-learning --timeout=600s
+
+      - name: Production Health Checks
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Comprehensive health checks
+          echo "Running production health checks..."
+          
+          # Check all pods are running
+          kubectl get pods -n pmp-learning -l app.kubernetes.io/name=pmp-learning-frontend
+          kubectl get pods -n pmp-learning -l app.kubernetes.io/name=pmp-learning-backend
+          
+          # Check service endpoints
+          kubectl get endpoints -n pmp-learning
+          
+          # Port forward and test
+          kubectl port-forward -n pmp-learning service/pmp-learning-frontend-service 8080:80 &
+          sleep 15
+          
+          # HTTP health checks
+          curl -f http://localhost:8080/health
+          curl -f http://localhost:8080/ready
+          
+          # Performance baseline check
+          time curl -f http://localhost:8080/ > /dev/null
+          
+          pkill -f "kubectl port-forward"
+
+      - name: Update Traffic Routing
+        if: success()
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Update Istio VirtualService for traffic shifting
+          echo "Updating traffic routing to new version..."
+          
+          # Gradually shift traffic (in production, this would be done over time)
+          kubectl apply -f - <<EOF
+          apiVersion: networking.istio.io/v1beta1
+          kind: VirtualService
+          metadata:
+            name: pmp-learning-virtualservice
+            namespace: pmp-learning
+          spec:
+            hosts:
+            - pmp-learning.com
+            http:
+            - match:
+              - uri:
+                  prefix: /
+              route:
+              - destination:
+                  host: pmp-learning-frontend-service
+                  subset: v1
+                weight: 0
+              - destination:
+                  host: pmp-learning-frontend-service
+                  subset: v2
+                weight: 100
+          EOF
+
+      - name: Cleanup Previous Version
+        if: success()
+        env:
+          KUBECONFIG: kubeconfig
+        run: |
+          # Wait a few minutes then clean up old version
+          sleep 300
+          
+          # Scale down old version (optional - keep for quick rollback)
+          # kubectl scale deployment pmp-learning-frontend-old -n pmp-learning --replicas=0
+
+      - name: Post-Deployment Monitoring
+        run: |
+          echo "🚀 Production deployment completed successfully!"
+          echo "📊 Monitoring dashboards:"
+          echo "- Grafana: https://grafana.pmp-learning.com"
+          echo "- Prometheus: https://prometheus.pmp-learning.com"
+          echo "- Jaeger: https://jaeger.pmp-learning.com"
+          echo "🔍 Application: https://pmp-learning.com"

@@ -1,0 +1,18 @@
+/* Base Tailwind imports and global styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global optimizations */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Better touch targets for mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

@@ -1,0 +1,359 @@
+# Monitoring Dashboards Configuration
+# Defines dashboard layouts and metrics for comprehensive application monitoring
+
+# Application Performance Dashboard
+application_performance:
+  name: "Application Performance Overview"
+  description: "Core performance metrics and health indicators"
+  refresh_interval: "30s"
+  
+  panels:
+    # Core Web Vitals
+    - name: "Core Web Vitals"
+      type: "stat"
+      targets:
+        - metric: "web_vitals_lcp"
+          label: "Largest Contentful Paint"
+          unit: "ms"
+          thresholds:
+            - value: 2500
+              color: "green"
+            - value: 4000
+              color: "yellow"
+            - value: 4001
+              color: "red"
+              
+        - metric: "web_vitals_fid"
+          label: "First Input Delay"
+          unit: "ms"
+          thresholds:
+            - value: 100
+              color: "green"
+            - value: 300
+              color: "yellow"
+            - value: 301
+              color: "red"
+              
+        - metric: "web_vitals_cls"
+          label: "Cumulative Layout Shift"
+          unit: "score"
+          thresholds:
+            - value: 0.1
+              color: "green"
+            - value: 0.25
+              color: "yellow"
+            - value: 0.26
+              color: "red"
+    
+    # Traffic and Usage
+    - name: "Traffic Overview"
+      type: "graph"
+      targets:
+        - metric: "page_views_total"
+          label: "Page Views"
+        - metric: "unique_visitors_total"
+          label: "Unique Visitors"
+        - metric: "session_duration_avg"
+          label: "Average Session Duration"
+      time_range: "24h"
+      
+    # Error Rates
+    - name: "Error Rates"
+      type: "graph"
+      targets:
+        - metric: "javascript_errors_rate"
+          label: "JavaScript Errors"
+          unit: "percent"
+        - metric: "network_errors_rate"
+          label: "Network Errors"
+          unit: "percent"
+        - metric: "rendering_errors_rate"
+          label: "Rendering Errors"
+          unit: "percent"
+      alert_thresholds:
+        warning: 1.0
+        critical: 5.0
+        
+    # Response Times
+    - name: "Response Times"
+      type: "graph"
+      targets:
+        - metric: "response_time_p50"
+          label: "50th percentile"
+        - metric: "response_time_p95"
+          label: "95th percentile"
+        - metric: "response_time_p99"
+          label: "99th percentile"
+      unit: "ms"
+
+# User Experience Dashboard
+user_experience:
+  name: "User Experience Metrics"
+  description: "User journey and interaction analytics"
+  refresh_interval: "1m"
+  
+  panels:
+    # Feature Usage
+    - name: "Feature Usage"
+      type: "pie_chart"
+      targets:
+        - metric: "feature_matrix_views"
+          label: "Matrix View"
+        - metric: "feature_network_views"
+          label: "Network View"
+        - metric: "feature_visualization_views"
+          label: "Visualizations"
+        - metric: "feature_exam_attempts"
+          label: "Mock Exams"
+        - metric: "feature_flashcard_sessions"
+          label: "Flashcards"
+      time_range: "7d"
+      
+    # User Journey
+    - name: "User Journey Flow"
+      type: "sankey"
+      targets:
+        - metric: "page_transitions"
+          dimensions: ["from_page", "to_page"]
+      time_range: "24h"
+      
+    # Engagement Metrics
+    - name: "Engagement Metrics"
+      type: "stat"
+      targets:
+        - metric: "bounce_rate"
+          label: "Bounce Rate"
+          unit: "percent"
+        - metric: "avg_pages_per_session"
+          label: "Pages per Session"
+        - metric: "return_visitor_rate"
+          label: "Return Visitors"
+          unit: "percent"
+        - metric: "time_on_page_avg"
+          label: "Avg. Time on Page"
+          unit: "seconds"
+
+# Technical Performance Dashboard
+technical_performance:
+  name: "Technical Performance"
+  description: "Detailed technical metrics for developers"
+  refresh_interval: "15s"
+  
+  panels:
+    # Bundle Performance
+    - name: "Bundle Metrics"
+      type: "stat"
+      targets:
+        - metric: "bundle_size_total"
+          label: "Total Bundle Size"
+          unit: "KB"
+        - metric: "bundle_size_vendor"
+          label: "Vendor Bundle"
+          unit: "KB"
+        - metric: "bundle_size_main"
+          label: "Main Bundle"
+          unit: "KB"
+        - metric: "resources_count"
+          label: "Resource Count"
+          
+    # Memory Usage
+    - name: "Memory Usage"
+      type: "graph"
+      targets:
+        - metric: "memory_used_heap"
+          label: "Used Heap"
+          unit: "MB"
+        - metric: "memory_total_heap"
+          label: "Total Heap"
+          unit: "MB"
+        - metric: "memory_limit_heap"
+          label: "Heap Limit"
+          unit: "MB"
+      time_range: "1h"
+      
+    # Network Performance
+    - name: "Network Performance"
+      type: "graph"
+      targets:
+        - metric: "dns_lookup_time"
+          label: "DNS Lookup"
+        - metric: "connection_time"
+          label: "Connection Time"
+        - metric: "ssl_handshake_time"
+          label: "SSL Handshake"
+        - metric: "time_to_first_byte"
+          label: "TTFB"
+      unit: "ms"
+      
+    # Resource Loading
+    - name: "Resource Loading Times"
+      type: "histogram"
+      targets:
+        - metric: "resource_load_duration"
+          dimensions: ["resource_type"]
+      buckets: [50, 100, 200, 500, 1000, 2000, 5000]
+      unit: "ms"
+
+# Availability Dashboard
+availability:
+  name: "Service Availability"
+  description: "Uptime and availability monitoring"
+  refresh_interval: "1m"
+  
+  panels:
+    # Uptime Status
+    - name: "Service Status"
+      type: "stat"
+      targets:
+        - metric: "uptime_percentage"
+          label: "Uptime"
+          unit: "percent"
+          thresholds:
+            - value: 99.9
+              color: "green"
+            - value: 99.0
+              color: "yellow"
+            - value: 98.9
+              color: "red"
+              
+    # Availability Over Time
+    - name: "Availability Timeline"
+      type: "graph"
+      targets:
+        - metric: "availability_status"
+          label: "Service Status"
+      time_range: "7d"
+      y_axis:
+        min: 0
+        max: 1
+        
+    # Response Time Distribution
+    - name: "Response Time Distribution"
+      type: "heatmap"
+      targets:
+        - metric: "response_time_distribution"
+      time_range: "24h"
+      
+    # Error Distribution
+    - name: "Error Types"
+      type: "table"
+      targets:
+        - metric: "errors_by_type"
+          columns: ["error_type", "count", "percentage", "last_seen"]
+      sort_by: "count"
+      sort_order: "desc"
+
+# Business Metrics Dashboard
+business_metrics:
+  name: "Business Intelligence"
+  description: "Business-focused metrics and KPIs"
+  refresh_interval: "5m"
+  
+  panels:
+    # Learning Progress
+    - name: "Learning Analytics"
+      type: "stat"
+      targets:
+        - metric: "total_learning_sessions"
+          label: "Total Sessions"
+        - metric: "avg_session_duration"
+          label: "Avg Session Length"
+          unit: "minutes"
+        - metric: "completion_rate"
+          label: "Completion Rate"
+          unit: "percent"
+        - metric: "knowledge_areas_covered"
+          label: "Areas Covered"
+          
+    # Exam Performance
+    - name: "Mock Exam Analytics"
+      type: "graph"
+      targets:
+        - metric: "exam_attempts_total"
+          label: "Exam Attempts"
+        - metric: "exam_pass_rate"
+          label: "Pass Rate"
+          unit: "percent"
+        - metric: "avg_exam_score"
+          label: "Average Score"
+          unit: "percent"
+      time_range: "30d"
+      
+    # Content Engagement
+    - name: "Content Popularity"
+      type: "bar_chart"
+      targets:
+        - metric: "content_views_by_category"
+          dimensions: ["knowledge_area"]
+      time_range: "7d"
+      
+    # User Retention
+    - name: "User Retention"
+      type: "cohort"
+      targets:
+        - metric: "user_retention_rate"
+          dimensions: ["signup_week", "weeks_since_signup"]
+      time_range: "12w"
+
+# Alerts Configuration
+alerts:
+  # Critical Alerts
+  critical:
+    - name: "Site Down"
+      condition: "uptime_percentage < 95"
+      for: "5m"
+      channels: ["email", "slack", "pagerduty"]
+      
+    - name: "High Error Rate"
+      condition: "error_rate > 5"
+      for: "2m"
+      channels: ["email", "slack"]
+      
+    - name: "Performance Degradation"
+      condition: "response_time_p95 > 5000"
+      for: "5m"
+      channels: ["email", "slack"]
+      
+  # Warning Alerts
+  warning:
+    - name: "Increased Error Rate"
+      condition: "error_rate > 1"
+      for: "10m"
+      channels: ["email"]
+      
+    - name: "Bundle Size Increase"
+      condition: "bundle_size_total > 5120"  # 5MB
+      for: "0m"  # Immediate
+      channels: ["email"]
+      
+    - name: "Memory Usage High"
+      condition: "memory_used_heap > 500"  # 500MB
+      for: "15m"
+      channels: ["email"]
+
+# Dashboard Sharing
+sharing:
+  public_dashboards:
+    - "application_performance"
+    - "availability"
+    
+  team_dashboards:
+    - "technical_performance"
+    - "user_experience"
+    
+  admin_dashboards:
+    - "business_metrics"
+
+# Export Configuration
+export:
+  formats: ["png", "pdf", "json"]
+  schedule:
+    daily_report:
+      dashboards: ["application_performance", "business_metrics"]
+      format: "pdf"
+      recipients: ["admin@pmp-learning.com"]
+      
+    weekly_summary:
+      dashboards: ["user_experience", "technical_performance"]
+      format: "pdf"
+      recipients: ["team@pmp-learning.com"]

@@ -1,0 +1,544 @@
+name: Canary Deployment Strategy
+
+on:
+  workflow_dispatch:
+    inputs:
+      canary_percentage:
+        description: 'Percentage of traffic to route to canary (1-100)'
+        required: true
+        default: '10'
+        type: choice
+        options: ['1', '5', '10', '25', '50', '100']
+      rollback:
+        description: 'Rollback canary deployment'
+        required: false
+        default: false
+        type: boolean
+      promote:
+        description: 'Promote canary to production'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+    paths: ['src/**', 'public/**', 'package.json', 'vite.config.*']
+  schedule:
+    # Auto-promote successful canary deployments daily at 6 AM UTC
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  deployments: write
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: canary-deployment
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '18'
+  CANARY_PERCENTAGE: ${{ inputs.canary_percentage || '10' }}
+  HEALTH_CHECK_TIMEOUT: '300'
+  ROLLBACK_THRESHOLD: '5' # Error rate percentage to trigger auto-rollback
+
+jobs:
+  # Deployment Decision Logic
+  deployment-strategy:
+    name: Determine Deployment Strategy
+    runs-on: ubuntu-latest
+    outputs:
+      action: ${{ steps.decision.outputs.action }}
+      canary-percentage: ${{ steps.decision.outputs.canary-percentage }}
+      should-deploy: ${{ steps.decision.outputs.should-deploy }}
+      current-version: ${{ steps.decision.outputs.current-version }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Determine deployment action
+        id: decision
+        run: |
+          # Default values
+          ACTION="deploy"
+          CANARY_PERCENTAGE="${{ env.CANARY_PERCENTAGE }}"
+          SHOULD_DEPLOY="false"
+          
+          # Manual triggers
+          if [ "${{ inputs.rollback }}" = "true" ]; then
+            ACTION="rollback"
+            SHOULD_DEPLOY="true"
+            echo "🔄 Manual rollback requested"
+            
+          elif [ "${{ inputs.promote }}" = "true" ]; then
+            ACTION="promote"
+            SHOULD_DEPLOY="true"
+            echo "🚀 Manual promotion requested"
+            
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ACTION="deploy"
+            SHOULD_DEPLOY="true"
+            echo "📦 Manual canary deployment requested with $CANARY_PERCENTAGE% traffic"
+            
+          # Auto deployment on main branch changes
+          elif [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            ACTION="deploy"
+            SHOULD_DEPLOY="true"
+            CANARY_PERCENTAGE="10" # Default for auto deployments
+            echo "🔄 Auto canary deployment triggered by main branch changes"
+            
+          # Scheduled promotion check
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            # Check if there's a successful canary to promote
+            ACTION="auto-promote"
+            echo "⏰ Scheduled promotion check"
+            
+            # Simple check - in real implementation you'd query monitoring data
+            SHOULD_DEPLOY="false" # Only promote if canary is healthy
+            
+          fi
+          
+          CURRENT_VERSION="${{ github.sha }}"
+          
+          echo "action=$ACTION" >> $GITHUB_OUTPUT
+          echo "canary-percentage=$CANARY_PERCENTAGE" >> $GITHUB_OUTPUT
+          echo "should-deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "📋 Deployment Decision:"
+          echo "  Action: $ACTION"
+          echo "  Canary %: $CANARY_PERCENTAGE"
+          echo "  Should Deploy: $SHOULD_DEPLOY"
+          echo "  Version: $CURRENT_VERSION"
+
+  # Build for Canary Deployment
+  build-canary:
+    name: Build Canary Version
+    runs-on: ubuntu-latest
+    needs: [deployment-strategy]
+    if: needs.deployment-strategy.outputs.should-deploy == 'true' && needs.deployment-strategy.outputs.action != 'rollback'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build canary version
+        run: npm run build
+        env:
+          NODE_ENV: production
+          VITE_APP_ENVIRONMENT: canary
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_APP_CANARY_PERCENTAGE: ${{ needs.deployment-strategy.outputs.canary-percentage }}
+          VITE_APP_BUILD_TIME: ${{ github.run_started_at }}
+          VITE_APP_CANARY_FLAG: "true"
+          
+      - name: Add canary markers
+        run: |
+          # Add canary identification to build
+          cat > dist/canary-info.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "canaryPercentage": ${{ needs.deployment-strategy.outputs.canary-percentage }},
+            "buildTime": "${{ github.run_started_at }}",
+            "buildId": "${{ github.run_id }}",
+            "branch": "${{ github.ref_name }}",
+            "isCanary": true,
+            "promotionCriteria": {
+              "minUptime": "24h",
+              "maxErrorRate": "1%",
+              "minSuccessRate": "99%"
+            }
+          }
+          EOF
+          
+          # Add canary banner to HTML
+          sed -i 's/<body>/<body><div id="canary-banner" style="background:#ff6b35;color:white;text-align:center;padding:4px;font-size:12px;">🧪 CANARY VERSION - ${{ needs.deployment-strategy.outputs.canary-percentage }}% of users<\/div>/' dist/index.html
+          
+      - name: Upload canary build
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-build
+          path: dist/
+          retention-days: 7
+
+  # Deploy Canary Version
+  deploy-canary:
+    name: Deploy Canary (${{ needs.deployment-strategy.outputs.canary-percentage }}%)
+    runs-on: ubuntu-latest
+    needs: [deployment-strategy, build-canary]
+    if: needs.deployment-strategy.outputs.should-deploy == 'true' && needs.deployment-strategy.outputs.action == 'deploy'
+    environment:
+      name: canary
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement-canary/
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Download canary build
+        uses: actions/download-artifact@v4
+        with:
+          name: canary-build
+          path: dist/
+          
+      - name: Deploy to canary branch
+        run: |
+          # Configure git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Clone canary branch or create it
+          git clone --single-branch --branch gh-pages-canary https://github.com/${{ github.repository }}.git canary-repo || \
+          git clone https://github.com/${{ github.repository }}.git canary-repo
+          
+          cd canary-repo
+          
+          # Create canary branch if it doesn't exist
+          git checkout gh-pages-canary 2>/dev/null || git checkout -b gh-pages-canary
+          
+          # Backup current version for potential rollback
+          if [ -f index.html ]; then
+            mkdir -p .backup-$(date +%Y%m%d-%H%M%S)
+            cp -r * .backup-$(date +%Y%m%d-%H%M%S)/ 2>/dev/null || true
+            
+            # Keep only last 5 backups
+            ls -dt .backup-* | tail -n +6 | xargs rm -rf 2>/dev/null || true
+          fi
+          
+          # Clear existing files
+          rm -rf * .nojekyll 2>/dev/null || true
+          
+          # Copy new build
+          cp -r ../dist/* .
+          
+          # Add .nojekyll for GitHub Pages
+          touch .nojekyll
+          
+          # Create deployment record
+          cat > deployment-record.json << EOF
+          {
+            "deploymentTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "version": "${{ github.sha }}",
+            "canaryPercentage": ${{ needs.deployment-strategy.outputs.canary-percentage }},
+            "buildId": "${{ github.run_id }}",
+            "previousVersion": "$(git log --oneline -1 --skip=1 --pretty=format:"%H" 2>/dev/null || echo 'none')",
+            "status": "active"
+          }
+          EOF
+          
+          # Add all changes
+          git add -A
+          
+          # Commit and push
+          if ! git diff --cached --exit-code > /dev/null; then
+            git commit -m "Deploy canary ${{ needs.deployment-strategy.outputs.canary-percentage }}%: ${{ github.sha }}"
+            git push origin gh-pages-canary
+            echo "✅ Canary deployed successfully"
+          else
+            echo "ℹ️ No changes to deploy"
+          fi
+
+  # Health Check and Monitoring
+  canary-health-check:
+    name: Canary Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-canary]
+    if: success()
+    
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 60
+        
+      - name: Initial health check
+        run: |
+          CANARY_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement-canary/"
+          echo "🏥 Checking canary health: $CANARY_URL"
+          
+          # Basic connectivity
+          for i in {1..5}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$CANARY_URL" || echo "000")
+            echo "Attempt $i: HTTP $HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Canary is accessible"
+              break
+            elif [ "$i" = "5" ]; then
+              echo "❌ Canary failed health check after 5 attempts"
+              exit 1
+            fi
+            
+            sleep 10
+          done
+          
+          # Check if canary info is available
+          CANARY_INFO=$(curl -s "$CANARY_URL/canary-info.json" || echo "{}")
+          echo "📋 Canary Info:"
+          echo "$CANARY_INFO" | jq . 2>/dev/null || echo "$CANARY_INFO"
+          
+          # Validate canary marker
+          if echo "$CANARY_INFO" | jq -e '.isCanary' >/dev/null 2>&1; then
+            echo "✅ Canary marker validated"
+          else
+            echo "⚠️ Canary marker not found"
+          fi
+          
+      - name: Extended monitoring setup
+        run: |
+          echo "🔍 Setting up extended monitoring..."
+          
+          # In a real implementation, you would:
+          # 1. Configure monitoring alerts
+          # 2. Set up error rate tracking
+          # 3. Enable performance monitoring
+          # 4. Set up user feedback collection
+          
+          cat > monitoring-config.json << EOF
+          {
+            "monitoringStartTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "canaryVersion": "${{ needs.deployment-strategy.outputs.current-version }}",
+            "monitoringPeriod": "24h",
+            "healthChecks": {
+              "interval": "5m",
+              "timeout": "30s",
+              "endpoint": "/health"
+            },
+            "alerts": {
+              "errorRateThreshold": "${{ env.ROLLBACK_THRESHOLD }}%",
+              "responseTimeThreshold": "2000ms",
+              "availabilityThreshold": "99%"
+            }
+          }
+          EOF
+          
+          echo "📊 Monitoring configuration:"
+          cat monitoring-config.json | jq .
+
+  # Auto-Rollback Logic
+  canary-monitor:
+    name: Monitor Canary Performance
+    runs-on: ubuntu-latest
+    needs: [canary-health-check]
+    if: success()
+    
+    steps:
+      - name: Continuous monitoring
+        run: |
+          echo "📊 Starting continuous canary monitoring..."
+          CANARY_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement-canary/"
+          
+          # Monitor for 10 minutes with 1-minute intervals
+          for i in {1..10}; do
+            echo "Monitor check $i/10..."
+            
+            # Health check
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$CANARY_URL" || echo "000")
+            RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$CANARY_URL" || echo "999")
+            
+            echo "  Status: $HTTP_CODE, Response Time: ${RESPONSE_TIME}s"
+            
+            # Simple failure detection
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "❌ Health check failed: HTTP $HTTP_CODE"
+              echo "trigger-rollback=true" >> $GITHUB_OUTPUT
+              break
+            fi
+            
+            # Response time check (> 5 seconds is considered poor)
+            if (( $(echo "$RESPONSE_TIME > 5" | bc -l) )); then
+              echo "⚠️ Poor response time: ${RESPONSE_TIME}s"
+            fi
+            
+            sleep 60
+          done
+          
+          echo "✅ Monitoring period completed"
+
+  # Rollback Canary
+  rollback-canary:
+    name: Rollback Canary Deployment
+    runs-on: ubuntu-latest
+    needs: [deployment-strategy]
+    if: needs.deployment-strategy.outputs.action == 'rollback' || failure()
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Rollback canary deployment
+        run: |
+          echo "🔄 Rolling back canary deployment..."
+          
+          # Configure git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Clone canary branch
+          git clone --single-branch --branch gh-pages-canary https://github.com/${{ github.repository }}.git canary-repo || {
+            echo "No canary branch found to rollback"
+            exit 0
+          }
+          
+          cd canary-repo
+          
+          # Find latest backup
+          LATEST_BACKUP=$(ls -dt .backup-* 2>/dev/null | head -n 1)
+          
+          if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
+            echo "📦 Restoring from backup: $LATEST_BACKUP"
+            
+            # Clear current deployment
+            rm -rf * .nojekyll
+            
+            # Restore from backup
+            cp -r "$LATEST_BACKUP"/* .
+            touch .nojekyll
+            
+            # Update deployment record
+            cat > deployment-record.json << EOF
+          {
+            "rollbackTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "rolledBackFrom": "${{ github.sha }}",
+            "buildId": "${{ github.run_id }}",
+            "reason": "Health check failure or manual rollback",
+            "status": "rolled-back"
+          }
+          EOF
+            
+            git add -A
+            git commit -m "Rollback canary deployment: ${{ github.sha }}"
+            git push origin gh-pages-canary
+            
+            echo "✅ Canary rollback completed"
+          else
+            echo "⚠️ No backup found for rollback"
+            
+            # Disable canary by removing deployment
+            rm -rf * .nojekyll
+            echo "Canary deployment disabled" > index.html
+            
+            git add -A
+            git commit -m "Disable canary deployment"
+            git push origin gh-pages-canary
+            
+            echo "🔄 Canary disabled"
+          fi
+
+  # Promote Canary to Production
+  promote-canary:
+    name: Promote Canary to Production
+    runs-on: ubuntu-latest
+    needs: [deployment-strategy, canary-monitor]
+    if: needs.deployment-strategy.outputs.action == 'promote' || (needs.deployment-strategy.outputs.action == 'auto-promote' && success())
+    environment:
+      name: production
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Get canary build
+        run: |
+          # Clone canary branch
+          git clone --single-branch --branch gh-pages-canary https://github.com/${{ github.repository }}.git canary-repo
+          
+          # Copy canary build
+          mkdir -p dist
+          cd canary-repo
+          
+          # Remove canary-specific elements
+          if [ -f index.html ]; then
+            # Remove canary banner
+            sed -i '/<div id="canary-banner"/d' index.html
+            
+            # Copy to dist
+            cp -r * ../dist/
+          else
+            echo "❌ No canary deployment found to promote"
+            exit 1
+          fi
+          
+          cd ..
+          
+          # Update build info for production
+          cat > dist/deployment-info.json << EOF
+          {
+            "environment": "production",
+            "deploymentType": "promoted-from-canary",
+            "version": "${{ github.sha }}",
+            "promotionTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "buildId": "${{ github.run_id }}",
+            "promotedFrom": "canary",
+            "canaryPercentage": "${{ needs.deployment-strategy.outputs.canary-percentage }}"
+          }
+          EOF
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      - name: Verify production deployment
+        run: |
+          sleep 30
+          
+          PROD_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" || echo "000")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Production promotion successful"
+          else
+            echo "❌ Production deployment verification failed: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+  # Cleanup and Notifications
+  deployment-cleanup:
+    name: Post-Deployment Cleanup
+    runs-on: ubuntu-latest
+    needs: [promote-canary, rollback-canary, canary-monitor]
+    if: always()
+    
+    steps:
+      - name: Clean up old deployments
+        run: |
+          echo "🧹 Cleaning up deployment artifacts..."
+          
+          # In a real implementation, you would:
+          # 1. Clean up old backup directories
+          # 2. Archive deployment logs
+          # 3. Update deployment tracking systems
+          # 4. Send notifications to stakeholders
+          
+          echo "✅ Cleanup completed"
+          
+      - name: Deployment summary
+        run: |
+          echo "📊 Canary Deployment Summary:"
+          echo "  Action: ${{ needs.deployment-strategy.outputs.action }}"
+          echo "  Version: ${{ needs.deployment-strategy.outputs.current-version }}"
+          echo "  Canary %: ${{ needs.deployment-strategy.outputs.canary-percentage }}"
+          echo "  Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "  Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"

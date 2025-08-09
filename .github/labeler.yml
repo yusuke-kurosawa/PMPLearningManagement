@@ -1,0 +1,94 @@
+# Auto-labeling configuration for PRs based on files changed
+
+# Documentation
+"📝 documentation":
+  - "**/*.md"
+  - "docs/**/*"
+  - "README*"
+
+# Frontend changes
+"🎨 frontend":
+  - "src/components/**/*"
+  - "src/pages/**/*"
+  - "**/*.jsx"
+  - "**/*.tsx"
+  - "**/*.css"
+  - "**/*.scss"
+
+# Backend/API changes
+"⚙️ backend":
+  - "src/server/**/*"
+  - "src/api/**/*"
+  - "server/**/*"
+  - "api/**/*"
+
+# Database changes
+"🗃️ database":
+  - "prisma/**/*"
+  - "migrations/**/*"
+  - "**/*.sql"
+
+# Configuration changes
+"🔧 config":
+  - "*.config.*"
+  - ".*rc*"
+  - ".env*"
+  - "package.json"
+  - "package-lock.json"
+  - "tsconfig.json"
+
+# CI/CD changes
+"🚀 ci/cd":
+  - ".github/**/*"
+  - "*.yml"
+  - "*.yaml"
+  - "Dockerfile*"
+  - "docker-compose*"
+
+# Testing
+"🧪 testing":
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "e2e/**/*"
+  - "tests/**/*"
+  - "__tests__/**/*"
+
+# Dependencies
+"📦 dependencies":
+  - "package.json"
+  - "package-lock.json"
+  - "yarn.lock"
+
+# Security
+"🔒 security":
+  - ".github/workflows/security*.yml"
+  - "**/security/**/*"
+
+# Performance
+"⚡ performance":
+  - "**/*performance*"
+  - ".bundlesizerc*"
+  - "*lighthouse*"
+
+# Visualization components (specific to this project)
+"📊 visualization":
+  - "src/components/visualizations/**/*"
+  - "src/components/**/Enhanced*"
+  - "src/components/**/Sankey*"
+  - "src/components/**/Network*"
+  - "src/components/**/Heatmap*"
+
+# Learning/Education features
+"🎓 learning":
+  - "src/components/learning/**/*"
+  - "src/components/**/FlashCard*"
+  - "src/components/**/MockExam*"
+  - "src/components/**/Progress*"
+
+# Data and content
+"📋 data":
+  - "src/data/**/*"
+  - "data/**/*"
+  - "**/*.json"
+  - "**/processData*"
+  - "**/glossary*"

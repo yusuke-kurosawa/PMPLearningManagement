@@ -1,0 +1,155 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "yusuke-kurosawa"
+    assignees:
+      - "yusuke-kurosawa"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    
+    # Security updates - immediate
+    allow:
+      - dependency-type: "all"
+    
+    # Group updates by type
+    groups:
+      # Production dependencies
+      production-dependencies:
+        applies-to: version-updates
+        dependency-type: "production"
+        patterns:
+          - "react*"
+          - "d3*"
+          - "@radix-ui/*"
+          - "lucide-react"
+        schedule:
+          interval: "weekly"
+          day: "monday"
+      
+      # Development dependencies
+      development-dependencies:
+        applies-to: version-updates
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "vite*"
+          - "vitest*"
+          - "@vitejs/*"
+          - "typescript"
+          - "tailwindcss"
+          - "postcss"
+          - "autoprefixer"
+        schedule:
+          interval: "weekly"
+          day: "tuesday"
+      
+      # Testing dependencies
+      testing-dependencies:
+        applies-to: version-updates
+        dependency-type: "development"
+        patterns:
+          - "playwright*"
+          - "@playwright/*"
+          - "@testing-library/*"
+          - "jest*"
+          - "@axe-core/*"
+          - "msw"
+        schedule:
+          interval: "weekly"
+          day: "wednesday"
+      
+      # Build and tooling dependencies
+      build-dependencies:
+        applies-to: version-updates
+        dependency-type: "development"
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "bundlesize"
+          - "gh-pages"
+          - "husky"
+          - "lint-staged"
+        schedule:
+          interval: "weekly"
+          day: "thursday"
+    
+    # Version update strategies
+    versioning-strategy: "increase"
+    
+    # Ignore specific versions or dependencies
+    ignore:
+      # Ignore major version updates for stable dependencies
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      
+      # Ignore patch updates for frequently updated packages
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-patch"]
+    
+    # Rebase strategy
+    rebase-strategy: "auto"
+    
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "02:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "yusuke-kurosawa"
+    assignees:
+      - "yusuke-kurosawa"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "ci-cd"
+      - "automated"
+    
+    # Group GitHub Actions updates
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+        
+    # Allow all GitHub Actions updates
+    allow:
+      - dependency-type: "all"
+      
+  # Docker dependencies (if using containers in the future)
+  - package-ecosystem: "docker"
+    directory: "/deployment"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "02:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "yusuke-kurosawa"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "docker"
+      - "infrastructure"
+      - "automated"

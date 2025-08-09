@@ -1,0 +1,125 @@
+# Uptime Monitoring Configuration
+# This file defines uptime monitoring rules for the application
+
+monitors:
+  - name: "Main Application"
+    url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+    method: "GET"
+    expected_status: 200
+    timeout: 10000
+    interval: 300000  # 5 minutes
+    retries: 3
+    tags:
+      - "production"
+      - "critical"
+    
+  - name: "Matrix View"
+    url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/matrix"
+    method: "GET"
+    expected_status: 200
+    timeout: 15000
+    interval: 600000  # 10 minutes
+    retries: 2
+    tags:
+      - "production"
+      - "feature"
+    
+  - name: "Network Visualization"
+    url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/network"
+    method: "GET"
+    expected_status: 200
+    timeout: 20000
+    interval: 600000  # 10 minutes
+    retries: 2
+    tags:
+      - "production"
+      - "visualization"
+    
+  - name: "Visualization Hub"
+    url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/visualizations"
+    method: "GET"
+    expected_status: 200
+    timeout: 20000
+    interval: 900000  # 15 minutes
+    retries: 2
+    tags:
+      - "production"
+      - "visualization"
+
+  - name: "Mock Exam"
+    url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/mock-exam"
+    method: "GET"
+    expected_status: 200
+    timeout: 15000
+    interval: 1800000  # 30 minutes
+    retries: 2
+    tags:
+      - "production"
+      - "exam"
+
+# Alert Configuration
+alerts:
+  - name: "Site Down Alert"
+    condition: "status != 200"
+    channels:
+      - "email"
+      - "webhook"
+    cooldown: 300000  # 5 minutes
+    
+  - name: "Slow Response Alert"
+    condition: "response_time > 5000"
+    channels:
+      - "email"
+    cooldown: 600000  # 10 minutes
+    
+  - name: "High Error Rate Alert"
+    condition: "error_rate > 0.05"
+    channels:
+      - "email"
+      - "webhook"
+    cooldown: 900000  # 15 minutes
+
+# Notification Channels
+channels:
+  email:
+    enabled: true
+    recipients:
+      - "admin@pmp-learning.com"
+    
+  webhook:
+    enabled: true
+    url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+    
+  sms:
+    enabled: false
+    provider: "twilio"
+    
+# Health Check Endpoints
+health_checks:
+  - endpoint: "/build-info.json"
+    expected_fields:
+      - "buildTime"
+      - "commitSha"
+      - "ref"
+    timeout: 5000
+    
+  - endpoint: "/"
+    expected_content: "PMPLearningManagement"
+    timeout: 10000
+
+# Performance Thresholds
+performance:
+  response_time:
+    warning: 3000
+    critical: 5000
+  
+  availability:
+    warning: 0.995  # 99.5%
+    critical: 0.99   # 99%
+  
+  error_rate:
+    warning: 0.01   # 1%
+    critical: 0.05  # 5%

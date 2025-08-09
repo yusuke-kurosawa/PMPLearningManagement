@@ -1,0 +1,65 @@
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pmp-learning-config
+  namespace: pmp-learning
+  labels:
+    app.kubernetes.io/name: pmp-learning-management
+    app.kubernetes.io/component: config
+data:
+  # Application Configuration
+  NODE_ENV: "production"
+  API_BASE_URL: "https://api.pmp-learning.com"
+  FRONTEND_URL: "https://pmp-learning.com"
+  
+  # Feature Flags
+  ENABLE_ANALYTICS: "true"
+  ENABLE_MONITORING: "true"
+  ENABLE_A_B_TESTING: "true"
+  ENABLE_FEATURE_FLAGS: "true"
+  
+  # Monitoring Configuration
+  PROMETHEUS_ENDPOINT: "http://prometheus:9090"
+  GRAFANA_ENDPOINT: "http://grafana:3000"
+  JAEGER_ENDPOINT: "http://jaeger-collector:14268"
+  
+  # Security Configuration
+  CORS_ORIGINS: "https://pmp-learning.com,https://admin.pmp-learning.com"
+  RATE_LIMIT_WINDOW_MS: "900000"  # 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: "1000"
+  
+  # Performance Configuration
+  CACHE_TTL: "3600"  # 1 hour
+  CDN_URL: "https://cdn.pmp-learning.com"
+  COMPRESSION_LEVEL: "6"
+
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pmp-learning-secrets
+  namespace: pmp-learning
+  labels:
+    app.kubernetes.io/name: pmp-learning-management
+    app.kubernetes.io/component: secrets
+type: Opaque
+stringData:
+  # Database Configuration
+  DATABASE_URL: "postgresql://user:password@postgres:5432/pmp_learning"
+  REDIS_URL: "redis://redis:6379"
+  
+  # JWT Configuration
+  JWT_SECRET: "your-super-secure-jwt-secret-key"
+  JWT_EXPIRES_IN: "24h"
+  
+  # External Services
+  GITHUB_CLIENT_SECRET: "github-oauth-client-secret"
+  SENDGRID_API_KEY: "sendgrid-api-key"
+  AWS_ACCESS_KEY_ID: "aws-access-key"
+  AWS_SECRET_ACCESS_KEY: "aws-secret-key"
+  
+  # Monitoring & Observability
+  DATADOG_API_KEY: "datadog-api-key"
+  NEWRELIC_LICENSE_KEY: "newrelic-license-key"

@@ -1,0 +1,313 @@
+name: Notifications & Monitoring
+
+on:
+  workflow_run:
+    workflows: 
+      - "CI/CD Pipeline - PMPLearning"
+      - "PR Validation"
+      - "Performance Monitoring"
+      - "Security Scan"
+    types: [completed]
+  
+  workflow_dispatch:
+    inputs:
+      notification_type:
+        description: 'Type of notification to send'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+        - test
+        - deployment
+        - security_alert
+        - performance_alert
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  # Workflow Status Notification
+  workflow-notification:
+    name: Workflow Status Notification
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run'
+    
+    steps:
+      - name: Get workflow info
+        id: workflow-info
+        run: |
+          echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+          echo "workflow_status=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+          echo "workflow_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          echo "commit=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+          
+      - name: Create status badge
+        id: badge
+        run: |
+          status="${{ steps.workflow-info.outputs.workflow_status }}"
+          case $status in
+            "success")
+              echo "badge_emoji=✅" >> $GITHUB_OUTPUT
+              echo "badge_color=28a745" >> $GITHUB_OUTPUT
+              ;;
+            "failure")
+              echo "badge_emoji=❌" >> $GITHUB_OUTPUT
+              echo "badge_color=d73a49" >> $GITHUB_OUTPUT
+              ;;
+            "cancelled")
+              echo "badge_emoji=⏹️" >> $GITHUB_OUTPUT
+              echo "badge_color=6f42c1" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "badge_emoji=⏳" >> $GITHUB_OUTPUT
+              echo "badge_color=ffc107" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          
+      - name: Send notification to Discord (if webhook available)
+        if: env.DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{
+                 \"username\": \"GitHub Actions\",
+                 \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+                 \"embeds\": [{
+                   \"title\": \"${{ steps.badge.outputs.badge_emoji }} ${{ steps.workflow-info.outputs.workflow_name }}\",
+                   \"description\": \"Workflow completed with status: **${{ steps.workflow-info.outputs.workflow_status }}**\",
+                   \"color\": \"${{ steps.badge.outputs.badge_color }}\",
+                   \"fields\": [
+                     {\"name\": \"Branch\", \"value\": \"${{ steps.workflow-info.outputs.branch }}\", \"inline\": true},
+                     {\"name\": \"Commit\", \"value\": \"[\`${{ steps.workflow-info.outputs.commit }}\`](${{ steps.workflow-info.outputs.workflow_url }})\", \"inline\": true}
+                   ],
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                 }]
+               }" \
+               "$DISCORD_WEBHOOK_URL"
+        continue-on-error: true
+
+  # Health Check & Uptime Monitoring
+  health-check:
+    name: Application Health Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    
+    strategy:
+      matrix:
+        endpoint:
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+            name: "Homepage"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/matrix"
+            name: "PMBOK Matrix"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/network"
+            name: "Network Diagram"
+    
+    steps:
+      - name: Check endpoint health
+        id: health-check
+        run: |
+          URL="${{ matrix.endpoint.url }}"
+          NAME="${{ matrix.endpoint.name }}"
+          
+          echo "Checking: $URL"
+          
+          # Perform health check
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL" || echo "000")
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 30 "$URL" || echo "0")
+          
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "response_time=$RESPONSE_TIME" >> $GITHUB_OUTPUT
+          echo "endpoint_name=$NAME" >> $GITHUB_OUTPUT
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "status=healthy" >> $GITHUB_OUTPUT
+            echo "✅ $NAME is healthy (${HTTP_CODE}, ${RESPONSE_TIME}s)"
+          else
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            echo "❌ $NAME is unhealthy (HTTP $HTTP_CODE)"
+          fi
+          
+      - name: Create incident issue if unhealthy
+        if: steps.health-check.outputs.status == 'unhealthy'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Service Down: ${{ steps.health-check.outputs.endpoint_name }}`;
+            const body = `## Service Health Alert
+            
+            **Service**: ${{ steps.health-check.outputs.endpoint_name }}
+            **URL**: ${{ matrix.endpoint.url }}
+            **Status**: ${{ steps.health-check.outputs.http_code }}
+            **Response Time**: ${{ steps.health-check.outputs.response_time }}s
+            **Detected**: ${new Date().toISOString()}
+            
+            ### Action Required:
+            1. Investigate the cause of the outage
+            2. Check deployment status
+            3. Verify infrastructure health
+            4. Restore service if needed
+            
+            ### Monitoring:
+            This issue will be automatically closed when the service is restored.
+            
+            /label incident 🚨 high-priority`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['incident', '🚨 high-priority', 'automated']
+            });
+
+  # Deployment Success Notification
+  deployment-notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.name == 'CI/CD Pipeline - PMPLearning' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    
+    steps:
+      - name: Get deployment info
+        id: deployment-info
+        run: |
+          echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+          echo "commit_short=$(echo ${{ github.event.workflow_run.head_sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+          echo "deploy_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+          
+      - name: Create deployment announcement
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentAnnouncement = `🚀 **Deployment Successful**
+            
+            A new version has been deployed to production!
+            
+            **Details:**
+            - **Environment**: Production
+            - **URL**: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+            - **Commit**: [\`${{ steps.deployment-info.outputs.commit_short }}\`](https://github.com/${{ github.repository }}/commit/${{ steps.deployment-info.outputs.commit_sha }})
+            - **Deploy Time**: ${{ steps.deployment-info.outputs.deploy_time }}
+            - **Workflow**: [View Details](${{ github.event.workflow_run.html_url }})
+            
+            ### What's New:
+            Check the [latest commits](https://github.com/${{ github.repository }}/commits/main) for recent changes.
+            
+            _Deployment completed successfully! 🎉_`;
+            
+            // Create a discussion or comment about the deployment
+            // This would typically be posted to a team channel or discussion board
+            console.log(deploymentAnnouncement);
+
+  # Metrics Collection
+  metrics-collection:
+    name: Metrics Collection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run'
+    
+    steps:
+      - name: Collect workflow metrics
+        run: |
+          # Extract workflow metrics
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
+          WORKFLOW_DURATION=$(( ${{ github.event.workflow_run.updated_at }} - ${{ github.event.workflow_run.created_at }} ))
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          
+          echo "Workflow: $WORKFLOW_NAME"
+          echo "Status: $WORKFLOW_STATUS"
+          echo "Duration: $WORKFLOW_DURATION seconds"
+          echo "Branch: $BRANCH"
+          
+          # This data could be sent to monitoring systems like:
+          # - DataDog
+          # - New Relic  
+          # - Custom metrics endpoint
+          # - InfluxDB
+          # - CloudWatch
+          
+          # Example: Send to custom metrics endpoint (if available)
+          if [ ! -z "${{ secrets.METRICS_ENDPOINT }}" ]; then
+            curl -X POST "${{ secrets.METRICS_ENDPOINT }}" \
+                 -H "Content-Type: application/json" \
+                 -d "{
+                   \"workflow\": \"$WORKFLOW_NAME\",
+                   \"status\": \"$WORKFLOW_STATUS\",
+                   \"duration\": $WORKFLOW_DURATION,
+                   \"branch\": \"$BRANCH\",
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                 }" || true
+          fi
+
+  # Weekly Summary Report
+  weekly-summary:
+    name: Weekly Summary Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * 1'  # Monday at midnight
+    
+    steps:
+      - name: Generate weekly summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            
+            // Get workflow runs from the past week
+            const workflowRuns = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              created: `>=${oneWeekAgo.toISOString()}`,
+              per_page: 100
+            });
+            
+            const stats = {
+              total: workflowRuns.data.total_count,
+              success: 0,
+              failure: 0,
+              cancelled: 0
+            };
+            
+            workflowRuns.data.workflow_runs.forEach(run => {
+              if (run.conclusion === 'success') stats.success++;
+              else if (run.conclusion === 'failure') stats.failure++;
+              else if (run.conclusion === 'cancelled') stats.cancelled++;
+            });
+            
+            const successRate = ((stats.success / stats.total) * 100).toFixed(1);
+            
+            const summary = `## 📊 Weekly CI/CD Summary
+            
+            **Week of**: ${oneWeekAgo.toDateString()} - ${new Date().toDateString()}
+            
+            ### Workflow Statistics:
+            - **Total Runs**: ${stats.total}
+            - **Success**: ${stats.success} (${successRate}%)
+            - **Failures**: ${stats.failure}
+            - **Cancelled**: ${stats.cancelled}
+            
+            ### Health Indicators:
+            ${successRate >= 90 ? '🟢 Excellent' : successRate >= 75 ? '🟡 Good' : '🔴 Needs Attention'}
+            
+            ### This Week's Focus:
+            ${stats.failure > 5 ? '- Investigate recurring build failures\n' : ''}
+            ${successRate < 75 ? '- Improve CI/CD reliability\n' : ''}
+            - Continue monitoring performance metrics
+            - Keep security scans up to date
+            
+            _Generated automatically by GitHub Actions_`;
+            
+            // This could be posted to a team discussion or sent via email
+            console.log(summary);
+            
+            // Optionally create a discussion or issue with the summary
+            // await github.rest.issues.create({
+            //   owner: context.repo.owner,
+            //   repo: context.repo.repo,
+            //   title: `Weekly CI/CD Summary - ${new Date().toDateString()}`,
+            //   body: summary,
+            //   labels: ['weekly-summary', 'automated']
+            // });

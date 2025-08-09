@@ -1,0 +1,300 @@
+name: 'Deploy Preview Environment'
+description: 'Deploys a preview environment for PR reviews with automatic cleanup'
+author: 'DevOps Team'
+
+inputs:
+  pr-number:
+    description: 'Pull request number'
+    required: true
+  environment-name:
+    description: 'Name of the preview environment'
+    required: false
+    default: 'preview-pr-${{ inputs.pr-number }}'
+  build-command:
+    description: 'Command to build the application'
+    required: false
+    default: 'npm run build'
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  cleanup:
+    description: 'Whether to cleanup the environment'
+    required: false
+    default: 'false'
+
+outputs:
+  preview-url:
+    description: 'URL of the deployed preview environment'
+    value: ${{ steps.deploy.outputs.preview-url }}
+  environment-name:
+    description: 'Name of the created environment'
+    value: ${{ steps.deploy.outputs.environment-name }}
+  deployment-status:
+    description: 'Status of the deployment'
+    value: ${{ steps.deploy.outputs.status }}
+  build-size:
+    description: 'Size of the built application'
+    value: ${{ steps.build.outputs.build-size }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.pr-number }}" ]; then
+          echo "❌ Error: PR number is required"
+          exit 1
+        fi
+        
+        if [ "${{ inputs.cleanup }}" == "true" ]; then
+          echo "🧹 Cleanup mode enabled"
+        else
+          echo "🚀 Deploy mode enabled"
+        fi
+
+    - name: Setup environment variables
+      shell: bash
+      run: |
+        ENV_NAME="${{ inputs.environment-name }}"
+        BRANCH_NAME="gh-pages-preview-${{ inputs.pr-number }}"
+        BASE_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement-preview-${{ inputs.pr-number }}/"
+        
+        echo "PREVIEW_ENV_NAME=$ENV_NAME" >> $GITHUB_ENV
+        echo "PREVIEW_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
+        echo "PREVIEW_URL=$BASE_URL" >> $GITHUB_ENV
+        
+        echo "📋 Environment Configuration:"
+        echo "  Environment: $ENV_NAME"
+        echo "  Branch: $BRANCH_NAME" 
+        echo "  URL: $BASE_URL"
+
+    - name: Build application
+      id: build
+      if: inputs.cleanup != 'true'
+      shell: bash
+      run: |
+        echo "🔨 Building application for preview..."
+        
+        # Build the application
+        ${{ inputs.build-command }}
+        
+        # Calculate build size
+        BUILD_SIZE=$(du -sh dist/ | cut -f1)
+        echo "build-size=$BUILD_SIZE" >> $GITHUB_OUTPUT
+        
+        # Add preview metadata
+        cat > dist/preview-info.json << EOF
+        {
+          "isPreview": true,
+          "prNumber": ${{ inputs.pr-number }},
+          "environmentName": "$PREVIEW_ENV_NAME",
+          "buildTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+          "buildSize": "$BUILD_SIZE",
+          "previewUrl": "$PREVIEW_URL"
+        }
+        EOF
+        
+        # Add preview banner to HTML
+        if [ -f "dist/index.html" ]; then
+          sed -i 's/<body>/<body><div id="preview-banner" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#ff6b35;color:white;text-align:center;padding:8px;font-weight:bold;">📋 PREVIEW: PR #${{ inputs.pr-number }} - Not for production use<\/div><div style="height:40px;"><\/div>/' dist/index.html
+        fi
+        
+        echo "✅ Build completed: $BUILD_SIZE"
+
+    - name: Deploy preview
+      id: deploy
+      if: inputs.cleanup != 'true'
+      shell: bash
+      run: |
+        echo "🚀 Deploying preview environment..."
+        
+        # Configure git
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        # Clone or create preview branch
+        if git ls-remote --exit-code --heads origin $PREVIEW_BRANCH > /dev/null 2>&1; then
+          echo "📂 Cloning existing preview branch..."
+          git clone --single-branch --branch $PREVIEW_BRANCH https://github.com/${{ github.repository }}.git preview-deploy
+        else
+          echo "🆕 Creating new preview branch..."
+          git clone https://github.com/${{ github.repository }}.git preview-deploy
+          cd preview-deploy
+          git checkout -b $PREVIEW_BRANCH
+          cd ..
+        fi
+        
+        cd preview-deploy
+        
+        # Backup current deployment for rollback
+        if [ -f "index.html" ]; then
+          mkdir -p .preview-backup
+          cp -r * .preview-backup/ 2>/dev/null || true
+        fi
+        
+        # Clear and copy new build
+        rm -rf * .nojekyll 2>/dev/null || true
+        cp -r ../dist/* .
+        touch .nojekyll
+        
+        # Create deployment metadata
+        cat > .preview-deployment.json << EOF
+        {
+          "prNumber": ${{ inputs.pr-number }},
+          "environmentName": "$PREVIEW_ENV_NAME",
+          "deploymentTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+          "commitSha": "${{ github.sha }}",
+          "workflowRunId": "${{ github.run_id }}",
+          "previewUrl": "$PREVIEW_URL"
+        }
+        EOF
+        
+        # Commit and push
+        git add -A
+        if ! git diff --cached --exit-code > /dev/null; then
+          git commit -m "Deploy preview for PR #${{ inputs.pr-number }}: ${{ github.sha }}"
+          git push origin $PREVIEW_BRANCH
+          
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "preview-url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "environment-name=$PREVIEW_ENV_NAME" >> $GITHUB_OUTPUT
+          
+          echo "✅ Preview deployed successfully"
+          echo "🔗 Preview URL: $PREVIEW_URL"
+        else
+          echo "status=no-changes" >> $GITHUB_OUTPUT
+          echo "ℹ️ No changes to deploy"
+        fi
+
+    - name: Cleanup preview environment
+      if: inputs.cleanup == 'true'
+      shell: bash
+      run: |
+        echo "🧹 Cleaning up preview environment..."
+        
+        # Delete remote branch
+        if git ls-remote --exit-code --heads origin $PREVIEW_BRANCH > /dev/null 2>&1; then
+          git push origin --delete $PREVIEW_BRANCH
+          echo "✅ Preview branch deleted: $PREVIEW_BRANCH"
+        else
+          echo "ℹ️ Preview branch does not exist: $PREVIEW_BRANCH"
+        fi
+        
+        echo "🗑️ Preview environment cleanup completed"
+
+    - name: Health check preview deployment
+      if: inputs.cleanup != 'true' && steps.deploy.outputs.status == 'success'
+      shell: bash
+      run: |
+        echo "🏥 Running health check on preview deployment..."
+        
+        # Wait for deployment to propagate
+        sleep 30
+        
+        # Check if preview is accessible
+        for i in {1..5}; do
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || echo "000")
+          echo "Health check attempt $i/5: HTTP $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Preview environment is healthy"
+            
+            # Verify preview info
+            PREVIEW_INFO=$(curl -s "$PREVIEW_URL/preview-info.json" || echo "{}")
+            if echo "$PREVIEW_INFO" | jq -e '.isPreview' > /dev/null 2>&1; then
+              echo "✅ Preview metadata validated"
+            fi
+            break
+          elif [ "$i" = "5" ]; then
+            echo "❌ Preview environment health check failed"
+          fi
+          
+          sleep 10
+        done
+
+    - name: Update PR with preview information
+      if: inputs.cleanup != 'true' && steps.deploy.outputs.status == 'success'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ inputs.pr-number }},
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && comment.body.includes('🚀 Preview Deployment')
+          );
+          
+          const previewUrl = '${{ steps.deploy.outputs.preview-url }}';
+          const buildSize = '${{ steps.build.outputs.build-size }}';
+          
+          const body = `🚀 **Preview Deployment Ready**
+          
+          Your preview environment has been deployed and is ready for testing!
+          
+          ## 🔗 Preview Links
+          - **Preview URL**: [${previewUrl}](${previewUrl})
+          - **Environment**: \`${{ steps.deploy.outputs.environment-name }}\`
+          
+          ## 📊 Build Information  
+          - **Build Size**: ${buildSize}
+          - **Commit**: \`${{ github.sha.substring(0, 7) }}\`
+          - **Deployed**: ${new Date().toLocaleString()}
+          
+          ## 🧪 Testing Checklist
+          - [ ] Homepage loads correctly
+          - [ ] Navigation works
+          - [ ] Key features functional
+          - [ ] Mobile responsiveness
+          - [ ] Performance acceptable
+          
+          ## ⚠️ Important Notes
+          - This is a preview environment for testing only
+          - Preview will be automatically cleaned up when PR is closed
+          - Changes to this PR will update the preview automatically
+          
+          ---
+          *Preview deployed by [Deploy Preview Action](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.pr-number }},
+              body: body
+            });
+          }
+
+    - name: Create deployment summary
+      if: inputs.cleanup != 'true'
+      shell: bash
+      run: |
+        echo "## 🚀 Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Attribute | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| **Preview URL** | [${{ steps.deploy.outputs.preview-url }}](${{ steps.deploy.outputs.preview-url }}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Environment** | \`${{ steps.deploy.outputs.environment-name }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Build Size** | ${{ steps.build.outputs.build-size }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Status** | ${{ steps.deploy.outputs.status == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| **PR Number** | #${{ inputs.pr-number }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Quick Actions" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [Open Preview](${{ steps.deploy.outputs.preview-url }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 📱 [Test Mobile](${{ steps.deploy.outputs.preview-url }}#mobile)" >> $GITHUB_STEP_SUMMARY
+        echo "- 🧪 [Run Tests](${{ steps.deploy.outputs.preview-url }}#test)" >> $GITHUB_STEP_SUMMARY
+
+branding:
+  icon: 'globe'
+  color: 'green'

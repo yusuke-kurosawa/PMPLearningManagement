@@ -1,0 +1,773 @@
+name: Infrastructure Security Audit
+
+on:
+  schedule:
+    # Weekly security scan on Wednesdays at 2 AM UTC
+    - cron: '0 2 * * 3'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - secrets
+          - container
+          - compliance
+          - network
+      severity_threshold:
+        description: 'Minimum severity to report'
+        required: false
+        default: 'medium'
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - critical
+  push:
+    branches: [main]
+    paths: 
+      - 'deployment/**'
+      - 'Dockerfile*'
+      - 'docker-compose*.yml'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  issues: write
+  pull-requests: write
+
+env:
+  TRIVY_VERSION: '0.50.1'
+  SEMGREP_VERSION: '1.45.0'
+
+jobs:
+  # Container Security Scanning
+  container-security-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'container' || github.event_name == 'schedule' || github.event_name == 'push'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build Docker image for scanning
+        run: |
+          # Create a Dockerfile if it doesn't exist
+          if [ ! -f Dockerfile ]; then
+            cat > Dockerfile << 'EOF'
+          # Multi-stage build for PMP Learning Management
+          FROM node:18-alpine AS builder
+          
+          # Security: Create non-root user
+          RUN addgroup -g 1001 -S nodejs && \
+              adduser -S nextjs -u 1001
+          
+          WORKDIR /app
+          
+          # Copy package files
+          COPY package*.json ./
+          
+          # Install dependencies
+          RUN npm ci --only=production && \
+              npm cache clean --force
+          
+          # Copy source code
+          COPY . .
+          
+          # Build the application
+          RUN npm run build
+          
+          # Production image
+          FROM nginx:alpine AS production
+          
+          # Security: Install security updates
+          RUN apk update && apk upgrade && \
+              apk add --no-cache dumb-init && \
+              rm -rf /var/cache/apk/*
+          
+          # Security: Create non-root user
+          RUN addgroup -g 1001 -S nginx-app && \
+              adduser -S nginx-app -u 1001 -G nginx-app
+          
+          # Copy built application
+          COPY --from=builder --chown=nginx-app:nginx-app /app/dist /usr/share/nginx/html
+          
+          # Copy nginx configuration
+          COPY --chown=nginx-app:nginx-app deployment/nginx.conf /etc/nginx/nginx.conf
+          
+          # Security: Remove default nginx user and use custom user
+          USER nginx-app
+          
+          # Health check
+          HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+            CMD wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1
+          
+          EXPOSE 80
+          
+          ENTRYPOINT ["dumb-init", "--"]
+          CMD ["nginx", "-g", "daemon off;"]
+          EOF
+          fi
+          
+          # Build the image
+          docker build -t pmp-learning:security-scan .
+          
+      - name: Create nginx config if not exists
+        run: |
+          mkdir -p deployment
+          if [ ! -f deployment/nginx.conf ]; then
+            cat > deployment/nginx.conf << 'EOF'
+          user nginx;
+          worker_processes auto;
+          error_log /var/log/nginx/error.log warn;
+          pid /var/run/nginx.pid;
+          
+          events {
+              worker_connections 1024;
+              use epoll;
+              multi_accept on;
+          }
+          
+          http {
+              include /etc/nginx/mime.types;
+              default_type application/octet-stream;
+              
+              # Security headers
+              add_header X-Frame-Options DENY always;
+              add_header X-Content-Type-Options nosniff always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+              add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self';" always;
+              
+              # Logging
+              log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                              '$status $body_bytes_sent "$http_referer" '
+                              '"$http_user_agent" "$http_x_forwarded_for"';
+              access_log /var/log/nginx/access.log main;
+              
+              # Performance
+              sendfile on;
+              tcp_nopush on;
+              tcp_nodelay on;
+              keepalive_timeout 65;
+              types_hash_max_size 2048;
+              server_tokens off;
+              
+              # Gzip compression
+              gzip on;
+              gzip_vary on;
+              gzip_proxied any;
+              gzip_comp_level 6;
+              gzip_types
+                  text/plain
+                  text/css
+                  text/xml
+                  text/javascript
+                  application/javascript
+                  application/xml+rss
+                  application/json;
+              
+              server {
+                  listen 80;
+                  server_name localhost;
+                  root /usr/share/nginx/html;
+                  index index.html index.htm;
+                  
+                  # Security: Disable server signature
+                  server_tokens off;
+                  
+                  # Security: Rate limiting
+                  limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+                  
+                  location / {
+                      try_files $uri $uri/ /index.html;
+                      
+                      # Cache static assets
+                      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                          expires 1y;
+                          add_header Cache-Control "public, immutable";
+                      }
+                  }
+                  
+                  # Security: Hide nginx version
+                  location = /nginx_status {
+                      stub_status on;
+                      access_log off;
+                      allow 127.0.0.1;
+                      deny all;
+                  }
+                  
+                  # Security: Block common attack patterns
+                  location ~ /\. {
+                      deny all;
+                      access_log off;
+                      log_not_found off;
+                  }
+                  
+                  error_page 404 /404.html;
+                  error_page 500 502 503 504 /50x.html;
+              }
+          }
+          EOF
+          fi
+        
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'pmp-learning:security-scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          
+      - name: Run detailed Trivy scan
+        run: |
+          # Install Trivy
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
+          
+          # Create output directory
+          mkdir -p security-reports
+          
+          # Comprehensive vulnerability scan
+          trivy image --format json --output security-reports/trivy-vulnerabilities.json pmp-learning:security-scan
+          
+          # Configuration scan
+          trivy config --format json --output security-reports/trivy-config.json deployment/
+          
+          # Secret scan
+          trivy fs --format json --output security-reports/trivy-secrets.json .
+          
+          # Generate summary report
+          cat > security-reports/container-security-summary.md << 'EOF'
+          # Container Security Scan Report
+          
+          **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Image:** pmp-learning:security-scan
+          **Scanner:** Trivy v$(trivy --version | head -n1 | awk '{print $2}')
+          
+          ## Summary
+          EOF
+          
+          # Count vulnerabilities by severity
+          CRITICAL=$(cat security-reports/trivy-vulnerabilities.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' 2>/dev/null || echo 0)
+          HIGH=$(cat security-reports/trivy-vulnerabilities.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' 2>/dev/null || echo 0)
+          MEDIUM=$(cat security-reports/trivy-vulnerabilities.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="MEDIUM")] | length' 2>/dev/null || echo 0)
+          LOW=$(cat security-reports/trivy-vulnerabilities.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="LOW")] | length' 2>/dev/null || echo 0)
+          
+          cat >> security-reports/container-security-summary.md << EOF
+          
+          ### Vulnerabilities
+          - **Critical:** $CRITICAL
+          - **High:** $HIGH
+          - **Medium:** $MEDIUM
+          - **Low:** $LOW
+          
+          ### Configuration Issues
+          $(cat security-reports/trivy-config.json | jq '[.Results[]?.Misconfigurations[]?] | length' 2>/dev/null || echo 0) configuration issues found
+          
+          ### Secrets Detection
+          $(cat security-reports/trivy-secrets.json | jq '[.Results[]?.Secrets[]?] | length' 2>/dev/null || echo 0) potential secrets found
+          
+          EOF
+          
+          # Add recommendations
+          if [ "$CRITICAL" -gt "0" ] || [ "$HIGH" -gt "0" ]; then
+            echo "### ⚠️ Action Required" >> security-reports/container-security-summary.md
+            echo "Critical or high severity vulnerabilities found. Update base images and dependencies." >> security-reports/container-security-summary.md
+          else
+            echo "### ✅ Security Status" >> security-reports/container-security-summary.md
+            echo "No critical or high severity vulnerabilities found." >> security-reports/container-security-summary.md
+          fi
+          
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          
+      - name: Upload container security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-security-reports
+          path: security-reports/
+          retention-days: 30
+
+  # Infrastructure as Code Security
+  iac-security-scan:
+    name: Infrastructure as Code Security
+    runs-on: ubuntu-latest
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'compliance' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Run Checkov IaC scanner
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: github_actions,dockerfile,kubernetes,terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          download_external_modules: true
+          
+      - name: Run detailed IaC analysis
+        run: |
+          # Install additional tools
+          pip install checkov
+          
+          mkdir -p security-reports
+          
+          # Run detailed Checkov scan
+          checkov -d . --framework github_actions,dockerfile,kubernetes --output json --output-file security-reports/checkov-results.json || true
+          
+          # Analyze GitHub Actions workflows specifically
+          checkov -d .github/workflows --framework github_actions --output json --output-file security-reports/github-actions-security.json || true
+          
+          # Generate IaC security report
+          cat > security-reports/iac-security-summary.md << 'EOF'
+          # Infrastructure as Code Security Report
+          
+          **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Scanner:** Checkov
+          **Scope:** GitHub Actions, Dockerfile, Kubernetes manifests
+          
+          ## Summary
+          EOF
+          
+          # Count issues by severity
+          TOTAL_CHECKS=$(cat security-reports/checkov-results.json | jq '.summary.parsing_errors + .summary.passed_checks + .summary.failed_checks + .summary.skipped_checks' 2>/dev/null || echo 0)
+          FAILED_CHECKS=$(cat security-reports/checkov-results.json | jq '.summary.failed_checks' 2>/dev/null || echo 0)
+          PASSED_CHECKS=$(cat security-reports/checkov-results.json | jq '.summary.passed_checks' 2>/dev/null || echo 0)
+          
+          cat >> security-reports/iac-security-summary.md << EOF
+          
+          ### Check Results
+          - **Total Checks:** $TOTAL_CHECKS
+          - **Passed:** $PASSED_CHECKS  
+          - **Failed:** $FAILED_CHECKS
+          - **Success Rate:** $(echo "scale=1; $PASSED_CHECKS * 100 / $TOTAL_CHECKS" | bc 2>/dev/null || echo "N/A")%
+          
+          ### GitHub Actions Security
+          $(cat security-reports/github-actions-security.json | jq '.summary.failed_checks' 2>/dev/null || echo 0) security issues found in workflows
+          
+          EOF
+          
+          if [ "$FAILED_CHECKS" -gt "0" ]; then
+            echo "### ⚠️ Failed Checks" >> security-reports/iac-security-summary.md
+            echo "Review the detailed report for specific security improvements." >> security-reports/iac-security-summary.md
+          else
+            echo "### ✅ All Checks Passed" >> security-reports/iac-security-summary.md
+            echo "Infrastructure configuration follows security best practices." >> security-reports/iac-security-summary.md
+          fi
+          
+      - name: Upload Checkov results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'checkov-results.sarif'
+          
+      - name: Upload IaC security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: iac-security-reports
+          path: security-reports/
+          retention-days: 30
+
+  # Advanced Secret Scanning
+  advanced-secret-scan:
+    name: Advanced Secret Scanning
+    runs-on: ubuntu-latest
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'secrets' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for comprehensive scanning
+          
+      - name: Run TruffleHog secret scanner
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified --json --output trufflehog-results.json
+          
+      - name: Advanced secret pattern detection
+        run: |
+          mkdir -p security-reports
+          
+          # Custom patterns for additional secret types
+          cat > secret-patterns.txt << 'EOF'
+          # API Keys and Tokens
+          api[_-]?key[_-]?[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?
+          access[_-]?token[_-]?[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?
+          secret[_-]?key[_-]?[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?
+          
+          # Database connections
+          (mongodb|mysql|postgresql|postgres)://[^:]+:[^@]+@[^/]+
+          
+          # JWT tokens
+          ey[A-Za-z0-9_-]*\.ey[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*
+          
+          # Private keys
+          -----BEGIN [A-Z]+ PRIVATE KEY-----
+          
+          # GitHub tokens
+          gh[pousr]_[A-Za-z0-9_]{36,255}
+          
+          # Discord tokens
+          [MN][A-Za-z\d]{23}\.[\w-]{6}\.[\w-]{27}
+          EOF
+          
+          # Scan for custom patterns
+          echo "Scanning for custom secret patterns..."
+          grep -r -E -f secret-patterns.txt . --exclude-dir=.git --exclude-dir=node_modules --exclude="*.md" > security-reports/custom-secrets.txt || echo "No custom patterns found"
+          
+          # Generate comprehensive secret scan report
+          cat > security-reports/secret-scan-summary.md << 'EOF'
+          # Secret Scanning Report
+          
+          **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Scope:** Full repository history + custom patterns
+          **Tools:** TruffleHog, Custom patterns
+          
+          ## Summary
+          EOF
+          
+          # Count TruffleHog results
+          if [ -f trufflehog-results.json ]; then
+            TRUFFLEHOG_SECRETS=$(cat trufflehog-results.json | jq '. | length' 2>/dev/null || echo 0)
+          else
+            TRUFFLEHOG_SECRETS=0
+          fi
+          
+          # Count custom pattern matches
+          CUSTOM_MATCHES=$(wc -l < security-reports/custom-secrets.txt 2>/dev/null || echo 0)
+          
+          cat >> security-reports/secret-scan-summary.md << EOF
+          
+          ### Detected Secrets
+          - **TruffleHog verified secrets:** $TRUFFLEHOG_SECRETS
+          - **Custom pattern matches:** $CUSTOM_MATCHES
+          
+          EOF
+          
+          TOTAL_SECRETS=$(($TRUFFLEHOG_SECRETS + $CUSTOM_MATCHES))
+          
+          if [ "$TOTAL_SECRETS" -gt "0" ]; then
+            echo "### ⚠️ Secrets Detected" >> security-reports/secret-scan-summary.md
+            echo "**Immediate action required:** Review and remove exposed secrets." >> security-reports/secret-scan-summary.md
+            echo "" >> security-reports/secret-scan-summary.md
+            echo "**Steps to take:**" >> security-reports/secret-scan-summary.md
+            echo "1. Rotate/revoke exposed secrets immediately" >> security-reports/secret-scan-summary.md
+            echo "2. Remove secrets from repository history" >> security-reports/secret-scan-summary.md
+            echo "3. Implement proper secret management" >> security-reports/secret-scan-summary.md
+            echo "4. Add secrets to .gitignore patterns" >> security-reports/secret-scan-summary.md
+          else
+            echo "### ✅ No Secrets Detected" >> security-reports/secret-scan-summary.md
+            echo "Repository appears clean of exposed secrets." >> security-reports/secret-scan-summary.md
+          fi
+          
+          # Copy TruffleHog results if they exist
+          [ -f trufflehog-results.json ] && cp trufflehog-results.json security-reports/
+          
+      - name: Upload secret scan reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: secret-scan-reports
+          path: security-reports/
+          retention-days: 30
+
+  # Network Security Analysis
+  network-security-scan:
+    name: Network Security Analysis
+    runs-on: ubuntu-latest
+    if: inputs.scan_type == 'all' || inputs.scan_type == 'network' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Analyze network configuration
+        run: |
+          mkdir -p security-reports
+          
+          # Analyze nginx configuration
+          cat > security-reports/network-security-analysis.md << 'EOF'
+          # Network Security Analysis
+          
+          **Analysis Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Scope:** Web server configuration, security headers, TLS settings
+          
+          ## Security Headers Analysis
+          EOF
+          
+          # Check nginx config if it exists
+          if [ -f deployment/nginx.conf ]; then
+            echo "### Nginx Configuration Review" >> security-reports/network-security-analysis.md
+            
+            # Check for security headers
+            if grep -q "X-Frame-Options" deployment/nginx.conf; then
+              echo "✅ X-Frame-Options header configured" >> security-reports/network-security-analysis.md
+            else
+              echo "❌ X-Frame-Options header missing" >> security-reports/network-security-analysis.md
+            fi
+            
+            if grep -q "X-Content-Type-Options" deployment/nginx.conf; then
+              echo "✅ X-Content-Type-Options header configured" >> security-reports/network-security-analysis.md
+            else
+              echo "❌ X-Content-Type-Options header missing" >> security-reports/network-security-analysis.md
+            fi
+            
+            if grep -q "Content-Security-Policy" deployment/nginx.conf; then
+              echo "✅ Content Security Policy configured" >> security-reports/network-security-analysis.md
+            else
+              echo "❌ Content Security Policy missing" >> security-reports/network-security-analysis.md
+            fi
+            
+            if grep -q "Strict-Transport-Security" deployment/nginx.conf; then
+              echo "✅ HSTS header configured" >> security-reports/network-security-analysis.md
+            else
+              echo "❌ HSTS header missing" >> security-reports/network-security-analysis.md
+            fi
+            
+            if grep -q "server_tokens off" deployment/nginx.conf; then
+              echo "✅ Server tokens disabled" >> security-reports/network-security-analysis.md
+            else
+              echo "❌ Server tokens not disabled" >> security-reports/network-security-analysis.md
+            fi
+          else
+            echo "ℹ️ No nginx configuration found to analyze" >> security-reports/network-security-analysis.md
+          fi
+          
+          echo "" >> security-reports/network-security-analysis.md
+          echo "## Recommendations" >> security-reports/network-security-analysis.md
+          echo "- Implement comprehensive security headers" >> security-reports/network-security-analysis.md
+          echo "- Configure Content Security Policy" >> security-reports/network-security-analysis.md
+          echo "- Enable HSTS for HTTPS enforcement" >> security-reports/network-security-analysis.md
+          echo "- Disable server information disclosure" >> security-reports/network-security-analysis.md
+          echo "- Implement rate limiting" >> security-reports/network-security-analysis.md
+          
+      - name: Test production site security headers
+        run: |
+          PROD_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          
+          echo "" >> security-reports/network-security-analysis.md
+          echo "## Production Site Analysis" >> security-reports/network-security-analysis.md
+          echo "**URL:** $PROD_URL" >> security-reports/network-security-analysis.md
+          echo "" >> security-reports/network-security-analysis.md
+          
+          # Test security headers
+          echo "Testing security headers..." 
+          HEADERS=$(curl -sI "$PROD_URL" 2>/dev/null || echo "Failed to fetch headers")
+          
+          if echo "$HEADERS" | grep -qi "x-frame-options"; then
+            echo "✅ X-Frame-Options: $(echo "$HEADERS" | grep -i "x-frame-options" | cut -d: -f2- | xargs)" >> security-reports/network-security-analysis.md
+          else
+            echo "❌ X-Frame-Options header not found" >> security-reports/network-security-analysis.md
+          fi
+          
+          if echo "$HEADERS" | grep -qi "x-content-type-options"; then
+            echo "✅ X-Content-Type-Options: $(echo "$HEADERS" | grep -i "x-content-type-options" | cut -d: -f2- | xargs)" >> security-reports/network-security-analysis.md
+          else
+            echo "❌ X-Content-Type-Options header not found" >> security-reports/network-security-analysis.md
+          fi
+          
+          if echo "$HEADERS" | grep -qi "content-security-policy"; then
+            echo "✅ Content-Security-Policy found" >> security-reports/network-security-analysis.md
+          else
+            echo "❌ Content-Security-Policy header not found" >> security-reports/network-security-analysis.md
+          fi
+          
+      - name: Upload network security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: network-security-reports
+          path: security-reports/
+          retention-days: 30
+
+  # Generate Comprehensive Security Report
+  generate-security-report:
+    name: Generate Comprehensive Security Report
+    runs-on: ubuntu-latest
+    needs: [container-security-scan, iac-security-scan, advanced-secret-scan, network-security-scan]
+    if: always()
+    
+    steps:
+      - name: Download all security reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports/
+          
+      - name: Generate comprehensive security report
+        run: |
+          mkdir -p final-security-report
+          
+          cat > final-security-report/infrastructure-security-report.md << EOF
+          # Infrastructure Security Audit Report
+          
+          **Report Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow:** [Infrastructure Security Audit](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          **Scope:** Container security, IaC analysis, secret scanning, network configuration
+          
+          ---
+          
+          ## Executive Summary
+          
+          This automated security audit assessed multiple aspects of the PMPLearningManagement infrastructure:
+          
+          EOF
+          
+          # Aggregate findings from all reports
+          CRITICAL_ISSUES=0
+          HIGH_ISSUES=0
+          MEDIUM_ISSUES=0
+          TOTAL_ISSUES=0
+          
+          # Container security summary
+          if [ -f "all-reports/container-security-reports/container-security-summary.md" ]; then
+            echo "### 🐳 Container Security" >> final-security-report/infrastructure-security-report.md
+            tail -n +5 all-reports/container-security-reports/container-security-summary.md >> final-security-report/infrastructure-security-report.md
+            echo "" >> final-security-report/infrastructure-security-report.md
+          fi
+          
+          # IaC security summary
+          if [ -f "all-reports/iac-security-reports/iac-security-summary.md" ]; then
+            echo "### 🏗️ Infrastructure as Code Security" >> final-security-report/infrastructure-security-report.md
+            tail -n +5 all-reports/iac-security-reports/iac-security-summary.md >> final-security-report/infrastructure-security-report.md
+            echo "" >> final-security-report/infrastructure-security-report.md
+          fi
+          
+          # Secret scanning summary
+          if [ -f "all-reports/secret-scan-reports/secret-scan-summary.md" ]; then
+            echo "### 🔐 Secret Scanning" >> final-security-report/infrastructure-security-report.md
+            tail -n +5 all-reports/secret-scan-reports/secret-scan-summary.md >> final-security-report/infrastructure-security-report.md
+            echo "" >> final-security-report/infrastructure-security-report.md
+          fi
+          
+          # Network security summary
+          if [ -f "all-reports/network-security-reports/network-security-analysis.md" ]; then
+            echo "### 🌐 Network Security" >> final-security-report/infrastructure-security-report.md
+            tail -n +5 all-reports/network-security-reports/network-security-analysis.md >> final-security-report/infrastructure-security-report.md
+            echo "" >> final-security-report/infrastructure-security-report.md
+          fi
+          
+          echo "---" >> final-security-report/infrastructure-security-report.md
+          echo "" >> final-security-report/infrastructure-security-report.md
+          echo "## 🎯 Priority Actions" >> final-security-report/infrastructure-security-report.md
+          echo "" >> final-security-report/infrastructure-security-report.md
+          
+          # Generate priority actions based on findings
+          PRIORITY_ACTIONS=""
+          
+          # Check for container vulnerabilities
+          if [ -f "all-reports/container-security-reports/trivy-vulnerabilities.json" ]; then
+            CRITICAL_VULNS=$(cat all-reports/container-security-reports/trivy-vulnerabilities.json | jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' 2>/dev/null || echo 0)
+            if [ "$CRITICAL_VULNS" -gt "0" ]; then
+              PRIORITY_ACTIONS="$PRIORITY_ACTIONS- 🚨 **Critical**: Update container base images to fix $CRITICAL_VULNS critical vulnerabilities\n"
+            fi
+          fi
+          
+          # Check for secrets
+          if [ -f "all-reports/secret-scan-reports/trufflehog-results.json" ]; then
+            SECRET_COUNT=$(cat all-reports/secret-scan-reports/trufflehog-results.json | jq '. | length' 2>/dev/null || echo 0)
+            if [ "$SECRET_COUNT" -gt "0" ]; then
+              PRIORITY_ACTIONS="$PRIORITY_ACTIONS- 🔐 **High**: Rotate/revoke $SECRET_COUNT exposed secrets immediately\n"
+            fi
+          fi
+          
+          # Check for IaC issues
+          if [ -f "all-reports/iac-security-reports/checkov-results.json" ]; then
+            FAILED_CHECKS=$(cat all-reports/iac-security-reports/checkov-results.json | jq '.summary.failed_checks' 2>/dev/null || echo 0)
+            if [ "$FAILED_CHECKS" -gt "5" ]; then
+              PRIORITY_ACTIONS="$PRIORITY_ACTIONS- 🏗️ **Medium**: Address $FAILED_CHECKS infrastructure security findings\n"
+            fi
+          fi
+          
+          if [ -n "$PRIORITY_ACTIONS" ]; then
+            echo -e "$PRIORITY_ACTIONS" >> final-security-report/infrastructure-security-report.md
+          else
+            echo "✅ No critical security issues requiring immediate attention" >> final-security-report/infrastructure-security-report.md
+          fi
+          
+          echo "" >> final-security-report/infrastructure-security-report.md
+          echo "## 📋 Compliance Status" >> final-security-report/infrastructure-security-report.md
+          echo "" >> final-security-report/infrastructure-security-report.md
+          echo "| Area | Status | Notes |" >> final-security-report/infrastructure-security-report.md
+          echo "|------|--------|-------|" >> final-security-report/infrastructure-security-report.md
+          echo "| Container Security | $( [ "$CRITICAL_VULNS" -eq "0" ] && echo "✅ Pass" || echo "❌ Fail" ) | $CRITICAL_VULNS critical vulnerabilities |" >> final-security-report/infrastructure-security-report.md
+          echo "| Secret Management | $( [ "$SECRET_COUNT" -eq "0" ] && echo "✅ Pass" || echo "❌ Fail" ) | $SECRET_COUNT exposed secrets |" >> final-security-report/infrastructure-security-report.md
+          echo "| IaC Security | $( [ "$FAILED_CHECKS" -lt "5" ] && echo "✅ Pass" || echo "⚠️ Review" ) | $FAILED_CHECKS failed checks |" >> final-security-report/infrastructure-security-report.md
+          echo "| Network Security | ⚠️ Review | Manual review required |" >> final-security-report/infrastructure-security-report.md
+          
+          echo "" >> final-security-report/infrastructure-security-report.md
+          echo "---" >> final-security-report/infrastructure-security-report.md
+          echo "*Report generated by automated security scanning pipeline*" >> final-security-report/infrastructure-security-report.md
+          
+      - name: Upload comprehensive security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-security-report
+          path: final-security-report/
+          retention-days: 90
+
+  # Create Security Issues for Critical Findings
+  create-security-issues:
+    name: Create Security Issues
+    runs-on: ubuntu-latest
+    needs: [container-security-scan, advanced-secret-scan, generate-security-report]
+    if: always()
+    
+    steps:
+      - name: Create critical security issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // This is a placeholder for creating issues based on critical findings
+            // In a real implementation, you would parse the security reports and create issues accordingly
+            
+            console.log('🔍 Analyzing security scan results for critical issues...');
+            
+            // Example logic for creating security issues
+            const criticalFindings = []; // Would be populated from actual scan results
+            
+            if (criticalFindings.length > 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '[SECURITY] Critical security vulnerabilities detected',
+                body: `## 🚨 Critical Security Alert
+                
+                **Detection Date:** ${new Date().toISOString().split('T')[0]}
+                
+                Critical security vulnerabilities have been detected in the infrastructure scan.
+                
+                ### Immediate Actions Required
+                1. Review the detailed security report
+                2. Address critical vulnerabilities immediately
+                3. Update affected components
+                4. Verify fixes with re-scan
+                
+                ### Reports
+                - 📊 [View security reports](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+                
+                ---
+                *This issue was automatically created by the Infrastructure Security Audit*`,
+                labels: ['security', 'critical', 'infrastructure', 'automated']
+              });
+            }
+            
+            console.log('✅ Security issue creation completed');

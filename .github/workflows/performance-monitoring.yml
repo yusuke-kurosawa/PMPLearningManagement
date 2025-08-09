@@ -1,0 +1,361 @@
+name: Performance Monitoring
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  pages: read
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Lighthouse Performance Audit
+  lighthouse-audit:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        url:
+          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/matrix"
+          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/network"
+          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/visualizations"
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Serve application locally
+        run: |
+          npm install -g serve
+          serve -s dist -p 3000 &
+          sleep 10
+        if: github.event_name == 'pull_request'
+        
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            ${{ matrix.url }}
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results-${{ github.run_id }}
+          path: .lighthouseci/
+          retention-days: 30
+
+  # Bundle Size Analysis
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build with bundle analysis
+        run: npm run analyze
+        
+      - name: Check bundle size
+        run: npm run performance:budget
+        
+      - name: Bundle size report
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Check if bundlesize report exists
+            let bundleReport = '';
+            try {
+              const distPath = path.join(process.cwd(), 'dist');
+              const assets = fs.readdirSync(path.join(distPath, 'assets'));
+              
+              const jsFiles = assets.filter(f => f.endsWith('.js'));
+              const cssFiles = assets.filter(f => f.endsWith('.css'));
+              
+              bundleReport = `## 📦 Bundle Size Report\n\n`;
+              bundleReport += `### JavaScript Files:\n`;
+              jsFiles.forEach(file => {
+                const stats = fs.statSync(path.join(distPath, 'assets', file));
+                const sizeKB = (stats.size / 1024).toFixed(2);
+                bundleReport += `- ${file}: ${sizeKB} KB\n`;
+              });
+              
+              bundleReport += `\n### CSS Files:\n`;
+              cssFiles.forEach(file => {
+                const stats = fs.statSync(path.join(distPath, 'assets', file));
+                const sizeKB = (stats.size / 1024).toFixed(2);
+                bundleReport += `- ${file}: ${sizeKB} KB\n`;
+              });
+              
+            } catch (error) {
+              bundleReport = '❌ Bundle analysis failed: ' + error.message;
+            }
+            
+            // Post comment on PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('📦 Bundle Size Report')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: bundleReport
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: bundleReport
+              });
+            }
+
+  # Core Web Vitals Testing
+  web-vitals:
+    name: Core Web Vitals Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+        
+      - name: Run Core Web Vitals test
+        run: |
+          cat << 'EOF' > web-vitals-test.js
+          const { chromium } = require('playwright');
+          
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            
+            // Navigate to the page
+            const url = process.env.TEST_URL || 'https://yusuke-kurosawa.github.io/PMPLearningManagement/';
+            await page.goto(url);
+            
+            // Wait for page to be fully loaded
+            await page.waitForLoadState('networkidle');
+            
+            // Measure Core Web Vitals
+            const vitals = await page.evaluate(() => {
+              return new Promise((resolve) => {
+                const vitals = {};
+                
+                // LCP (Largest Contentful Paint)
+                new PerformanceObserver((list) => {
+                  const entries = list.getEntries();
+                  if (entries.length > 0) {
+                    vitals.lcp = entries[entries.length - 1].startTime;
+                  }
+                }).observe({ entryTypes: ['largest-contentful-paint'] });
+                
+                // FID (First Input Delay) - simulated
+                vitals.fid = 0; // Would need real user interaction
+                
+                // CLS (Cumulative Layout Shift)
+                let cls = 0;
+                new PerformanceObserver((list) => {
+                  list.getEntries().forEach((entry) => {
+                    if (!entry.hadRecentInput) {
+                      cls += entry.value;
+                    }
+                  });
+                  vitals.cls = cls;
+                }).observe({ entryTypes: ['layout-shift'] });
+                
+                setTimeout(() => resolve(vitals), 3000);
+              });
+            });
+            
+            console.log('Core Web Vitals Results:');
+            console.log(`LCP: ${vitals.lcp?.toFixed(2) || 'N/A'} ms`);
+            console.log(`CLS: ${vitals.cls?.toFixed(3) || 'N/A'}`);
+            console.log(`FID: Simulated - 0 ms`);
+            
+            await browser.close();
+          })();
+          EOF
+          
+          node web-vitals-test.js
+        
+      - name: Performance regression test
+        run: |
+          echo "Running performance regression tests..."
+          # This could be expanded with specific performance benchmarks
+          npm run build
+          
+          # Check if build size exceeds thresholds
+          DIST_SIZE=$(du -s dist/ | cut -f1)
+          echo "Build size: ${DIST_SIZE} KB"
+          
+          # Set threshold (adjust as needed)
+          MAX_SIZE=5000  # 5MB in KB
+          
+          if [ $DIST_SIZE -gt $MAX_SIZE ]; then
+            echo "❌ Build size exceeds threshold: ${DIST_SIZE} KB > ${MAX_SIZE} KB"
+            exit 1
+          else
+            echo "✅ Build size within acceptable range: ${DIST_SIZE} KB"
+          fi
+
+  # Performance Monitoring Summary
+  performance-summary:
+    name: Performance Summary
+    runs-on: ubuntu-latest
+    needs: [lighthouse-audit, bundle-analysis, web-vitals]
+    if: always()
+    
+    steps:
+      - name: Create Performance Report
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const lighthouseStatus = '${{ needs.lighthouse-audit.result }}';
+            const bundleStatus = '${{ needs.bundle-analysis.result }}';
+            const webVitalsStatus = '${{ needs.web-vitals.result }}';
+            
+            const getStatusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⏹️';
+                default: return '⏳';
+              }
+            };
+            
+            const report = `## 🚀 Performance Report
+            
+            ### Test Results:
+            ${getStatusEmoji(lighthouseStatus)} **Lighthouse Audit**: ${lighthouseStatus}
+            ${getStatusEmoji(bundleStatus)} **Bundle Analysis**: ${bundleStatus}  
+            ${getStatusEmoji(webVitalsStatus)} **Core Web Vitals**: ${webVitalsStatus}
+            
+            ### Key Metrics:
+            - **Performance Score**: See Lighthouse report for details
+            - **Bundle Size**: Check bundle analysis report
+            - **Core Web Vitals**: LCP, CLS, and FID measurements
+            
+            ### Recommendations:
+            ${lighthouseStatus === 'failure' ? '⚠️ Lighthouse audit failed - check performance scores\n' : ''}
+            ${bundleStatus === 'failure' ? '⚠️ Bundle size exceeds limits - consider code splitting\n' : ''}
+            ${webVitalsStatus === 'failure' ? '⚠️ Core Web Vitals need improvement\n' : ''}
+            
+            _For detailed reports, check the workflow artifacts._`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: report
+            });
+
+  # Scheduled Performance Alert
+  performance-alert:
+    name: Performance Alert
+    runs-on: ubuntu-latest
+    needs: [lighthouse-audit, bundle-analysis, web-vitals]
+    if: github.event_name == 'schedule' && (needs.lighthouse-audit.result == 'failure' || needs.bundle-analysis.result == 'failure' || needs.web-vitals.result == 'failure')
+    
+    steps:
+      - name: Create Performance Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Performance Alert - ${new Date().toISOString().split('T')[0]}`;
+            const body = `## Performance Degradation Detected
+            
+            Our scheduled performance monitoring has detected issues:
+            
+            - **Lighthouse Audit**: ${{ needs.lighthouse-audit.result }}
+            - **Bundle Analysis**: ${{ needs.bundle-analysis.result }}
+            - **Core Web Vitals**: ${{ needs.web-vitals.result }}
+            
+            ### Action Required:
+            1. Review the failed performance tests
+            2. Identify performance regressions
+            3. Optimize affected areas
+            4. Re-run performance tests
+            
+            **Workflow Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            /label performance 🚨 high-priority`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['performance', '🚨 high-priority']
+            });

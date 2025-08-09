@@ -1,0 +1,331 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # PR Info and Labeling
+  pr-info:
+    name: PR Information & Labeling
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: PR Size Labeling
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/XS'
+          xs_max_size: 10
+          s_label: 'size/S'
+          s_max_size: 100
+          m_label: 'size/M'
+          m_max_size: 500
+          l_label: 'size/L'
+          l_max_size: 1000
+          xl_label: 'size/XL'
+          
+      - name: Auto-label based on files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  # Enhanced Code Quality
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run ESLint with annotations
+        run: |
+          npx eslint src --ext .js,.jsx,.ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif || true
+          
+      - name: Upload ESLint results to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
+          
+      - name: Run Prettier check
+        run: npm run format:check
+        
+      - name: TypeScript compilation check
+        run: npm run typecheck
+
+  # Build verification with caching
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Check bundle size
+        run: npm run performance:budget
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-build-${{ github.event.pull_request.number }}
+          path: dist/
+          retention-days: 3
+
+  # Comprehensive Testing
+  test-suite:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+        
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 18
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-node-${{ matrix.node-version }}
+          path: |
+            coverage/
+            test-results/
+          retention-days: 3
+
+  # E2E Testing on PR
+  e2e-tests:
+    name: E2E Tests (Critical Path)
+    runs-on: ubuntu-latest
+    needs: [build-verification]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Run E2E tests (smoke tests only)
+        run: npx playwright test --project=chromium --grep="@smoke"
+        env:
+          CI: true
+          
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 3
+
+  # Security scan for PR
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=high --json > audit-results.json || true
+          if [ -s audit-results.json ]; then
+            echo "::warning::Security vulnerabilities detected. Please review npm audit results."
+          fi
+          
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # PR Summary Comment
+  pr-summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-verification, test-suite, security-scan]
+    if: always()
+    
+    steps:
+      - name: Create or Update PR Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('🔄 PR Validation Summary')
+            );
+            
+            // Determine status based on job outcomes
+            const jobs = [
+              { name: 'Code Quality', status: '${{ needs.code-quality.result }}' },
+              { name: 'Build Verification', status: '${{ needs.build-verification.result }}' },
+              { name: 'Test Suite', status: '${{ needs.test-suite.result }}' },
+              { name: 'Security Scan', status: '${{ needs.security-scan.result }}' }
+            ];
+            
+            const getStatusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⏹️';
+                case 'skipped': return '⏭️';
+                default: return '⏳';
+              }
+            };
+            
+            const jobSummary = jobs.map(job => 
+              `- ${getStatusEmoji(job.status)} ${job.name}: ${job.status}`
+            ).join('\n');
+            
+            const allPassed = jobs.every(job => job.status === 'success');
+            const overallStatus = allPassed ? '🎉 All checks passed!' : '⚠️ Some checks failed';
+            
+            const body = `🔄 **PR Validation Summary**
+            
+            ${overallStatus}
+            
+            ## Check Results:
+            ${jobSummary}
+            
+            ## Build Info:
+            - **PR**: #${{ github.event.pull_request.number }}
+            - **Commit**: \`${context.sha.substring(0, 7)}\`
+            - **Branch**: \`${{ github.head_ref }}\`
+            - **Author**: @${{ github.event.pull_request.user.login }}
+            - **Triggered**: ${new Date().toISOString()}
+            
+            ${allPassed ? '_This PR is ready for review! 🚀_' : '_Please address failing checks before merging._'}
+            
+            <details>
+            <summary>View workflow details</summary>
+            
+            [View full workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            </details>`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

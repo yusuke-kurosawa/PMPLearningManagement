@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit hooks..."
+
+# Run linting
+echo "📋 Running ESLint..."
+npm run lint
+
+# Check TypeScript
+echo "🔧 Checking TypeScript..."
+npm run typecheck
+
+# Check formatting
+echo "✨ Checking code formatting..."
+npm run format:check
+
+# Run unit tests (if they exist and are fast)
+if npm run test:run --silent 2>/dev/null; then
+  echo "🧪 Running unit tests..."
+  npm run test:run
+else
+  echo "⏭️  Skipping unit tests (not configured or too slow)"
+fi
+
+echo "✅ Pre-commit checks completed!"

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { progressService } from '../services/progressService';
+import { progressService } from '../../services/progressService';
 
 const LearningProgressContext = createContext();
 

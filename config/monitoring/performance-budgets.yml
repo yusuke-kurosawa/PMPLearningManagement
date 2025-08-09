@@ -1,0 +1,189 @@
+# Performance Budgets Configuration
+# Defines performance thresholds and budgets for the application
+
+# Bundle Size Budgets
+bundle_budgets:
+  total_js:
+    warning: 1024  # 1MB
+    error: 2048    # 2MB
+    
+  total_css:
+    warning: 256   # 256KB
+    error: 512     # 512KB
+    
+  total_assets:
+    warning: 5120  # 5MB
+    error: 10240   # 10MB
+    
+  vendor_js:
+    warning: 512   # 512KB
+    error: 1024    # 1MB
+    
+  main_js:
+    warning: 512   # 512KB
+    error: 1024    # 1MB
+
+# Network Performance Budgets
+network_budgets:
+  requests:
+    warning: 50
+    error: 100
+    
+  total_size:
+    warning: 2048  # 2MB
+    error: 5120    # 5MB
+    
+  first_party_requests:
+    warning: 30
+    error: 50
+    
+  third_party_requests:
+    warning: 20
+    error: 50
+
+# Core Web Vitals Budgets
+core_web_vitals:
+  largest_contentful_paint:
+    good: 2500      # ms
+    needs_improvement: 4000  # ms
+    
+  first_input_delay:
+    good: 100       # ms
+    needs_improvement: 300   # ms
+    
+  cumulative_layout_shift:
+    good: 0.1
+    needs_improvement: 0.25
+    
+  first_contentful_paint:
+    good: 1800      # ms
+    needs_improvement: 3000  # ms
+    
+  speed_index:
+    good: 3400      # ms
+    needs_improvement: 5800  # ms
+    
+  total_blocking_time:
+    good: 200       # ms
+    needs_improvement: 600   # ms
+
+# Page-specific Budgets
+page_budgets:
+  home:
+    lcp: 2000       # ms
+    fcp: 1500       # ms
+    cls: 0.05
+    
+  matrix:
+    lcp: 3000       # ms (more complex visualization)
+    fcp: 2000       # ms
+    cls: 0.1
+    
+  network:
+    lcp: 4000       # ms (D3.js heavy)
+    fcp: 2500       # ms
+    cls: 0.1
+    
+  visualizations:
+    lcp: 5000       # ms (multiple visualizations)
+    fcp: 3000       # ms
+    cls: 0.15
+    
+  exam:
+    lcp: 2500       # ms
+    fcp: 1800       # ms
+    cls: 0.05
+
+# Resource Type Budgets
+resource_budgets:
+  fonts:
+    count: 5
+    size: 200       # KB
+    
+  images:
+    count: 50
+    size: 2048      # KB
+    
+  videos:
+    count: 0
+    size: 0         # KB
+    
+  documents:
+    count: 10
+    size: 512       # KB
+
+# Performance Monitoring Configuration
+monitoring:
+  real_user_monitoring:
+    enabled: true
+    sample_rate: 0.1
+    
+  synthetic_monitoring:
+    enabled: true
+    locations:
+      - "us-east-1"
+      - "eu-west-1"
+      - "ap-southeast-1"
+    frequency: "hourly"
+    
+  performance_observer:
+    enabled: true
+    metrics:
+      - "navigation"
+      - "paint"
+      - "largest-contentful-paint"
+      - "first-input"
+      - "layout-shift"
+
+# Alert Thresholds
+alerts:
+  budget_exceeded:
+    severity: "warning"
+    channels: ["email", "slack"]
+    
+  critical_performance:
+    severity: "critical"
+    conditions:
+      - "lcp > 4000"
+      - "cls > 0.25"
+      - "fid > 300"
+    channels: ["email", "slack", "pagerduty"]
+    
+  degraded_performance:
+    severity: "warning"
+    conditions:
+      - "lcp > 2500"
+      - "cls > 0.1"
+      - "fid > 100"
+    channels: ["email"]
+
+# Optimization Targets
+optimization_targets:
+  quarter_goals:
+    lcp_improvement: "15%"
+    bundle_reduction: "20%"
+    cls_improvement: "30%"
+    
+  techniques:
+    - "Code splitting"
+    - "Lazy loading"
+    - "Image optimization"
+    - "Font optimization"
+    - "Tree shaking"
+    - "Compression"
+    
+  priorities:
+    high:
+      - "Reduce main bundle size"
+      - "Improve LCP on visualizations"
+      - "Minimize CLS on all pages"
+    
+    medium:
+      - "Optimize font loading"
+      - "Implement service worker caching"
+      - "Reduce third-party scripts"
+    
+    low:
+      - "Optimize images"
+      - "Implement prefetching"
+      - "Add performance hints"

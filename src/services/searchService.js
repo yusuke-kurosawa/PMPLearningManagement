@@ -1,4 +1,4 @@
-import { glossaryTerms } from '../data/pmpGlossary';
+import { glossaryTerms } from '../data/schemas/glossary/pmpGlossary';
 
 // Fuse.jsのような検索ライブラリを使わず、カスタム実装
 class SearchService {

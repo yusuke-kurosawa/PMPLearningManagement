@@ -1,0 +1,481 @@
+name: Dependabot Auto-merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+  status: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  # Analyze Dependabot PR
+  analyze-dependabot-pr:
+    name: Analyze Dependabot PR
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    outputs:
+      auto-merge-type: ${{ steps.analyze.outputs.auto-merge-type }}
+      should-auto-merge: ${{ steps.analyze.outputs.should-auto-merge }}
+      pr-info: ${{ steps.analyze.outputs.pr-info }}
+      
+    steps:
+      - name: Get PR details
+        uses: actions/github-script@v7
+        id: analyze
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            // Parse the PR title to understand the update type
+            const title = pr.title;
+            const body = pr.body || '';
+            
+            // Extract dependency information
+            const isDependencyPR = title.includes('deps:') || title.includes('Bump');
+            const isSecurityUpdate = body.includes('security') || body.includes('vulnerability');
+            const isPatchUpdate = title.match(/from \d+\.\d+\.\d+ to \d+\.\d+\.(\d+)/) && 
+                                 parseInt(RegExp.$1) > parseInt(title.match(/from \d+\.\d+\.(\d+)/)?.[1] || '0');
+            const isMinorUpdate = title.match(/from \d+\.(\d+)\.\d+ to \d+\.(\d+)\.\d+/) && 
+                                 parseInt(title.match(/to \d+\.(\d+)\.\d+/)?.[1] || '0') > parseInt(title.match(/from \d+\.(\d+)\.\d+/)?.[1] || '0');
+            const isMajorUpdate = title.match(/from (\d+)\.\d+\.\d+ to (\d+)\.\d+\.\d+/) && 
+                                 parseInt(title.match(/to (\d+)\.\d+\.\d+/)?.[1] || '0') > parseInt(title.match(/from (\d+)\.\d+\.\d+/)?.[1] || '0');
+            
+            // Determine auto-merge strategy
+            let autoMergeType = 'none';
+            let shouldAutoMerge = false;
+            
+            if (!isDependencyPR) {
+              console.log('Not a dependency PR');
+            } else if (isSecurityUpdate) {
+              autoMergeType = 'security';
+              shouldAutoMerge = true;
+              console.log('Security update - will auto-merge after tests');
+            } else if (isPatchUpdate) {
+              autoMergeType = 'patch';
+              shouldAutoMerge = true;
+              console.log('Patch update - will auto-merge after tests');
+            } else if (isMinorUpdate) {
+              // Check if it's a dev dependency or trusted package
+              const isDevDependency = body.includes('@types/') || 
+                                    body.includes('eslint') || 
+                                    body.includes('prettier') || 
+                                    body.includes('vite') || 
+                                    body.includes('typescript');
+              const isTrustedPackage = body.includes('react') || 
+                                     body.includes('@radix-ui/') || 
+                                     body.includes('lucide-react');
+              
+              if (isDevDependency) {
+                autoMergeType = 'minor-dev';
+                shouldAutoMerge = true;
+                console.log('Minor dev dependency update - will auto-merge after tests');
+              } else if (isTrustedPackage) {
+                autoMergeType = 'minor-trusted';
+                shouldAutoMerge = true;
+                console.log('Minor trusted package update - will auto-merge after tests');
+              } else {
+                autoMergeType = 'minor-review';
+                shouldAutoMerge = false;
+                console.log('Minor update requires review');
+              }
+            } else if (isMajorUpdate) {
+              autoMergeType = 'major';
+              shouldAutoMerge = false;
+              console.log('Major update requires manual review');
+            }
+            
+            const prInfo = {
+              number: context.issue.number,
+              title: title,
+              isDependencyPR,
+              isSecurityUpdate,
+              isPatchUpdate,
+              isMinorUpdate,
+              isMajorUpdate,
+              author: pr.user.login
+            };
+            
+            core.setOutput('auto-merge-type', autoMergeType);
+            core.setOutput('should-auto-merge', shouldAutoMerge.toString());
+            core.setOutput('pr-info', JSON.stringify(prInfo));
+            
+            return {
+              autoMergeType,
+              shouldAutoMerge,
+              prInfo
+            };
+
+  # Enhanced PR validation for Dependabot
+  dependabot-validation:
+    name: Dependabot PR Validation
+    runs-on: ubuntu-latest
+    needs: [analyze-dependabot-pr]
+    if: needs.analyze-dependabot-pr.outputs.should-auto-merge == 'true'
+    outputs:
+      validation-passed: ${{ steps.validate.outputs.validation-passed }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Validate dependency update
+        id: validate
+        run: |
+          echo "🔍 Validating dependency update..."
+          
+          VALIDATION_PASSED="true"
+          
+          # Check if package.json is valid
+          if ! npm run lint > /dev/null 2>&1; then
+            echo "❌ Linting failed"
+            VALIDATION_PASSED="false"
+          fi
+          
+          # Check if TypeScript compiles
+          if ! npm run typecheck > /dev/null 2>&1; then
+            echo "❌ TypeScript compilation failed"
+            VALIDATION_PASSED="false"
+          fi
+          
+          # Check if build succeeds
+          if ! npm run build > /dev/null 2>&1; then
+            echo "❌ Build failed"
+            VALIDATION_PASSED="false"
+          fi
+          
+          # Run unit tests
+          if ! npm run test:run > /dev/null 2>&1; then
+            echo "❌ Unit tests failed"
+            VALIDATION_PASSED="false"
+          fi
+          
+          # Check bundle size (if it's a production dependency)
+          if [[ "${{ needs.analyze-dependabot-pr.outputs.auto-merge-type }}" != *"dev"* ]]; then
+            if ! npm run performance:budget > /dev/null 2>&1; then
+              echo "⚠️ Bundle size check failed - needs review"
+              # Don't fail auto-merge for bundle size, but note it
+            fi
+          fi
+          
+          echo "validation-passed=$VALIDATION_PASSED" >> $GITHUB_OUTPUT
+          
+          if [ "$VALIDATION_PASSED" = "true" ]; then
+            echo "✅ All validations passed"
+          else
+            echo "❌ Some validations failed"
+          fi
+
+  # Wait for required checks
+  wait-for-checks:
+    name: Wait for Required Checks
+    runs-on: ubuntu-latest
+    needs: [analyze-dependabot-pr, dependabot-validation]
+    if: needs.analyze-dependabot-pr.outputs.should-auto-merge == 'true' && needs.dependabot-validation.outputs.validation-passed == 'true'
+    outputs:
+      checks-passed: ${{ steps.wait.outputs.checks-passed }}
+      
+    steps:
+      - name: Wait for all checks to complete
+        id: wait
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const maxWaitTime = 20 * 60 * 1000; // 20 minutes
+            const pollInterval = 30 * 1000; // 30 seconds
+            const startTime = Date.now();
+            
+            const requiredChecks = [
+              'lint-and-format',
+              'build-test', 
+              'security-audit'
+            ];
+            
+            while (Date.now() - startTime < maxWaitTime) {
+              console.log('Checking status of required checks...');
+              
+              // Get check runs for this commit
+              const { data: checkRuns } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.payload.pull_request.head.sha
+              });
+              
+              // Get commit status
+              const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.payload.pull_request.head.sha
+              });
+              
+              let allPassed = true;
+              let allCompleted = true;
+              
+              // Check required check runs
+              for (const checkName of requiredChecks) {
+                const check = checkRuns.check_runs.find(run => run.name === checkName);
+                if (check) {
+                  console.log(`${checkName}: ${check.status} - ${check.conclusion}`);
+                  if (check.status !== 'completed') {
+                    allCompleted = false;
+                  } else if (check.conclusion !== 'success') {
+                    allPassed = false;
+                  }
+                } else {
+                  console.log(`${checkName}: not found`);
+                  allCompleted = false;
+                }
+              }
+              
+              // Also check overall commit status
+              if (statuses.state === 'pending') {
+                allCompleted = false;
+              } else if (statuses.state !== 'success') {
+                allPassed = false;
+              }
+              
+              if (allCompleted) {
+                core.setOutput('checks-passed', allPassed.toString());
+                if (allPassed) {
+                  console.log('✅ All required checks passed');
+                  return true;
+                } else {
+                  console.log('❌ Some required checks failed');
+                  return false;
+                }
+              }
+              
+              console.log('⏳ Waiting for checks to complete...');
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+            }
+            
+            console.log('⏱️ Timeout waiting for checks');
+            core.setOutput('checks-passed', 'false');
+            return false;
+
+  # Auto-merge the Dependabot PR
+  auto-merge:
+    name: Auto-merge Dependabot PR
+    runs-on: ubuntu-latest
+    needs: [analyze-dependabot-pr, dependabot-validation, wait-for-checks]
+    if: >
+      needs.analyze-dependabot-pr.outputs.should-auto-merge == 'true' && 
+      needs.dependabot-validation.outputs.validation-passed == 'true' &&
+      needs.wait-for-checks.outputs.checks-passed == 'true'
+      
+    steps:
+      - name: Auto-approve PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: `🤖 Auto-approved by GitHub Actions
+              
+              **Dependency Update Type:** ${{ needs.analyze-dependabot-pr.outputs.auto-merge-type }}
+              
+              ✅ All automated checks passed:
+              - Linting and formatting
+              - TypeScript compilation  
+              - Build success
+              - Unit tests
+              - Security audit
+              
+              This PR has been automatically approved and will be merged.`
+            });
+            
+      - name: Enable auto-merge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              commit_title: `${{ fromJson(needs.analyze-dependabot-pr.outputs.pr-info).title }}`,
+              commit_message: `Auto-merged by GitHub Actions\n\nDependency update type: ${{ needs.analyze-dependabot-pr.outputs.auto-merge-type }}\nAll automated checks passed.`,
+              merge_method: 'squash'
+            });
+            
+            console.log('✅ PR auto-merged successfully');
+
+  # Handle failed auto-merge
+  auto-merge-failed:
+    name: Handle Auto-merge Failure
+    runs-on: ubuntu-latest
+    needs: [analyze-dependabot-pr, dependabot-validation, wait-for-checks, auto-merge]
+    if: >
+      always() && 
+      github.actor == 'dependabot[bot]' && 
+      needs.analyze-dependabot-pr.outputs.should-auto-merge == 'true' &&
+      (needs.dependabot-validation.result == 'failure' || 
+       needs.wait-for-checks.result == 'failure' || 
+       needs.auto-merge.result == 'failure')
+       
+    steps:
+      - name: Comment on failed auto-merge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let reason = 'Unknown reason';
+            let details = '';
+            
+            if ('${{ needs.dependabot-validation.result }}' === 'failure') {
+              reason = 'Validation failed';
+              details = `
+              ❌ **Validation Failed**
+              
+              The dependency update failed one or more validation checks:
+              - Linting and formatting
+              - TypeScript compilation
+              - Build process
+              - Unit tests
+              
+              Please review the validation results and fix any issues.`;
+              
+            } else if ('${{ needs.wait-for-checks.result }}' === 'failure') {
+              reason = 'Required checks failed';
+              details = `
+              ❌ **Required Checks Failed**
+              
+              One or more required CI checks failed:
+              - Build and test suite
+              - Security audit
+              - Code quality checks
+              
+              Please review the failing checks and address any issues.`;
+              
+            } else if ('${{ needs.auto-merge.result }}' === 'failure') {
+              reason = 'Auto-merge process failed';
+              details = `
+              ❌ **Auto-merge Failed**
+              
+              The auto-merge process encountered an error. This may be due to:
+              - Merge conflicts
+              - Branch protection rules
+              - Permissions issues
+              
+              Manual intervention may be required.`;
+            }
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🤖 **Auto-merge Failed: ${reason}**
+              
+              **Dependency Update Type:** ${{ needs.analyze-dependabot-pr.outputs.auto-merge-type }}
+              
+              ${details}
+              
+              **Actions Required:**
+              1. Review the failed checks in the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              2. Address any failing tests or validations
+              3. Re-run the workflow or merge manually once issues are resolved
+              
+              **Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
+
+  # Add labels for manual review PRs
+  label-manual-review:
+    name: Label Manual Review PRs
+    runs-on: ubuntu-latest
+    needs: [analyze-dependabot-pr]
+    if: >
+      github.actor == 'dependabot[bot]' && 
+      needs.analyze-dependabot-pr.outputs.should-auto-merge == 'false'
+      
+    steps:
+      - name: Add labels for manual review
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const autoMergeType = '${{ needs.analyze-dependabot-pr.outputs.auto-merge-type }}';
+            const prInfo = JSON.parse('${{ needs.analyze-dependabot-pr.outputs.pr-info }}');
+            
+            let labels = ['dependencies', 'dependabot'];
+            let reviewBody = '';
+            
+            if (autoMergeType === 'major') {
+              labels.push('major-update', 'needs-review');
+              reviewBody = `🔄 **Major Dependency Update**
+              
+              This PR contains a major version update that requires manual review.
+              
+              **Update Type:** Major version change
+              **Risk Level:** High - may contain breaking changes
+              
+              **Review Checklist:**
+              - [ ] Review changelog for breaking changes
+              - [ ] Test critical application functionality
+              - [ ] Update code if needed for compatibility
+              - [ ] Run full test suite
+              - [ ] Consider gradual rollout strategy
+              
+              ⚠️ **Important:** Major updates may introduce breaking changes. Please review thoroughly before merging.`;
+              
+            } else if (autoMergeType === 'minor-review') {
+              labels.push('minor-update', 'needs-review');
+              reviewBody = `🔄 **Minor Dependency Update**
+              
+              This PR contains a minor update to a production dependency that requires review.
+              
+              **Update Type:** Minor version change
+              **Risk Level:** Medium - new features may affect functionality
+              
+              **Review Checklist:**
+              - [ ] Review changelog for new features
+              - [ ] Test affected functionality
+              - [ ] Run test suite
+              - [ ] Check for any deprecation warnings
+              
+              ℹ️ **Note:** Minor updates typically don't contain breaking changes but may introduce new features.`;
+            }
+            
+            // Add labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+            
+            // Add review comment if needed
+            if (reviewBody) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: reviewBody
+              });
+            }

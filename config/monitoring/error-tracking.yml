@@ -1,0 +1,134 @@
+# Error Tracking Configuration
+# Configuration for error monitoring and tracking systems
+
+# Sentry Configuration
+sentry:
+  enabled: true
+  environment: "production"
+  release: "$GITHUB_SHA"
+  
+  # Error Filtering
+  ignore_errors:
+    - "ResizeObserver loop limit exceeded"
+    - "Network request failed"
+    - "ChunkLoadError"
+    - "Loading chunk"
+  
+  # Sample Rates
+  traces_sample_rate: 0.1
+  replays_session_sample_rate: 0.1
+  replays_on_error_sample_rate: 1.0
+  
+  # Tags
+  tags:
+    component: "pmp-learning-frontend"
+    platform: "web"
+    
+  # User Context
+  capture_user_feedback: true
+  capture_console_logs: false
+  capture_xhr: true
+  
+  # Performance Monitoring
+  performance_monitoring:
+    enabled: true
+    trace_propagation_targets:
+      - "localhost"
+      - "yusuke-kurosawa.github.io"
+      - "api.pmp-learning.com"
+  
+  # Release Health
+  release_health:
+    enabled: true
+    session_tracking: true
+
+# Custom Error Boundaries
+error_boundaries:
+  - name: "RootErrorBoundary"
+    component: "App"
+    fallback_component: "ErrorFallback"
+    capture_errors: true
+    
+  - name: "VisualizationErrorBoundary"
+    component: "VisualizationHub"
+    fallback_component: "VisualizationErrorFallback"
+    capture_errors: true
+    
+  - name: "ExamErrorBoundary"
+    component: "MockExam"
+    fallback_component: "ExamErrorFallback"
+    capture_errors: true
+
+# Error Categories
+error_categories:
+  critical:
+    - "TypeError"
+    - "ReferenceError"
+    - "SyntaxError"
+    
+  warning:
+    - "Network Error"
+    - "Timeout Error"
+    - "Validation Error"
+    
+  info:
+    - "User Navigation Error"
+    - "Feature Not Available"
+
+# Alerting Rules
+alerts:
+  critical_error_threshold: 10  # per minute
+  error_spike_threshold: 5x     # compared to baseline
+  new_error_notification: true
+  
+  # Notification Channels
+  channels:
+    - type: "email"
+      recipients: ["admin@pmp-learning.com"]
+      severity: ["critical", "warning"]
+    
+    - type: "slack"
+      webhook_url: "$SLACK_ERROR_WEBHOOK"
+      severity: ["critical"]
+    
+    - type: "pagerduty"
+      service_key: "$PAGERDUTY_SERVICE_KEY"
+      severity: ["critical"]
+
+# Error Reporting
+reporting:
+  daily_digest: true
+  weekly_summary: true
+  error_trends: true
+  
+  # Custom Metrics
+  custom_metrics:
+    - name: "visualization_errors"
+      description: "Errors in visualization components"
+      tags: ["component:visualization"]
+    
+    - name: "exam_errors"
+      description: "Errors in mock exam functionality"
+      tags: ["component:exam"]
+    
+    - name: "navigation_errors"
+      description: "Routing and navigation errors"
+      tags: ["component:navigation"]
+
+# Performance Error Thresholds
+performance_thresholds:
+  javascript_errors:
+    warning: 0.01   # 1% error rate
+    critical: 0.05  # 5% error rate
+  
+  network_errors:
+    warning: 0.02   # 2% error rate
+    critical: 0.10  # 10% error rate
+  
+  memory_leaks:
+    warning: 100    # MB
+    critical: 500   # MB
+  
+  render_errors:
+    warning: 5      # per minute
+    critical: 20    # per minute

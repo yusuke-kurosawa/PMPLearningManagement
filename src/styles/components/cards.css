@@ -1,0 +1,27 @@
+/* Flash card specific styles */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Card 3D effects */
+.card-flip-container {
+  perspective: 1000px;
+}
+
+/* Dark mode shadow */
+.dark-shadow {
+  @apply shadow-lg dark:shadow-2xl dark:shadow-gray-900/50;
+}

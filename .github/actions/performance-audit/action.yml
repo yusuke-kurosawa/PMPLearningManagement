@@ -1,0 +1,377 @@
+name: 'Performance Audit'
+description: 'Comprehensive performance audit using Lighthouse, bundle analysis, and Web Vitals'
+author: 'DevOps Team'
+
+inputs:
+  url:
+    description: 'URL to audit'
+    required: true
+  budget-config:
+    description: 'Path to performance budget configuration'
+    required: false
+    default: '.lighthouserc.json'
+  output-path:
+    description: 'Path to save audit results'
+    required: false
+    default: 'performance-audit'
+  lighthouse-config:
+    description: 'Custom Lighthouse configuration'
+    required: false
+  mobile-audit:
+    description: 'Whether to include mobile audit'
+    required: false
+    default: 'true'
+  performance-threshold:
+    description: 'Minimum performance score threshold'
+    required: false
+    default: '75'
+  create-report:
+    description: 'Whether to create a detailed report'
+    required: false
+    default: 'true'
+
+outputs:
+  performance-score:
+    description: 'Lighthouse performance score'
+    value: ${{ steps.lighthouse.outputs.performance-score }}
+  accessibility-score:
+    description: 'Lighthouse accessibility score'
+    value: ${{ steps.lighthouse.outputs.accessibility-score }}
+  seo-score:
+    description: 'Lighthouse SEO score'
+    value: ${{ steps.lighthouse.outputs.seo-score }}
+  best-practices-score:
+    description: 'Lighthouse best practices score'
+    value: ${{ steps.lighthouse.outputs.best-practices-score }}
+  bundle-size:
+    description: 'Total bundle size'
+    value: ${{ steps.bundle-analysis.outputs.bundle-size }}
+  audit-status:
+    description: 'Overall audit status (pass/warning/fail)'
+    value: ${{ steps.evaluation.outputs.status }}
+  report-path:
+    description: 'Path to the generated report'
+    value: ${{ steps.report.outputs.report-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup audit environment
+      shell: bash
+      run: |
+        echo "🔍 Setting up performance audit environment..."
+        
+        # Create output directory
+        mkdir -p ${{ inputs.output-path }}
+        
+        # Install Lighthouse CLI if not present
+        if ! command -v lighthouse &> /dev/null; then
+          echo "Installing Lighthouse CLI..."
+          npm install -g lighthouse @lhci/cli
+        fi
+        
+        echo "✅ Environment setup complete"
+
+    - name: Run Lighthouse audit
+      id: lighthouse
+      shell: bash
+      run: |
+        echo "🚦 Running Lighthouse performance audit..."
+        
+        URL="${{ inputs.url }}"
+        OUTPUT_DIR="${{ inputs.output-path }}"
+        
+        # Desktop audit
+        echo "📊 Running desktop audit..."
+        lighthouse "$URL" \
+          --output=json \
+          --output=html \
+          --output-path="$OUTPUT_DIR/lighthouse-desktop" \
+          --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
+          --preset=desktop \
+          --throttling-method=simulate \
+          --quiet
+        
+        # Mobile audit (if enabled)
+        if [ "${{ inputs.mobile-audit }}" == "true" ]; then
+          echo "📱 Running mobile audit..."
+          lighthouse "$URL" \
+            --output=json \
+            --output=html \
+            --output-path="$OUTPUT_DIR/lighthouse-mobile" \
+            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage" \
+            --form-factor=mobile \
+            --throttling-method=simulate \
+            --quiet
+        fi
+        
+        # Extract scores from desktop results
+        if [ -f "$OUTPUT_DIR/lighthouse-desktop.report.json" ]; then
+          PERF_SCORE=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.categories.performance.score * 100' | cut -d. -f1)
+          A11Y_SCORE=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.categories.accessibility.score * 100' | cut -d. -f1)
+          SEO_SCORE=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.categories.seo.score * 100' | cut -d. -f1)
+          BP_SCORE=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.categories."best-practices".score * 100' | cut -d. -f1)
+          
+          echo "performance-score=$PERF_SCORE" >> $GITHUB_OUTPUT
+          echo "accessibility-score=$A11Y_SCORE" >> $GITHUB_OUTPUT
+          echo "seo-score=$SEO_SCORE" >> $GITHUB_OUTPUT
+          echo "best-practices-score=$BP_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "📊 Lighthouse Scores:"
+          echo "  Performance: $PERF_SCORE/100"
+          echo "  Accessibility: $A11Y_SCORE/100"
+          echo "  SEO: $SEO_SCORE/100"
+          echo "  Best Practices: $BP_SCORE/100"
+        else
+          echo "❌ Failed to generate Lighthouse report"
+          exit 1
+        fi
+
+    - name: Web Vitals analysis
+      id: web-vitals
+      shell: bash
+      run: |
+        echo "⚡ Analyzing Web Vitals..."
+        
+        OUTPUT_DIR="${{ inputs.output-path }}"
+        
+        # Extract Web Vitals from Lighthouse report
+        if [ -f "$OUTPUT_DIR/lighthouse-desktop.report.json" ]; then
+          LCP=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.audits."largest-contentful-paint".numericValue // 0')
+          FID=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.audits."max-potential-fid".numericValue // 0')
+          CLS=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.audits."cumulative-layout-shift".numericValue // 0')
+          FCP=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.audits."first-contentful-paint".numericValue // 0')
+          TTFB=$(cat "$OUTPUT_DIR/lighthouse-desktop.report.json" | jq '.audits."server-response-time".numericValue // 0')
+          
+          # Create Web Vitals summary
+          cat > "$OUTPUT_DIR/web-vitals.json" << EOF
+          {
+            "lcp": $LCP,
+            "fid": $FID,
+            "cls": $CLS,
+            "fcp": $FCP,
+            "ttfb": $TTFB,
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+          
+          echo "⚡ Web Vitals:"
+          echo "  LCP: ${LCP}ms"
+          echo "  FID: ${FID}ms" 
+          echo "  CLS: $CLS"
+          echo "  FCP: ${FCP}ms"
+          echo "  TTFB: ${TTFB}ms"
+        fi
+
+    - name: Bundle size analysis
+      id: bundle-analysis
+      shell: bash
+      run: |
+        echo "📦 Analyzing bundle size..."
+        
+        OUTPUT_DIR="${{ inputs.output-path }}"
+        
+        # Check if dist directory exists
+        if [ -d "dist" ]; then
+          # Calculate total bundle size
+          TOTAL_SIZE=$(du -sb dist/ | cut -f1)
+          TOTAL_SIZE_MB=$(echo "scale=2; $TOTAL_SIZE / 1024 / 1024" | bc)
+          
+          # Analyze individual files
+          find dist -name "*.js" -o -name "*.css" -o -name "*.woff2" -o -name "*.png" -o -name "*.jpg" | \
+          while read file; do
+            SIZE=$(stat -c%s "$file")
+            SIZE_KB=$(echo "scale=1; $SIZE / 1024" | bc)
+            echo "$(basename "$file"): ${SIZE_KB}KB"
+          done > "$OUTPUT_DIR/bundle-breakdown.txt"
+          
+          # Check bundle size budget
+          if [ -f "${{ inputs.budget-config }}" ]; then
+            echo "💰 Checking bundle size budget..."
+            npm run performance:budget > "$OUTPUT_DIR/budget-check.txt" 2>&1 || echo "Budget check completed with warnings"
+          fi
+          
+          echo "bundle-size=$TOTAL_SIZE_MB MB" >> $GITHUB_OUTPUT
+          echo "📦 Total bundle size: $TOTAL_SIZE_MB MB"
+          
+        else
+          echo "⚠️ No dist directory found for bundle analysis"
+          echo "bundle-size=0 MB" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Performance evaluation
+      id: evaluation
+      shell: bash
+      run: |
+        echo "📊 Evaluating performance metrics..."
+        
+        PERF_SCORE="${{ steps.lighthouse.outputs.performance-score }}"
+        THRESHOLD="${{ inputs.performance-threshold }}"
+        
+        STATUS="pass"
+        ISSUES=""
+        
+        # Performance score check
+        if [ "$PERF_SCORE" -lt "$THRESHOLD" ]; then
+          STATUS="fail"
+          ISSUES="$ISSUES- Performance score ($PERF_SCORE) below threshold ($THRESHOLD)\n"
+        elif [ "$PERF_SCORE" -lt "90" ]; then
+          STATUS="warning"
+          ISSUES="$ISSUES- Performance score ($PERF_SCORE) could be improved\n"
+        fi
+        
+        # Accessibility check
+        A11Y_SCORE="${{ steps.lighthouse.outputs.accessibility-score }}"
+        if [ "$A11Y_SCORE" -lt "90" ]; then
+          STATUS="warning"
+          ISSUES="$ISSUES- Accessibility score ($A11Y_SCORE) below recommended 90\n"
+        fi
+        
+        # Bundle size check (if over 5MB, warn)
+        BUNDLE_SIZE_MB=$(echo "${{ steps.bundle-analysis.outputs.bundle-size }}" | cut -d' ' -f1)
+        if (( $(echo "$BUNDLE_SIZE_MB > 5" | bc -l) )); then
+          STATUS="warning"
+          ISSUES="$ISSUES- Bundle size (${BUNDLE_SIZE_MB}MB) is quite large\n"
+        fi
+        
+        echo "status=$STATUS" >> $GITHUB_OUTPUT
+        
+        case $STATUS in
+          "pass")
+            echo "✅ Performance audit: PASSED"
+            ;;
+          "warning")
+            echo "⚠️ Performance audit: WARNING"
+            echo -e "Issues:\n$ISSUES"
+            ;;
+          "fail")
+            echo "❌ Performance audit: FAILED"
+            echo -e "Critical issues:\n$ISSUES"
+            ;;
+        esac
+
+    - name: Generate comprehensive report
+      id: report
+      if: inputs.create-report == 'true'
+      shell: bash
+      run: |
+        echo "📝 Generating comprehensive performance report..."
+        
+        OUTPUT_DIR="${{ inputs.output-path }}"
+        REPORT_FILE="$OUTPUT_DIR/performance-report.md"
+        
+        cat > "$REPORT_FILE" << EOF
+        # Performance Audit Report
+        
+        **Audit Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        **URL:** ${{ inputs.url }}
+        **Audit Tool:** Lighthouse $(lighthouse --version | head -n1)
+        
+        ## 📊 Performance Scores
+        
+        | Metric | Desktop Score | Status |
+        |--------|---------------|--------|
+        | **Performance** | ${{ steps.lighthouse.outputs.performance-score }}/100 | ${{ steps.lighthouse.outputs.performance-score >= 90 && '✅ Excellent' || steps.lighthouse.outputs.performance-score >= 75 && '⚠️ Good' || '❌ Needs Improvement' }} |
+        | **Accessibility** | ${{ steps.lighthouse.outputs.accessibility-score }}/100 | ${{ steps.lighthouse.outputs.accessibility-score >= 90 && '✅ Excellent' || steps.lighthouse.outputs.accessibility-score >= 75 && '⚠️ Good' || '❌ Needs Improvement' }} |
+        | **Best Practices** | ${{ steps.lighthouse.outputs.best-practices-score }}/100 | ${{ steps.lighthouse.outputs.best-practices-score >= 90 && '✅ Excellent' || steps.lighthouse.outputs.best-practices-score >= 75 && '⚠️ Good' || '❌ Needs Improvement' }} |
+        | **SEO** | ${{ steps.lighthouse.outputs.seo-score }}/100 | ${{ steps.lighthouse.outputs.seo-score >= 90 && '✅ Excellent' || steps.lighthouse.outputs.seo-score >= 75 && '⚠️ Good' || '❌ Needs Improvement' }} |
+        
+        ## ⚡ Web Vitals
+        EOF
+        
+        if [ -f "$OUTPUT_DIR/web-vitals.json" ]; then
+          LCP=$(cat "$OUTPUT_DIR/web-vitals.json" | jq '.lcp')
+          FCP=$(cat "$OUTPUT_DIR/web-vitals.json" | jq '.fcp')
+          CLS=$(cat "$OUTPUT_DIR/web-vitals.json" | jq '.cls')
+          
+          cat >> "$REPORT_FILE" << EOF
+        
+        | Metric | Value | Status |
+        |--------|-------|--------|
+        | **Largest Contentful Paint (LCP)** | ${LCP}ms | $(echo "$LCP <= 2500" | bc -l | grep -q 1 && echo '✅ Good' || echo "$LCP <= 4000" | bc -l | grep -q 1 && echo '⚠️ Needs Improvement' || echo '❌ Poor') |
+        | **First Contentful Paint (FCP)** | ${FCP}ms | $(echo "$FCP <= 1800" | bc -l | grep -q 1 && echo '✅ Good' || echo "$FCP <= 3000" | bc -l | grep -q 1 && echo '⚠️ Needs Improvement' || echo '❌ Poor') |
+        | **Cumulative Layout Shift (CLS)** | $CLS | $(echo "$CLS <= 0.1" | bc -l | grep -q 1 && echo '✅ Good' || echo "$CLS <= 0.25" | bc -l | grep -q 1 && echo '⚠️ Needs Improvement' || echo '❌ Poor') |
+        EOF
+        fi
+        
+        cat >> "$REPORT_FILE" << EOF
+        
+        ## 📦 Bundle Analysis
+        
+        - **Total Bundle Size:** ${{ steps.bundle-analysis.outputs.bundle-size }}
+        - **Bundle Breakdown:** See \`bundle-breakdown.txt\`
+        EOF
+        
+        if [ -f "$OUTPUT_DIR/budget-check.txt" ]; then
+          echo "- **Budget Check:** See \`budget-check.txt\`" >> "$REPORT_FILE"
+        fi
+        
+        cat >> "$REPORT_FILE" << EOF
+        
+        ## 🎯 Recommendations
+        
+        EOF
+        
+        # Add specific recommendations based on scores
+        PERF_SCORE="${{ steps.lighthouse.outputs.performance-score }}"
+        if [ "$PERF_SCORE" -lt "90" ]; then
+          echo "### Performance Improvements" >> "$REPORT_FILE"
+          echo "- Optimize images and use modern formats (WebP, AVIF)" >> "$REPORT_FILE"
+          echo "- Implement code splitting and lazy loading" >> "$REPORT_FILE"
+          echo "- Minimize and compress JavaScript and CSS" >> "$REPORT_FILE"
+          echo "- Use a Content Delivery Network (CDN)" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+        fi
+        
+        A11Y_SCORE="${{ steps.lighthouse.outputs.accessibility-score }}"
+        if [ "$A11Y_SCORE" -lt "90" ]; then
+          echo "### Accessibility Improvements" >> "$REPORT_FILE"
+          echo "- Add proper alt text to images" >> "$REPORT_FILE"
+          echo "- Ensure sufficient color contrast" >> "$REPORT_FILE"
+          echo "- Add ARIA labels where appropriate" >> "$REPORT_FILE"
+          echo "- Ensure keyboard navigation works" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+        fi
+        
+        cat >> "$REPORT_FILE" << EOF
+        ## 📊 Detailed Results
+        
+        - **Desktop Report:** [lighthouse-desktop.report.html](lighthouse-desktop.report.html)
+        EOF
+        
+        if [ "${{ inputs.mobile-audit }}" == "true" ]; then
+          echo "- **Mobile Report:** [lighthouse-mobile.report.html](lighthouse-mobile.report.html)" >> "$REPORT_FILE"
+        fi
+        
+        cat >> "$REPORT_FILE" << EOF
+        - **Web Vitals Data:** [web-vitals.json](web-vitals.json)
+        
+        ---
+        *Report generated by Performance Audit Action*
+        EOF
+        
+        echo "report-path=$REPORT_FILE" >> $GITHUB_OUTPUT
+        echo "✅ Comprehensive report generated: $REPORT_FILE"
+
+    - name: Create performance summary
+      shell: bash
+      run: |
+        echo "## 📊 Performance Audit Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**URL:** ${{ inputs.url }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ steps.evaluation.outputs.status == 'pass' && '✅ PASS' || steps.evaluation.outputs.status == 'warning' && '⚠️ WARNING' || '❌ FAIL' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Lighthouse Scores" >> $GITHUB_STEP_SUMMARY
+        echo "| Category | Score | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Performance | ${{ steps.lighthouse.outputs.performance-score }}/100 | ${{ steps.lighthouse.outputs.performance-score >= 90 && '🟢' || steps.lighthouse.outputs.performance-score >= 75 && '🟡' || '🔴' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Accessibility | ${{ steps.lighthouse.outputs.accessibility-score }}/100 | ${{ steps.lighthouse.outputs.accessibility-score >= 90 && '🟢' || steps.lighthouse.outputs.accessibility-score >= 75 && '🟡' || '🔴' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Best Practices | ${{ steps.lighthouse.outputs.best-practices-score }}/100 | ${{ steps.lighthouse.outputs.best-practices-score >= 90 && '🟢' || steps.lighthouse.outputs.best-practices-score >= 75 && '🟡' || '🔴' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| SEO | ${{ steps.lighthouse.outputs.seo-score }}/100 | ${{ steps.lighthouse.outputs.seo-score >= 90 && '🟢' || steps.lighthouse.outputs.seo-score >= 75 && '🟡' || '🔴' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Bundle Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Total Size:** ${{ steps.bundle-analysis.outputs.bundle-size }}" >> $GITHUB_STEP_SUMMARY
+
+branding:
+  icon: 'zap'
+  color: 'yellow'

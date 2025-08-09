@@ -1,0 +1,516 @@
+name: Dependency Health Check
+
+on:
+  schedule:
+    # Run weekly on Sundays at 1 AM UTC
+    - cron: '0 1 * * 0'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of check to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - security
+          - outdated
+          - unused
+          - licenses
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  security-events: write
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Dependency Security Audit
+  security-audit:
+    name: Security Vulnerability Audit
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'security' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run npm audit
+        id: audit
+        run: |
+          # Run audit and capture results
+          npm audit --audit-level=info --json > audit-results.json || true
+          
+          # Parse results
+          TOTAL_VULNS=$(cat audit-results.json | jq '.vulnerabilities | length // 0' 2>/dev/null || echo 0)
+          CRITICAL=$(cat audit-results.json | jq '[.vulnerabilities[] | select(.severity == "critical")] | length' 2>/dev/null || echo 0)
+          HIGH=$(cat audit-results.json | jq '[.vulnerabilities[] | select(.severity == "high")] | length' 2>/dev/null || echo 0)
+          MODERATE=$(cat audit-results.json | jq '[.vulnerabilities[] | select(.severity == "moderate")] | length' 2>/dev/null || echo 0)
+          LOW=$(cat audit-results.json | jq '[.vulnerabilities[] | select(.severity == "low")] | length' 2>/dev/null || echo 0)
+          INFO=$(cat audit-results.json | jq '[.vulnerabilities[] | select(.severity == "info")] | length' 2>/dev/null || echo 0)
+          
+          echo "total-vulnerabilities=$TOTAL_VULNS" >> $GITHUB_OUTPUT
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+          echo "low=$LOW" >> $GITHUB_OUTPUT
+          echo "info=$INFO" >> $GITHUB_OUTPUT
+          
+          echo "📊 Vulnerability Summary:"
+          echo "  Total: $TOTAL_VULNS"
+          echo "  Critical: $CRITICAL"
+          echo "  High: $HIGH"
+          echo "  Moderate: $MODERATE"
+          echo "  Low: $LOW"
+          echo "  Info: $INFO"
+          
+          # Create detailed report
+          cat > security-report.md << EOF
+          # Security Audit Report - $(date +%Y-%m-%d)
+          
+          ## Summary
+          - **Total Vulnerabilities**: $TOTAL_VULNS
+          - **Critical**: $CRITICAL
+          - **High**: $HIGH
+          - **Moderate**: $MODERATE
+          - **Low**: $LOW
+          - **Info**: $INFO
+          
+          ## Details
+          EOF
+          
+          if [ "$TOTAL_VULNS" -gt "0" ]; then
+            echo "" >> security-report.md
+            echo "### Vulnerability Details" >> security-report.md
+            cat audit-results.json | jq -r '.vulnerabilities[] | "- **\(.title)** (\(.severity)): \(.overview // "No details available")"' >> security-report.md 2>/dev/null || echo "- Unable to parse vulnerability details" >> security-report.md
+          else
+            echo "✅ No vulnerabilities found!" >> security-report.md
+          fi
+          
+        continue-on-error: true
+        
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: |
+            security-report.md
+            audit-results.json
+          retention-days: 30
+
+  # Check for Outdated Dependencies
+  outdated-check:
+    name: Outdated Dependencies Check
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'outdated' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          # Get outdated packages
+          npm outdated --json > outdated-results.json || true
+          
+          # Count outdated packages
+          OUTDATED_COUNT=$(cat outdated-results.json | jq 'length' 2>/dev/null || echo 0)
+          echo "outdated-count=$OUTDATED_COUNT" >> $GITHUB_OUTPUT
+          
+          echo "📦 Outdated packages: $OUTDATED_COUNT"
+          
+          # Create outdated report
+          cat > outdated-report.md << EOF
+          # Outdated Dependencies Report - $(date +%Y-%m-%d)
+          
+          ## Summary
+          - **Outdated Packages**: $OUTDATED_COUNT
+          
+          EOF
+          
+          if [ "$OUTDATED_COUNT" -gt "0" ]; then
+            echo "## Outdated Packages" >> outdated-report.md
+            echo "" >> outdated-report.md
+            echo "| Package | Current | Wanted | Latest | Location |" >> outdated-report.md
+            echo "|---------|---------|--------|--------|----------|" >> outdated-report.md
+            
+            cat outdated-results.json | jq -r 'to_entries[] | "| \(.key) | \(.value.current) | \(.value.wanted) | \(.value.latest) | \(.value.location // "dependencies") |"' >> outdated-report.md 2>/dev/null || echo "| Unable to parse outdated data | - | - | - | - |" >> outdated-report.md
+          else
+            echo "✅ All packages are up to date!" >> outdated-report.md
+          fi
+          
+      - name: Upload outdated report
+        uses: actions/upload-artifact@v4
+        with:
+          name: outdated-dependencies-report
+          path: |
+            outdated-report.md
+            outdated-results.json
+          retention-days: 30
+
+  # License Compliance Check
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'licenses' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install license checker
+        run: npm install -g license-checker
+        
+      - name: Check licenses
+        id: licenses
+        run: |
+          # Generate license report
+          license-checker --json > license-results.json || true
+          license-checker --csv > license-results.csv || true
+          
+          # Count packages and license types
+          TOTAL_PACKAGES=$(cat license-results.json | jq 'length' 2>/dev/null || echo 0)
+          
+          echo "total-packages=$TOTAL_PACKAGES" >> $GITHUB_OUTPUT
+          echo "📄 Total packages with licenses: $TOTAL_PACKAGES"
+          
+          # Create license report
+          cat > license-report.md << EOF
+          # License Compliance Report - $(date +%Y-%m-%d)
+          
+          ## Summary
+          - **Total Packages**: $TOTAL_PACKAGES
+          
+          ## License Distribution
+          EOF
+          
+          # Get license distribution
+          cat license-results.json | jq -r 'group_by(.licenses) | map({license: .[0].licenses, count: length}) | sort_by(.count) | reverse | .[] | "- **\(.license)**: \(.count) packages"' >> license-report.md 2>/dev/null || echo "- Unable to parse license data" >> license-report.md
+          
+          # Check for problematic licenses
+          PROBLEMATIC_LICENSES=("GPL" "AGPL" "LGPL" "CDDL" "EPL")
+          FOUND_ISSUES=false
+          
+          for license in "${PROBLEMATIC_LICENSES[@]}"; do
+            if cat license-results.json | jq -e ".[].licenses | test(\"$license\"; \"i\")" > /dev/null 2>&1; then
+              if [ "$FOUND_ISSUES" = false ]; then
+                echo "" >> license-report.md
+                echo "## ⚠️ Potentially Problematic Licenses" >> license-report.md
+                FOUND_ISSUES=true
+              fi
+              echo "- Found packages with $license license" >> license-report.md
+            fi
+          done
+          
+          if [ "$FOUND_ISSUES" = false ]; then
+            echo "" >> license-report.md
+            echo "✅ No problematic licenses detected!" >> license-report.md
+          fi
+          
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-compliance-report
+          path: |
+            license-report.md
+            license-results.json
+            license-results.csv
+          retention-days: 30
+
+  # Unused Dependencies Check
+  unused-dependencies-check:
+    name: Unused Dependencies Check
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'unused' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install depcheck
+        run: npm install -g depcheck
+        
+      - name: Check for unused dependencies
+        id: unused
+        run: |
+          # Run depcheck
+          depcheck --json > unused-results.json || true
+          
+          # Parse results
+          UNUSED_DEPS=$(cat unused-results.json | jq '.dependencies | length' 2>/dev/null || echo 0)
+          UNUSED_DEV_DEPS=$(cat unused-results.json | jq '.devDependencies | length' 2>/dev/null || echo 0)
+          MISSING_DEPS=$(cat unused-results.json | jq '.missing | length' 2>/dev/null || echo 0)
+          
+          echo "unused-deps=$UNUSED_DEPS" >> $GITHUB_OUTPUT
+          echo "unused-dev-deps=$UNUSED_DEV_DEPS" >> $GITHUB_OUTPUT
+          echo "missing-deps=$MISSING_DEPS" >> $GITHUB_OUTPUT
+          
+          echo "📦 Dependency Analysis:"
+          echo "  Unused dependencies: $UNUSED_DEPS"
+          echo "  Unused dev dependencies: $UNUSED_DEV_DEPS"
+          echo "  Missing dependencies: $MISSING_DEPS"
+          
+          # Create unused dependencies report
+          cat > unused-report.md << EOF
+          # Unused Dependencies Report - $(date +%Y-%m-%d)
+          
+          ## Summary
+          - **Unused Dependencies**: $UNUSED_DEPS
+          - **Unused Dev Dependencies**: $UNUSED_DEV_DEPS
+          - **Missing Dependencies**: $MISSING_DEPS
+          
+          EOF
+          
+          if [ "$UNUSED_DEPS" -gt "0" ]; then
+            echo "## Unused Production Dependencies" >> unused-report.md
+            cat unused-results.json | jq -r '.dependencies[] | "- `\(.)`"' >> unused-report.md 2>/dev/null || echo "- Unable to parse unused dependencies" >> unused-report.md
+            echo "" >> unused-report.md
+          fi
+          
+          if [ "$UNUSED_DEV_DEPS" -gt "0" ]; then
+            echo "## Unused Development Dependencies" >> unused-report.md
+            cat unused-results.json | jq -r '.devDependencies[] | "- `\(.)`"' >> unused-report.md 2>/dev/null || echo "- Unable to parse unused dev dependencies" >> unused-report.md
+            echo "" >> unused-report.md
+          fi
+          
+          if [ "$MISSING_DEPS" -gt "0" ]; then
+            echo "## Missing Dependencies" >> unused-report.md
+            cat unused-results.json | jq -r '.missing | to_entries[] | "- `\(.key)` (used in: \(.value | join(", ")))"' >> unused-report.md 2>/dev/null || echo "- Unable to parse missing dependencies" >> unused-report.md
+            echo "" >> unused-report.md
+          fi
+          
+          if [ "$UNUSED_DEPS" -eq "0" ] && [ "$UNUSED_DEV_DEPS" -eq "0" ] && [ "$MISSING_DEPS" -eq "0" ]; then
+            echo "✅ No unused or missing dependencies found!" >> unused-report.md
+          fi
+          
+      - name: Upload unused dependencies report
+        uses: actions/upload-artifact@v4
+        with:
+          name: unused-dependencies-report
+          path: |
+            unused-report.md
+            unused-results.json
+          retention-days: 30
+
+  # Generate Comprehensive Report
+  generate-comprehensive-report:
+    name: Generate Comprehensive Health Report
+    runs-on: ubuntu-latest
+    needs: [security-audit, outdated-check, license-check, unused-dependencies-check]
+    if: always()
+    
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+          
+      - name: Generate comprehensive report
+        run: |
+          mkdir -p final-report
+          
+          cat > final-report/dependency-health-report.md << EOF
+          # Dependency Health Report - $(date +%Y-%m-%d)
+          
+          Generated by: **GitHub Actions Dependency Health Check**
+          Workflow Run: [#${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ---
+          
+          ## 🛡️ Security Status
+          EOF
+          
+          if [ -f "reports/security-audit-report/security-report.md" ]; then
+            echo "### Security Vulnerabilities" >> final-report/dependency-health-report.md
+            tail -n +3 reports/security-audit-report/security-report.md >> final-report/dependency-health-report.md
+            echo "" >> final-report/dependency-health-report.md
+            
+            # Check for critical/high vulnerabilities
+            CRITICAL=$(cat reports/security-audit-report/audit-results.json | jq '[.vulnerabilities[] | select(.severity == "critical")] | length' 2>/dev/null || echo 0)
+            HIGH=$(cat reports/security-audit-report/audit-results.json | jq '[.vulnerabilities[] | select(.severity == "high")] | length' 2>/dev/null || echo 0)
+            
+            if [ "$CRITICAL" -gt "0" ] || [ "$HIGH" -gt "0" ]; then
+              echo "🚨 **Action Required**: Critical or high severity vulnerabilities found!" >> final-report/dependency-health-report.md
+            else
+              echo "✅ No critical or high severity vulnerabilities" >> final-report/dependency-health-report.md
+            fi
+          else
+            echo "⚠️ Security audit report not available" >> final-report/dependency-health-report.md
+          fi
+          
+          echo "" >> final-report/dependency-health-report.md
+          echo "---" >> final-report/dependency-health-report.md
+          echo "" >> final-report/dependency-health-report.md
+          echo "## 📦 Package Updates" >> final-report/dependency-health-report.md
+          
+          if [ -f "reports/outdated-dependencies-report/outdated-report.md" ]; then
+            tail -n +3 reports/outdated-dependencies-report/outdated-report.md >> final-report/dependency-health-report.md
+          else
+            echo "⚠️ Outdated packages report not available" >> final-report/dependency-health-report.md
+          fi
+          
+          echo "" >> final-report/dependency-health-report.md
+          echo "---" >> final-report/dependency-health-report.md
+          echo "" >> final-report/dependency-health-report.md
+          echo "## 📄 License Compliance" >> final-report/dependency-health-report.md
+          
+          if [ -f "reports/license-compliance-report/license-report.md" ]; then
+            tail -n +3 reports/license-compliance-report/license-report.md >> final-report/dependency-health-report.md
+          else
+            echo "⚠️ License compliance report not available" >> final-report/dependency-health-report.md
+          fi
+          
+          echo "" >> final-report/dependency-health-report.md
+          echo "---" >> final-report/dependency-health-report.md
+          echo "" >> final-report/dependency-health-report.md
+          echo "## 🧹 Cleanup Opportunities" >> final-report/dependency-health-report.md
+          
+          if [ -f "reports/unused-dependencies-report/unused-report.md" ]; then
+            tail -n +3 reports/unused-dependencies-report/unused-report.md >> final-report/dependency-health-report.md
+          else
+            echo "⚠️ Unused dependencies report not available" >> final-report/dependency-health-report.md
+          fi
+          
+          echo "" >> final-report/dependency-health-report.md
+          echo "---" >> final-report/dependency-health-report.md
+          echo "" >> final-report/dependency-health-report.md
+          echo "## 📊 Summary & Recommendations" >> final-report/dependency-health-report.md
+          echo "" >> final-report/dependency-health-report.md
+          
+          # Generate recommendations based on findings
+          RECOMMENDATIONS=""
+          
+          if [ "$CRITICAL" -gt "0" ]; then
+            RECOMMENDATIONS="$RECOMMENDATIONS- 🚨 **Critical**: Update packages with critical vulnerabilities immediately\n"
+          fi
+          
+          if [ "$HIGH" -gt "0" ]; then
+            RECOMMENDATIONS="$RECOMMENDATIONS- ⚠️ **High Priority**: Update packages with high severity vulnerabilities\n"
+          fi
+          
+          if [ -f "reports/unused-dependencies-report/unused-results.json" ]; then
+            UNUSED_TOTAL=$(cat reports/unused-dependencies-report/unused-results.json | jq '(.dependencies | length) + (.devDependencies | length)' 2>/dev/null || echo 0)
+            if [ "$UNUSED_TOTAL" -gt "0" ]; then
+              RECOMMENDATIONS="$RECOMMENDATIONS- 🧹 **Cleanup**: Remove unused dependencies to reduce bundle size\n"
+            fi
+          fi
+          
+          if [ -f "reports/outdated-dependencies-report/outdated-results.json" ]; then
+            OUTDATED_TOTAL=$(cat reports/outdated-dependencies-report/outdated-results.json | jq 'length' 2>/dev/null || echo 0)
+            if [ "$OUTDATED_TOTAL" -gt "10" ]; then
+              RECOMMENDATIONS="$RECOMMENDATIONS- 📦 **Updates**: Consider updating outdated packages\n"
+            fi
+          fi
+          
+          if [ -n "$RECOMMENDATIONS" ]; then
+            echo "### Recommended Actions" >> final-report/dependency-health-report.md
+            echo -e "$RECOMMENDATIONS" >> final-report/dependency-health-report.md
+          else
+            echo "✅ **No immediate actions required** - Dependencies are in good health!" >> final-report/dependency-health-report.md
+          fi
+          
+          echo "" >> final-report/dependency-health-report.md
+          echo "### Next Steps" >> final-report/dependency-health-report.md
+          echo "1. Review the detailed reports above" >> final-report/dependency-health-report.md
+          echo "2. Address any security vulnerabilities first" >> final-report/dependency-health-report.md
+          echo "3. Consider updating outdated packages during maintenance windows" >> final-report/dependency-health-report.md
+          echo "4. Remove unused dependencies to improve build performance" >> final-report/dependency-health-report.md
+          echo "5. Review license compliance for legal requirements" >> final-report/dependency-health-report.md
+          
+          echo "📋 Comprehensive dependency health report generated"
+          
+      - name: Upload comprehensive report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-dependency-health-report
+          path: final-report/
+          retention-days: 90
+
+  # Create GitHub Issues for Critical Findings
+  create-security-issues:
+    name: Create Issues for Critical Findings
+    runs-on: ubuntu-latest
+    needs: [security-audit, generate-comprehensive-report]
+    if: always() && needs.security-audit.outputs.critical > 0 || needs.security-audit.outputs.high > 0
+    
+    steps:
+      - name: Create security issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const critical = '${{ needs.security-audit.outputs.critical }}' || '0';
+            const high = '${{ needs.security-audit.outputs.high }}' || '0';
+            const total = '${{ needs.security-audit.outputs.total-vulnerabilities }}' || '0';
+            
+            if (parseInt(critical) > 0 || parseInt(high) > 0) {
+              const severity = parseInt(critical) > 0 ? 'critical' : 'high';
+              const title = `[SECURITY] ${severity.charAt(0).toUpperCase() + severity.slice(1)} security vulnerabilities detected`;
+              
+              const body = `## 🚨 Security Vulnerabilities Detected
+              
+              **Detection Date:** ${new Date().toISOString().split('T')[0]}
+              **Severity:** ${severity.toUpperCase()}
+              
+              ### Summary
+              - **Critical:** ${critical} vulnerabilities
+              - **High:** ${high} vulnerabilities  
+              - **Total:** ${total} vulnerabilities
+              
+              ### Action Required
+              ${parseInt(critical) > 0 ? 
+                '🚨 **CRITICAL**: Immediate action required. Critical vulnerabilities pose significant security risks.' : 
+                '⚠️ **HIGH PRIORITY**: These vulnerabilities should be addressed promptly.'
+              }
+              
+              ### Recommended Steps
+              1. **Review** the detailed security audit report
+              2. **Update** affected packages to secure versions
+              3. **Test** the application after updates
+              4. **Deploy** security patches as soon as possible
+              
+              ### Reports
+              - 📊 [View detailed security report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              - 🔍 [Workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+              
+              ---
+              *This issue was automatically created by the Dependency Health Check workflow.*`;
+              
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security', 'critical', 'dependencies', 'automated']
+              });
+            }

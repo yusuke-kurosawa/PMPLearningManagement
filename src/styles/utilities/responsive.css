@@ -1,0 +1,22 @@
+/* Responsive utilities */
+.text-responsive {
+  @apply text-sm md:text-base lg:text-lg;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .force-graph-container {
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  /* Optimize table scrolling on mobile */
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  
+  /* Improve modal backdrop on mobile */
+  .modal-backdrop {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

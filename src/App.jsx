@@ -1,19 +1,22 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import Navigation from './components/Navigation';
-import PageTransition from './components/PageTransition';
-import CustomizationPanel from './components/CustomizationPanel';
-import Home from './components/Home';
-import PMBOKMatrix from './components/PMBOKMatrix';
-import ITTOForceGraph from './components/ITTOForceGraph';
-import IntegratedView from './components/IntegratedView';
-import PMPGlossary from './components/PMPGlossary';
-import VisualizationHub from './components/VisualizationHub';
-import LearningProgressDashboard from './components/LearningProgressDashboard';
-import FlashCardLearning from './components/FlashCardLearning';
-import MockExam from './components/MockExam';
-import ExamResults from './components/ExamResults';
+import Navigation from './components/layout/Navigation';
+import PageTransition from './components/layout/PageTransition';
+import CustomizationPanel from './components/shared/CustomizationPanel';
+import Home from './components/pages/Home';
+import PMBOKMatrix from './components/pages/PMBOKMatrix';
+import ITTOForceGraph from './components/visualizations/ITTOForceGraph';
+import IntegratedView from './components/visualizations/IntegratedView';
+import PMPGlossary from './components/learning/PMPGlossary';
+import VisualizationHub from './components/visualizations/VisualizationHub';
+import LearningProgressDashboard from './components/learning/LearningProgressDashboard';
+import FlashCardLearning from './components/learning/FlashCardLearning';
+import MockExam from './components/learning/MockExam';
+import ExamResults from './components/learning/ExamResults';
+import CollaborationHub from './components/collaboration/CollaborationHub';
+import DataManagement from './components/collaboration/DataManagement';
+import PMBOKVersionSelector from './components/shared/PMBOKVersionSelector';
 
 function App() {
   return (
@@ -37,6 +40,9 @@ function App() {
               <Route path="/flashcards" element={<FlashCardLearning />} />
               <Route path="/mock-exam" element={<MockExam />} />
               <Route path="/exam-results" element={<ExamResults />} />
+              <Route path="/collaboration" element={<CollaborationHub />} />
+              <Route path="/data-management" element={<DataManagement />} />
+              <Route path="/pmbok-versions" element={<PMBOKVersionSelector />} />
             </Routes>
           </PageTransition>
           <CustomizationPanel />

@@ -1,0 +1,478 @@
+name: 🚀 Parallel Test Execution (6-Person Team)
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # 毎日2:00 AM (JST) に実行
+    - cron: '0 17 * * *'
+
+env:
+  NODE_VERSION: '18.x'
+  DATABASE_URL: postgresql://test:test@localhost:5432/pmp_test?schema=public
+  REDIS_URL: redis://localhost:6379
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
+
+jobs:
+  # 前処理: 環境セットアップとデータベース準備
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-keys.outputs.key }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pmp_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci
+
+    - name: 🗃️ Generate cache keys
+      id: cache-keys
+      run: |
+        echo "key=deps-${{ hashFiles('package-lock.json') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    - name: 🔧 Database setup
+      run: |
+        npx prisma migrate dev --name ci-setup
+        npx prisma db seed
+
+    - name: 📊 Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.npm
+          .next/cache
+        key: ${{ steps.cache-keys.outputs.key }}
+        restore-keys: |
+          deps-${{ hashFiles('package-lock.json') }}
+
+  # チーム1: 認証・セキュリティテスト (2名分)
+  auth-security-team:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        worker: [1, 2] # 2名並列実行
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pmp_test_auth_${{ matrix.worker }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - ${{ 5432 + matrix.worker }}:5432
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - ${{ 6379 + matrix.worker }}:6379
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Restore dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.npm
+        key: ${{ needs.setup.outputs.cache-key }}
+        restore-keys: |
+          deps-${{ hashFiles('package-lock.json') }}
+
+    - name: 🔐 Auth & Security Tests
+      run: |
+        export DATABASE_URL="postgresql://test:test@localhost:${{ 5432 + matrix.worker }}/pmp_test_auth_${{ matrix.worker }}?schema=public"
+        export REDIS_URL="redis://localhost:${{ 6379 + matrix.worker }}"
+        
+        npx vitest run tests/unit/auth/**/*.test.ts \
+          --reporter=json --outputFile=test-results/auth-security-${{ matrix.worker }}.json \
+          --coverage --coverage.reporter=json \
+          --coverage.reportsDirectory=coverage/auth-security-${{ matrix.worker }} \
+          --testTimeout=30000 --maxWorkers=2
+      
+    - name: 📊 Upload auth test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: auth-security-results-${{ matrix.worker }}
+        path: |
+          test-results/auth-security-${{ matrix.worker }}.json
+          coverage/auth-security-${{ matrix.worker }}/
+
+  # チーム2: ビジネスロジックテスト (2名分)
+  business-logic-team:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        worker: [1, 2] # 2名並列実行
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pmp_test_business_${{ matrix.worker }}
+        ports:
+          - ${{ 5434 + matrix.worker }}:5432
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - ${{ 6381 + matrix.worker }}:6379
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Restore dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.npm
+        key: ${{ needs.setup.outputs.cache-key }}
+
+    - name: 🧠 Business Logic Tests
+      run: |
+        export DATABASE_URL="postgresql://test:test@localhost:${{ 5434 + matrix.worker }}/pmp_test_business_${{ matrix.worker }}?schema=public"
+        export REDIS_URL="redis://localhost:${{ 6381 + matrix.worker }}"
+        
+        npx vitest run tests/unit/services/**/*.test.ts tests/unit/routers/**/*.test.ts \
+          --reporter=json --outputFile=test-results/business-logic-${{ matrix.worker }}.json \
+          --coverage --coverage.reporter=json \
+          --coverage.reportsDirectory=coverage/business-logic-${{ matrix.worker }} \
+          --testTimeout=45000 --maxWorkers=2
+
+    - name: 📊 Upload business logic test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: business-logic-results-${{ matrix.worker }}
+        path: |
+          test-results/business-logic-${{ matrix.worker }}.json
+          coverage/business-logic-${{ matrix.worker }}/
+
+  # チーム3: 統合・外部APIテスト (1名)
+  integration-external-team:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pmp_test_integration
+        ports:
+          - 5437:5432
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6384:6379
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Restore dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.npm
+        key: ${{ needs.setup.outputs.cache-key }}
+
+    - name: 🔗 Integration & External API Tests
+      run: |
+        export DATABASE_URL="postgresql://test:test@localhost:5437/pmp_test_integration?schema=public"
+        export REDIS_URL="redis://localhost:6384"
+        
+        npx vitest run tests/unit/external/**/*.test.ts tests/integration/**/*.test.ts \
+          --reporter=json --outputFile=test-results/integration-external.json \
+          --coverage --coverage.reporter=json \
+          --coverage.reportsDirectory=coverage/integration-external \
+          --testTimeout=60000 --maxWorkers=1
+
+    - name: 📊 Upload integration test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: integration-external-results
+        path: |
+          test-results/integration-external.json
+          coverage/integration-external/
+
+  # チーム4: パフォーマンス・インフラテスト (1名)
+  performance-infra-team:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pmp_test_performance
+        ports:
+          - 5438:5432
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6385:6379
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js with memory optimization
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Restore dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          ~/.npm
+        key: ${{ needs.setup.outputs.cache-key }}
+
+    - name: ⚡ Performance & Infrastructure Tests
+      run: |
+        export DATABASE_URL="postgresql://test:test@localhost:5438/pmp_test_performance?schema=public"
+        export REDIS_URL="redis://localhost:6385"
+        export NODE_OPTIONS="--expose-gc --max-old-space-size=4096"
+        
+        npx vitest run tests/performance/**/*.test.ts \
+          --reporter=json --outputFile=test-results/performance-infra.json \
+          --coverage --coverage.reporter=json \
+          --coverage.reportsDirectory=coverage/performance-infra \
+          --testTimeout=120000 --maxWorkers=1
+
+    - name: 📊 Upload performance test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-infra-results
+        path: |
+          test-results/performance-infra.json
+          coverage/performance-infra/
+
+  # 結果統合と品質ゲートチェック
+  quality-gate:
+    needs: [auth-security-team, business-logic-team, integration-external-team, performance-infra-team]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci
+
+    - name: 📥 Download all test results
+      uses: actions/download-artifact@v4
+      with:
+        path: downloaded-results
+
+    - name: 🔄 Merge test results and coverage
+      run: |
+        mkdir -p test-results coverage
+        
+        # テスト結果統合
+        find downloaded-results -name "*.json" -exec cp {} test-results/ \;
+        
+        # カバレッジ統合
+        find downloaded-results -type d -name "coverage" -exec cp -r {}/* coverage/ \; 2>/dev/null || true
+        
+        # カバレッジマージ
+        npx c8 merge coverage/auth-security-* coverage/business-logic-* coverage/integration-external coverage/performance-infra --out coverage/merged
+        npx c8 report --reporter=html --reports-dir=coverage/merged --out-dir=coverage/html
+        npx c8 report --reporter=json-summary --reports-dir=coverage/merged --out-dir=coverage
+
+    - name: 📊 Generate quality report
+      run: |
+        node scripts/generate-quality-report.js
+      
+    - name: 🚪 Quality Gate Check
+      run: |
+        node scripts/quality-gate-check.js
+        
+        # カバレッジ閾値チェック
+        COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "❌ Coverage $COVERAGE% is below 80% threshold"
+          exit 1
+        fi
+        
+        echo "✅ Quality gate passed: $COVERAGE% coverage"
+
+    - name: 📈 Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: coverage/coverage-final.json
+        flags: unittests
+        name: pmp-learning-management
+
+    - name: 📊 Upload quality reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: quality-reports
+        path: |
+          coverage/html/
+          test-results/quality-summary.json
+          test-results/quality-report.html
+
+    - name: 💬 Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+          const qualityReport = JSON.parse(fs.readFileSync('test-results/quality-summary.json', 'utf8'));
+          
+          const comment = `## 🧪 Test Results Summary
+          
+          ### 📊 Coverage Report
+          - **Lines**: ${coverage.total.lines.pct.toFixed(1)}%
+          - **Branches**: ${coverage.total.branches.pct.toFixed(1)}%  
+          - **Functions**: ${coverage.total.functions.pct.toFixed(1)}%
+          - **Statements**: ${coverage.total.statements.pct.toFixed(1)}%
+          
+          ### ✅ Quality Gate
+          - **Status**: ${qualityReport.qualityGate.passed ? '✅ PASSED' : '❌ FAILED'}
+          - **Test Pass Rate**: ${(qualityReport.testExecution.passRate * 100).toFixed(1)}%
+          - **Performance**: ${qualityReport.performance.avgResponseTime}ms avg response time
+          
+          ### 👥 Team Contributions
+          - **Auth/Security**: ${qualityReport.teamContributions['auth-security'].testsRun} tests, ${qualityReport.teamContributions['auth-security'].coverage.toFixed(1)}% coverage
+          - **Business Logic**: ${qualityReport.teamContributions['business-logic'].testsRun} tests, ${qualityReport.teamContributions['business-logic'].coverage.toFixed(1)}% coverage
+          - **Integration/External**: ${qualityReport.teamContributions['integration-external'].testsRun} tests, ${qualityReport.teamContributions['integration-external'].coverage.toFixed(1)}% coverage
+          - **Performance/Infra**: ${qualityReport.teamContributions['performance-infra'].testsRun} tests, ${qualityReport.teamContributions['performance-infra'].coverage.toFixed(1)}% coverage
+          
+          [📝 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: 🚨 Slack notification on failure
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        text: '❌ Parallel test execution failed! Quality gate not met.'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # パフォーマンストレンド追跡
+  performance-tracking:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: 📥 Download performance results
+      uses: actions/download-artifact@v4
+      with:
+        name: performance-infra-results
+
+    - name: 📈 Update performance trends
+      run: |
+        # パフォーマンスデータを時系列データベース（InfluxDB等）に送信
+        # または GitHub Issues/Discussions でトレンドレポート作成
+        echo "Performance tracking implementation needed"
+
+  # 定期実行時の詳細レポート
+  detailed-report:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+    - name: 📊 Generate detailed weekly report
+      run: |
+        # 週次詳細レポート生成
+        echo "Detailed weekly report generation needed"

@@ -1,0 +1,344 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scan daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: write
+  issues: write
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Dependency Vulnerability Scan
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=high --json > audit-results.json || true
+          if [ -s audit-results.json ]; then
+            echo "Security vulnerabilities detected:"
+            cat audit-results.json | jq '.vulnerabilities | to_entries | map(select(.value.severity == "high" or .value.severity == "critical")) | length' > high_critical_count.txt
+            HIGH_CRITICAL=$(cat high_critical_count.txt)
+            if [ "$HIGH_CRITICAL" -gt "0" ]; then
+              echo "::error::Found $HIGH_CRITICAL high/critical severity vulnerabilities"
+              npm audit --audit-level=high
+              exit 1
+            else
+              echo "::notice::No high/critical severity vulnerabilities found"
+            fi
+          fi
+          
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-results
+          path: audit-results.json
+          retention-days: 30
+
+  # Code Security Analysis with CodeQL
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build project
+        run: npm run build
+        
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # Secret Detection
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: TruffleHog OSS Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified --fail
+          
+      - name: GitLeaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: .gitleaks.toml
+
+  # Container Security (if using Docker)
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Build Docker image
+        run: |
+          if [ -f "Dockerfile" ] || [ -f "deployment/Dockerfile" ]; then
+            DOCKERFILE_PATH="Dockerfile"
+            if [ -f "deployment/Dockerfile" ]; then
+              DOCKERFILE_PATH="deployment/Dockerfile"
+            fi
+            docker build -f $DOCKERFILE_PATH -t pmp-learning:${{ github.sha }} .
+          else
+            echo "No Dockerfile found, skipping container scan"
+            exit 0
+          fi
+          
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        if: hashFiles('**/Dockerfile', 'deployment/Dockerfile') != ''
+        with:
+          image-ref: 'pmp-learning:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: hashFiles('**/Dockerfile', 'deployment/Dockerfile') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # OWASP ZAP Security Scan
+  zap-scan:
+    name: OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
+          cmd_options: '-a'
+          
+      - name: Create ZAP report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: report_html.html
+          retention-days: 30
+
+  # SBOM Generation
+  sbom-generation:
+    name: Software Bill of Materials
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate SBOM
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-format JSON --output-file sbom.json
+          npx @cyclonedx/cyclonedx-npm --output-format XML --output-file sbom.xml
+          
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            sbom.json
+            sbom.xml
+          retention-days: 90
+
+  # License Compliance Check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Check licenses
+        run: |
+          npx license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;Unlicense" --json > license-report.json
+          
+      - name: Upload license report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: license-report.json
+          retention-days: 30
+
+  # Security Summary Report
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, codeql-analysis, secret-scan, license-check]
+    if: always()
+    
+    steps:
+      - name: Create Security Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dependencyStatus = '${{ needs.dependency-scan.result }}';
+            const codeqlStatus = '${{ needs.codeql-analysis.result }}';
+            const secretStatus = '${{ needs.secret-scan.result }}';
+            const licenseStatus = '${{ needs.license-check.result }}';
+            
+            const getStatusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⏹️';
+                case 'skipped': return '⏭️';
+                default: return '⏳';
+              }
+            };
+            
+            const overallSecure = [dependencyStatus, codeqlStatus, secretStatus, licenseStatus]
+              .every(status => status === 'success' || status === 'skipped');
+            
+            let report = `## 🔒 Security Scan Summary\n\n`;
+            report += `**Overall Status**: ${overallSecure ? '🟢 Secure' : '🔴 Issues Detected'}\n\n`;
+            report += `### Scan Results:\n`;
+            report += `${getStatusEmoji(dependencyStatus)} **Dependency Scan**: ${dependencyStatus}\n`;
+            report += `${getStatusEmoji(codeqlStatus)} **CodeQL Analysis**: ${codeqlStatus}\n`;
+            report += `${getStatusEmoji(secretStatus)} **Secret Detection**: ${secretStatus}\n`;
+            report += `${getStatusEmoji(licenseStatus)} **License Compliance**: ${licenseStatus}\n\n`;
+            
+            if (!overallSecure) {
+              report += `### ⚠️ Action Required:\n`;
+              if (dependencyStatus === 'failure') report += `- Review and update vulnerable dependencies\n`;
+              if (codeqlStatus === 'failure') report += `- Address code security issues found by CodeQL\n`;
+              if (secretStatus === 'failure') report += `- Remove or secure detected secrets\n`;
+              if (licenseStatus === 'failure') report += `- Review license compliance issues\n`;
+            }
+            
+            report += `\n**Scan Date**: ${new Date().toISOString()}\n`;
+            report += `**Workflow**: [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            // Post as PR comment if this is a PR
+            if (context.eventName === 'pull_request') {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const existingComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('🔒 Security Scan Summary')
+              );
+              
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: report
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: report
+                });
+              }
+            }
+            
+            // Create issue if scheduled scan finds problems
+            if (context.eventName === 'schedule' && !overallSecure) {
+              const title = `🚨 Security Alert - ${new Date().toISOString().split('T')[0]}`;
+              const issueBody = `${report}\n\n/label security 🚨 high-priority`;
+              
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: issueBody,
+                labels: ['security', '🚨 high-priority']
+              });
+            }

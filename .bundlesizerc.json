@@ -1,0 +1,33 @@
+{
+  "files": [
+    {
+      "path": "./dist/assets/index-*.js",
+      "maxSize": "200KB",
+      "compression": "gzip"
+    },
+    {
+      "path": "./dist/assets/vendor-*.js",
+      "maxSize": "300KB",
+      "compression": "gzip"
+    },
+    {
+      "path": "./dist/assets/d3-*.js",
+      "maxSize": "150KB",
+      "compression": "gzip"
+    },
+    {
+      "path": "./dist/assets/*.css",
+      "maxSize": "50KB",
+      "compression": "gzip"
+    }
+  ],
+  "defaultSize": "100KB",
+  "compression": "gzip",
+  "ci": {
+    "trackBranches": ["main", "develop"],
+    "repoBranchBase": "main"
+  },
+  "reportOptions": {
+    "errors": ["maxSize"]
+  }
+}

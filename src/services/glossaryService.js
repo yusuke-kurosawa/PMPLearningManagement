@@ -1,4 +1,4 @@
-import { glossaryTerms, glossaryCategories } from '../data/pmpGlossary';
+import { glossaryTerms, glossaryCategories } from '../data/schemas/glossary/pmpGlossary';
 
 /**
  * 用語集データの統合管理サービス
