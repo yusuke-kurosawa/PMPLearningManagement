@@ -1,35 +1,40 @@
-import { openDB, IDBPDatabase } from 'idb';
+import { openDB, IDBPDatabase } from 'idb'
 
 export interface SyncQueueItem {
-  id: string;
-  type: 'progress-update' | 'exam-result-create' | 'flashcard-update' | 'setting-update' | 'user-action';
-  data: any;
-  timestamp: number;
-  retryCount: number;
-  maxRetries: number;
-  status: 'pending' | 'in-progress' | 'completed' | 'failed';
-  error?: string;
-  priority: 'low' | 'medium' | 'high';
-  userId?: string;
+  id: string
+  type:
+    | 'progress-update'
+    | 'exam-result-create'
+    | 'flashcard-update'
+    | 'setting-update'
+    | 'user-action'
+  data: any
+  timestamp: number
+  retryCount: number
+  maxRetries: number
+  status: 'pending' | 'in-progress' | 'completed' | 'failed'
+  error?: string
+  priority: 'low' | 'medium' | 'high'
+  userId?: string
 }
 
 export interface SyncOptions {
-  priority?: 'low' | 'medium' | 'high';
-  maxRetries?: number;
-  delay?: number;
+  priority?: 'low' | 'medium' | 'high'
+  maxRetries?: number
+  delay?: number
 }
 
 export class SyncQueue {
-  private dbPromise: Promise<IDBPDatabase> | null = null;
-  private readonly DB_NAME = 'PMPSyncQueue';
-  private readonly DB_VERSION = 1;
-  private readonly STORE_NAME = 'syncQueue';
-  private isProcessing = false;
-  private processingInterval: NodeJS.Timeout | null = null;
+  private dbPromise: Promise<IDBPDatabase> | null = null
+  private readonly DB_NAME = 'PMPSyncQueue'
+  private readonly DB_VERSION = 1
+  private readonly STORE_NAME = 'syncQueue'
+  private isProcessing = false
+  private processingInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    this.initDB();
-    this.startProcessing();
+    this.initDB()
+    this.startProcessing()
   }
 
   /**
@@ -41,18 +46,18 @@ export class SyncQueue {
         upgrade(db) {
           if (!db.objectStoreNames.contains('syncQueue')) {
             const store = db.createObjectStore('syncQueue', {
-              keyPath: 'id'
-            });
-            store.createIndex('timestamp', 'timestamp');
-            store.createIndex('type', 'type');
-            store.createIndex('status', 'status');
-            store.createIndex('priority', 'priority');
-            store.createIndex('userId', 'userId');
+              keyPath: 'id',
+            })
+            store.createIndex('timestamp', 'timestamp')
+            store.createIndex('type', 'type')
+            store.createIndex('status', 'status')
+            store.createIndex('priority', 'priority')
+            store.createIndex('userId', 'userId')
           }
-        }
-      });
+        },
+      })
     }
-    return this.dbPromise;
+    return this.dbPromise
   }
 
   /**
@@ -60,8 +65,8 @@ export class SyncQueue {
    */
   async add(type: SyncQueueItem['type'], data: any, options: SyncOptions = {}): Promise<string> {
     try {
-      const db = await this.initDB();
-      
+      const db = await this.initDB()
+
       const item: SyncQueueItem = {
         id: this.generateId(),
         type,
@@ -71,22 +76,24 @@ export class SyncQueue {
         maxRetries: options.maxRetries || 3,
         status: 'pending',
         priority: options.priority || 'medium',
-        userId: data.userId || 'local-user'
-      };
+        userId: data.userId || 'local-user',
+      }
 
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      await tx.objectStore(this.STORE_NAME).put(item);
-      await tx.complete;
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      await tx.objectStore(this.STORE_NAME).put(item)
+      await tx.complete
 
       // Trigger immediate processing for high priority items
       if (options.priority === 'high') {
-        setTimeout(() => this.processQueue(), 100);
+        setTimeout(() => this.processQueue(), 100)
       }
 
-      return item.id;
+      return item.id
     } catch (error) {
-      console.error('Failed to add item to sync queue:', error);
-      throw new Error(`Queue add failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Failed to add item to sync queue:', error)
+      throw new Error(
+        `Queue add failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -95,56 +102,60 @@ export class SyncQueue {
    */
   async getPendingItems(limit: number = 10): Promise<SyncQueueItem[]> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readonly');
-      const index = tx.objectStore(this.STORE_NAME).index('status');
-      const items = await index.getAll('pending');
-      await tx.complete;
+      const db = await this.initDB()
+
+      const tx = db.transaction(this.STORE_NAME, 'readonly')
+      const index = tx.objectStore(this.STORE_NAME).index('status')
+      const items = await index.getAll('pending')
+      await tx.complete
 
       // Sort by priority and timestamp
       return items
         .sort((a, b) => {
-          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          const priorityOrder = { high: 3, medium: 2, low: 1 }
           if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-            return priorityOrder[b.priority] - priorityOrder[a.priority];
+            return priorityOrder[b.priority] - priorityOrder[a.priority]
           }
-          return a.timestamp - b.timestamp;
+          return a.timestamp - b.timestamp
         })
-        .slice(0, limit);
+        .slice(0, limit)
     } catch (error) {
-      console.error('Failed to get pending items:', error);
-      return [];
+      console.error('Failed to get pending items:', error)
+      return []
     }
   }
 
   /**
    * Update item status
    */
-  async updateItemStatus(id: string, status: SyncQueueItem['status'], error?: string): Promise<void> {
+  async updateItemStatus(
+    id: string,
+    status: SyncQueueItem['status'],
+    error?: string
+  ): Promise<void> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      const store = tx.objectStore(this.STORE_NAME);
-      const item = await store.get(id);
-      
+      const db = await this.initDB()
+
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      const store = tx.objectStore(this.STORE_NAME)
+      const item = await store.get(id)
+
       if (item) {
-        item.status = status;
+        item.status = status
         if (error) {
-          item.error = error;
-          item.retryCount++;
+          item.error = error
+          item.retryCount++
         }
         if (status === 'completed') {
-          item.error = undefined;
+          item.error = undefined
         }
-        
-        await store.put(item);
+
+        await store.put(item)
       }
-      
-      await tx.complete;
+
+      await tx.complete
     } catch (error) {
-      console.error('Failed to update item status:', error);
+      console.error('Failed to update item status:', error)
     }
   }
 
@@ -153,13 +164,13 @@ export class SyncQueue {
    */
   async removeItem(id: string): Promise<void> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      await tx.objectStore(this.STORE_NAME).delete(id);
-      await tx.complete;
+      const db = await this.initDB()
+
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      await tx.objectStore(this.STORE_NAME).delete(id)
+      await tx.complete
     } catch (error) {
-      console.error('Failed to remove item from queue:', error);
+      console.error('Failed to remove item from queue:', error)
     }
   }
 
@@ -168,38 +179,38 @@ export class SyncQueue {
    */
   async processQueue(): Promise<void> {
     if (this.isProcessing || !navigator.onLine) {
-      return;
+      return
     }
 
-    this.isProcessing = true;
+    this.isProcessing = true
 
     try {
-      const pendingItems = await this.getPendingItems(5);
-      
+      const pendingItems = await this.getPendingItems(5)
+
       for (const item of pendingItems) {
         if (item.retryCount >= item.maxRetries) {
-          await this.updateItemStatus(item.id, 'failed', 'Max retries exceeded');
-          continue;
+          await this.updateItemStatus(item.id, 'failed', 'Max retries exceeded')
+          continue
         }
 
-        await this.updateItemStatus(item.id, 'in-progress');
+        await this.updateItemStatus(item.id, 'in-progress')
 
         try {
-          await this.processItem(item);
-          await this.updateItemStatus(item.id, 'completed');
+          await this.processItem(item)
+          await this.updateItemStatus(item.id, 'completed')
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          await this.updateItemStatus(item.id, 'pending', errorMessage);
-          
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+          await this.updateItemStatus(item.id, 'pending', errorMessage)
+
           // Exponential backoff for retries
-          const delay = Math.pow(2, item.retryCount) * 1000;
-          setTimeout(() => {}, delay);
+          const delay = Math.pow(2, item.retryCount) * 1000
+          setTimeout(() => {}, delay)
         }
       }
     } catch (error) {
-      console.error('Queue processing error:', error);
+      console.error('Queue processing error:', error)
     } finally {
-      this.isProcessing = false;
+      this.isProcessing = false
     }
   }
 
@@ -209,22 +220,22 @@ export class SyncQueue {
   private async processItem(item: SyncQueueItem): Promise<void> {
     switch (item.type) {
       case 'progress-update':
-        await this.syncProgressUpdate(item.data);
-        break;
+        await this.syncProgressUpdate(item.data)
+        break
       case 'exam-result-create':
-        await this.syncExamResult(item.data);
-        break;
+        await this.syncExamResult(item.data)
+        break
       case 'flashcard-update':
-        await this.syncFlashCardUpdate(item.data);
-        break;
+        await this.syncFlashCardUpdate(item.data)
+        break
       case 'setting-update':
-        await this.syncSettingUpdate(item.data);
-        break;
+        await this.syncSettingUpdate(item.data)
+        break
       case 'user-action':
-        await this.syncUserAction(item.data);
-        break;
+        await this.syncUserAction(item.data)
+        break
       default:
-        throw new Error(`Unknown sync type: ${item.type}`);
+        throw new Error(`Unknown sync type: ${item.type}`)
     }
   }
 
@@ -237,13 +248,13 @@ export class SyncQueue {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-ID': data.userId
+        'X-User-ID': data.userId,
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      throw new Error(`Progress sync failed: ${response.statusText}`);
+      throw new Error(`Progress sync failed: ${response.statusText}`)
     }
   }
 
@@ -256,13 +267,13 @@ export class SyncQueue {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-ID': data.userId
+        'X-User-ID': data.userId,
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      throw new Error(`Exam result sync failed: ${response.statusText}`);
+      throw new Error(`Exam result sync failed: ${response.statusText}`)
     }
   }
 
@@ -275,13 +286,13 @@ export class SyncQueue {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-ID': data.userId
+        'X-User-ID': data.userId,
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      throw new Error(`Flashcard sync failed: ${response.statusText}`);
+      throw new Error(`Flashcard sync failed: ${response.statusText}`)
     }
   }
 
@@ -294,13 +305,13 @@ export class SyncQueue {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-ID': data.userId
+        'X-User-ID': data.userId,
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      throw new Error(`Setting sync failed: ${response.statusText}`);
+      throw new Error(`Setting sync failed: ${response.statusText}`)
     }
   }
 
@@ -313,13 +324,13 @@ export class SyncQueue {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-ID': data.userId
+        'X-User-ID': data.userId,
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      throw new Error(`User action sync failed: ${response.statusText}`);
+      throw new Error(`User action sync failed: ${response.statusText}`)
     }
   }
 
@@ -330,14 +341,14 @@ export class SyncQueue {
     // Process queue every 30 seconds
     this.processingInterval = setInterval(() => {
       if (navigator.onLine) {
-        this.processQueue();
+        this.processQueue()
       }
-    }, 30000);
+    }, 30000)
 
     // Process immediately when coming back online
     window.addEventListener('online', () => {
-      setTimeout(() => this.processQueue(), 1000);
-    });
+      setTimeout(() => this.processQueue(), 1000)
+    })
   }
 
   /**
@@ -345,8 +356,8 @@ export class SyncQueue {
    */
   stopProcessing(): void {
     if (this.processingInterval) {
-      clearInterval(this.processingInterval);
-      this.processingInterval = null;
+      clearInterval(this.processingInterval)
+      this.processingInterval = null
     }
   }
 
@@ -354,47 +365,50 @@ export class SyncQueue {
    * Get queue statistics
    */
   async getQueueStats(): Promise<{
-    pending: number;
-    inProgress: number;
-    completed: number;
-    failed: number;
-    total: number;
+    pending: number
+    inProgress: number
+    completed: number
+    failed: number
+    total: number
   }> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readonly');
-      const items = await tx.objectStore(this.STORE_NAME).getAll();
-      await tx.complete;
+      const db = await this.initDB()
 
-      const stats = items.reduce((acc, item) => {
-        acc[item.status]++;
-        acc.total++;
-        return acc;
-      }, {
-        pending: 0,
-        'in-progress': 0,
-        completed: 0,
-        failed: 0,
-        total: 0
-      });
+      const tx = db.transaction(this.STORE_NAME, 'readonly')
+      const items = await tx.objectStore(this.STORE_NAME).getAll()
+      await tx.complete
+
+      const stats = items.reduce(
+        (acc, item) => {
+          acc[item.status]++
+          acc.total++
+          return acc
+        },
+        {
+          pending: 0,
+          'in-progress': 0,
+          completed: 0,
+          failed: 0,
+          total: 0,
+        }
+      )
 
       return {
         pending: stats.pending,
         inProgress: stats['in-progress'],
         completed: stats.completed,
         failed: stats.failed,
-        total: stats.total
-      };
+        total: stats.total,
+      }
     } catch (error) {
-      console.error('Failed to get queue stats:', error);
+      console.error('Failed to get queue stats:', error)
       return {
         pending: 0,
         inProgress: 0,
         completed: 0,
         failed: 0,
-        total: 0
-      };
+        total: 0,
+      }
     }
   }
 
@@ -403,24 +417,24 @@ export class SyncQueue {
    */
   async clearCompleted(): Promise<number> {
     try {
-      const db = await this.initDB();
-      let removedCount = 0;
+      const db = await this.initDB()
+      let removedCount = 0
 
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      const store = tx.objectStore(this.STORE_NAME);
-      const index = store.index('status');
-      const items = await index.getAll('completed');
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      const store = tx.objectStore(this.STORE_NAME)
+      const index = store.index('status')
+      const items = await index.getAll('completed')
 
       for (const item of items) {
-        await store.delete(item.id);
-        removedCount++;
+        await store.delete(item.id)
+        removedCount++
       }
 
-      await tx.complete;
-      return removedCount;
+      await tx.complete
+      return removedCount
     } catch (error) {
-      console.error('Failed to clear completed items:', error);
-      return 0;
+      console.error('Failed to clear completed items:', error)
+      return 0
     }
   }
 
@@ -429,13 +443,13 @@ export class SyncQueue {
    */
   async clear(): Promise<void> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      await tx.objectStore(this.STORE_NAME).clear();
-      await tx.complete;
+      const db = await this.initDB()
+
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      await tx.objectStore(this.STORE_NAME).clear()
+      await tx.complete
     } catch (error) {
-      console.error('Failed to clear queue:', error);
+      console.error('Failed to clear queue:', error)
     }
   }
 
@@ -443,7 +457,7 @@ export class SyncQueue {
    * Generate unique ID
    */
   private generateId(): string {
-    return `sync-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `sync-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   /**
@@ -451,30 +465,30 @@ export class SyncQueue {
    */
   async retryFailedItems(): Promise<void> {
     try {
-      const db = await this.initDB();
-      
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      const store = tx.objectStore(this.STORE_NAME);
-      const index = store.index('status');
-      const failedItems = await index.getAll('failed');
+      const db = await this.initDB()
+
+      const tx = db.transaction(this.STORE_NAME, 'readwrite')
+      const store = tx.objectStore(this.STORE_NAME)
+      const index = store.index('status')
+      const failedItems = await index.getAll('failed')
 
       for (const item of failedItems) {
         if (item.retryCount < item.maxRetries) {
-          item.status = 'pending';
-          item.retryCount = 0; // Reset retry count for manual retry
-          item.error = undefined;
-          await store.put(item);
+          item.status = 'pending'
+          item.retryCount = 0 // Reset retry count for manual retry
+          item.error = undefined
+          await store.put(item)
         }
       }
 
-      await tx.complete;
-      
+      await tx.complete
+
       // Trigger immediate processing
-      setTimeout(() => this.processQueue(), 100);
+      setTimeout(() => this.processQueue(), 100)
     } catch (error) {
-      console.error('Failed to retry failed items:', error);
+      console.error('Failed to retry failed items:', error)
     }
   }
 }
 
-export const syncQueue = new SyncQueue();
+export const syncQueue = new SyncQueue()

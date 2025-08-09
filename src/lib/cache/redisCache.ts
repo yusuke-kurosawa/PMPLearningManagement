@@ -42,12 +42,12 @@ export interface CacheStats {
 
 // キャッシュキー戦略
 export enum CacheKeyStrategy {
-  USER_DATA = 'user',           // ユーザー固有データ
-  PMBOK_DATA = 'pmbok',         // PMBOKプロセス・用語集
-  EXAM_DATA = 'exam',           // 試験問題・結果
-  SESSION_DATA = 'session',     // セッション関連
+  USER_DATA = 'user', // ユーザー固有データ
+  PMBOK_DATA = 'pmbok', // PMBOKプロセス・用語集
+  EXAM_DATA = 'exam', // 試験問題・結果
+  SESSION_DATA = 'session', // セッション関連
   ANALYTICS_DATA = 'analytics', // 分析・統計
-  TEMP_DATA = 'temp',          // 一時的なデータ
+  TEMP_DATA = 'temp', // 一時的なデータ
 }
 
 /**
@@ -112,15 +112,15 @@ export class RedisCacheManager {
     additionalParams?: Record<string, any>
   ): string {
     let key = `${strategy}:${identifier}`
-    
+
     if (additionalParams) {
       const params = Object.keys(additionalParams)
         .sort()
-        .map(k => `${k}:${additionalParams[k]}`)
+        .map((k) => `${k}:${additionalParams[k]}`)
         .join(':')
       key += `:${params}`
     }
-    
+
     return key
   }
 
@@ -155,11 +155,11 @@ export class RedisCacheManager {
     }
   ): Promise<void> {
     const startTime = Date.now()
-    
+
     try {
       const redis = await this.getRedis()
       const key = this.generateKey(strategy, identifier, options?.additionalParams)
-      
+
       const entry: CacheEntry<T> = {
         data,
         timestamp: Date.now(),
@@ -168,8 +168,8 @@ export class RedisCacheManager {
         tags: options?.tags || [],
       }
 
-      let serializedData = JSON.stringify(entry)
-      
+      const serializedData = JSON.stringify(entry)
+
       // 圧縮判定
       if (serializedData.length > this.config.compressionThreshold) {
         const compressed = this.compress(serializedData)
@@ -182,7 +182,7 @@ export class RedisCacheManager {
       // タグ付けによる関連キーの管理
       if (entry.tags.length > 0) {
         const pipeline = redis.pipeline()
-        entry.tags.forEach(tag => {
+        entry.tags.forEach((tag) => {
           pipeline.sadd(`tag:${tag}`, key)
           pipeline.expire(`tag:${tag}`, entry.ttl + 3600) // タグは1時間長く保持
         })
@@ -191,7 +191,6 @@ export class RedisCacheManager {
 
       this.stats.sets++
       this.updateResponseTime(Date.now() - startTime)
-      
     } catch (error) {
       console.error('Cache set error:', error)
       throw error
@@ -210,20 +209,20 @@ export class RedisCacheManager {
     }
   ): Promise<T | null> {
     const startTime = Date.now()
-    
+
     try {
       const redis = await this.getRedis()
       const key = this.generateKey(strategy, identifier, options?.additionalParams)
-      
+
       const result = await redis.get(key)
-      
+
       if (!result) {
         this.stats.misses++
         return null
       }
 
       let entry: CacheEntry<T>
-      
+
       // 圧縮データの展開判定
       if (result.startsWith('H4sI') || result.length > this.config.compressionThreshold) {
         try {
@@ -238,8 +237,7 @@ export class RedisCacheManager {
       }
 
       // バージョンチェック
-      if (options?.acceptedVersions && 
-          !options.acceptedVersions.includes(entry.version)) {
+      if (options?.acceptedVersions && !options.acceptedVersions.includes(entry.version)) {
         await this.delete(strategy, identifier, options)
         this.stats.misses++
         return null
@@ -247,9 +245,8 @@ export class RedisCacheManager {
 
       this.stats.hits++
       this.updateResponseTime(Date.now() - startTime)
-      
+
       return entry.data
-      
     } catch (error) {
       console.error('Cache get error:', error)
       this.stats.misses++
@@ -270,16 +267,15 @@ export class RedisCacheManager {
     try {
       const redis = await this.getRedis()
       const key = this.generateKey(strategy, identifier, options?.additionalParams)
-      
+
       const result = await redis.del(key)
-      
+
       if (result > 0) {
         this.stats.deletes++
         return true
       }
-      
+
       return false
-      
     } catch (error) {
       console.error('Cache delete error:', error)
       return false
@@ -297,15 +293,15 @@ export class RedisCacheManager {
     }
   ): Promise<Map<string, T>> {
     const results = new Map<string, T>()
-    
+
     try {
       const redis = await this.getRedis()
-      const keys = identifiers.map(id => 
+      const keys = identifiers.map((id) =>
         this.generateKey(strategy, id, options?.additionalParams)
       )
-      
+
       const values = await redis.mget(...keys)
-      
+
       for (let i = 0; i < identifiers.length; i++) {
         if (values[i]) {
           try {
@@ -320,11 +316,10 @@ export class RedisCacheManager {
           this.stats.misses++
         }
       }
-      
     } catch (error) {
       console.error('Cache mget error:', error)
     }
-    
+
     return results
   }
 
@@ -345,7 +340,7 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const pipeline = redis.pipeline()
       const ttl = options?.ttl || this.config.defaultTTL
-      
+
       for (const [identifier, data] of dataMap) {
         const key = this.generateKey(strategy, identifier, options?.additionalParams)
         const entry: CacheEntry<T> = {
@@ -355,22 +350,21 @@ export class RedisCacheManager {
           version: options?.version || '1.0.0',
           tags: options?.tags || [],
         }
-        
+
         const serializedData = JSON.stringify(entry)
         pipeline.setex(key, ttl, serializedData)
-        
+
         // タグ管理
         if (entry.tags.length > 0) {
-          entry.tags.forEach(tag => {
+          entry.tags.forEach((tag) => {
             pipeline.sadd(`tag:${tag}`, key)
             pipeline.expire(`tag:${tag}`, ttl + 3600)
           })
         }
       }
-      
+
       await pipeline.exec()
       this.stats.sets += dataMap.size
-      
     } catch (error) {
       console.error('Cache mset error:', error)
       throw error
@@ -384,18 +378,17 @@ export class RedisCacheManager {
     try {
       const redis = await this.getRedis()
       const keys = await redis.smembers(`tag:${tag}`)
-      
+
       if (keys.length === 0) return 0
-      
+
       const pipeline = redis.pipeline()
-      keys.forEach(key => pipeline.del(key))
+      keys.forEach((key) => pipeline.del(key))
       pipeline.del(`tag:${tag}`)
-      
+
       await pipeline.exec()
       this.stats.deletes += keys.length
-      
+
       return keys.length
-      
     } catch (error) {
       console.error('Cache invalidate by tag error:', error)
       return 0
@@ -409,14 +402,13 @@ export class RedisCacheManager {
     try {
       const redis = await this.getRedis()
       const keys = await redis.keys(pattern)
-      
+
       if (keys.length === 0) return 0
-      
+
       await redis.del(...keys)
       this.stats.deletes += keys.length
-      
+
       return keys.length
-      
     } catch (error) {
       console.error('Cache invalidate by pattern error:', error)
       return 0
@@ -435,7 +427,7 @@ export class RedisCacheManager {
    */
   private updateResponseTime(responseTime: number): void {
     const totalResponses = this.stats.hits + this.stats.misses
-    this.stats.avgResponseTime = 
+    this.stats.avgResponseTime =
       (this.stats.avgResponseTime * (totalResponses - 1) + responseTime) / totalResponses
     this.stats.hitRate = this.stats.hits / totalResponses
   }
@@ -448,17 +440,16 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const info = await redis.info('memory')
       const keyCount = await redis.dbsize()
-      
+
       // メモリ使用量の解析
       const memoryMatch = info.match(/used_memory:(\d+)/)
       const memoryUsage = memoryMatch ? parseInt(memoryMatch[1]) : 0
-      
+
       return {
         ...this.stats,
         memoryUsage,
         keyCount,
       }
-      
     } catch (error) {
       console.error('Failed to get cache stats:', error)
       return this.stats
@@ -479,15 +470,15 @@ export class RedisCacheManager {
     }
   }> {
     const startTime = Date.now()
-    
+
     try {
       const redis = await this.getRedis()
       await redis.ping()
       const responseTime = Date.now() - startTime
       const stats = await this.getStats()
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-      
+
       // ヘルスチェック条件
       if (responseTime > 100 || stats.hitRate < 0.7) {
         status = 'degraded'
@@ -495,7 +486,7 @@ export class RedisCacheManager {
       if (responseTime > 500 || stats.memoryUsage > 0.9) {
         status = 'unhealthy'
       }
-      
+
       return {
         status,
         details: {
@@ -504,9 +495,8 @@ export class RedisCacheManager {
           memoryUsage: stats.memoryUsage,
           hitRate: stats.hitRate,
           keyCount: stats.keyCount,
-        }
+        },
       }
-      
     } catch (error) {
       console.error('Cache health check failed:', error)
       return {
@@ -517,7 +507,7 @@ export class RedisCacheManager {
           memoryUsage: 0,
           hitRate: 0,
           keyCount: 0,
-        }
+        },
       }
     }
   }
@@ -528,7 +518,7 @@ export class RedisCacheManager {
   async cleanup(): Promise<number> {
     try {
       const redis = await this.getRedis()
-      
+
       // Luaスクリプトで効率的にクリーンアップ
       const luaScript = `
         local keys = redis.call('keys', ARGV[1])
@@ -546,15 +536,14 @@ export class RedisCacheManager {
         
         return deleted
       `
-      
-      const deleted = await redis.eval(luaScript, 0, `${this.keyPrefix}:*`) as number
-      
+
+      const deleted = (await redis.eval(luaScript, 0, `${this.keyPrefix}:*`)) as number
+
       if (deleted > 0) {
         console.log(`Cleaned up ${deleted} expired cache keys`)
       }
-      
+
       return deleted
-      
     } catch (error) {
       console.error('Cache cleanup error:', error)
       return 0
@@ -604,10 +593,7 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
       generateKey?: (req: any) => Record<string, any>
     }
   ) {
-    return async function (
-      req: any,
-      handler: () => Promise<T>
-    ): Promise<T> {
+    return async function (req: any, handler: () => Promise<T>): Promise<T> {
       try {
         // スキップ条件チェック
         if (options?.skipCache && options.skipCache(req)) {
@@ -615,18 +601,12 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
         }
 
         // キー生成
-        const keyIdentifier = typeof identifier === 'function' 
-          ? identifier(req) 
-          : identifier
-        
+        const keyIdentifier = typeof identifier === 'function' ? identifier(req) : identifier
+
         const additionalParams = options?.generateKey ? options.generateKey(req) : undefined
 
         // キャッシュから取得を試行
-        const cachedData = await cacheManager.get<T>(
-          strategy,
-          keyIdentifier,
-          { additionalParams }
-        )
+        const cachedData = await cacheManager.get<T>(strategy, keyIdentifier, { additionalParams })
 
         if (cachedData !== null) {
           return cachedData
@@ -634,7 +614,7 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
 
         // キャッシュミスの場合、データを取得してキャッシュ
         const data = await handler()
-        
+
         if (data !== null && data !== undefined) {
           await cacheManager.set(strategy, keyIdentifier, data, {
             ttl: options?.ttl,
@@ -645,7 +625,6 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
         }
 
         return data
-
       } catch (error) {
         console.error('Cache middleware error:', error)
         // キャッシュエラー時は元の処理を実行
@@ -665,12 +644,10 @@ export class SpecializedCacheHelpers {
    * ユーザーセッション用キャッシュ
    */
   async cacheUserSession(userId: string, sessionData: any, ttl: number = 3600): Promise<void> {
-    await this.cacheManager.set(
-      CacheKeyStrategy.SESSION_DATA,
-      userId,
-      sessionData,
-      { ttl, tags: ['session', `user:${userId}`] }
-    )
+    await this.cacheManager.set(CacheKeyStrategy.SESSION_DATA, userId, sessionData, {
+      ttl,
+      tags: ['session', `user:${userId}`],
+    })
   }
 
   /**
@@ -729,9 +706,12 @@ export const redisCacheManager = new RedisCacheManager()
 export const cacheHelpers = new SpecializedCacheHelpers(redisCacheManager)
 
 // 定期クリーンアップの設定
-setInterval(async () => {
-  await redisCacheManager.cleanup()
-}, 30 * 60 * 1000) // 30分ごと
+setInterval(
+  async () => {
+    await redisCacheManager.cleanup()
+  },
+  30 * 60 * 1000
+) // 30分ごと
 
 export default {
   RedisCacheManager,

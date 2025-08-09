@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { IndexedDBStorage } from './indexedDb';
-import { SyncQueue } from './syncQueue';
+import { z } from 'zod'
+import { IndexedDBStorage } from './indexedDb'
+import { SyncQueue } from './syncQueue'
 
 // Migration schemas for data validation
 export const LegacyProgressSchema = z.object({
@@ -8,8 +8,8 @@ export const LegacyProgressSchema = z.object({
   knowledgeAreas: z.record(z.number()),
   processes: z.record(z.number()),
   totalStudyTime: z.number().optional(),
-  lastUpdated: z.string().optional()
-});
+  lastUpdated: z.string().optional(),
+})
 
 export const LegacyExamResultSchema = z.object({
   examId: z.string(),
@@ -19,49 +19,49 @@ export const LegacyExamResultSchema = z.object({
   timeSpent: z.number(),
   knowledgeAreaScores: z.record(z.number()),
   completedAt: z.string(),
-  answers: z.record(z.union([z.string(), z.number()]))
-});
+  answers: z.record(z.union([z.string(), z.number()])),
+})
 
 export const LegacyFlashCardSchema = z.object({
   processId: z.string(),
   confidence: z.number(),
   reviewCount: z.number(),
   lastReviewedAt: z.string(),
-  nextReviewAt: z.string()
-});
+  nextReviewAt: z.string(),
+})
 
 export interface MigrationStatus {
-  version: string;
-  completed: boolean;
-  errors: string[];
-  progress: number;
-  startedAt?: string;
-  completedAt?: string;
-  backupCreated?: boolean;
-  dataValidated?: boolean;
+  version: string
+  completed: boolean
+  errors: string[]
+  progress: number
+  startedAt?: string
+  completedAt?: string
+  backupCreated?: boolean
+  dataValidated?: boolean
 }
 
 export interface MigrationReport {
-  status: MigrationStatus;
+  status: MigrationStatus
   migratedItems: {
-    progress: number;
-    examResults: number;
-    flashCards: number;
-    settings: number;
-  };
-  validationErrors: string[];
-  warnings: string[];
+    progress: number
+    examResults: number
+    flashCards: number
+    settings: number
+  }
+  validationErrors: string[]
+  warnings: string[]
 }
 
 export class MigrationService {
-  private storage: IndexedDBStorage;
-  private syncQueue: SyncQueue;
-  private readonly CURRENT_VERSION = '2.0.0';
-  private readonly MIGRATION_KEY = 'pmp-migration-status';
-  
+  private storage: IndexedDBStorage
+  private syncQueue: SyncQueue
+  private readonly CURRENT_VERSION = '2.0.0'
+  private readonly MIGRATION_KEY = 'pmp-migration-status'
+
   constructor() {
-    this.storage = new IndexedDBStorage();
-    this.syncQueue = new SyncQueue();
+    this.storage = new IndexedDBStorage()
+    this.syncQueue = new SyncQueue()
   }
 
   /**
@@ -69,25 +69,25 @@ export class MigrationService {
    */
   async getMigrationStatus(): Promise<MigrationStatus> {
     try {
-      const status = localStorage.getItem(this.MIGRATION_KEY);
+      const status = localStorage.getItem(this.MIGRATION_KEY)
       if (status) {
-        return JSON.parse(status) as MigrationStatus;
+        return JSON.parse(status) as MigrationStatus
       }
-      
+
       return {
         version: this.CURRENT_VERSION,
         completed: false,
         errors: [],
-        progress: 0
-      };
+        progress: 0,
+      }
     } catch (error) {
-      console.error('Failed to get migration status:', error);
+      console.error('Failed to get migration status:', error)
       return {
         version: this.CURRENT_VERSION,
         completed: false,
         errors: [error instanceof Error ? error.message : 'Unknown error'],
-        progress: 0
-      };
+        progress: 0,
+      }
     }
   }
 
@@ -95,9 +95,9 @@ export class MigrationService {
    * Update migration status
    */
   private async updateMigrationStatus(status: Partial<MigrationStatus>): Promise<void> {
-    const currentStatus = await this.getMigrationStatus();
-    const updatedStatus = { ...currentStatus, ...status };
-    localStorage.setItem(this.MIGRATION_KEY, JSON.stringify(updatedStatus));
+    const currentStatus = await this.getMigrationStatus()
+    const updatedStatus = { ...currentStatus, ...status }
+    localStorage.setItem(this.MIGRATION_KEY, JSON.stringify(updatedStatus))
   }
 
   /**
@@ -105,31 +105,34 @@ export class MigrationService {
    */
   async createBackup(): Promise<boolean> {
     try {
-      const backup: Record<string, any> = {};
-      
+      const backup: Record<string, any> = {}
+
       // Backup all PMP-related localStorage items
       for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('pmp-') || key.includes('learning-') || key.includes('progress-'))) {
-          backup[key] = localStorage.getItem(key);
+        const key = localStorage.key(i)
+        if (
+          key &&
+          (key.includes('pmp-') || key.includes('learning-') || key.includes('progress-'))
+        ) {
+          backup[key] = localStorage.getItem(key)
         }
       }
-      
+
       // Store backup in IndexedDB
-      await this.storage.setItem('backup-' + Date.now(), backup);
-      
-      await this.updateMigrationStatus({ 
-        backupCreated: true,
-        progress: 10 
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to create backup:', error);
+      await this.storage.setItem('backup-' + Date.now(), backup)
+
       await this.updateMigrationStatus({
-        errors: [error instanceof Error ? error.message : 'Backup creation failed']
-      });
-      return false;
+        backupCreated: true,
+        progress: 10,
+      })
+
+      return true
+    } catch (error) {
+      console.error('Failed to create backup:', error)
+      await this.updateMigrationStatus({
+        errors: [error instanceof Error ? error.message : 'Backup creation failed'],
+      })
+      return false
     }
   }
 
@@ -137,69 +140,79 @@ export class MigrationService {
    * Validate localStorage data before migration
    */
   async validateLegacyData(): Promise<{ valid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-    
+    const errors: string[] = []
+
     try {
       // Validate progress data
-      const progressData = localStorage.getItem('learning-progress');
+      const progressData = localStorage.getItem('learning-progress')
       if (progressData) {
         try {
-          const parsed = JSON.parse(progressData);
-          LegacyProgressSchema.parse(parsed);
+          const parsed = JSON.parse(progressData)
+          LegacyProgressSchema.parse(parsed)
         } catch (err) {
-          errors.push(`Invalid progress data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          errors.push(
+            `Invalid progress data: ${err instanceof Error ? err.message : 'Unknown error'}`
+          )
         }
       }
-      
+
       // Validate exam results
-      const examResults = localStorage.getItem('exam-results');
+      const examResults = localStorage.getItem('exam-results')
       if (examResults) {
         try {
-          const parsed = JSON.parse(examResults);
+          const parsed = JSON.parse(examResults)
           if (Array.isArray(parsed)) {
             parsed.forEach((result, index) => {
               try {
-                LegacyExamResultSchema.parse(result);
+                LegacyExamResultSchema.parse(result)
               } catch (err) {
-                errors.push(`Invalid exam result at index ${index}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                errors.push(
+                  `Invalid exam result at index ${index}: ${err instanceof Error ? err.message : 'Unknown error'}`
+                )
               }
-            });
+            })
           }
         } catch (err) {
-          errors.push(`Invalid exam results format: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          errors.push(
+            `Invalid exam results format: ${err instanceof Error ? err.message : 'Unknown error'}`
+          )
         }
       }
-      
+
       // Validate flashcard data
-      const flashCardData = localStorage.getItem('flashcard-progress');
+      const flashCardData = localStorage.getItem('flashcard-progress')
       if (flashCardData) {
         try {
-          const parsed = JSON.parse(flashCardData);
+          const parsed = JSON.parse(flashCardData)
           Object.entries(parsed).forEach(([key, value], index) => {
             try {
-              LegacyFlashCardSchema.parse(value);
+              LegacyFlashCardSchema.parse(value)
             } catch (err) {
-              errors.push(`Invalid flashcard data for ${key}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+              errors.push(
+                `Invalid flashcard data for ${key}: ${err instanceof Error ? err.message : 'Unknown error'}`
+              )
             }
-          });
+          })
         } catch (err) {
-          errors.push(`Invalid flashcard data format: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          errors.push(
+            `Invalid flashcard data format: ${err instanceof Error ? err.message : 'Unknown error'}`
+          )
         }
       }
-      
-      await this.updateMigrationStatus({ 
+
+      await this.updateMigrationStatus({
         dataValidated: true,
         progress: 20,
-        errors: errors.length > 0 ? errors : []
-      });
-      
-      return { valid: errors.length === 0, errors };
+        errors: errors.length > 0 ? errors : [],
+      })
+
+      return { valid: errors.length === 0, errors }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Data validation failed';
+      const errorMsg = error instanceof Error ? error.message : 'Data validation failed'
       await this.updateMigrationStatus({
-        errors: [errorMsg]
-      });
-      return { valid: false, errors: [errorMsg] };
+        errors: [errorMsg],
+      })
+      return { valid: false, errors: [errorMsg] }
     }
   }
 
@@ -208,11 +221,11 @@ export class MigrationService {
    */
   private async migrateLearningProgress(): Promise<number> {
     try {
-      const progressData = localStorage.getItem('learning-progress');
-      if (!progressData) return 0;
-      
-      const parsed = LegacyProgressSchema.parse(JSON.parse(progressData));
-      
+      const progressData = localStorage.getItem('learning-progress')
+      if (!progressData) return 0
+
+      const parsed = LegacyProgressSchema.parse(JSON.parse(progressData))
+
       // Transform to new format
       const modernProgress = {
         id: 'user-progress',
@@ -224,16 +237,16 @@ export class MigrationService {
         lastUpdated: parsed.lastUpdated || new Date().toISOString(),
         version: this.CURRENT_VERSION,
         migratedFrom: 'localStorage',
-        migratedAt: new Date().toISOString()
-      };
-      
-      await this.storage.setItem('learning-progress', modernProgress);
-      await this.syncQueue.add('progress-update', modernProgress);
-      
-      return 1;
+        migratedAt: new Date().toISOString(),
+      }
+
+      await this.storage.setItem('learning-progress', modernProgress)
+      await this.syncQueue.add('progress-update', modernProgress)
+
+      return 1
     } catch (error) {
-      console.error('Failed to migrate learning progress:', error);
-      throw error;
+      console.error('Failed to migrate learning progress:', error)
+      throw error
     }
   }
 
@@ -242,38 +255,38 @@ export class MigrationService {
    */
   private async migrateExamResults(): Promise<number> {
     try {
-      const examResults = localStorage.getItem('exam-results');
-      if (!examResults) return 0;
-      
-      const parsed = JSON.parse(examResults);
-      const validResults = [];
-      
+      const examResults = localStorage.getItem('exam-results')
+      if (!examResults) return 0
+
+      const parsed = JSON.parse(examResults)
+      const validResults = []
+
       if (Array.isArray(parsed)) {
         for (const result of parsed) {
           try {
-            const validatedResult = LegacyExamResultSchema.parse(result);
+            const validatedResult = LegacyExamResultSchema.parse(result)
             const modernResult = {
               ...validatedResult,
               id: `exam-${validatedResult.examId}-${Date.parse(validatedResult.completedAt)}`,
               userId: 'local-user',
               version: this.CURRENT_VERSION,
               migratedFrom: 'localStorage',
-              migratedAt: new Date().toISOString()
-            };
-            
-            validResults.push(modernResult);
-            await this.storage.setItem(`exam-result-${modernResult.id}`, modernResult);
-            await this.syncQueue.add('exam-result-create', modernResult);
+              migratedAt: new Date().toISOString(),
+            }
+
+            validResults.push(modernResult)
+            await this.storage.setItem(`exam-result-${modernResult.id}`, modernResult)
+            await this.syncQueue.add('exam-result-create', modernResult)
           } catch (err) {
-            console.warn('Skipping invalid exam result:', err);
+            console.warn('Skipping invalid exam result:', err)
           }
         }
       }
-      
-      return validResults.length;
+
+      return validResults.length
     } catch (error) {
-      console.error('Failed to migrate exam results:', error);
-      throw error;
+      console.error('Failed to migrate exam results:', error)
+      throw error
     }
   }
 
@@ -282,15 +295,15 @@ export class MigrationService {
    */
   private async migrateFlashCardProgress(): Promise<number> {
     try {
-      const flashCardData = localStorage.getItem('flashcard-progress');
-      if (!flashCardData) return 0;
-      
-      const parsed = JSON.parse(flashCardData);
-      const migratedCount = Object.keys(parsed).length;
-      
+      const flashCardData = localStorage.getItem('flashcard-progress')
+      if (!flashCardData) return 0
+
+      const parsed = JSON.parse(flashCardData)
+      const migratedCount = Object.keys(parsed).length
+
       for (const [processId, progress] of Object.entries(parsed)) {
         try {
-          const validatedProgress = LegacyFlashCardSchema.parse(progress);
+          const validatedProgress = LegacyFlashCardSchema.parse(progress)
           const modernProgress = {
             ...validatedProgress,
             id: `flashcard-${processId}`,
@@ -298,20 +311,20 @@ export class MigrationService {
             userId: 'local-user',
             version: this.CURRENT_VERSION,
             migratedFrom: 'localStorage',
-            migratedAt: new Date().toISOString()
-          };
-          
-          await this.storage.setItem(`flashcard-${processId}`, modernProgress);
-          await this.syncQueue.add('flashcard-update', modernProgress);
+            migratedAt: new Date().toISOString(),
+          }
+
+          await this.storage.setItem(`flashcard-${processId}`, modernProgress)
+          await this.syncQueue.add('flashcard-update', modernProgress)
         } catch (err) {
-          console.warn(`Skipping invalid flashcard progress for ${processId}:`, err);
+          console.warn(`Skipping invalid flashcard progress for ${processId}:`, err)
         }
       }
-      
-      return migratedCount;
+
+      return migratedCount
     } catch (error) {
-      console.error('Failed to migrate flashcard progress:', error);
-      throw error;
+      console.error('Failed to migrate flashcard progress:', error)
+      throw error
     }
   }
 
@@ -320,41 +333,41 @@ export class MigrationService {
    */
   private async migrateUserSettings(): Promise<number> {
     try {
-      let migratedCount = 0;
+      let migratedCount = 0
       const settingsKeys = [
         'theme-preference',
         'user-preferences',
         'customization-settings',
-        'notification-settings'
-      ];
-      
+        'notification-settings',
+      ]
+
       for (const key of settingsKeys) {
-        const value = localStorage.getItem(key);
+        const value = localStorage.getItem(key)
         if (value) {
           try {
-            const parsed = JSON.parse(value);
+            const parsed = JSON.parse(value)
             const modernSetting = {
               key,
               value: parsed,
               userId: 'local-user',
               version: this.CURRENT_VERSION,
               migratedFrom: 'localStorage',
-              migratedAt: new Date().toISOString()
-            };
-            
-            await this.storage.setItem(key, modernSetting);
-            await this.syncQueue.add('setting-update', modernSetting);
-            migratedCount++;
+              migratedAt: new Date().toISOString(),
+            }
+
+            await this.storage.setItem(key, modernSetting)
+            await this.syncQueue.add('setting-update', modernSetting)
+            migratedCount++
           } catch (err) {
-            console.warn(`Failed to migrate setting ${key}:`, err);
+            console.warn(`Failed to migrate setting ${key}:`, err)
           }
         }
       }
-      
-      return migratedCount;
+
+      return migratedCount
     } catch (error) {
-      console.error('Failed to migrate user settings:', error);
-      throw error;
+      console.error('Failed to migrate user settings:', error)
+      throw error
     }
   }
 
@@ -362,64 +375,74 @@ export class MigrationService {
    * Main migration function
    */
   async migrateFromLocalStorage(): Promise<MigrationReport> {
-    const startTime = new Date().toISOString();
-    
+    const startTime = new Date().toISOString()
+
     await this.updateMigrationStatus({
       startedAt: startTime,
-      progress: 0
-    });
-    
+      progress: 0,
+    })
+
     try {
       // Step 1: Create backup
-      const backupSuccess = await this.createBackup();
+      const backupSuccess = await this.createBackup()
       if (!backupSuccess) {
-        throw new Error('Failed to create backup');
+        throw new Error('Failed to create backup')
       }
-      
+
       // Step 2: Validate data
-      const validation = await this.validateLegacyData();
+      const validation = await this.validateLegacyData()
       if (!validation.valid && validation.errors.length > 5) {
-        throw new Error(`Too many validation errors: ${validation.errors.slice(0, 3).join(', ')}...`);
+        throw new Error(
+          `Too many validation errors: ${validation.errors.slice(0, 3).join(', ')}...`
+        )
       }
-      
+
       // Step 3: Migrate data
       const migratedItems = {
         progress: 0,
         examResults: 0,
         flashCards: 0,
-        settings: 0
-      };
-      
-      try {
-        migratedItems.progress = await this.migrateLearningProgress();
-        await this.updateMigrationStatus({ progress: 40 });
-      } catch (err) {
-        validation.errors.push(`Progress migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        settings: 0,
       }
-      
+
       try {
-        migratedItems.examResults = await this.migrateExamResults();
-        await this.updateMigrationStatus({ progress: 60 });
+        migratedItems.progress = await this.migrateLearningProgress()
+        await this.updateMigrationStatus({ progress: 40 })
       } catch (err) {
-        validation.errors.push(`Exam results migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        validation.errors.push(
+          `Progress migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
       }
-      
+
       try {
-        migratedItems.flashCards = await this.migrateFlashCardProgress();
-        await this.updateMigrationStatus({ progress: 80 });
+        migratedItems.examResults = await this.migrateExamResults()
+        await this.updateMigrationStatus({ progress: 60 })
       } catch (err) {
-        validation.errors.push(`Flashcard migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        validation.errors.push(
+          `Exam results migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
       }
-      
+
       try {
-        migratedItems.settings = await this.migrateUserSettings();
-        await this.updateMigrationStatus({ progress: 90 });
+        migratedItems.flashCards = await this.migrateFlashCardProgress()
+        await this.updateMigrationStatus({ progress: 80 })
       } catch (err) {
-        validation.errors.push(`Settings migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        validation.errors.push(
+          `Flashcard migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
       }
-      
+
+      try {
+        migratedItems.settings = await this.migrateUserSettings()
+        await this.updateMigrationStatus({ progress: 90 })
+      } catch (err) {
+        validation.errors.push(
+          `Settings migration failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        )
+      }
+
       // Step 4: Complete migration
-      const completedAt = new Date().toISOString();
+      const completedAt = new Date().toISOString()
       const finalStatus: MigrationStatus = {
         version: this.CURRENT_VERSION,
         completed: true,
@@ -428,36 +451,35 @@ export class MigrationService {
         startedAt: startTime,
         completedAt,
         backupCreated: true,
-        dataValidated: true
-      };
-      
-      await this.updateMigrationStatus(finalStatus);
-      
+        dataValidated: true,
+      }
+
+      await this.updateMigrationStatus(finalStatus)
+
       return {
         status: finalStatus,
         migratedItems,
         validationErrors: validation.errors,
-        warnings: []
-      };
-      
+        warnings: [],
+      }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Migration failed';
+      const errorMsg = error instanceof Error ? error.message : 'Migration failed'
       const failedStatus: MigrationStatus = {
         version: this.CURRENT_VERSION,
         completed: false,
         errors: [errorMsg],
         progress: 0,
-        startedAt: startTime
-      };
-      
-      await this.updateMigrationStatus(failedStatus);
-      
+        startedAt: startTime,
+      }
+
+      await this.updateMigrationStatus(failedStatus)
+
       return {
         status: failedStatus,
         migratedItems: { progress: 0, examResults: 0, flashCards: 0, settings: 0 },
         validationErrors: [errorMsg],
-        warnings: []
-      };
+        warnings: [],
+      }
     }
   }
 
@@ -465,31 +487,31 @@ export class MigrationService {
    * Check if migration is needed
    */
   async isMigrationNeeded(): Promise<boolean> {
-    const status = await this.getMigrationStatus();
-    
+    const status = await this.getMigrationStatus()
+
     if (status.completed) {
-      return false;
+      return false
     }
-    
+
     // Check if there's any legacy data to migrate
     const hasLegacyData = [
       'learning-progress',
-      'exam-results', 
+      'exam-results',
       'flashcard-progress',
-      'theme-preference'
-    ].some(key => localStorage.getItem(key) !== null);
-    
-    return hasLegacyData;
+      'theme-preference',
+    ].some((key) => localStorage.getItem(key) !== null)
+
+    return hasLegacyData
   }
 
   /**
    * Reset migration status (for testing)
    */
   async resetMigration(): Promise<void> {
-    localStorage.removeItem(this.MIGRATION_KEY);
-    await this.storage.clear();
-    await this.syncQueue.clear();
+    localStorage.removeItem(this.MIGRATION_KEY)
+    await this.storage.clear()
+    await this.syncQueue.clear()
   }
 }
 
-export const migrationService = new MigrationService();
+export const migrationService = new MigrationService()

@@ -8,20 +8,20 @@ import { z } from 'zod'
 
 // キャッシング戦略の定義
 export enum CacheStrategy {
-  CACHE_ASIDE = 'cache_aside',           // 読み取り時キャッシュ
-  WRITE_THROUGH = 'write_through',       // 書き込み同期キャッシュ
-  WRITE_BEHIND = 'write_behind',         // 書き込み非同期キャッシュ
-  CACHE_FIRST = 'cache_first',           // キャッシュ優先
-  NETWORK_FIRST = 'network_first',       // ネットワーク優先
+  CACHE_ASIDE = 'cache_aside', // 読み取り時キャッシュ
+  WRITE_THROUGH = 'write_through', // 書き込み同期キャッシュ
+  WRITE_BEHIND = 'write_behind', // 書き込み非同期キャッシュ
+  CACHE_FIRST = 'cache_first', // キャッシュ優先
+  NETWORK_FIRST = 'network_first', // ネットワーク優先
 }
 
 // 無効化パターン
 export enum InvalidationPattern {
-  TIME_BASED = 'time_based',             // 時間ベース
-  EVENT_BASED = 'event_based',           // イベントベース
+  TIME_BASED = 'time_based', // 時間ベース
+  EVENT_BASED = 'event_based', // イベントベース
   DEPENDENCY_BASED = 'dependency_based', // 依存関係ベース
-  LRU_BASED = 'lru_based',              // LRUベース
-  SMART_REFRESH = 'smart_refresh',       // スマートリフレッシュ
+  LRU_BASED = 'lru_based', // LRUベース
+  SMART_REFRESH = 'smart_refresh', // スマートリフレッシュ
 }
 
 // キャッシング設定スキーマ
@@ -77,8 +77,8 @@ export class AdvancedCacheManager {
 
     try {
       // キャッシュから取得を試行
-      let cachedData = await this.cacheManager.get<T>(keyStrategy, identifier)
-      
+      const cachedData = await this.cacheManager.get<T>(keyStrategy, identifier)
+
       if (cachedData !== null) {
         return {
           data: cachedData,
@@ -90,7 +90,7 @@ export class AdvancedCacheManager {
 
       // キャッシュミスの場合はデータを取得
       const data = await dataFetcher()
-      
+
       if (data !== null && data !== undefined) {
         await this.cacheManager.set(keyStrategy, identifier, data, {
           ttl: fullConfig.ttl,
@@ -104,7 +104,6 @@ export class AdvancedCacheManager {
         source: 'network',
         timestamp: startTime,
       }
-
     } catch (error) {
       console.error('Cache-Aside error:', error)
       return {
@@ -135,12 +134,11 @@ export class AdvancedCacheManager {
         this.cacheManager.set(keyStrategy, identifier, data, {
           ttl: fullConfig.ttl,
           tags: fullConfig.tags,
-        })
+        }),
       ])
 
       // 依存関係の無効化
       await this.invalidateDependencies(identifier)
-
     } catch (error) {
       console.error('Write-Through error:', error)
       // エラー時はキャッシュを削除して整合性を保つ
@@ -186,7 +184,6 @@ export class AdvancedCacheManager {
           await this.cacheManager.delete(keyStrategy, identifier)
         }
       })
-
     } catch (error) {
       console.error('Write-Behind error:', error)
       throw error
@@ -234,7 +231,7 @@ export class AdvancedCacheManager {
 
       // キャッシュミスまたは期限切れの場合
       const data = await dataFetcher()
-      
+
       if (data !== null && data !== undefined) {
         await this.cacheManager.set(keyStrategy, identifier, data, {
           ttl: fullConfig.ttl,
@@ -249,10 +246,9 @@ export class AdvancedCacheManager {
         timestamp: startTime,
         refreshed: true,
       }
-
     } catch (error) {
       console.error('Smart cache error:', error)
-      
+
       // エラー時は古いデータの返却を試行
       const staleData = await this.getStaleData<T>(keyStrategy, identifier, fullConfig.maxStale)
       if (staleData !== null) {
@@ -290,7 +286,7 @@ export class AdvancedCacheManager {
     const dependencies = this.dependencyGraph.get(key)
     if (!dependencies) return
 
-    const invalidationTasks = Array.from(dependencies).map(depKey => {
+    const invalidationTasks = Array.from(dependencies).map((depKey) => {
       // 依存キーの形式: "strategy:identifier"
       const [strategy, identifier] = depKey.split(':', 2)
       return this.cacheManager.delete(strategy as CacheKeyStrategy, identifier)
@@ -310,7 +306,7 @@ export class AdvancedCacheManager {
     config: CacheStrategyConfig
   ): void {
     const refreshKey = `${keyStrategy}:${identifier}`
-    
+
     // 既にリフレッシュがスケジュールされている場合はスキップ
     if (this.refreshQueue.has(refreshKey)) return
 
@@ -346,16 +342,16 @@ export class AdvancedCacheManager {
       const redis = await (this.cacheManager as any).getRedis()
       const cacheKey = `${keyStrategy}:${identifier}`
       const result = await redis.get(cacheKey)
-      
+
       if (result) {
         const entry = JSON.parse(result)
         const age = Date.now() - entry.timestamp
-        
+
         if (age < maxStale * 1000) {
           return entry.data
         }
       }
-      
+
       return null
     } catch (error) {
       console.error('Get stale data error:', error)
@@ -372,12 +368,12 @@ export class AdvancedCacheManager {
       if (refreshTasks.length === 0) return
 
       console.log(`Processing ${refreshTasks.length} background refresh tasks`)
-      
+
       // 並列数を制限してリフレッシュを実行
       const concurrencyLimit = 5
       for (let i = 0; i < refreshTasks.length; i += concurrencyLimit) {
         const batch = refreshTasks.slice(i, i + concurrencyLimit)
-        await Promise.allSettled(batch.map(task => task()))
+        await Promise.allSettled(batch.map((task) => task()))
       }
     }, 30000) // 30秒ごと
   }
@@ -394,14 +390,16 @@ export class AdvancedCacheManager {
     }>
   ): Promise<number> {
     let warmedUp = 0
-    const warmupTasks = warmupConfigs.map(async ({ keyStrategy, identifier, dataFetcher, config }) => {
-      try {
-        const result = await this.cacheAside(keyStrategy, identifier, dataFetcher, config)
-        if (!result.hit) warmedUp++
-      } catch (error) {
-        console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+    const warmupTasks = warmupConfigs.map(
+      async ({ keyStrategy, identifier, dataFetcher, config }) => {
+        try {
+          const result = await this.cacheAside(keyStrategy, identifier, dataFetcher, config)
+          if (!result.hit) warmedUp++
+        } catch (error) {
+          console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+        }
       }
-    })
+    )
 
     await Promise.allSettled(warmupTasks)
     console.log(`Cache warmup completed: ${warmedUp} entries loaded`)
@@ -458,7 +456,7 @@ export class AdvancedCacheManager {
     for (const layer of layers) {
       const layerKey = `${layer.name}:${keyStrategy}:${identifier}`
       const cachedData = await this.cacheManager.get<T>(keyStrategy, layerKey)
-      
+
       if (cachedData !== null) {
         return {
           data: cachedData,
@@ -471,17 +469,17 @@ export class AdvancedCacheManager {
 
     // すべてのレイヤーでミスした場合は取得
     const data = await dataFetcher()
-    
+
     if (data !== null && data !== undefined) {
       // 各レイヤーの条件に応じてキャッシュ
-      const cacheTasks = layers.map(layer => {
+      const cacheTasks = layers.map((layer) => {
         if (!layer.condition || layer.condition(data)) {
           const layerKey = `${layer.name}:${keyStrategy}:${identifier}`
           return this.cacheManager.set(keyStrategy, layerKey, data, { ttl: layer.ttl })
         }
         return Promise.resolve()
       })
-      
+
       await Promise.allSettled(cacheTasks)
     }
 
@@ -537,11 +535,7 @@ export class PMPCacheStrategies {
   /**
    * 試験問題用キャッシング（階層化）
    */
-  async cacheExamQuestions(
-    examType: string,
-    difficulty: string,
-    dataFetcher: () => Promise<any>
-  ) {
+  async cacheExamQuestions(examType: string, difficulty: string, dataFetcher: () => Promise<any>) {
     return this.advancedCache.multiLayerCache(
       CacheKeyStrategy.EXAM_DATA,
       `questions:${examType}:${difficulty}`,
