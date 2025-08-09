@@ -93,7 +93,7 @@
       "label": "Home screen on mobile"
     },
     {
-      "src": "screenshots/desktop-matrix.png", 
+      "src": "screenshots/desktop-matrix.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",

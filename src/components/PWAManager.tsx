@@ -1,22 +1,23 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { pwaManager } from '@/lib/pwa';
+import { useEffect } from 'react'
+import { pwaManager } from '@/lib/pwa'
 
 export function PWAManager() {
   useEffect(() => {
     // Register service worker
     if ('serviceWorker' in navigator) {
-      pwaManager.registerServiceWorker()
+      pwaManager
+        .registerServiceWorker()
         .then((registration) => {
-          console.log('SW registered: ', registration);
+          console.warn('SW registered: ', registration)
         })
         .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError);
-        });
+          console.error('SW registration failed: ', registrationError)
+        })
     }
-  }, []);
+  }, [])
 
   // This component doesn't render anything
-  return null;
+  return null
 }
