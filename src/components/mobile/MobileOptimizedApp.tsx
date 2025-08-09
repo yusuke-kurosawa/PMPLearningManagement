@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Menu, 
   X, 
@@ -34,7 +35,13 @@ import {
   Sun,
   Moon,
   Zap,
-  Globe
+  Globe,
+  Grid,
+  Network,
+  Layers,
+  TrendingUp,
+  Brain,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -96,6 +103,8 @@ interface DeviceInfo {
 
 const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // PWA State
   const [pwaCapabilities, setPwaCapabilities] = useState<PWACapabilities>({
@@ -474,11 +483,15 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const navigation = [
-    { id: 'home', label: 'Home', icon: Home, href: '/' },
-    { id: 'study', label: 'Study', icon: BookOpen, href: '/study' },
-    { id: 'collaboration', label: 'Groups', icon: Users, href: '/collaboration' },
-    { id: 'progress', label: 'Progress', icon: BarChart3, href: '/progress' },
-    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings' },
+    { id: 'home', label: 'ホーム', icon: Home, href: '/' },
+    { id: 'matrix', label: 'マトリックス', icon: Grid, href: '/matrix' },
+    { id: 'network', label: 'ネットワーク', icon: Network, href: '/network' },
+    { id: 'visualizations', label: '視覚化', icon: Layers, href: '/visualizations' },
+    { id: 'glossary', label: '用語集', icon: BookOpen, href: '/glossary' },
+    { id: 'progress', label: '進捗', icon: BarChart3, href: '/progress' },
+    { id: 'flashcards', label: 'フラッシュカード', icon: Brain, href: '/flashcards' },
+    { id: 'mock-exam', label: '模擬試験', icon: GraduationCap, href: '/mock-exam' },
+    { id: 'collaboration', label: 'コラボ', icon: Users, href: '/collaboration' },
   ];
 
   return (
@@ -520,10 +533,10 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                   {navigation.map((item) => (
                     <Button
                       key={item.id}
-                      variant="ghost"
+                      variant={location.pathname === item.href ? "secondary" : "ghost"}
                       className="w-full justify-start"
                       onClick={() => {
-                        // Navigate to item.href
+                        navigate(item.href);
                         setIsMobileMenuOpen(false);
                       }}
                     >
@@ -648,9 +661,10 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
             {navigation.slice(0, 4).map((item) => (
               <Button
                 key={item.id}
-                variant="ghost"
+                variant={location.pathname === item.href ? "secondary" : "ghost"}
                 size="sm"
                 className="flex flex-col items-center gap-1 py-2"
+                onClick={() => navigate(item.href)}
               >
                 <item.icon className="w-4 h-4" />
                 <span className="text-xs">{item.label}</span>

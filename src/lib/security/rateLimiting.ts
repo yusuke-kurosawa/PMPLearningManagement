@@ -529,35 +529,59 @@ export class DDoSProtection {
   }
 
   /**
-   * 地理的異常検知
+   * 地理的異常検知（GeoIPサービス統合）
    */
   private async checkGeographicAnomaly(
     clientIp: string,
     userId?: string
   ): Promise<{ isAnomalous: boolean; reason?: string }> {
-    // 簡略化された実装（実際にはGeoIPサービスを使用）
     try {
       if (!userId) {
         return { isAnomalous: false }
+      }
+
+      // GeoIPサービスを使用して実際の地理情報を取得
+      const { geoIPService } = await import('./geoip')
+      const currentLocation = await geoIPService.getGeoLocation(clientIp)
+      
+      if (!currentLocation) {
+        return {
+          isAnomalous: true,
+          reason: 'Unable to determine geographic location',
+        }
       }
 
       const redis = await this.getRedis()
       const userLocationKey = `user_location:${userId}`
       const lastKnownCountry = await redis.get(userLocationKey)
 
-      // 実際の実装では GeoIP lookup を行う
-      // const currentCountry = await geoipLookup(clientIp)
-      const currentCountry = 'JP' // プレースホルダー
-
-      if (lastKnownCountry && lastKnownCountry !== currentCountry) {
-        return {
-          isAnomalous: true,
-          reason: `Location change from ${lastKnownCountry} to ${currentCountry}`,
-        }
+      // 初回アクセスの場合
+      if (!lastKnownCountry) {
+        await redis.setex(userLocationKey, 86400 * 7, currentLocation.countryCode)
+        return { isAnomalous: false }
       }
 
-      // 現在の位置を記録
-      await redis.setex(userLocationKey, 86400 * 7, currentCountry) // 1週間保持
+      // 国が変わった場合の詳細チェック
+      if (lastKnownCountry !== currentLocation.countryCode) {
+        // 異常アクセスパターンの詳細検知
+        const anomalyResult = await geoIPService.detectAnomalousPatterns(userId, clientIp)
+        
+        if (anomalyResult.isAnomalous && anomalyResult.confidence > 70) {
+          return {
+            isAnomalous: true,
+            reason: `Geographic anomaly detected: ${anomalyResult.reasons.join(', ')}`,
+          }
+        }
+
+        // 現在の位置を更新
+        await redis.setex(userLocationKey, 86400 * 7, currentLocation.countryCode)
+        
+        // 単純な国変更の場合は警告レベル
+        return {
+          isAnomalous: false,
+          reason: `Location change from ${lastKnownCountry} to ${currentLocation.countryCode}`,
+        }
+      }
 
       return { isAnomalous: false }
     } catch (error) {
