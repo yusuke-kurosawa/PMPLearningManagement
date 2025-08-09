@@ -1,14 +1,58 @@
 {
   "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
+    "eslint:recommended", 
+    "plugin:react/recommended", 
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "parser": "@babel/eslint-parser",
-  "plugins": ["react", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx"],
+      "parser": "@babel/eslint-parser",
+      "parserOptions": {
+        "requireConfigFile": false,
+        "babelOptions": {
+          "presets": ["@babel/preset-react"]
+        }
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser"
+    },
+    {
+      "files": ["**/*.test.{js,jsx,ts,tsx}", "src/test/**/*.{js,jsx,ts,tsx}"],
+      "env": {
+        "jest": true,
+        "vitest-globals/env": true
+      },
+      "extends": ["plugin:vitest-globals/recommended"],
+      "globals": {
+        "vi": "readonly",
+        "expect": "readonly",
+        "describe": "readonly",
+        "it": "readonly",
+        "test": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly",
+        "beforeAll": "readonly",
+        "afterAll": "readonly"
+      }
+    }
+  ],
   "rules": {
     "prettier/prettier": "error",
-    "no-unused-vars": [
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
       "warn",
       {
         "argsIgnorePattern": "^_",
@@ -17,12 +61,17 @@
     ],
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
+    "react/display-name": "error",
+    "react/no-unescaped-entities": "error",
     "no-console": [
       "warn",
       {
         "allow": ["warn", "error"]
       }
-    ]
+    ],
+    "no-case-declarations": "error",
+    "no-useless-escape": "error",
+    "@typescript-eslint/no-explicit-any": "warn"
   },
   "settings": {
     "react": {
@@ -33,12 +82,5 @@
     "browser": true,
     "es2021": true,
     "node": true
-  },
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
   }
 }
