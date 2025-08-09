@@ -31,23 +31,23 @@ export type GeoLocation = z.infer<typeof GeoLocationSchema>
 
 // 地理制限設定
 export interface GeoRestrictionConfig {
-  allowedCountries?: string[]  // 許可する国コード
-  blockedCountries?: string[]  // 禁止する国コード
-  allowedRegions?: string[]    // 許可する地域
-  blockedRegions?: string[]    // 禁止する地域
-  blockProxies?: boolean       // プロキシをブロック
-  blockVpn?: boolean          // VPNをブロック
-  blockTor?: boolean          // Torをブロック
-  blockHosting?: boolean      // ホスティングプロバイダーをブロック
-  threatThreshold?: number    // 脅威スコア閾値
+  allowedCountries?: string[] // 許可する国コード
+  blockedCountries?: string[] // 禁止する国コード
+  allowedRegions?: string[] // 許可する地域
+  blockedRegions?: string[] // 禁止する地域
+  blockProxies?: boolean // プロキシをブロック
+  blockVpn?: boolean // VPNをブロック
+  blockTor?: boolean // Torをブロック
+  blockHosting?: boolean // ホスティングプロバイダーをブロック
+  threatThreshold?: number // 脅威スコア閾値
 }
 
 // 異常パターン検知結果
 export interface AnomalyDetectionResult {
   isAnomalous: boolean
-  confidence: number  // 0-100
+  confidence: number // 0-100
   reasons: string[]
-  riskScore: number   // 0-100
+  riskScore: number // 0-100
   recommendations: string[]
 }
 
@@ -64,7 +64,8 @@ export class GeoIPService {
   private providers = {
     ipapi: {
       url: 'http://ip-api.com/json/',
-      fields: 'status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,proxy,hosting',
+      fields:
+        'status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,proxy,hosting',
       rateLimitPerMinute: 1000,
       free: true,
     },
@@ -151,7 +152,6 @@ export class GeoIPService {
 
       await this.cacheLocation(ip, fallbackData)
       return fallbackData
-
     } catch (error) {
       console.error('GeoIP lookup error:', error)
       return null
@@ -256,18 +256,17 @@ export class GeoIPService {
    */
   private async fetchFromMaxMind(ip: string): Promise<GeoLocation | null> {
     try {
-      const auth = Buffer.from(`${process.env.MAXMIND_USER_ID}:${process.env.MAXMIND_LICENSE_KEY}`).toString('base64')
-      
-      const response = await fetch(
-        `${this.providers.maxmind.url}${ip}`,
-        {
-          timeout: 5000,
-          headers: {
-            'Authorization': `Basic ${auth}`,
-            'User-Agent': 'PMPLearningManagement/1.0',
-          },
-        }
-      )
+      const auth = Buffer.from(
+        `${process.env.MAXMIND_USER_ID}:${process.env.MAXMIND_LICENSE_KEY}`
+      ).toString('base64')
+
+      const response = await fetch(`${this.providers.maxmind.url}${ip}`, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'User-Agent': 'PMPLearningManagement/1.0',
+        },
+      })
 
       if (!response.ok) {
         throw new Error(`MaxMind request failed: ${response.status}`)
@@ -309,11 +308,11 @@ export class GeoIPService {
 
       const cacheKey = `${this.cachePrefix}:${ip}`
       const cached = await this.redis.get(cacheKey)
-      
+
       if (cached) {
         return JSON.parse(cached) as GeoLocation
       }
-      
+
       return null
     } catch (error) {
       console.error('Cache retrieval error:', error)
@@ -330,11 +329,7 @@ export class GeoIPService {
       if (!this.redis) return
 
       const cacheKey = `${this.cachePrefix}:${ip}`
-      await this.redis.setex(
-        cacheKey,
-        this.cacheTTL,
-        JSON.stringify(location)
-      )
+      await this.redis.setex(cacheKey, this.cacheTTL, JSON.stringify(location))
     } catch (error) {
       console.error('Cache storage error:', error)
     }
@@ -361,7 +356,8 @@ export class GeoIPService {
    * IPアドレス検証
    */
   private isValidIP(ip: string): boolean {
-    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+    const ipv4Regex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
     const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/
     return ipv4Regex.test(ip) || ipv6Regex.test(ip)
   }
@@ -441,8 +437,10 @@ export class GeoIPService {
         }
       }
 
-      if (config.allowedCountries?.length > 0 && 
-          !config.allowedCountries.includes(location.countryCode)) {
+      if (
+        config.allowedCountries?.length > 0 &&
+        !config.allowedCountries.includes(location.countryCode)
+      ) {
         return {
           allowed: false,
           reason: `Country not in allowed list: ${location.country}`,
@@ -460,8 +458,10 @@ export class GeoIPService {
           }
         }
 
-        if (config.allowedRegions?.length > 0 && 
-            !config.allowedRegions.includes(location.regionCode)) {
+        if (
+          config.allowedRegions?.length > 0 &&
+          !config.allowedRegions.includes(location.regionCode)
+        ) {
           return {
             allowed: false,
             reason: `Region not in allowed list: ${location.region}`,
@@ -471,7 +471,6 @@ export class GeoIPService {
       }
 
       return { allowed: true, location }
-
     } catch (error) {
       console.error('Geo restriction check error:', error)
       return {
@@ -533,8 +532,9 @@ export class GeoIPService {
         }
 
         // 短時間での多国間移動
-        const recentCountries = new Set(locationHistory.map(l => l.countryCode))
-        if (recentCountries.size > 3 && timeWindow <= 4 * 60 * 60 * 1000) { // 4時間以内
+        const recentCountries = new Set(locationHistory.map((l) => l.countryCode))
+        if (recentCountries.size > 3 && timeWindow <= 4 * 60 * 60 * 1000) {
+          // 4時間以内
           reasons.push(`Multiple countries in short time: ${recentCountries.size}`)
           recommendations.push('Implement step-up authentication')
           riskScore += 40
@@ -580,16 +580,16 @@ export class GeoIPService {
       })
 
       const isAnomalous = riskScore > 50
-      const confidence = Math.min(100, riskScore + (reasons.length * 5))
+      const confidence = Math.min(100, riskScore + reasons.length * 5)
 
       return {
         isAnomalous,
         confidence,
         reasons: reasons.length > 0 ? reasons : ['Normal access pattern'],
         riskScore: Math.min(100, riskScore),
-        recommendations: recommendations.length > 0 ? recommendations : ['Continue normal monitoring'],
+        recommendations:
+          recommendations.length > 0 ? recommendations : ['Continue normal monitoring'],
       }
-
     } catch (error) {
       console.error('Anomaly detection error:', error)
       return {
@@ -660,12 +660,15 @@ export class GeoIPService {
    */
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371 // 地球の半径 (km)
-    const dLat = (lat2 - lat1) * Math.PI / 180
-    const dLon = (lon2 - lon1) * Math.PI / 180
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const dLat = ((lat2 - lat1) * Math.PI) / 180
+    const dLon = ((lon2 - lon1) * Math.PI) / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     return R * c
   }
 
@@ -674,12 +677,20 @@ export class GeoIPService {
    */
   private isSuspiciousISP(isp: string): boolean {
     const suspiciousKeywords = [
-      'hosting', 'datacenter', 'cloud', 'vps', 'proxy',
-      'vpn', 'anonymous', 'tor', 'dedicated', 'colocation'
+      'hosting',
+      'datacenter',
+      'cloud',
+      'vps',
+      'proxy',
+      'vpn',
+      'anonymous',
+      'tor',
+      'dedicated',
+      'colocation',
     ]
-    
+
     const lowerISP = isp.toLowerCase()
-    return suspiciousKeywords.some(keyword => lowerISP.includes(keyword))
+    return suspiciousKeywords.some((keyword) => lowerISP.includes(keyword))
   }
 
   /**
@@ -716,23 +727,24 @@ export class GeoIPService {
         return {requests, countries}
       `
 
-      const result = await this.redis.eval(
-        luaScript,
-        1,
-        statsKey,
-        cutoff.toString()
-      ) as [number, number]
+      const result = (await this.redis.eval(luaScript, 1, statsKey, cutoff.toString())) as [
+        number,
+        number,
+      ]
 
       // より詳細な統計は別途取得
       const topCountries = await this.redis.zrevrange(
-        `${statsKey}:country_counts`, 0, 9, 'WITHSCORES'
+        `${statsKey}:country_counts`,
+        0,
+        9,
+        'WITHSCORES'
       )
 
       const countryStats: Array<{ country: string; count: number }> = []
       for (let i = 0; i < topCountries.length; i += 2) {
         countryStats.push({
           country: topCountries[i],
-          count: parseInt(topCountries[i + 1])
+          count: parseInt(topCountries[i + 1]),
         })
       }
 

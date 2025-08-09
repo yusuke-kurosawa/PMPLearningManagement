@@ -3,24 +3,24 @@
  * Developer 3: エンタープライズ級キー管理機能
  */
 
-import crypto from 'crypto';
-import Redis from 'ioredis';
-import { getRedisClient } from './rateLimiting';
-import type { KeyVersion, KeyRotationConfig, EncryptionMetadata } from './encryption';
+import crypto from 'crypto'
+import Redis from 'ioredis'
+import { getRedisClient } from './rateLimiting'
+import type { KeyVersion, KeyRotationConfig, EncryptionMetadata } from './encryption'
 
 /**
  * キー管理システム
  */
 export class KeyManagementSystem {
-  private redis: Redis | null = null;
-  private masterKey: Buffer;
-  private config: KeyRotationConfig;
-  private rotationTimer: NodeJS.Timeout | null = null;
-  private keyUsageCounter: Map<string, number> = new Map();
-  private keyCache: Map<string, KeyVersion> = new Map();
+  private redis: Redis | null = null
+  private masterKey: Buffer
+  private config: KeyRotationConfig
+  private rotationTimer: NodeJS.Timeout | null = null
+  private keyUsageCounter: Map<string, number> = new Map()
+  private keyCache: Map<string, KeyVersion> = new Map()
 
   constructor(masterKey: string, config?: Partial<KeyRotationConfig>) {
-    this.masterKey = Buffer.from(masterKey, 'hex');
+    this.masterKey = Buffer.from(masterKey, 'hex')
     this.config = {
       rotationInterval: config?.rotationInterval || 86400000, // 24時間
       keyRetentionPeriod: config?.keyRetentionPeriod || 7 * 86400000, // 7日間
@@ -28,10 +28,10 @@ export class KeyManagementSystem {
       masterKeyRotationThreshold: config?.masterKeyRotationThreshold || 10000,
       keyDerivationRounds: config?.keyDerivationRounds || 100000,
       maxActiveKeys: config?.maxActiveKeys || 5,
-    };
+    }
 
-    this.initializeRedis();
-    this.startKeyRotationScheduler();
+    this.initializeRedis()
+    this.startKeyRotationScheduler()
   }
 
   /**
@@ -39,10 +39,10 @@ export class KeyManagementSystem {
    */
   private async initializeRedis(): Promise<void> {
     try {
-      this.redis = await getRedisClient();
-      console.info('Key Management System: Redis connected');
+      this.redis = await getRedisClient()
+      console.info('Key Management System: Redis connected')
     } catch (error) {
-      console.warn('Key Management System: Redis not available, using in-memory storage:', error);
+      console.warn('Key Management System: Redis not available, using in-memory storage:', error)
     }
   }
 
@@ -51,27 +51,27 @@ export class KeyManagementSystem {
    */
   private startKeyRotationScheduler(): void {
     if (!this.config.autoRotationEnabled) {
-      return;
+      return
     }
 
     this.rotationTimer = setInterval(async () => {
       try {
-        await this.performKeyRotation();
+        await this.performKeyRotation()
       } catch (error) {
-        console.error('Scheduled key rotation failed:', error);
+        console.error('Scheduled key rotation failed:', error)
       }
-    }, this.config.rotationInterval);
+    }, this.config.rotationInterval)
 
-    console.info(`Key rotation scheduler started (interval: ${this.config.rotationInterval}ms)`);
+    console.info(`Key rotation scheduler started (interval: ${this.config.rotationInterval}ms)`)
   }
 
   /**
    * 新しい暗号化キーの生成
    */
   async generateEncryptionKey(purpose: KeyVersion['purpose'] = 'encryption'): Promise<KeyVersion> {
-    const keyId = crypto.randomUUID();
-    const salt = crypto.randomBytes(32);
-    
+    const keyId = crypto.randomUUID()
+    const salt = crypto.randomBytes(32)
+
     // PBKDF2でマスターキーから派生キーを生成
     const derivedKey = crypto.pbkdf2Sync(
       this.masterKey,
@@ -79,7 +79,7 @@ export class KeyManagementSystem {
       this.config.keyDerivationRounds,
       32, // 256-bit key
       'sha512'
-    );
+    )
 
     const keyVersion: KeyVersion = {
       id: keyId,
@@ -90,14 +90,14 @@ export class KeyManagementSystem {
       algorithm: 'aes-256-gcm',
       purpose,
       rotationSchedule: this.config.rotationInterval,
-    };
+    }
 
     // キーをストレージに保存
-    await this.storeKey(keyVersion);
-    this.keyCache.set(keyId, keyVersion);
+    await this.storeKey(keyVersion)
+    this.keyCache.set(keyId, keyVersion)
 
-    console.info(`New encryption key generated: ${keyId.substring(0, 8)}... (${purpose})`);
-    return keyVersion;
+    console.info(`New encryption key generated: ${keyId.substring(0, 8)}... (${purpose})`)
+    return keyVersion
   }
 
   /**
@@ -107,36 +107,36 @@ export class KeyManagementSystem {
     try {
       // キャッシュから最新のアクティブキーを取得
       let activeKey = Array.from(this.keyCache.values())
-        .filter(key => key.status === 'active' && key.purpose === 'encryption')
-        .sort((a, b) => b.createdAt - a.createdAt)[0];
+        .filter((key) => key.status === 'active' && key.purpose === 'encryption')
+        .sort((a, b) => b.createdAt - a.createdAt)[0]
 
       if (!activeKey) {
         // Redisから最新のアクティブキーを検索
-        activeKey = await this.findActiveKeyFromStorage('encryption');
+        activeKey = await this.findActiveKeyFromStorage('encryption')
       }
 
       if (!activeKey) {
         // アクティブキーが存在しない場合は新規生成
-        console.warn('No active encryption key found, generating new key');
-        activeKey = await this.generateEncryptionKey();
+        console.warn('No active encryption key found, generating new key')
+        activeKey = await this.generateEncryptionKey()
       }
 
       // 使用回数をカウント
-      const usage = this.keyUsageCounter.get(activeKey.id) || 0;
-      this.keyUsageCounter.set(activeKey.id, usage + 1);
+      const usage = this.keyUsageCounter.get(activeKey.id) || 0
+      this.keyUsageCounter.set(activeKey.id, usage + 1)
 
       // 使用回数が閾値を超えた場合はローテーション
       if (usage >= this.config.masterKeyRotationThreshold) {
-        console.info(`Key usage threshold exceeded for ${activeKey.id}, triggering rotation`);
-        await this.performKeyRotation();
+        console.info(`Key usage threshold exceeded for ${activeKey.id}, triggering rotation`)
+        await this.performKeyRotation()
         // 新しいアクティブキーを取得
-        return await this.getActiveEncryptionKey();
+        return await this.getActiveEncryptionKey()
       }
 
-      return activeKey;
+      return activeKey
     } catch (error) {
-      console.error('Failed to get active encryption key:', error);
-      throw new Error('Encryption key retrieval failed');
+      console.error('Failed to get active encryption key:', error)
+      throw new Error('Encryption key retrieval failed')
     }
   }
 
@@ -147,24 +147,24 @@ export class KeyManagementSystem {
     try {
       // キャッシュから確認
       if (this.keyCache.has(keyId)) {
-        return this.keyCache.get(keyId)!;
+        return this.keyCache.get(keyId)!
       }
 
       // Redisから取得
       if (this.redis) {
-        const keyData = await this.redis.get(`key:${keyId}`);
+        const keyData = await this.redis.get(`key:${keyId}`)
         if (keyData) {
-          const keyVersion = this.deserializeKey(keyData);
-          this.keyCache.set(keyId, keyVersion);
-          return keyVersion;
+          const keyVersion = this.deserializeKey(keyData)
+          this.keyCache.set(keyId, keyVersion)
+          return keyVersion
         }
       }
 
-      console.warn(`Key not found: ${keyId}`);
-      return null;
+      console.warn(`Key not found: ${keyId}`)
+      return null
     } catch (error) {
-      console.error(`Failed to retrieve key ${keyId}:`, error);
-      return null;
+      console.error(`Failed to retrieve key ${keyId}:`, error)
+      return null
     }
   }
 
@@ -173,30 +173,29 @@ export class KeyManagementSystem {
    */
   async performKeyRotation(): Promise<void> {
     try {
-      console.info('Starting key rotation process...');
+      console.info('Starting key rotation process...')
 
       // 現在のアクティブキーを取得
-      const activeKeys = await this.getActiveKeys();
+      const activeKeys = await this.getActiveKeys()
 
       // 新しいキーを生成
-      const newKey = await this.generateEncryptionKey();
+      const newKey = await this.generateEncryptionKey()
 
       // 古いキーを非推奨に変更
       for (const oldKey of activeKeys) {
-        await this.deprecateKey(oldKey.id);
+        await this.deprecateKey(oldKey.id)
       }
 
       // 期限切れキーのクリーンアップ
-      await this.cleanupExpiredKeys();
+      await this.cleanupExpiredKeys()
 
-      console.info(`Key rotation completed. New key: ${newKey.id.substring(0, 8)}...`);
+      console.info(`Key rotation completed. New key: ${newKey.id.substring(0, 8)}...`)
 
       // ローテーション統計を更新
-      await this.updateRotationStatistics();
-
+      await this.updateRotationStatistics()
     } catch (error) {
-      console.error('Key rotation failed:', error);
-      throw error;
+      console.error('Key rotation failed:', error)
+      throw error
     }
   }
 
@@ -204,45 +203,47 @@ export class KeyManagementSystem {
    * キーの非推奨化
    */
   async deprecateKey(keyId: string): Promise<void> {
-    const key = await this.getKeyById(keyId);
+    const key = await this.getKeyById(keyId)
     if (!key) {
-      console.warn(`Cannot deprecate non-existent key: ${keyId}`);
-      return;
+      console.warn(`Cannot deprecate non-existent key: ${keyId}`)
+      return
     }
 
-    key.status = 'deprecated';
-    key.expiresAt = Date.now() + this.config.keyRetentionPeriod;
+    key.status = 'deprecated'
+    key.expiresAt = Date.now() + this.config.keyRetentionPeriod
 
-    await this.storeKey(key);
-    this.keyCache.set(keyId, key);
+    await this.storeKey(key)
+    this.keyCache.set(keyId, key)
 
-    console.info(`Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`);
+    console.info(
+      `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
+    )
   }
 
   /**
    * キーの取り消し
    */
   async revokeKey(keyId: string, reason?: string): Promise<void> {
-    const key = await this.getKeyById(keyId);
+    const key = await this.getKeyById(keyId)
     if (!key) {
-      console.warn(`Cannot revoke non-existent key: ${keyId}`);
-      return;
+      console.warn(`Cannot revoke non-existent key: ${keyId}`)
+      return
     }
 
-    key.status = 'revoked';
-    key.expiresAt = Date.now(); // 即座に期限切れに
+    key.status = 'revoked'
+    key.expiresAt = Date.now() // 即座に期限切れに
 
-    await this.storeKey(key);
-    this.keyCache.set(keyId, key);
+    await this.storeKey(key)
+    this.keyCache.set(keyId, key)
 
-    console.warn(`Key revoked: ${keyId.substring(0, 8)}... ${reason ? `(reason: ${reason})` : ''}`);
+    console.warn(`Key revoked: ${keyId.substring(0, 8)}... ${reason ? `(reason: ${reason})` : ''}`)
 
     // セキュリティログ記録
     await this.logSecurityEvent('KEY_REVOKED', {
       keyId,
       reason,
       timestamp: Date.now(),
-    });
+    })
   }
 
   /**
@@ -253,51 +254,52 @@ export class KeyManagementSystem {
     newKeyId: string,
     batchSize: number = 100
   ): Promise<{
-    processed: number;
-    failed: number;
-    completed: boolean;
+    processed: number
+    failed: number
+    completed: boolean
   }> {
     try {
-      const oldKey = await this.getKeyById(oldKeyId);
-      const newKey = await this.getKeyById(newKeyId);
+      const oldKey = await this.getKeyById(oldKeyId)
+      const newKey = await this.getKeyById(newKeyId)
 
       if (!oldKey || !newKey) {
-        throw new Error('Required keys not found for re-encryption');
+        throw new Error('Required keys not found for re-encryption')
       }
 
       // 再暗号化が必要なデータのリストを取得
-      const dataToReEncrypt = await this.getDataForReEncryption(oldKeyId, batchSize);
+      const dataToReEncrypt = await this.getDataForReEncryption(oldKeyId, batchSize)
 
-      let processed = 0;
-      let failed = 0;
+      let processed = 0
+      let failed = 0
 
       for (const dataItem of dataToReEncrypt) {
         try {
           // 旧キーで復号
-          const decryptedData = this.decryptWithKey(dataItem.encryptedData, oldKey);
-          
+          const decryptedData = this.decryptWithKey(dataItem.encryptedData, oldKey)
+
           // 新キーで再暗号化
-          const reEncryptedData = this.encryptWithKey(decryptedData, newKey);
-          
+          const reEncryptedData = this.encryptWithKey(decryptedData, newKey)
+
           // データベース更新
-          await this.updateEncryptedData(dataItem.id, reEncryptedData, newKeyId);
-          
-          processed++;
+          await this.updateEncryptedData(dataItem.id, reEncryptedData, newKeyId)
+
+          processed++
         } catch (error) {
-          console.error(`Re-encryption failed for data item ${dataItem.id}:`, error);
-          failed++;
+          console.error(`Re-encryption failed for data item ${dataItem.id}:`, error)
+          failed++
         }
       }
 
-      const completed = dataToReEncrypt.length < batchSize; // 最後のバッチの場合
+      const completed = dataToReEncrypt.length < batchSize // 最後のバッチの場合
 
-      console.info(`Re-encryption batch completed: ${processed} processed, ${failed} failed, completed: ${completed}`);
+      console.info(
+        `Re-encryption batch completed: ${processed} processed, ${failed} failed, completed: ${completed}`
+      )
 
-      return { processed, failed, completed };
-
+      return { processed, failed, completed }
     } catch (error) {
-      console.error('Gradual re-encryption failed:', error);
-      throw error;
+      console.error('Gradual re-encryption failed:', error)
+      throw error
     }
   }
 
@@ -305,27 +307,30 @@ export class KeyManagementSystem {
    * キー使用統計の取得
    */
   async getKeyUsageStatistics(): Promise<{
-    activeKeys: number;
-    deprecatedKeys: number;
-    revokedKeys: number;
-    totalUsage: number;
-    rotationHistory: Array<{ timestamp: number; keyId: string; action: string }>;
+    activeKeys: number
+    deprecatedKeys: number
+    revokedKeys: number
+    totalUsage: number
+    rotationHistory: Array<{ timestamp: number; keyId: string; action: string }>
   }> {
     try {
-      const allKeys = await this.getAllKeys();
-      
-      const stats = {
-        activeKeys: allKeys.filter(k => k.status === 'active').length,
-        deprecatedKeys: allKeys.filter(k => k.status === 'deprecated').length,
-        revokedKeys: allKeys.filter(k => k.status === 'revoked').length,
-        totalUsage: Array.from(this.keyUsageCounter.values()).reduce((sum, count) => sum + count, 0),
-        rotationHistory: await this.getRotationHistory(),
-      };
+      const allKeys = await this.getAllKeys()
 
-      return stats;
+      const stats = {
+        activeKeys: allKeys.filter((k) => k.status === 'active').length,
+        deprecatedKeys: allKeys.filter((k) => k.status === 'deprecated').length,
+        revokedKeys: allKeys.filter((k) => k.status === 'revoked').length,
+        totalUsage: Array.from(this.keyUsageCounter.values()).reduce(
+          (sum, count) => sum + count,
+          0
+        ),
+        rotationHistory: await this.getRotationHistory(),
+      }
+
+      return stats
     } catch (error) {
-      console.error('Failed to get key usage statistics:', error);
-      throw error;
+      console.error('Failed to get key usage statistics:', error)
+      throw error
     }
   }
 
@@ -334,28 +339,27 @@ export class KeyManagementSystem {
    */
   async setupProductionKeyStrategy(): Promise<void> {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('Production key strategy setup called in non-production environment');
-      return;
+      console.warn('Production key strategy setup called in non-production environment')
+      return
     }
 
     try {
       // HSM統合の準備（将来実装）
-      await this.prepareHSMIntegration();
+      await this.prepareHSMIntegration()
 
       // 分散キー管理の設定
-      await this.setupDistributedKeyManagement();
+      await this.setupDistributedKeyManagement()
 
       // 暗号化キー監査ログの有効化
-      await this.enableKeyAuditLogging();
+      await this.enableKeyAuditLogging()
 
       // 災害復旧用キーバックアップの設定
-      await this.setupKeyBackupStrategy();
+      await this.setupKeyBackupStrategy()
 
-      console.info('Production key management strategy initialized');
-
+      console.info('Production key management strategy initialized')
     } catch (error) {
-      console.error('Failed to setup production key strategy:', error);
-      throw error;
+      console.error('Failed to setup production key strategy:', error)
+      throw error
     }
   }
 
@@ -363,24 +367,20 @@ export class KeyManagementSystem {
    * キーをストレージに保存
    */
   private async storeKey(keyVersion: KeyVersion): Promise<void> {
-    const serializedKey = this.serializeKey(keyVersion);
-    
+    const serializedKey = this.serializeKey(keyVersion)
+
     if (this.redis) {
       await this.redis.setex(
         `key:${keyVersion.id}`,
         Math.ceil(this.config.keyRetentionPeriod / 1000),
         serializedKey
-      );
-      
+      )
+
       // インデックス更新
-      await this.redis.zadd(
-        'keys:by_created',
-        keyVersion.createdAt,
-        keyVersion.id
-      );
+      await this.redis.zadd('keys:by_created', keyVersion.createdAt, keyVersion.id)
     } else {
       // メモリ内ストレージ（開発環境用）
-      this.keyCache.set(keyVersion.id, keyVersion);
+      this.keyCache.set(keyVersion.id, keyVersion)
     }
   }
 
@@ -388,33 +388,33 @@ export class KeyManagementSystem {
    * アクティブキーの取得
    */
   private async getActiveKeys(): Promise<KeyVersion[]> {
-    const allKeys = await this.getAllKeys();
-    return allKeys.filter(key => key.status === 'active');
+    const allKeys = await this.getAllKeys()
+    return allKeys.filter((key) => key.status === 'active')
   }
 
   /**
    * ストレージからアクティブキーを検索
    */
   private async findActiveKeyFromStorage(purpose: string): Promise<KeyVersion | null> {
-    if (!this.redis) return null;
+    if (!this.redis) return null
 
     try {
-      const keyIds = await this.redis.zrevrange('keys:by_created', 0, 10);
-      
+      const keyIds = await this.redis.zrevrange('keys:by_created', 0, 10)
+
       for (const keyId of keyIds) {
-        const keyData = await this.redis.get(`key:${keyId}`);
+        const keyData = await this.redis.get(`key:${keyId}`)
         if (keyData) {
-          const key = this.deserializeKey(keyData);
+          const key = this.deserializeKey(keyData)
           if (key.status === 'active' && key.purpose === purpose) {
-            return key;
+            return key
           }
         }
       }
-      
-      return null;
+
+      return null
     } catch (error) {
-      console.error('Failed to find active key from storage:', error);
-      return null;
+      console.error('Failed to find active key from storage:', error)
+      return null
     }
   }
 
@@ -423,18 +423,18 @@ export class KeyManagementSystem {
    */
   private async cleanupExpiredKeys(): Promise<void> {
     try {
-      const now = Date.now();
-      const allKeys = await this.getAllKeys();
-      
+      const now = Date.now()
+      const allKeys = await this.getAllKeys()
+
       for (const key of allKeys) {
         if (key.expiresAt && key.expiresAt < now) {
           // キーを完全に削除
-          await this.deleteKey(key.id);
-          console.info(`Expired key cleaned up: ${key.id.substring(0, 8)}...`);
+          await this.deleteKey(key.id)
+          console.info(`Expired key cleaned up: ${key.id.substring(0, 8)}...`)
         }
       }
     } catch (error) {
-      console.error('Key cleanup failed:', error);
+      console.error('Key cleanup failed:', error)
     }
   }
 
@@ -443,34 +443,34 @@ export class KeyManagementSystem {
    */
   private async deleteKey(keyId: string): Promise<void> {
     if (this.redis) {
-      await this.redis.del(`key:${keyId}`);
-      await this.redis.zrem('keys:by_created', keyId);
+      await this.redis.del(`key:${keyId}`)
+      await this.redis.zrem('keys:by_created', keyId)
     }
-    
-    this.keyCache.delete(keyId);
-    this.keyUsageCounter.delete(keyId);
+
+    this.keyCache.delete(keyId)
+    this.keyUsageCounter.delete(keyId)
   }
 
   /**
    * 全キーの取得
    */
   private async getAllKeys(): Promise<KeyVersion[]> {
-    const keys: KeyVersion[] = [];
+    const keys: KeyVersion[] = []
 
     if (this.redis) {
-      const keyIds = await this.redis.zrange('keys:by_created', 0, -1);
-      
+      const keyIds = await this.redis.zrange('keys:by_created', 0, -1)
+
       for (const keyId of keyIds) {
-        const keyData = await this.redis.get(`key:${keyId}`);
+        const keyData = await this.redis.get(`key:${keyId}`)
         if (keyData) {
-          keys.push(this.deserializeKey(keyData));
+          keys.push(this.deserializeKey(keyData))
         }
       }
     } else {
-      keys.push(...Array.from(this.keyCache.values()));
+      keys.push(...Array.from(this.keyCache.values()))
     }
 
-    return keys;
+    return keys
   }
 
   /**
@@ -480,48 +480,48 @@ export class KeyManagementSystem {
     return JSON.stringify({
       ...key,
       key: key.key.toString('hex'),
-    });
+    })
   }
 
   /**
    * キーのデシリアライゼーション
    */
   private deserializeKey(data: string): KeyVersion {
-    const parsed = JSON.parse(data);
+    const parsed = JSON.parse(data)
     return {
       ...parsed,
       key: Buffer.from(parsed.key, 'hex'),
-    };
+    }
   }
 
   /**
    * 特定のキーでデータ暗号化
    */
   private encryptWithKey(data: string, key: KeyVersion): string {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher(key.algorithm, key.key);
-    
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
+    const iv = crypto.randomBytes(16)
+    const cipher = crypto.createCipher(key.algorithm, key.key)
+
+    let encrypted = cipher.update(data, 'utf8', 'hex')
+    encrypted += cipher.final('hex')
+
     return JSON.stringify({
       encrypted,
       iv: iv.toString('hex'),
       keyId: key.id,
-    });
+    })
   }
 
   /**
    * 特定のキーでデータ復号化
    */
   private decryptWithKey(encryptedData: string, key: KeyVersion): string {
-    const { encrypted, iv } = JSON.parse(encryptedData);
-    const decipher = crypto.createDecipher(key.algorithm, key.key);
-    
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
+    const { encrypted, iv } = JSON.parse(encryptedData)
+    const decipher = crypto.createDecipher(key.algorithm, key.key)
+
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8')
+    decrypted += decipher.final('utf8')
+
+    return decrypted
   }
 
   /**
@@ -530,15 +530,19 @@ export class KeyManagementSystem {
   private async getDataForReEncryption(oldKeyId: string, limit: number): Promise<any[]> {
     // 実際の実装では、データベースクエリを実行
     // ここではダミーデータを返す
-    return [];
+    return []
   }
 
   /**
    * 暗号化データの更新（実装は実際のデータベース構造に依存）
    */
-  private async updateEncryptedData(dataId: string, newEncryptedData: string, newKeyId: string): Promise<void> {
+  private async updateEncryptedData(
+    dataId: string,
+    newEncryptedData: string,
+    newKeyId: string
+  ): Promise<void> {
     // 実際の実装では、データベース更新を実行
-    console.log(`Updated data ${dataId} with new key ${newKeyId}`);
+    console.log(`Updated data ${dataId} with new key ${newKeyId}`)
   }
 
   /**
@@ -547,27 +551,29 @@ export class KeyManagementSystem {
   private async updateRotationStatistics(): Promise<void> {
     try {
       if (this.redis) {
-        await this.redis.incr('key_rotation_count');
-        await this.redis.set('last_rotation_time', Date.now());
+        await this.redis.incr('key_rotation_count')
+        await this.redis.set('last_rotation_time', Date.now())
       }
     } catch (error) {
-      console.error('Failed to update rotation statistics:', error);
+      console.error('Failed to update rotation statistics:', error)
     }
   }
 
   /**
    * ローテーション履歴の取得
    */
-  private async getRotationHistory(): Promise<Array<{ timestamp: number; keyId: string; action: string }>> {
+  private async getRotationHistory(): Promise<
+    Array<{ timestamp: number; keyId: string; action: string }>
+  > {
     try {
       if (this.redis) {
-        const history = await this.redis.lrange('key_rotation_history', 0, 9);
-        return history.map(item => JSON.parse(item));
+        const history = await this.redis.lrange('key_rotation_history', 0, 9)
+        return history.map((item) => JSON.parse(item))
       }
-      return [];
+      return []
     } catch (error) {
-      console.error('Failed to get rotation history:', error);
-      return [];
+      console.error('Failed to get rotation history:', error)
+      return []
     }
   }
 
@@ -580,16 +586,16 @@ export class KeyManagementSystem {
         event,
         details,
         timestamp: Date.now(),
-      };
-
-      if (this.redis) {
-        await this.redis.lpush('security_events', JSON.stringify(logEntry));
-        await this.redis.ltrim('security_events', 0, 999); // 最新1000件を保持
       }
 
-      console.warn(`Security event logged: ${event}`, details);
+      if (this.redis) {
+        await this.redis.lpush('security_events', JSON.stringify(logEntry))
+        await this.redis.ltrim('security_events', 0, 999) // 最新1000件を保持
+      }
+
+      console.warn(`Security event logged: ${event}`, details)
     } catch (error) {
-      console.error('Failed to log security event:', error);
+      console.error('Failed to log security event:', error)
     }
   }
 
@@ -598,7 +604,7 @@ export class KeyManagementSystem {
    */
   private async prepareHSMIntegration(): Promise<void> {
     // HSM (Hardware Security Module) 統合の準備
-    console.info('HSM integration preparation (placeholder)');
+    console.info('HSM integration preparation (placeholder)')
   }
 
   /**
@@ -606,7 +612,7 @@ export class KeyManagementSystem {
    */
   private async setupDistributedKeyManagement(): Promise<void> {
     // 分散環境でのキー管理設定
-    console.info('Distributed key management setup (placeholder)');
+    console.info('Distributed key management setup (placeholder)')
   }
 
   /**
@@ -614,7 +620,7 @@ export class KeyManagementSystem {
    */
   private async enableKeyAuditLogging(): Promise<void> {
     // キー使用の監査ログ機能を有効化
-    console.info('Key audit logging enabled (placeholder)');
+    console.info('Key audit logging enabled (placeholder)')
   }
 
   /**
@@ -622,7 +628,7 @@ export class KeyManagementSystem {
    */
   private async setupKeyBackupStrategy(): Promise<void> {
     // 災害復旧用のキーバックアップ戦略を設定
-    console.info('Key backup strategy setup (placeholder)');
+    console.info('Key backup strategy setup (placeholder)')
   }
 
   /**
@@ -630,11 +636,11 @@ export class KeyManagementSystem {
    */
   destroy(): void {
     if (this.rotationTimer) {
-      clearInterval(this.rotationTimer);
-      this.rotationTimer = null;
+      clearInterval(this.rotationTimer)
+      this.rotationTimer = null
     }
-    
-    console.info('Key Management System destroyed');
+
+    console.info('Key Management System destroyed')
   }
 }
 
@@ -642,30 +648,30 @@ export class KeyManagementSystem {
  * 拡張された暗号化サービス（キーローテーション対応）
  */
 export class EnhancedEncryptionService {
-  private keyManager: KeyManagementSystem;
+  private keyManager: KeyManagementSystem
 
   constructor(masterKey: string, config?: Partial<KeyRotationConfig>) {
-    this.keyManager = new KeyManagementSystem(masterKey, config);
+    this.keyManager = new KeyManagementSystem(masterKey, config)
   }
 
   /**
    * データ暗号化（自動キーローテーション対応）
    */
   async encrypt(data: string): Promise<{
-    encrypted: string;
-    iv: string;
-    tag: string;
-    metadata: EncryptionMetadata;
+    encrypted: string
+    iv: string
+    tag: string
+    metadata: EncryptionMetadata
   }> {
     try {
-      const activeKey = await this.keyManager.getActiveEncryptionKey();
-      const iv = crypto.randomBytes(16);
-      
-      const cipher = crypto.createCipher(activeKey.algorithm, activeKey.key);
-      let encrypted = cipher.update(data, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
-      
-      const tag = cipher.getAuthTag?.()?.toString('hex') || '';
+      const activeKey = await this.keyManager.getActiveEncryptionKey()
+      const iv = crypto.randomBytes(16)
+
+      const cipher = crypto.createCipher(activeKey.algorithm, activeKey.key)
+      let encrypted = cipher.update(data, 'utf8', 'hex')
+      encrypted += cipher.final('hex')
+
+      const tag = cipher.getAuthTag?.()?.toString('hex') || ''
 
       const metadata: EncryptionMetadata = {
         keyId: activeKey.id,
@@ -673,17 +679,17 @@ export class EnhancedEncryptionService {
         algorithm: activeKey.algorithm,
         timestamp: Date.now(),
         rotationGeneration: 1, // TODO: 世代管理実装
-      };
+      }
 
       return {
         encrypted,
         iv: iv.toString('hex'),
         tag,
         metadata,
-      };
+      }
     } catch (error) {
-      console.error('Enhanced encryption failed:', error);
-      throw new Error('Encryption failed');
+      console.error('Enhanced encryption failed:', error)
+      throw new Error('Encryption failed')
     }
   }
 
@@ -697,29 +703,29 @@ export class EnhancedEncryptionService {
     metadata: EncryptionMetadata
   ): Promise<string> {
     try {
-      const key = await this.keyManager.getKeyById(metadata.keyId);
-      
+      const key = await this.keyManager.getKeyById(metadata.keyId)
+
       if (!key) {
-        throw new Error(`Decryption key not found: ${metadata.keyId}`);
+        throw new Error(`Decryption key not found: ${metadata.keyId}`)
       }
 
       if (key.status === 'revoked') {
-        throw new Error(`Cannot decrypt with revoked key: ${metadata.keyId}`);
+        throw new Error(`Cannot decrypt with revoked key: ${metadata.keyId}`)
       }
 
-      const decipher = crypto.createDecipher(key.algorithm, key.key);
-      
+      const decipher = crypto.createDecipher(key.algorithm, key.key)
+
       if (tag) {
-        decipher.setAuthTag?.(Buffer.from(tag, 'hex'));
+        decipher.setAuthTag?.(Buffer.from(tag, 'hex'))
       }
 
-      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
+      let decrypted = decipher.update(encryptedData, 'hex', 'utf8')
+      decrypted += decipher.final('utf8')
 
-      return decrypted;
+      return decrypted
     } catch (error) {
-      console.error('Enhanced decryption failed:', error);
-      throw new Error('Decryption failed');
+      console.error('Enhanced decryption failed:', error)
+      throw new Error('Decryption failed')
     }
   }
 
@@ -727,19 +733,19 @@ export class EnhancedEncryptionService {
    * キー管理システムへのアクセス
    */
   getKeyManager(): KeyManagementSystem {
-    return this.keyManager;
+    return this.keyManager
   }
 
   /**
    * システム終了処理
    */
   destroy(): void {
-    this.keyManager.destroy();
+    this.keyManager.destroy()
   }
 }
 
 // 環境変数からキーマネージャーを初期化
-const env = process.env;
+const env = process.env
 export const keyManager = new KeyManagementSystem(
   env.ENCRYPTION_MASTER_KEY || crypto.randomBytes(32).toString('hex'),
   {
@@ -748,15 +754,15 @@ export const keyManager = new KeyManagementSystem(
     autoRotationEnabled: env.ENCRYPTION_AUTO_ROTATION !== 'false',
     keyDerivationRounds: parseInt(env.ENCRYPTION_KEY_DERIVATION_ITERATIONS || '100000'),
   }
-);
+)
 
 export const enhancedEncryption = new EnhancedEncryptionService(
   env.ENCRYPTION_MASTER_KEY || crypto.randomBytes(32).toString('hex')
-);
+)
 
 export default {
   KeyManagementSystem,
   EnhancedEncryptionService,
   keyManager,
   enhancedEncryption,
-};
+}
