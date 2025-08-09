@@ -1,4 +1,28 @@
-name: Cloud-Optimized PWA Deployment Pipeline
+# ====================================================================
+# GitHub Pages デプロイメントパイプライン
+# ====================================================================
+# 目的: PMPLearningManagementアプリケーションをGitHub Pagesにデプロイし、
+#      PWA要件の検証とパフォーマンス監視を実行
+# 
+# 実行タイミング:
+#   - mainブランチへのプッシュ時（本番デプロイ）
+#   - developブランチへのプッシュ時（ステージング検証）
+#   - mainブランチへのプルリクエスト時（品質チェック）
+#   - 手動実行（workflow_dispatch）
+#   - 毎週月曜日の午前6時（定期パフォーマンス監査）
+#
+# 主な処理:
+#   1. コード品質チェック（ESLint、TypeScript、フォーマット）
+#   2. セキュリティ監査
+#   3. ビルドテストとアーティファクト生成
+#   4. パフォーマンスバジェット検証
+#   5. PWA要件の検証
+#   6. GitHub Pagesへのデプロイ（mainブランチのみ）
+#   7. Lighthouse CIによるパフォーマンス監査
+#   8. デプロイ後のヘルスチェック
+# ====================================================================
+
+name: 📦 GitHub Pages デプロイメント & PWA検証
 
 on:
   push:
@@ -30,7 +54,7 @@ env:
 jobs:
   # Phase 1: Basic Quality Gates
   lint-and-format:
-    name: Lint & Format Check
+    name: 🔍 コード品質チェック（Lint & Format）
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,7 +83,7 @@ jobs:
 
   # Security and Dependencies
   security-audit:
-    name: Security Audit
+    name: 🔒 セキュリティ監査
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -99,7 +123,7 @@ jobs:
 
   # Build Test
   build-test:
-    name: Build Test
+    name: 🏗️ ビルドテスト
     runs-on: ubuntu-latest
     needs: [lint-and-format]
     steps:
@@ -159,7 +183,7 @@ jobs:
 
   # Performance Budget Check
   performance-budget:
-    name: Performance Budget Check
+    name: ⚡ パフォーマンスバジェット検証
     runs-on: ubuntu-latest
     needs: [build-test]
     steps:
@@ -195,7 +219,7 @@ jobs:
 
   # PWA Validation
   pwa-validation:
-    name: PWA Validation
+    name: 📱 PWA要件検証
     runs-on: ubuntu-latest
     needs: [build-test]
     steps:
@@ -247,7 +271,7 @@ jobs:
 
   # Deploy to GitHub Pages (Only on main branch)
   deploy-pages:
-    name: Deploy to GitHub Pages
+    name: 🚀 GitHub Pagesへのデプロイ
     runs-on: ubuntu-latest
     needs: [build-test, security-audit, performance-budget, pwa-validation]
     if: github.ref == 'refs/heads/main'
@@ -353,7 +377,7 @@ jobs:
 
   # Lighthouse CI Performance Audit
   lighthouse-ci:
-    name: Lighthouse CI Performance Audit
+    name: 🌐 Lighthouse パフォーマンス監査
     runs-on: ubuntu-latest
     needs: [deploy-pages]
     if: success() && github.ref == 'refs/heads/main'
@@ -384,7 +408,7 @@ jobs:
 
   # Post-deployment health check with PWA validation
   health-check:
-    name: Comprehensive Health Check
+    name: ✅ デプロイ後ヘルスチェック
     runs-on: ubuntu-latest
     needs: [deploy-pages]
     if: success() && github.ref == 'refs/heads/main'
@@ -438,7 +462,7 @@ jobs:
 
   # PR Comment for staging info
   pr-info:
-    name: PR Information
+    name: 💬 PRステータス通知
     runs-on: ubuntu-latest
     needs: [build-test]
     if: github.event_name == 'pull_request'
