@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1f2937">
+    <title>オフライン - PMP Learning</title>
+    
+    <!-- Inline critical CSS for offline page -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .features h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+            font-weight: bold;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(239, 68, 68, 0.9);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status.online {
+            background: rgba(34, 197, 94, 0.9);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">オフライン</div>
+    
+    <div class="container">
+        <div class="icon">📚</div>
+        <h1>PMP Learning</h1>
+        <p>現在インターネット接続がありません。<br>オフラインでも一部の機能をご利用いただけます。</p>
+        
+        <div class="features">
+            <h3>オフラインで利用可能:</h3>
+            <ul>
+                <li>キャッシュ済みの学習コンテンツ</li>
+                <li>フラッシュカード学習</li>
+                <li>用語集の閲覧</li>
+                <li>学習進捗の確認</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <a href="/PMPLearningManagement/" class="button" onclick="location.reload()">再試行</a>
+            <a href="/PMPLearningManagement/#/flashcards" class="button">フラッシュカード</a>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.7;">
+            インターネット接続が復旧すると自動的に最新の内容に更新されます。
+        </p>
+    </div>
+
+    <script>
+        // Monitor online/offline status
+        function updateStatus() {
+            const status = document.getElementById('status');
+            if (navigator.onLine) {
+                status.textContent = 'オンライン';
+                status.classList.add('online');
+                // Auto-redirect when back online
+                setTimeout(() => {
+                    window.location.href = '/PMPLearningManagement/';
+                }, 2000);
+            } else {
+                status.textContent = 'オフライン';
+                status.classList.remove('online');
+            }
+        }
+        
+        // Initial status
+        updateStatus();
+        
+        // Listen for connection changes
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+        
+        // Periodic connectivity check
+        setInterval(() => {
+            fetch('/PMPLearningManagement/manifest.json', { 
+                method: 'HEAD',
+                cache: 'no-cache',
+                mode: 'no-cors'
+            }).then(() => {
+                if (!navigator.onLine) {
+                    // Connection restored
+                    window.location.href = '/PMPLearningManagement/';
+                }
+            }).catch(() => {
+                // Still offline
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

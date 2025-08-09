@@ -1,0 +1,67 @@
+# Security and Performance Headers for PWA Deployment
+# These headers enhance security and performance for the PMP Learning Management System
+
+# Global headers for all routes
+/*
+  # Security Headers
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Content Security Policy for PWA
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; manifest-src 'self'; worker-src 'self'
+  
+  # Performance Headers
+  Cache-Control: public, max-age=31536000, immutable
+  
+  # PWA Headers
+  X-Robots-Tag: index, follow
+  
+  # Mobile Optimization
+  Viewport: width=device-width, initial-scale=1.0
+
+# Specific caching for static assets
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# Service Worker specific headers
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Content-Type: application/javascript
+
+# PWA Manifest
+/manifest.json
+  Cache-Control: public, max-age=86400
+  Content-Type: application/manifest+json
+
+# HTML pages - shorter cache for updates
+*.html
+  Cache-Control: public, max-age=3600
+  X-Content-Type-Options: nosniff
+
+# API routes (if any)
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Content-Type: application/json
+
+# Font files
+*.woff
+  Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *
+
+*.woff2  
+  Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *
+
+# Image files
+*.png
+  Cache-Control: public, max-age=31536000
+  
+*.jpg
+  Cache-Control: public, max-age=31536000
+  
+*.svg
+  Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *

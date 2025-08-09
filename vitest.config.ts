@@ -67,11 +67,6 @@ export default defineConfig({
       hooks: 'parallel'
     },
     // 高度品質ゲート
-    benchmark: {
-      include: ['**/*.bench.{js,ts}'],
-      exclude: ['node_modules', 'dist', '.next'],
-      outputFile: 'benchmark-results.json'
-    },
     // Flaky test防止
     retry: 2,
     bail: 0,
@@ -98,9 +93,7 @@ export default defineConfig({
       'json',
       'html',
       // 高度レポーティング
-      ['junit', { outputFile: './test-results.xml' }],
-      // 品質メトリクス
-      ['custom', { outputFile: './quality-metrics.json' }]
+      ['junit', { outputFile: './test-results.xml' }]
     ],
     outputFile: {
       json: './test-results.json',
@@ -116,6 +109,7 @@ export default defineConfig({
     benchmark: {
       include: ['**/*.bench.{js,ts}'],
       exclude: ['node_modules', 'dist', '.next'],
+      outputFile: 'benchmark-results.json'
     },
   },
   resolve: {

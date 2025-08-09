@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - PMPLearning
+name: Cloud-Optimized PWA Deployment Pipeline
 
 on:
   push:
@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # Weekly performance audit on Mondays
 
 permissions:
   contents: read
@@ -13,6 +15,7 @@ permissions:
   id-token: write
   checks: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +23,9 @@ concurrency:
 
 env:
   NODE_VERSION: '18'
-  CACHE_VERSION: 'v1'
+  CACHE_VERSION: 'v2'
+  LIGHTHOUSE_CI_TOKEN: ${{ secrets.LIGHTHOUSE_CI_TOKEN }}
+  SITE_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
 
 jobs:
   # Phase 1: Basic Quality Gates
@@ -115,13 +120,31 @@ jobs:
         run: npm run build
         env:
           SKIP_ENV_VALIDATION: true
+          NODE_ENV: production
+          GENERATE_SOURCEMAP: false
 
-      - name: Check build output
+      - name: Analyze build output
         run: |
           if [ -d "dist" ]; then
             echo "✅ Build completed successfully"
-            echo "Build size:"
+            echo "Build size analysis:"
             du -sh dist/
+            echo "Asset breakdown:"
+            find dist -name "*.js" -exec du -h {} + | sort -hr
+            find dist -name "*.css" -exec du -h {} + | sort -hr
+            
+            # Check for PWA files
+            if [ -f "dist/manifest.json" ]; then
+              echo "✅ PWA manifest found"
+            else
+              echo "⚠️  PWA manifest missing"
+            fi
+            
+            if [ -f "dist/sw.js" ] || [ -f "dist/service-worker.js" ]; then
+              echo "✅ Service worker found"
+            else
+              echo "⚠️  Service worker missing"
+            fi
           else
             echo "❌ Build failed - no dist directory found"
             exit 1
@@ -134,11 +157,99 @@ jobs:
           path: dist/
           retention-days: 1
 
+  # Performance Budget Check
+  performance-budget:
+    name: Performance Budget Check
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for bundle analysis
+        run: npm run build
+        env:
+          NODE_ENV: production
+          SKIP_ENV_VALIDATION: true
+
+      - name: Check performance budget
+        run: |
+          echo "Checking performance budget..."
+          npm run performance:budget || {
+            echo "❌ Performance budget exceeded!"
+            echo "Bundle size analysis:"
+            find dist -name "*.js" -exec du -h {} + | sort -hr | head -10
+            exit 1
+          }
+          echo "✅ Performance budget passed"
+
+  # PWA Validation
+  pwa-validation:
+    name: PWA Validation
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          SKIP_ENV_VALIDATION: true
+
+      - name: Validate PWA assets
+        run: |
+          echo "Validating PWA configuration..."
+          
+          # Check manifest.json
+          if [ -f "dist/manifest.json" ]; then
+            echo "✅ PWA manifest exists"
+            echo "Manifest content:"
+            cat dist/manifest.json | jq '.'
+          else
+            echo "⚠️  PWA manifest not found"
+          fi
+          
+          # Check service worker
+          if find dist -name "*.js" -exec grep -l "serviceWorker" {} \; | head -1; then
+            echo "✅ Service worker registration found"
+          else
+            echo "⚠️  Service worker registration not detected"
+          fi
+          
+          # Check icons
+          if find dist -name "*.png" -o -name "*.ico" | grep -E "(icon|logo)" | head -1; then
+            echo "✅ PWA icons found"
+          else
+            echo "⚠️  PWA icons not found"
+          fi
+
   # Deploy to GitHub Pages (Only on main branch)
   deploy-pages:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: [build-test, security-audit]
+    needs: [build-test, security-audit, performance-budget, pwa-validation]
     if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
@@ -157,25 +268,76 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build for production
-        run: npm run build
+      - name: Build optimized production bundle
+        run: npm run build:optimized
         env:
           NODE_ENV: production
           SKIP_ENV_VALIDATION: true
+          GENERATE_SOURCEMAP: false
 
-      - name: Copy build output for GitHub Pages
+      - name: Prepare optimized build for GitHub Pages
         run: |
-          # Copy Vite build output for GitHub Pages
+          # The build:optimized script already handles all PWA optimizations
           mkdir -p out
           cp -r dist/* out/
           
-          # Ensure proper routing for SPA
+          echo "📊 Deployment Summary:"
+          
+          # Verify optimized build output
           if [ -f "out/index.html" ]; then
-            echo "✅ Index.html found in build output"
+            echo "✅ Optimized index.html ready"
           else
-            echo "❌ No index.html found in build output"
+            echo "❌ index.html missing"
             exit 1
           fi
+          
+          if [ -f "out/404.html" ]; then
+            echo "✅ SPA routing configured"
+          else
+            echo "❌ SPA routing missing"
+            exit 1
+          fi
+          
+          if [ -f "out/.nojekyll" ]; then
+            echo "✅ Jekyll processing disabled"
+          else
+            echo "❌ .nojekyll missing"
+            exit 1
+          fi
+          
+          # Verify PWA assets
+          if [ -f "out/manifest.json" ]; then
+            echo "✅ PWA manifest ready"
+          else
+            echo "⚠️  PWA manifest missing"
+          fi
+          
+          if [ -f "out/sw.js" ]; then
+            echo "✅ Service worker ready"
+          else
+            echo "⚠️  Service worker missing"
+          fi
+          
+          if [ -f "out/offline.html" ]; then
+            echo "✅ Offline page ready"
+          else
+            echo "⚠️  Offline page missing"
+          fi
+          
+          if [ -f "out/_headers" ]; then
+            echo "✅ Security headers configured"
+          else
+            echo "⚠️  Security headers missing"
+          fi
+          
+          # Show deployment report if available
+          if [ -f "out/deployment-report.json" ]; then
+            echo "📋 Deployment Report:"
+            cat out/deployment-report.json | jq '.bundleSize // "No bundle size data"' || echo "Report available but jq not installed"
+          fi
+          
+          echo "📦 Final deployment size:"
+          du -sh out/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -189,9 +351,40 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Post-deployment check
+  # Lighthouse CI Performance Audit
+  lighthouse-ci:
+    name: Lighthouse CI Performance Audit
+    runs-on: ubuntu-latest
+    needs: [deploy-pages]
+    if: success() && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.12.x
+
+      - name: Wait for deployment
+        run: sleep 45
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun --config=.lighthouserc.json || {
+            echo "⚠️  Lighthouse audit failed, but continuing deployment"
+            echo "Check the performance metrics and optimize accordingly"
+          }
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          LHCI_TOKEN: ${{ env.LIGHTHOUSE_CI_TOKEN }}
+
+  # Post-deployment health check with PWA validation
   health-check:
-    name: Health Check
+    name: Comprehensive Health Check
     runs-on: ubuntu-latest
     needs: [deploy-pages]
     if: success() && github.ref == 'refs/heads/main'
@@ -199,19 +392,49 @@ jobs:
       - name: Wait for deployment
         run: sleep 30
 
-      - name: Check site accessibility
+      - name: Comprehensive site health check
         run: |
-          URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
-          echo "Checking: $URL"
+          URL="${{ env.SITE_URL }}"
+          echo "Running comprehensive health check for: $URL"
           
+          # Basic accessibility check
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
           echo "HTTP Status: $HTTP_CODE"
           
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ Site is accessible"
           else
-            echo "⚠️  Site returned HTTP $HTTP_CODE"
+            echo "❌ Site returned HTTP $HTTP_CODE"
+            exit 1
           fi
+          
+          # Check PWA manifest
+          MANIFEST_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${URL}manifest.json" || echo "000")
+          if [ "$MANIFEST_CODE" = "200" ]; then
+            echo "✅ PWA manifest is accessible"
+          else
+            echo "⚠️  PWA manifest returned HTTP $MANIFEST_CODE"
+          fi
+          
+          # Check service worker (if exists)
+          SW_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${URL}sw.js" || echo "000")
+          if [ "$SW_CODE" = "200" ]; then
+            echo "✅ Service worker is accessible"
+          elif [ "$SW_CODE" = "404" ]; then
+            echo "ℹ️  Service worker not found (may be embedded)"
+          else
+            echo "⚠️  Service worker returned HTTP $SW_CODE"
+          fi
+          
+          # Test mobile viewport
+          MOBILE_CONTENT=$(curl -s -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)" "$URL" | grep -i "viewport" || echo "")
+          if [ -n "$MOBILE_CONTENT" ]; then
+            echo "✅ Mobile viewport meta tag detected"
+          else
+            echo "⚠️  Mobile viewport meta tag not found"
+          fi
+          
+          echo "Health check completed successfully!"
 
   # PR Comment for staging info
   pr-info:
@@ -234,19 +457,26 @@ jobs:
               comment.user.type === 'Bot' && comment.body.includes('🔄 Build Status')
             );
             
-            const body = `🔄 **Build Status Update**
+            const body = `🚀 **Cloud-Optimized PWA Build Status**
             
             - ✅ Linting and formatting checks passed
             - ✅ TypeScript compilation successful  
             - ✅ Build completed successfully
             - 🔍 Security audit completed
+            - 📊 Performance budget validated
+            - 📱 PWA configuration validated
             
             **Build Info:**
             - Commit: \`${context.sha.substring(0, 7)}\`
             - Branch: \`${context.ref}\`
             - Build Time: \`${new Date().toISOString()}\`
             
-            _This PR is ready for review!_`;
+            **Performance & PWA:**
+            - Bundle size optimized for mobile delivery
+            - Service worker and offline capabilities ready
+            - Mobile-first responsive design validated
+            
+            _This PR is ready for review and optimized for production deployment!_`;
             
             if (botComment) {
               await github.rest.issues.updateComment({

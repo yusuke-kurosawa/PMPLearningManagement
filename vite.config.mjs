@@ -9,26 +9,55 @@ export default defineConfig({
   // GitHub Pages configuration
   base: '/PMPLearningManagement/',
   
-  // Build configuration
+  // Build configuration optimized for mobile PWA
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    minify: 'esbuild',
-    target: 'es2015',
+    sourcemap: false, // Disabled for production performance
+    minify: 'terser', // Better compression for mobile
+    target: ['es2015', 'edge88', 'chrome88', 'safari14'], // Modern browser support
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendor chunk for third-party libraries
+          // Core React chunk (priority loading)
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          // D3 visualization chunk
+          // D3 visualization chunk (lazy loaded)
           d3: ['d3', 'd3-sankey'],
           // UI component library chunk
-          ui: ['lucide-react', 'framer-motion']
-        }
+          ui: ['lucide-react', 'framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-progress'],
+          // Radix UI components (separate chunk for tree shaking)
+          radix: [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog', 
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-select',
+            '@radix-ui/react-dropdown-menu'
+          ],
+          // Chart libraries (optional loading)
+          charts: ['recharts']
+        },
+        // Optimize chunk names for mobile caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    // Bundle size limits
-    chunkSizeWarningLimit: 1000
+    // Aggressive bundle size limits for mobile
+    chunkSizeWarningLimit: 500,
+    // Terser options for better mobile performance
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console logs in production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 2 // Multiple compression passes
+      },
+      mangle: {
+        safari10: true // Safari compatibility
+      },
+      format: {
+        comments: false // Remove comments
+      }
+    }
   },
   
   // Development server configuration
@@ -63,10 +92,13 @@ export default defineConfig({
     devSourcemap: true
   },
   
-  // Environment variables
+  // Environment variables and feature flags
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-    __BUILD_DATE__: JSON.stringify(new Date().toISOString())
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __IS_PRODUCTION__: JSON.stringify(process.env.NODE_ENV === 'production'),
+    __ENABLE_PWA__: JSON.stringify(true),
+    __ENABLE_OFFLINE__: JSON.stringify(true)
   },
   
   // Optimization

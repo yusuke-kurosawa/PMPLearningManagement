@@ -1,4 +1,4 @@
-name: Performance Monitoring
+name: Mobile-First PWA Performance Monitoring
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Run performance tests daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run performance tests every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -18,6 +18,11 @@ on:
         options:
         - production
         - staging
+      mobile_focus:
+        description: 'Focus on mobile performance'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -36,11 +41,22 @@ jobs:
     
     strategy:
       matrix:
-        url:
-          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
-          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/matrix"
-          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/network"
-          - "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/visualizations"
+        include:
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+            name: "home"
+            device: "mobile"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/matrix"
+            name: "matrix"
+            device: "mobile"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/flashcards"
+            name: "flashcards"
+            device: "mobile"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/#/mock-exam"
+            name: "exam"
+            device: "mobile"
+          - url: "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+            name: "home"
+            device: "desktop"
     
     steps:
       - name: Checkout
@@ -65,7 +81,7 @@ jobs:
           sleep 10
         if: github.event_name == 'pull_request'
         
-      - name: Run Lighthouse CI
+      - name: Run Mobile-Optimized Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
@@ -73,13 +89,37 @@ jobs:
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
+        env:
+          LHCI_DEVICE: ${{ matrix.device }}
+          LHCI_THROTTLING: ${{ matrix.device == 'mobile' && 'mobile3G' || 'desktop' }}
           
       - name: Upload Lighthouse results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-results-${{ github.run_id }}
+          name: lighthouse-results-${{ matrix.name }}-${{ matrix.device }}-${{ github.run_id }}
           path: .lighthouseci/
+          retention-days: 30
+
+      - name: Extract Core Web Vitals
+        if: always()
+        run: |
+          echo "📊 Core Web Vitals - ${{ matrix.name }} (${{ matrix.device }})" > cwv-${{ matrix.name }}-${{ matrix.device }}.md
+          echo "URL: ${{ matrix.url }}" >> cwv-${{ matrix.name }}-${{ matrix.device }}.md
+          echo "Device: ${{ matrix.device }}" >> cwv-${{ matrix.name }}-${{ matrix.device }}.md
+          echo "" >> cwv-${{ matrix.name }}-${{ matrix.device }}.md
+          
+          # Extract metrics from lighthouse results if available
+          if [ -d ".lighthouseci" ]; then
+            find .lighthouseci -name "*.json" -exec jq -r '.audits | {fcp: .["first-contentful-paint"].displayValue, lcp: .["largest-contentful-paint"].displayValue, cls: .["cumulative-layout-shift"].displayValue, tbt: .["total-blocking-time"].displayValue}' {} \; | head -1 >> cwv-${{ matrix.name }}-${{ matrix.device }}.md 2>/dev/null || echo "Metrics extraction failed" >> cwv-${{ matrix.name }}-${{ matrix.device }}.md
+          fi
+
+      - name: Upload Core Web Vitals Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cwv-report-${{ matrix.name }}-${{ matrix.device }}
+          path: cwv-${{ matrix.name }}-${{ matrix.device }}.md
           retention-days: 30
 
   # Bundle Size Analysis

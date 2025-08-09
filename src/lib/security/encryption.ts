@@ -6,6 +6,8 @@
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import Redis from 'ioredis'
+import { getRedisClient } from './rateLimiting'
 
 // 暗号化設定
 const ENCRYPTION_CONFIG = {
@@ -17,20 +19,78 @@ const ENCRYPTION_CONFIG = {
   iterations: 100000, // PBKDF2 反復回数
 } as const
 
-// 環境変数スキーマ
+// キーバージョン情報
+export interface KeyVersion {
+  id: string
+  key: Buffer
+  derivedFrom?: string
+  createdAt: number
+  expiresAt?: number
+  status: 'active' | 'deprecated' | 'revoked'
+  algorithm: string
+  purpose: 'encryption' | 'signing' | 'derivation'
+  rotationSchedule?: number
+}
+
+// キーローテーション設定
+export interface KeyRotationConfig {
+  rotationInterval: number // milliseconds
+  keyRetentionPeriod: number // milliseconds
+  autoRotationEnabled: boolean
+  masterKeyRotationThreshold: number // number of encryptions before rotation
+  keyDerivationRounds: number
+  maxActiveKeys: number
+}
+
+// 暗号化メタデータ
+export interface EncryptionMetadata {
+  keyId: string
+  keyVersion: number
+  algorithm: string
+  timestamp: number
+  rotationGeneration: number
+}
+
+// 拡張された暗号化結果
+export interface EnhancedEncryptionResult extends EncryptionResult {
+  metadata: EncryptionMetadata
+  keyId: string
+  version: number
+}
+
+// 環境変数スキーマ（キーローテーション対応）
 const EncryptionEnvSchema = z.object({
-  ENCRYPTION_KEY: z.string().min(32),
+  ENCRYPTION_MASTER_KEY: z.string().min(32),
+  ENCRYPTION_KEY_ROTATION_INTERVAL: z.string().default('86400000'), // 24時間
+  ENCRYPTION_KEY_DERIVATION_ITERATIONS: z.string().default('100000'),
   HASH_PEPPER: z.string().min(16),
   APP_SECRET: z.string().min(32),
 })
 
-// 環境変数の検証
+// 環境変数の検証（キーローテーション対応）
 const getEncryptionEnv = () => {
   try {
     return EncryptionEnvSchema.parse({
-      ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex'),
-      HASH_PEPPER: process.env.HASH_PEPPER || crypto.randomBytes(16).toString('hex'),
-      APP_SECRET: process.env.APP_SECRET || process.env.NEXTAUTH_SECRET || 'default-app-secret',
+      ENCRYPTION_MASTER_KEY: process.env.ENCRYPTION_MASTER_KEY || (() => {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('ENCRYPTION_MASTER_KEY must be set in production')
+        }
+        return crypto.randomBytes(32).toString('hex')
+      })(),
+      ENCRYPTION_KEY_ROTATION_INTERVAL: process.env.ENCRYPTION_KEY_ROTATION_INTERVAL || '86400000',
+      ENCRYPTION_KEY_DERIVATION_ITERATIONS: process.env.ENCRYPTION_KEY_DERIVATION_ITERATIONS || '100000',
+      HASH_PEPPER: process.env.HASH_PEPPER || (() => {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('HASH_PEPPER must be set in production')
+        }
+        return crypto.randomBytes(16).toString('hex')
+      })(),
+      APP_SECRET: process.env.APP_SECRET || process.env.NEXTAUTH_SECRET || (() => {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('APP_SECRET must be set in production')
+        }
+        return 'default-app-secret-change-in-production'
+      })(),
     })
   } catch (error) {
     console.error('暗号化環境変数が正しく設定されていません:', error)
@@ -61,14 +121,25 @@ export interface PasswordHashResult {
 }
 
 /**
- * 対称暗号化クラス
+ * 対称暗号化クラス（キーローテーション統合）
  */
 export class SymmetricEncryption {
   private readonly masterKey: Buffer
+  private keyManager?: any // Circular dependency回避のため動的インポート
 
   constructor() {
     const env = getEncryptionEnv()
-    this.masterKey = Buffer.from(env.ENCRYPTION_KEY, 'hex')
+    this.masterKey = Buffer.from(env.ENCRYPTION_MASTER_KEY, 'hex')
+    this.initializeKeyManager()
+  }
+
+  private async initializeKeyManager(): Promise<void> {
+    try {
+      const { keyManager } = await import('./keyManagement')
+      this.keyManager = keyManager
+    } catch (error) {
+      console.warn('Key manager not available, using direct master key:', error)
+    }
   }
 
   /**
