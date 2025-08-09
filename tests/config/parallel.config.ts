@@ -1,8 +1,8 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 /**
  * 6人チーム高度並列戦略設定
- * 
+ *
  * 専門チーム編成:
  * 1. コアロジック・アルゴリズム担当（2名）
  * 2. データ整合性・トランザクション担当（1名）
@@ -21,15 +21,15 @@ export const teamParallelConfig = defineConfig({
         minThreads: 6,
         useAtomics: true,
         // チーム専門分野別分離
-        isolate: true
-      }
+        isolate: true,
+      },
     },
     // チーム別実行シーケンス
     sequence: {
       concurrent: true,
       shuffle: false, // チーム順序維持
       hooks: 'parallel',
-      setupFiles: 'parallel'
+      setupFiles: 'parallel',
     },
     // 高度品質ゲート（90%+要件）
     coverage: {
@@ -38,16 +38,12 @@ export const teamParallelConfig = defineConfig({
         functions: 92,
         lines: 91,
         statements: 90,
-        perFile: true
+        perFile: true,
       },
       // チーム別カバレッジ追跡
-      include: [
-        'src/server/**/*.ts',
-        'src/lib/**/*.ts',
-        'src/services/**/*.ts'
-      ],
+      include: ['src/server/**/*.ts', 'src/lib/**/*.ts', 'src/services/**/*.ts'],
       reporter: ['text', 'json', 'html', 'lcov', 'teamcity'],
-      reportsDirectory: './coverage-team-parallel'
+      reportsDirectory: './coverage-team-parallel',
     },
     // 実行時間30秒以内維持
     testTimeout: 30000,
@@ -61,7 +57,7 @@ export const teamParallelConfig = defineConfig({
       'verbose',
       'json',
       'html',
-      ['junit', { outputFile: './test-results-team-parallel.xml' }]
+      ['junit', { outputFile: './test-results-team-parallel.xml' }],
     ],
     // チーム別ログ分離
     logHeapUsage: true,
@@ -70,8 +66,8 @@ export const teamParallelConfig = defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./tests/setup/globalSetup.ts'],
-    teardownFiles: ['./tests/teardown/globalTeardown.ts']
-  }
-});
+    teardownFiles: ['./tests/teardown/globalTeardown.ts'],
+  },
+})
 
-export default teamParallelConfig;
+export default teamParallelConfig

@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from 'msw'
 
 export const handlers = [
   // Mock API endpoints (if any external APIs are used in the future)
@@ -19,51 +19,47 @@ export const handlers = [
         'Stakeholder Management': { completed: 0, total: 4 },
       },
       processGroupProgress: {
-        'Initiating': { completed: 2, total: 2 },
-        'Planning': { completed: 6, total: 24 },
-        'Executing': { completed: 2, total: 10 },
+        Initiating: { completed: 2, total: 2 },
+        Planning: { completed: 6, total: 24 },
+        Executing: { completed: 2, total: 10 },
         'Monitoring and Controlling': { completed: 2, total: 12 },
-        'Closing': { completed: 0, total: 1 },
+        Closing: { completed: 0, total: 1 },
       },
       studyTime: 1200, // in minutes
-      lastStudyDate: '2025-08-08T10:30:00Z'
-    });
+      lastStudyDate: '2025-08-08T10:30:00Z',
+    })
   }),
 
   http.post('/api/progress/:processId', () => {
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ success: true })
   }),
 
   http.get('/api/exam/questions', () => {
     return HttpResponse.json([
       {
         id: 1,
-        question: "Which of the following is NOT one of the five process groups in PMBOK?",
-        options: [
-          "Initiating",
-          "Planning", 
-          "Testing",
-          "Executing"
-        ],
+        question: 'Which of the following is NOT one of the five process groups in PMBOK?',
+        options: ['Initiating', 'Planning', 'Testing', 'Executing'],
         correct: 2,
-        knowledgeArea: "Integration Management",
-        processGroup: "General",
-        explanation: "Testing is not one of the five process groups. The five process groups are: Initiating, Planning, Executing, Monitoring and Controlling, and Closing."
-      }
-    ]);
+        knowledgeArea: 'Integration Management',
+        processGroup: 'General',
+        explanation:
+          'Testing is not one of the five process groups. The five process groups are: Initiating, Planning, Executing, Monitoring and Controlling, and Closing.',
+      },
+    ])
   }),
 
   // Mock localStorage for browser environment
   http.get('/api/storage/:key', ({ params }) => {
-    const { key } = params;
-    const value = localStorage.getItem(key);
-    return HttpResponse.json({ value });
+    const { key } = params
+    const value = localStorage.getItem(key)
+    return HttpResponse.json({ value })
   }),
 
   http.post('/api/storage/:key', async ({ params, request }) => {
-    const { key } = params;
-    const { value } = await request.json();
-    localStorage.setItem(key, JSON.stringify(value));
-    return HttpResponse.json({ success: true });
+    const { key } = params
+    const { value } = await request.json()
+    localStorage.setItem(key, JSON.stringify(value))
+    return HttpResponse.json({ success: true })
   }),
-];
+]

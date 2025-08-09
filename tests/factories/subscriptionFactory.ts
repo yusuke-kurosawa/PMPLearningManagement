@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker'
 
 // Subscription plans
 export const SUBSCRIPTION_PLANS = {
@@ -61,19 +61,19 @@ export const SUBSCRIPTION_PLANS = {
       downloadableContent: true,
     },
   },
-};
+}
 
 // Stripe subscription factory
 export function createStripeSubscription(overrides?: any) {
-  const plan = faker.helpers.arrayElement(['PREMIUM', 'PREMIUM_ANNUAL']);
+  const plan = faker.helpers.arrayElement(['PREMIUM', 'PREMIUM_ANNUAL'])
   const status = faker.helpers.arrayElement([
     'active',
     'past_due',
     'canceled',
     'incomplete',
     'trialing',
-  ]);
-  
+  ])
+
   return {
     id: `sub_${faker.string.alphanumeric(24)}`,
     object: 'subscription',
@@ -90,28 +90,30 @@ export function createStripeSubscription(overrides?: any) {
     trial_end: null,
     items: {
       object: 'list',
-      data: [{
-        id: `si_${faker.string.alphanumeric(14)}`,
-        object: 'subscription_item',
-        price: {
-          id: SUBSCRIPTION_PLANS[plan].stripePriceId,
-          object: 'price',
-          currency: 'jpy',
-          unit_amount: SUBSCRIPTION_PLANS[plan].price,
-          recurring: {
-            interval: SUBSCRIPTION_PLANS[plan].interval,
-            interval_count: 1,
+      data: [
+        {
+          id: `si_${faker.string.alphanumeric(14)}`,
+          object: 'subscription_item',
+          price: {
+            id: SUBSCRIPTION_PLANS[plan].stripePriceId,
+            object: 'price',
+            currency: 'jpy',
+            unit_amount: SUBSCRIPTION_PLANS[plan].price,
+            recurring: {
+              interval: SUBSCRIPTION_PLANS[plan].interval,
+              interval_count: 1,
+            },
           },
+          quantity: 1,
         },
-        quantity: 1,
-      }],
+      ],
     },
     metadata: {
       userId: faker.string.uuid(),
       plan,
     },
     ...overrides,
-  };
+  }
 }
 
 // Stripe customer factory
@@ -127,14 +129,16 @@ export function createStripeCustomer(overrides?: any) {
     default_source: `card_${faker.string.alphanumeric(24)}`,
     sources: {
       object: 'list',
-      data: [{
-        id: `card_${faker.string.alphanumeric(24)}`,
-        object: 'card',
-        brand: faker.helpers.arrayElement(['Visa', 'Mastercard', 'Amex']),
-        last4: faker.string.numeric(4),
-        exp_month: faker.number.int({ min: 1, max: 12 }),
-        exp_year: faker.number.int({ min: 2025, max: 2030 }),
-      }],
+      data: [
+        {
+          id: `card_${faker.string.alphanumeric(24)}`,
+          object: 'card',
+          brand: faker.helpers.arrayElement(['Visa', 'Mastercard', 'Amex']),
+          last4: faker.string.numeric(4),
+          exp_month: faker.number.int({ min: 1, max: 12 }),
+          exp_year: faker.number.int({ min: 2025, max: 2030 }),
+        },
+      ],
     },
     subscriptions: {
       object: 'list',
@@ -144,7 +148,7 @@ export function createStripeCustomer(overrides?: any) {
       userId: faker.string.uuid(),
     },
     ...overrides,
-  };
+  }
 }
 
 // Stripe payment method factory
@@ -179,13 +183,13 @@ export function createStripePaymentMethod(overrides?: any) {
     livemode: false,
     metadata: {},
     ...overrides,
-  };
+  }
 }
 
 // Stripe invoice factory
 export function createStripeInvoice(overrides?: any) {
-  const amount = faker.number.int({ min: 1000, max: 50000 });
-  
+  const amount = faker.number.int({ min: 1000, max: 50000 })
+
   return {
     id: `in_${faker.string.alphanumeric(24)}`,
     object: 'invoice',
@@ -204,23 +208,25 @@ export function createStripeInvoice(overrides?: any) {
     period_end: Math.floor(Date.now() / 1000),
     lines: {
       object: 'list',
-      data: [{
-        id: `il_${faker.string.alphanumeric(24)}`,
-        object: 'line_item',
-        amount: amount,
-        currency: 'jpy',
-        description: 'Premium subscription',
-        period: {
-          start: Math.floor(Date.now() / 1000) - 86400 * 30,
-          end: Math.floor(Date.now() / 1000),
+      data: [
+        {
+          id: `il_${faker.string.alphanumeric(24)}`,
+          object: 'line_item',
+          amount: amount,
+          currency: 'jpy',
+          description: 'Premium subscription',
+          period: {
+            start: Math.floor(Date.now() / 1000) - 86400 * 30,
+            end: Math.floor(Date.now() / 1000),
+          },
         },
-      }],
+      ],
     },
     payment_intent: `pi_${faker.string.alphanumeric(24)}`,
     hosted_invoice_url: faker.internet.url(),
     invoice_pdf: faker.internet.url(),
     ...overrides,
-  };
+  }
 }
 
 // Stripe webhook event factory
@@ -241,7 +247,7 @@ export function createStripeWebhookEvent(type: string, data: any) {
       id: `req_${faker.string.alphanumeric(16)}`,
       idempotency_key: faker.string.uuid(),
     },
-  };
+  }
 }
 
 // Payment history factory
@@ -257,24 +263,24 @@ export function createPaymentHistory(userId: string, count: number = 5) {
     receiptUrl: faker.internet.url(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
-  }));
+  }))
 }
 
 // Subscription with full details
 export function createFullSubscription(userId: string) {
-  const customer = createStripeCustomer({ metadata: { userId } });
+  const customer = createStripeCustomer({ metadata: { userId } })
   const subscription = createStripeSubscription({
     customer: customer.id,
     metadata: { userId },
-  });
-  const paymentMethod = createStripePaymentMethod({ customer: customer.id });
-  const invoices = Array.from({ length: 3 }, () => 
+  })
+  const paymentMethod = createStripePaymentMethod({ customer: customer.id })
+  const invoices = Array.from({ length: 3 }, () =>
     createStripeInvoice({
       customer: customer.id,
       subscription: subscription.id,
     })
-  );
-  
+  )
+
   return {
     id: faker.string.uuid(),
     userId,
@@ -285,13 +291,9 @@ export function createFullSubscription(userId: string) {
     plan: subscription.metadata.plan,
     currentPeriodStart: new Date(subscription.current_period_start * 1000),
     currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-    canceledAt: subscription.canceled_at 
-      ? new Date(subscription.canceled_at * 1000) 
-      : null,
+    canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
-    trialEnd: subscription.trial_end 
-      ? new Date(subscription.trial_end * 1000) 
-      : null,
+    trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
     metadata: subscription.metadata,
     stripeCustomer: customer,
     stripeSubscription: subscription,
@@ -300,7 +302,7 @@ export function createFullSubscription(userId: string) {
     paymentHistory: createPaymentHistory(userId),
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
-  };
+  }
 }
 
 // Coupon factory
@@ -320,5 +322,5 @@ export function createCoupon(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }

@@ -1,10 +1,10 @@
-import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import '@testing-library/jest-dom'
+import { vi } from 'vitest'
 
 // Mock matchMedia for responsive design tests
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -14,21 +14,21 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-});
+})
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
-}));
+}))
 
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
-}));
+}))
 
 // Mock localStorage
 const localStorageMock = {
@@ -36,36 +36,33 @@ const localStorageMock = {
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-};
-global.localStorage = localStorageMock;
+}
+global.localStorage = localStorageMock
 
 // Mock sessionStorage
-global.sessionStorage = localStorageMock;
+global.sessionStorage = localStorageMock
 
 // Mock scrollTo
-window.scrollTo = vi.fn();
+window.scrollTo = vi.fn()
 
 // Mock URL.createObjectURL
-window.URL.createObjectURL = vi.fn();
-window.URL.revokeObjectURL = vi.fn();
+window.URL.createObjectURL = vi.fn()
+window.URL.revokeObjectURL = vi.fn()
 
 // Suppress console warnings in tests
-const originalWarn = console.warn;
+const originalWarn = console.warn
 beforeAll(() => {
   console.warn = (...args: any[]) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('React Router Future Flag Warning')
-    ) {
-      return;
+    if (typeof args[0] === 'string' && args[0].includes('React Router Future Flag Warning')) {
+      return
     }
-    originalWarn(...args);
-  };
-});
+    originalWarn(...args)
+  }
+})
 
 afterAll(() => {
-  console.warn = originalWarn;
-});
+  console.warn = originalWarn
+})
 
 // Global test timeout
-vi.setConfig({ testTimeout: 10000 });
+vi.setConfig({ testTimeout: 10000 })

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 // Mock theme context for testing
 export const mockThemeContext = {
@@ -10,20 +10,16 @@ export const mockThemeContext = {
     autoSave: true,
     notifications: true,
     compactMode: false,
-    highContrast: false
+    highContrast: false,
   },
   toggleDarkMode: vi.fn(),
   updateSettings: vi.fn(),
-  resetSettings: vi.fn()
-};
+  resetSettings: vi.fn(),
+}
 
 export const MockThemeProvider = ({ children, value = mockThemeContext }) => {
-  return (
-    <div data-testid="mock-theme-provider">
-      {children}
-    </div>
-  );
-};
+  return <div data-testid="mock-theme-provider">{children}</div>
+}
 
 // Mock useTheme hook
-export const useTheme = () => mockThemeContext;
+export const useTheme = () => mockThemeContext

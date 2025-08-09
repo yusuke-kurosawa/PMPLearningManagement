@@ -95,15 +95,17 @@ describe('KeyManagementSystem', () => {
 
     // Property-based testing
     it('should generate keys with consistent properties', () => {
-      fc.assert(fc.asyncProperty(
-        fc.constantFrom('encryption', 'signing', 'derivation'),
-        async (purpose) => {
-          const key = await keyManager.generateEncryptionKey(purpose)
-          expect(key.purpose).toBe(purpose)
-          expect(key.status).toBe('active')
-          expect(key.key.length).toBe(32)
-        }
-      ))
+      fc.assert(
+        fc.asyncProperty(
+          fc.constantFrom('encryption', 'signing', 'derivation'),
+          async (purpose) => {
+            const key = await keyManager.generateEncryptionKey(purpose)
+            expect(key.purpose).toBe(purpose)
+            expect(key.status).toBe('active')
+            expect(key.key.length).toBe(32)
+          }
+        )
+      )
     })
   })
 
@@ -164,10 +166,10 @@ describe('KeyManagementSystem', () => {
 
     it('should cache keys for performance', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       // 最初の取得
       const found1 = await keyManager.getKeyById(key.id)
-      
+
       // 2回目の取得（キャッシュから）
       const found2 = await keyManager.getKeyById(key.id)
 
@@ -180,9 +182,9 @@ describe('KeyManagementSystem', () => {
   describe('キーローテーション', () => {
     it('should perform key rotation', async () => {
       const oldKey = await keyManager.generateEncryptionKey()
-      
+
       await keyManager.performKeyRotation()
-      
+
       const newActiveKey = await keyManager.getActiveEncryptionKey()
       const retrievedOldKey = await keyManager.getKeyById(oldKey.id)
 
@@ -192,11 +194,11 @@ describe('KeyManagementSystem', () => {
 
     it('should set expiry date for deprecated keys', async () => {
       const oldKey = await keyManager.generateEncryptionKey()
-      
+
       await keyManager.performKeyRotation()
-      
+
       const deprecatedKey = await keyManager.getKeyById(oldKey.id)
-      
+
       expect(deprecatedKey!.status).toBe('deprecated')
       expect(deprecatedKey!.expiresAt).toBeTruthy()
       expect(deprecatedKey!.expiresAt!).toBeGreaterThan(Date.now())
@@ -204,7 +206,7 @@ describe('KeyManagementSystem', () => {
 
     it('should clean up expired keys', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       // キーを手動で期限切れに設定
       await keyManager.deprecateKey(key.id)
       const deprecatedKey = await keyManager.getKeyById(key.id)
@@ -218,9 +220,9 @@ describe('KeyManagementSystem', () => {
 
     it('should update rotation statistics', async () => {
       const statsBefore = await keyManager.getKeyUsageStatistics()
-      
+
       await keyManager.performKeyRotation()
-      
+
       const statsAfter = await keyManager.getKeyUsageStatistics()
       expect(statsAfter.activeKeys).toBeGreaterThanOrEqual(1)
     })
@@ -229,9 +231,9 @@ describe('KeyManagementSystem', () => {
   describe('キーの非推奨化と取り消し', () => {
     it('should deprecate keys correctly', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       await keyManager.deprecateKey(key.id)
-      
+
       const deprecatedKey = await keyManager.getKeyById(key.id)
       expect(deprecatedKey!.status).toBe('deprecated')
       expect(deprecatedKey!.expiresAt).toBeTruthy()
@@ -239,9 +241,9 @@ describe('KeyManagementSystem', () => {
 
     it('should revoke keys with immediate expiry', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       await keyManager.revokeKey(key.id, 'security breach')
-      
+
       const revokedKey = await keyManager.getKeyById(key.id)
       expect(revokedKey!.status).toBe('revoked')
       expect(revokedKey!.expiresAt).toBeLessThanOrEqual(Date.now())
@@ -249,13 +251,13 @@ describe('KeyManagementSystem', () => {
 
     it('should handle non-existent key deprecation gracefully', async () => {
       const nonExistentId = crypto.randomUUID()
-      
+
       await expect(keyManager.deprecateKey(nonExistentId)).resolves.not.toThrow()
     })
 
     it('should handle non-existent key revocation gracefully', async () => {
       const nonExistentId = crypto.randomUUID()
-      
+
       await expect(keyManager.revokeKey(nonExistentId)).resolves.not.toThrow()
     })
   })
@@ -277,9 +279,9 @@ describe('KeyManagementSystem', () => {
 
     it('should track rotation history', async () => {
       await keyManager.performKeyRotation()
-      
+
       const stats = await keyManager.getKeyUsageStatistics()
-      
+
       expect(stats.rotationHistory).toBeDefined()
       expect(Array.isArray(stats.rotationHistory)).toBe(true)
     })
@@ -334,7 +336,9 @@ describe('KeyManagementSystem', () => {
 
     it('should handle rotation errors gracefully', async () => {
       // キーの取得でエラーを発生させる
-      vi.spyOn(keyManager as any, 'getActiveKeys').mockRejectedValueOnce(new Error('Key fetch failed'))
+      vi.spyOn(keyManager as any, 'getActiveKeys').mockRejectedValueOnce(
+        new Error('Key fetch failed')
+      )
 
       await expect(keyManager.performKeyRotation()).rejects.toThrow('Key fetch failed')
     })
@@ -347,28 +351,32 @@ describe('KeyManagementSystem', () => {
 
       await keyManager.revokeKey(key.id, 'test revocation')
 
-      expect(logSpy).toHaveBeenCalledWith('KEY_REVOKED', expect.objectContaining({
-        keyId: key.id,
-        reason: 'test revocation'
-      }))
+      expect(logSpy).toHaveBeenCalledWith(
+        'KEY_REVOKED',
+        expect.objectContaining({
+          keyId: key.id,
+          reason: 'test revocation',
+        })
+      )
     })
 
     it('should prevent access to revoked keys for decryption', async () => {
       const encryptionService = new EnhancedEncryptionService(masterKey)
-      
+
       const { encrypted, iv, tag, metadata } = await encryptionService.encrypt('test data')
-      
+
       await keyManager.revokeKey(metadata.keyId)
 
-      await expect(encryptionService.decrypt(encrypted, iv, tag, metadata))
-        .rejects.toThrow('Cannot decrypt with revoked key')
+      await expect(encryptionService.decrypt(encrypted, iv, tag, metadata)).rejects.toThrow(
+        'Cannot decrypt with revoked key'
+      )
 
       encryptionService.destroy()
     })
 
     it('should use proper key derivation parameters', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       expect(key.derivedFrom).toBeTruthy()
       expect(key.derivedFrom!.length).toBe(64) // 32 bytes as hex = 64 chars
     })
@@ -376,12 +384,10 @@ describe('KeyManagementSystem', () => {
 
   describe('パフォーマンス', () => {
     it('should handle concurrent key operations', async () => {
-      const promises = Array.from({ length: 10 }, () => 
-        keyManager.generateEncryptionKey()
-      )
+      const promises = Array.from({ length: 10 }, () => keyManager.generateEncryptionKey())
 
       const keys = await Promise.all(promises)
-      const keyIds = keys.map(k => k.id)
+      const keyIds = keys.map((k) => k.id)
       const uniqueIds = new Set(keyIds)
 
       expect(uniqueIds.size).toBe(10) // All keys should be unique
@@ -389,7 +395,7 @@ describe('KeyManagementSystem', () => {
 
     it('should cache keys for performance', async () => {
       const key = await keyManager.generateEncryptionKey()
-      
+
       const startTime = Date.now()
       await keyManager.getKeyById(key.id) // First call (from Redis/storage)
       const firstCallTime = Date.now() - startTime
@@ -432,7 +438,7 @@ describe('EnhancedEncryptionService', () => {
   describe('暗号化・復号化', () => {
     it('should encrypt and decrypt data successfully', async () => {
       const originalData = 'sensitive information'
-      
+
       const encrypted = await encryptionService.encrypt(originalData)
       const decrypted = await encryptionService.decrypt(
         encrypted.encrypted,
@@ -477,40 +483,38 @@ describe('EnhancedEncryptionService', () => {
 
     it('should fail decryption with wrong key', async () => {
       const encrypted = await encryptionService.encrypt('test data')
-      
+
       // 異なるキーIDでメタデータを改ざん
       const tamperedMetadata = {
         ...encrypted.metadata,
         keyId: crypto.randomUUID(),
       }
 
-      await expect(encryptionService.decrypt(
-        encrypted.encrypted,
-        encrypted.iv,
-        encrypted.tag,
-        tamperedMetadata
-      )).rejects.toThrow('Decryption key not found')
+      await expect(
+        encryptionService.decrypt(
+          encrypted.encrypted,
+          encrypted.iv,
+          encrypted.tag,
+          tamperedMetadata
+        )
+      ).rejects.toThrow('Decryption key not found')
     })
 
     it('should fail decryption with corrupted data', async () => {
       const encrypted = await encryptionService.encrypt('test data')
-      
+
       // 暗号化データを改ざん
       const tamperedData = encrypted.encrypted.substring(0, -4) + 'xxxx'
 
-      await expect(encryptionService.decrypt(
-        tamperedData,
-        encrypted.iv,
-        encrypted.tag,
-        encrypted.metadata
-      )).rejects.toThrow('Decryption failed')
+      await expect(
+        encryptionService.decrypt(tamperedData, encrypted.iv, encrypted.tag, encrypted.metadata)
+      ).rejects.toThrow('Decryption failed')
     })
 
     // Property-based testing
     it('should handle arbitrary input data', () => {
-      fc.assert(fc.asyncProperty(
-        fc.string({ minLength: 0, maxLength: 1000 }),
-        async (data) => {
+      fc.assert(
+        fc.asyncProperty(fc.string({ minLength: 0, maxLength: 1000 }), async (data) => {
           const encrypted = await encryptionService.encrypt(data)
           const decrypted = await encryptionService.decrypt(
             encrypted.encrypted,
@@ -519,8 +523,8 @@ describe('EnhancedEncryptionService', () => {
             encrypted.metadata
           )
           expect(decrypted).toBe(data)
-        }
-      ))
+        })
+      )
     })
   })
 
@@ -536,17 +540,17 @@ describe('EnhancedEncryptionService', () => {
 
     it('should support key rotation during operation', async () => {
       const data = 'test data'
-      
+
       // データを暗号化
       const encrypted1 = await encryptionService.encrypt(data)
-      
+
       // キーローテーション実行
       const keyManager = encryptionService.getKeyManager()
       await keyManager.performKeyRotation()
-      
+
       // 新しいキーでデータを暗号化
       const encrypted2 = await encryptionService.encrypt(data)
-      
+
       // 両方のデータが復号できる
       const decrypted1 = await encryptionService.decrypt(
         encrypted1.encrypted,
@@ -580,7 +584,7 @@ describe('EnhancedEncryptionService', () => {
     it('should provide meaningful error messages', async () => {
       const keyManager = encryptionService.getKeyManager()
       const testKeyId = crypto.randomUUID()
-      
+
       vi.spyOn(keyManager, 'getKeyById').mockResolvedValueOnce(null)
 
       const fakeMetadata = {
@@ -591,8 +595,9 @@ describe('EnhancedEncryptionService', () => {
         rotationGeneration: 1,
       }
 
-      await expect(encryptionService.decrypt('encrypted', 'iv', 'tag', fakeMetadata))
-        .rejects.toThrow(`Decryption key not found: ${testKeyId}`)
+      await expect(
+        encryptionService.decrypt('encrypted', 'iv', 'tag', fakeMetadata)
+      ).rejects.toThrow(`Decryption key not found: ${testKeyId}`)
     })
   })
 })

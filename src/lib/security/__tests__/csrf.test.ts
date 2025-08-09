@@ -10,13 +10,13 @@ import * as fc from 'fast-check'
 // Crypto モック
 vi.mock('crypto', () => ({
   randomBytes: vi.fn().mockImplementation((size: number) => ({
-    toString: vi.fn().mockReturnValue('a'.repeat(size * 2))
+    toString: vi.fn().mockReturnValue('a'.repeat(size * 2)),
   })),
   createHmac: vi.fn().mockImplementation(() => ({
     update: vi.fn().mockReturnThis(),
-    digest: vi.fn().mockReturnValue('mocked-hmac-signature')
+    digest: vi.fn().mockReturnValue('mocked-hmac-signature'),
   })),
-  timingSafeEqual: vi.fn().mockImplementation((a: Buffer, b: Buffer) => a.equals(b))
+  timingSafeEqual: vi.fn().mockImplementation((a: Buffer, b: Buffer) => a.equals(b)),
 }))
 
 // Redis モック
@@ -61,7 +61,7 @@ describe('Enhanced CSRF Protection', () => {
   describe('Token Generation', () => {
     it('should generate cryptographically secure tokens', async () => {
       const token = await csrf.generateToken('user123', 'session456', 'fingerprint')
-      
+
       expect(token).toMatch(/^[a-f0-9]+\.\d+\.[a-f0-9]+$/) // nonce.timestamp.signature format
       expect(token.split('.')[0]).toHaveLength(32) // nonce length
       expect(token.split('.')[2]).toHaveLength(19) // signature length (mocked)
@@ -71,9 +71,9 @@ describe('Enhanced CSRF Protection', () => {
       const tokens = await Promise.all([
         csrf.generateToken(),
         csrf.generateToken(),
-        csrf.generateToken()
+        csrf.generateToken(),
       ])
-      
+
       const uniqueTokens = new Set(tokens)
       expect(uniqueTokens.size).toBe(3)
     })
@@ -82,7 +82,7 @@ describe('Enhanced CSRF Protection', () => {
       const token1 = await csrf.generateToken('user1')
       const token2 = await csrf.generateToken('user2')
       const token3 = await csrf.generateToken('user1', 'different-session')
-      
+
       expect(token1).not.toBe(token2)
       expect(token1).not.toBe(token3)
       expect(token2).not.toBe(token3)
@@ -103,7 +103,7 @@ describe('Enhanced CSRF Protection', () => {
     it('should validate properly formatted tokens', async () => {
       const token = await csrf.generateToken('user123', 'session456')
       const result = await csrf.validateToken(token, 'user123', 'session456')
-      
+
       expect(result.valid).toBe(true)
       expect(result.error).toBeUndefined()
     })
@@ -128,7 +128,7 @@ describe('Enhanced CSRF Protection', () => {
       // Create token with past timestamp
       const expiredToken = 'nonce123.1000.signature'
       const result = await csrf.validateToken(expiredToken)
-      
+
       expect(result.valid).toBe(false)
       expect(result.error).toContain('expired')
       expect(result.riskScore).toBe(30)
@@ -137,9 +137,9 @@ describe('Enhanced CSRF Protection', () => {
     it('should detect replay attacks with future timestamps', async () => {
       const futureTimestamp = Date.now() + 10000 // 10 seconds in future
       const futureToken = `nonce123.${futureTimestamp}.signature`
-      
+
       const result = await csrf.validateToken(futureToken)
-      
+
       expect(result.valid).toBe(false)
       expect(result.error).toContain('Invalid token timestamp')
       expect(result.riskScore).toBe(80)
@@ -148,11 +148,11 @@ describe('Enhanced CSRF Protection', () => {
 
     it('should validate user context', async () => {
       const token = await csrf.generateToken('user123')
-      
+
       // Valid user context
       const validResult = await csrf.validateToken(token, 'user123')
       expect(validResult.valid).toBe(true)
-      
+
       // Invalid user context
       const invalidResult = await csrf.validateToken(token, 'user456')
       expect(invalidResult.valid).toBe(false)
@@ -162,12 +162,12 @@ describe('Enhanced CSRF Protection', () => {
 
     it('should validate session context', async () => {
       const token = await csrf.generateToken('user123', 'session456')
-      
+
       // Valid session context
       const validResult = await csrf.validateToken(token, 'user123', 'session456')
       expect(validResult.valid).toBe(true)
-      
-      // Invalid session context  
+
+      // Invalid session context
       const invalidResult = await csrf.validateToken(token, 'user123', 'session789')
       expect(invalidResult.valid).toBe(false)
       expect(invalidResult.error).toContain('Session context mismatch')
@@ -177,7 +177,7 @@ describe('Enhanced CSRF Protection', () => {
     it('should detect fingerprint changes as warnings', async () => {
       const token = await csrf.generateToken('user123', 'session456', 'fingerprint1')
       const result = await csrf.validateToken(token, 'user123', 'session456', 'fingerprint2')
-      
+
       expect(result.valid).toBe(true) // Still valid but with warning
       expect(result.riskScore).toBe(40)
       expect(result.recommendations).toContain('Device fingerprint changed')
@@ -185,47 +185,49 @@ describe('Enhanced CSRF Protection', () => {
 
     // Property-based testing
     it('should handle arbitrary input safely', () => {
-      fc.assert(fc.asyncProperty(
-        fc.string(),
-        fc.option(fc.string()),
-        fc.option(fc.string()),
-        async (token, userId, sessionId) => {
-          const result = await csrf.validateToken(token, userId, sessionId)
-          expect(typeof result.valid).toBe('boolean')
-          expect(typeof result.riskScore).toBe('number')
-          if (result.error) {
-            expect(typeof result.error).toBe('string')
+      fc.assert(
+        fc.asyncProperty(
+          fc.string(),
+          fc.option(fc.string()),
+          fc.option(fc.string()),
+          async (token, userId, sessionId) => {
+            const result = await csrf.validateToken(token, userId, sessionId)
+            expect(typeof result.valid).toBe('boolean')
+            expect(typeof result.riskScore).toBe('number')
+            if (result.error) {
+              expect(typeof result.error).toBe('string')
+            }
           }
-        }
-      ))
+        )
+      )
     })
   })
 
   describe('Double Submit Cookie', () => {
     it('should implement double submit cookie pattern', () => {
       const mockResponse = {
-        cookie: vi.fn()
+        cookie: vi.fn(),
       }
 
       csrf.setDoubleSubmitCookie('test-token', mockResponse)
-      
+
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2)
-      
+
       // Check that both cookies are set
       const cookieCalls = mockResponse.cookie.mock.calls
       expect(cookieCalls[0][0]).toBe('csrf-token') // Hashed cookie
       expect(cookieCalls[1][0]).toBe('csrf-token-double') // Plain token cookie
-      
+
       // Check cookie options
       expect(cookieCalls[0][2]).toMatchObject({
         httpOnly: true,
         secure: true,
-        sameSite: 'strict'
+        sameSite: 'strict',
       })
       expect(cookieCalls[1][2]).toMatchObject({
         httpOnly: false, // Accessible to client-side
         secure: true,
-        sameSite: 'strict'
+        sameSite: 'strict',
       })
     })
 
@@ -233,17 +235,17 @@ describe('Enhanced CSRF Protection', () => {
       const mockRequest = {
         method: 'POST',
         headers: {
-          'x-csrf-token': 'plain-token'
+          'x-csrf-token': 'plain-token',
         },
         cookies: {
           'csrf-token': 'hashed-token',
-          'csrf-token-double': 'plain-token'
-        }
+          'csrf-token-double': 'plain-token',
+        },
       }
 
       // This would be called by the middleware
       const validation = await csrf['validateEnhancedRequest'](mockRequest, 'user123')
-      
+
       // The actual validation depends on proper HMAC implementation
       expect(typeof validation.valid).toBe('boolean')
     })
@@ -263,7 +265,7 @@ describe('Enhanced CSRF Protection', () => {
       const next = vi.fn()
 
       await middleware(req, res, next)
-      
+
       expect(next).toHaveBeenCalledOnce()
     })
 
@@ -274,21 +276,23 @@ describe('Enhanced CSRF Protection', () => {
         path: '/test',
         headers: {},
         ip: '127.0.0.1',
-        get: vi.fn().mockReturnValue('test-agent')
+        get: vi.fn().mockReturnValue('test-agent'),
       }
       const res = {
         status: vi.fn().mockReturnThis(),
-        json: vi.fn()
+        json: vi.fn(),
       }
       const next = vi.fn()
 
       await middleware(req, res, next)
-      
+
       expect(res.status).toHaveBeenCalledWith(403)
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: 'CSRF validation failed',
-        code: 'CSRF_VALIDATION_FAILED'
-      }))
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'CSRF validation failed',
+          code: 'CSRF_VALIDATION_FAILED',
+        })
+      )
       expect(next).not.toHaveBeenCalled()
     })
 
@@ -298,18 +302,18 @@ describe('Enhanced CSRF Protection', () => {
         method: 'POST',
         path: '/api/csrf/refresh',
         user: { id: 'user123' },
-        sessionID: 'session456'
+        sessionID: 'session456',
       }
       const res = {
-        json: vi.fn()
+        json: vi.fn(),
       }
       const next = vi.fn()
 
       await middleware(req, res, next)
-      
+
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          token: expect.stringMatching(/^[a-f0-9]+\.\d+\.[a-f0-9]+$/)
+          token: expect.stringMatching(/^[a-f0-9]+\.\d+\.[a-f0-9]+$/),
         })
       )
     })
@@ -318,39 +322,39 @@ describe('Enhanced CSRF Protection', () => {
   describe('Token Lifecycle Management', () => {
     it('should enforce token limits per user', async () => {
       const userId = 'user123'
-      
+
       // Create multiple tokens for the same user
       const tokens = []
       for (let i = 0; i < 6; i++) {
         tokens.push(await csrf.generateToken(userId))
       }
-      
+
       // Token limit enforcement would be tested with actual Redis
       expect(tokens).toHaveLength(6)
     })
 
     it('should clean up expired tokens', async () => {
       const cleanupSpy = vi.spyOn(csrf as any, 'cleanupExpiredTokens')
-      
+
       await csrf.generateToken()
-      
+
       expect(cleanupSpy).toHaveBeenCalled()
     })
 
     it('should handle token rotation', async () => {
       const rotateSpy = vi.spyOn(csrf as any, 'rotateActiveTokens')
-      
+
       // Manually trigger rotation for testing
       await csrf['rotateActiveTokens']()
-      
+
       expect(rotateSpy).toHaveBeenCalled()
     })
 
     it('should invalidate tokens properly', async () => {
       const token = await csrf.generateToken('user123')
-      
+
       await csrf.invalidateToken(token)
-      
+
       const result = await csrf.validateToken(token, 'user123')
       expect(result.valid).toBe(false)
     })
@@ -359,25 +363,26 @@ describe('Enhanced CSRF Protection', () => {
   describe('Security Features', () => {
     it('should use timing-safe comparison', async () => {
       const { timingSafeEqual } = await import('crypto')
-      
+
       const token = await csrf.generateToken()
       await csrf.validateToken(token)
-      
+
       expect(timingSafeEqual).toHaveBeenCalled()
     })
 
     it('should generate secure fingerprints', () => {
       const mockRequest = {
-        get: vi.fn()
+        get: vi
+          .fn()
           .mockReturnValueOnce('Mozilla/5.0')
           .mockReturnValueOnce('en-US,en;q=0.9')
           .mockReturnValueOnce('gzip, deflate')
           .mockReturnValue(null),
-        ip: '192.168.1.1'
+        ip: '192.168.1.1',
       }
 
       const fingerprint = csrf['generateFingerprint'](mockRequest)
-      
+
       expect(typeof fingerprint).toBe('string')
       expect(fingerprint).toHaveLength(16)
       expect(mockRequest.get).toHaveBeenCalledWith('User-Agent')
@@ -386,13 +391,11 @@ describe('Enhanced CSRF Protection', () => {
     })
 
     it('should handle concurrent token operations safely', async () => {
-      const promises = Array.from({ length: 10 }, (_, i) => 
-        csrf.generateToken(`user${i}`)
-      )
-      
+      const promises = Array.from({ length: 10 }, (_, i) => csrf.generateToken(`user${i}`))
+
       const tokens = await Promise.all(promises)
       const uniqueTokens = new Set(tokens)
-      
+
       expect(uniqueTokens.size).toBe(10)
     })
   })
@@ -400,13 +403,13 @@ describe('Enhanced CSRF Protection', () => {
   describe('Error Handling', () => {
     it('should handle Redis connection errors gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      
+
       // Create CSRF instance that will fail Redis connection
       const csrfWithFailedRedis = new CSRFProtection()
-      
+
       const token = await csrfWithFailedRedis.generateToken()
       expect(token).toBeTruthy()
-      
+
       consoleSpy.mockRestore()
     })
 
@@ -417,31 +420,33 @@ describe('Enhanced CSRF Protection', () => {
         path: '/test',
         get: vi.fn().mockImplementation(() => {
           throw new Error('Request error')
-        })
+        }),
       }
       const res = {
         status: vi.fn().mockReturnThis(),
-        json: vi.fn()
+        json: vi.fn(),
       }
       const next = vi.fn()
 
       await middleware(req, res, next)
-      
+
       expect(res.status).toHaveBeenCalledWith(500)
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: 'CSRF system error',
-        code: 'CSRF_SYSTEM_ERROR'
-      }))
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'CSRF system error',
+          code: 'CSRF_SYSTEM_ERROR',
+        })
+      )
     })
 
     it('should validate configuration in production', () => {
       const originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'production'
-      
+
       expect(() => {
         new CSRFProtection({ secretKey: undefined })
       }).toThrow('CSRF_SECRET must be set in production')
-      
+
       process.env.NODE_ENV = originalEnv
     })
   })
@@ -450,25 +455,25 @@ describe('Enhanced CSRF Protection', () => {
     it('should handle high token generation load', async () => {
       const startTime = Date.now()
       const promises = Array.from({ length: 100 }, () => csrf.generateToken())
-      
+
       await Promise.all(promises)
       const endTime = Date.now()
-      
+
       // Should complete within reasonable time
       expect(endTime - startTime).toBeLessThan(1000) // 1 second
     })
 
     it('should cache tokens efficiently', async () => {
       const token = await csrf.generateToken('user123')
-      
+
       // Multiple validations should reuse cached token
       const results = await Promise.all([
         csrf.validateToken(token, 'user123'),
         csrf.validateToken(token, 'user123'),
         csrf.validateToken(token, 'user123'),
       ])
-      
-      results.forEach(result => {
+
+      results.forEach((result) => {
         expect(result.valid).toBe(true)
       })
     })

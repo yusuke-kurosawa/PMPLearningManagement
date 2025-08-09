@@ -1,66 +1,63 @@
-import { http, HttpResponse } from 'msw';
-import { createUser, createAdminUser, createPremiumUser } from '../factories/userFactory';
-import { createLearningProgress, createExamResult } from '../factories/progressFactory';
-import { createStripeSubscription, createStripeCustomer } from '../factories/subscriptionFactory';
+import { http, HttpResponse } from 'msw'
+import { createUser, createAdminUser, createPremiumUser } from '../factories/userFactory'
+import { createLearningProgress, createExamResult } from '../factories/progressFactory'
+import { createStripeSubscription, createStripeCustomer } from '../factories/subscriptionFactory'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 // Auth handlers
 const authHandlers = [
   // Login
   http.post(`${API_URL}/api/auth/login`, async ({ request }) => {
-    const body = await request.json() as any;
-    
+    const body = (await request.json()) as any
+
     if (body.email === 'test@example.com' && body.password === 'password') {
       return HttpResponse.json({
         user: createUser({ email: body.email }),
         token: 'mock-jwt-token',
-      });
+      })
     }
-    
-    return HttpResponse.json(
-      { error: 'Invalid credentials' },
-      { status: 401 }
-    );
+
+    return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 })
   }),
-  
+
   // Register
   http.post(`${API_URL}/api/auth/register`, async ({ request }) => {
-    const body = await request.json() as any;
-    
+    const body = (await request.json()) as any
+
     return HttpResponse.json({
-      user: createUser({ 
+      user: createUser({
         email: body.email,
         name: body.name,
       }),
       token: 'mock-jwt-token',
-    });
+    })
   }),
-  
+
   // Session
   http.get(`${API_URL}/api/auth/session`, () => {
     return HttpResponse.json({
       user: createUser(),
       expires: new Date(Date.now() + 86400000).toISOString(),
-    });
+    })
   }),
-  
+
   // Logout
   http.post(`${API_URL}/api/auth/logout`, () => {
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ success: true })
   }),
-];
+]
 
 // User handlers
 const userHandlers = [
   // Get users
   http.get(`${API_URL}/api/users`, ({ request }) => {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    
-    const users = Array.from({ length: limit }, () => createUser());
-    
+    const url = new URL(request.url)
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const limit = parseInt(url.searchParams.get('limit') || '10')
+
+    const users = Array.from({ length: limit }, () => createUser())
+
     return HttpResponse.json({
       data: users,
       pagination: {
@@ -69,47 +66,49 @@ const userHandlers = [
         total: 100,
         totalPages: 10,
       },
-    });
+    })
   }),
-  
+
   // Get user by ID
   http.get(`${API_URL}/api/users/:id`, ({ params }) => {
-    const { id } = params;
-    
+    const { id } = params
+
     if (id === 'admin') {
-      return HttpResponse.json(createAdminUser());
+      return HttpResponse.json(createAdminUser())
     }
-    
+
     if (id === 'premium') {
-      return HttpResponse.json(createPremiumUser());
+      return HttpResponse.json(createPremiumUser())
     }
-    
-    return HttpResponse.json(createUser({ id: id as string }));
+
+    return HttpResponse.json(createUser({ id: id as string }))
   }),
-  
+
   // Update user
   http.patch(`${API_URL}/api/users/:id`, async ({ params, request }) => {
-    const { id } = params;
-    const body = await request.json() as any;
-    
-    return HttpResponse.json(createUser({ 
-      id: id as string,
-      ...body,
-    }));
+    const { id } = params
+    const body = (await request.json()) as any
+
+    return HttpResponse.json(
+      createUser({
+        id: id as string,
+        ...body,
+      })
+    )
   }),
-  
+
   // Delete user
   http.delete(`${API_URL}/api/users/:id`, ({ params }) => {
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ success: true })
   }),
-];
+]
 
 // Learning progress handlers
 const learningHandlers = [
   // Get user progress
   http.get(`${API_URL}/api/learning/progress`, () => {
-    const progress = Array.from({ length: 49 }, () => createLearningProgress());
-    
+    const progress = Array.from({ length: 49 }, () => createLearningProgress())
+
     return HttpResponse.json({
       progress,
       statistics: {
@@ -120,20 +119,20 @@ const learningHandlers = [
         averageScore: 78.5,
         totalStudyTime: 12500,
       },
-    });
+    })
   }),
-  
+
   // Update progress
   http.post(`${API_URL}/api/learning/progress`, async ({ request }) => {
-    const body = await request.json() as any;
-    
-    return HttpResponse.json(createLearningProgress(body));
+    const body = (await request.json()) as any
+
+    return HttpResponse.json(createLearningProgress(body))
   }),
-  
+
   // Get exam results
   http.get(`${API_URL}/api/learning/exams`, () => {
-    const results = Array.from({ length: 5 }, () => createExamResult());
-    
+    const results = Array.from({ length: 5 }, () => createExamResult())
+
     return HttpResponse.json({
       results,
       statistics: {
@@ -142,55 +141,57 @@ const learningHandlers = [
         passRate: 60,
         bestScore: 85,
       },
-    });
+    })
   }),
-  
+
   // Submit exam
   http.post(`${API_URL}/api/learning/exams`, async ({ request }) => {
-    const body = await request.json() as any;
-    
-    return HttpResponse.json(createExamResult({
-      score: body.score || 75,
-      totalQuestions: body.answers?.length || 180,
-    }));
+    const body = (await request.json()) as any
+
+    return HttpResponse.json(
+      createExamResult({
+        score: body.score || 75,
+        totalQuestions: body.answers?.length || 180,
+      })
+    )
   }),
-];
+]
 
 // Payment handlers
 const paymentHandlers = [
   // Create checkout session
   http.post(`${API_URL}/api/payments/create-checkout-session`, async ({ request }) => {
-    const body = await request.json() as any;
-    
+    const body = (await request.json()) as any
+
     return HttpResponse.json({
       sessionId: 'cs_test_' + Math.random().toString(36).substr(2, 9),
       url: 'https://checkout.stripe.com/pay/cs_test_123',
-    });
+    })
   }),
-  
+
   // Get subscription
   http.get(`${API_URL}/api/payments/subscription`, () => {
     return HttpResponse.json({
       subscription: createStripeSubscription(),
       customer: createStripeCustomer(),
-    });
+    })
   }),
-  
+
   // Cancel subscription
   http.post(`${API_URL}/api/payments/cancel-subscription`, () => {
     return HttpResponse.json({
       success: true,
-      subscription: createStripeSubscription({ 
+      subscription: createStripeSubscription({
         cancel_at_period_end: true,
       }),
-    });
+    })
   }),
-  
+
   // Webhook
   http.post(`${API_URL}/api/webhooks/stripe`, async ({ request }) => {
-    return HttpResponse.json({ received: true });
+    return HttpResponse.json({ received: true })
   }),
-];
+]
 
 // Notification handlers
 const notificationHandlers = [
@@ -215,19 +216,19 @@ const notificationHandlers = [
           createdAt: new Date().toISOString(),
         },
       ],
-    });
+    })
   }),
-  
+
   // Mark as read
   http.patch(`${API_URL}/api/notifications/:id/read`, () => {
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ success: true })
   }),
-  
+
   // Send notification
   http.post(`${API_URL}/api/notifications/send`, async ({ request }) => {
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ success: true })
   }),
-];
+]
 
 // Health check handlers
 const healthHandlers = [
@@ -240,31 +241,31 @@ const healthHandlers = [
         redis: 'connected',
         stripe: 'connected',
       },
-    });
+    })
   }),
-  
+
   http.get(`${API_URL}/api/health/ready`, () => {
-    return HttpResponse.json({ ready: true });
+    return HttpResponse.json({ ready: true })
   }),
-  
+
   http.get(`${API_URL}/api/health/live`, () => {
-    return HttpResponse.json({ alive: true });
+    return HttpResponse.json({ alive: true })
   }),
-];
+]
 
 // tRPC handlers
 const trpcHandlers = [
   // User router
   http.post(`${API_URL}/api/trpc/user.getById`, async ({ request }) => {
-    const body = await request.json() as any;
-    
+    const body = (await request.json()) as any
+
     return HttpResponse.json({
       result: {
         data: createUser({ id: body.input }),
       },
-    });
+    })
   }),
-  
+
   http.post(`${API_URL}/api/trpc/user.list`, () => {
     return HttpResponse.json({
       result: {
@@ -273,9 +274,9 @@ const trpcHandlers = [
           totalCount: 100,
         },
       },
-    });
+    })
   }),
-  
+
   // Learning router
   http.post(`${API_URL}/api/trpc/learning.getProgress`, () => {
     return HttpResponse.json({
@@ -284,19 +285,19 @@ const trpcHandlers = [
           progress: Array.from({ length: 49 }, () => createLearningProgress()),
         },
       },
-    });
+    })
   }),
-  
+
   http.post(`${API_URL}/api/trpc/learning.updateProgress`, async ({ request }) => {
-    const body = await request.json() as any;
-    
+    const body = (await request.json()) as any
+
     return HttpResponse.json({
       result: {
         data: createLearningProgress(body.input),
       },
-    });
+    })
   }),
-];
+]
 
 // Export all handlers
 export const handlers = [
@@ -307,25 +308,19 @@ export const handlers = [
   ...notificationHandlers,
   ...healthHandlers,
   ...trpcHandlers,
-];
+]
 
 // Handler overrides for specific tests
 export const errorHandlers = {
   serverError: http.get(`${API_URL}/api/*`, () => {
-    return HttpResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }),
-  
+
   unauthorized: http.get(`${API_URL}/api/*`, () => {
-    return HttpResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
+    return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }),
-  
+
   networkError: http.get(`${API_URL}/api/*`, () => {
-    return HttpResponse.error();
+    return HttpResponse.error()
   }),
-};
+}

@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
-import { User, Role, Subscription } from '@prisma/client';
+import { faker } from '@faker-js/faker'
+import { User, Role, Subscription } from '@prisma/client'
 
 // User factory
 export function createUser(overrides?: Partial<User>): User {
@@ -32,12 +32,12 @@ export function createUser(overrides?: Partial<User>): User {
       twitter: faker.internet.userName(),
     },
     ...overrides,
-  } as User;
+  } as User
 }
 
 // Batch create users
 export function createUsers(count: number, overrides?: Partial<User>): User[] {
-  return Array.from({ length: count }, () => createUser(overrides));
+  return Array.from({ length: count }, () => createUser(overrides))
 }
 
 // Create user with specific role
@@ -46,7 +46,7 @@ export function createAdminUser(overrides?: Partial<User>): User {
     role: 'ADMIN' as Role,
     email: `admin-${faker.string.alphanumeric(6)}@example.com`,
     ...overrides,
-  });
+  })
 }
 
 export function createPremiumUser(overrides?: Partial<User>): User {
@@ -54,28 +54,28 @@ export function createPremiumUser(overrides?: Partial<User>): User {
     role: 'PREMIUM' as Role,
     email: `premium-${faker.string.alphanumeric(6)}@example.com`,
     ...overrides,
-  });
+  })
 }
 
 // User with subscription
 export interface UserWithSubscription extends User {
-  subscription: Subscription | null;
+  subscription: Subscription | null
 }
 
 export function createUserWithSubscription(
   userOverrides?: Partial<User>,
   subscriptionOverrides?: Partial<Subscription>
 ): UserWithSubscription {
-  const user = createPremiumUser(userOverrides);
+  const user = createPremiumUser(userOverrides)
   const subscription = createSubscription({
     userId: user.id,
     ...subscriptionOverrides,
-  });
-  
+  })
+
   return {
     ...user,
     subscription,
-  };
+  }
 }
 
 // Subscription factory
@@ -97,7 +97,7 @@ export function createSubscription(overrides?: Partial<Subscription>): Subscript
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  } as Subscription;
+  } as Subscription
 }
 
 // Account factory (OAuth accounts)
@@ -115,7 +115,7 @@ export function createAccount(userId: string, provider: string = 'google') {
     scope: 'openid email profile',
     id_token: faker.string.alphanumeric(128),
     session_state: faker.string.alphanumeric(32),
-  };
+  }
 }
 
 // Session factory
@@ -127,7 +127,7 @@ export function createSession(userId: string) {
     expires: faker.date.future(),
     createdAt: faker.date.recent(),
     updatedAt: faker.date.recent(),
-  };
+  }
 }
 
 // User statistics factory
@@ -142,12 +142,8 @@ export function createUserStats(userId: string) {
     flashcardsReviewed: faker.number.int({ min: 0, max: 1000 }),
     streak: faker.number.int({ min: 0, max: 365 }),
     lastActivityAt: faker.date.recent(),
-    achievements: [
-      'first_login',
-      'completed_first_process',
-      'perfect_score',
-    ],
-  };
+    achievements: ['first_login', 'completed_first_process', 'perfect_score'],
+  }
 }
 
 // User preferences factory
@@ -176,7 +172,7 @@ export function createUserPreferences(overrides?: any) {
       difficulty: faker.helpers.arrayElement(['beginner', 'intermediate', 'advanced']),
     },
     ...overrides,
-  };
+  }
 }
 
 // Test user seeds
@@ -208,34 +204,32 @@ export const TEST_USERS = {
     name: 'Unverified User',
     emailVerified: null,
   }),
-};
+}
 
 // Batch operations
 export function createUserBatch(config: {
-  admins?: number;
-  premium?: number;
-  regular?: number;
-  inactive?: number;
+  admins?: number
+  premium?: number
+  regular?: number
+  inactive?: number
 }) {
-  const users: User[] = [];
-  
+  const users: User[] = []
+
   if (config.admins) {
-    users.push(...Array.from({ length: config.admins }, () => createAdminUser()));
+    users.push(...Array.from({ length: config.admins }, () => createAdminUser()))
   }
-  
+
   if (config.premium) {
-    users.push(...Array.from({ length: config.premium }, () => createPremiumUser()));
+    users.push(...Array.from({ length: config.premium }, () => createPremiumUser()))
   }
-  
+
   if (config.regular) {
-    users.push(...Array.from({ length: config.regular }, () => createUser()));
+    users.push(...Array.from({ length: config.regular }, () => createUser()))
   }
-  
+
   if (config.inactive) {
-    users.push(...Array.from({ length: config.inactive }, () => 
-      createUser({ isActive: false })
-    ));
+    users.push(...Array.from({ length: config.inactive }, () => createUser({ isActive: false })))
   }
-  
-  return users;
+
+  return users
 }

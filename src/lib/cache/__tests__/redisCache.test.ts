@@ -12,11 +12,7 @@ import {
   type CacheEntry,
   type CacheStats,
 } from '../redisCache'
-import {
-  AdvancedCacheManager,
-  PMPCacheStrategies,
-  CacheStrategy,
-} from '../cacheStrategies'
+import { AdvancedCacheManager, PMPCacheStrategies, CacheStrategy } from '../cacheStrategies'
 
 // Redis モック設定
 const mockRedis = {
@@ -89,12 +85,10 @@ describe('Redis キャッシングシステム', () => {
       const testData = { id: '123', name: 'Test User', email: 'test@example.com' }
       mockRedis.setex.mockResolvedValue('OK')
 
-      await cacheManager.set(
-        CacheKeyStrategy.USER_DATA,
-        'user123',
-        testData,
-        { ttl: 600, tags: ['user', 'profile'] }
-      )
+      await cacheManager.set(CacheKeyStrategy.USER_DATA, 'user123', testData, {
+        ttl: 600,
+        tags: ['user', 'profile'],
+      })
 
       expect(mockRedis.setex).toHaveBeenCalledWith(
         'user:user123',
@@ -141,7 +135,7 @@ describe('Redis キャッシングシステム', () => {
     it('複数のキーを一括取得できる', async () => {
       const testData1 = { id: '1', name: 'User 1' }
       const testData2 = { id: '2', name: 'User 2' }
-      
+
       const entry1: CacheEntry = {
         data: testData1,
         timestamp: Date.now(),
@@ -149,7 +143,7 @@ describe('Redis キャッシングシステム', () => {
         version: '1.0.0',
         tags: [],
       }
-      
+
       const entry2: CacheEntry = {
         data: testData2,
         timestamp: Date.now(),
@@ -164,10 +158,11 @@ describe('Redis キャッシングシステム', () => {
         null, // 3番目のキーは存在しない
       ])
 
-      const results = await cacheManager.mget(
-        CacheKeyStrategy.USER_DATA,
-        ['user1', 'user2', 'user3']
-      )
+      const results = await cacheManager.mget(CacheKeyStrategy.USER_DATA, [
+        'user1',
+        'user2',
+        'user3',
+      ])
 
       expect(results.size).toBe(2)
       expect(results.get('user1')).toEqual(testData1)
@@ -262,8 +257,8 @@ describe('Redis キャッシングシステム', () => {
 
     it('レスポンス時間が遅い場合はdegradedステータス', async () => {
       // 遅いレスポンスをシミュレート
-      mockRedis.ping.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve('PONG'), 150))
+      mockRedis.ping.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve('PONG'), 150))
       )
       mockRedis.info.mockResolvedValue('used_memory:512000')
       mockRedis.dbsize.mockResolvedValue(100)
@@ -297,9 +292,9 @@ describe('Redis キャッシングシステム', () => {
     })
 
     it('大きなデータは圧縮される', async () => {
-      const largeData = { 
+      const largeData = {
         content: 'x'.repeat(2000), // 2KB の大きなデータ
-        metadata: { size: 'large' } 
+        metadata: { size: 'large' },
       }
       mockRedis.setex.mockResolvedValue('OK')
 
@@ -356,14 +351,10 @@ describe('Redis キャッシングシステム', () => {
         version: '1.0.0',
         tags: [],
       }
-      
+
       mockRedis.get.mockResolvedValue(JSON.stringify(cacheEntry))
 
-      const middleware = cacheMiddleware(
-        CacheKeyStrategy.USER_DATA,
-        'user123',
-        { ttl: 600 }
-      )
+      const middleware = cacheMiddleware(CacheKeyStrategy.USER_DATA, 'user123', { ttl: 600 })
 
       const mockHandler = vi.fn().mockResolvedValue({ id: '123', name: 'Fresh User' })
       const mockReq = { userId: 'user123' }
@@ -376,15 +367,11 @@ describe('Redis キャッシングシステム', () => {
 
     it('キャッシュミス時は元の処理を実行してキャッシュする', async () => {
       const freshData = { id: '123', name: 'Fresh User' }
-      
+
       mockRedis.get.mockResolvedValue(null) // キャッシュミス
       mockRedis.setex.mockResolvedValue('OK')
 
-      const middleware = cacheMiddleware(
-        CacheKeyStrategy.USER_DATA,
-        'user456',
-        { ttl: 600 }
-      )
+      const middleware = cacheMiddleware(CacheKeyStrategy.USER_DATA, 'user456', { ttl: 600 })
 
       const mockHandler = vi.fn().mockResolvedValue(freshData)
       const mockReq = { userId: 'user456' }
@@ -397,13 +384,9 @@ describe('Redis キャッシングシステム', () => {
     })
 
     it('スキップ条件がある場合は適切にスキップする', async () => {
-      const middleware = cacheMiddleware(
-        CacheKeyStrategy.USER_DATA,
-        'user789',
-        { 
-          skipCache: (req: any) => req.bypassCache === true,
-        }
-      )
+      const middleware = cacheMiddleware(CacheKeyStrategy.USER_DATA, 'user789', {
+        skipCache: (req: any) => req.bypassCache === true,
+      })
 
       const mockHandler = vi.fn().mockResolvedValue({ id: '789', name: 'Bypassed User' })
       const mockReq = { userId: 'user789', bypassCache: true }
@@ -422,7 +405,7 @@ describe('Redis キャッシングシステム', () => {
       const middleware = cacheMiddleware(
         CacheKeyStrategy.USER_DATA,
         (req: any) => `user_${req.userId}`,
-        { 
+        {
           generateKey: (req: any) => ({ role: req.userRole }),
         }
       )
@@ -438,11 +421,8 @@ describe('Redis キャッシングシステム', () => {
 
     it('キャッシュエラー時は元の処理にフォールバック', async () => {
       mockRedis.get.mockRejectedValue(new Error('Cache error'))
-      
-      const middleware = cacheMiddleware(
-        CacheKeyStrategy.USER_DATA,
-        'user_error'
-      )
+
+      const middleware = cacheMiddleware(CacheKeyStrategy.USER_DATA, 'user_error')
 
       const mockHandler = vi.fn().mockResolvedValue({ id: '999', name: 'Fallback User' })
       const mockReq = { userId: 'user_error' }
@@ -566,7 +546,7 @@ describe('Redis キャッシングシステム', () => {
     it('Cache-Aside パターンが正しく動作する', async () => {
       const testData = { id: 'test', value: 'cache-aside' }
       const dataFetcher = vi.fn().mockResolvedValue(testData)
-      
+
       mockRedis.get.mockResolvedValue(null) // キャッシュミス
       mockRedis.setex.mockResolvedValue('OK')
 
@@ -591,10 +571,10 @@ describe('Redis キャッシングシステム', () => {
         version: '1.0.0',
         tags: [],
       }
-      
+
       mockRedis.get.mockResolvedValue(JSON.stringify(cacheEntry))
       mockRedis.ttl.mockResolvedValue(60) // TTLが残り60秒（リフレッシュ閾値以下）
-      
+
       const dataFetcher = vi.fn().mockResolvedValue({ id: 'smart', value: 'refreshed' })
 
       const result = await advancedCache.smartCache(
@@ -607,7 +587,7 @@ describe('Redis キャッシングシステム', () => {
       expect(result.data).toEqual(testData)
       expect(result.hit).toBe(true)
       expect(result.source).toBe('cache')
-      
+
       // バックグラウンドリフレッシュがスケジュールされることを確認
       expect(advancedCache['refreshQueue'].has('user:smart_key')).toBe(true)
     })
@@ -615,7 +595,7 @@ describe('Redis キャッシングシステム', () => {
     it('Write-Through パターンが正しく動作する', async () => {
       const testData = { id: 'write', value: 'through' }
       const dataPersister = vi.fn().mockResolvedValue(undefined)
-      
+
       mockRedis.setex.mockResolvedValue('OK')
 
       await advancedCache.writeThrough(
@@ -632,7 +612,7 @@ describe('Redis キャッシングシステム', () => {
     it('Write-Behind パターンが非同期で動作する', async () => {
       const testData = { id: 'write', value: 'behind' }
       const dataPersister = vi.fn().mockResolvedValue(undefined)
-      
+
       mockRedis.setex.mockResolvedValue('OK')
 
       await advancedCache.writeBehind(
@@ -644,9 +624,9 @@ describe('Redis キャッシングシステム', () => {
 
       // キャッシュには即座に保存される
       expect(mockRedis.setex).toHaveBeenCalled()
-      
+
       // dataPersisterは非同期で実行される（テスト環境では即座にコールされる）
-      await new Promise(resolve => setImmediate(resolve))
+      await new Promise((resolve) => setImmediate(resolve))
       expect(dataPersister).toHaveBeenCalledWith(testData)
     })
 
@@ -699,7 +679,7 @@ describe('Redis キャッシングシステム', () => {
     it('マルチレイヤーキャッシングが動作する', async () => {
       const testData = { size: 'large', items: new Array(20) }
       const dataFetcher = vi.fn().mockResolvedValue(testData)
-      
+
       mockRedis.get.mockResolvedValue(null) // すべてのレイヤーでミス
       mockRedis.setex.mockResolvedValue('OK')
 
@@ -739,7 +719,7 @@ describe('Redis キャッシングシステム', () => {
     it('ユーザーダッシュボードデータをスマートキャッシュする', async () => {
       const dashboardData = { progress: 75, recentActivity: [] }
       const dataFetcher = vi.fn().mockResolvedValue(dashboardData)
-      
+
       mockRedis.get.mockResolvedValue(null)
       mockRedis.setex.mockResolvedValue('OK')
 
@@ -752,7 +732,7 @@ describe('Redis キャッシングシステム', () => {
     it('PMBOKプロセス情報をキャッシュする', async () => {
       const processData = [{ id: 'p1', name: 'Process 1' }]
       const dataFetcher = vi.fn().mockResolvedValue(processData)
-      
+
       mockRedis.get.mockResolvedValue(null)
       mockRedis.setex.mockResolvedValue('OK')
 
@@ -765,15 +745,11 @@ describe('Redis キャッシングシステム', () => {
     it('試験問題を階層化キャッシュする', async () => {
       const examQuestions = new Array(15).fill(0).map((_, i) => ({ id: i, question: `Q${i}` }))
       const dataFetcher = vi.fn().mockResolvedValue(examQuestions)
-      
+
       mockRedis.get.mockResolvedValue(null)
       mockRedis.setex.mockResolvedValue('OK')
 
-      const result = await pmpStrategies.cacheExamQuestions(
-        'mock',
-        'medium',
-        dataFetcher
-      )
+      const result = await pmpStrategies.cacheExamQuestions('mock', 'medium', dataFetcher)
 
       expect(result.data).toEqual(examQuestions)
       expect(dataFetcher).toHaveBeenCalledTimes(1)
@@ -782,22 +758,22 @@ describe('Redis キャッシングシステム', () => {
     it('学習統計をWrite-Behindで更新する', async () => {
       const stats = { completedProcesses: 25, totalTime: 3600 }
       const dataPersister = vi.fn().mockResolvedValue(undefined)
-      
+
       mockRedis.setex.mockResolvedValue('OK')
 
       await pmpStrategies.updateLearningStats('user123', stats, dataPersister)
 
       expect(mockRedis.setex).toHaveBeenCalled()
-      
+
       // 非同期でデータベースに保存される
-      await new Promise(resolve => setImmediate(resolve))
+      await new Promise((resolve) => setImmediate(resolve))
       expect(dataPersister).toHaveBeenCalledWith(stats)
     })
 
     it('セッション情報をWrite-Throughで更新する', async () => {
       const sessionData = { userId: 'user123', lastActivity: Date.now() }
       const dataPersister = vi.fn().mockResolvedValue(undefined)
-      
+
       mockRedis.setex.mockResolvedValue('OK')
 
       await pmpStrategies.updateUserSession('user123', sessionData, dataPersister)

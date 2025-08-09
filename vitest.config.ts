@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { defineConfig } from 'vitest/config'
+import path from 'path'
 
 export default defineConfig({
   plugins: [],
@@ -34,7 +34,7 @@ export default defineConfig({
         lines: 91,
         statements: 90,
         // 高品質水準要件（90%+）
-        perFile: true // ファイル単位での厳格な閾値適用
+        perFile: true, // ファイル単位での厳格な閾値適用
       },
       // Mutation testing設定
       all: true,
@@ -43,7 +43,7 @@ export default defineConfig({
         statements: [90, 95],
         functions: [90, 95],
         branches: [90, 95],
-        lines: [90, 95]
+        lines: [90, 95],
       },
     },
     testTimeout: 30000, // 30秒以内維持
@@ -57,14 +57,14 @@ export default defineConfig({
       threads: {
         maxThreads: 6,
         minThreads: 6,
-        useAtomics: true
-      }
+        useAtomics: true,
+      },
     },
     // チーム専門分野別の並列実行
     sequence: {
       concurrent: true,
       shuffle: true,
-      hooks: 'parallel'
+      hooks: 'parallel',
     },
     // 高度品質ゲート
     // Flaky test防止
@@ -93,12 +93,12 @@ export default defineConfig({
       'json',
       'html',
       // 高度レポーティング
-      ['junit', { outputFile: './test-results.xml' }]
+      ['junit', { outputFile: './test-results.xml' }],
     ],
     outputFile: {
       json: './test-results.json',
       html: './test-results.html',
-      junit: './test-results.xml'
+      junit: './test-results.xml',
     },
     // 高度テストモード
     passWithNoTests: false,
@@ -109,7 +109,7 @@ export default defineConfig({
     benchmark: {
       include: ['**/*.bench.{js,ts}'],
       exclude: ['node_modules', 'dist', '.next'],
-      outputFile: 'benchmark-results.json'
+      outputFile: 'benchmark-results.json',
     },
   },
   resolve: {
@@ -117,4 +117,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-});
+})
