@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results.json' }],
-    ['junit', { outputFile: 'results.xml' }]
+    ['junit', { outputFile: 'results.xml' }],
   ],
   use: {
     baseURL: 'http://localhost:3000',
@@ -54,6 +54,6 @@ export default defineConfig({
   expect: {
     timeout: 10000,
   },
-  
+
   timeout: 30000,
-});
+})

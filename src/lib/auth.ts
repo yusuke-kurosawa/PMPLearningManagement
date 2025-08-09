@@ -77,10 +77,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('メールアドレスまたはパスワードが正しくありません')
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
         if (!isPasswordValid) {
           throw new Error('メールアドレスまたはパスワードが正しくありません')
@@ -102,14 +99,14 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = (user as any).role || 'USER'
       }
-      
+
       // Refresh access token for OAuth providers
       if (account?.provider === 'google') {
         token.accessToken = account.access_token
         token.refreshToken = account.refresh_token
         token.accessTokenExpires = account.expires_at
       }
-      
+
       return token
     },
     async session({ session, token }) {
@@ -124,17 +121,17 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider !== 'credentials') {
         return true
       }
-      
+
       // For credentials provider, check if email is verified
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email! },
       })
-      
+
       if (!existingUser?.emailVerified) {
         // You can redirect to email verification page
         return '/auth/verify-email'
       }
-      
+
       return true
     },
   },
@@ -142,7 +139,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, isNewUser }) {
       // Log sign in event
       console.log(`User ${user.email} signed in via ${account?.provider}`)
-      
+
       // Track user activity
       if (user.id) {
         await prisma.user.update({
@@ -158,13 +155,13 @@ export const authOptions: NextAuthOptions = {
     async createUser({ user }) {
       // Send welcome email
       console.log(`New user created: ${user.email}`)
-      
+
       // Initialize user progress
       const pmbokProcesses = await prisma.pMBOKProcess.findMany()
-      
+
       if (pmbokProcesses.length > 0) {
         await prisma.learningProgress.createMany({
-          data: pmbokProcesses.map(process => ({
+          data: pmbokProcesses.map((process) => ({
             userId: user.id,
             processId: process.id,
             status: 'NOT_STARTED',
@@ -192,11 +189,11 @@ export async function getServerSession() {
  */
 export async function getAuthenticatedUser() {
   const session = await getServerSession()
-  
+
   if (!session?.user?.id) {
     throw new Error('Unauthorized')
   }
-  
+
   return session.user
 }
 
@@ -205,16 +202,16 @@ export async function getAuthenticatedUser() {
  */
 export async function requireRole(requiredRole: 'USER' | 'PREMIUM' | 'ADMIN') {
   const user = await getAuthenticatedUser()
-  
+
   const roleHierarchy = {
     USER: 0,
     PREMIUM: 1,
     ADMIN: 2,
   }
-  
+
   if (roleHierarchy[user.role as keyof typeof roleHierarchy] < roleHierarchy[requiredRole]) {
     throw new Error('Insufficient permissions')
   }
-  
+
   return user
 }

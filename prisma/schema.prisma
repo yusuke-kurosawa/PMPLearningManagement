@@ -1,0 +1,633 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー管理
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  username  String?   @unique
+  name      String?
+  avatar    String?
+  role      UserRole  @default(USER)
+  
+  // 認証関連
+  password  String?
+  provider  String?   // oauth provider
+  providerId String?
+  
+  // プロフィール
+  jobTitle  String?
+  company   String?
+  experience ExperienceLevel @default(BEGINNER)
+  timezone  String?   @default("UTC")
+  language  String?   @default("ja")
+  
+  // 学習設定
+  learningGoals Json?
+  preferences   Json?
+  
+  // 統計
+  totalStudyTime Int @default(0) // minutes
+  totalPoints    Int @default(0)
+  streakDays     Int @default(0)
+  lastActiveAt   DateTime?
+  
+  // タイムスタンプ
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  // リレーション
+  learningProgress LearningProgress[]
+  examAttempts     ExamAttempt[]
+  notes            Note[]
+  achievements     UserAchievement[]
+  studyGroups      StudyGroupMember[]
+  discussions      Discussion[]
+  comments         Comment[]
+  subscriptions    Subscription[]
+  
+  @@index([email])
+  @@index([username])
+  @@index([createdAt])
+  @@index([lastActiveAt])
+  @@index([role, deletedAt])
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  PREMIUM
+  INSTRUCTOR
+  ADMIN
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// 学習進捗管理
+model LearningProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  processId      String
+  knowledgeArea  String
+  processGroup   String
+  
+  // 進捗状況
+  status         ProgressStatus @default(NOT_STARTED)
+  completedAt    DateTime?
+  masteryLevel   Int      @default(0) // 0-100
+  studyTime      Int      @default(0) // minutes
+  lastReviewedAt DateTime?
+  nextReviewAt   DateTime?
+  
+  // 学習メトリクス
+  viewCount      Int      @default(0)
+  practiceCount  Int      @default(0)
+  correctRate    Float?   // 正答率 0.0-1.0
+  averageScore   Float?
+  
+  // メタデータ
+  notes          String?
+  tags           String[]
+  difficulty     Int?     @default(1) // 1-5
+  confidence     Int?     @default(1) // 1-5
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  process PMBOKProcess @relation(fields: [processId], references: [id])
+  
+  @@unique([userId, processId])
+  @@index([userId, status])
+  @@index([processId, status])
+  @@index([knowledgeArea, processGroup])
+  @@index([masteryLevel])
+  @@index([nextReviewAt])
+  @@index([completedAt])
+  @@map("learning_progress")
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  MASTERED
+  NEEDS_REVIEW
+}
+
+// PMBOKプロセス定義
+model PMBOKProcess {
+  id            String   @id @default(cuid())
+  name          String
+  nameEn        String?
+  description   String?
+  knowledgeArea String
+  processGroup  String
+  
+  // ITTO構造
+  inputs        Json     // InputOutput[]
+  tools         Json     // ToolTechnique[]
+  outputs       Json     // InputOutput[]
+  
+  // メタデータ
+  complexity    Int      @default(1) // 1-5
+  importance    Int      @default(1) // 1-5
+  frequency     Int      @default(1) // 1-5
+  version       String   @default("7.0") // PMBOK version
+  
+  // 関係性
+  predecessors  String[] // process IDs
+  successors    String[] // process IDs
+  dependencies  Json?    // detailed dependencies
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  learningProgress LearningProgress[]
+  examQuestions    ExamQuestion[]
+  
+  @@unique([name, version])
+  @@index([knowledgeArea, processGroup])
+  @@index([version])
+  @@index([complexity])
+  @@fulltext([name, description])
+  @@map("pmbok_processes")
+}
+
+// 試験問題管理
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  question      String
+  questionType  QuestionType @default(MULTIPLE_CHOICE)
+  
+  // 選択肢（多肢選択用）
+  options       Json?    // Option[]
+  correctAnswer String   // answer key
+  explanation   String?
+  
+  // 分類
+  knowledgeArea String
+  processGroup  String?
+  processId     String?
+  domain        String?  // PMBOK7 performance domains
+  
+  // 難易度・メタデータ
+  difficulty    Int      @default(1) // 1-5
+  points        Int      @default(1)
+  tags          String[]
+  references    Json?    // Reference[]
+  
+  // 統計
+  timesAnswered Int      @default(0)
+  correctRate   Float    @default(0.0)
+  averageTime   Int?     // seconds
+  
+  // バージョニング
+  version       String   @default("1.0")
+  isActive      Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  process      PMBOKProcess? @relation(fields: [processId], references: [id])
+  examAnswers  ExamAnswer[]
+  
+  @@index([knowledgeArea, processGroup])
+  @@index([difficulty])
+  @@index([isActive, version])
+  @@index([correctRate])
+  @@fulltext([question, explanation])
+  @@map("exam_questions")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_BLANK
+  DRAG_DROP
+  SCENARIO
+}
+
+// 試験受験管理
+model ExamAttempt {
+  id          String      @id @default(cuid())
+  userId      String
+  examType    ExamType    @default(PRACTICE)
+  
+  // 試験設定
+  title       String?
+  description String?
+  timeLimit   Int?        // minutes
+  totalQuestions Int
+  
+  // 受験状況
+  status      AttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime    @default(now())
+  completedAt DateTime?
+  submittedAt DateTime?
+  
+  // 結果
+  totalScore     Int?
+  maxScore       Int?
+  passingScore   Int?
+  percentageScore Float?
+  
+  // 詳細統計
+  correctAnswers   Int @default(0)
+  incorrectAnswers Int @default(0)
+  skippedAnswers   Int @default(0)
+  timeSpent        Int @default(0) // seconds
+  
+  // パフォーマンス分析
+  knowledgeAreaScores Json? // { [area]: { correct, total, percentage } }
+  processGroupScores  Json? // { [group]: { correct, total, percentage } }
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers     ExamAnswer[]
+  
+  @@index([userId, status])
+  @@index([examType, status])
+  @@index([completedAt])
+  @@index([percentageScore])
+  @@map("exam_attempts")
+}
+
+enum ExamType {
+  PRACTICE
+  MOCK_EXAM
+  FINAL_EXAM
+  QUIZ
+}
+
+enum AttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  SUBMITTED
+  GRADED
+  EXPIRED
+}
+
+// 試験回答記録
+model ExamAnswer {
+  id               String    @id @default(cuid())
+  attemptId        String
+  questionId       String
+  
+  // 回答データ
+  answer           String    // user's answer
+  isCorrect        Boolean?
+  pointsEarned     Int       @default(0)
+  timeSpent        Int?      // seconds
+  
+  // メタデータ
+  answeredAt       DateTime? @default(now())
+  isSkipped        Boolean   @default(false)
+  isBookmarked     Boolean   @default(false)
+  confidence       Int?      // 1-5
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  attempt  ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question ExamQuestion @relation(fields: [questionId], references: [id])
+  
+  @@unique([attemptId, questionId])
+  @@index([attemptId, isCorrect])
+  @@index([questionId, isCorrect])
+  @@map("exam_answers")
+}
+
+// スタディグループ
+model StudyGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  
+  // 設定
+  isPublic    Boolean  @default(true)
+  maxMembers  Int      @default(50)
+  inviteCode  String?  @unique
+  
+  // メタデータ
+  tags        String[]
+  targetLevel ExperienceLevel @default(BEGINNER)
+  focusAreas  String[]        // knowledge areas
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  members     StudyGroupMember[]
+  discussions Discussion[]
+  
+  @@index([isPublic])
+  @@index([targetLevel])
+  @@index([createdAt])
+  @@fulltext([name, description])
+  @@map("study_groups")
+}
+
+// スタディグループメンバー
+model StudyGroupMember {
+  id          String    @id @default(cuid())
+  userId      String
+  groupId     String
+  role        GroupRole @default(MEMBER)
+  
+  joinedAt    DateTime  @default(now())
+  lastActiveAt DateTime?
+  
+  // リレーション
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+  @@index([groupId, role])
+  @@index([joinedAt])
+  @@map("study_group_members")
+}
+
+enum GroupRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+// ディスカッション
+model Discussion {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  groupId     String?
+  
+  // 分類
+  category    DiscussionCategory @default(GENERAL)
+  tags        String[]
+  
+  // メタデータ
+  isPinned    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  viewCount   Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  author   User         @relation(fields: [authorId], references: [id])
+  group    StudyGroup?  @relation(fields: [groupId], references: [id])
+  comments Comment[]
+  
+  @@index([groupId, category])
+  @@index([authorId])
+  @@index([isPinned, createdAt])
+  @@fulltext([title, content])
+  @@map("discussions")
+}
+
+enum DiscussionCategory {
+  GENERAL
+  QUESTION
+  STUDY_TIP
+  EXAM_EXPERIENCE
+  ITTO_DISCUSSION
+  PROCESS_CLARIFICATION
+}
+
+// コメント
+model Comment {
+  id           String @id @default(cuid())
+  content      String
+  authorId     String
+  discussionId String
+  parentId     String?
+  
+  // メタデータ
+  isEdited     Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  author     User       @relation(fields: [authorId], references: [id])
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  parent     Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[]  @relation("CommentReplies")
+  
+  @@index([discussionId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+// 学習ノート
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  userId    String
+  processId String?
+  
+  // 分類
+  category  NoteCategory @default(GENERAL)
+  tags      String[]
+  
+  // メタデータ
+  isPublic  Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, category])
+  @@index([processId])
+  @@index([isPublic, createdAt])
+  @@fulltext([title, content])
+  @@map("notes")
+}
+
+enum NoteCategory {
+  GENERAL
+  ITTO_SUMMARY
+  PROCESS_NOTES
+  EXAM_TIP
+  FORMULA
+  DEFINITION
+}
+
+// アチーブメントシステム
+model Achievement {
+  id          String @id @default(cuid())
+  name        String @unique
+  nameEn      String?
+  description String
+  
+  // アチーブメント設定
+  type        AchievementType
+  category    AchievementCategory
+  difficulty  Int @default(1) // 1-5
+  points      Int @default(10)
+  
+  // 条件
+  criteria    Json // achievement criteria
+  
+  // メタデータ
+  icon        String?
+  badgeUrl    String?
+  isActive    Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  userAchievements UserAchievement[]
+  
+  @@index([type, category])
+  @@index([isActive])
+  @@map("achievements")
+}
+
+enum AchievementType {
+  PROGRESS
+  STREAK
+  SCORE
+  TIME
+  COMPLETION
+  SOCIAL
+}
+
+enum AchievementCategory {
+  LEARNING
+  EXAM
+  COLLABORATION
+  MILESTONE
+  SPECIAL
+}
+
+// ユーザーアチーブメント
+model UserAchievement {
+  id            String @id @default(cuid())
+  userId        String
+  achievementId String
+  
+  unlockedAt    DateTime @default(now())
+  progress      Float    @default(1.0) // 0.0-1.0
+  
+  // リレーション
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+  @@index([userId, unlockedAt])
+  @@map("user_achievements")
+}
+
+// サブスクリプション管理
+model Subscription {
+  id        String           @id @default(cuid())
+  userId    String
+  plan      SubscriptionPlan
+  status    SubscriptionStatus @default(ACTIVE)
+  
+  // 期間
+  startDate DateTime
+  endDate   DateTime?
+  
+  // 支払い情報
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId       String?
+  
+  // 機能制限
+  features  Json // enabled features
+  limits    Json // usage limits
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // リレーション
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId])
+  @@index([status, endDate])
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  FREE
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  SUSPENDED
+}
+
+// システム設定
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+  
+  description String?
+  category    String?
+  isPublic    Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@map("system_configs")
+}
+
+// 監査ログ
+model AuditLog {
+  id       String    @id @default(cuid())
+  userId   String?
+  action   String
+  resource String
+  details  Json?
+  
+  // メタデータ
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([action, resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -20,17 +20,20 @@ data/
 ## Input Data Sources
 
 ### PMBOK Materials
+
 - **PMBOKガイド第７版（日本語訳）.pdf**: Official PMBOK Guide 7th Edition in Japanese
 - **アジャイル実務ガイド.pdf**: Agile Practice Guide
 - **knowledge_areas.md**: Knowledge areas documentation
 - **process_groups.md**: Process groups documentation
 
 ### Templates
+
 - **glossary_template.csv**: Template for glossary entries
 - **itto_relationship_template.json**: Template for ITTO relationships
 - **process_template.json**: Template for process definitions
 
 ### Sample Data
+
 - **sample_processes.json**: Example process data structure
 
 ## Usage Notes
