@@ -1,10 +1,18 @@
 # GitHub Actions ワークフロー一覧
 
-このディレクトリには、PMPLearningManagementプロジェクトのCI/CDパイプラインを構成するGitHub Actionsワークフローが含まれています。
+## 📋 概要
+
+このディレクトリには、PMPLearningManagementプロジェクトのCI/CDパイプラインを構成するGitHub Actionsワークフローが含まれています。すべてのワークフローは日本語チーム向けに標準化され、包括的なコメントと統一された命名規則に従っています。
+
+## 🎯 標準化について
+
+- **標準仕様書**: [`WORKFLOW_STANDARDS.md`](WORKFLOW_STANDARDS.md) - 包括的な標準仕様とガイドライン
+- **テンプレート**: [`00-template-workflow.yml`](00-template-workflow.yml) - 新規ワークフロー作成用テンプレート  
+- **実装サマリー**: [`IMPLEMENTATION_SUMMARY.md`](IMPLEMENTATION_SUMMARY.md) - 標準化の成果と結果
 
 ## 📦 デプロイメント関連
 
-### deploy.yml - GitHub Pages デプロイメント & PWA検証
+### deploy.yml - 📦 本番デプロイメント & PWA検証 ⭐ 標準化済み
 
 - **目的**: アプリケーションをGitHub Pagesにデプロイし、PWA要件の検証とパフォーマンス監視を実行
 - **実行**: mainブランチへのプッシュ時、プルリクエスト時

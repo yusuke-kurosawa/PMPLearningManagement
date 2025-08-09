@@ -41,9 +41,14 @@ env:
   NODE_VERSION: '18'
 
 jobs:
-  # PR Info and Labeling
+  # PR基本情報の収集とサイズ分析
   pr-info:
-    name: 🏷️ PR情報収集とラベリング
+    name: 🏷️ PR基本情報収集とサイズ分析
+    # 🎯 目的: PRのサイズとタイプを分析してラベルを自動付与
+    # ⏱️ 推定時間: 1-2分
+    # 🔧 主要処理: ファイル変更数分析、PR情報抽出、ラベル自動付与
+    # 📋 成果物: サイズラベル、タイプラベル
+    # ⚠️ 注意点: ドラフトPRは除外される
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     
