@@ -55,7 +55,9 @@
     "idd:status": "git log --oneline -10 | while read line; do if echo \"$line\" | grep -qE '#[0-9]+'; then echo \"✓ $line\"; else echo \"✗ $line\"; fi; done",
     "idd:report": "node scripts/issue-report-generator.js",
     "idd:metrics": "node scripts/issue-kpi-analyzer.js",
-    "idd:quality": "node scripts/issue-quality-checker.js"
+    "idd:quality": "node scripts/issue-quality-checker.js",
+    "docs:sync": "node .github/scripts/docs-sync-validator.js",
+    "docs:sync:auto": "node .github/scripts/docs-sync-validator.js && echo '✅ 同期チェック完了。問題がある場合は .claude-sync-instruction.md を確認してください。'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

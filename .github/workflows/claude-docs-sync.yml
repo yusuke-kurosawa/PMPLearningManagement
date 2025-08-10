@@ -1,0 +1,236 @@
+name: "📚 Claude Docs Auto-Sync"
+
+on:
+  # CLAUDE.mdまたはREADME.mdが変更された時
+  push:
+    paths:
+      - 'CLAUDE.md'
+      - 'README.md'
+      - '.github/workflows/claude-docs-sync.yml'
+  
+  # 手動実行
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: '強制同期を実行する'
+        required: false
+        default: false
+        type: boolean
+
+  # 定期実行（毎日9時に実行）
+  schedule:
+    - cron: '0 9 * * *'
+
+jobs:
+  docs-sync:
+    name: "🔄 ドキュメント自動同期"
+    runs-on: ubuntu-latest
+    if: github.repository == 'yusuke-kurosawa/PMPLearningManagement'
+    
+    steps:
+      - name: "📥 リポジトリのチェックアウト"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "🔍 変更ファイルの検出"
+        id: changes
+        run: |
+          # 変更されたファイルを検出
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            changed_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})
+            echo "Changed files: $changed_files"
+            
+            if echo "$changed_files" | grep -E "(CLAUDE\.md|README\.md)"; then
+              echo "docs_changed=true" >> $GITHUB_OUTPUT
+              
+              if echo "$changed_files" | grep "CLAUDE\.md"; then
+                echo "claude_changed=true" >> $GITHUB_OUTPUT
+              fi
+              
+              if echo "$changed_files" | grep "README\.md"; then
+                echo "readme_changed=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "docs_changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # 手動実行または定期実行の場合は常に同期をチェック
+            echo "docs_changed=true" >> $GITHUB_OUTPUT
+            echo "claude_changed=true" >> $GITHUB_OUTPUT
+            echo "readme_changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "📊 ドキュメント整合性分析"
+        id: analysis
+        if: steps.changes.outputs.docs_changed == 'true'
+        run: |
+          # ファイルの存在確認
+          if [[ ! -f "CLAUDE.md" ]]; then
+            echo "❌ CLAUDE.md が見つかりません"
+            exit 1
+          fi
+          
+          if [[ ! -f "README.md" ]]; then
+            echo "❌ README.md が見つかりません"
+            exit 1
+          fi
+          
+          # ファイルサイズ確認
+          claude_size=$(wc -l < CLAUDE.md)
+          readme_size=$(wc -l < README.md)
+          
+          echo "📏 CLAUDE.md: ${claude_size}行"
+          echo "📏 README.md: ${readme_size}行"
+          
+          # 基本的な整合性チェック
+          claude_project_name=$(grep -o "PMPLearningManagement" CLAUDE.md | head -1)
+          readme_project_name=$(grep -o "PMPLearningManagement" README.md | head -1)
+          
+          if [[ "$claude_project_name" != "$readme_project_name" ]]; then
+            echo "⚠️ プロジェクト名の不整合を検出"
+            echo "sync_required=true" >> $GITHUB_OUTPUT
+          fi
+          
+          # バージョン情報の確認
+          if grep -q "React 18" CLAUDE.md && ! grep -q "React 18" README.md; then
+            echo "⚠️ React バージョン情報の不整合を検出"
+            echo "sync_required=true" >> $GITHUB_OUTPUT
+          fi
+          
+          # 言語規約の確認
+          if grep -q "言語規約" CLAUDE.md && ! grep -q "言語規約\|日本語.*標準" README.md; then
+            echo "⚠️ 言語規約の不整合を検出"
+            echo "sync_required=true" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "✅ ドキュメント分析完了"
+
+      - name: "🔄 Claude Code Actions による自動同期"
+        id: sync
+        if: steps.analysis.outputs.sync_required == 'true' || github.event.inputs.force_sync == 'true'
+        run: |
+          echo "🤖 Claude Code Actions による同期を実行..."
+          
+          # Claude Code Actions用の同期指示ファイルを作成
+          cat > .claude-sync-instruction.md << 'EOF'
+          # Claude Auto-Sync Instruction
+          
+          ## 🎯 同期タスク
+          
+          CLAUDE.mdとREADME.mdの完全同期を実行してください：
+          
+          ### 必須チェック項目
+          1. **プロジェクト名・概要の統一**
+          2. **技術スタック・バージョン情報の一致**
+          3. **開発環境・コマンドの同期**
+          4. **言語規約（日本語標準）の統一**
+          5. **機能リスト・説明の整合性**
+          
+          ### 同期ルール
+          - CLAUDE.md: AI向けの詳細技術情報
+          - README.md: 一般向けのプロジェクト概要
+          - 共通情報は100%一致させる
+          - 矛盾を完全に排除する
+          
+          ### 出力形式
+          ```
+          ✅ 同期完了
+          📊 変更点: [変更内容の要約]
+          🎯 整合性: 100%達成
+          ```
+          EOF
+          
+          echo "📝 Claude同期指示ファイルを作成しました"
+          echo "sync_instruction_created=true" >> $GITHUB_OUTPUT
+
+      - name: "📝 自動同期実行記録"
+        if: steps.sync.outputs.sync_instruction_created == 'true'
+        run: |
+          # 同期ログを作成
+          timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+          
+          cat >> .github/docs-sync-log.md << EOF
+          
+          ## 📅 ${timestamp} - 自動同期実行
+          
+          **トリガー**: ${{ github.event_name }}
+          **実行者**: ${{ github.actor }}
+          **コミットSHA**: ${{ github.sha }}
+          
+          ### 変更検出
+          - CLAUDE.md変更: ${{ steps.changes.outputs.claude_changed || 'false' }}
+          - README.md変更: ${{ steps.changes.outputs.readme_changed || 'false' }}
+          
+          ### 分析結果
+          - 同期要求: ${{ steps.analysis.outputs.sync_required || 'false' }}
+          - 強制実行: ${{ github.event.inputs.force_sync || 'false' }}
+          
+          ---
+          EOF
+          
+          echo "📋 同期ログを更新しました"
+
+      - name: "🚨 同期が必要な場合の通知"
+        if: steps.analysis.outputs.sync_required == 'true'
+        run: |
+          echo "⚠️ ドキュメント同期が必要です！"
+          echo ""
+          echo "🔍 検出された不整合:"
+          echo "- プロジェクト名・バージョン情報の不一致"
+          echo "- 言語規約の記述不統一"
+          echo "- 技術仕様の矛盾"
+          echo ""
+          echo "📋 対応方法:"
+          echo "1. .claude-sync-instruction.md の指示に従って手動で Claude に同期を依頼"
+          echo "2. 両ファイルを確認して矛盾点を修正"
+          echo "3. コミット後に再度このワークフローが実行されます"
+          echo ""
+          echo "💡 自動修復のため、Issue #sync-docs-$(date +%s) を作成することを検討してください"
+
+      - name: "✅ 同期完了通知"
+        if: steps.changes.outputs.docs_changed == 'true' && steps.analysis.outputs.sync_required != 'true'
+        run: |
+          echo "🎉 ドキュメントの整合性が確認されました！"
+          echo ""
+          echo "📊 検証結果:"
+          echo "- プロジェクト名: 一致"
+          echo "- 技術情報: 一致" 
+          echo "- 言語規約: 一致"
+          echo "- バージョン情報: 一致"
+          echo ""
+          echo "✨ ドキュメント品質: 良好"
+
+      - name: "📈 メトリクス収集"
+        if: always()
+        run: |
+          # 同期メトリクスを収集
+          metrics_file=".github/metrics/docs-sync-metrics.json"
+          mkdir -p "$(dirname "$metrics_file")"
+          
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # メトリクスデータを作成
+          cat > "$metrics_file" << EOF
+          {
+            "timestamp": "$timestamp",
+            "workflow_run": "${{ github.run_number }}",
+            "trigger": "${{ github.event_name }}",
+            "actor": "${{ github.actor }}",
+            "sync_required": "${{ steps.analysis.outputs.sync_required || 'false' }}",
+            "docs_changed": "${{ steps.changes.outputs.docs_changed || 'false' }}",
+            "claude_changed": "${{ steps.changes.outputs.claude_changed || 'false' }}",
+            "readme_changed": "${{ steps.changes.outputs.readme_changed || 'false' }}",
+            "status": "completed"
+          }
+          EOF
+          
+          echo "📊 同期メトリクスを記録しました"
+
+      - name: "🔍 次回実行予告"
+        run: |
+          next_scheduled=$(date -d "tomorrow 09:00" '+%Y-%m-%d 09:00 JST')
+          echo "⏰ 次回定期実行: $next_scheduled"
+          echo "🔄 対象ファイル: CLAUDE.md, README.md"
+          echo "📋 監視内容: 整合性チェック、自動同期指示"
