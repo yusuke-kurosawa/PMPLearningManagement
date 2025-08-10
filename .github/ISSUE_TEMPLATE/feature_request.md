@@ -1,8 +1,8 @@
 ---
-name: Feature Request
-about: Suggest a new feature for PMPLearningManagement
+name: 機能要求
+about: PMPラーニングマネジメントの新しい機能を提案してください
 title: '[FEATURE] '
-labels: 'enhancement, idd-required'
+labels: '✨ 種類:新機能, 📋 優先度:中, 🆕 状況:未着手'
 assignees: ''
 ---
 
@@ -30,6 +30,27 @@ assignees: ''
 ## 📸 Mockups / Examples
 <!-- If applicable, add mockups, diagrams, or examples -->
 
+## 🏷️ ラベル設定ガイド
+<!-- 適切なラベルを設定してください -->
+**機能の種類**:
+- ✨ 新機能: 完全に新しい機能の追加
+- 🔧 改善: 既存機能の強化・使いやすさ向上
+
+**優先度の設定**:
+- 🔥 高: ユーザー体験に大きな影響
+- 📋 中: 通常の機能追加（デフォルト）
+- 📌 低: あると便利な機能
+- 💭 検討: 将来的な検討事項
+
+**関連領域**（該当する場合追加）:
+- 🎨 UI/UX, ⚛️ フロントエンド, 🔧 バックエンド
+- 📱 モバイル, 📖 学習機能, 📊 視覚化
+- 🛠️ DevOps, 🔐 認証・認可, 🤖 AI/ML
+
+**特別なラベル**（必要に応じて）:
+- 🌟 初心者歓迎, 👡 ヘルプ募集, 💡 アイデア募集
+- ⚠️ 破壊的変更（既存機能への影響あり）
+
 ## 🏷️ IDD Tracking
 <!-- DO NOT REMOVE - Required for IDD compliance -->
 - [ ] This issue will be referenced in all related commits
@@ -40,4 +61,14 @@ assignees: ''
 <!-- Add any other context about the feature request here -->
 
 ---
-*This issue template ensures IDD (Issue-Driven Development) compliance. All commits related to this feature must reference this issue number.*
+
+## 📋 チェックリスト
+- [ ] 機能の目的・価値が明確に記載されている
+- [ ] 具体的な受入条件がリストされている
+- [ ] 適切な優先度ラベルを設定済み
+- [ ] 関連する領域ラベルを追加済み
+- [ ] 必要に応じてモックアップや例を添付済み
+
+*このテンプレートは Issue-Driven Development (IDD) 準拠です。この機能に関連するコミットは必ずこのIssue番号を参照してください。*
+
+**ラベル運用ガイド**: [ラベル管理ガイド](.github/LABEL_MANAGEMENT_GUIDE.md)

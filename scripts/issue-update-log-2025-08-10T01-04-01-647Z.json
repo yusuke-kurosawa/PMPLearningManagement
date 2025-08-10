@@ -1,0 +1,781 @@
+[
+  {
+    "issue": 67,
+    "title": "[FEATURE] Automated Testing 1754786403",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 65,
+    "title": "[VERIFICATION] Claude AI Response After API Key Setup",
+    "oldLabels": [],
+    "newLabels": [
+      "area:backend",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 64,
+    "title": "[テスト] 翻訳ワークフロー動作確認",
+    "oldLabels": [],
+    "newLabels": [
+      "type:test",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 63,
+    "title": "[Test] Translation Workflow Test",
+    "oldLabels": [],
+    "newLabels": [
+      "type:test",
+      "priority:low",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 61,
+    "title": "Add real-time collaboration features",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 60,
+    "title": "Navigation menu not responsive on mobile devices",
+    "oldLabels": [],
+    "newLabels": [
+      "area:mobile",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 59,
+    "title": "[TEST] Claude Code Analysis Request",
+    "oldLabels": [],
+    "newLabels": [
+      "type:test",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 58,
+    "title": "[TEST] Claude AI Basic Response Test",
+    "oldLabels": [],
+    "newLabels": [
+      "type:test",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 57,
+    "title": "[SPIKE] Security Architecture & Compliance Framework Implementation",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "status:triage",
+      "area:security",
+      "priority:medium",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 56,
+    "title": "[SPIKE] Advanced Analytics Dashboard Architecture & Performance Optimization",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "status:triage",
+      "area:performance",
+      "priority:medium",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 55,
+    "title": "[SPIKE] Mentorship Matching Algorithm & Community Platform Architecture",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "status:triage",
+      "priority:medium",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 54,
+    "title": "[SPIKE] Project Simulation Engine Architecture & Real-time Scenario Processing",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "status:triage",
+      "priority:medium",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 53,
+    "title": "[SPIKE] AI Coaching System Architecture & LLM Integration Strategy",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "status:triage",
+      "priority:medium",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 52,
+    "title": "Epic: UI/UX改善とレイアウトコンポーネント強化",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "area:ui",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 51,
+    "title": "Epic: 監視・ヘルスチェック・メトリクス実装",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 50,
+    "title": "Epic: セキュリティ強化とコンプライアンス実装",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "area:security",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 49,
+    "title": "Epic: パフォーマンス最適化とバンドルサイズ削減",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "area:performance",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 48,
+    "title": "Epic: CI/CDパイプラインとインフラ自動化",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "area:devops",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 47,
+    "title": "Epic: 包括的テストフレームワークの実装",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "type:test",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 46,
+    "title": "Epic: モバイル・PWA最適化とレスポンシブデザイン実装",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "area:mobile",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 45,
+    "title": "Epic: 認証・認可システムの完全実装",
+    "oldLabels": [],
+    "newLabels": [
+      "epic",
+      "size:xl",
+      "priority:medium",
+      "status:ready"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 44,
+    "title": "[Accessibility] Voice Reading & Audio Learning Features",
+    "oldLabels": [],
+    "newLabels": [
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 43,
+    "title": "[Feature] Gamification System - Learning Motivation & Engagement",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 42,
+    "title": "[Feature] Advanced Data Visualization Suite - Interactive Analytics",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 41,
+    "title": "[Feature] Real-time Sync Functionality - Multi-device Experience",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 40,
+    "title": "[Infrastructure] API Backend Implementation - Scalable Data Architecture",
+    "oldLabels": [],
+    "newLabels": [
+      "area:backend",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 39,
+    "title": "[Tech] State Management Library Integration - Zustand Implementation",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 38,
+    "title": "[Tech Debt] TypeScript Migration - Comprehensive Type Safety Implementation",
+    "oldLabels": [],
+    "newLabels": [
+      "area:frontend",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 37,
+    "title": "[Feature] Continuous Learning Dashboard - Post-Certification Value Tracking",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 36,
+    "title": "[Feature] PMBOK 7th Edition Support - Principles-Based Framework",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m",
+      "help-wanted"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 35,
+    "title": "[Feature] Career Services Integration - Job Matching & Salary Tools",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 34,
+    "title": "[UX] Advanced User Settings and Personalization Options",
+    "oldLabels": [],
+    "newLabels": [
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 33,
+    "title": "[UX] Intelligent Notification System with Preferences",
+    "oldLabels": [],
+    "newLabels": [
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 32,
+    "title": "[UX] Dark Mode Theme Implementation with System Preference",
+    "oldLabels": [],
+    "newLabels": [
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 31,
+    "title": "[UX] Comprehensive Accessibility Improvements (WCAG 2.1 AA)",
+    "oldLabels": [],
+    "newLabels": [
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 30,
+    "title": "[UX] Enhanced Onboarding Experience with Interactive Tutorial",
+    "oldLabels": [],
+    "newLabels": [
+      "area:ui",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 29,
+    "title": "[Feature] Customizable Learning Dashboard with Widgets",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 28,
+    "title": "[Feature] Multi-language Support and Internationalization",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m",
+      "help-wanted"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 27,
+    "title": "[Feature] Native Mobile App Development (iOS/Android)",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:mobile",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 26,
+    "title": "[Feature] Complete Offline Mode with Background Sync",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:l"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 25,
+    "title": "[Feature] Customizable Learning Dashboard with Widgets",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 24,
+    "title": "[Performance] Database Query Optimization and Indexing",
+    "oldLabels": [],
+    "newLabels": [
+      "area:backend",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 23,
+    "title": "[Performance] Bundle Size Reduction and Optimization",
+    "oldLabels": [],
+    "newLabels": [
+      "area:performance",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 22,
+    "title": "[Performance] Comprehensive Image Optimization Pipeline",
+    "oldLabels": [],
+    "newLabels": [
+      "area:performance",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 21,
+    "title": "[Performance] Initial Load Time Optimization (<1s target)",
+    "oldLabels": [],
+    "newLabels": [
+      "area:performance",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 20,
+    "title": "[AI] Intelligent Study Assistant Chatbot Integration",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 19,
+    "title": "[AI] Predictive Exam Score Modeling and Success Probability",
+    "oldLabels": [],
+    "newLabels": [
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 18,
+    "title": "[AI] Intelligent Weakness Analysis and Improvement System",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 17,
+    "title": "[AI] Personalized Content Recommendations Engine",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 16,
+    "title": "[AI] Adaptive Learning Path Generation with Machine Learning",
+    "oldLabels": [],
+    "newLabels": [
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 15,
+    "title": "[Security] Fine-grained Access Control and RBAC Enhancement",
+    "oldLabels": [],
+    "newLabels": [
+      "area:security",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 13,
+    "title": "[Security] Comprehensive Audit Logging System",
+    "oldLabels": [],
+    "newLabels": [
+      "area:security",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 12,
+    "title": "[Security] Extended Data Encryption Implementation",
+    "oldLabels": [],
+    "newLabels": [
+      "area:security",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 11,
+    "title": "[Security] Implement Two-Factor Authentication (2FA)",
+    "oldLabels": [],
+    "newLabels": [
+      "area:security",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 10,
+    "title": "コラボレーション機能の追加",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 9,
+    "title": "PWAオフラインサポートの実装",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 8,
+    "title": "ダークモードとカスタマイズ機能",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 7,
+    "title": "スマート検索機能の実装",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 6,
+    "title": "視覚化オプションの強化",
+    "oldLabels": [],
+    "newLabels": [
+      "area:visualization",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 5,
+    "title": "PMBOK第7版への対応",
+    "oldLabels": [],
+    "newLabels": [
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 4,
+    "title": "データのインポート/エクスポート機能",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 3,
+    "title": "PMP模擬試験機能の実装",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 2,
+    "title": "フラッシュカードによるインタラクティブ学習モード",
+    "oldLabels": [],
+    "newLabels": [
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  },
+  {
+    "issue": 1,
+    "title": "学習進捗トラッキング機能の実装",
+    "oldLabels": [],
+    "newLabels": [
+      "type:feature",
+      "area:learning",
+      "priority:medium",
+      "status:ready",
+      "size:m"
+    ],
+    "status": "updated"
+  }
+]

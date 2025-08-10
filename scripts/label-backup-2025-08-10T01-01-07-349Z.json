@@ -1,0 +1,380 @@
+[
+  {
+    "id": 9084997037,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINrQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%90%9B%20%E7%A8%AE%E9%A1%9E:%E3%83%90%E3%82%B0",
+    "name": "🐛 種類:バグ",
+    "color": "d73a4a",
+    "default": false,
+    "description": "システムの不具合・異常動作の報告"
+  },
+  {
+    "id": 9084997043,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINsw",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9C%A8%20%E7%A8%AE%E9%A1%9E:%E6%96%B0%E6%A9%9F%E8%83%BD",
+    "name": "✨ 種類:新機能",
+    "color": "0e8a16",
+    "default": false,
+    "description": "新しい機能の追加要求"
+  },
+  {
+    "id": 9084997048,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINuA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%9A%20%E7%A8%AE%E9%A1%9E:%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88",
+    "name": "📚 種類:ドキュメント",
+    "color": "0075ca",
+    "default": false,
+    "description": "ドキュメントの追加・更新"
+  },
+  {
+    "id": 9084997044,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINtA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%A7%20%E7%A8%AE%E9%A1%9E:%E6%94%B9%E5%96%84",
+    "name": "🔧 種類:改善",
+    "color": "1d76db",
+    "default": false,
+    "description": "既存機能の改善・強化"
+  },
+  {
+    "id": 9084997064,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINyA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%8F%97%EF%B8%8F%20%E7%A8%AE%E9%A1%9E:%E3%83%AA%E3%83%95%E3%82%A1%E3%82%AF%E3%82%BF%E3%83%AA%E3%83%B3%E3%82%B0",
+    "name": "🏗️ 種類:リファクタリング",
+    "color": "5319e7",
+    "default": false,
+    "description": "コードの構造改善・技術的負債解消"
+  },
+  {
+    "id": 9084997065,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYINyQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%92%20%E7%A8%AE%E9%A1%9E:%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3",
+    "name": "🔒 種類:セキュリティ",
+    "color": "b60205",
+    "default": false,
+    "description": "セキュリティ関連の問題・対応"
+  },
+  {
+    "id": 9084997076,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN1A",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9A%A1%20%E7%A8%AE%E9%A1%9E:%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9",
+    "name": "⚡ 種類:パフォーマンス",
+    "color": "fbca04",
+    "default": false,
+    "description": "パフォーマンスの最適化"
+  },
+  {
+    "id": 9084997094,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN5g",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%A7%AA%20%E7%A8%AE%E9%A1%9E:%E3%83%86%E3%82%B9%E3%83%88",
+    "name": "🧪 種類:テスト",
+    "color": "f9d0c4",
+    "default": false,
+    "description": "テストの追加・修正・改善"
+  },
+  {
+    "id": 9084997116,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN_A",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%8B%20%E5%84%AA%E5%85%88%E5%BA%A6:%E4%B8%AD",
+    "name": "📋 優先度:中",
+    "color": "fbca04",
+    "default": false,
+    "description": "通常の優先度（デフォルト）"
+  },
+  {
+    "id": 9084997115,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN-w",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%A5%20%E5%84%AA%E5%85%88%E5%BA%A6:%E9%AB%98",
+    "name": "🔥 優先度:高",
+    "color": "d93f0b",
+    "default": false,
+    "description": "ユーザー体験に重大な影響"
+  },
+  {
+    "id": 9084997107,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN8w",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%9A%A8%20%E5%84%AA%E5%85%88%E5%BA%A6:%E7%B7%8A%E6%80%A5",
+    "name": "🚨 優先度:緊急",
+    "color": "b60205",
+    "default": false,
+    "description": "本番環境停止・重大な機能障害"
+  },
+  {
+    "id": 9084997118,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN_g",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%92%AD%20%E5%84%AA%E5%85%88%E5%BA%A6:%E6%A4%9C%E8%A8%8E",
+    "name": "💭 優先度:検討",
+    "color": "c5def5",
+    "default": false,
+    "description": "将来的な検討事項"
+  },
+  {
+    "id": 9084997117,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIN_Q",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%8C%20%E5%84%AA%E5%85%88%E5%BA%A6:%E4%BD%8E",
+    "name": "📌 優先度:低",
+    "color": "0e8a16",
+    "default": false,
+    "description": "時間があるときに対応"
+  },
+  {
+    "id": 9084997129,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOCQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%86%95%20%E7%8A%B6%E6%B3%81:%E6%9C%AA%E7%9D%80%E6%89%8B",
+    "name": "🆕 状況:未着手",
+    "color": "ededed",
+    "default": false,
+    "description": "まだ作業が開始されていない"
+  },
+  {
+    "id": 9084997142,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOFg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%8D%20%E7%8A%B6%E6%B3%81:%E8%AA%BF%E6%9F%BB%E4%B8%AD",
+    "name": "🔍 状況:調査中",
+    "color": "d4c5f9",
+    "default": false,
+    "description": "問題の調査・分析中"
+  },
+  {
+    "id": 9084997148,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOHA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%9A%80%20%E7%8A%B6%E6%B3%81:%E4%BD%9C%E6%A5%AD%E4%B8%AD",
+    "name": "🚀 状況:作業中",
+    "color": "0052cc",
+    "default": false,
+    "description": "現在作業を進行中"
+  },
+  {
+    "id": 9084997179,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOOw",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%8F%B8%EF%B8%8F%20%E7%8A%B6%E6%B3%81:%E4%BF%9D%E7%95%99",
+    "name": "⏸️ 状況:保留",
+    "color": "fef2c0",
+    "default": false,
+    "description": "他の作業完了待ち・外部要因で保留"
+  },
+  {
+    "id": 9084997156,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOJA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%91%80%20%E7%8A%B6%E6%B3%81:%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC%E5%BE%85%E3%81%A1",
+    "name": "👀 状況:レビュー待ち",
+    "color": "fbca04",
+    "default": false,
+    "description": "コードレビュー・確認待ち"
+  },
+  {
+    "id": 9084997197,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOTQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9C%85%20%E7%8A%B6%E6%B3%81:%E5%AE%8C%E4%BA%86",
+    "name": "✅ 状況:完了",
+    "color": "0e8a16",
+    "default": false,
+    "description": "作業が完了済み"
+  },
+  {
+    "id": 9084997228,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIObA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9D%8C%20%E7%8A%B6%E6%B3%81:%E5%AF%BE%E5%BF%9C%E4%B8%8D%E8%A6%81",
+    "name": "❌ 状況:対応不要",
+    "color": "ffffff",
+    "default": false,
+    "description": "対応しない・重複・無効"
+  },
+  {
+    "id": 9084997231,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIObw",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%8E%A8%20%E9%A0%98%E5%9F%9F:UI/UX",
+    "name": "🎨 領域:UI/UX",
+    "color": "bfd4f2",
+    "default": false,
+    "description": "ユーザーインターフェース・体験"
+  },
+  {
+    "id": 9084997250,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOgg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9A%9B%EF%B8%8F%20%E9%A0%98%E5%9F%9F:%E3%83%95%E3%83%AD%E3%83%B3%E3%83%88%E3%82%A8%E3%83%B3%E3%83%89",
+    "name": "⚛️ 領域:フロントエンド",
+    "color": "61dafb",
+    "default": false,
+    "description": "React・TypeScript・フロントエンド全般"
+  },
+  {
+    "id": 9084997254,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOhg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%A7%20%E9%A0%98%E5%9F%9F:%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89",
+    "name": "🔧 領域:バックエンド",
+    "color": "d4c5f9",
+    "default": false,
+    "description": "API・サーバーサイド・データベース"
+  },
+  {
+    "id": 9084997294,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOrg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%96%20%E9%A0%98%E5%9F%9F:%E5%AD%A6%E7%BF%92%E6%A9%9F%E8%83%BD",
+    "name": "📖 領域:学習機能",
+    "color": "c2e0c6",
+    "default": false,
+    "description": "学習コンテンツ・進捗管理・試験機能"
+  },
+  {
+    "id": 9084997262,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOjg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%B1%20%E9%A0%98%E5%9F%9F:%E3%83%A2%E3%83%90%E3%82%A4%E3%83%AB",
+    "name": "📱 領域:モバイル",
+    "color": "f9d0c4",
+    "default": false,
+    "description": "モバイル対応・PWA機能"
+  },
+  {
+    "id": 9084997285,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOpQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%A4%96%20%E9%A0%98%E5%9F%9F:AI/ML",
+    "name": "🤖 領域:AI/ML",
+    "color": "3e4b9e",
+    "default": false,
+    "description": "AI機能・機械学習・自動化"
+  },
+  {
+    "id": 9084997307,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOuw",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%8A%20%E9%A0%98%E5%9F%9F:%E8%A6%96%E8%A6%9A%E5%8C%96",
+    "name": "📊 領域:視覚化",
+    "color": "ff6b6b",
+    "default": false,
+    "description": "D3.js・グラフ・チャート・ダイアグラム"
+  },
+  {
+    "id": 9084997314,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOwg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%9B%A0%EF%B8%8F%20%E9%A0%98%E5%9F%9F:DevOps",
+    "name": "🛠️ 領域:DevOps",
+    "color": "28a745",
+    "default": false,
+    "description": "CI/CD・デプロイ・インフラ・監視"
+  },
+  {
+    "id": 9084997324,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOzA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%90%20%E9%A0%98%E5%9F%9F:%E8%AA%8D%E8%A8%BC%E3%83%BB%E8%AA%8D%E5%8F%AF",
+    "name": "🔐 領域:認証・認可",
+    "color": "6f42c1",
+    "default": false,
+    "description": "ユーザー認証・権限管理・セキュリティ"
+  },
+  {
+    "id": 9084997325,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIOzQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%9A%80%20WF:CI/CD",
+    "name": "🚀 WF:CI/CD",
+    "color": "28a745",
+    "default": false,
+    "description": "継続的インテグレーション・デプロイメント"
+  },
+  {
+    "id": 9084997346,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIO4g",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%A6%20WF:%E4%BE%9D%E5%AD%98%E9%96%A2%E4%BF%82",
+    "name": "📦 WF:依存関係",
+    "color": "0366d6",
+    "default": false,
+    "description": "パッケージ更新・依存関係管理"
+  },
+  {
+    "id": 9084997335,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIO1w",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%A7%AA%20WF:%E3%83%86%E3%82%B9%E3%83%88%E8%87%AA%E5%8B%95%E5%8C%96",
+    "name": "🧪 WF:テスト自動化",
+    "color": "f093fb",
+    "default": false,
+    "description": "自動テスト・品質保証"
+  },
+  {
+    "id": 9084997357,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIO7Q",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%8A%20WF:%E7%9B%A3%E8%A6%96%E3%83%BB%E5%88%86%E6%9E%90",
+    "name": "📊 WF:監視・分析",
+    "color": "ff7518",
+    "default": false,
+    "description": "モニタリング・メトリクス・分析"
+  },
+  {
+    "id": 9084997386,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPCg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%93%8B%20WF:%E3%82%BF%E3%82%B9%E3%82%AF%E7%AE%A1%E7%90%86",
+    "name": "📋 WF:タスク管理",
+    "color": "d1ecf1",
+    "default": false,
+    "description": "プロジェクト管理・スプリント計画"
+  },
+  {
+    "id": 9084997369,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIO-Q",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%8D%20WF:%E3%82%B3%E3%83%BC%E3%83%89%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC",
+    "name": "🔍 WF:コードレビュー",
+    "color": "5319e7",
+    "default": false,
+    "description": "コードレビュープロセス・品質管理"
+  },
+  {
+    "id": 9084997422,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPLg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%86%98%20%E3%83%98%E3%83%AB%E3%83%97%E5%8B%9F%E9%9B%86",
+    "name": "🆘 ヘルプ募集",
+    "color": "008672",
+    "default": false,
+    "description": "外部からの支援・知見が必要"
+  },
+  {
+    "id": 9084997406,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPHg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%8C%9F%20%E5%88%9D%E5%BF%83%E8%80%85%E6%AD%93%E8%BF%8E",
+    "name": "🌟 初心者歓迎",
+    "color": "7057ff",
+    "default": false,
+    "description": "プロジェクト初参加者に適した課題"
+  },
+  {
+    "id": 9084997455,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPTw",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9A%A0%EF%B8%8F%20%E7%A0%B4%E5%A3%8A%E7%9A%84%E5%A4%89%E6%9B%B4",
+    "name": "⚠️ 破壊的変更",
+    "color": "d93f0b",
+    "default": false,
+    "description": "既存機能に影響する変更"
+  },
+  {
+    "id": 9084997432,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPOA",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%92%A1%20%E3%82%A2%E3%82%A4%E3%83%87%E3%82%A2%E5%8B%9F%E9%9B%86",
+    "name": "💡 アイデア募集",
+    "color": "ffa8cc",
+    "default": false,
+    "description": "解決方法・実装方式のアイデア募集"
+  },
+  {
+    "id": 9084997485,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPbQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%AD%90%20Claude%E5%88%86%E6%9E%90%E6%B8%88%E3%81%BF",
+    "name": "⭐ Claude分析済み",
+    "color": "e1f5fe",
+    "default": false,
+    "description": "AI(Claude)によって分析・レビュー済み"
+  },
+  {
+    "id": 9084997478,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPZg",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%E2%9D%93%20%E8%B3%AA%E5%95%8F",
+    "name": "❓ 質問",
+    "color": "d876e3",
+    "default": false,
+    "description": "使い方・実装に関する質問"
+  },
+  {
+    "id": 9084997469,
+    "node_id": "LA_kwDOPHIvnc8AAAACHYIPXQ",
+    "url": "https://api.github.com/repos/yusuke-kurosawa/PMPLearningManagement/labels/%F0%9F%94%84%20%E9%87%8D%E8%A4%87",
+    "name": "🔄 重複",
+    "color": "cfd3d7",
+    "default": false,
+    "description": "既存のIssue・PRと重複"
+  }
+]

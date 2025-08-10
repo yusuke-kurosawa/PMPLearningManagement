@@ -1,0 +1,187 @@
+[
+  {
+    "color": "d73a4a",
+    "description": "バグ・不具合の報告",
+    "name": "type:bug"
+  },
+  {
+    "color": "1d76db",
+    "description": "既存機能の改善",
+    "name": "type:enhancement"
+  },
+  {
+    "color": "0e8a16",
+    "description": "新機能の要求",
+    "name": "type:feature"
+  },
+  {
+    "color": "0075ca",
+    "description": "ドキュメントの更新",
+    "name": "type:docs"
+  },
+  {
+    "color": "5319e7",
+    "description": "リファクタリング",
+    "name": "type:refactor"
+  },
+  {
+    "color": "fef2c0",
+    "description": "メンテナンス作業",
+    "name": "type:chore"
+  },
+  {
+    "color": "f9d0c4",
+    "description": "テストに関する作業",
+    "name": "type:test"
+  },
+  {
+    "color": "b60205",
+    "description": "本番停止・重大な機能障害",
+    "name": "priority:critical"
+  },
+  {
+    "color": "d93f0b",
+    "description": "ユーザー体験に重大な影響",
+    "name": "priority:high"
+  },
+  {
+    "color": "bfd4f2",
+    "description": "UI/UXに関する作業",
+    "name": "area:ui"
+  },
+  {
+    "color": "0e8a16",
+    "description": "時間があるときに対応",
+    "name": "priority:low"
+  },
+  {
+    "color": "fbca04",
+    "description": "通常の優先度",
+    "name": "priority:medium"
+  },
+  {
+    "color": "d4c5f9",
+    "description": "バックエンド（API/Database）",
+    "name": "area:backend"
+  },
+  {
+    "color": "61dafb",
+    "description": "フロントエンド（React/TypeScript）",
+    "name": "area:frontend"
+  },
+  {
+    "color": "c2e0c6",
+    "description": "学習機能・コンテンツ",
+    "name": "area:learning"
+  },
+  {
+    "color": "f9d0c4",
+    "description": "モバイル対応・PWA",
+    "name": "area:mobile"
+  },
+  {
+    "color": "28a745",
+    "description": "CI/CD・インフラ・デプロイ",
+    "name": "area:devops"
+  },
+  {
+    "color": "ff6b6b",
+    "description": "視覚化・グラフ機能",
+    "name": "area:visualization"
+  },
+  {
+    "color": "ff7518",
+    "description": "パフォーマンス最適化",
+    "name": "area:performance"
+  },
+  {
+    "color": "6f42c1",
+    "description": "セキュリティ・認証",
+    "name": "area:security"
+  },
+  {
+    "color": "d4c5f9",
+    "description": "トリアージ・調査が必要",
+    "name": "status:triage"
+  },
+  {
+    "color": "0052cc",
+    "description": "作業中",
+    "name": "status:in-progress"
+  },
+  {
+    "color": "0e8a16",
+    "description": "作業開始可能",
+    "name": "status:ready"
+  },
+  {
+    "color": "fef2c0",
+    "description": "ブロック・保留中",
+    "name": "status:blocked"
+  },
+  {
+    "color": "fbca04",
+    "description": "レビュー待ち",
+    "name": "status:review"
+  },
+  {
+    "color": "9cb9d4",
+    "description": "中（1-2日程度）",
+    "name": "size:m"
+  },
+  {
+    "color": "bfd4f2",
+    "description": "小（半日程度）",
+    "name": "size:s"
+  },
+  {
+    "color": "c5def5",
+    "description": "非常に小さい（1-2時間）",
+    "name": "size:xs"
+  },
+  {
+    "color": "7b9fc1",
+    "description": "大（1週間程度）",
+    "name": "size:l"
+  },
+  {
+    "color": "5a84ae",
+    "description": "非常に大きい（複数週間）",
+    "name": "size:xl"
+  },
+  {
+    "color": "5319e7",
+    "description": "複数のissueを含む大きな機能",
+    "name": "epic"
+  },
+  {
+    "color": "7057ff",
+    "description": "新規貢献者に適した課題",
+    "name": "good-first-issue"
+  },
+  {
+    "color": "008672",
+    "description": "外部からの支援が必要",
+    "name": "help-wanted"
+  },
+  {
+    "color": "d876e3",
+    "description": "質問・ヘルプ要求",
+    "name": "question"
+  },
+  {
+    "color": "cfd3d7",
+    "description": "重複のissue",
+    "name": "duplicate"
+  },
+  {
+    "color": "ffffff",
+    "description": "対応しない",
+    "name": "wontfix"
+  },
+  {
+    "color": "d93f0b",
+    "description": "破壊的変更",
+    "name": "breaking-change"
+  }
+]

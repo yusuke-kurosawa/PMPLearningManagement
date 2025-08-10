@@ -1,0 +1,288 @@
+name: 📊 Daily Status Update
+
+on:
+  schedule:
+    # 毎日 09:00 UTC (JST 18:00) に実行
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update even if no changes detected'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  daily-status-update:
+    name: 🔄 Update Project Status
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 100  # 過去の履歴も取得
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📊 Analyze project changes
+        id: analyze
+        run: |
+          # 過去1日間の変更を分析
+          DAY_AGO=$(date -d '1 days ago' '+%Y-%m-%d')
+          COMMITS=$(git log --since="$DAY_AGO" --oneline --no-merges | wc -l)
+          FILES_CHANGED=$(git log --since="$DAY_AGO" --name-only --pretty=format: | sort -u | grep -v '^$' | wc -l)
+          
+          # Issue/PR統計
+          ISSUES_CLOSED=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues?state=closed&since=${DAY_AGO}T00:00:00Z" \
+            | jq length)
+          
+          PRS_MERGED=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&since=${DAY_AGO}T00:00:00Z" \
+            | jq '[.[] | select(.merged_at != null)] | length')
+          
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+          echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
+          echo "issues_closed=$ISSUES_CLOSED" >> $GITHUB_OUTPUT
+          echo "prs_merged=$PRS_MERGED" >> $GITHUB_OUTPUT
+          echo "day_ago=$DAY_AGO" >> $GITHUB_OUTPUT
+          
+          # 変更がない場合のチェック（force_updateがtrueでない場合）
+          if [[ "$COMMITS" -eq 0 && "${{ github.event.inputs.force_update }}" != "true" ]]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📁 Analyze codebase structure
+        id: codebase
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          # コンポーネント数を数える
+          COMPONENTS=$(find src/components -name "*.jsx" -o -name "*.tsx" | wc -l)
+          SERVICES=$(find src/services -name "*.js" -o -name "*.ts" | wc -l)
+          HOOKS=$(find src/hooks -name "*.js" -o -name "*.ts" | wc -l)
+          
+          # テストファイル数
+          TEST_FILES=$(find . -name "*.test.*" -o -name "*.spec.*" | wc -l)
+          
+          # 総行数（JSX/TSX/JS/TSファイル）
+          TOTAL_LINES=$(find src -name "*.jsx" -o -name "*.tsx" -o -name "*.js" -o -name "*.ts" \
+            | xargs wc -l | tail -1 | awk '{print $1}')
+          
+          echo "components=$COMPONENTS" >> $GITHUB_OUTPUT
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          echo "hooks=$HOOKS" >> $GITHUB_OUTPUT
+          echo "test_files=$TEST_FILES" >> $GITHUB_OUTPUT
+          echo "total_lines=$TOTAL_LINES" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Check implementation status
+        id: implementation
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          # 各機能の実装状況をファイル存在で確認
+          declare -A features
+          features[
+            "auth_system"]="src/components/auth/AuthPage.jsx"
+          features["pwa_support"]="src/lib/pwa.ts"
+          features["dark_mode"]="src/contexts/ThemeContext.jsx"
+          features["mobile_optimized"]="src/components/mobile/"
+          features["visualization_hub"]="src/components/visualizations/VisualizationHub.jsx"
+          features["mock_exam"]="src/components/learning/MockExam.jsx"
+          features["flashcards"]="src/components/learning/FlashCardLearning.jsx"
+          features["progress_dashboard"]="src/components/learning/LearningProgressDashboard.jsx"
+          
+          implemented=0
+          total=${#features[@]}
+          
+          status_json="{"
+          for feature in "${!features[@]}"; do
+            if [[ -e "${features[$feature]}" ]]; then
+              status="✅"
+              ((implemented++))
+            else
+              status="❌"
+            fi
+            status_json="$status_json\"$feature\":\"$status\","
+          done
+          status_json="${status_json%,}}"
+          
+          completion_rate=$((implemented * 100 / total))
+          
+          echo "features_json=$status_json" >> $GITHUB_OUTPUT
+          echo "completion_rate=$completion_rate" >> $GITHUB_OUTPUT
+          echo "implemented_count=$implemented" >> $GITHUB_OUTPUT
+          echo "total_features=$total" >> $GITHUB_OUTPUT
+
+      - name: 📝 Update CLAUDE.md
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          # CLAUDE.mdのメトリクス部分を更新
+          current_date=$(date '+%Y-%m-%d')
+          
+          # メトリクス更新用のセクションを作成
+          cat > temp_metrics.md << EOF
+          ## 📈 メトリクス（自動更新: $current_date）
+
+          ### 開発統計
+          - 📁 コンポーネント数: ${{ steps.codebase.outputs.components }}個
+          - 🔧 サービス数: ${{ steps.codebase.outputs.services }}個  
+          - 🎣 カスタムフック数: ${{ steps.codebase.outputs.hooks }}個
+          - 🧪 テストファイル数: ${{ steps.codebase.outputs.test_files }}個
+          - 📊 総コード行数: ${{ steps.codebase.outputs.total_lines }}行
+
+          ### 日次活動（過去24時間）
+          - 📝 コミット数: ${{ steps.analyze.outputs.commits }}回
+          - 📁 変更ファイル数: ${{ steps.analyze.outputs.files_changed }}個
+          - ✅ 解決Issue数: ${{ steps.analyze.outputs.issues_closed }}個
+          - 🔄 マージPR数: ${{ steps.analyze.outputs.prs_merged }}個
+
+          ### 機能実装状況
+          - 🎯 全体進捗: ${{ steps.implementation.outputs.completion_rate }}% (${{ steps.implementation.outputs.implemented_count }}/${{ steps.implementation.outputs.total_features }})
+          EOF
+          
+          # CLAUDE.mdの既存メトリクスセクションを更新（存在する場合）
+          if grep -q "## 📈 メトリクス" CLAUDE.md; then
+            # 既存のメトリクスセクションを置換
+            awk '
+            /## 📈 メトリクス/{
+              print "## 📈 メトリクス（自動更新: '$current_date'）"
+              while(getline line < "temp_metrics.md") {
+                if(line !~ /^## 📈 メトリクス/) print line
+              }
+              skip=1
+            }
+            skip && /^## [^#]/{skip=0}
+            !skip {print}
+            ' CLAUDE.md > CLAUDE_updated.md
+            mv CLAUDE_updated.md CLAUDE.md
+          else
+            # メトリクスセクションが存在しない場合は末尾に追加
+            echo "" >> CLAUDE.md
+            cat temp_metrics.md >> CLAUDE.md
+          fi
+          
+          rm -f temp_metrics.md
+
+      - name: 📝 Update project-status.md
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          current_date=$(date '+%Y-%m-%d')
+          
+          # project-status.mdを更新
+          sed -i "s/\*最終更新: [0-9-]*\*/\*最終更新: $current_date\*/" .claude/context/project-status.md
+          
+          # メトリクスセクションを追加/更新
+          cat >> .claude/context/project-status.md << EOF
+
+## 📊 日次統計 (自動更新)
+
+**更新日**: $current_date  
+**コミット**: ${{ steps.analyze.outputs.commits }}回 | **ファイル変更**: ${{ steps.analyze.outputs.files_changed }}個  
+**Issue解決**: ${{ steps.analyze.outputs.issues_closed }}個 | **PR**: ${{ steps.analyze.outputs.prs_merged }}個  
+**実装進捗**: ${{ steps.implementation.outputs.completion_rate }}% (${{ steps.implementation.outputs.implemented_count }}/${{ steps.implementation.outputs.total_features }})
+EOF
+
+      - name: 🔄 Create summary report
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          current_date=$(date '+%Y-%m-%d')
+          
+          cat > daily_report.md << EOF
+          # 📊 日次プロジェクトレポート - $current_date
+
+          ## 🎯 概要
+          過去24時間（${{ steps.analyze.outputs.day_ago }}〜$current_date）のプロジェクト活動統計
+
+          ## 📈 開発活動
+          - **コミット数**: ${{ steps.analyze.outputs.commits }}回
+          - **変更ファイル数**: ${{ steps.analyze.outputs.files_changed }}個
+          - **Issue解決数**: ${{ steps.analyze.outputs.issues_closed }}個  
+          - **PR処理数**: ${{ steps.analyze.outputs.prs_merged }}個
+
+          ## 📁 コードベース統計
+          - **コンポーネント**: ${{ steps.codebase.outputs.components }}個
+          - **サービス**: ${{ steps.codebase.outputs.services }}個
+          - **フック**: ${{ steps.codebase.outputs.hooks }}個
+          - **テスト**: ${{ steps.codebase.outputs.test_files }}個
+          - **総行数**: ${{ steps.codebase.outputs.total_lines }}行
+
+          ## 🎯 実装進捗
+          **完了率**: ${{ steps.implementation.outputs.completion_rate }}%（${{ steps.implementation.outputs.implemented_count }}/${{ steps.implementation.outputs.total_features }}機能）
+
+          ---
+          *このレポートは自動生成されました*
+          EOF
+
+      - name: 💾 Commit changes
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 変更があるかチェック
+          if git diff --quiet; then
+            echo "変更なし - コミットをスキップ"
+            echo "skip_pr=true" >> $GITHUB_ENV
+          else
+            git add CLAUDE.md .claude/context/project-status.md
+            git commit -m "docs: 📊 日次ステータス自動更新
+
+            📈 開発統計:
+            - コミット: ${{ steps.analyze.outputs.commits }}回
+            - ファイル変更: ${{ steps.analyze.outputs.files_changed }}個
+            - Issue解決: ${{ steps.analyze.outputs.issues_closed }}個
+            - PR処理: ${{ steps.analyze.outputs.prs_merged }}個
+            
+            🎯 実装進捗: ${{ steps.implementation.outputs.completion_rate }}%
+            
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            echo "skip_pr=false" >> $GITHUB_ENV
+          fi
+
+      - name: 📤 Push changes
+        if: steps.analyze.outputs.has_changes == 'true' && env.skip_pr == 'false'
+        run: |
+          git push origin main
+
+      - name: 📋 Create Issue for manual review (if needed)
+        if: steps.analyze.outputs.has_changes == 'true' && env.skip_pr == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dailyReport = require('fs').readFileSync('daily_report.md', 'utf8');
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 日次レビュー - ${new Date().toISOString().split('T')[0]}`,
+              body: `${dailyReport}
+
+              ## ✅ アクション項目
+              - [ ] 実装進捗の確認
+              - [ ] 未解決Issueの優先度見直し  
+              - [ ] パフォーマンス指標の確認
+              - [ ] セキュリティ監査結果の確認
+
+              このIssueは日次レビュー用に自動作成されました。適切な担当者をアサインして、必要な対応を行ってください。`,
+              labels: ['📊 metrics', '🔄 daily-review', '🤖 automated']
+            });
+
+      - name: 📢 Summary
+        if: always()
+        run: |
+          if [ "${{ steps.analyze.outputs.has_changes }}" = "true" ]; then
+            echo "✅ 日次更新が正常に完了しました"
+            echo "📊 コミット数: ${{ steps.analyze.outputs.commits }}"
+            echo "🎯 実装進捗: ${{ steps.implementation.outputs.completion_rate }}%"
+          else
+            echo "ℹ️ 今日は変更がないため、更新をスキップしました"
+          fi

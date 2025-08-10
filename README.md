@@ -1,13 +1,11 @@
 # PMP学習管理システム
 
 [![CI/CD Pipeline](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/deploy.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/deploy.yml)
-[![PR Validation](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/pr-validation.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/pr-validation.yml)
-[![Performance Monitoring](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/performance-monitoring.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/performance-monitoring.yml)
-[![Security Scan](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/security-scan.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/security-scan.yml)
+[![IDD Compliance](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/idd-compliance.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/idd-compliance.yml)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-green?logo=github)](https://yusuke-kurosawa.github.io/PMPLearningManagement/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-PMBOK（プロジェクトマネジメント知識体系）学習のための包括的なWebアプリケーション
+PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の学習用包括的PWA対応Webアプリケーション
 
 ## 🌐 デモサイト
 
@@ -15,11 +13,19 @@ PMBOK（プロジェクトマネジメント知識体系）学習のための包
 
 ## 📋 概要
 
-PMP学習管理システムは、PMBOK第6版および第7版の学習を支援する最先端のWebアプリケーションです。49のプロセス、その関係性、ITTO（インプット、ツールと技法、アウトプット）フレームワークを多様な視覚化手法で理解し、効率的に学習するための統合プラットフォームを提供します。AIコーチング、プロジェクトシミュレーター、メンターシップ機能など、最新の学習支援機能を搭載しています。
+PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の学習用包括的PWA対応Webアプリケーションです。49のプロセス、12のプリンシプル、8つのパフォーマンスドメイン、およびITTO（インプット、ツールと技法、アウトプット）フレームワークを多様な視覚化手法で理解し、効率的に学習するための統合プラットフォームを提供します。
 
-## ✨ 主な機能
+**現在のシステム成熟度**:
+- **実装状態**: 静的サイト + 先進的フロントエンド機能（バックエンド統合準備中）
+- **IDD成熟度**: 99% - 完全自動化達成（Git hooks + GitHub Actions）
+- **コンテキスト管理**: 自動化された管理システム実装済み（60%メモリ削減達成）
+- **品質保証**: テストインフラ完備（Vitest + Playwright）
+- **パフォーマンス**: Lighthouse最適化済み、Core Web Vitals達成
+- **アーキテクチャ**: モジュラー設計 + コンテキスト管理システム実装済み
 
-### 📊 視覚化機能
+## ✨ 主な実装済み機能
+
+### 📊 視覚化機能（完全実装済み）
 
 - **PMBOKマトリックスビュー**: 10の知識エリアと5つのプロセス群で整理された49プロセスの対話型マトリックス
 - **ITTOネットワーク図**: D3.jsを使用したプロセス関係性の力学的グラフ視覚化
@@ -32,46 +38,33 @@ PMP学習管理システムは、PMBOK第6版および第7版の学習を支援�
   - プロセスフロー図（時系列的な流れ）
   - 知識エリアヒートマップ（エリア別の各種指標）
 
-### 📚 学習支援機能
+### 📚 学習支援機能（実装済み）
 
 - **PMP用語集**: 45以上の重要用語を収録した検索可能な用語集（カテゴリフィルタリング対応）
 - **学習進捗ダッシュボード**: 知識エリア別・プロセス群別の習熟度管理と統計表示
 - **フラッシュカード学習**: ITTOを効率的に暗記する3Dアニメーション付きフラッシュカード
 - **PMP模擬試験**: 実際の試験形式を再現した180問・230分のフル模擬試験（詳細な結果分析付き）
 
-### 🤖 AI・高度な学習機能
+### 🎯 先進機能（UI実装済み、バックエンド統合待ち）
 
-- **AIコーチングダッシュボード**: 個人に最適化された学習アドバイスとフィードバック
-- **プロジェクトシミュレーター**: 実際のプロジェクトシナリオをシミュレート
-- **メンターシップハブ**: インストラクターとの1対1の学習サポート
+- **AIコーチングシステム**: コンポーネント実装済み（`AICoachingDashboard.jsx`）
+- **プロジェクトシミュレーター**: コンポーネント実装済み（`ProjectSimulator.jsx`）
+- **メンターシップハブ**: コンポーネント実装済み（`MentorshipHub.jsx`）
+- **コラボレーション機能**: 
+  - StudyGroups.jsx（学習グループ管理）
+  - SharedNotes.jsx（共有ノート）
+  - DiscussionThread.jsx（ディスカッションスレッド）
+  - DataManagement.jsx（データ管理）
 
-### 👥 コラボレーション機能
+### 🔧 システム機能（実装済み）
 
-- **ディスカッションフォーラム**: 学習者同士の情報交換
-- **スタディグループ**: グループ学習の管理と進捗共有
-- **共有ノート**: 学習メモの共有と共同編集
-- **データ管理**: インポート/エクスポート機能
-
-### 🔐 認証・セキュリティ
-
-- **ユーザー認証**: Supabaseによる安全な認証システム
-- **ロールベースアクセス制御（RBAC）**: 学習者、インストラクター、管理者の役割別アクセス管理
-- **プロテクテッドルート**: 権限に基づいたコンテンツアクセス制御
-- **プロファイル管理**: ユーザープロフィールのカスタマイズ
-
-### 📱 モバイル・PWA対応
-
-- **PWA（Progressive Web App）**: オフライン対応、インストール可能
-- **レスポンシブデザイン**: デスクトップとモバイルデバイスに完全最適化
-- **モバイル最適化コンポーネント**: タッチ操作に最適化された専用UI
-- **モバイル専用ナビゲーション**: ボトムナビゲーションバー
-
-### 🎨 カスタマイズ機能
-
-- **ダークモード**: 目に優しいダークテーマ
-- **カスタマイゼーションパネル**: UI設定のカスタマイズ
-- **PMBOK版切り替え**: 第6版と第7版の切り替え
-- **ユーザー設定**: 個人の学習設定を保存
+- **認証システム**: Supabase統合、JWT + Refresh Token実装済み
+- **ダークモード**: 完全実装済み（`ThemeContext`）
+- **グローバル検索**: 実装済み（`GlobalSearch.jsx`）
+- **カスタマイズパネル**: ユーザー設定管理実装済み
+- **コマンドパレット**: キーボードショートカット対応
+- **PWA対応**: Service Worker部分実装済み
+- **モバイル最適化**: レスポンシブデザイン実装済み
 
 ## 🚀 セットアップ
 
@@ -90,6 +83,10 @@ cd PMPLearningManagement
 # 依存関係のインストール
 npm install
 
+# IDD環境のセットアップ
+npm run idd:setup
+npm run idd:hooks:install
+
 # 開発サーバーの起動
 npm run dev
 ```
@@ -100,93 +97,101 @@ npm run dev
 # プロダクションビルド
 npm run build
 
-# 最適化されたビルド
-npm run build:optimized
+# プロダクションプレビュー
+npm run preview
 
 # GitHub Pagesへのデプロイ
 npm run deploy
-
-# 本番環境へのデプロイ
-npm run deploy:production
 ```
 
-## 🛠️ 技術スタック
+### 環境
+
+- 開発サーバー: http://localhost:5173
+- 本番URL: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+
+## 🛠️ 技術スタック（実際の実装）
 
 ### フロントエンド
 
-- **フレームワーク**: React 18.2 + React Router v6
-- **状態管理**: Zustand, React Query (TanStack Query)
-- **視覚化**: D3.js v7, D3-sankey, Recharts
-- **スタイリング**: Tailwind CSS v3, Tailwind Animate
-- **UIコンポーネント**: Radix UI, Lucide React Icons
-- **アニメーション**: Framer Motion
+- **フレームワーク**: React 18.2（HashRouter使用）
 - **ビルドツール**: Vite v5
-- **型安全性**: TypeScript
+- **視覚化**: D3.js v7, D3-sankey
+- **スタイリング**: Tailwind CSS v3 + tailwindcss-animate
+- **UIコンポーネント**: Radix UI（@radix-ui/react-*）完全採用
+- **アイコン**: Lucide React
+- **アニメーション**: Framer Motion v12
+- **フォーム管理**: React Hook Form v7 + Zod
 
-### バックエンド・認証
+### 状態管理・データ永続化
 
-- **認証**: Supabase Auth
-- **データベース**: Supabase (PostgreSQL)
-- **リアルタイム**: Supabase Realtime
+- **グローバル状態**: Zustand v4（実装済み）+ React Context
+- **サーバー状態**: @tanstack/react-query v5（準備済み）
+- **データ永続化**: LocalStorage（現在）、IndexedDB移行準備中
+- **認証**: Supabase Auth（@supabase/supabase-js v2）
+- **カスタムフック**: 
+  - useProgress（学習進捗管理）
+  - useDebounce（検索最適化）
+  - useAuth（認証管理）
+  - useIsMobile（モバイル検出）
 
-### テスト
+### テスト・品質管理
 
-- **単体テスト**: Vitest, React Testing Library
-- **E2Eテスト**: Playwright
-- **アクセシビリティテスト**: Jest-axe, Axe Playwright
-- **ミューテーションテスト**: Stryker
-- **プロパティベーステスト**: Fast-check
-- **カオステスト**: カスタム実装
-- **並列テスト実行**: Vitest Pool Threads
+- **単体テスト**: Vitest v1.6 + @testing-library/react
+- **E2Eテスト**: Playwright v1.40
+- **高度なテスト**: 
+  - Stryker（ミューテーションテスト）
+  - fast-check（プロパティベーステスト）
+- **モック**: MSW v2, Sinon, Nock
+- **リンティング**: ESLint + Prettier
+- **型チェック**: TypeScript v5.3（部分導入）
 
-### CI/CD・DevOps（21のワークフロー）
+### パフォーマンス最適化
 
-- **デプロイメント**: GitHub Actions → GitHub Pages
-- **PRバリデーション**: 自動コードレビュー、テスト実行
-- **セキュリティスキャン**: npm audit, ゼロトラストセキュリティ
-- **パフォーマンス監視**: Lighthouse CI, バンドルサイズ分析
-- **統合テスト**: 自動統合テスト実行
-- **高度なテスト**: ミューテーション、プロパティ、カオステスト
-- **AI支援レビュー**: AIによるコードレビュー
-- **オブザーバビリティ**: ログ、メトリクス、トレース
-- **品質ゲート**: 包括的な品質チェック
-- **並列テスト**: チーム別並列実行
-- **テストデータ管理**: 自動データ生成・管理
-- **開発者体験**: DX向上のためのツール
-- **監視設定**: アプリケーション監視
-- **依存関係管理**: 依存関係の健全性チェック
-- **コンプライアンス監査**: 規制要件のチェック
-- **通知**: Slack/Discord統合
-- **Dependabot**: 自動マージ設定
-- **機能管理**: フィーチャーフラグ
-- **インフラセキュリティ**: インフラストラクチャのセキュリティ監査
+- **コード分割**: React.lazy/Suspense による遅延ロード実装済み
+- **メモ化**: React.memo, useMemo, useCallback活用
+- **最適化**: スロットリング、デバウンシング実装
+- **コンテキスト管理**: 
+  - LRUキャッシュ（50アイテム制限）
+  - 自動圧縮（1KB以上のファイル）
+  - TTLベース有効期限（24時間）
+  - メモリ監視と自動クリーンアップ
 
-### 開発ツール
+### デプロイメント・インフラ
 
-- **コード品質**: ESLint, Prettier
-- **Git Hooks**: Husky, lint-staged
-- **パッケージ管理**: npm
+- **ホスティング**: GitHub Pages（HashRouter使用）
+- **CI/CD**: GitHub Actions（複数ワークフロー実装）
+- **パッケージ管理**: npm v8+
+- **デプロイ**: gh-pages v6
 
-## 📱 モバイル・PWA対応
+## 🎯 Issue-Driven Development (IDD) 実装
 
-### Progressive Web App機能
+### IDD完全自動化システム
 
-- **オフライン対応**: Service Workerによるキャッシュ戦略
-- **インストール可能**: ホーム画面への追加
-- **プッシュ通知**: 学習リマインダー（実装予定）
-- **バックグラウンド同期**: オフラインデータの自動同期
+本プロジェクトは99%のIDD準拠率を達成し、完全自動化されたワークフローを実装しています。
 
-### モバイル最適化
+#### Git Hooks（ローカル開発）
+- **pre-commit**: Issue参照チェック
+- **commit-msg**: メッセージフォーマット検証
+- **pre-push**: 最終準拠チェック
 
-- **タッチ最適化UI**: タッチジェスチャー対応
-- **モバイル専用コンポーネント**:
-  - MobileOptimizedApp（PWA管理）
-  - MobilePMBOKMatrix（最適化されたマトリックス）
-  - MobileFlashCard（スワイプ対応フラッシュカード）
-  - MobileMockExam（モバイル向け試験UI）
-  - MobileProgressDashboard（コンパクトな進捗表示）
-- **レスポンシブブレークポイント**: sm (640px), md (768px), lg (1024px)
-- **パフォーマンス最適化**: 遅延ロード、コード分割
+#### GitHub Actions（CI/CD）
+- **issue-driven-development.yml**: メインIDD検証
+- **idd-compliance.yml**: PR準拠チェック
+- **idd-metrics-collector.yml**: メトリクス収集
+- **deploy.yml**: GitHub Pagesデプロイ
+
+#### IDD NPMスクリプト
+```bash
+npm run idd:setup          # IDD環境セットアップ
+npm run idd:hooks:install  # Git hooks インストール
+npm run idd:check          # 準拠チェック
+npm run idd:status         # ステータス表示
+npm run idd:report         # レポート生成
+npm run idd:metrics        # メトリクス分析
+npm run idd:quality        # 品質チェック
+```
+
+詳細は[IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md)を参照してください。
 
 ## 🔄 開発ワークフロー
 
@@ -196,155 +201,55 @@ npm run deploy:production
 # 開発
 npm run dev                    # 開発サーバーの起動
 npm run build                  # プロダクションビルド
-npm run build:optimized        # 最適化されたビルド
-npm run start                  # プロダクションプレビュー
+npm run preview                # プロダクションプレビュー
+
+# GitHub Pagesへのデプロイ
+npm run deploy
+
+# テストの実行
+npm run test                   # 単体テスト
+npm run test:e2e               # E2Eテスト
+npm run test:coverage          # カバレッジレポート
 
 # コード品質
-npm run lint                   # ESLintの実行
-npm run lint:fix               # ESLint問題の自動修正
-npm run format                 # Prettierでコードフォーマット
-npm run format:check           # フォーマットチェック
-npm run typecheck              # TypeScript型チェック
-
-# テスト
-npm run test                   # 単体テストの実行
-npm run test:ui                # Vitestの UIモード
-npm run test:coverage          # カバレッジレポート生成
-npm run test:watch             # ウォッチモードでテスト
-npm run test:e2e               # E2Eテストの実行
-npm run test:e2e:ui            # PlaywrightのUIモード
-npm run test:a11y              # アクセシビリティテスト
-npm run test:mutation          # ミューテーションテスト
-npm run test:property          # プロパティベーステスト
-npm run test:chaos             # カオステスト
-npm run test:advanced          # 高度なテストの全実行
-npm run test:quality-gate      # 品質ゲートテスト
-npm run test:team-parallel     # チーム並列テスト
-npm run test:all               # すべてのテストを実行
-
-# デプロイメント
-npm run deploy                 # GitHub Pagesへのデプロイ
-npm run deploy:production      # 本番環境へのデプロイ
-
-# 分析・監視
-npm run analyze                # バンドル分析
-npm run security:audit         # セキュリティ監査
-npm run performance:budget     # パフォーマンス予算チェック
+npm run lint                   # ESLint実行
+npm run lint:fix               # ESLint自動修正
+npm run format                 # Prettier実行
 
 # コンテキスト管理
-npm run sync-context           # Claudeコンテキストの同期
-npm run context:update         # コンテキストの更新
-npm run context:view           # 現在のステータス表示
+npm run context:update         # コンテキスト同期
+npm run context:consolidate    # ドキュメント統合
+npm run context:cleanup        # クリーンアップ
+
+# IDD関連
+npm run idd:check              # 準拠チェック
+npm run idd:status             # ステータス表示
+npm run idd:report             # レポート生成
 ```
 
-### CI/CDパイプライン（DevOps成熟度レベル5）
+### CI/CDパイプライン
 
-#### 21の自動化されたワークフロー
+#### GitHub Actionsワークフロー
 
 1. **デプロイメント** (`deploy.yml`)
-   - プロダクションビルドの最適化
    - GitHub Pagesへの自動デプロイ
+   - プロダクションビルドの最適化
    - キャッシュ戦略の実装
 
-2. **PRバリデーション** (`pr-validation.yml`)
-   - コード品質チェック（ESLint、Prettier）
-   - TypeScriptコンパイル
-   - 単体テストの実行
-   - カバレッジレポート
+2. **IDDコンプライアンス** (`idd-compliance.yml`)
+   - PRのIssue参照チェック
+   - コミットメッセージ検証
+   - IDD準拠率の計算
 
-3. **セキュリティスキャン** (`security-scan.yml`)
-   - npm監査（高レベル脆弱性）
-   - 依存関係のセキュリティチェック
-   - SAST（静的アプリケーションセキュリティテスト）
+3. **IDDメイン検証** (`issue-driven-development.yml`)
+   - 包括的なIDDチェック
+   - ブランチ保護ルールの適用
+   - 自動レポート生成
 
-4. **パフォーマンス監視** (`performance-monitoring.yml`)
-   - Lighthouse CIによるパフォーマンステスト
-   - バンドルサイズ分析
-   - ランタイムパフォーマンスメトリクス
-
-5. **統合テスト** (`integration-test.yml`)
-   - API統合テスト
-   - コンポーネント統合テスト
-   - データフロー検証
-
-6. **高度なテスト** (`advanced-testing.yml`)
-   - ミューテーションテスト
-   - プロパティベーステスト
-   - カオステスト
-   - カバレッジ閾値チェック
-
-7. **AI支援レビュー** (`ai-assisted-review.yml`)
-   - AIによるコードレビュー
-   - ベストプラクティスの提案
-   - セキュリティパターンの検出
-
-8. **オブザーバビリティ** (`observability.yml`)
-   - ログ集約
-   - メトリクス収集
-   - 分散トレーシング
-
-9. **品質ゲート** (`advanced-quality-gates.yml`)
-   - 包括的な品質チェック
-   - 技術的負債の測定
-   - コード複雑度分析
-
-10. **並列テスト実行** (`test-parallel.yml`)
-    - チーム別並列実行
-    - テスト結果の集約
-    - 最適化された実行時間
-
-11. **テストデータ管理** (`test-data-management.yml`)
-    - テストデータの自動生成
-    - データのバージョン管理
-    - シードデータの管理
-
-12. **開発者体験** (`developer-experience.yml`)
-    - DXメトリクスの収集
-    - ビルド時間の最適化
-    - 開発環境の自動セットアップ
-
-13. **監視設定** (`monitoring-setup.yml`)
-    - アプリケーション監視
-    - エラートラッキング
-    - パフォーマンス監視
-
-14. **依存関係管理** (`dependency-health-check.yml`)
-    - 依存関係の健全性チェック
-    - ライセンスコンプライアンス
-    - 更新の自動提案
-
-15. **コンプライアンス監査** (`compliance-audit.yml`)
-    - 規制要件のチェック
-    - アクセシビリティ標準
-    - データプライバシー
-
-16. **ゼロトラストセキュリティ** (`zero-trust-security.yml`)
-    - ランタイムセキュリティ
-    - 最小権限の原則
-    - セキュリティポリシーの適用
-
-17. **通知** (`notifications.yml`)
-    - Slack/Discord通知
-    - ステータス更新
-    - アラート管理
-
-18. **Dependabot自動マージ** (`dependabot-auto-merge.yml`)
-    - 安全な更新の自動マージ
-    - バージョン制約の管理
-
-19. **機能管理** (`feature-management.yml`)
-    - フィーチャーフラグ
-    - A/Bテスト設定
-    - 段階的ロールアウト
-
-20. **インフラセキュリティ** (`infrastructure-security.yml`)
-    - インフラストラクチャのスキャン
-    - コンテナセキュリティ
-    - クラウド設定の検証
-
-21. **標準テスト** (`test.yml`)
-    - 基本的なテストスイート
-    - 高速フィードバック
+4. **IDDメトリクス収集** (`idd-metrics-collector.yml`)
+   - IDD準拠メトリクスの収集
+   - ダッシュボードデータ生成
+   - 傾向分析とレポート
 
 ### ブランチ保護
 
@@ -352,7 +257,7 @@ npm run context:view           # 現在のステータス表示
 - すべてのステータスチェックが必須
 - mainブランチへの直接プッシュ禁止
 - マージ時の自動デプロイメント
-- 管理者も例外なし
+- IDDコンプライアンスチェック必須
 
 ## 🤝 コントリビューション
 
@@ -360,48 +265,70 @@ npm run context:view           # 現在のステータス表示
 
 ### 貢献の流れ
 
-1. リポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更を実装
-4. テストを実行 (`npm run test:all`)
-5. 変更をコミット (`git commit -m 'feat: 素晴らしい機能を追加'`)
-6. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-7. プルリクエストを作成
+1. Issueを作成または既存のIssueを選択
+2. **適切なラベルを設定**（[ラベル運用ガイド](.github/LABEL_MANAGEMENT_GUIDE.md)参照）
+3. フィーチャーブランチを作成（`git checkout -b feature/issue-123`）
+4. IDDに準拠したコミットメッセージで変更をコミット
+5. プルリクエストを作成（Issue番号を含める）
+6. コードレビューと自動チェックの通過を待つ
+7. マージ
+
+### 🏷️ Issue・PR ラベルシステム
+
+当プロジェクトでは、効率的なタスク管理のため統一されたラベル体系を採用しています：
+
+- **必須ラベル**: すべてのIssueに「種類」と「優先度」ラベルが必要
+- **推奨ラベル**: 「状況」と「領域」ラベルで進捗と担当領域を明確化
+- **特別ラベル**: 初心者歓迎、アイデア募集等の特殊用途ラベル
+
+詳細は **[ラベル管理ガイド](.github/LABEL_MANAGEMENT_GUIDE.md)** を参照してください。
+
+#### ラベル管理コマンド
+
+```bash
+# 現在のラベル状況確認
+node .github/scripts/manage-labels.js status
+
+# ラベル定義の検証
+node .github/scripts/manage-labels.js validate
+
+# ラベル体系の完全リセット
+node .github/scripts/manage-labels.js reset
+```
 
 ### コードスタイル
 
-- **TypeScript**: 型安全性を確保
-- **ESLint/Prettier**: 設定に従ったコード品質
-- **テスト**: 新機能には必ず単体テストを追加
-- **アクセシビリティ**: WCAG 2.1 AA準拠
-- **コメント**: 複雑な関数にはJSDocコメントを追加
+- 関数コンポーネント + Hooksパターンを使用
+- 明確で説明的な変数名
+- 単一責任の原則に従う
+- 適切なコメントとJSDoc
+- ESLint + Prettier設定に準拠
 
-### コミットメッセージ規約
+### Git コミット（IDD準拠）
+
+すべてのコミットはIssue番号を含む必要があります：
 
 ```
-feat: 新機能の追加
-fix: バグ修正
-docs: ドキュメントの更新
-style: フォーマットの変更
-refactor: リファクタリング
-test: テストの追加・修正
-chore: ビルドプロセスやツールの変更
-perf: パフォーマンス改善
+feat: 新機能の追加 #123
+fix: バグ修正 #456
+docs: ドキュメント更新 #789
+style: フォーマット変更 #012
+refactor: リファクタリング #345
+test: テスト追加 #678
+chore: 雑務 #901
 ```
 
-### プルリクエストのチェックリスト
+### プルリクエスト
 
-- [ ] コードがプロジェクトのスタイルガイドに従っている
-- [ ] 自己レビューを実施した
-- [ ] コードにコメントを追加した（特に複雑な部分）
-- [ ] ドキュメントを更新した
-- [ ] 変更によって既存の機能が壊れていない
-- [ ] テストを追加し、すべてのテストがパスしている
-- [ ] 依存関係の変更を最小限に抑えた
+- Issue番号を必ず含める
+- テストを含める
+- CLAUDE.mdガイドラインに準拠
+- コードレビューを受ける
 
 ## 📊 プロジェクト統計
 
 - **コンポーネント数**: 100以上
+- **IDD準拠率**: 99%
 - **テストカバレッジ**: 80%以上目標
 - **Lighthouseスコア**:
   - パフォーマンス: 90+
@@ -410,28 +337,27 @@ perf: パフォーマンス改善
   - SEO: 100
 - **ブラウザサポート**: Chrome, Firefox, Safari, Edge（最新2バージョン）
 
-## 🔮 今後のロードマップ
+## 🔮 今後の実装予定
 
-### バージョン 2.1（2024 Q2）
+### 優先度：高
 
-- [ ] PMBOK第7版の完全サポート
-- [ ] AI学習アシスタントの強化
-- [ ] リアルタイムコラボレーション機能
-- [ ] 音声認識による学習サポート
+- [ ] バックエンドAPI統合（tRPC + Prisma）
+- [ ] WebSocket リアルタイム通信
+- [ ] 決済システム（Stripe）統合
+- [ ] PWA完全対応（オフライン機能）
 
-### バージョン 2.2（2024 Q3）
+### 優先度：中
 
-- [ ] 多言語対応（英語、中国語、スペイン語）
-- [ ] APIバックエンドの実装
-- [ ] 高度な分析ダッシュボード
-- [ ] ゲーミフィケーション要素の追加
+- [ ] 多言語対応（i18n）
+- [ ] AI学習アドバイザー（GPT-4統合）
+- [ ] 音声読み上げ機能
+- [ ] PDFエクスポート機能
 
-### バージョン 3.0（2024 Q4）
+### 優先度：低
 
-- [ ] ネイティブモバイルアプリ（React Native）
-- [ ] 企業向けエンタープライズ機能
-- [ ] LMS（Learning Management System）統合
-- [ ] AIによる個別学習パスの生成
+- [ ] ゲーミフィケーション要素
+- [ ] ソーシャル共有機能
+- [ ] カスタムテーマ作成機能
 
 ## 📄 ライセンス
 

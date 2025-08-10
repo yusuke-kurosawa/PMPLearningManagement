@@ -47,6 +47,7 @@
     "context:view": "cat .claude/context/current-status.md",
     "context:consolidate": "node scripts/consolidate-docs.js",
     "context:cleanup": "npm run context:consolidate && rm -rf dist playwright-report test-results* *.log *.tsbuildinfo",
+    "status:update": "node scripts/update-project-status.js",
     "idd:setup": "bash scripts/setup-idd-automation.sh",
     "idd:hooks:install": "bash .github/hooks/install.sh",
     "idd:hooks:uninstall": "bash .github/hooks/uninstall.sh",
