@@ -1,0 +1,170 @@
+name: 📚 学習コンテンツ：教材の提案！
+description: PMBOKの学習コンテンツや教材の改善アイデアを提案しませんか？用語集、問題、解説などの学習資料を充実させましょう！
+title: "📚 [学習コンテンツ] "
+labels: ["T:📚 知識の伝道師", "A:📚 ナレッジシェア", "P:⭐ 標準"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎓 ようこそ、知識の伝道師！
+        
+        PMP学習のコンテンツをより良くしたいというあなたの想い、とても素晴らしいです！
+        あなたの経験や知識が、他の学習者の成長を助けてくれます。みんなで最高の学習資料を作り上げましょう！ 💫
+
+  - type: dropdown
+    id: content_type
+    attributes:
+      label: 🏷️ どんなコンテンツの提案ですか？
+      description: 改善したいコンテンツのタイプを選んでください
+      options:
+        - 📖 PMP用語集（用語の追加、解説改善）
+        - ❓ 模擬試験問題（新問題、解説改善）
+        - 🏆 フラッシュカード（ITTOデータ、解説改善）
+        - 📋 PMBOKプロセス情報（詳細、関連性）
+        - 📊 視覚化データ（グラフ、チャート）
+        - 📝 学習ガイド（効率的学習法、コツ）
+        - 🎆 実務例（ケーススタディ、体験談）
+        - 🌍 その他のアイデア
+    validations:
+      required: true
+
+  - type: textarea
+    id: content_description
+    attributes:
+      label: 🎡 提案するコンテンツ
+      description: 具体的にどんなコンテンツを提案しますか？
+      placeholder: |
+        例（用語集の場合）：
+        - 用語：「ステークホルダー・エンゲージメント」
+        - 定義：プロジェクトに影響を与える関係者と良好な関係を築き...
+        - カテゴリ：ステークホルダー管理
+    validations:
+      required: true
+
+  - type: textarea
+    id: why_needed
+    attributes:
+      label: 🤔 なぜこのコンテンツが必要ですか？
+      description: どんな問題やニーズを解決しますか？
+      placeholder: "例：現在の用語集にはPMBOK 7版の新しい用語が少なく、最新の試験対策に不安がある"
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_learners
+    attributes:
+      label: 🎯 どんな学習者に役立ちますか？
+      description: このコンテンツは主にどんな人へ向けていますか？
+      placeholder: |
+        例：
+        - PMP初学者（基礎用語を学びたい人）
+        - PMP受験直前の人（最新情報を知りたい人）
+        - 実務経験者（プロジェクト管理をより深く学びたい人）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: knowledge_area
+    attributes:
+      label: 📋 PMBOK知識エリア（関連する場合）
+      description: このコンテンツが関連する知識エリアを選んでください
+      options:
+        - 横断的（全体・一般的）
+        - プロジェクト統合管理
+        - プロジェクトスコープ管理
+        - プロジェクトスケジュール管理
+        - プロジェクトコスト管理
+        - プロジェクト品質管理
+        - プロジェクト資源管理
+        - プロジェクトコミュニケーション管理
+        - プロジェクトリスク管理
+        - プロジェクト調達管理
+        - プロジェクトステークホルダー管理
+        - PMBOK 7版パフォーマンスドメイン
+        - 関連なし
+    validations:
+      required: true
+
+  - type: textarea
+    id: content_examples
+    attributes:
+      label: 📝 コンテンツの具体例
+      description: |
+        可能であれば、実際のコンテンツの例やサンプルを書いてください。
+        用語集なら定義、問題なら全文、解説ならポイントなど。
+      placeholder: |
+        例（模擬試験問題の場合）：
+        問題：プロジェクトマネージャーがステークホルダー・エンゲージメント計画を...
+        A) ...
+        B) ...
+        正解：B
+        解説：ステークホルダー・エンゲージメントでは...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: data_sources
+    attributes:
+      label: 📚 情報源（該当するものをチェック）
+      description: このコンテンツの情報源を教えてください
+      options:
+        - label: PMBOK Guide 第6版
+        - label: PMBOK Guide 第7版
+        - label: PMP試験公式ガイド
+        - label: 実務経験・体験談
+        - label: PMI公式資料
+        - label: 书籍・教材
+        - label: オンラインコース
+        - label: 講師・研修の内容
+        - label: その他
+
+  - type: textarea
+    id: contribution_offer
+    attributes:
+      label: 🤝 貢献の申し出
+      description: このコンテンツ作成にどのように関わりたいですか？
+      placeholder: |
+        例：
+        - コンテンツの初版を作成したい
+        - レビューやフィードバックを提供したい
+        - 経験者としてアドバイスをしたい
+        - アイデアを出しただけ
+
+  - type: textarea
+    id: additional_notes
+    attributes:
+      label: 💡 その他のアイデア
+      description: |
+        他に伝えたいことやアイディアがあれば、何でも書いてください！
+        時間をかけてでも、みんなに役立つコンテンツを作りたいです。
+      placeholder: "例：ビジュアルを重視したい、音声や動画も添えたいなど"
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 似たようなコンテンツ提案がないか検索しました
+          required: true
+        - label: このコンテンツが他の学習者にも役立つと信じています
+          required: true
+        - label: PMBOKの正確な情報を提供し、学習者の成長をサポートしたいです！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎆 学習コンテンツの提案をありがとうございます！
+        
+        あなたの知識や経験が、PMPラーニングコミュニティの学習資料を豊かにしてくれます。
+        チームで内容を検討して、品質の高いコンテンツとして実装していきます！
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 📅 チームでコンテンツの精度と信頼性を確認
+        - 📦 実装方法とスケジュールを決定
+        - 🚀 コンテンツ作成開始のお知らせ
+        
+        **作成進捗を追いたい場合は、このIssueを "👀 Watch" してくださいね！**

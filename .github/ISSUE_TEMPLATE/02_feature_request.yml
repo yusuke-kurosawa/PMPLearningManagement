@@ -1,0 +1,151 @@
+name: ✨ アイデアマジシャン：新しい魔法を提案！
+description: 「こんな機能があったらいいなぁ」を実現しましょう！あなたのアイデアでPMP学習がもっと楽しくなります。
+title: "✨ [機能提案] "
+labels: ["T:✨ 新機能の魔法使い", "P:💡 アイデア", "S:🔍 調査中"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎆 ようこそ、アイデアマジシャン！
+        
+        素晴らしいアイデアをありがとうございます！あなたの想像力が、みんなのPMP学習をより良くしてくれます。
+        一緒に素晴らしい機能を作り上げていきましょう！ 🚀
+
+  - type: dropdown
+    id: feature_category
+    attributes:
+      label: 🏷️ どんなジャンルの機能ですか？
+      description: 一番近いカテゴリを選んでください
+      options:
+        - 📚 学習機能（フラッシュカード、模擬試験など）
+        - 📊 視覚化機能（グラフ、チャート、マップなど）
+        - 🚀 パフォーマンス改善（速度、レスポンシブ対応など）
+        - 🎨 UI/UX改善（デザイン、操作性など）
+        - 📱 モバイル機能（PWA、タッチ操作など）
+        - 🤝 コラボレーション機能（共有、チーム学習など）
+        - 📊 進捗管理機能（統計、ダッシュボードなど）
+        - 🌍 その他のアイデア
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_summary
+    attributes:
+      label: 🎡 機能の概要
+      description: どんな機能があったらいいですか？簡潔に説明してください。
+      placeholder: "例：フラッシュカードに音声読み上げ機能を追加して、耳でも学習できるようにしたい"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_solving
+    attributes:
+      label: 🔧 どんな問題を解決しますか？
+      description: 現在困っていることや、もっとこうだったらいいのにと感じることはありますか？
+      placeholder: "例：通勤中に音声で学習したいのに、スマホを見ながらだと集中できない"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: 💡 あなたのアイデア
+      description: 具体的にどんな機能や仕組みを想像していますか？
+      placeholder: |
+        例：
+        - フラッシュカードに「🔊 読み上げ」ボタンを追加
+        - Web Speech APIを使用してブラウザ純正機能で実装
+        - 音声速度や音程を調整可能に
+        - バックグラウンド再生にも対応
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_stories
+    attributes:
+      label: 📝 ユーザーストーリー
+      description: 「××として、○○したい」の形で書いてください
+      placeholder: |
+        例：
+        - PMP受験者として、通勤中に耳で学習したい
+        - 視覚障害を持つ学習者として、アクセシビリティを向上させたい
+        - 多忙な社会人として、隠し時間を有効活用したい
+      value: |
+        - ××として、○○したい
+        - 
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority_impact
+    attributes:
+      label: 👥 どのくらいの人に役立ちそうですか？
+      description: この機能が実装されたら、どのくらいの学習者が喜びそうですか？
+      options:
+        - 🌟 多くの人が求めている！（高需要）
+        - 😊 一部の人にとても役立つ（中需要）
+        - 🌱 あるとうれしい機能（低需要）
+        - 🎆 ニッチだけど面白いアイデア（実験的）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: implementation_ideas
+    attributes:
+      label: 🔨 実装のアイデア（知っている場合）
+      description: 技術的な知識がある場合はチェックしてください
+      options:
+        - label: 🎨 UI/UXデザインを考えられる
+        - label: ⚙️ フロントエンド実装を手伝える
+        - label: 🛠️ バックエンド実装を手伝える
+        - label: 🧪 テスト作成を手伝える
+        - label: 📄 ドキュメント作成を手伝える
+        - label: 💡 アイデアを出しただけ
+
+  - type: textarea
+    id: mockups_wireframes
+    attributes:
+      label: 📏 モックアップやワイヤーフレーム
+      description: |
+        手描きのスケッチやデジタルモックアップがあれば貼り付けてください！
+        ドラッグ&ドロップで簡単に添付できます。
+      placeholder: スケッチやモックアップをここにドロップしてください
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 🎆 こだわりやアイデア
+      description: |
+        他に伝えたいことがあれば、何でも書いてください！
+        細かいアイデアやこだわりも大歓迎です。
+      placeholder: "例：似たようなアプリを見たことがある、デザインのイメージがあるなど"
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 似たような機能提案がないか検索しました
+          required: true
+        - label: この機能が他の学習者にも役立つことを信じています
+          required: true
+        - label: PMPラーニングコミュニティの一員として、みんなでより良い学習体験を作りたいです！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## ✨ 素晴らしいアイデアをありがとうございます！
+        
+        あなたのクリエイティビティが PMPラーニングをより楽しく、より効果的にしてくれます。
+        チームで検討して、実現可能なものから優先的に開発していきます！
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 🗃️ チームで実現可能性を検討します
+        - 📋 優先度とスケジュールを決めます
+        - 🚀 開発開始のお知らせをします
+        
+        **この機能の進捗を追いたい場合は、"👀 Watch" ボタンをクリックしてください！**

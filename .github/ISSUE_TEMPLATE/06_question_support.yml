@@ -1,0 +1,167 @@
+name: ❓ サポート：質問・相談！
+description: わからないことがある？困っていることがある？気軽に質問してください！みんなで一緒に解決して、学習を楽しく進めましょう。
+title: "❓ [質問・相談] "
+labels: ["TM:💬 ディスカッション", "TM:🎓 メンター募集", "P:⭐ 標準"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎆 ようこそ、サポートヒーロー！
+        
+        質問や相談をしてくれてありがとうございます！どんな小さなことでも大歓迎です。
+        みんなで知識を共有して、一緒にPMP学習を成功させましょう！🚀
+        
+        **気軽にどんどん質問してくださいね！** 😊
+
+  - type: dropdown
+    id: question_category
+    attributes:
+      label: 🏷️ どんな種類の質問ですか？
+      description: 一番近いカテゴリを選んでください
+      options:
+        - 🚀 使い方・操作方法（機能の使い方がわからない）
+        - 📚 PMBOKの内容（用語、プロセス、ITTOなど）
+        - 🏆 学習方法（効果的な勉強の仕方）
+        - 🎯 PMP試験対策（受験のコツ、スケジュール）
+        - 🛠️ 技術的な問題（インストール、環境設定）
+        - 📱 モバイルアプリ関連
+        - 🤝 コラボレーション機能
+        - 🎆 その他のこと
+    validations:
+      required: true
+
+  - type: textarea
+    id: question_detail
+    attributes:
+      label: 🎓 具体的な質問内容
+      description: どんなことで困っているのか、詳しく教えてください。
+      placeholder: |
+        例：
+        - フラッシュカード学習で、知識エリア別に絞り込んで練習したいんですが、どこで設定できますか？
+        - ITTOの関連性がネットワーク図で見えると聞いたのですが、どうやって表示しますか？
+        - PMP試験まであと2ヶ月ですが、どんなペースで進めたらいいでしょうか？
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted_solutions
+    attributes:
+      label: 🔍 これまでに試したこと
+      description: すでに試してみたことや、調べたことがあれば教えてください。
+      placeholder: |
+        例：
+        - READMEを読んでみたけど、該当する部分が見つからなかった
+        - Googleで「PMP ITTO 解き方」で検索したが、あまりみつからなかった
+        - 他の学習アプリも使ってみたが、こちらの方が使いやすい
+        - 特に何も試していない（初めてなので）
+
+  - type: dropdown
+    id: experience_level
+    attributes:
+      label: 🌟 あなたのPMP学習レベルは？
+      description: 現在の学習状況を教えてください。答え方を調整します。
+      options:
+        - 🌱 初心者（PMBOKを初めて学習）
+        - 🌿 基礎習得中（用語やプロセスを学習中）
+        - 🌻 中級者（ITTOや関連性を学習中）
+        - 🌲 上級者（模擬試験や総仕上げ段階）
+        - 🎉 経験者（PMP試験合格済み、実務経験あり）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: environment_info
+    attributes:
+      label: 🖥️ 使用環境（該当するものをチェック）
+      description: 技術的な問題の場合、使用環境を教えてください
+      options:
+        - label: 💻 Windows PC
+        - label: 🍎 Mac
+        - label: 📱 iPhone/iPad
+        - label: 🤖 Android
+        - label: 🌐 Chrome
+        - label: 🦊 Firefox
+        - label: 🧭 Safari
+        - label: 📲 PWA（アプリ版）
+        - label: 環境やブラウザは関係ない質問
+
+  - type: textarea
+    id: screenshots_examples
+    attributes:
+      label: 📸 スクリーンショットや例
+      description: |
+        操作方法や技術的な問題の場合、スクリーンショットがあると
+        回答がしやすくなります。ドラッグ&ドロップで簡単に貼り付けできます。
+      placeholder: スクリーンショットや具体例があればここに貼り付けてください
+
+  - type: dropdown
+    id: urgency_level
+    attributes:
+      label: ⏰ どのくらい急いですか？
+      description: 回答の優先度を調整します
+      options:
+        - 😊 のんびり（時間のあるときに教えて）
+        - 📋 普通（数日以内に知りたい）
+        - 🔥 急ぎ（今学習していて困っている）
+        - 🚨 緊急（明日試験なので今すぐ！）
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 💡 その他の情報
+      description: |
+        他に伝えたいことや、関連しそうな情報があれば何でも書いてください。
+        あなたの学習状況や目標を教えてくれると、より的確な回答ができます。
+      placeholder: |
+        例：
+        - プロジェクト管理の実務経験は3年あります
+        - 3ヶ月後のPMP試験に向けて集中的に学習中
+        - 特にリスク管理の分野が苦手
+        - 他の学習サイトも併用しています
+
+  - type: checkboxes
+    id: communication_preference
+    attributes:
+      label: 💬 コミュニケーションの希望
+      description: どんな形でサポートしてもらいたいですか？（複数選択可）
+      options:
+        - label: 📝 コメントで簡潔な回答
+        - label: 📚 詳細な解説や参考資料
+        - label: 📹 スクリーンショット付きの手順説明
+        - label: 🎥 動画やGIFでの操作説明
+        - label: 🤝 他の学習者との意見交換
+        - label: 📞 リアルタイムでの相談（可能なら）
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 似たような質問がないか検索しました
+          required: true
+        - label: 幅広い意見や回答を歓迎し、他の学習者にも参考になるよう共有したいです
+          required: true
+        - label: PMPラーニングコミュニティの一員として、お互いに助け合って成長したいです！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎉 質問をしてくれてありがとうございます！
+        
+        あなたの質問が、PMPラーニングコミュニティをより活発にしてくれます。
+        コミュニティメンバーが、経験と知識を活かしてサポートしてくれます。
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 👥 コミュニティメンバーが回答してくれます
+        - 💫 追加の質問や情報があればコメントでやり取り
+        - ✅ 解決後にクローズします
+        
+        **回答を受け取りたい場合は、このIssueを "👀 Watch" してくださいね！**
+        
+        **この質問が解決したら、他の学習者のために知識ベースに追加されるかもしれません！**

@@ -1,0 +1,136 @@
+name: 🚀 スピードアップ：改善提案！
+description: 既存の機能をもっと使いやすく、速く、美しくしませんか？改善のアイデアでみんなの学習体験を向上しましょう！
+title: "🚀 [改善提案] "
+labels: ["T:🚀 パフォーマンス・スピードスター", "P:⭐ 標準", "S:🔍 調査中"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎆 ようこそ、スピードアップ改善者！
+        
+        素晴らしい改善アイデアをありがとうございます！あなたの細かい気づきが、
+        みんなのPMP学習をより快適に、より効率的にしてくれます。一緒に最高の学習体験を作り上げましょう！ 🎯
+
+  - type: dropdown
+    id: improvement_area
+    attributes:
+      label: 🏷️ どのエリアの改善ですか？
+      description: 改善したい範囲を選んでください
+      options:
+        - 🚀 パフォーマンス改善（速度、反応速度など）
+        - 🎨 UI/UX改善（デザイン、操作性など）
+        - 📱 モバイル体験改善（タッチ操作、レスポンシブ）
+        - 🌿 アクセシビリティ改善（読み上げ、キーボード操作）
+        - 📊 データ表示改善（グラフ、統計、進捗）
+        - 🔍 検索機能改善（精度、速度、結果表示）
+        - 📚 学習機能改善（フラッシュカード、模擬試験）
+        - 🌍 その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_situation
+    attributes:
+      label: 📋 現在の状況
+      description: 今どんな感じですか？何が不便だと感じていますか？
+      placeholder: "例：フラッシュカードの読み込みが遅くて、次のカードを表示するまで数秒待たされる"
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_improvement
+    attributes:
+      label: 🎆 理想的な状態
+      description: どんなふうになったらいいですか？具体的に教えてください。
+      placeholder: "例：カードの読み込みが瞬時で、スムーズにテンポよく学習できる"
+    validations:
+      required: true
+
+  - type: textarea
+    id: specific_suggestions
+    attributes:
+      label: 💡 具体的な改善案
+      description: どんな改善をしたらいいと思いますか？アイデアを教えてください。
+      placeholder: |
+        例：
+        - カードデータの事前読み込みを実装
+        - ローディングアニメーションを追加して待ち時間を楽しく
+        - カードの表示アニメーションを高速化
+        - キーボードショートカットで高速操作に対応
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact_level
+    attributes:
+      label: 🎯 どのくらいのインパクトがありそうですか？
+      description: この改善が実装されたら、学習体験にどの程度影響がありますか？
+      options:
+        - 🎆 大幅改善（学習効率が大きく向上）
+        - 🌟 適度な改善（体験が明らかに良くなる）
+        - 😊 小さな改善（細かい但し継続的な改善）
+        - 🌱 ニッチな改善（特定の状況で役立つ）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: affected_features
+    attributes:
+      label: 🏷️ 関連する機能（該当するものをチェック）
+      description: この改善はどの機能に関連していますか？
+      options:
+        - label: 📋 PMBOKマトリックス
+        - label: 🔗 ITTOネットワーク図
+        - label: 🏆 フラッシュカード学習
+        - label: 🎯 模擬試験
+        - label: 📊 学習進捗ダッシュボード
+        - label: 📖 PMP用語集
+        - label: 📏 視覚化ハブ
+        - label: 📱 モバイルアプリ
+        - label: 🌐 ブラウザ版
+
+  - type: textarea
+    id: examples_references
+    attributes:
+      label: 📚 参考例やインスピレーション
+      description: |
+        他のアプリやサイトで「これいいな！」と思った例がありますか？
+        スクリーンショットやURLを貼り付けてもOKです。
+      placeholder: "例：Ankiのカード表示のスムーズさ、Quizletのアニメーションなど"
+
+  - type: textarea
+    id: implementation_help
+    attributes:
+      label: 🔨 実装のお手伝い
+      description: この改善を実装するのに手伝っていただけそうなことがありますか？
+      placeholder: "例：フロントエンドのコードレビュー、テスト作成、UIデザインなど"
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 似たような改善提案がないか検索しました
+          required: true
+        - label: この改善が他の学習者にもメリットがあると思います
+          required: true
+        - label: PMPラーニングをより良くしたいという熱意でいっぱいです！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎆 最高の改善アイデアをありがとうございます！
+        
+        あなたの細かい気づきと改善アイデアが、PMPラーニングをより快適に、より効率的にしてくれます。
+        チームで優先度を評価して、実装可能なものから順次対応していきます！
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 📋 チームでインパクトと実装難易度を評価
+        - 🚀 優先度とスケジュールを決定
+        - 🔨 実装開始のお知らせをします
+        
+        **進捗を追いたい場合は、このIssueを"👀 Watch"してくださいね！**

@@ -1,0 +1,132 @@
+name: 🐛 バグハンター：問題を退治しよう！
+description: 何か変だな？おかしいな？と思ったことを報告して、一緒に問題解決をしましょう！
+title: "🐛 [バグ報告] "
+labels: ["T:🐛 バグハンター", "P:🔥 高優先度", "S:🔍 調査中"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🌟 ようこそ、バグハンター！
+        
+        問題を見つけてくれてありがとうございます！みんなでより良いPMPラーニング体験を作り上げていきましょう。
+        あなたの報告が、他の学習者の役に立ちます！ 🚀
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: 🎯 どんな問題が起きましたか？
+      description: 「こうなるはずなのに、こうなった」を教えてください！
+      placeholder: "例：フラッシュカードをクリックしても裏面が表示されない"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 📋 問題を再現する手順
+      description: 他の人も同じ問題を確認できるように、手順を教えてください
+      placeholder: |
+        1. PMBOKマトリックスページを開く
+        2. フラッシュカード学習をクリック
+        3. 任意のカードをクリック
+        4. ここで問題が発生
+      value: |
+        1. 
+        2. 
+        3. 
+        4. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 😊 期待していた動作
+      description: 本当はどうなってほしかったですか？
+      placeholder: "カードが回転して裏面の答えが表示されるはず"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: 😅 実際の動作
+      description: 実際に何が起きましたか？
+      placeholder: "何も反応がない、または違う画面に移動した"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 スクリーンショットがあれば
+      description: |
+        百聞は一見にしかず！画像があると問題解決が早くなります。
+        ドラッグ&ドロップで簡単に貼り付けできます。
+      placeholder: スクリーンショットをここにドロップまたは貼り付け
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 この問題の緊急度は？
+      description: 学習にどの程度影響がありますか？
+      options:
+        - 📋 普通（学習は続けられる）
+        - 🔥 高い（学習が困難になる）
+        - 🚨 緊急（全く使えない）
+        - 🌱 低い（気になる程度）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: 🖥️ 使用環境（該当するものをチェック）
+      options:
+        - label: 💻 Windows PC
+        - label: 🍎 Mac
+        - label: 📱 iPhone/iPad
+        - label: 🤖 Android
+        - label: 🌐 Chrome
+        - label: 🦊 Firefox
+        - label: 🧭 Safari
+        - label: 📲 PWA（アプリ版）
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 💡 その他の情報
+      description: |
+        他に気づいたことや、関連しそうな情報があれば教えてください！
+        どんな小さなことでも大歓迎です。
+      placeholder: "いつごろから起きている、特定の条件でのみ発生、など"
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 同じ問題の報告がないか検索しました
+          required: true
+        - label: 問題の説明が他の人にも分かるように書きました
+          required: true
+        - label: このバグ修正によってPMPラーニングがより良くなることを願っています！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎉 報告ありがとうございます！
+        
+        あなたの報告は PMPラーニングコミュニティにとって貴重な貢献です。
+        開発チームが確認次第、適切なラベルを設定して対応を開始します。
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 👥 チームメンバーが詳細を確認します  
+        - 🔧 修正作業を開始します
+        - ✅ 解決後にお知らせします
+        
+        **質問がある場合は、いつでもコメントで教えてくださいね！** 😊

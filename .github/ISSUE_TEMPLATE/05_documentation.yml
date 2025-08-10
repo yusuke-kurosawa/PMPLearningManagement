@@ -1,0 +1,153 @@
+name: 📄 ドキュメント：説明文改善！
+description: ドキュメントやガイドをもっとわかりやすく、使いやすくしませんか？新しい学習者が迷わないような清潔な文書を一緒に作りましょう！
+title: "📄 [ドキュメント] "
+labels: ["T:📚 知識の伝道師", "TM:📚 ナレッジシェア", "P:🌱 低優先度"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎆 ようこそ、ドキュメントの芸術家！
+        
+        わかりやすい説明文を作りたいというあなたの想い、素晴らしいです！
+        良いドキュメントは、新しい学習者の最高の道しるべになります。一緒にみんなにとって使いやすいガイドを作り上げましょう！ 💫
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: 🏷️ どんなドキュメントの改善ですか？
+      description: 改善したいドキュメントの種類を選んでください
+      options:
+        - 📁 READMEファイル（プロジェクトの概要、使い方）
+        - 🚀 セットアップガイド（インストール、環境構築）
+        - 📝 使い方ガイド（機能の操作方法）
+        - 🎓 学習ガイド（効果的な学習方法、コツ）
+        - ❓ FAQ（よくある質問と答え）
+        - 🔧 トラブルシューティングガイド
+        - 📦 APIドキュメントや技術仕様
+        - 🎨 デザインガイドライン
+        - 🌍 その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_problem
+    attributes:
+      label: 😕 現在の問題点
+      description: 今のドキュメントのどこがわかりにくい、使いにくいですか？
+      placeholder: |
+        例：
+        - セットアップ手順が複雑で、初心者がつまずく
+        - 機能の使い方が書いてあるが、手順が飛び飛びで理解しにくい
+        - スクリーンショットが古くて、現在のUIと違う
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_audience
+    attributes:
+      label: 🎯 どんな人に向けたドキュメントですか？
+      description: 主にどんな人がこのドキュメントを読むことを想定していますか？
+      placeholder: |
+        例：
+        - PMPを初めて学習する人
+        - プログラミング初心者
+        - プロジェクトマネージャーの経験あり
+        - 開発者（コントリビューター）
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement_suggestions
+    attributes:
+      label: 💡 改善アイデア
+      description: どんなふうに改善したらいいですか？具体的なアイデアを教えてください。
+      placeholder: |
+        例：
+        - ステップバイステップの詳細な手順を追加
+        - 現在のUIに合わせたスクリーンショットに更新
+        - コード例や実際の使用例を追加
+        - ビジュアル（図、チャート）を追加して理解しやすく
+        - 動画やGIFで動作を見えるように
+        - 言語の統一（敵語、日本語）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: 🚨 緊急度
+      description: このドキュメント改善はどのくらい緊急ですか？
+      options:
+        - 🗺️ 普通（時間のあるときに改善）
+        - 🔥 高い（新しいユーザーが困っている）
+        - 🚨 緊急（現在の情報が間違っている）
+        - 🌱 低い（あるとよい程度）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: affected_areas
+    attributes:
+      label: 🏷️ 関連するエリア（該当するものをチェック）
+      description: このドキュメントはどの部分に関連していますか？
+      options:
+        - label: 🏠 プロジェクト全体の概要
+        - label: 🚀 初期設定・インストール
+        - label: 📚 学習機能の使い方
+        - label: 📊 視覚化機能の使い方
+        - label: 📱 モバイルアプリの使い方
+        - label: 🔧 トラブル解決方法
+        - label: 🤝 コントリビューションガイド
+        - label: 📦 開発者向け情報
+
+  - type: textarea
+    id: examples_references
+    attributes:
+      label: 📚 参考例やインスピレーション
+      description: |
+        他のプロジェクトやサービスで「このドキュメントわかりやすい！」と
+        感じたものがありましたら、URLやスクリーンショットを貼り付けてください。
+      placeholder: "例：Next.jsのドキュメントのステップバイステップガイド、StripeのAPIドキュメントのコード例など"
+
+  - type: textarea
+    id: contribution_offer
+    attributes:
+      label: 🤝 お手伝いできること
+      description: このドキュメント改善にどのように関わりたいですか？
+      placeholder: |
+        例：
+        - ドキュメントの初版を書きたい
+        - スクリーンショットや図を作成したい
+        - レビューやフィードバックを提供したい
+        - 翻訳を手伝いたい
+        - アイデアを出しただけ
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 🤝 確認事項
+      description: 以下の項目を確認してチェックをお願いします
+      options:
+        - label: 似たようなドキュメント改善提案がないか検索しました
+          required: true
+        - label: このドキュメントが他の学習者や利用者にも役立つと信じています
+          required: true
+        - label: わかりやすいドキュメントでPMPラーニングをよりアクセシブルにしたいです！
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🎆 ドキュメント改善の提案をありがとうございます！
+        
+        あなたの細かい気づきが、新しい学習者にとって最高の道しるべを作ってくれます。
+        チームで優先度と実装方法を検討して、読みやすいドキュメントに仕上げていきます！
+        
+        **次のステップ：**
+        - 🏷️ 自動的に適切なラベルが設定されます
+        - 📋 チームで緊急度と影響範囲を評価
+        - 📝 ドキュメント改善計画を立案
+        - 🚀 作成・更新開始のお知らせ
+        
+        **作成進捗を知りたい場合は、このIssueを "👀 Watch" してくださいね！**
