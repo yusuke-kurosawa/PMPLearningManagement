@@ -2,20 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react'
 import {
   Brain,
   Target,
-  TrendingUp,
   Calendar,
   AlertCircle,
   CheckCircle,
   Clock,
   Star,
   Lightbulb,
-  BookOpen,
   Award,
   ArrowRight,
   RefreshCw,
   MessageSquare,
   BarChart3,
-  PieChart,
 } from 'lucide-react'
 import aiCoachingService from '../../services/aiCoachingService'
 
@@ -23,7 +20,7 @@ const AICoachingDashboard = () => {
   const [learningPath, setLearningPath] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeCoaching, setActiveCoaching] = useState(null)
-  const [userProgress, setUserProgress] = useState({})
+  const [_userProgress, setUserProgress] = useState({})
   const [selectedWeekness, setSelectedWeekness] = useState(null)
 
   // Mock user ID - in real app this would come from auth context

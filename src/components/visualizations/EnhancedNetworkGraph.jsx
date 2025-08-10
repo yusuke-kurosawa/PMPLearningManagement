@@ -93,7 +93,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
       const radius = Math.min(dimensions.width, dimensions.height) * 0.35
 
       switch (selectedLayout) {
-        case 'hierarchical':
+        case 'hierarchical': {
           // 階層型レイアウト
           const levels = {}
           nodes.forEach((node) => {
@@ -117,6 +117,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
             })
           })
           break
+        }
 
         case 'circular':
           // 円形レイアウト
@@ -127,7 +128,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
           })
           break
 
-        case 'radial':
+        case 'radial': {
           // 放射状レイアウト
           const typeGroups = d3.group(nodes, (d) => d.type)
           let angleOffset = 0
@@ -142,6 +143,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
             angleOffset += angleStep
           })
           break
+        }
 
         case 'grid':
           // グリッドレイアウト
