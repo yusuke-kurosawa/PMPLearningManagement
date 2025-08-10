@@ -100,10 +100,6 @@ jobs:
             2. Translated body (maintain markdown formatting)
             `;
             
-            // Create translation using OpenAI (or fallback to simple translation)
-            let translatedTitle = issue.title;
-            let translatedBody = issue.body || '';
-            
             try {
               // Try Claude AI translation first, fallback to simple mapping
               let useClaudeTranslation = false;
@@ -152,15 +148,34 @@ ${issue.body || '本文なし'}
                     }]
                   };
 
-                  // Call Claude API
-                  const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'x-api-key': claudeApiKey,
-                      'anthropic-version': '2023-06-01'
-                    },
-                    body: JSON.stringify(claudePayload)
+                  // Call Claude API using Node.js https module
+                  const https = require('https');
+                  const response = await new Promise((resolve, reject) => {
+                    const postData = JSON.stringify(claudePayload);
+                    const options = {
+                      hostname: 'api.anthropic.com',
+                      port: 443,
+                      path: '/v1/messages',
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': claudeApiKey,
+                        'anthropic-version': '2023-06-01',
+                        'Content-Length': Buffer.byteLength(postData)
+                      }
+                    };
+
+                    const req = https.request(options, (res) => {
+                      let data = '';
+                      res.on('data', (chunk) => data += chunk);
+                      res.on('end', () => {
+                        resolve({ ok: res.statusCode === 200, json: () => Promise.resolve(JSON.parse(data)) });
+                      });
+                    });
+
+                    req.on('error', reject);
+                    req.write(postData);
+                    req.end();
                   });
 
                   if (response.ok) {
