@@ -1,116 +1,118 @@
 // PWA utilities and service worker management
 
 export interface PWAInstallPrompt {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  prompt(): Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
 declare global {
   interface WindowEventMap {
     beforeinstallprompt: Event & {
-      preventDefault(): void;
-      prompt(): Promise<void>;
-      userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-    };
+      preventDefault(): void
+      prompt(): Promise<void>
+      userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+    }
   }
 }
 
 class PWAManager {
-  private deferredPrompt: PWAInstallPrompt | null = null;
-  private isInstalled = false;
-  private registration: ServiceWorkerRegistration | null = null;
+  private deferredPrompt: PWAInstallPrompt | null = null
+  private isInstalled = false
+  private registration: ServiceWorkerRegistration | null = null
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.init();
+      this.init()
     }
   }
 
   private async init() {
     // Check if already installed
-    this.checkInstallStatus();
-    
+    this.checkInstallStatus()
+
     // Listen for install prompt
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      this.deferredPrompt = e as PWAInstallPrompt;
-    });
+      e.preventDefault()
+      this.deferredPrompt = e as PWAInstallPrompt
+    })
 
     // Listen for app installed
     window.addEventListener('appinstalled', () => {
-      this.isInstalled = true;
-      this.deferredPrompt = null;
-    });
+      this.isInstalled = true
+      this.deferredPrompt = null
+    })
 
     // Register service worker
-    await this.registerServiceWorker();
+    await this.registerServiceWorker()
   }
 
   private checkInstallStatus() {
     // Check if app is installed
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        (window.navigator as any).standalone === true) {
-      this.isInstalled = true;
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true
+    ) {
+      this.isInstalled = true
     }
   }
 
   async registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
     if ('serviceWorker' in navigator) {
       try {
-        this.registration = await navigator.serviceWorker.register('/sw.js');
-        
-        console.log('Service Worker registered successfully:', this.registration);
+        this.registration = await navigator.serviceWorker.register('/sw.js')
+
+        console.log('Service Worker registered successfully:', this.registration)
 
         // Handle updates
         this.registration.addEventListener('updatefound', () => {
-          const newWorker = this.registration?.installing;
+          const newWorker = this.registration?.installing
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New content is available
-                this.showUpdateNotification();
+                this.showUpdateNotification()
               }
-            });
+            })
           }
-        });
+        })
 
-        return this.registration;
+        return this.registration
       } catch (error) {
-        console.error('Service Worker registration failed:', error);
-        return null;
+        console.error('Service Worker registration failed:', error)
+        return null
       }
     }
-    return null;
+    return null
   }
 
   async installApp(): Promise<boolean> {
     if (!this.deferredPrompt) {
-      return false;
+      return false
     }
 
     try {
-      await this.deferredPrompt.prompt();
-      const { outcome } = await this.deferredPrompt.userChoice;
-      
+      await this.deferredPrompt.prompt()
+      const { outcome } = await this.deferredPrompt.userChoice
+
       if (outcome === 'accepted') {
-        this.isInstalled = true;
-        this.deferredPrompt = null;
-        return true;
+        this.isInstalled = true
+        this.deferredPrompt = null
+        return true
       }
-      
-      return false;
+
+      return false
     } catch (error) {
-      console.error('Error installing PWA:', error);
-      return false;
+      console.error('Error installing PWA:', error)
+      return false
     }
   }
 
   canInstall(): boolean {
-    return !!this.deferredPrompt && !this.isInstalled;
+    return !!this.deferredPrompt && !this.isInstalled
   }
 
   isAppInstalled(): boolean {
-    return this.isInstalled;
+    return this.isInstalled
   }
 
   private showUpdateNotification() {
@@ -119,57 +121,53 @@ class PWAManager {
       new Notification('アップデートが利用可能です', {
         body: '新しいバージョンが利用可能です。再読み込みしてください。',
         icon: '/icon-192x192.png',
-        tag: 'app-update'
-      });
+        tag: 'app-update',
+      })
     }
   }
 
   async requestNotificationPermission(): Promise<NotificationPermission> {
     if ('Notification' in window) {
-      return await Notification.requestPermission();
+      return await Notification.requestPermission()
     }
-    return 'denied';
+    return 'denied'
   }
 
   async subscribeToNotifications(): Promise<PushSubscription | null> {
     if (!this.registration || !('PushManager' in window)) {
-      return null;
+      return null
     }
 
     try {
       const subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_KEY || ''
-        )
-      });
+        applicationServerKey: this.urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_KEY || ''),
+      })
 
-      return subscription;
+      return subscription
     } catch (error) {
-      console.error('Error subscribing to notifications:', error);
-      return null;
+      console.error('Error subscribing to notifications:', error)
+      return null
     }
   }
 
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
 
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
+    const rawData = window.atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
 
     for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
+      outputArray[i] = rawData.charCodeAt(i)
     }
-    return outputArray;
+    return outputArray
   }
 
   async updateServiceWorker(): Promise<void> {
     if (this.registration) {
-      await this.registration.update();
-      window.location.reload();
+      await this.registration.update()
+      window.location.reload()
     }
   }
 
@@ -177,11 +175,11 @@ class PWAManager {
   async cacheUserData(key: string, data: any): Promise<void> {
     if ('caches' in window) {
       try {
-        const cache = await caches.open('user-data');
-        const response = new Response(JSON.stringify(data));
-        await cache.put(key, response);
+        const cache = await caches.open('user-data')
+        const response = new Response(JSON.stringify(data))
+        await cache.put(key, response)
       } catch (error) {
-        console.error('Error caching user data:', error);
+        console.error('Error caching user data:', error)
       }
     }
   }
@@ -189,68 +187,68 @@ class PWAManager {
   async getCachedUserData(key: string): Promise<any | null> {
     if ('caches' in window) {
       try {
-        const cache = await caches.open('user-data');
-        const response = await cache.match(key);
+        const cache = await caches.open('user-data')
+        const response = await cache.match(key)
         if (response) {
-          return await response.json();
+          return await response.json()
         }
       } catch (error) {
-        console.error('Error retrieving cached data:', error);
+        console.error('Error retrieving cached data:', error)
       }
     }
-    return null;
+    return null
   }
 
   // Background sync
   async syncWhenOnline(tag: string, data?: any): Promise<void> {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
-        const registration = await navigator.serviceWorker.ready;
-        
+        const registration = await navigator.serviceWorker.ready
+
         // Store data to sync later if provided
         if (data) {
-          await this.cacheUserData(`sync-${tag}`, data);
+          await this.cacheUserData(`sync-${tag}`, data)
         }
-        
-        await registration.sync.register(tag);
+
+        await registration.sync.register(tag)
       } catch (error) {
-        console.error('Background sync registration failed:', error);
+        console.error('Background sync registration failed:', error)
       }
     }
   }
 }
 
 // Singleton instance
-export const pwaManager = new PWAManager();
+export const pwaManager = new PWAManager()
 
 // Utility functions for mobile-specific features
 export const isMobile = (): boolean => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-};
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
 
 export const isIOS = (): boolean => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
-};
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+}
 
 export const isAndroid = (): boolean => {
-  return /Android/.test(navigator.userAgent);
-};
+  return /Android/.test(navigator.userAgent)
+}
 
 export const isStandalone = (): boolean => {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         (window.navigator as any).standalone === true;
-};
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true
+  )
+}
 
 export const getViewportHeight = (): number => {
-  return window.visualViewport?.height || window.innerHeight;
-};
+  return window.visualViewport?.height || window.innerHeight
+}
 
 export const addToHomeScreen = {
   isSupported: () => pwaManager.canInstall(),
   install: () => pwaManager.installApp(),
-  isInstalled: () => pwaManager.isAppInstalled()
-};
+  isInstalled: () => pwaManager.isAppInstalled(),
+}
 
-export default pwaManager;
+export default pwaManager

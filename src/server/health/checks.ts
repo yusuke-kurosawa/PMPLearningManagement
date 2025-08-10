@@ -61,7 +61,9 @@ try {
     })
   }
 } catch (error) {
-  Logger.warn('Redis接続の初期化に失敗しました', { error: error instanceof Error ? error.message : error })
+  Logger.warn('Redis接続の初期化に失敗しました', {
+    error: error instanceof Error ? error.message : error,
+  })
 }
 
 // ヘルスチェッククラス
@@ -69,7 +71,7 @@ export class HealthChecker {
   // データベースヘルスチェック
   static async checkDatabase(): Promise<HealthCheckResult> {
     const startTime = Date.now()
-    
+
     try {
       // 基本接続チェック
       await Promise.race([
@@ -80,10 +82,10 @@ export class HealthChecker {
       ])
 
       // 接続プール情報取得（可能な場合）
-      const connectionInfo = await prisma.$queryRaw`SELECT 
+      const connectionInfo = (await prisma.$queryRaw`SELECT 
         COUNT(*) as total_connections
       FROM pg_stat_activity 
-      WHERE datname = current_database()` as any[]
+      WHERE datname = current_database()`) as any[]
 
       const responseTime = Date.now() - startTime
 
@@ -110,7 +112,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('データベースヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -148,7 +150,7 @@ export class HealthChecker {
       const usedMemory = memoryMatch ? parseInt(memoryMatch[1]) : 0
 
       const responseTime = Date.now() - startTime
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
       if (responseTime > 100) {
         status = 'degraded'
@@ -166,7 +168,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('Redisヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -190,7 +192,7 @@ export class HealthChecker {
       ])
 
       const responseTime = Date.now() - startTime
-      
+
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
       if (responseTime > 2000) {
         status = 'degraded'
@@ -208,7 +210,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('Stripeヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -247,7 +249,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('メールヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -264,20 +266,20 @@ export class HealthChecker {
     try {
       const fs = await import('fs/promises')
       const path = await import('path')
-      
+
       // ログディレクトリの読み書きテスト
       const testDir = path.join(process.cwd(), 'logs')
       const testFile = path.join(testDir, '.health-check')
 
       // ディレクトリ作成（存在しない場合）
       await fs.mkdir(testDir, { recursive: true })
-      
+
       // テストファイル書き込み
       await fs.writeFile(testFile, new Date().toISOString())
-      
+
       // テストファイル読み込み
       const content = await fs.readFile(testFile, 'utf-8')
-      
+
       // テストファイル削除
       await fs.unlink(testFile)
 
@@ -312,7 +314,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('ストレージヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -331,14 +333,16 @@ export class HealthChecker {
       // 複数の外部APIを並行してチェック
       const checks = [
         // OpenAI API（AI機能用）
-        this.checkOpenAI().then(result => ({ openai: result })).catch(error => ({ openai: { error: error.message } })),
-        
+        this.checkOpenAI()
+          .then((result) => ({ openai: result }))
+          .catch((error) => ({ openai: { error: error.message } })),
+
         // その他の外部サービス（必要に応じて追加）
         // this.checkSlack().then(result => ({ slack: result })).catch(error => ({ slack: { error: error.message } })),
       ]
 
       const apiResults = await Promise.allSettled(
-        checks.map(check => 
+        checks.map((check) =>
           Promise.race([
             check,
             new Promise((_, reject) =>
@@ -349,7 +353,7 @@ export class HealthChecker {
       )
 
       // 結果をマージ
-      apiResults.forEach(result => {
+      apiResults.forEach((result) => {
         if (result.status === 'fulfilled') {
           Object.assign(results, result.value)
         }
@@ -370,7 +374,7 @@ export class HealthChecker {
     } catch (error) {
       const responseTime = Date.now() - startTime
       Logger.error('外部APIヘルスチェック失敗', error)
-      
+
       return {
         status: 'degraded', // 外部APIは完全失敗でもdegradedに留める
         timestamp: new Date().toISOString(),
@@ -392,12 +396,12 @@ export class HealthChecker {
       // OpenAI APIの簡単なリクエスト
       const response = await fetch('https://api.openai.com/v1/models', {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
       })
 
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: response.ok ? 'healthy' : 'unhealthy',
         responseTime,
@@ -444,7 +448,7 @@ export class HealthChecker {
       }
     } catch (error) {
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -460,10 +464,10 @@ export class HealthChecker {
 
     try {
       const startUsage = process.cpuUsage()
-      
+
       // 100ms待機してCPU使用率を測定
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       const currentUsage = process.cpuUsage(startUsage)
       const responseTime = Date.now() - startTime
 
@@ -491,7 +495,7 @@ export class HealthChecker {
       }
     } catch (error) {
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -535,7 +539,7 @@ export class HealthChecker {
       }
     } catch (error) {
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -548,32 +552,23 @@ export class HealthChecker {
   // 包括的ヘルスチェック
   static async performComprehensiveHealthCheck(): Promise<SystemHealth> {
     const startTime = Date.now()
-    
+
     Logger.info('包括的ヘルスチェック開始')
 
     try {
       // 並行してヘルスチェックを実行
-      const [
-        database,
-        redis,
-        stripe,
-        email,
-        storage,
-        external_apis,
-        memory,
-        cpu,
-        disk,
-      ] = await Promise.all([
-        this.checkDatabase(),
-        this.checkRedis(),
-        this.checkStripe(),
-        this.checkEmail(),
-        this.checkStorage(),
-        this.checkExternalApis(),
-        this.checkMemory(),
-        this.checkCpu(),
-        this.checkDisk(),
-      ])
+      const [database, redis, stripe, email, storage, external_apis, memory, cpu, disk] =
+        await Promise.all([
+          this.checkDatabase(),
+          this.checkRedis(),
+          this.checkStripe(),
+          this.checkEmail(),
+          this.checkStorage(),
+          this.checkExternalApis(),
+          this.checkMemory(),
+          this.checkCpu(),
+          this.checkDisk(),
+        ])
 
       const checks = {
         database,
@@ -589,12 +584,12 @@ export class HealthChecker {
 
       // 全体的なステータス判定
       const results = Object.values(checks)
-      const healthy = results.filter(r => r.status === 'healthy').length
-      const degraded = results.filter(r => r.status === 'degraded').length
-      const unhealthy = results.filter(r => r.status === 'unhealthy').length
+      const healthy = results.filter((r) => r.status === 'healthy').length
+      const degraded = results.filter((r) => r.status === 'degraded').length
+      const unhealthy = results.filter((r) => r.status === 'unhealthy').length
 
       let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-      
+
       if (unhealthy > 0) {
         overallStatus = 'unhealthy'
       } else if (degraded > 0) {
@@ -634,7 +629,7 @@ export class HealthChecker {
       return systemHealth
     } catch (error) {
       Logger.error('包括的ヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -662,15 +657,12 @@ export class HealthChecker {
 
     try {
       // 最低限のチェックのみ実行
-      const [database, memory] = await Promise.all([
-        this.checkDatabase(),
-        this.checkMemory(),
-      ])
+      const [database, memory] = await Promise.all([this.checkDatabase(), this.checkMemory()])
 
       const responseTime = Date.now() - startTime
 
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-      
+
       if (database.status === 'unhealthy' || memory.status === 'unhealthy') {
         status = 'unhealthy'
       } else if (database.status === 'degraded' || memory.status === 'degraded') {
@@ -684,7 +676,7 @@ export class HealthChecker {
       }
     } catch (error) {
       Logger.error('軽量ヘルスチェック失敗', error)
-      
+
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),

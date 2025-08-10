@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { 
-  PermissionChecker, 
+import {
+  PermissionChecker,
   createPermissionChecker,
   requirePermission,
   requireOwnership,
@@ -15,7 +15,7 @@ import {
   SubscriptionPlan,
   UserContext,
   PermissionError,
-  getPermissionDebugInfo
+  getPermissionDebugInfo,
 } from '../rbac'
 import { UserRole } from '@prisma/client'
 
@@ -77,7 +77,7 @@ describe('RBAC システム', () => {
         expect(checker.hasPermission(Permission.EXAM_CREATE)).toBe(true)
         expect(checker.hasPermission(Permission.COLLAB_MODERATE)).toBe(true)
         expect(checker.hasPermission(Permission.AI_ADVANCED)).toBe(true)
-        
+
         // 管理者専用権限は持たない
         expect(checker.hasPermission(Permission.SYSTEM_ADMIN)).toBe(false)
         expect(checker.hasPermission(Permission.USER_ADMIN)).toBe(false)
@@ -90,7 +90,7 @@ describe('RBAC システム', () => {
         expect(checker.hasPermission(Permission.LEARNING_ANALYTICS)).toBe(true)
         expect(checker.hasPermission(Permission.AI_ADVANCED)).toBe(true)
         expect(checker.hasPermission(Permission.ANALYTICS_ADVANCED)).toBe(true)
-        
+
         // 管理機能は持たない
         expect(checker.hasPermission(Permission.EXAM_CREATE)).toBe(false)
         expect(checker.hasPermission(Permission.CONTENT_WRITE)).toBe(false)
@@ -102,7 +102,7 @@ describe('RBAC システム', () => {
         expect(checker.hasPermission(Permission.LEARNING_READ)).toBe(true)
         expect(checker.hasPermission(Permission.CONTENT_READ)).toBe(true)
         expect(checker.hasPermission(Permission.EXAM_TAKE)).toBe(true)
-        
+
         // プレミアム機能は持たない
         expect(checker.hasPermission(Permission.AI_BASIC)).toBe(false)
         expect(checker.hasPermission(Permission.LEARNING_ANALYTICS)).toBe(false)
@@ -113,7 +113,7 @@ describe('RBAC システム', () => {
     describe('複数権限チェック', () => {
       it('全ての権限が必要な場合（AND条件）', () => {
         const checker = createPermissionChecker(instructorUser)
-        
+
         const requiredPermissions = [
           Permission.LEARNING_READ,
           Permission.LEARNING_WRITE,
@@ -132,7 +132,7 @@ describe('RBAC システム', () => {
 
       it('いずれかの権限があれば良い場合（OR条件）', () => {
         const checker = createPermissionChecker(freeUser)
-        
+
         const anyPermissions = [
           Permission.AI_UNLIMITED, // 持っていない
           Permission.CONTENT_READ, // 持っている
@@ -170,17 +170,11 @@ describe('RBAC システム', () => {
         const profileIncompleteCondition = (ctx: UserContext) => !ctx.profileComplete
 
         expect(
-          checker.canAccessWithCondition(
-            Permission.LEARNING_ANALYTICS,
-            profileCompleteCondition
-          )
+          checker.canAccessWithCondition(Permission.LEARNING_ANALYTICS, profileCompleteCondition)
         ).toBe(true)
 
         expect(
-          checker.canAccessWithCondition(
-            Permission.LEARNING_ANALYTICS,
-            profileIncompleteCondition
-          )
+          checker.canAccessWithCondition(Permission.LEARNING_ANALYTICS, profileIncompleteCondition)
         ).toBe(false)
       })
     })
@@ -284,37 +278,39 @@ describe('RBAC システム', () => {
 
       it('権限がある場合は成功', () => {
         const checker = requirePermission(Permission.LEARNING_READ)
-        
+
         expect(() => checker(testUser)).not.toThrow()
       })
 
       it('権限がない場合はエラー', () => {
         const checker = requirePermission(Permission.SYSTEM_ADMIN)
-        
+
         expect(() => checker(testUser)).toThrow('権限が不足しています')
       })
 
       it('複数権限のAND条件チェック', () => {
-        const checker = requirePermission([
-          Permission.LEARNING_READ,
-          Permission.AI_ADVANCED,
-        ], { mode: 'all' })
-        
+        const checker = requirePermission([Permission.LEARNING_READ, Permission.AI_ADVANCED], {
+          mode: 'all',
+        })
+
         expect(() => checker(testUser)).not.toThrow()
       })
 
       it('複数権限のOR条件チェック', () => {
-        const checker = requirePermission([
-          Permission.SYSTEM_ADMIN, // 持っていない
-          Permission.LEARNING_READ, // 持っている
-        ], { mode: 'any' })
-        
+        const checker = requirePermission(
+          [
+            Permission.SYSTEM_ADMIN, // 持っていない
+            Permission.LEARNING_READ, // 持っている
+          ],
+          { mode: 'any' }
+        )
+
         expect(() => checker(testUser)).not.toThrow()
       })
 
       it('未認証ユーザーは常にエラー', () => {
         const checker = requirePermission(Permission.LEARNING_READ)
-        
+
         expect(() => checker(null)).toThrow('認証が必要です')
       })
 
@@ -322,7 +318,7 @@ describe('RBAC システム', () => {
         const checker = requirePermission(Permission.LEARNING_READ, {
           customCheck: (ctx) => ctx.profileComplete,
         })
-        
+
         expect(() => checker(testUser)).not.toThrow()
 
         const incompleteUser = { ...testUser, profileComplete: false }
@@ -341,13 +337,13 @@ describe('RBAC システム', () => {
 
       it('自分のリソースへのアクセスは成功', () => {
         const checker = requireOwnership('user123')
-        
+
         expect(() => checker(testUser)).not.toThrow()
       })
 
       it('他人のリソースへのアクセスはエラー', () => {
         const checker = requireOwnership('other-user')
-        
+
         expect(() => checker(testUser)).toThrow('リソースへのアクセス権限がありません')
       })
 
@@ -361,7 +357,7 @@ describe('RBAC システム', () => {
         }
 
         const checker = requireOwnership('any-user')
-        
+
         expect(() => checker(adminUser)).not.toThrow()
       })
     })
@@ -405,7 +401,7 @@ describe('RBAC システム', () => {
       // 基本権限のみ
       expect(checker.hasPermission(Permission.LEARNING_READ)).toBe(true)
       expect(checker.hasPermission(Permission.CONTENT_READ)).toBe(true)
-      
+
       // プレミアム機能は無効
       expect(checker.hasPermission(Permission.AI_ADVANCED)).toBe(false)
       expect(checker.hasPermission(Permission.ANALYTICS_ADVANCED)).toBe(false)

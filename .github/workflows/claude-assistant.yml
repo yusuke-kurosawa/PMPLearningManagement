@@ -1,0 +1,97 @@
+name: Claude AI Assistant
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  claude-response:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Extract Claude mention
+      id: extract
+      run: |
+        if [ "${{ github.event_name }}" == "issues" ]; then
+          BODY="${{ github.event.issue.body }}"
+        else
+          BODY="${{ github.event.comment.body }}"
+        fi
+        
+        # Extract text after @claude mention
+        CLAUDE_REQUEST=$(echo "$BODY" | sed -n 's/.*@claude\s*\(.*\)/\1/p')
+        echo "request=$CLAUDE_REQUEST" >> $GITHUB_OUTPUT
+
+    - name: Call Claude API
+      id: claude
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        REQUEST="${{ steps.extract.outputs.request }}"
+        
+        # Prepare the API request
+        RESPONSE=$(curl -s -X POST https://api.anthropic.com/v1/messages \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: $ANTHROPIC_API_KEY" \
+          -H "anthropic-version: 2023-06-01" \
+          -d @- <<EOF
+        {
+          "model": "claude-3-sonnet-20240229",
+          "max_tokens": 1024,
+          "messages": [
+            {
+              "role": "user",
+              "content": "You are a helpful assistant for the PMP Learning Management project. Answer the following request concisely: $REQUEST"
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Extract the response content
+        CLAUDE_RESPONSE=$(echo "$RESPONSE" | jq -r '.content[0].text // "Error processing request"')
+        
+        # Save response for next step
+        echo "response<<EOF" >> $GITHUB_OUTPUT
+        echo "$CLAUDE_RESPONSE" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Post Claude response
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const response = `${{ steps.claude.outputs.response }}`;
+          
+          const comment = `
+          ## Claude AI Response
+          
+          ${response}
+          
+          ---
+          *This response was generated automatically by Claude AI*
+          `;
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });

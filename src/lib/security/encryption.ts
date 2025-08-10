@@ -71,26 +71,34 @@ const EncryptionEnvSchema = z.object({
 const getEncryptionEnv = () => {
   try {
     return EncryptionEnvSchema.parse({
-      ENCRYPTION_MASTER_KEY: process.env.ENCRYPTION_MASTER_KEY || (() => {
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error('ENCRYPTION_MASTER_KEY must be set in production')
-        }
-        return crypto.randomBytes(32).toString('hex')
-      })(),
+      ENCRYPTION_MASTER_KEY:
+        process.env.ENCRYPTION_MASTER_KEY ||
+        (() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error('ENCRYPTION_MASTER_KEY must be set in production')
+          }
+          return crypto.randomBytes(32).toString('hex')
+        })(),
       ENCRYPTION_KEY_ROTATION_INTERVAL: process.env.ENCRYPTION_KEY_ROTATION_INTERVAL || '86400000',
-      ENCRYPTION_KEY_DERIVATION_ITERATIONS: process.env.ENCRYPTION_KEY_DERIVATION_ITERATIONS || '100000',
-      HASH_PEPPER: process.env.HASH_PEPPER || (() => {
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error('HASH_PEPPER must be set in production')
-        }
-        return crypto.randomBytes(16).toString('hex')
-      })(),
-      APP_SECRET: process.env.APP_SECRET || process.env.NEXTAUTH_SECRET || (() => {
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error('APP_SECRET must be set in production')
-        }
-        return 'default-app-secret-change-in-production'
-      })(),
+      ENCRYPTION_KEY_DERIVATION_ITERATIONS:
+        process.env.ENCRYPTION_KEY_DERIVATION_ITERATIONS || '100000',
+      HASH_PEPPER:
+        process.env.HASH_PEPPER ||
+        (() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error('HASH_PEPPER must be set in production')
+          }
+          return crypto.randomBytes(16).toString('hex')
+        })(),
+      APP_SECRET:
+        process.env.APP_SECRET ||
+        process.env.NEXTAUTH_SECRET ||
+        (() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error('APP_SECRET must be set in production')
+          }
+          return 'default-app-secret-change-in-production'
+        })(),
     })
   } catch (error) {
     console.error('暗号化環境変数が正しく設定されていません:', error)
@@ -285,7 +293,7 @@ export class HashingService {
     try {
       const env = getEncryptionEnv()
       const hmac = crypto.createHmac('sha256', env.APP_SECRET)
-      
+
       let hashData = data + this.pepper
       if (useTimestamp) {
         hashData += Date.now().toString()
@@ -365,7 +373,7 @@ export class TokenGenerator {
    * 期限付きトークンの生成
    */
   generateTimedToken(payload: object, expirationMinutes: number = 60): string {
-    const expirationTime = Date.now() + (expirationMinutes * 60 * 1000)
+    const expirationTime = Date.now() + expirationMinutes * 60 * 1000
     const tokenData = {
       payload,
       exp: expirationTime,
@@ -391,7 +399,7 @@ export class TokenGenerator {
       })
 
       const tokenData = JSON.parse(decrypted)
-      
+
       // 期限チェック
       if (Date.now() > tokenData.exp) {
         return null
@@ -501,14 +509,9 @@ export class DatabaseEncryption {
   /**
    * ユーザーデータの暗号化（データベース保存前）
    */
-  encryptUserData(userData: {
-    email: string
-    name?: string
-    phone?: string
-    address?: string
-  }) {
+  encryptUserData(userData: { email: string; name?: string; phone?: string; address?: string }) {
     const encrypted = this.piiEncryption.encryptPII(userData)
-    
+
     return {
       // 暗号化されたデータ
       encryptedData: encrypted,
@@ -517,16 +520,16 @@ export class DatabaseEncryption {
       nameHash: userData.name ? this.piiEncryption.createSearchableHash(userData.name) : null,
       // 部分検索用ハッシュ
       emailSearchHashes: this.piiEncryption.createPartialSearchHashes(userData.email),
-      nameSearchHashes: userData.name ? this.piiEncryption.createPartialSearchHashes(userData.name) : [],
+      nameSearchHashes: userData.name
+        ? this.piiEncryption.createPartialSearchHashes(userData.name)
+        : [],
     }
   }
 
   /**
    * ユーザーデータの復号化（データベース読み取り後）
    */
-  decryptUserData(encryptedUserData: {
-    encryptedData: Record<string, DecryptionInput>
-  }) {
+  decryptUserData(encryptedUserData: { encryptedData: Record<string, DecryptionInput> }) {
     return this.piiEncryption.decryptPII(encryptedUserData.encryptedData)
   }
 

@@ -71,24 +71,24 @@ const config: Config = {
         'safe-right': 'env(safe-area-inset-right)',
       },
       screens: {
-        'xs': '375px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
+        xs: '375px',
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
         '2xl': '1536px',
         // Mobile-specific breakpoints
-        'mobile': { 'max': '767px' },
-        'tablet': { 'min': '768px', 'max': '1023px' },
-        'desktop': { 'min': '1024px' },
+        mobile: { max: '767px' },
+        tablet: { min: '768px', max: '1023px' },
+        desktop: { min: '1024px' },
         // Orientation breakpoints
-        'portrait': { 'raw': '(orientation: portrait)' },
-        'landscape': { 'raw': '(orientation: landscape)' },
+        portrait: { raw: '(orientation: portrait)' },
+        landscape: { raw: '(orientation: landscape)' },
         // Touch-specific
-        'touch': { 'raw': '(hover: none)' },
-        'no-touch': { 'raw': '(hover: hover)' },
+        touch: { raw: '(hover: none)' },
+        'no-touch': { raw: '(hover: hover)' },
         // High resolution displays
-        'retina': { 'raw': '(-webkit-min-device-pixel-ratio: 2)' },
+        retina: { raw: '(-webkit-min-device-pixel-ratio: 2)' },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -161,7 +161,7 @@ const config: Config = {
         'swipe-indicator': 'swipe-indicator 1.5s ease-out infinite',
       },
       backdropBlur: {
-        'xs': '2px',
+        xs: '2px',
       },
       perspective: {
         '1000': '1000px',
@@ -171,19 +171,19 @@ const config: Config = {
         'preserve-3d': 'preserve-3d',
       },
       backfaceVisibility: {
-        'hidden': 'hidden',
-        'visible': 'visible',
+        hidden: 'hidden',
+        visible: 'visible',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
       },
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        xs: ['0.75rem', { lineHeight: '1rem' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+        base: ['1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],
         '2xl': ['1.5rem', { lineHeight: '2rem' }],
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],

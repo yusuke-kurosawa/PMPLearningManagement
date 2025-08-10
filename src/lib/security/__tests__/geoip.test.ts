@@ -55,16 +55,18 @@ describe('GeoIPService', () => {
   describe('getGeoLocation', () => {
     it('should return cached location if available', async () => {
       // Redis から キャッシュされたデータを返すモック
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      vi.mocked(mockRedis.get).mockResolvedValueOnce(JSON.stringify({
-        ip: '203.0.113.1',
-        country: 'Japan',
-        countryCode: 'JP',
-        threat: 10,
-      }))
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+      vi.mocked(mockRedis.get).mockResolvedValueOnce(
+        JSON.stringify({
+          ip: '203.0.113.1',
+          country: 'Japan',
+          countryCode: 'JP',
+          threat: 10,
+        })
+      )
 
       const result = await service.getGeoLocation('203.0.113.1')
-      
+
       expect(result).toEqual({
         ip: '203.0.113.1',
         country: 'Japan',
@@ -75,7 +77,9 @@ describe('GeoIPService', () => {
 
     it('should fetch from IP-API when no cache available', async () => {
       nock('http://ip-api.com')
-        .get('/json/203.0.113.1?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,proxy,hosting')
+        .get(
+          '/json/203.0.113.1?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,proxy,hosting'
+        )
         .reply(200, {
           status: 'success',
           country: 'Japan',
@@ -93,7 +97,7 @@ describe('GeoIPService', () => {
         })
 
       const result = await service.getGeoLocation('203.0.113.1')
-      
+
       expect(result).toMatchObject({
         ip: '203.0.113.1',
         country: 'Japan',
@@ -106,9 +110,7 @@ describe('GeoIPService', () => {
 
     it('should fallback to IPGeolocation when IP-API fails', async () => {
       // IP-API を失敗させる
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .reply(500)
+      nock('http://ip-api.com').get(/.*/).reply(500)
 
       // IPGeolocation API を成功させる
       nock('https://api.ipgeolocation.io')
@@ -133,7 +135,7 @@ describe('GeoIPService', () => {
         })
 
       const result = await service.getGeoLocation('8.8.8.8')
-      
+
       expect(result).toMatchObject({
         ip: '8.8.8.8',
         country: 'United States',
@@ -145,7 +147,7 @@ describe('GeoIPService', () => {
 
     it('should handle private IP addresses', async () => {
       const result = await service.getGeoLocation('192.168.1.1')
-      
+
       expect(result).toEqual({
         ip: '192.168.1.1',
         country: 'Private Network',
@@ -160,17 +162,16 @@ describe('GeoIPService', () => {
 
     // Property-based testing
     it('should handle various IP formats correctly', () => {
-      fc.assert(fc.property(
-        fc.ipV4(),
-        async (ip) => {
+      fc.assert(
+        fc.property(fc.ipV4(), async (ip) => {
           try {
             const result = await service.getGeoLocation(ip)
             expect(result?.ip).toBe(ip)
           } catch (error) {
             // プライベートIPの場合は例外が発生する可能性がある
           }
-        }
-      ))
+        })
+      )
     })
   })
 
@@ -298,8 +299,8 @@ describe('GeoIPService', () => {
 
   describe('detectAnomalousPatterns', () => {
     it('should detect impossible travel patterns', async () => {
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+
       // 過去の位置履歴をモック（東京）
       vi.mocked(mockRedis.zrevrange).mockResolvedValueOnce([
         JSON.stringify({
@@ -318,7 +319,7 @@ describe('GeoIPService', () => {
         country: 'United States',
         countryCode: 'US',
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         threat: 10,
         proxy: false,
         vpn: false,
@@ -329,7 +330,7 @@ describe('GeoIPService', () => {
       const result = await service.detectAnomalousPatterns('user123', '8.8.8.8')
 
       expect(result.isAnomalous).toBe(true)
-      expect(result.reasons.some(r => r.includes('Impossible travel speed'))).toBe(true)
+      expect(result.reasons.some((r) => r.includes('Impossible travel speed'))).toBe(true)
       expect(result.riskScore).toBeGreaterThan(50)
     })
 
@@ -347,7 +348,7 @@ describe('GeoIPService', () => {
 
       const result = await service.detectAnomalousPatterns('user123', '203.0.113.1')
 
-      expect(result.reasons.some(r => r.includes('high-risk country'))).toBe(true)
+      expect(result.reasons.some((r) => r.includes('high-risk country'))).toBe(true)
     })
 
     it('should detect proxy/VPN usage', async () => {
@@ -364,7 +365,7 @@ describe('GeoIPService', () => {
 
       const result = await service.detectAnomalousPatterns('user123', '203.0.113.1')
 
-      expect(result.reasons.some(r => r.includes('VPN usage detected'))).toBe(true)
+      expect(result.reasons.some((r) => r.includes('VPN usage detected'))).toBe(true)
     })
 
     it('should detect Tor usage with high risk score', async () => {
@@ -381,7 +382,7 @@ describe('GeoIPService', () => {
 
       const result = await service.detectAnomalousPatterns('user123', '203.0.113.1')
 
-      expect(result.reasons.some(r => r.includes('Tor usage detected'))).toBe(true)
+      expect(result.reasons.some((r) => r.includes('Tor usage detected'))).toBe(true)
       expect(result.riskScore).toBeGreaterThanOrEqual(70)
     })
 
@@ -406,15 +407,20 @@ describe('GeoIPService', () => {
 
   describe('getGeoStats', () => {
     it('should return comprehensive statistics', async () => {
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+
       vi.mocked(mockRedis.eval).mockResolvedValueOnce([150, 25])
       vi.mocked(mockRedis.zrevrange).mockResolvedValueOnce([
-        'Japan', '50',
-        'United States', '40',
-        'United Kingdom', '30',
-        'Germany', '20',
-        'France', '10',
+        'Japan',
+        '50',
+        'United States',
+        '40',
+        'United Kingdom',
+        '30',
+        'Germany',
+        '20',
+        'France',
+        '10',
       ])
 
       const stats = await service.getGeoStats()
@@ -428,18 +434,18 @@ describe('GeoIPService', () => {
 
   describe('clearCache', () => {
     it('should clear specific IP cache', async () => {
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+
       await service.clearCache('203.0.113.1')
 
       expect(mockRedis.del).toHaveBeenCalledWith('geoip:203.0.113.1')
     })
 
     it('should clear all caches when no IP specified', async () => {
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+
       vi.mocked(mockRedis.keys).mockResolvedValueOnce(['geoip:1.1.1.1', 'geoip:8.8.8.8'])
-      
+
       await service.clearCache()
 
       expect(mockRedis.keys).toHaveBeenCalledWith('geoip:*')
@@ -455,7 +461,7 @@ describe('GeoIPService', () => {
         .reply(200, {})
 
       const result = await service.getGeoLocation('203.0.113.1')
-      
+
       // フォールバックデータを返すことを確認
       expect(result).toMatchObject({
         ip: '203.0.113.1',
@@ -466,12 +472,10 @@ describe('GeoIPService', () => {
     })
 
     it('should handle API rate limits', async () => {
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .reply(429, { message: 'Rate limit exceeded' })
+      nock('http://ip-api.com').get(/.*/).reply(429, { message: 'Rate limit exceeded' })
 
       const result = await service.getGeoLocation('203.0.113.1')
-      
+
       expect(result).toMatchObject({
         ip: '203.0.113.1',
         country: 'Unknown',
@@ -480,12 +484,10 @@ describe('GeoIPService', () => {
     })
 
     it('should handle malformed API responses', async () => {
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .reply(200, 'invalid json')
+      nock('http://ip-api.com').get(/.*/).reply(200, 'invalid json')
 
       const result = await service.getGeoLocation('203.0.113.1')
-      
+
       expect(result).toMatchObject({
         ip: '203.0.113.1',
         country: 'Unknown',
@@ -498,17 +500,14 @@ describe('GeoIPService', () => {
     it('should handle concurrent requests efficiently', async () => {
       // 複数のリクエストを並行実行
       const ips = ['1.1.1.1', '8.8.8.8', '203.0.113.1', '192.0.2.1']
-      
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .times(4)
-        .reply(200, {
-          status: 'success',
-          country: 'Test Country',
-          countryCode: 'TC',
-        })
 
-      const promises = ips.map(ip => service.getGeoLocation(ip))
+      nock('http://ip-api.com').get(/.*/).times(4).reply(200, {
+        status: 'success',
+        country: 'Test Country',
+        countryCode: 'TC',
+      })
+
+      const promises = ips.map((ip) => service.getGeoLocation(ip))
       const results = await Promise.all(promises)
 
       expect(results).toHaveLength(4)
@@ -519,16 +518,14 @@ describe('GeoIPService', () => {
     })
 
     it('should cache results for performance', async () => {
-      const mockRedis = await import('../rateLimiting').then(m => m.getRedisClient())
-      
+      const mockRedis = await import('../rateLimiting').then((m) => m.getRedisClient())
+
       // 初回リクエスト
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .reply(200, {
-          status: 'success',
-          country: 'Japan',
-          countryCode: 'JP',
-        })
+      nock('http://ip-api.com').get(/.*/).reply(200, {
+        status: 'success',
+        country: 'Japan',
+        countryCode: 'JP',
+      })
 
       await service.getGeoLocation('203.0.113.1')
 
@@ -536,11 +533,13 @@ describe('GeoIPService', () => {
       expect(mockRedis.setex).toHaveBeenCalled()
 
       // 2回目のリクエストでキャッシュから取得
-      vi.mocked(mockRedis.get).mockResolvedValueOnce(JSON.stringify({
-        ip: '203.0.113.1',
-        country: 'Japan',
-        countryCode: 'JP',
-      }))
+      vi.mocked(mockRedis.get).mockResolvedValueOnce(
+        JSON.stringify({
+          ip: '203.0.113.1',
+          country: 'Japan',
+          countryCode: 'JP',
+        })
+      )
 
       const cachedResult = await service.getGeoLocation('203.0.113.1')
       expect(cachedResult?.country).toBe('Japan')
@@ -550,18 +549,16 @@ describe('GeoIPService', () => {
   describe('Security Testing', () => {
     it('should not expose sensitive information in logs', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      
+
       // 意図的にエラーを発生させる
-      nock('http://ip-api.com')
-        .get(/.*/)
-        .replyWithError('Network error')
+      nock('http://ip-api.com').get(/.*/).replyWithError('Network error')
 
       await service.getGeoLocation('203.0.113.1')
 
       // ログにAPIキーなどの機密情報が含まれていないことを確認
       expect(consoleSpy).toHaveBeenCalled()
       const logCalls = consoleSpy.mock.calls
-      logCalls.forEach(call => {
+      logCalls.forEach((call) => {
         expect(call.join(' ')).not.toContain('test-key')
         expect(call.join(' ')).not.toContain('test-license')
       })
@@ -574,7 +571,7 @@ describe('GeoIPService', () => {
         '../../etc/passwd',
         '<script>alert("xss")</script>',
         'DROP TABLE users;',
-        '\'OR\'1\'=\'1',
+        "'OR'1'='1",
       ]
 
       for (const input of maliciousInputs) {

@@ -67,7 +67,7 @@ describe('データベース最適化システム', () => {
 
     it('データベース統計を正しく取得する', async () => {
       client = new EnhancedPrismaClient()
-      
+
       mockPrismaClient.$queryRaw.mockResolvedValue([
         { state: 'active', count: 10 },
         { state: 'idle', count: 5 },
@@ -88,7 +88,7 @@ describe('データベース最適化システム', () => {
 
     it('ヘルスチェックが正常に動作する', async () => {
       client = new EnhancedPrismaClient()
-      
+
       mockPrismaClient.$queryRaw.mockResolvedValue([{ test: 1 }])
       mockPrismaClient.user.count.mockResolvedValue(100)
 
@@ -103,7 +103,7 @@ describe('データベース最適化システム', () => {
 
     it('エラー時にはunhealthyステータスを返す', async () => {
       client = new EnhancedPrismaClient()
-      
+
       mockPrismaClient.$queryRaw.mockRejectedValue(new Error('Connection failed'))
 
       const health = await client.healthCheck()
@@ -114,10 +114,10 @@ describe('データベース最適化システム', () => {
 
     it('レスポンス時間が遅い場合にdegradedステータスを返す', async () => {
       client = new EnhancedPrismaClient()
-      
+
       // 遅いクエリをシミュレート
-      mockPrismaClient.$queryRaw.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve([{ test: 1 }]), 1100))
+      mockPrismaClient.$queryRaw.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve([{ test: 1 }]), 1100))
       )
       mockPrismaClient.user.count.mockResolvedValue(100)
 
@@ -129,7 +129,7 @@ describe('データベース最適化システム', () => {
 
     it('データベース最適化が正常に実行される', async () => {
       client = new EnhancedPrismaClient()
-      
+
       mockPrismaClient.$queryRaw.mockResolvedValue([
         { tablename: 'User' },
         { tablename: 'ExamAttempt' },
@@ -145,7 +145,7 @@ describe('データベース最適化システム', () => {
 
     it('クエリ統計を正しく記録する', () => {
       client = new EnhancedPrismaClient()
-      
+
       // クエリ統計をシミュレート
       const stats = client.getQueryStats()
       expect(Array.isArray(stats)).toBe(true)
@@ -153,7 +153,7 @@ describe('データベース最適化システム', () => {
 
     it('遅いクエリを正しく検出する', () => {
       client = new EnhancedPrismaClient()
-      
+
       const slowQueries = client.getSlowQueries(5)
       expect(Array.isArray(slowQueries)).toBe(true)
       expect(slowQueries.length).toBeLessThanOrEqual(5)
@@ -161,9 +161,9 @@ describe('データベース最適化システム', () => {
 
     it('統計をリセットできる', () => {
       client = new EnhancedPrismaClient()
-      
+
       client.resetStats()
-      
+
       const stats = client.getQueryStats()
       expect(stats.length).toBe(0)
     })
@@ -228,12 +228,10 @@ describe('データベース最適化システム', () => {
     })
 
     it('メトリクスを正しく収集する', async () => {
-      mockPrismaClient.$queryRaw
-        .mockResolvedValueOnce([{ test: 1 }])
-        .mockResolvedValueOnce([
-          { state: 'active', count: 20 },
-          { state: 'idle', count: 10 },
-        ])
+      mockPrismaClient.$queryRaw.mockResolvedValueOnce([{ test: 1 }]).mockResolvedValueOnce([
+        { state: 'active', count: 20 },
+        { state: 'idle', count: 10 },
+      ])
       mockPrismaClient.user.count.mockResolvedValue(100)
 
       // プライベートメソッドをテストするため、リフレクションを使用
@@ -247,15 +245,15 @@ describe('データベース最適化システム', () => {
 
     it('アラートを正しく生成する', async () => {
       // 高いレスポンス時間をシミュレート
-      mockPrismaClient.$queryRaw.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve([{ test: 1 }]), 2100))
+      mockPrismaClient.$queryRaw.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve([{ test: 1 }]), 2100))
       )
       mockPrismaClient.user.count.mockResolvedValue(100)
 
       await (monitor as any).collectMetrics()
 
       const alerts = monitor.getAlerts()
-      expect(alerts.some(alert => alert.type === 'performance')).toBe(true)
+      expect(alerts.some((alert) => alert.type === 'performance')).toBe(true)
     })
 
     it('メトリクスをリセットできる', () => {
@@ -410,18 +408,18 @@ describe('データベース最適化システム', () => {
       const data = { id: 1, name: 'Test User' }
 
       cache.set(query, data, 100) // 100ms TTL
-      
+
       expect(cache.get(query)).toEqual(data)
-      
+
       // TTLの期限を待つ
-      await new Promise(resolve => setTimeout(resolve, 150))
-      
+      await new Promise((resolve) => setTimeout(resolve, 150))
+
       expect(cache.get(query)).toBeNull()
     })
 
     it('存在しないキーでnullを返す', () => {
       const query = { table: 'nonexistent', where: { id: 999 } }
-      
+
       expect(cache.get(query)).toBeNull()
     })
 
@@ -451,7 +449,7 @@ describe('データベース最適化システム', () => {
       cache.set({ table: 'permanent', id: 1 }, { data: 'perm1' }, 10000)
 
       // 期限切れまで待つ
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const cleaned = cache.cleanup()
 
@@ -472,14 +470,9 @@ describe('データベース最適化システム', () => {
 
   describe('IndexOptimizer', () => {
     it('単一フィールドのインデックスを推奨する', () => {
-      const suggestions = IndexOptimizer.suggestIndexes(
-        'User',
-        { email: 'test@example.com' }
-      )
+      const suggestions = IndexOptimizer.suggestIndexes('User', { email: 'test@example.com' })
 
-      expect(suggestions).toContain(
-        'CREATE INDEX idx_User_email ON "User" ("email");'
-      )
+      expect(suggestions).toContain('CREATE INDEX idx_User_email ON "User" ("email");')
     })
 
     it('複合フィールドのインデックスを推奨する', () => {
@@ -490,8 +483,8 @@ describe('データベース最適化システム', () => {
       )
 
       expect(suggestions.length).toBeGreaterThan(0)
-      expect(suggestions.some(s => s.includes('userId'))).toBe(true)
-      expect(suggestions.some(s => s.includes('status'))).toBe(true)
+      expect(suggestions.some((s) => s.includes('userId'))).toBe(true)
+      expect(suggestions.some((s) => s.includes('status'))).toBe(true)
     })
 
     it('ORDER BY句を含むインデックスを推奨する', () => {
@@ -501,7 +494,9 @@ describe('データベース最適化システム', () => {
         { startTime: 'desc', score: 'asc' }
       )
 
-      expect(suggestions.some(s => s.includes('ORDER') || s.includes('DESC') || s.includes('ASC'))).toBe(true)
+      expect(
+        suggestions.some((s) => s.includes('ORDER') || s.includes('DESC') || s.includes('ASC'))
+      ).toBe(true)
     })
 
     it('クエリプラン分析用のクエリを生成する（開発環境）', () => {
@@ -558,7 +553,7 @@ describe('データベース最適化システム', () => {
         sortBy: 'createdAt',
         sortOrder: 'desc',
       })
-      
+
       expect(paginationQuery.take).toBe(10)
       expect(paginationQuery.skip).toBe(0)
 
@@ -593,21 +588,26 @@ describe('データベース最適化システム', () => {
     })
 
     it('無効な設定値でもエラーにならない', () => {
-      expect(() => new EnhancedPrismaClient({
-        maxConnections: -1, // 無効な値
-        minConnections: 1000, // 論理的に無効
-        acquireTimeoutMillis: 0, // 無効な値
-      })).not.toThrow()
+      expect(
+        () =>
+          new EnhancedPrismaClient({
+            maxConnections: -1, // 無効な値
+            minConnections: 1000, // 論理的に無効
+            acquireTimeoutMillis: 0, // 無効な値
+          })
+      ).not.toThrow()
     })
 
     it('クエリエラー時の統計記録', async () => {
       const client = new EnhancedPrismaClient()
-      
+
       // エラーを発生させるミドルウェアをテスト
       const middleware = vi.fn().mockRejectedValue(new Error('Query failed'))
-      
+
       try {
-        await middleware({ model: 'User', action: 'findMany' }, () => Promise.reject(new Error('Query failed')))
+        await middleware({ model: 'User', action: 'findMany' }, () =>
+          Promise.reject(new Error('Query failed'))
+        )
       } catch (error) {
         // エラーが適切に処理されることを確認
         expect(error.message).toBe('Query failed')

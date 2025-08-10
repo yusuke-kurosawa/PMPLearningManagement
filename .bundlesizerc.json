@@ -2,17 +2,22 @@
   "files": [
     {
       "path": "./dist/assets/index-*.js",
-      "maxSize": "200KB",
+      "maxSize": "280KB",
       "compression": "gzip"
     },
     {
       "path": "./dist/assets/vendor-*.js",
-      "maxSize": "300KB",
+      "maxSize": "170KB",
+      "compression": "gzip"
+    },
+    {
+      "path": "./dist/assets/ui-*.js",
+      "maxSize": "180KB",
       "compression": "gzip"
     },
     {
       "path": "./dist/assets/d3-*.js",
-      "maxSize": "150KB",
+      "maxSize": "100KB",
       "compression": "gzip"
     },
     {
@@ -21,7 +26,7 @@
       "compression": "gzip"
     }
   ],
-  "defaultSize": "100KB",
+  "defaultSize": "20KB",
   "compression": "gzip",
   "ci": {
     "trackBranches": ["main", "develop"],

@@ -19,11 +19,7 @@ const VAPID_CONFIG = {
 
 // Web Push初期化
 if (VAPID_CONFIG.publicKey && VAPID_CONFIG.privateKey) {
-  webpush.setVapidDetails(
-    VAPID_CONFIG.subject,
-    VAPID_CONFIG.publicKey,
-    VAPID_CONFIG.privateKey
-  )
+  webpush.setVapidDetails(VAPID_CONFIG.subject, VAPID_CONFIG.publicKey, VAPID_CONFIG.privateKey)
 }
 
 // プッシュ通知データスキーマ
@@ -35,11 +31,15 @@ export const pushNotificationSchema = z.object({
   badge: z.string().url().optional(),
   image: z.string().url().optional(),
   data: z.record(z.any()).optional().default({}),
-  actions: z.array(z.object({
-    action: z.string(),
-    title: z.string(),
-    icon: z.string().url().optional(),
-  })).optional(),
+  actions: z
+    .array(
+      z.object({
+        action: z.string(),
+        title: z.string(),
+        icon: z.string().url().optional(),
+      })
+    )
+    .optional(),
   tag: z.string().optional(),
   renotify: z.boolean().optional().default(false),
   requireInteraction: z.boolean().optional().default(false),
@@ -78,7 +78,7 @@ export class PushNotificationService {
 
       // ユーザーのプッシュサブスクリプション取得
       const subscriptions = await prisma.pushSubscription.findMany({
-        where: { 
+        where: {
           userId: validatedData.userId,
           active: true,
         },
@@ -118,14 +118,13 @@ export class PushNotificationService {
           }
 
           await webpush.sendNotification(pushSubscription, payload, options)
-          
+
           // 成功時の記録
           await this.recordDeliverySuccess(subscription.id)
           sentCount++
-          
         } catch (error: any) {
           failureCount++
-          
+
           // エラーの種類に応じた処理
           if (error.statusCode === 410 || error.statusCode === 404) {
             // サブスクリプションが無効な場合は削除
@@ -161,7 +160,6 @@ export class PushNotificationService {
         failureCount,
         errors,
       }
-      
     } catch (error) {
       console.error('プッシュ通知送信エラー:', error)
       throw new TRPCError({
@@ -239,7 +237,6 @@ export class PushNotificationService {
         subscriptionId: subscription.id,
         success: true,
       }
-
     } catch (error) {
       console.error('プッシュサブスクリプション登録エラー:', error)
       throw new TRPCError({
@@ -290,15 +287,17 @@ export class PushNotificationService {
   }
 
   // ユーザーのプッシュサブスクリプション一覧取得
-  static async getUserSubscriptions(userId: string): Promise<Array<{
-    id: string
-    endpoint: string
-    deviceType: string
-    userAgent: string | null
-    createdAt: Date
-    lastUsedAt: Date | null
-    active: boolean
-  }>> {
+  static async getUserSubscriptions(userId: string): Promise<
+    Array<{
+      id: string
+      endpoint: string
+      deviceType: string
+      userAgent: string | null
+      createdAt: Date
+      lastUsedAt: Date | null
+      active: boolean
+    }>
+  > {
     try {
       return await prisma.pushSubscription.findMany({
         where: { userId },
@@ -350,7 +349,7 @@ export class PushNotificationService {
       [NotificationPriority.HIGH]: 'high',
       [NotificationPriority.URGENT]: 'high',
     }
-    
+
     return urgencyMap[priority] || 'normal'
   }
 
@@ -459,7 +458,7 @@ export class PushNotificationService {
           failureCount++
           errors.push({
             userId,
-            error: result.errors.map(e => e.error).join(', ') || 'Unknown error',
+            error: result.errors.map((e) => e.error).join(', ') || 'Unknown error',
           })
         }
       } catch (error) {
@@ -537,7 +536,7 @@ export class PushNotificationService {
         totalDelivered,
         totalFailed,
         deliveryRate: Math.round(deliveryRate * 100) / 100,
-        topDeviceTypes: deviceStats.map(stat => ({
+        topDeviceTypes: deviceStats.map((stat) => ({
           deviceType: stat.deviceType,
           count: stat._count.id,
         })),
@@ -578,14 +577,15 @@ export class PushNotificationService {
 
       return {
         success: result.success,
-        message: result.success 
+        message: result.success
           ? `テスト通知を ${result.sentCount} 台のデバイスに送信しました`
           : 'テスト通知の送信に失敗しました',
       }
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'テスト通知の送信中にエラーが発生しました',
+        message:
+          error instanceof Error ? error.message : 'テスト通知の送信中にエラーが発生しました',
       }
     }
   }
@@ -596,7 +596,7 @@ export class PushNotificationService {
   }> {
     try {
       const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000)
-      
+
       const result = await prisma.pushSubscription.deleteMany({
         where: {
           OR: [
@@ -624,8 +624,11 @@ export class PushNotificationService {
 }
 
 // 便利関数エクスポート
-export const sendPushNotification = PushNotificationService.sendPushNotification.bind(PushNotificationService)
-export const registerPushSubscription = PushNotificationService.registerSubscription.bind(PushNotificationService)
-export const unregisterPushSubscription = PushNotificationService.unregisterSubscription.bind(PushNotificationService)
+export const sendPushNotification =
+  PushNotificationService.sendPushNotification.bind(PushNotificationService)
+export const registerPushSubscription =
+  PushNotificationService.registerSubscription.bind(PushNotificationService)
+export const unregisterPushSubscription =
+  PushNotificationService.unregisterSubscription.bind(PushNotificationService)
 
 export default PushNotificationService

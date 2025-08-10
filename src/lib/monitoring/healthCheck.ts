@@ -11,12 +11,14 @@ const HealthCheckConfigSchema = z.object({
   retries: z.number().int().min(0).default(3),
   retryDelay: z.number().positive().default(1000),
   enableDetailedChecks: z.boolean().default(true),
-  thresholds: z.object({
-    responseTime: z.number().positive().default(1000),
-    memoryUsage: z.number().min(0).max(1).default(0.9),
-    diskUsage: z.number().min(0).max(1).default(0.9),
-    cpuUsage: z.number().min(0).max(1).default(0.9),
-  }).default({}),
+  thresholds: z
+    .object({
+      responseTime: z.number().positive().default(1000),
+      memoryUsage: z.number().min(0).max(1).default(0.9),
+      diskUsage: z.number().min(0).max(1).default(0.9),
+      cpuUsage: z.number().min(0).max(1).default(0.9),
+    })
+    .default({}),
 })
 
 export type HealthCheckConfig = z.infer<typeof HealthCheckConfigSchema>
@@ -71,7 +73,7 @@ export class HealthCheckManager {
 
   constructor(config?: Partial<HealthCheckConfig>) {
     this.config = HealthCheckConfigSchema.parse(config || {})
-    
+
     // 基本チェッカーの登録
     this.registerDefaultCheckers()
   }
@@ -82,13 +84,13 @@ export class HealthCheckManager {
   private registerDefaultCheckers(): void {
     // システム基本情報チェッカー
     this.registerChecker('system', new SystemHealthChecker(this.config))
-    
+
     // メモリ使用量チェッカー
     this.registerChecker('memory', new MemoryHealthChecker(this.config))
-    
+
     // ディスク使用量チェッカー（Node.js環境では限定的）
     this.registerChecker('disk', new DiskHealthChecker(this.config))
-    
+
     // イベントループチェッカー
     this.registerChecker('event_loop', new EventLoopHealthChecker(this.config))
   }
@@ -117,16 +119,12 @@ export class HealthCheckManager {
     }
 
     const startTime = Date.now()
-    
+
     try {
-      const result = await this.executeWithTimeout(
-        checker.check(),
-        this.config.timeout
-      )
-      
+      const result = await this.executeWithTimeout(checker.check(), this.config.timeout)
+
       result.responseTime = Date.now() - startTime
       return result
-      
     } catch (error) {
       return {
         name: checker.name,
@@ -143,9 +141,7 @@ export class HealthCheckManager {
    * すべてのヘルスチェックを実行
    */
   async runAllChecks(): Promise<HealthReport> {
-    const checkPromises = Array.from(this.checkers.keys()).map(name =>
-      this.runSingleCheck(name)
-    )
+    const checkPromises = Array.from(this.checkers.keys()).map((name) => this.runSingleCheck(name))
 
     const results = await Promise.allSettled(checkPromises)
     const checks: CheckResult[] = []
@@ -181,7 +177,7 @@ export class HealthCheckManager {
     }
 
     // ステータス集計
-    checks.forEach(check => {
+    checks.forEach((check) => {
       switch (check.status) {
         case HealthStatus.HEALTHY:
           summary.healthy++
@@ -221,10 +217,7 @@ export class HealthCheckManager {
   /**
    * タイムアウト付きでチェックを実行
    */
-  private async executeWithTimeout<T>(
-    promise: Promise<T>,
-    timeout: number
-  ): Promise<T> {
+  private async executeWithTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) =>
@@ -239,18 +232,17 @@ export class HealthCheckManager {
   async quickHealthCheck(): Promise<{ status: HealthStatus; uptime: number }> {
     try {
       const uptime = Date.now() - this.startTime.getTime()
-      
+
       // 基本的なシステムチェックのみ
       const memUsage = process.memoryUsage()
       const memoryUsageRatio = memUsage.heapUsed / memUsage.heapTotal
-      
+
       let status = HealthStatus.HEALTHY
       if (memoryUsageRatio > this.config.thresholds.memoryUsage) {
         status = HealthStatus.DEGRADED
       }
 
       return { status, uptime }
-      
     } catch (error) {
       return { status: HealthStatus.CRITICAL, uptime: 0 }
     }
@@ -264,15 +256,14 @@ export class HealthCheckManager {
 
   async getCachedHealthReport(): Promise<HealthReport> {
     const now = Date.now()
-    
-    if (this.healthReportCache && 
-        (now - this.healthReportCache.timestamp) < this.cacheTimeout) {
+
+    if (this.healthReportCache && now - this.healthReportCache.timestamp < this.cacheTimeout) {
       return this.healthReportCache.report
     }
 
     const report = await this.runAllChecks()
     this.healthReportCache = { report, timestamp: now }
-    
+
     return report
   }
 
@@ -297,7 +288,7 @@ export class SystemHealthChecker implements HealthChecker {
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     try {
       const details = {
         platform: process.platform,
@@ -312,7 +303,7 @@ export class SystemHealthChecker implements HealthChecker {
       const cpuUsage = process.cpuUsage()
       const elapsedTime = process.hrtime()
       const totalTime = elapsedTime[0] * 1000 + elapsedTime[1] / 1000000
-      const cpuPercent = ((cpuUsage.user + cpuUsage.system) / 1000) / totalTime
+      const cpuPercent = (cpuUsage.user + cpuUsage.system) / 1000 / totalTime
 
       details.cpuUsage = {
         user: cpuUsage.user,
@@ -332,7 +323,6 @@ export class SystemHealthChecker implements HealthChecker {
         details,
         timestamp: new Date(),
       }
-      
     } catch (error) {
       return {
         name: this.name,
@@ -359,7 +349,7 @@ export class MemoryHealthChecker implements HealthChecker {
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     try {
       const memUsage = process.memoryUsage()
       const memoryUsageRatio = memUsage.heapUsed / memUsage.heapTotal
@@ -387,7 +377,6 @@ export class MemoryHealthChecker implements HealthChecker {
         details,
         timestamp: new Date(),
       }
-      
     } catch (error) {
       return {
         name: this.name,
@@ -414,13 +403,13 @@ export class DiskHealthChecker implements HealthChecker {
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     try {
       // Node.js環境では詳細なディスク情報は取得困難なため、
       // ファイルシステムの基本的な読み書き確認を行う
       const fs = require('fs').promises
       const tmpFile = `/tmp/health-check-${Date.now()}`
-      
+
       await fs.writeFile(tmpFile, 'health check')
       const content = await fs.readFile(tmpFile, 'utf8')
       await fs.unlink(tmpFile)
@@ -439,7 +428,6 @@ export class DiskHealthChecker implements HealthChecker {
         details,
         timestamp: new Date(),
       }
-      
     } catch (error) {
       return {
         name: this.name,
@@ -466,10 +454,10 @@ export class EventLoopHealthChecker implements HealthChecker {
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     return new Promise<CheckResult>((resolve) => {
       const start = process.hrtime()
-      
+
       setImmediate(() => {
         const delta = process.hrtime(start)
         const lag = delta[0] * 1000 + delta[1] / 1000000 // ms
@@ -508,17 +496,14 @@ export class DatabaseHealthChecker implements HealthChecker {
   private config: HealthCheckConfig
   private connectionTest: () => Promise<boolean>
 
-  constructor(
-    config: HealthCheckConfig,
-    connectionTest: () => Promise<boolean>
-  ) {
+  constructor(config: HealthCheckConfig, connectionTest: () => Promise<boolean>) {
     this.config = config
     this.connectionTest = connectionTest
   }
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     try {
       const isConnected = await this.connectionTest()
       const responseTime = Date.now() - startTime
@@ -543,7 +528,6 @@ export class DatabaseHealthChecker implements HealthChecker {
         details,
         timestamp: new Date(),
       }
-      
     } catch (error) {
       return {
         name: this.name,
@@ -565,17 +549,14 @@ export class RedisHealthChecker implements HealthChecker {
   private config: HealthCheckConfig
   private pingTest: () => Promise<string>
 
-  constructor(
-    config: HealthCheckConfig,
-    pingTest: () => Promise<string>
-  ) {
+  constructor(config: HealthCheckConfig, pingTest: () => Promise<string>) {
     this.config = config
     this.pingTest = pingTest
   }
 
   async check(): Promise<CheckResult> {
     const startTime = Date.now()
-    
+
     try {
       const result = await this.pingTest()
       const responseTime = Date.now() - startTime
@@ -601,7 +582,6 @@ export class RedisHealthChecker implements HealthChecker {
         details,
         timestamp: new Date(),
       }
-      
     } catch (error) {
       return {
         name: this.name,

@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker'
 
 // Knowledge areas and process groups from PMBOK
 export const KNOWLEDGE_AREAS = [
@@ -12,7 +12,7 @@ export const KNOWLEDGE_AREAS = [
   'RISK',
   'PROCUREMENT',
   'STAKEHOLDER',
-] as const;
+] as const
 
 export const PROCESS_GROUPS = [
   'INITIATING',
@@ -20,14 +20,9 @@ export const PROCESS_GROUPS = [
   'EXECUTING',
   'MONITORING_CONTROLLING',
   'CLOSING',
-] as const;
+] as const
 
-export const LEARNING_STATUS = [
-  'NOT_STARTED',
-  'IN_PROGRESS',
-  'COMPLETED',
-  'MASTERED',
-] as const;
+export const LEARNING_STATUS = ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MASTERED'] as const
 
 // Learning progress factory
 export function createLearningProgress(overrides?: any) {
@@ -50,15 +45,15 @@ export function createLearningProgress(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Exam result factory
 export function createExamResult(overrides?: any) {
-  const totalQuestions = 180;
-  const correctAnswers = faker.number.int({ min: 0, max: totalQuestions });
-  const score = Math.round((correctAnswers / totalQuestions) * 100);
-  
+  const totalQuestions = 180
+  const correctAnswers = faker.number.int({ min: 0, max: totalQuestions })
+  const score = Math.round((correctAnswers / totalQuestions) * 100)
+
   return {
     id: faker.string.uuid(),
     userId: faker.string.uuid(),
@@ -81,31 +76,37 @@ export function createExamResult(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Generate knowledge area scores
 function generateKnowledgeAreaScores() {
-  return KNOWLEDGE_AREAS.reduce((acc, area) => {
-    acc[area] = {
-      total: faker.number.int({ min: 10, max: 30 }),
-      correct: faker.number.int({ min: 5, max: 30 }),
-      percentage: faker.number.float({ min: 40, max: 100, multipleOf: 0.1 }),
-    };
-    return acc;
-  }, {} as Record<string, any>);
+  return KNOWLEDGE_AREAS.reduce(
+    (acc, area) => {
+      acc[area] = {
+        total: faker.number.int({ min: 10, max: 30 }),
+        correct: faker.number.int({ min: 5, max: 30 }),
+        percentage: faker.number.float({ min: 40, max: 100, multipleOf: 0.1 }),
+      }
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 // Generate process group scores
 function generateProcessGroupScores() {
-  return PROCESS_GROUPS.reduce((acc, group) => {
-    acc[group] = {
-      total: faker.number.int({ min: 20, max: 50 }),
-      correct: faker.number.int({ min: 10, max: 50 }),
-      percentage: faker.number.float({ min: 40, max: 100, multipleOf: 0.1 }),
-    };
-    return acc;
-  }, {} as Record<string, any>);
+  return PROCESS_GROUPS.reduce(
+    (acc, group) => {
+      acc[group] = {
+        total: faker.number.int({ min: 20, max: 50 }),
+        correct: faker.number.int({ min: 10, max: 50 }),
+        percentage: faker.number.float({ min: 40, max: 100, multipleOf: 0.1 }),
+      }
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 // Generate flagged questions
@@ -113,7 +114,7 @@ function generateFlaggedQuestions(count = 10) {
   return Array.from({ length: count }, (_, i) => ({
     questionId: `q-${i + 1}`,
     flaggedAt: faker.date.recent(),
-  }));
+  }))
 }
 
 // Generate exam answers
@@ -125,7 +126,7 @@ function generateExamAnswers(totalQuestions: number) {
     isCorrect: faker.datatype.boolean(),
     timeSpent: faker.number.int({ min: 30, max: 300 }),
     confidence: faker.helpers.arrayElement(['LOW', 'MEDIUM', 'HIGH']),
-  }));
+  }))
 }
 
 // Flashcard progress factory
@@ -148,7 +149,7 @@ export function createFlashcardProgress(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Study session factory
@@ -170,7 +171,7 @@ export function createStudySession(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Learning goal factory
@@ -200,7 +201,7 @@ export function createLearningGoal(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Achievement factory
@@ -227,27 +228,33 @@ export function createAchievement(overrides?: any) {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
-  };
+  }
 }
 
 // Progress statistics factory
 export function createProgressStatistics(userId: string) {
-  const totalProcesses = 49;
-  const completedProcesses = faker.number.int({ min: 0, max: totalProcesses });
-  
+  const totalProcesses = 49
+  const completedProcesses = faker.number.int({ min: 0, max: totalProcesses })
+
   return {
     userId,
     totalProcesses,
     completedProcesses,
     progressPercentage: Math.round((completedProcesses / totalProcesses) * 100),
-    knowledgeAreaProgress: KNOWLEDGE_AREAS.reduce((acc, area) => {
-      acc[area] = faker.number.int({ min: 0, max: 100 });
-      return acc;
-    }, {} as Record<string, number>),
-    processGroupProgress: PROCESS_GROUPS.reduce((acc, group) => {
-      acc[group] = faker.number.int({ min: 0, max: 100 });
-      return acc;
-    }, {} as Record<string, number>),
+    knowledgeAreaProgress: KNOWLEDGE_AREAS.reduce(
+      (acc, area) => {
+        acc[area] = faker.number.int({ min: 0, max: 100 })
+        return acc
+      },
+      {} as Record<string, number>
+    ),
+    processGroupProgress: PROCESS_GROUPS.reduce(
+      (acc, group) => {
+        acc[group] = faker.number.int({ min: 0, max: 100 })
+        return acc
+      },
+      {} as Record<string, number>
+    ),
     totalStudyTime: faker.number.int({ min: 0, max: 100000 }),
     averageScore: faker.number.float({ min: 60, max: 100, multipleOf: 0.1 }),
     examsTaken: faker.number.int({ min: 0, max: 50 }),
@@ -256,14 +263,12 @@ export function createProgressStatistics(userId: string) {
     longestStreak: faker.number.int({ min: 0, max: 365 }),
     lastActivityDate: faker.date.recent(),
     estimatedCompletionDate: faker.date.future(),
-  };
+  }
 }
 
 // Batch create progress records
 export function createProgressBatch(userId: string, count: number) {
-  return Array.from({ length: count }, () => 
-    createLearningProgress({ userId })
-  );
+  return Array.from({ length: count }, () => createLearningProgress({ userId }))
 }
 
 // Create complete user progress
@@ -271,14 +276,10 @@ export function createCompleteUserProgress(userId: string) {
   return {
     learningProgress: createProgressBatch(userId, 49),
     examResults: Array.from({ length: 5 }, () => createExamResult({ userId })),
-    flashcardProgress: Array.from({ length: 100 }, () => 
-      createFlashcardProgress({ userId })
-    ),
-    studySessions: Array.from({ length: 20 }, () => 
-      createStudySession({ userId })
-    ),
+    flashcardProgress: Array.from({ length: 100 }, () => createFlashcardProgress({ userId })),
+    studySessions: Array.from({ length: 20 }, () => createStudySession({ userId })),
     goals: Array.from({ length: 3 }, () => createLearningGoal({ userId })),
     achievements: Array.from({ length: 10 }, () => createAchievement({ userId })),
     statistics: createProgressStatistics(userId),
-  };
+  }
 }

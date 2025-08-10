@@ -3,14 +3,14 @@
  * Developer 2: Learning Progress Developer Implementation
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Target, 
-  Calendar, 
-  Clock, 
-  Trophy, 
+import React, { useState, useEffect } from 'react'
+import {
+  BarChart3,
+  TrendingUp,
+  Target,
+  Calendar,
+  Clock,
+  Trophy,
   Star,
   BookOpen,
   Brain,
@@ -23,22 +23,22 @@ import {
   AlertCircle,
   CheckCircle2,
   Flame,
-  Award
-} from 'lucide-react';
+  Award,
+} from 'lucide-react'
 import {
   useProgressStore,
   type ProcessProgress,
   type LearningGoal,
   type StudySession,
-  type Achievement
-} from '../../stores/progressStore';
-import { api } from '../../lib/api/client';
-import { useToast } from '../../hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import { Badge } from '../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+  type Achievement,
+} from '../../stores/progressStore'
+import { api } from '../../lib/api/client'
+import { useToast } from '../../hooks/use-toast'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Button } from '../ui/button'
+import { Progress } from '../ui/progress'
+import { Badge } from '../ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import {
   LineChart,
   Line,
@@ -56,15 +56,17 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
-} from 'recharts';
-import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
+  Radar,
+} from 'recharts'
+import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 
 const EnhancedProgressDashboard: React.FC = () => {
-  const { toast } = useToast();
-  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'achievements'>('overview');
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week');
-  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast()
+  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'achievements'>(
+    'overview'
+  )
+  const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week')
+  const [isExporting, setIsExporting] = useState(false)
 
   // Store state and actions
   const {
@@ -88,162 +90,174 @@ const EnhancedProgressDashboard: React.FC = () => {
     updateGoal,
     checkAchievements,
     exportProgress,
-  } = useProgressStore();
+  } = useProgressStore()
 
   // Load data on mount
   useEffect(() => {
-    loadProgress();
-    checkAchievements();
-  }, []);
+    loadProgress()
+    checkAchievements()
+  }, [])
 
   // Auto-sync with server every 5 minutes
   useEffect(() => {
-    const interval = setInterval(syncWithServer, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(syncWithServer, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleExportProgress = async () => {
-    setIsExporting(true);
+    setIsExporting(true)
     try {
-      const data = exportProgress();
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `pmp-progress-${format(new Date(), 'yyyy-MM-dd')}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
+      const data = exportProgress()
+      const blob = new Blob([data], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `pmp-progress-${format(new Date(), 'yyyy-MM-dd')}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
       toast({
-        title: "Progress Exported",
-        description: "Your learning progress has been exported successfully.",
-      });
+        title: 'Progress Exported',
+        description: 'Your learning progress has been exported successfully.',
+      })
     } catch (error) {
       toast({
-        title: "Export Failed",
-        description: "Failed to export progress data.",
-        variant: "destructive",
-      });
+        title: 'Export Failed',
+        description: 'Failed to export progress data.',
+        variant: 'destructive',
+      })
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
   const handleCreateGoal = async (goalData: any) => {
     try {
-      await createGoal(goalData);
+      await createGoal(goalData)
       toast({
-        title: "Goal Created",
-        description: "Your new learning goal has been created.",
-      });
+        title: 'Goal Created',
+        description: 'Your new learning goal has been created.',
+      })
     } catch (error) {
       toast({
-        title: "Failed to Create Goal",
-        description: "Could not create your learning goal.",
-        variant: "destructive",
-      });
+        title: 'Failed to Create Goal',
+        description: 'Could not create your learning goal.',
+        variant: 'destructive',
+      })
     }
-  };
+  }
 
   // Chart data preparation
-  const weeklyProgress = getWeeklyProgress();
-  const monthlyTrends = getMonthlyTrends();
-  const totalStudyTime = getTotalStudyTime();
-  const overallProgress = getOverallProgress();
-  const weakAreas = getWeakAreas();
-  const strongAreas = getStrongAreas();
-  const recommendations = getRecommendedStudy();
+  const weeklyProgress = getWeeklyProgress()
+  const monthlyTrends = getMonthlyTrends()
+  const totalStudyTime = getTotalStudyTime()
+  const overallProgress = getOverallProgress()
+  const weakAreas = getWeakAreas()
+  const strongAreas = getStrongAreas()
+  const recommendations = getRecommendedStudy()
 
   // Process mastery distribution
-  const masteryDistribution = Object.values(processProgress).reduce((acc, process) => {
-    acc[process.masteryLevel] = (acc[process.masteryLevel] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const masteryDistribution = Object.values(processProgress).reduce(
+    (acc, process) => {
+      acc[process.masteryLevel] = (acc[process.masteryLevel] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   const masteryChartData = Object.entries(masteryDistribution).map(([level, count]) => ({
     name: level.replace('_', ' ').toUpperCase(),
     value: count,
-    color: {
-      'not_started': '#f3f4f6',
-      'beginner': '#fbbf24',
-      'intermediate': '#60a5fa',
-      'advanced': '#34d399',
-      'mastered': '#10b981',
-    }[level] || '#gray-400',
-  }));
+    color:
+      {
+        not_started: '#f3f4f6',
+        beginner: '#fbbf24',
+        intermediate: '#60a5fa',
+        advanced: '#34d399',
+        mastered: '#10b981',
+      }[level] || '#gray-400',
+  }))
 
   // Knowledge area performance
   const knowledgeAreaData = Object.entries(
-    Object.values(processProgress).reduce((acc, process) => {
-      if (!acc[process.knowledgeArea]) {
-        acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 };
-      }
-      acc[process.knowledgeArea].total += 1;
-      if (process.masteryLevel === 'mastered') acc[process.knowledgeArea].mastered += 1;
-      acc[process.knowledgeArea].studyTime += process.studyTime;
-      return acc;
-    }, {} as Record<string, { total: number; mastered: number; studyTime: number }>)
+    Object.values(processProgress).reduce(
+      (acc, process) => {
+        if (!acc[process.knowledgeArea]) {
+          acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 }
+        }
+        acc[process.knowledgeArea].total += 1
+        if (process.masteryLevel === 'mastered') acc[process.knowledgeArea].mastered += 1
+        acc[process.knowledgeArea].studyTime += process.studyTime
+        return acc
+      },
+      {} as Record<string, { total: number; mastered: number; studyTime: number }>
+    )
   ).map(([area, data]) => ({
     area: area.replace(/([A-Z])/g, ' $1').trim(),
     mastery: (data.mastered / data.total) * 100,
     studyTime: data.studyTime,
     fullMark: 100,
-  }));
+  }))
 
   // Recent achievements (last 30 days)
   const recentAchievements = achievements
-    .filter(a => a.isUnlocked && a.unlockedAt && a.unlockedAt > subDays(new Date(), 30))
+    .filter((a) => a.isUnlocked && a.unlockedAt && a.unlockedAt > subDays(new Date(), 30))
     .sort((a, b) => (b.unlockedAt?.getTime() || 0) - (a.unlockedAt?.getTime() || 0))
-    .slice(0, 5);
+    .slice(0, 5)
 
   // Active goals with progress
   const activeGoals = goals
-    .filter(g => !g.isCompleted)
+    .filter((g) => !g.isCompleted)
     .sort((a, b) => (a.targetDate?.getTime() || 0) - (b.targetDate?.getTime() || 0))
-    .slice(0, 3);
+    .slice(0, 3)
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <Card className="w-96">
           <CardContent className="p-6 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <h3 className="text-lg font-semibold mb-2">Loading Progress</h3>
+            <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-600" />
+            <h3 className="mb-2 text-lg font-semibold">Loading Progress</h3>
             <p className="text-gray-600">Fetching your learning data...</p>
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Learning Progress Dashboard</h1>
               <p className="text-gray-600">Track your PMP certification journey</p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={syncWithServer}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Sync
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExportProgress} disabled={isExporting}>
-                <Download className="w-4 h-4 mr-2" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportProgress}
+                disabled={isExporting}
+              >
+                <Download className="mr-2 h-4 w-4" />
                 Export
               </Button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600" />
+                <AlertCircle className="h-4 w-4 text-red-600" />
                 <span className="text-red-800">{error}</span>
               </div>
             </div>
@@ -251,13 +265,13 @@ const EnhancedProgressDashboard: React.FC = () => {
         </div>
 
         {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Total Study Time */}
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Clock className="w-6 h-6 text-blue-600" />
+                <div className="rounded-full bg-blue-100 p-3">
+                  <Clock className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Study Time</p>
@@ -273,8 +287,8 @@ const EnhancedProgressDashboard: React.FC = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="rounded-full bg-green-100 p-3">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-600">Overall Progress</p>
@@ -289,12 +303,14 @@ const EnhancedProgressDashboard: React.FC = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <Flame className="w-6 h-6 text-orange-600" />
+                <div className="rounded-full bg-orange-100 p-3">
+                  <Flame className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Current Streak</p>
-                  <p className="text-2xl font-bold text-gray-900">{studyStreak.currentStreak} days</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {studyStreak.currentStreak} days
+                  </p>
                   <p className="text-xs text-gray-500">Best: {studyStreak.longestStreak} days</p>
                 </div>
               </div>
@@ -305,13 +321,13 @@ const EnhancedProgressDashboard: React.FC = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-full">
-                  <Trophy className="w-6 h-6 text-purple-600" />
+                <div className="rounded-full bg-purple-100 p-3">
+                  <Trophy className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Achievements</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {achievements.filter(a => a.isUnlocked).length}
+                    {achievements.filter((a) => a.isUnlocked).length}
                   </p>
                   <p className="text-xs text-gray-500">of {achievements.length} unlocked</p>
                 </div>
@@ -330,7 +346,7 @@ const EnhancedProgressDashboard: React.FC = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Weekly Progress Chart */}
               <Card>
                 <CardHeader>
@@ -340,16 +356,16 @@ const EnhancedProgressDashboard: React.FC = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={weeklyProgress}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="date" 
+                      <XAxis
+                        dataKey="date"
                         tickFormatter={(value) => format(new Date(value), 'MMM dd')}
                       />
                       <YAxis />
-                      <Tooltip 
+                      <Tooltip
                         labelFormatter={(value) => format(new Date(value), 'MMM dd, yyyy')}
                         formatter={(value: number, name: string) => [
                           name === 'studyTime' ? `${value} min` : value,
-                          name === 'studyTime' ? 'Study Time' : 'Processes Studied'
+                          name === 'studyTime' ? 'Study Time' : 'Processes Studied',
                         ]}
                       />
                       <Area
@@ -388,11 +404,11 @@ const EnhancedProgressDashboard: React.FC = () => {
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {masteryChartData.map((entry, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
+                        <div
+                          className="h-3 w-3 rounded-full"
                           style={{ backgroundColor: entry.color }}
                         />
                         <span className="text-xs text-gray-600">
@@ -405,12 +421,12 @@ const EnhancedProgressDashboard: React.FC = () => {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Weak Areas */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 text-yellow-600" />
+                    <AlertCircle className="h-5 w-5 text-yellow-600" />
                     Areas to Improve
                   </CardTitle>
                 </CardHeader>
@@ -419,7 +435,7 @@ const EnhancedProgressDashboard: React.FC = () => {
                     weakAreas.map((process) => (
                       <div key={process.processId} className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="truncate text-sm font-medium text-gray-900">
                             {process.processName}
                           </p>
                           <p className="text-xs text-gray-500">{process.knowledgeArea}</p>
@@ -430,7 +446,7 @@ const EnhancedProgressDashboard: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="py-4 text-center text-gray-500">
                       Great job! No weak areas identified.
                     </p>
                   )}
@@ -441,7 +457,7 @@ const EnhancedProgressDashboard: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-green-600" />
+                    <Star className="h-5 w-5 text-green-600" />
                     Strong Areas
                   </CardTitle>
                 </CardHeader>
@@ -450,18 +466,18 @@ const EnhancedProgressDashboard: React.FC = () => {
                     strongAreas.map((process) => (
                       <div key={process.processId} className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="truncate text-sm font-medium text-gray-900">
                             {process.processName}
                           </p>
                           <p className="text-xs text-gray-500">{process.knowledgeArea}</p>
                         </div>
-                        <Badge variant="default" className="text-xs bg-green-600">
+                        <Badge variant="default" className="bg-green-600 text-xs">
                           {process.confidenceScore}%
                         </Badge>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="py-4 text-center text-gray-500">
                       Keep studying to build strong areas!
                     </p>
                   )}
@@ -472,7 +488,7 @@ const EnhancedProgressDashboard: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-blue-600" />
+                    <Brain className="h-5 w-5 text-blue-600" />
                     Recommendations
                   </CardTitle>
                 </CardHeader>
@@ -480,12 +496,12 @@ const EnhancedProgressDashboard: React.FC = () => {
                   {recommendations.length > 0 ? (
                     recommendations.map((recommendation, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <Zap className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
                         <p className="text-sm text-gray-700">{recommendation}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="py-4 text-center text-gray-500">
                       No specific recommendations at this time.
                     </p>
                   )}
@@ -496,7 +512,7 @@ const EnhancedProgressDashboard: React.FC = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Monthly Study Trends */}
               <Card>
                 <CardHeader>
@@ -531,11 +547,7 @@ const EnhancedProgressDashboard: React.FC = () => {
                     <RadarChart data={knowledgeAreaData}>
                       <PolarGrid />
                       <PolarAngleAxis dataKey="area" tick={{ fontSize: 12 }} />
-                      <PolarRadiusAxis
-                        angle={90}
-                        domain={[0, 100]}
-                        tick={{ fontSize: 10 }}
-                      />
+                      <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
                       <Radar
                         name="Mastery %"
                         dataKey="mastery"
@@ -559,12 +571,12 @@ const EnhancedProgressDashboard: React.FC = () => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left p-2">Process</th>
-                        <th className="text-left p-2">Knowledge Area</th>
-                        <th className="text-left p-2">Mastery Level</th>
-                        <th className="text-left p-2">Study Time</th>
-                        <th className="text-left p-2">Confidence</th>
-                        <th className="text-left p-2">Last Studied</th>
+                        <th className="p-2 text-left">Process</th>
+                        <th className="p-2 text-left">Knowledge Area</th>
+                        <th className="p-2 text-left">Mastery Level</th>
+                        <th className="p-2 text-left">Study Time</th>
+                        <th className="p-2 text-left">Confidence</th>
+                        <th className="p-2 text-left">Last Studied</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -576,11 +588,13 @@ const EnhancedProgressDashboard: React.FC = () => {
                             <td className="p-2 font-medium">{process.processName}</td>
                             <td className="p-2 text-gray-600">{process.knowledgeArea}</td>
                             <td className="p-2">
-                              <Badge 
+                              <Badge
                                 variant={
-                                  process.masteryLevel === 'mastered' ? 'default' :
-                                  process.masteryLevel === 'advanced' ? 'secondary' :
-                                  'outline'
+                                  process.masteryLevel === 'mastered'
+                                    ? 'default'
+                                    : process.masteryLevel === 'advanced'
+                                      ? 'secondary'
+                                      : 'outline'
                                 }
                                 className="capitalize"
                               >
@@ -590,15 +604,14 @@ const EnhancedProgressDashboard: React.FC = () => {
                             <td className="p-2">{process.studyTime}m</td>
                             <td className="p-2">
                               <div className="flex items-center gap-2">
-                                <Progress value={process.confidenceScore} className="w-16 h-2" />
+                                <Progress value={process.confidenceScore} className="h-2 w-16" />
                                 <span className="text-xs">{process.confidenceScore}%</span>
                               </div>
                             </td>
                             <td className="p-2 text-gray-500">
-                              {process.lastStudied 
+                              {process.lastStudied
                                 ? format(process.lastStudied, 'MMM dd')
-                                : 'Never'
-                              }
+                                : 'Never'}
                             </td>
                           </tr>
                         ))}
@@ -611,39 +624,45 @@ const EnhancedProgressDashboard: React.FC = () => {
 
           {/* Goals Tab */}
           <TabsContent value="goals" className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Learning Goals</h2>
-              <Button onClick={() => handleCreateGoal({
-                title: "New Goal",
-                description: "Description",
-                type: "study_time",
-                targetValue: 100,
-                targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-              })}>
-                <Target className="w-4 h-4 mr-2" />
+              <Button
+                onClick={() =>
+                  handleCreateGoal({
+                    title: 'New Goal',
+                    description: 'Description',
+                    type: 'study_time',
+                    targetValue: 100,
+                    targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                  })
+                }
+              >
+                <Target className="mr-2 h-4 w-4" />
                 Create Goal
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {activeGoals.map((goal) => (
                 <Card key={goal.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-blue-600" />
+                      <Target className="h-5 w-5 text-blue-600" />
                       {goal.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-4">{goal.description}</p>
+                    <p className="mb-4 text-sm text-gray-600">{goal.description}</p>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Progress</span>
-                        <span>{goal.currentValue} / {goal.targetValue}</span>
+                        <span>
+                          {goal.currentValue} / {goal.targetValue}
+                        </span>
                       </div>
                       <Progress value={(goal.currentValue / goal.targetValue) * 100} />
                       {goal.targetDate && (
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="mt-2 text-xs text-gray-500">
                           Due: {format(goal.targetDate, 'MMM dd, yyyy')}
                         </p>
                       )}
@@ -657,14 +676,14 @@ const EnhancedProgressDashboard: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                   Completed Goals
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {goals
-                    .filter(g => g.isCompleted)
+                    .filter((g) => g.isCompleted)
                     .slice(0, 5)
                     .map((goal) => (
                       <div key={goal.id} className="flex items-center justify-between">
@@ -677,8 +696,8 @@ const EnhancedProgressDashboard: React.FC = () => {
                         </Badge>
                       </div>
                     ))}
-                  {goals.filter(g => g.isCompleted).length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
+                  {goals.filter((g) => g.isCompleted).length === 0 && (
+                    <p className="py-4 text-center text-gray-500">
                       No completed goals yet. Keep working towards your targets!
                     </p>
                   )}
@@ -689,38 +708,39 @@ const EnhancedProgressDashboard: React.FC = () => {
 
           {/* Achievements Tab */}
           <TabsContent value="achievements" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Recent Achievements */}
               <Card className="md:col-span-2 lg:col-span-3">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-yellow-600" />
+                    <Award className="h-5 w-5 text-yellow-600" />
                     Recent Achievements
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {recentAchievements.length > 0 ? (
                       recentAchievements.map((achievement) => (
                         <div
                           key={achievement.id}
-                          className="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200"
+                          className="rounded-lg border border-yellow-200 bg-gradient-to-r from-yellow-50 to-yellow-100 p-4"
                         >
                           <div className="flex items-center gap-3">
                             <div className="text-2xl">{achievement.icon}</div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
                               <p className="text-sm text-gray-600">{achievement.description}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {achievement.unlockedAt && format(achievement.unlockedAt, 'MMM dd, yyyy')}
+                              <p className="mt-1 text-xs text-gray-500">
+                                {achievement.unlockedAt &&
+                                  format(achievement.unlockedAt, 'MMM dd, yyyy')}
                               </p>
                             </div>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="col-span-full text-center py-8">
-                        <Trophy className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <div className="col-span-full py-8 text-center">
+                        <Trophy className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                         <p className="text-gray-500">No recent achievements. Keep studying!</p>
                       </div>
                     )}
@@ -742,19 +762,23 @@ const EnhancedProgressDashboard: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <div className="text-3xl opacity-80">{achievement.icon}</div>
                       <div className="flex-1">
-                        <h4 className={`font-semibold ${
-                          achievement.isUnlocked ? 'text-yellow-900' : 'text-gray-600'
-                        }`}>
+                        <h4
+                          className={`font-semibold ${
+                            achievement.isUnlocked ? 'text-yellow-900' : 'text-gray-600'
+                          }`}
+                        >
                           {achievement.title}
                         </h4>
-                        <p className={`text-sm ${
-                          achievement.isUnlocked ? 'text-yellow-700' : 'text-gray-500'
-                        }`}>
+                        <p
+                          className={`text-sm ${
+                            achievement.isUnlocked ? 'text-yellow-700' : 'text-gray-500'
+                          }`}
+                        >
                           {achievement.description}
                         </p>
                         {!achievement.isUnlocked && (
                           <div className="mt-2">
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <div className="mb-1 flex justify-between text-xs text-gray-500">
                               <span>Progress</span>
                               <span>{achievement.progress.toFixed(0)}%</span>
                             </div>
@@ -762,7 +786,7 @@ const EnhancedProgressDashboard: React.FC = () => {
                           </div>
                         )}
                         {achievement.isUnlocked && achievement.unlockedAt && (
-                          <p className="text-xs text-yellow-600 mt-1">
+                          <p className="mt-1 text-xs text-yellow-600">
                             Unlocked {format(achievement.unlockedAt, 'MMM dd, yyyy')}
                           </p>
                         )}
@@ -776,7 +800,7 @@ const EnhancedProgressDashboard: React.FC = () => {
         </Tabs>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EnhancedProgressDashboard;
+export default EnhancedProgressDashboard

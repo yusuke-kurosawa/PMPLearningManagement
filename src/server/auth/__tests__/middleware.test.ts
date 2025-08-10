@@ -5,11 +5,11 @@
 
 import { describe, it, expect, beforeEach, jest } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  validateJWT, 
-  generateSecureToken, 
+import {
+  validateJWT,
+  generateSecureToken,
   verifyHMACSignature,
-  authMiddleware 
+  authMiddleware,
 } from '../middleware'
 import jwt from 'jsonwebtoken'
 
@@ -37,11 +37,11 @@ describe('JWT検証ミドルウェア', () => {
         sub: 'user123',
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600, // 1時間後
-        iss: 'pmp-learning-system'
+        iss: 'pmp-learning-system',
       }
-      
+
       const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: `Bearer ${token}`,
@@ -60,11 +60,11 @@ describe('JWT検証ミドルウェア', () => {
         sub: 'user123',
         iat: Math.floor(Date.now() / 1000) - 7200, // 2時間前
         exp: Math.floor(Date.now() / 1000) - 3600, // 1時間前（期限切れ）
-        iss: 'pmp-learning-system'
+        iss: 'pmp-learning-system',
       }
-      
+
       const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: `Bearer ${token}`,
@@ -83,9 +83,9 @@ describe('JWT検証ミドルウェア', () => {
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
       }
-      
+
       const token = jwt.sign(payload, 'wrong-secret')
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: `Bearer ${token}`,
@@ -103,11 +103,11 @@ describe('JWT検証ミドルウェア', () => {
         sub: 'user123',
         iat: Math.floor(Date.now() / 1000) + 300, // 5分後（未来の時刻）
         exp: Math.floor(Date.now() / 1000) + 3600,
-        iss: 'pmp-learning-system'
+        iss: 'pmp-learning-system',
       }
-      
+
       const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: `Bearer ${token}`,
@@ -125,11 +125,11 @@ describe('JWT検証ミドルウェア', () => {
         sub: 'user123',
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
-        iss: 'malicious-system'
+        iss: 'malicious-system',
       }
-      
+
       const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: `Bearer ${token}`,
@@ -156,11 +156,11 @@ describe('JWT検証ミドルウェア', () => {
         sub: 'user123',
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
-        iss: 'pmp-learning-system'
+        iss: 'pmp-learning-system',
       }
-      
+
       const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           cookie: `next-auth.session-token=${token}`,
@@ -177,7 +177,7 @@ describe('JWT検証ミドルウェア', () => {
   describe('generateSecureToken', () => {
     it('指定した長さのセキュアなトークンを生成する', () => {
       const token = generateSecureToken(32)
-      
+
       expect(token).toHaveLength(64) // hex文字列なので32バイト = 64文字
       expect(token).toMatch(/^[a-f0-9]+$/)
     })
@@ -185,7 +185,7 @@ describe('JWT検証ミドルウェア', () => {
     it('異なる呼び出しで異なるトークンを生成する', () => {
       const token1 = generateSecureToken(16)
       const token2 = generateSecureToken(16)
-      
+
       expect(token1).not.toBe(token2)
     })
   })
@@ -195,10 +195,7 @@ describe('JWT検証ミドルウェア', () => {
       const secret = 'webhook-secret-key'
       const payload = '{"event":"user.created","data":{"id":"user123"}}'
       const crypto = require('crypto')
-      const expectedSignature = crypto
-        .createHmac('sha256', secret)
-        .update(payload)
-        .digest('hex')
+      const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
 
       const result = verifyHMACSignature(payload, expectedSignature, secret)
 
@@ -219,12 +216,9 @@ describe('JWT検証ミドルウェア', () => {
       const secret = 'webhook-secret-key'
       const originalPayload = '{"event":"user.created","data":{"id":"user123"}}'
       const modifiedPayload = '{"event":"user.deleted","data":{"id":"user123"}}'
-      
+
       const crypto = require('crypto')
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(originalPayload)
-        .digest('hex')
+      const signature = crypto.createHmac('sha256', secret).update(originalPayload).digest('hex')
 
       const result = verifyHMACSignature(modifiedPayload, signature, secret)
 
@@ -235,7 +229,7 @@ describe('JWT検証ミドルウェア', () => {
   describe('レート制限とセキュリティ', () => {
     it('セキュリティヘッダーが正しく設定される', async () => {
       const request = new NextRequest('http://localhost:3000/')
-      
+
       // getTokenをモックして認証不要のルートをテスト
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue(null)
@@ -252,7 +246,7 @@ describe('JWT検証ミドルウェア', () => {
 
     it('認証が必要なルートで未認証ユーザーをリダイレクトする', async () => {
       const request = new NextRequest('http://localhost:3000/dashboard')
-      
+
       // getTokenをモックして未認証状態をシミュレート
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue(null)
@@ -265,7 +259,7 @@ describe('JWT検証ミドルウェア', () => {
 
     it('管理者専用ルートで権限チェックを行う', async () => {
       const request = new NextRequest('http://localhost:3000/admin')
-      
+
       // 一般ユーザーをモック
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue({
@@ -287,7 +281,7 @@ describe('JWT検証ミドルウェア', () => {
   describe('エラーハンドリング', () => {
     it('JWTシークレットが設定されていない場合のエラーハンドリング', async () => {
       delete process.env.NEXTAUTH_SECRET
-      
+
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           authorization: 'Bearer some-token',

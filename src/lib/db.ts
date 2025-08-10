@@ -6,9 +6,7 @@ declare global {
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
-      : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     errorFormat: 'pretty',
   })
 }
@@ -23,7 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
 prisma.$use(async (params, next) => {
   // You can add custom middleware here
   // For example, automatic soft deletes, logging, etc.
-  
+
   const result = await next(params)
   return result
 })
@@ -83,13 +81,13 @@ export const db = {
   // Batch operations helper
   async batchCreate<T>(model: any, data: T[], chunkSize = 100) {
     const results = []
-    
+
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunk = data.slice(i, i + chunkSize)
       const created = await model.createMany({ data: chunk })
       results.push(created)
     }
-    
+
     return results
   },
 
@@ -121,8 +119,8 @@ export const db = {
 }
 
 // Export Prisma types for use in other files
-export type { 
-  User, 
+export type {
+  User,
   LearningProgress,
   PMBOKProcess,
   ExamQuestion,

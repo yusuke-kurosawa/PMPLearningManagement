@@ -1,47 +1,47 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { z } from 'zod';
+import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { z } from 'zod'
 
 // Validation utilities
 class ValidationUtils {
   static email(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   static password(password: string): {
-    isValid: boolean;
-    errors: string[];
+    isValid: boolean
+    errors: string[]
   } {
-    const errors: string[] = [];
+    const errors: string[] = []
 
     if (password.length < 8) {
-      errors.push('Password must be at least 8 characters long');
+      errors.push('Password must be at least 8 characters long')
     }
 
     if (password.length > 128) {
-      errors.push('Password must be less than 128 characters');
+      errors.push('Password must be less than 128 characters')
     }
 
     if (!/(?=.*[a-z])/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
+      errors.push('Password must contain at least one lowercase letter')
     }
 
     if (!/(?=.*[A-Z])/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
+      errors.push('Password must contain at least one uppercase letter')
     }
 
     if (!/(?=.*\d)/.test(password)) {
-      errors.push('Password must contain at least one number');
+      errors.push('Password must contain at least one number')
     }
 
     if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.push('Password must contain at least one special character');
+      errors.push('Password must contain at least one special character')
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-    };
+    }
   }
 
   static sanitizeInput(input: string): string {
@@ -49,76 +49,80 @@ class ValidationUtils {
       .trim()
       .replace(/[<>]/g, '') // Remove potential HTML tags
       .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/on\w+=/gi, ''); // Remove event handlers
+      .replace(/on\w+=/gi, '') // Remove event handlers
   }
 
   static validateUrl(url: string): boolean {
     try {
-      const parsedUrl = new URL(url);
-      return ['http:', 'https:'].includes(parsedUrl.protocol);
+      const parsedUrl = new URL(url)
+      return ['http:', 'https:'].includes(parsedUrl.protocol)
     } catch {
-      return false;
+      return false
     }
   }
 
   static validateJSON(jsonString: string): { isValid: boolean; data?: any; error?: string } {
     try {
-      const data = JSON.parse(jsonString);
-      return { isValid: true, data };
+      const data = JSON.parse(jsonString)
+      return { isValid: true, data }
     } catch (error) {
-      return { 
-        isValid: false, 
-        error: error instanceof Error ? error.message : 'Invalid JSON'
-      };
+      return {
+        isValid: false,
+        error: error instanceof Error ? error.message : 'Invalid JSON',
+      }
     }
   }
 
   static validatePhoneNumber(phone: string): boolean {
     // Basic international phone number validation
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-    return phoneRegex.test(cleanPhone);
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+    return phoneRegex.test(cleanPhone)
   }
 
   static validateFileType(fileName: string, allowedTypes: string[]): boolean {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    return extension ? allowedTypes.includes(extension) : false;
+    const extension = fileName.split('.').pop()?.toLowerCase()
+    return extension ? allowedTypes.includes(extension) : false
   }
 
   static validateFileSize(size: number, maxSizeInMB: number): boolean {
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
-    return size <= maxSizeInBytes;
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024
+    return size <= maxSizeInBytes
   }
 }
 
 // Zod schemas for testing
-const userSchema = z.object({
-  name: z.string().min(2).max(50),
-  email: z.string().email(),
-  age: z.number().min(13).max(120),
-  password: z.string().min(8),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const userSchema = z
+  .object({
+    name: z.string().min(2).max(50),
+    email: z.string().email(),
+    age: z.number().min(13).max(120),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 const learningProgressSchema = z.object({
   processId: z.string().uuid(),
   status: z.enum(['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED']),
   score: z.number().min(0).max(100).optional(),
   timeSpent: z.number().min(0),
-});
+})
 
 const examResultSchema = z.object({
   examId: z.string().uuid(),
-  answers: z.array(z.object({
-    questionId: z.string().uuid(),
-    selectedAnswer: z.string().min(1),
-    timeSpent: z.number().min(0),
-  })),
+  answers: z.array(
+    z.object({
+      questionId: z.string().uuid(),
+      selectedAnswer: z.string().min(1),
+      timeSpent: z.number().min(0),
+    })
+  ),
   totalTime: z.number().min(0),
-});
+})
 
 describe('Validation Utils', () => {
   describe('email validation', () => {
@@ -128,12 +132,12 @@ describe('Validation Utils', () => {
         'user.name@domain.co.jp',
         'user+tag@example.org',
         'firstname-lastname@subdomain.domain.com',
-      ];
+      ]
 
-      validEmails.forEach(email => {
-        expect(ValidationUtils.email(email)).toBe(true);
-      });
-    });
+      validEmails.forEach((email) => {
+        expect(ValidationUtils.email(email)).toBe(true)
+      })
+    })
 
     test('should reject invalid email addresses', () => {
       const invalidEmails = [
@@ -145,13 +149,13 @@ describe('Validation Utils', () => {
         'test@com',
         'test@example.',
         'test..test@example.com',
-      ];
+      ]
 
-      invalidEmails.forEach(email => {
-        expect(ValidationUtils.email(email)).toBe(false);
-      });
-    });
-  });
+      invalidEmails.forEach((email) => {
+        expect(ValidationUtils.email(email)).toBe(false)
+      })
+    })
+  })
 
   describe('password validation', () => {
     test('should accept strong passwords', () => {
@@ -160,14 +164,14 @@ describe('Validation Utils', () => {
         'MyStr0ng@Pass',
         'C0mpl3x$Password',
         'S3cure!Pa$$w0rd',
-      ];
+      ]
 
-      strongPasswords.forEach(password => {
-        const result = ValidationUtils.password(password);
-        expect(result.isValid).toBe(true);
-        expect(result.errors).toHaveLength(0);
-      });
-    });
+      strongPasswords.forEach((password) => {
+        const result = ValidationUtils.password(password)
+        expect(result.isValid).toBe(true)
+        expect(result.errors).toHaveLength(0)
+      })
+    })
 
     test('should reject weak passwords', () => {
       const weakPasswords = [
@@ -176,23 +180,23 @@ describe('Validation Utils', () => {
         { password: 'ONLYUPPERCASE', expectedErrors: ['lowercase', 'number', 'special'] },
         { password: 'NoNumbers!', expectedErrors: ['number'] },
         { password: 'NoSpecial123', expectedErrors: ['special'] },
-      ];
+      ]
 
       weakPasswords.forEach(({ password }) => {
-        const result = ValidationUtils.password(password);
-        expect(result.isValid).toBe(false);
-        expect(result.errors.length).toBeGreaterThan(0);
-      });
-    });
+        const result = ValidationUtils.password(password)
+        expect(result.isValid).toBe(false)
+        expect(result.errors.length).toBeGreaterThan(0)
+      })
+    })
 
     test('should reject very long passwords', () => {
-      const longPassword = 'A'.repeat(129) + '1@';
-      const result = ValidationUtils.password(longPassword);
-      
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must be less than 128 characters');
-    });
-  });
+      const longPassword = 'A'.repeat(129) + '1@'
+      const result = ValidationUtils.password(longPassword)
+
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain('Password must be less than 128 characters')
+    })
+  })
 
   describe('input sanitization', () => {
     test('should remove HTML tags', () => {
@@ -200,44 +204,36 @@ describe('Validation Utils', () => {
         { input: '<script>alert("xss")</script>', expected: 'alert("xss")' },
         { input: 'Hello <b>World</b>', expected: 'Hello World' },
         { input: '<div>Content</div>', expected: 'Content' },
-      ];
+      ]
 
       inputs.forEach(({ input, expected }) => {
-        expect(ValidationUtils.sanitizeInput(input)).toBe(expected);
-      });
-    });
+        expect(ValidationUtils.sanitizeInput(input)).toBe(expected)
+      })
+    })
 
     test('should remove JavaScript protocols', () => {
-      const inputs = [
-        'javascript:alert("xss")',
-        'JAVASCRIPT:void(0)',
-        'Hello javascript:alert()',
-      ];
+      const inputs = ['javascript:alert("xss")', 'JAVASCRIPT:void(0)', 'Hello javascript:alert()']
 
-      inputs.forEach(input => {
-        const result = ValidationUtils.sanitizeInput(input);
-        expect(result.toLowerCase()).not.toContain('javascript:');
-      });
-    });
+      inputs.forEach((input) => {
+        const result = ValidationUtils.sanitizeInput(input)
+        expect(result.toLowerCase()).not.toContain('javascript:')
+      })
+    })
 
     test('should remove event handlers', () => {
-      const inputs = [
-        'onclick="alert()"',
-        'onload="malicious()"',
-        'onmouseover="xss()"',
-      ];
+      const inputs = ['onclick="alert()"', 'onload="malicious()"', 'onmouseover="xss()"']
 
-      inputs.forEach(input => {
-        const result = ValidationUtils.sanitizeInput(input);
-        expect(result).not.toMatch(/on\w+=/i);
-      });
-    });
+      inputs.forEach((input) => {
+        const result = ValidationUtils.sanitizeInput(input)
+        expect(result).not.toMatch(/on\w+=/i)
+      })
+    })
 
     test('should trim whitespace', () => {
-      const input = '  Hello World  ';
-      expect(ValidationUtils.sanitizeInput(input)).toBe('Hello World');
-    });
-  });
+      const input = '  Hello World  '
+      expect(ValidationUtils.sanitizeInput(input)).toBe('Hello World')
+    })
+  })
 
   describe('URL validation', () => {
     test('should accept valid URLs', () => {
@@ -246,12 +242,12 @@ describe('Validation Utils', () => {
         'http://localhost:3000',
         'https://subdomain.domain.com/path',
         'http://example.com:8080/api',
-      ];
+      ]
 
-      validUrls.forEach(url => {
-        expect(ValidationUtils.validateUrl(url)).toBe(true);
-      });
-    });
+      validUrls.forEach((url) => {
+        expect(ValidationUtils.validateUrl(url)).toBe(true)
+      })
+    })
 
     test('should reject invalid URLs', () => {
       const invalidUrls = [
@@ -260,22 +256,22 @@ describe('Validation Utils', () => {
         'javascript:alert()',
         'data:text/html,<script>alert()</script>',
         'file:///etc/passwd',
-      ];
+      ]
 
-      invalidUrls.forEach(url => {
-        expect(ValidationUtils.validateUrl(url)).toBe(false);
-      });
-    });
-  });
+      invalidUrls.forEach((url) => {
+        expect(ValidationUtils.validateUrl(url)).toBe(false)
+      })
+    })
+  })
 
   describe('JSON validation', () => {
     test('should validate correct JSON', () => {
-      const validJson = '{"name": "John", "age": 30}';
-      const result = ValidationUtils.validateJSON(validJson);
+      const validJson = '{"name": "John", "age": 30}'
+      const result = ValidationUtils.validateJSON(validJson)
 
-      expect(result.isValid).toBe(true);
-      expect(result.data).toEqual({ name: 'John', age: 30 });
-    });
+      expect(result.isValid).toBe(true)
+      expect(result.data).toEqual({ name: 'John', age: 30 })
+    })
 
     test('should reject invalid JSON', () => {
       const invalidJsons = [
@@ -283,15 +279,15 @@ describe('Validation Utils', () => {
         '{name: "John"}',
         '{"name": "John" "age": 30}',
         'not json at all',
-      ];
+      ]
 
-      invalidJsons.forEach(json => {
-        const result = ValidationUtils.validateJSON(json);
-        expect(result.isValid).toBe(false);
-        expect(result.error).toBeDefined();
-      });
-    });
-  });
+      invalidJsons.forEach((json) => {
+        const result = ValidationUtils.validateJSON(json)
+        expect(result.isValid).toBe(false)
+        expect(result.error).toBeDefined()
+      })
+    })
+  })
 
   describe('phone number validation', () => {
     test('should accept valid phone numbers', () => {
@@ -301,12 +297,12 @@ describe('Validation Utils', () => {
         '+44 20 7946 0958',
         '1234567890',
         '+33 1 42 68 53 00',
-      ];
+      ]
 
-      validPhones.forEach(phone => {
-        expect(ValidationUtils.validatePhoneNumber(phone)).toBe(true);
-      });
-    });
+      validPhones.forEach((phone) => {
+        expect(ValidationUtils.validatePhoneNumber(phone)).toBe(true)
+      })
+    })
 
     test('should reject invalid phone numbers', () => {
       const invalidPhones = [
@@ -315,34 +311,34 @@ describe('Validation Utils', () => {
         '123',
         '+0123456789', // starts with 0
         '+123456789012345678', // too long
-      ];
+      ]
 
-      invalidPhones.forEach(phone => {
-        expect(ValidationUtils.validatePhoneNumber(phone)).toBe(false);
-      });
-    });
-  });
+      invalidPhones.forEach((phone) => {
+        expect(ValidationUtils.validatePhoneNumber(phone)).toBe(false)
+      })
+    })
+  })
 
   describe('file validation', () => {
     test('should validate file types', () => {
-      const allowedTypes = ['jpg', 'png', 'pdf'];
+      const allowedTypes = ['jpg', 'png', 'pdf']
 
-      expect(ValidationUtils.validateFileType('image.jpg', allowedTypes)).toBe(true);
-      expect(ValidationUtils.validateFileType('document.PDF', allowedTypes)).toBe(true);
-      expect(ValidationUtils.validateFileType('malware.exe', allowedTypes)).toBe(false);
-      expect(ValidationUtils.validateFileType('file', allowedTypes)).toBe(false);
-    });
+      expect(ValidationUtils.validateFileType('image.jpg', allowedTypes)).toBe(true)
+      expect(ValidationUtils.validateFileType('document.PDF', allowedTypes)).toBe(true)
+      expect(ValidationUtils.validateFileType('malware.exe', allowedTypes)).toBe(false)
+      expect(ValidationUtils.validateFileType('file', allowedTypes)).toBe(false)
+    })
 
     test('should validate file sizes', () => {
-      const maxSizeMB = 5;
-      const fiveMBInBytes = 5 * 1024 * 1024;
+      const maxSizeMB = 5
+      const fiveMBInBytes = 5 * 1024 * 1024
 
-      expect(ValidationUtils.validateFileSize(fiveMBInBytes - 1, maxSizeMB)).toBe(true);
-      expect(ValidationUtils.validateFileSize(fiveMBInBytes, maxSizeMB)).toBe(true);
-      expect(ValidationUtils.validateFileSize(fiveMBInBytes + 1, maxSizeMB)).toBe(false);
-    });
-  });
-});
+      expect(ValidationUtils.validateFileSize(fiveMBInBytes - 1, maxSizeMB)).toBe(true)
+      expect(ValidationUtils.validateFileSize(fiveMBInBytes, maxSizeMB)).toBe(true)
+      expect(ValidationUtils.validateFileSize(fiveMBInBytes + 1, maxSizeMB)).toBe(false)
+    })
+  })
+})
 
 describe('Zod Schema Validation', () => {
   describe('user schema', () => {
@@ -353,10 +349,10 @@ describe('Zod Schema Validation', () => {
         age: 25,
         password: 'SecurePass123!',
         confirmPassword: 'SecurePass123!',
-      };
+      }
 
-      expect(() => userSchema.parse(validUser)).not.toThrow();
-    });
+      expect(() => userSchema.parse(validUser)).not.toThrow()
+    })
 
     test('should reject invalid user data', () => {
       const invalidUsers = [
@@ -395,13 +391,13 @@ describe('Zod Schema Validation', () => {
           password: 'SecurePass123!',
           confirmPassword: 'DifferentPass123!', // passwords don't match
         },
-      ];
+      ]
 
-      invalidUsers.forEach(user => {
-        expect(() => userSchema.parse(user)).toThrow();
-      });
-    });
-  });
+      invalidUsers.forEach((user) => {
+        expect(() => userSchema.parse(user)).toThrow()
+      })
+    })
+  })
 
   describe('learning progress schema', () => {
     test('should validate correct progress data', () => {
@@ -410,20 +406,20 @@ describe('Zod Schema Validation', () => {
         status: 'IN_PROGRESS' as const,
         score: 85,
         timeSpent: 3600,
-      };
+      }
 
-      expect(() => learningProgressSchema.parse(validProgress)).not.toThrow();
-    });
+      expect(() => learningProgressSchema.parse(validProgress)).not.toThrow()
+    })
 
     test('should allow optional score', () => {
       const progressWithoutScore = {
         processId: '123e4567-e89b-12d3-a456-426614174000',
         status: 'NOT_STARTED' as const,
         timeSpent: 0,
-      };
+      }
 
-      expect(() => learningProgressSchema.parse(progressWithoutScore)).not.toThrow();
-    });
+      expect(() => learningProgressSchema.parse(progressWithoutScore)).not.toThrow()
+    })
 
     test('should reject invalid progress data', () => {
       const invalidProgresses = [
@@ -448,13 +444,13 @@ describe('Zod Schema Validation', () => {
           status: 'COMPLETED',
           timeSpent: -1, // negative time
         },
-      ];
+      ]
 
-      invalidProgresses.forEach(progress => {
-        expect(() => learningProgressSchema.parse(progress)).toThrow();
-      });
-    });
-  });
+      invalidProgresses.forEach((progress) => {
+        expect(() => learningProgressSchema.parse(progress)).toThrow()
+      })
+    })
+  })
 
   describe('exam result schema', () => {
     test('should validate correct exam result', () => {
@@ -473,10 +469,10 @@ describe('Zod Schema Validation', () => {
           },
         ],
         totalTime: 1800,
-      };
+      }
 
-      expect(() => examResultSchema.parse(validResult)).not.toThrow();
-    });
+      expect(() => examResultSchema.parse(validResult)).not.toThrow()
+    })
 
     test('should reject invalid exam result', () => {
       const invalidResults = [
@@ -512,14 +508,14 @@ describe('Zod Schema Validation', () => {
           answers: [],
           totalTime: -1, // negative time
         },
-      ];
+      ]
 
-      invalidResults.forEach(result => {
-        expect(() => examResultSchema.parse(result)).toThrow();
-      });
-    });
-  });
-});
+      invalidResults.forEach((result) => {
+        expect(() => examResultSchema.parse(result)).toThrow()
+      })
+    })
+  })
+})
 
 describe('Security Validation', () => {
   test('should prevent XSS attacks', () => {
@@ -528,15 +524,15 @@ describe('Security Validation', () => {
       'javascript:alert("xss")',
       '<img src="x" onerror="alert(\'xss\')">',
       '<svg onload="alert(\'xss\')">',
-    ];
+    ]
 
-    xssInputs.forEach(input => {
-      const sanitized = ValidationUtils.sanitizeInput(input);
-      expect(sanitized.toLowerCase()).not.toContain('script');
-      expect(sanitized.toLowerCase()).not.toContain('javascript:');
-      expect(sanitized).not.toMatch(/on\w+=/i);
-    });
-  });
+    xssInputs.forEach((input) => {
+      const sanitized = ValidationUtils.sanitizeInput(input)
+      expect(sanitized.toLowerCase()).not.toContain('script')
+      expect(sanitized.toLowerCase()).not.toContain('javascript:')
+      expect(sanitized).not.toMatch(/on\w+=/i)
+    })
+  })
 
   test('should validate SQL injection patterns', () => {
     const sqlInjectionInputs = [
@@ -544,30 +540,23 @@ describe('Security Validation', () => {
       '1 OR 1=1',
       "admin'--",
       'UNION SELECT * FROM users',
-    ];
+    ]
 
     // In a real application, these would be handled by parameterized queries
     // Here we just test that they don't break our validation
-    sqlInjectionInputs.forEach(input => {
-      const sanitized = ValidationUtils.sanitizeInput(input);
-      expect(typeof sanitized).toBe('string');
-    });
-  });
+    sqlInjectionInputs.forEach((input) => {
+      const sanitized = ValidationUtils.sanitizeInput(input)
+      expect(typeof sanitized).toBe('string')
+    })
+  })
 
   test('should handle Unicode and special characters safely', () => {
-    const unicodeInputs = [
-      '测试',
-      'тест',
-      'テスト',
-      '🚀💻🔐',
-      'café',
-      'naïve',
-    ];
+    const unicodeInputs = ['测试', 'тест', 'テスト', '🚀💻🔐', 'café', 'naïve']
 
-    unicodeInputs.forEach(input => {
-      const sanitized = ValidationUtils.sanitizeInput(input);
-      expect(sanitized).toBeTruthy();
-      expect(typeof sanitized).toBe('string');
-    });
-  });
-});
+    unicodeInputs.forEach((input) => {
+      const sanitized = ValidationUtils.sanitizeInput(input)
+      expect(sanitized).toBeTruthy()
+      expect(typeof sanitized).toBe('string')
+    })
+  })
+})

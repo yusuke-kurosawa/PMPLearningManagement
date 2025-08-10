@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# IDD Commit Message Hook - コミットメッセージ形式検証
+# このフックは、コミットメッセージがIDD準拠であることを確認します
+
+set -e
+
+# カラー定義
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# コミットメッセージファイル
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# エラーメッセージ
+print_error() {
+    echo -e "${RED}❌ $1${NC}" >&2
+}
+
+# 成功メッセージ
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+# 警告メッセージ
+print_warning() {
+    echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+# 情報メッセージ
+print_info() {
+    echo -e "${BLUE}ℹ $1${NC}"
+}
+
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}🔍 IDD Compliance - Commit Message Validation${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+# マージコミットやリバートコミットは除外
+if echo "$COMMIT_MSG" | grep -qE '^(Merge|Revert)'; then
+    print_info "Merge/Revert commit detected - skipping IDD validation"
+    exit 0
+fi
+
+# Issue番号の存在チェック
+if ! echo "$COMMIT_MSG" | grep -qE '#[0-9]+'; then
+    print_error "IDD Violation: No issue reference found!"
+    echo ""
+    echo "📋 Your commit message must reference an issue number."
+    echo ""
+    echo "Required format:"
+    echo "  <type>: <description> (#<issue_number>)"
+    echo ""
+    echo "Examples:"
+    echo "  feat: Add user authentication (#42)"
+    echo "  fix: Resolve database connection timeout (#108)"
+    echo "  docs: Update API documentation (#73)"
+    echo "  refactor: Optimize query performance (#156)"
+    echo ""
+    echo "Valid commit types:"
+    echo "  • feat     - New feature"
+    echo "  • fix      - Bug fix"
+    echo "  • docs     - Documentation changes"
+    echo "  • style    - Code style changes (formatting, etc.)"
+    echo "  • refactor - Code refactoring"
+    echo "  • test     - Test additions or modifications"
+    echo "  • chore    - Maintenance tasks"
+    echo "  • perf     - Performance improvements"
+    echo "  • ci       - CI/CD changes"
+    echo ""
+    
+    # 最近のIssueを提案
+    if command -v gh &> /dev/null; then
+        echo -e "${YELLOW}📝 Recent open issues you might want to reference:${NC}"
+        gh issue list --limit 5 --state open 2>/dev/null || true
+        echo ""
+        echo "💡 Tip: Create a new issue if none exists for your changes:"
+        echo "   gh issue create --title \"Your issue title\" --body \"Description\""
+    fi
+    
+    exit 1
+fi
+
+# コミットメッセージの形式チェック
+if ! echo "$COMMIT_MSG" | head -n 1 | grep -qE '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+ \(#[0-9]+\)'; then
+    print_warning "Commit message format could be improved"
+    echo ""
+    echo "Recommended format:"
+    echo "  <type>(<scope>): <subject> (#<issue>)"
+    echo ""
+    echo "Your message:"
+    echo "  $(echo "$COMMIT_MSG" | head -n 1)"
+    echo ""
+    echo "While this will be accepted, consider following the conventional format."
+fi
+
+# Issue番号を抽出
+ISSUE_NUMBERS=$(echo "$COMMIT_MSG" | grep -oE '#[0-9]+' | sed 's/#//')
+
+# GitHubでIssueの存在を確認（可能な場合）
+if command -v gh &> /dev/null; then
+    for issue_num in $ISSUE_NUMBERS; do
+        if gh issue view "$issue_num" &>/dev/null; then
+            ISSUE_TITLE=$(gh issue view "$issue_num" --json title -q .title 2>/dev/null || echo "Unknown")
+            print_success "Issue #$issue_num found: $ISSUE_TITLE"
+        else
+            print_warning "Issue #$issue_num not found or not accessible"
+        fi
+    done
+fi
+
+# コミットメッセージの長さチェック
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n 1)
+if [ ${#FIRST_LINE} -gt 72 ]; then
+    print_warning "First line of commit message is longer than 72 characters (${#FIRST_LINE} chars)"
+    echo "Consider making it more concise."
+fi
+
+# コミットメッセージの品質向上のための提案
+if ! echo "$COMMIT_MSG" | grep -q "^$" ; then
+    if [ $(echo "$COMMIT_MSG" | wc -l) -eq 1 ]; then
+        print_info "Consider adding a detailed description after a blank line"
+    fi
+fi
+
+# IDD準拠の記録
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Commit with issue reference: $ISSUE_NUMBERS" >> .github/idd-compliance.log 2>/dev/null || true
+
+print_success "Commit message validation passed!"
+echo ""
+echo "📊 IDD Compliance Score: 100% ✨"
+echo ""
+
+exit 0

@@ -75,13 +75,7 @@
       "procurement",
       "stakeholder"
     ],
-    "processGroup": [
-      "initiating",
-      "planning",
-      "executing",
-      "monitoring_controlling",
-      "closing"
-    ],
+    "processGroup": ["initiating", "planning", "executing", "monitoring_controlling", "closing"],
     "toolCategory": [
       "data_gathering",
       "data_analysis",

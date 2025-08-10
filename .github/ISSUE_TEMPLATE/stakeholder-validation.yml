@@ -1,0 +1,125 @@
+name: "🔍 Stakeholder Validation Request"
+description: "Request stakeholder validation for a feature or epic"
+title: "[VALIDATION] "
+labels: ["needs-validation", "stakeholder-review", "type:validation"]
+assignees: ["yusuke-kurosawa"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Stakeholder Validation Checklist
+        Use this template to request validation from stakeholders before implementation begins.
+        
+        **Process**: Issue → Stakeholder Review → Validation → Development → Testing → Release
+
+  - type: input
+    id: epic-issue
+    attributes:
+      label: "Related Epic/Issue"
+      description: "Link to the epic or feature issue that needs validation"
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stakeholder-type
+    attributes:
+      label: "Primary Stakeholder Type"
+      description: "Who is the primary stakeholder for this validation?"
+      options:
+        - "Product Manager"
+        - "End Users (PMP Candidates)"
+        - "Training Organizations"
+        - "Technical Leadership"
+        - "Business Leadership"
+        - "Compliance/Legal"
+    validations:
+      required: true
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: "Business Value Proposition"
+      description: "Clearly articulate the business value and user impact"
+      placeholder: |
+        - What business problem does this solve?
+        - What user pain point does this address?
+        - Expected ROI or success metrics
+        - Market differentiation or competitive advantage
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "High-Level Acceptance Criteria"
+      description: "Define what success looks like from stakeholder perspective"
+      placeholder: |
+        - [ ] Criterion 1: Must achieve X outcome
+        - [ ] Criterion 2: Should improve Y metric by Z%
+        - [ ] Criterion 3: User can accomplish task A in B steps
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks-constraints
+    attributes:
+      label: "Known Risks & Constraints"
+      description: "Identify potential risks, technical constraints, or dependencies"
+      placeholder: |
+        - Technical risks or limitations
+        - Resource constraints (time, budget, skills)
+        - Integration or compatibility concerns
+        - Regulatory or compliance requirements
+
+  - type: dropdown
+    id: priority-justification
+    attributes:
+      label: "Priority Level"
+      description: "Justify the priority level for this feature"
+      options:
+        - "Critical - Blocks certification program launch"
+        - "High - Significant user impact or competitive advantage"
+        - "Medium - Quality of life improvement"
+        - "Low - Nice to have enhancement"
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: "Success Metrics & KPIs"
+      description: "How will we measure the success of this feature?"
+      placeholder: |
+        - User engagement metrics (time on platform, session frequency)
+        - Learning outcomes (pass rates, time to competency)
+        - Business metrics (user acquisition, retention, revenue)
+        - Technical metrics (performance, reliability, security)
+
+  - type: checkboxes
+    id: validation-checklist
+    attributes:
+      label: "Validation Requirements"
+      description: "Check all validation activities required"
+      options:
+        - label: "User research/interviews conducted"
+        - label: "Market analysis completed"
+        - label: "Technical feasibility assessed"
+        - label: "Resource estimation provided"
+        - label: "Legal/compliance review completed"
+        - label: "Budget approval obtained"
+        - label: "Timeline agreed upon"
+
+  - type: input
+    id: deadline
+    attributes:
+      label: "Validation Deadline"
+      description: "When do you need stakeholder validation completed?"
+      placeholder: "YYYY-MM-DD"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "Additional Context"
+      description: "Any other information stakeholders should consider"
+      placeholder: "Market research findings, user feedback, competitive analysis, etc."

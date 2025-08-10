@@ -8,7 +8,7 @@ This directory contains the main React application source code organized by doma
 src/
 ├── components/          # React components organized by domain
 │   ├── collaboration/   # Team collaboration features
-│   ├── layout/         # Layout and navigation components  
+│   ├── layout/         # Layout and navigation components
 │   ├── learning/       # Learning and assessment features
 │   ├── pages/          # Main page components
 │   ├── shared/         # Reusable shared components

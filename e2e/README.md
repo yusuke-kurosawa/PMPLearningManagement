@@ -17,17 +17,20 @@ e2e/
 ## Test Files
 
 ### accessibility.spec.js
+
 - Tests WCAG compliance
 - Keyboard navigation
 - Screen reader compatibility
 - Color contrast validation
 
 ### home.spec.js
+
 - Landing page functionality
 - Core feature access
 - Responsive design validation
 
 ### navigation.spec.js
+
 - Menu navigation
 - Route transitions
 - Mobile navigation
@@ -51,6 +54,7 @@ npm run test:e2e:debug
 ## Test Configuration
 
 E2E tests are configured via `config/build/playwright.config.js` and use:
+
 - Chromium, Firefox, and WebKit browsers
 - Mobile device emulation
 - Accessibility testing with axe-core

@@ -1,0 +1,141 @@
+name: "PMP Learning Management - Sprint Planning Board"
+description: "Main project board for agile sprint planning, backlog management, and development workflow tracking"
+
+columns:
+  backlog:
+    name: "📋 Product Backlog"
+    description: "Prioritized features and user stories ready for sprint planning"
+    automation:
+      - newly_added_issues
+    filters:
+      - "label:validated-feature"
+      - "label:ready-for-dev"
+      - "label:type:feature"
+
+  sprint_backlog:
+    name: "🎯 Sprint Backlog" 
+    description: "Issues committed for current sprint (2-week iteration)"
+    automation:
+      - assigned_issues
+    filters:
+      - "label:in-sprint"
+      - "assignee:*"
+
+  in_progress:
+    name: "🔄 In Progress"
+    description: "Active development work in current sprint"
+    automation:
+      - issues_in_progress
+    filters:
+      - "label:in-progress"
+
+  code_review:
+    name: "👀 Code Review"
+    description: "Pull requests awaiting review and approval"
+    automation:
+      - pull_requests_requiring_review
+    filters:
+      - "is:pr"
+      - "is:open"
+
+  testing:
+    name: "🧪 Testing & QA"
+    description: "Features in testing phase (90%+ test coverage required)"
+    automation:
+      - issues_with_label_testing
+    filters:
+      - "label:testing"
+      - "label:qa-review"
+
+  done:
+    name: "✅ Done"
+    description: "Completed work from current and recent sprints"
+    automation:
+      - closed_issues
+      - merged_pull_requests
+
+workflows:
+  issue_lifecycle:
+    - trigger: "issue_opened"
+      condition: "has_label('validated-feature')"
+      action: "move_to_column('backlog')"
+    
+    - trigger: "issue_assigned"  
+      condition: "has_label('in-sprint')"
+      action: "move_to_column('sprint_backlog')"
+    
+    - trigger: "issue_labeled"
+      condition: "label_added('in-progress')"
+      action: "move_to_column('in_progress')"
+    
+    - trigger: "pull_request_opened"
+      condition: "references_issue()"
+      action: "move_to_column('code_review')"
+    
+    - trigger: "issue_labeled"
+      condition: "label_added('testing')"  
+      action: "move_to_column('testing')"
+    
+    - trigger: "issue_closed"
+      condition: "is_merged() or is_completed()"
+      action: "move_to_column('done')"
+
+sprint_settings:
+  duration_weeks: 2
+  capacity_story_points: 80
+  team_velocity_target: 75
+  sprint_goals:
+    - "Deliver validated features with 90%+ test coverage"
+    - "Maintain team velocity and predictability"
+    - "Complete all committed user stories"
+    - "Zero critical bugs in production"
+
+labels_config:
+  sprint_labels:
+    - name: "in-sprint"
+      color: "0052CC"
+      description: "Issue committed to current sprint"
+    
+    - name: "sprint-goal"
+      color: "FF6900" 
+      description: "Critical for achieving sprint goal"
+    
+    - name: "carry-over"
+      color: "FBCA04"
+      description: "Carried over from previous sprint"
+
+  workflow_labels:
+    - name: "blocked"
+      color: "B60205"
+      description: "Cannot proceed due to external dependency"
+    
+    - name: "in-progress"
+      color: "0E8A16" 
+      description: "Currently being worked on"
+    
+    - name: "code-review"
+      color: "D4C5F9"
+      description: "Awaiting code review"
+    
+    - name: "testing"
+      color: "C2E0C6"
+      description: "In testing phase"
+
+metrics_tracking:
+  velocity_metrics:
+    - "story_points_completed_per_sprint"
+    - "sprint_commitment_accuracy"
+    - "cycle_time_average"
+    - "lead_time_average"
+  
+  quality_metrics:
+    - "test_coverage_percentage"
+    - "bugs_found_in_testing"
+    - "bugs_escaped_to_production"
+    - "code_review_coverage"
+  
+  team_metrics:
+    - "sprint_goal_achievement_rate"
+    - "team_satisfaction_score"
+    - "impediment_resolution_time"
+    - "deployment_frequency"

@@ -1,5 +1,30 @@
-# Zero Trust Security & Advanced Security Testing
-name: Zero Trust Security Implementation
+# ====================================================================
+# 🔒 ゼロトラストセキュリティ実装 - エンタープライズ防御
+# ====================================================================
+# 目的: ゼロトラストセキュリティモデルに基づく包括的な
+#      セキュリティテストと検証を実装し、
+#      「決して信頼せず、常に検証する」原則を徹底する
+# 
+# 実行タイミング:
+#   - main/developブランチへのプッシュ時
+#   - mainブランチへのプルリクエスト時
+#   - 手動実行（workflow_dispatch）
+#   - 日次定期実行（毎日午前3時UTC）
+#
+# 主な処理:
+#   1. アイデンティティ検証の強化（多要素認証）
+#   2. 最小権限の原則の適用（RBAC/ABAC）
+#   3. ネットワークセグメンテーション（マイクロセグメンテーション）
+#   4. エンドポイントセキュリティ（EDR）
+#   5. 継続的なセキュリティ監視と脆弱性評価
+#
+# 依存関係: セキュリティツールセットアップ → 各種セキュリティテスト → レポート生成
+# 実行時間目安: 約20-30分（セキュリティレベルにより変動）
+# リソース使用量: 中（CPU 2コア、メモリ 4GB）
+# チーム責任者: セキュリティエンジニア、DevSecOpsエンジニア
+# ====================================================================
+
+name: 🔒 ゼロトラストセキュリティ実装
 
 on:
   push:
@@ -7,42 +32,73 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Daily security scans at 3 AM UTC
+    # 日次セキュリティスキャン: 毎日午前3時UTC（日本時間正午）
     - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       security_level:
-        description: 'Security assessment level'
+        description: 'セキュリティ評価レベルを選択'
         required: true
         default: 'comprehensive'
         type: choice
         options:
-        - basic
-        - comprehensive
-        - penetration
-        - red-team
+        - basic           # 基本的なセキュリティチェック
+        - comprehensive   # 包括的なセキュリティ評価
+        - penetration     # 侵入テスト
+        - red-team        # レッドチーム演習
 
+# 権限設定 - セキュリティスキャンに必要な権限
+permissions:
+  contents: read              # リポジトリコンテンツの読み取り
+  security-events: write      # セキュリティイベントの書き込み
+  packages: read              # パッケージの読み取り
+  actions: read               # アクションログの読み取り
+
+# 同時実行制御
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# 環境変数の標準定義
 env:
-  SECURITY_NAMESPACE: security
-  FALCO_VERSION: '0.36.2'
-  TRIVY_VERSION: '0.48.3'
+  NODE_VERSION: '18'                      # Node.jsバージョン統一
+  CACHE_VERSION: 'v2'                     # キャッシュバージョン管理
+  TIMEOUT_MINUTES: 30                     # デフォルトタイムアウト
+  RETRY_COUNT: 3                          # リトライ回数
+  SECURITY_NAMESPACE: security            # セキュリティネームスペース
+  FALCO_VERSION: '0.36.2'                 # Falcoバージョン
+  TRIVY_VERSION: '0.48.3'                 # Trivyバージョン
 
 jobs:
-  # Zero Trust Architecture Implementation
+  # ========================================
+  # フェーズ1: ゼロトラストアーキテクチャ実装
+  # ========================================
   zero-trust-implementation:
+    name: 🔐 ゼロトラストアーキテクチャ実装
+    # 🎯 目的: ゼロトラスト原則に基づくセキュリティ検証を実施
+    # ⏱️ 推定時間: 10-15分
+    # 🔧 主要処理: セキュリティツールのセットアップ、ポリシー検証、脆弱性スキャン
+    # 📋 成果物: セキュリティスコア、脅威レベル評価
+    # ⚠️ 注意点: セキュリティツールのバージョン管理が重要
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      packages: read
+    timeout-minutes: ${{ fromJSON(env.TIMEOUT_MINUTES) }}
     outputs:
       security-score: ${{ steps.security-assessment.outputs.score }}
       threat-level: ${{ steps.threat-analysis.outputs.level }}
     steps:
-      - name: Checkout repository
+      - name: リポジトリコードの取得
+        # 💡 処理内容: セキュリティスキャン対象のソースコードを取得
+        # 🔗 依存: なし（初期ステップ）
+        # 📊 メトリクス: 取得時間10-30秒
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得（セキュリティ分析用）
 
-      - name: Setup Security Tools
+      - name: セキュリティツールのセットアップ
+        # 💡 処理内容: Trivy、kubectl、Conftestなどのセキュリティツールをインストール
+        # 🔗 依存: checkout完了後
+        # 📊 メトリクス: ツールインストール2-3分
+        # 🚨 エラーハンドリング: ダウンロード失敗時はリトライ
         run: |
           # Install security scanning tools
           curl -sfL https://github.com/aquasecurity/trivy/releases/download/v${{ env.TRIVY_VERSION }}/trivy_${{ env.TRIVY_VERSION }}_Linux-64bit.tar.gz | tar xzf - -C /tmp
@@ -58,7 +114,11 @@ jobs:
           tar xzf conftest_Linux_x86_64.tar.gz
           sudo mv conftest /usr/local/bin/
 
-      - name: Zero Trust Principle 1 - Never Trust, Always Verify
+      - name: ゼロトラスト原則 1 - 決して信頼せず、常に検証
+        # 💡 処理内容: アイデンティティ検証ポリシーの作成と適用
+        # 🔗 依存: セキュリティツールセットアップ完了後
+        # 📊 メトリクス: ポリシー検証1-2分
+        # 🚨 エラーハンドリング: ポリシー違反時は即座に失敗
         run: |
           echo "🔐 Zero Trust Principle 1: Never Trust, Always Verify"
           

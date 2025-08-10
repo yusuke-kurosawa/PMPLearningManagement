@@ -1,58 +1,50 @@
 ---
 name: Bug Report
-about: Create a report to help us improve
+about: Report a bug to help us improve PMPLearningManagement
 title: '[BUG] '
-labels: 'bug'
+labels: 'bug, idd-required'
 assignees: ''
 ---
 
-## Bug Description
-A clear and concise description of what the bug is.
+## 🐛 Bug Description
+<!-- A clear and concise description of what the bug is -->
 
-## Steps to Reproduce
+## 📍 Steps to Reproduce
+<!-- Steps to reproduce the behavior -->
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
+2. Click on '...'
+3. Scroll down to '...'
 4. See error
 
-## Expected Behavior
-A clear and concise description of what you expected to happen.
+## 🎯 Expected Behavior
+<!-- What you expected to happen -->
 
-## Actual Behavior
-A clear and concise description of what actually happened.
+## 📸 Actual Behavior
+<!-- What actually happened -->
 
-## Screenshots
-If applicable, add screenshots to help explain your problem.
+## 📷 Screenshots
+<!-- If applicable, add screenshots to help explain your problem -->
 
-## Environment
-- OS: [e.g. iOS, Windows, Linux]
-- Browser: [e.g. Chrome, Firefox, Safari]
-- Browser Version: [e.g. 22]
-- Device: [e.g. iPhone12, Desktop]
+## 🖥️ Environment
+<!-- Please complete the following information -->
+- **OS:** [e.g., Windows 11, macOS 13, Ubuntu 22.04]
+- **Browser:** [e.g., Chrome 120, Safari 17, Firefox 121]
+- **Version:** [e.g., v1.2.3]
+- **Node Version:** [e.g., 18.17.0]
 
-## Additional Context
-Add any other context about the problem here.
+## 📝 Additional Context
+<!-- Add any other context about the problem here -->
 
-## Component/Feature
-- [ ] Home Page
-- [ ] PMBOK Matrix
-- [ ] Network Diagrams
-- [ ] Flashcards
-- [ ] Mock Exam
-- [ ] Visualizations
-- [ ] Glossary
-- [ ] Progress Dashboard
-- [ ] Mobile Experience
-- [ ] Other (specify): ___
+## 🏷️ IDD Tracking
+<!-- DO NOT REMOVE - Required for IDD compliance -->
+- [ ] This issue will be referenced in all bug fix commits
+- [ ] All PRs for this bug will reference this issue number
+- [ ] Root cause analysis will be documented
 
-## Severity
-- [ ] Critical (blocks core functionality)
-- [ ] High (major feature broken)
-- [ ] Medium (minor feature issues)
-- [ ] Low (cosmetic/enhancement)
+## 🔗 Related Issues
+<!-- Link any related issues -->
+- Related to #
+- Duplicate of #
 
-## Browser Console Errors
-If you see any errors in the browser console, please paste them here:
-```
-Paste console errors here
-```
+---
+*This issue template ensures IDD (Issue-Driven Development) compliance. All commits related to this bug must reference this issue number.*

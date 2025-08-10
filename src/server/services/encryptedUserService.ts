@@ -4,13 +4,13 @@
  */
 
 import { prisma } from '@/lib/db'
-import { 
+import {
   databaseEncryption,
   hashingService,
   tokenGenerator,
   piiEncryption,
   type DecryptionInput,
-  type EncryptionResult 
+  type EncryptionResult,
 } from '@/lib/security/encryption'
 import { z } from 'zod'
 
@@ -43,7 +43,7 @@ export class EncryptedUserService {
     try {
       // 入力データ検証
       const validatedData = EncryptedUserDataSchema.parse(userData)
-      
+
       // データ暗号化
       const encryptedResult = databaseEncryption.encryptUserData(validatedData)
 
@@ -105,12 +105,14 @@ export class EncryptedUserService {
    */
   async getDecryptedUserData(userId: string): Promise<EncryptedUserInput | null> {
     try {
-      const result = await prisma.$queryRaw<Array<{
-        encryptedEmail: string
-        encryptedName: string | null
-        encryptedPhone: string | null  
-        encryptedAddress: string | null
-      }>>`
+      const result = await prisma.$queryRaw<
+        Array<{
+          encryptedEmail: string
+          encryptedName: string | null
+          encryptedPhone: string | null
+          encryptedAddress: string | null
+        }>
+      >`
         SELECT "encryptedEmail", "encryptedName", "encryptedPhone", "encryptedAddress"
         FROM "EncryptedUserData"
         WHERE "userId" = ${userId}
@@ -121,10 +123,10 @@ export class EncryptedUserService {
       }
 
       const encryptedData = result[0]
-      
+
       // 復号化
       const decrypted: Record<string, DecryptionInput> = {}
-      
+
       if (encryptedData.encryptedEmail) {
         decrypted.email = JSON.parse(encryptedData.encryptedEmail)
       }
@@ -157,7 +159,10 @@ export class EncryptedUserService {
   /**
    * 暗号化ユーザーデータの更新
    */
-  async updateEncryptedUserData(userId: string, updateData: Partial<EncryptedUserInput>): Promise<void> {
+  async updateEncryptedUserData(
+    userId: string,
+    updateData: Partial<EncryptedUserInput>
+  ): Promise<void> {
     try {
       if (Object.keys(updateData).length === 0) {
         return
@@ -248,10 +253,13 @@ export class EncryptedUserService {
   /**
    * 部分マッチング検索（名前や住所など）
    */
-  async searchUsersByPartialMatch(searchTerm: string, field: 'name' | 'phone' | 'address'): Promise<string[]> {
+  async searchUsersByPartialMatch(
+    searchTerm: string,
+    field: 'name' | 'phone' | 'address'
+  ): Promise<string[]> {
     try {
       const searchHashes = piiEncryption.createPartialSearchHashes(searchTerm)
-      const searchHashesStr = searchHashes.map(h => `'${h}'`).join(',')
+      const searchHashesStr = searchHashes.map((h) => `'${h}'`).join(',')
 
       const fieldColumn = `${field}SearchHashes`
 
@@ -262,7 +270,7 @@ export class EncryptedUserService {
         LIMIT 100
       `
 
-      return result.map(r => r.userId)
+      return result.map((r) => r.userId)
     } catch (error) {
       console.error('部分マッチング検索エラー:', error)
       return []
@@ -295,25 +303,29 @@ export class EncryptedUserService {
   /**
    * データ整合性チェック
    */
-  async checkDataIntegrity(): Promise<Array<{
-    userId: string
-    hasUserRecord: boolean
-    hasEncryptedData: boolean
-    emailHashValid: boolean
-    issueDescription: string
-  }>> {
+  async checkDataIntegrity(): Promise<
+    Array<{
+      userId: string
+      hasUserRecord: boolean
+      hasEncryptedData: boolean
+      emailHashValid: boolean
+      issueDescription: string
+    }>
+  > {
     try {
-      const result = await prisma.$queryRaw<Array<{
-        user_id: string
-        has_user_record: boolean
-        has_encrypted_data: boolean
-        email_hash_valid: boolean
-        issue_description: string
-      }>>`
+      const result = await prisma.$queryRaw<
+        Array<{
+          user_id: string
+          has_user_record: boolean
+          has_encrypted_data: boolean
+          email_hash_valid: boolean
+          issue_description: string
+        }>
+      >`
         SELECT * FROM check_encryption_integrity()
       `
 
-      return result.map(row => ({
+      return result.map((row) => ({
         userId: row.user_id,
         hasUserRecord: row.has_user_record,
         hasEncryptedData: row.has_encrypted_data,
@@ -335,11 +347,13 @@ export class EncryptedUserService {
 
     try {
       // プレーンテキストのユーザーデータを取得（暗号化データが無いもの）
-      const users = await prisma.$queryRaw<Array<{
-        id: string
-        email: string
-        name: string | null
-      }>>`
+      const users = await prisma.$queryRaw<
+        Array<{
+          id: string
+          email: string
+          name: string | null
+        }>
+      >`
         SELECT u."id", u."email", u."name"
         FROM "User" u
         LEFT JOIN "EncryptedUserData" eud ON u."id" = eud."userId"

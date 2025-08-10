@@ -52,25 +52,24 @@ class RedisClient {
   static async getInstance(): Promise<Redis> {
     if (!RedisClient.instance && !RedisClient.connecting) {
       RedisClient.connecting = true
-      
+
       try {
         RedisClient.instance = new Redis(REDIS_CONFIG)
-        
+
         RedisClient.instance.on('connect', () => {
           console.log('Redis connected successfully')
         })
-        
+
         RedisClient.instance.on('error', (error) => {
           console.error('Redis connection error:', error)
         })
-        
+
         RedisClient.instance.on('close', () => {
           console.log('Redis connection closed')
         })
 
         // 接続テスト
         await RedisClient.instance.ping()
-        
       } catch (error) {
         console.error('Redis initialization failed:', error)
         RedisClient.instance = null
@@ -82,7 +81,7 @@ class RedisClient {
 
     // 接続中の場合は待機
     while (RedisClient.connecting) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     if (!RedisClient.instance) {
@@ -121,10 +120,7 @@ export class SlidingWindowRateLimiter {
   /**
    * Rate limit チェック（Sliding Window アルゴリズム）
    */
-  async checkLimit(
-    identifier: string,
-    config: RateLimitConfig
-  ): Promise<RateLimitResult> {
+  async checkLimit(identifier: string, config: RateLimitConfig): Promise<RateLimitResult> {
     try {
       const redis = await this.getRedis()
       const key = `${this.keyPrefix}:${identifier}`
@@ -156,7 +152,7 @@ export class SlidingWindowRateLimiter {
         end
       `
 
-      const result = await redis.eval(
+      const result = (await redis.eval(
         luaScript,
         1,
         key,
@@ -164,7 +160,7 @@ export class SlidingWindowRateLimiter {
         now.toString(),
         config.maxRequests.toString(),
         Math.ceil(config.windowMs / 1000).toString()
-      ) as [number, number, number]
+      )) as [number, number, number]
 
       const [allowed, currentRequests, remaining] = result
       const resetTime = new Date(now + config.windowMs)
@@ -313,7 +309,7 @@ export class TokenBucketRateLimiter {
         end
       `
 
-      const result = await redis.eval(
+      const result = (await redis.eval(
         luaScript,
         1,
         key,
@@ -321,7 +317,7 @@ export class TokenBucketRateLimiter {
         refillRate.toString(),
         requested.toString(),
         now.toString()
-      ) as [number, number, number]
+      )) as [number, number, number]
 
       const [allowed, remainingTokens, bucketCapacity] = result
 
@@ -329,8 +325,9 @@ export class TokenBucketRateLimiter {
         success: allowed === 1,
         limit: bucketCapacity,
         remaining: Math.floor(remainingTokens),
-        resetTime: new Date(now + (bucketCapacity - remainingTokens) / refillRate * 1000),
-        retryAfter: allowed === 0 ? Math.ceil((requested - remainingTokens) / refillRate) : undefined,
+        resetTime: new Date(now + ((bucketCapacity - remainingTokens) / refillRate) * 1000),
+        retryAfter:
+          allowed === 0 ? Math.ceil((requested - remainingTokens) / refillRate) : undefined,
       }
     } catch (error) {
       console.error('Token bucket error:', error)
@@ -378,7 +375,7 @@ export class DDoSProtection {
     recommendations: string[]
   }> {
     const recommendations: string[] = []
-    
+
     try {
       // 1. IP-based Rate Limiting
       const ipLimit = await this.slidingWindow.checkLimit(
@@ -400,7 +397,7 @@ export class DDoSProtection {
         `burst:${clientIp}`,
         20, // capacity
         0.5, // refill rate per second
-        1   // requested tokens
+        1 // requested tokens
       )
 
       if (!burstLimit.success) {
@@ -426,10 +423,10 @@ export class DDoSProtection {
 
       // 4. Suspicious patterns detection
       const suspiciousScore = await this.calculateSuspiciousScore(clientIp, userAgent)
-      
+
       if (suspiciousScore > 80) {
         recommendations.push('High suspicious score detected')
-        
+
         if (suspiciousScore > 95) {
           return {
             allowed: false,
@@ -454,7 +451,6 @@ export class DDoSProtection {
         allowed: true,
         recommendations: recommendations.length > 0 ? recommendations : ['Normal traffic pattern'],
       }
-
     } catch (error) {
       console.error('DDoS protection error:', error)
       return {
@@ -467,10 +463,7 @@ export class DDoSProtection {
   /**
    * 疑わしいスコア計算
    */
-  private async calculateSuspiciousScore(
-    clientIp: string,
-    userAgent?: string
-  ): Promise<number> {
+  private async calculateSuspiciousScore(clientIp: string, userAgent?: string): Promise<number> {
     let score = 0
     const redis = await this.getRedis()
 
@@ -478,11 +471,17 @@ export class DDoSProtection {
       // User-Agent パターン解析
       if (userAgent) {
         const botPatterns = [
-          /bot/i, /crawler/i, /spider/i, /scraper/i,
-          /curl/i, /wget/i, /python/i, /java/i,
+          /bot/i,
+          /crawler/i,
+          /spider/i,
+          /scraper/i,
+          /curl/i,
+          /wget/i,
+          /python/i,
+          /java/i,
         ]
-        
-        if (botPatterns.some(pattern => pattern.test(userAgent))) {
+
+        if (botPatterns.some((pattern) => pattern.test(userAgent))) {
           score += 30
         }
 
@@ -506,7 +505,7 @@ export class DDoSProtection {
 
       const failedAttempts = parseInt(ipReputationData[0] || '0')
       const successRate = parseFloat(ipReputationData[1] || '1.0')
-      
+
       if (failedAttempts > 10) score += 25
       if (successRate < 0.5) score += 30
 
@@ -517,7 +516,8 @@ export class DDoSProtection {
 
       // Request frequency analysis
       const requestFrequency = await this.getRequestFrequency(clientIp)
-      if (requestFrequency > 10) { // 10 req/sec
+      if (requestFrequency > 10) {
+        // 10 req/sec
         score += 20
       }
 
@@ -543,7 +543,7 @@ export class DDoSProtection {
       // GeoIPサービスを使用して実際の地理情報を取得
       const { geoIPService } = await import('./geoip')
       const currentLocation = await geoIPService.getGeoLocation(clientIp)
-      
+
       if (!currentLocation) {
         return {
           isAnomalous: true,
@@ -565,7 +565,7 @@ export class DDoSProtection {
       if (lastKnownCountry !== currentLocation.countryCode) {
         // 異常アクセスパターンの詳細検知
         const anomalyResult = await geoIPService.detectAnomalousPatterns(userId, clientIp)
-        
+
         if (anomalyResult.isAnomalous && anomalyResult.confidence > 70) {
           return {
             isAnomalous: true,
@@ -575,7 +575,7 @@ export class DDoSProtection {
 
         // 現在の位置を更新
         await redis.setex(userLocationKey, 86400 * 7, currentLocation.countryCode)
-        
+
         // 単純な国変更の場合は警告レベル
         return {
           isAnomalous: false,
@@ -602,7 +602,7 @@ export class DDoSProtection {
 
       await redis.zremrangebyscore(key, '-inf', oneSecondAgo)
       const count = await redis.zcard(key)
-      
+
       return count
     } catch (error) {
       console.error('Request frequency check error:', error)
@@ -658,19 +658,12 @@ export class DDoSProtection {
         return {total, failed, success_rate}
       `
 
-      await redis.eval(
-        luaScript,
-        1,
-        key,
-        success ? '1' : '0',
-        now.toString()
-      )
+      await redis.eval(luaScript, 1, key, success ? '1' : '0', now.toString())
 
       // Request frequency tracking
       const freqKey = `freq:${clientIp}`
       await redis.zadd(freqKey, now, now)
       await redis.expire(freqKey, 10) // 10秒間保持
-
     } catch (error) {
       console.error('IP reputation update error:', error)
     }
@@ -683,7 +676,7 @@ export class DDoSProtection {
     try {
       const redis = await this.getRedis()
       const pattern = `*:${clientIp}`
-      
+
       // パターンにマッチするキーを削除
       const keys = await redis.keys(pattern)
       if (keys.length > 0) {

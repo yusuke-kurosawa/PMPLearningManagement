@@ -89,12 +89,10 @@ const logger = winston.createLogger({
   transports: [
     // コンソール出力
     new winston.transports.Console({
-      format: process.env.NODE_ENV === 'development' 
-        ? winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-          )
-        : customFormat,
+      format:
+        process.env.NODE_ENV === 'development'
+          ? winston.format.combine(winston.format.colorize(), winston.format.simple())
+          : customFormat,
     }),
 
     // ファイル出力（エラーレベル）
@@ -178,7 +176,7 @@ export class Logger {
 
     try {
       const result = await fn()
-      
+
       const endTime = process.hrtime.bigint()
       const duration = Number(endTime - startTime) / 1000000 // ナノ秒をミリ秒に変換
 
@@ -208,17 +206,18 @@ export class Logger {
   }
 
   // ログレベル別メソッド
-  static error(
-    message: string, 
-    error?: Error | unknown,
-    metadata?: Record<string, any>
-  ): void {
-    const errorInfo = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      code: (error as any).code,
-    } : error ? { message: String(error) } : undefined
+  static error(message: string, error?: Error | unknown, metadata?: Record<string, any>): void {
+    const errorInfo =
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: (error as any).code,
+          }
+        : error
+          ? { message: String(error) }
+          : undefined
 
     logger.error(message, { metadata, error: errorInfo })
   }
@@ -255,11 +254,7 @@ export class Logger {
   }
 
   // 構造化ログ
-  static structured(
-    level: LogLevel,
-    event: string,
-    data: Record<string, any>
-  ): void {
+  static structured(level: LogLevel, event: string, data: Record<string, any>): void {
     logger.log(level, `[${event}]`, {
       metadata: {
         event,
@@ -358,10 +353,12 @@ export class Logger {
       statusCode,
       duration,
       success: !error && statusCode < 400,
-      error: error ? {
-        name: error.name,
-        message: error.message,
-      } : undefined,
+      error: error
+        ? {
+            name: error.name,
+            message: error.message,
+          }
+        : undefined,
     })
   }
 
@@ -408,14 +405,10 @@ export class Logger {
 }
 
 // Express/Next.js用のリクエストログミドルウェア
-export const requestLoggingMiddleware = (
-  req: any,
-  res: any,
-  next: any
-) => {
+export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
   const startTime = Date.now()
   const correlationId = req.headers['x-correlation-id'] || Logger.generateCorrelationId()
-  
+
   // レスポンスヘッダーに相関IDを追加
   res.setHeader('X-Correlation-ID', correlationId)
 
@@ -438,7 +431,7 @@ export const requestLoggingMiddleware = (
 
   // レスポンス終了時のログ
   const originalSend = res.send
-  res.send = function(data: any) {
+  res.send = function (data: any) {
     const duration = Date.now() - startTime
     const statusCode = res.statusCode
 
@@ -477,7 +470,7 @@ export const trpcLoggingMiddleware = () => {
     return Logger.withContext(context, async () => {
       try {
         const result = await next()
-        
+
         const duration = Date.now() - startTime
         Logger.debug(`tRPC ${type} ${path}`, {
           duration,

@@ -91,7 +91,7 @@ describe('Rate Limiting システム', () => {
 
     it('複数の制限条件をチェックする', async () => {
       mockRedis.eval
-        .mockResolvedValueOnce([1, 5, 95])  // 1分制限: 許可
+        .mockResolvedValueOnce([1, 5, 95]) // 1分制限: 許可
         .mockResolvedValueOnce([0, 1000, 0]) // 1時間制限: 拒否
 
       const result = await limiter.checkMultipleLimit('user789', [
@@ -178,8 +178,8 @@ describe('Rate Limiting システム', () => {
         1,
         'test_token_bucket:user123',
         '20', // capacity
-        '2',  // refill rate
-        '3',  // requested tokens
+        '2', // refill rate
+        '3', // requested tokens
         expect.any(String) // timestamp
       )
     })
@@ -195,8 +195,8 @@ describe('Rate Limiting システム', () => {
     it('通常のトラフィックを許可する', async () => {
       // Rate limiting結果をモック（すべて通過）
       mockRedis.eval
-        .mockResolvedValueOnce([1, 50, 50])   // IP rate limit: OK
-        .mockResolvedValueOnce([1, 15, 5])    // Token bucket: OK
+        .mockResolvedValueOnce([1, 50, 50]) // IP rate limit: OK
+        .mockResolvedValueOnce([1, 15, 5]) // Token bucket: OK
         .mockResolvedValueOnce([1, 100, 100]) // User rate limit: OK
 
       // Suspicious scoreの計算用モック
@@ -232,8 +232,7 @@ describe('Rate Limiting システム', () => {
     })
 
     it('疑わしいUser-Agentを検出する', async () => {
-      mockRedis.eval
-        .mockResolvedValue([1, 50, 50])  // Rate limits OK
+      mockRedis.eval.mockResolvedValue([1, 50, 50]) // Rate limits OK
 
       // Suspicious bot User-Agent
       mockRedis.hmget.mockResolvedValue(['0', '1.0', '1234567890'])
@@ -303,7 +302,7 @@ describe('Rate Limiting システム', () => {
       )
 
       expect(result.allowed).toBe(true)
-      expect(result.recommendations.some(r => r.includes('Geographic anomaly'))).toBe(true)
+      expect(result.recommendations.some((r) => r.includes('Geographic anomaly'))).toBe(true)
     })
 
     it('IP reputationを更新する', async () => {
@@ -317,7 +316,7 @@ describe('Rate Limiting システム', () => {
       })
 
       expect(mockRedis.eval).toHaveBeenCalledWith(
-        expect.stringContaining('local success = ARGV[1] == \'1\''),
+        expect.stringContaining("local success = ARGV[1] == '1'"),
         1,
         'ip_reputation:192.168.1.7',
         '1', // success
@@ -401,10 +400,12 @@ describe('Rate Limiting システム', () => {
       mockRedis.eval.mockResolvedValue([1, 50, 50])
 
       // 不正な値でもエラーにならないことを確認
-      await expect(limiter.checkLimit('user123', {
-        windowMs: -1000, // 負の値
-        maxRequests: 0,  // ゼロ
-      })).resolves.toBeDefined()
+      await expect(
+        limiter.checkLimit('user123', {
+          windowMs: -1000, // 負の値
+          maxRequests: 0, // ゼロ
+        })
+      ).resolves.toBeDefined()
     })
   })
 
@@ -423,17 +424,19 @@ describe('Rate Limiting システム', () => {
 
       // 100並列リクエスト
       for (let i = 0; i < 100; i++) {
-        promises.push(limiter.checkLimit(`user${i}`, {
-          windowMs: 60 * 1000,
-          maxRequests: 100,
-        }))
+        promises.push(
+          limiter.checkLimit(`user${i}`, {
+            windowMs: 60 * 1000,
+            maxRequests: 100,
+          })
+        )
       }
 
       const results = await Promise.all(promises)
       const endTime = Date.now()
 
       expect(results.length).toBe(100)
-      expect(results.every(r => r.success)).toBe(true)
+      expect(results.every((r) => r.success)).toBe(true)
       expect(endTime - startTime).toBeLessThan(1000) // 1秒以内に完了
     })
   })

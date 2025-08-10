@@ -38,10 +38,10 @@ export function geoLocationMiddleware() {
     try {
       // クライアントIPを取得
       const clientIP = getClientIP(req)
-      
+
       // GeoIP情報取得
       const geoLocation = await geoIPService.getGeoLocation(clientIP)
-      
+
       if (geoLocation) {
         req.geoLocation = {
           ip: geoLocation.ip,
@@ -80,10 +80,10 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const clientIP = getClientIP(req)
-      
+
       // 地理的制限チェック
       const restrictionResult = await geoIPService.checkGeoRestrictions(clientIP, config)
-      
+
       req.geoRestriction = {
         allowed: restrictionResult.allowed,
         reason: restrictionResult.reason,
@@ -93,7 +93,7 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
       if (!restrictionResult.allowed) {
         // 制限された場合のログ記録
         console.warn(`Geo-restricted access blocked: ${clientIP} - ${restrictionResult.reason}`)
-        
+
         return res.status(403).json({
           error: 'Access denied',
           message: 'Your location is not permitted to access this service',
@@ -105,7 +105,7 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
       next()
     } catch (error) {
       console.error('Geo restriction middleware error:', error)
-      
+
       // エラー時は安全側に倒す（本番環境での設定による）
       if (process.env.GEO_RESTRICTION_FAIL_SECURE === 'true') {
         return res.status(503).json({
@@ -114,7 +114,7 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
           code: 'GEO_SERVICE_ERROR',
         })
       }
-      
+
       next()
     }
   }
@@ -133,10 +133,10 @@ export function anomalyDetectionMiddleware() {
       }
 
       const clientIP = getClientIP(req)
-      
+
       // 異常パターン検知
       const anomalyResult = await geoIPService.detectAnomalousPatterns(userId, clientIP)
-      
+
       if (anomalyResult.isAnomalous && anomalyResult.confidence > 80) {
         // 高信頼度の異常パターンを検知
         console.warn(`Anomalous access pattern detected: User ${userId}, IP ${clientIP}`, {
@@ -190,18 +190,14 @@ export function geoEnhancedDDoSMiddleware() {
       if (geoLocation) {
         // 高脅威地域からのアクセスは厳しく制限
         let baseLimit = 100 // 基本制限（1分間）
-        
+
         if (geoLocation.threat > 70) baseLimit = 20
         else if (geoLocation.threat > 50) baseLimit = 50
         else if (geoLocation.proxy || geoLocation.vpn) baseLimit = 30
         else if (geoLocation.hosting) baseLimit = 40
 
         // カスタム制限設定でDDoS保護をチェック
-        const protection = await ddosProtection.checkProtection(
-          clientIP,
-          userAgent,
-          userId
-        )
+        const protection = await ddosProtection.checkProtection(clientIP, userAgent, userId)
 
         if (!protection.allowed) {
           // IP reputationを更新
@@ -241,7 +237,7 @@ export function geoEnhancedDDoSMiddleware() {
 export function countryAccessMiddleware(allowedCountries: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const geoLocation = req.geoLocation
-    
+
     if (!geoLocation) {
       // 地理情報がない場合は拒否
       return res.status(403).json({
@@ -253,7 +249,7 @@ export function countryAccessMiddleware(allowedCountries: string[]) {
 
     if (!allowedCountries.includes(geoLocation.countryCode)) {
       console.warn(`Country access denied: ${geoLocation.countryCode} not in allowed list`)
-      
+
       return res.status(403).json({
         error: 'Access denied',
         message: `Access from ${geoLocation.country} is not permitted`,
@@ -271,7 +267,7 @@ export function countryAccessMiddleware(allowedCountries: string[]) {
 export function proxyDetectionMiddleware(blockProxies = true, blockVPN = false) {
   return (req: Request, res: Response, next: NextFunction) => {
     const geoLocation = req.geoLocation
-    
+
     if (geoLocation) {
       if (blockProxies && geoLocation.proxy) {
         console.warn(`Proxy access blocked: ${geoLocation.ip}`)
@@ -318,7 +314,7 @@ export function geoStatusMiddleware() {
       }
 
       const stats = await geoIPService.getGeoStats()
-      
+
       res.json({
         geoStats: stats,
         timestamp: new Date().toISOString(),

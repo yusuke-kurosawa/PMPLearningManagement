@@ -34,11 +34,11 @@ const signUpSchema = z.object({
     .string()
     .min(2, '名前は2文字以上である必要があります')
     .max(50, '名前は50文字以下である必要があります')
-    .regex(/^[a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$/, '有効な文字を使用してください'),
-  email: z
-    .string()
-    .email('有効なメールアドレスを入力してください')
-    .toLowerCase(),
+    .regex(
+      /^[a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$/,
+      '有効な文字を使用してください'
+    ),
+  email: z.string().email('有効なメールアドレスを入力してください').toLowerCase(),
   password: z
     .string()
     .min(8, 'パスワードは8文字以上である必要があります')
@@ -46,7 +46,7 @@ const signUpSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       'パスワードは大文字、小文字、数字、特殊文字を含む必要があります'
     ),
-  agreeToTerms: z.boolean().refine(val => val === true, '利用規約に同意する必要があります'),
+  agreeToTerms: z.boolean().refine((val) => val === true, '利用規約に同意する必要があります'),
 })
 
 const signInSchema = z.object({
@@ -87,24 +87,10 @@ const updateProfileSchema = z.object({
     .min(2, '名前は2文字以上である必要があります')
     .max(50, '名前は50文字以下である必要があります')
     .optional(),
-  bio: z
-    .string()
-    .max(500, '自己紹介は500文字以下である必要があります')
-    .optional(),
-  location: z
-    .string()
-    .max(100, '所在地は100文字以下である必要があります')
-    .optional(),
-  website: z
-    .string()
-    .url('有効なURLを入力してください')
-    .optional()
-    .or(z.literal('')),
-  linkedIn: z
-    .string()
-    .url('有効なLinkedIn URLを入力してください')
-    .optional()
-    .or(z.literal('')),
+  bio: z.string().max(500, '自己紹介は500文字以下である必要があります').optional(),
+  location: z.string().max(100, '所在地は100文字以下である必要があります').optional(),
+  website: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
+  linkedIn: z.string().url('有効なLinkedIn URLを入力してください').optional().or(z.literal('')),
   twitter: z
     .string()
     .regex(/^@?[A-Za-z0-9_]{1,15}$/, '有効なTwitterユーザー名を入力してください')
@@ -124,127 +110,125 @@ const generateVerificationToken = (): string => {
 // メイン認証ルーター
 export const authRouter = createTRPCRouter({
   // ユーザー登録
-  signUp: publicProcedure
-    .input(signUpSchema)
-    .mutation(async ({ input, ctx }) => {
-      const clientIP = ctx.req?.headers['x-forwarded-for'] || ctx.req?.ip || 'unknown'
+  signUp: publicProcedure.input(signUpSchema).mutation(async ({ input, ctx }) => {
+    const clientIP = ctx.req?.headers['x-forwarded-for'] || ctx.req?.ip || 'unknown'
 
-      try {
-        // レート制限チェック
-        await signUpRateLimiter.consume(clientIP as string)
+    try {
+      // レート制限チェック
+      await signUpRateLimiter.consume(clientIP as string)
 
-        // 既存ユーザーチェック
-        const existingUser = await prisma.user.findUnique({
-          where: { email: input.email },
-        })
+      // 既存ユーザーチェック
+      const existingUser = await prisma.user.findUnique({
+        where: { email: input.email },
+      })
 
-        if (existingUser) {
-          throw new TRPCError({
-            code: 'CONFLICT',
-            message: 'このメールアドレスは既に登録されています',
-          })
-        }
-
-        // パスワードハッシュ化
-        const hashedPassword = await hashPassword(input.password)
-
-        // 確認トークン生成
-        const verificationToken = generateVerificationToken()
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24時間
-
-        // ユーザー作成
-        const user = await prisma.user.create({
-          data: {
-            name: input.name,
-            email: input.email,
-            hashedPassword,
-            role: UserRole.USER,
-            subscriptionPlan: SubscriptionPlan.FREE,
-            subscriptionActive: true,
-            profileComplete: false,
-            emailVerificationToken: verificationToken,
-            emailVerificationExpires: verificationExpires,
-            settings: {
-              create: {
-                theme: 'light',
-                language: 'ja',
-                notifications: {
-                  email: true,
-                  push: false,
-                  weekly_progress: true,
-                  exam_reminders: true,
-                },
-              },
-            },
-            learningProgress: {
-              create: {
-                totalStudyTime: 0,
-                completedProcesses: [],
-                currentStreak: 0,
-                longestStreak: 0,
-                lastActivityDate: new Date(),
-              },
-            },
-          },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            createdAt: true,
-          },
-        })
-
-        // 確認メール送信
-        try {
-          await sendEmail({
-            to: user.email,
-            subject: 'PMP Learning Management - メール確認',
-            template: 'email-verification',
-            data: {
-              name: user.name,
-              verificationLink: `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${verificationToken}`,
-              expiresAt: verificationExpires,
-            },
-          })
-        } catch (emailError) {
-          console.error('確認メール送信エラー:', emailError)
-          // メール送信失敗でもユーザー作成は継続
-        }
-
-        // アクティビティ記録
-        await prisma.userActivity.create({
-          data: {
-            userId: user.id,
-            action: 'SIGN_UP',
-            details: {
-              ip: clientIP,
-              userAgent: ctx.req?.headers['user-agent'],
-            },
-          },
-        })
-
-        return {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          },
-          message: '登録が完了しました。確認メールをご確認ください。',
-        }
-      } catch (error) {
-        if (error instanceof TRPCError) {
-          throw error
-        }
-
-        console.error('ユーザー登録エラー:', error)
+      if (existingUser) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: '登録処理中にエラーが発生しました',
+          code: 'CONFLICT',
+          message: 'このメールアドレスは既に登録されています',
         })
       }
-    }),
+
+      // パスワードハッシュ化
+      const hashedPassword = await hashPassword(input.password)
+
+      // 確認トークン生成
+      const verificationToken = generateVerificationToken()
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24時間
+
+      // ユーザー作成
+      const user = await prisma.user.create({
+        data: {
+          name: input.name,
+          email: input.email,
+          hashedPassword,
+          role: UserRole.USER,
+          subscriptionPlan: SubscriptionPlan.FREE,
+          subscriptionActive: true,
+          profileComplete: false,
+          emailVerificationToken: verificationToken,
+          emailVerificationExpires: verificationExpires,
+          settings: {
+            create: {
+              theme: 'light',
+              language: 'ja',
+              notifications: {
+                email: true,
+                push: false,
+                weekly_progress: true,
+                exam_reminders: true,
+              },
+            },
+          },
+          learningProgress: {
+            create: {
+              totalStudyTime: 0,
+              completedProcesses: [],
+              currentStreak: 0,
+              longestStreak: 0,
+              lastActivityDate: new Date(),
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      })
+
+      // 確認メール送信
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'PMP Learning Management - メール確認',
+          template: 'email-verification',
+          data: {
+            name: user.name,
+            verificationLink: `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${verificationToken}`,
+            expiresAt: verificationExpires,
+          },
+        })
+      } catch (emailError) {
+        console.error('確認メール送信エラー:', emailError)
+        // メール送信失敗でもユーザー作成は継続
+      }
+
+      // アクティビティ記録
+      await prisma.userActivity.create({
+        data: {
+          userId: user.id,
+          action: 'SIGN_UP',
+          details: {
+            ip: clientIP,
+            userAgent: ctx.req?.headers['user-agent'],
+          },
+        },
+      })
+
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        message: '登録が完了しました。確認メールをご確認ください。',
+      }
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error
+      }
+
+      console.error('ユーザー登録エラー:', error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '登録処理中にエラーが発生しました',
+      })
+    }
+  }),
 
   // メール確認
   verifyEmail: publicProcedure
@@ -383,63 +367,61 @@ export const authRouter = createTRPCRouter({
     }),
 
   // パスワードリセット実行
-  resetPassword: publicProcedure
-    .input(resetPasswordSchema)
-    .mutation(async ({ input }) => {
-      try {
-        const user = await prisma.user.findFirst({
-          where: {
-            passwordResetToken: input.token,
-            passwordResetExpires: {
-              gt: new Date(),
-            },
+  resetPassword: publicProcedure.input(resetPasswordSchema).mutation(async ({ input }) => {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          passwordResetToken: input.token,
+          passwordResetExpires: {
+            gt: new Date(),
           },
-        })
+        },
+      })
 
-        if (!user) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: '無効または期限切れのリセットトークンです',
-          })
-        }
-
-        // 新しいパスワードをハッシュ化
-        const hashedPassword = await hashPassword(input.newPassword)
-
-        // パスワード更新
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            hashedPassword,
-            passwordResetToken: null,
-            passwordResetExpires: null,
-          },
-        })
-
-        // アクティビティ記録
-        await prisma.userActivity.create({
-          data: {
-            userId: user.id,
-            action: 'PASSWORD_RESET_COMPLETED',
-            details: {},
-          },
-        })
-
-        return {
-          message: 'パスワードが正常に変更されました',
-        }
-      } catch (error) {
-        if (error instanceof TRPCError) {
-          throw error
-        }
-
-        console.error('パスワードリセットエラー:', error)
+      if (!user) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'パスワードリセット処理中にエラーが発生しました',
+          code: 'BAD_REQUEST',
+          message: '無効または期限切れのリセットトークンです',
         })
       }
-    }),
+
+      // 新しいパスワードをハッシュ化
+      const hashedPassword = await hashPassword(input.newPassword)
+
+      // パスワード更新
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          hashedPassword,
+          passwordResetToken: null,
+          passwordResetExpires: null,
+        },
+      })
+
+      // アクティビティ記録
+      await prisma.userActivity.create({
+        data: {
+          userId: user.id,
+          action: 'PASSWORD_RESET_COMPLETED',
+          details: {},
+        },
+      })
+
+      return {
+        message: 'パスワードが正常に変更されました',
+      }
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error
+      }
+
+      console.error('パスワードリセットエラー:', error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'パスワードリセット処理中にエラーが発生しました',
+      })
+    }
+  }),
 
   // 現在のユーザー情報取得
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -470,7 +452,8 @@ export const authRouter = createTRPCRouter({
       id: user.id,
       role: user.role,
       subscriptionPlan: user.subscriptionPlan,
-      subscriptionActive: user.subscription?.status === 'active' || user.subscriptionPlan === SubscriptionPlan.FREE,
+      subscriptionActive:
+        user.subscription?.status === 'active' || user.subscriptionPlan === SubscriptionPlan.FREE,
       profileComplete: user.profileComplete,
     })
 
@@ -486,7 +469,8 @@ export const authRouter = createTRPCRouter({
       twitter: user.twitter,
       role: user.role,
       subscriptionPlan: user.subscriptionPlan,
-      subscriptionActive: user.subscription?.status === 'active' || user.subscriptionPlan === SubscriptionPlan.FREE,
+      subscriptionActive:
+        user.subscription?.status === 'active' || user.subscriptionPlan === SubscriptionPlan.FREE,
       profileComplete: user.profileComplete,
       emailVerified: user.emailVerified,
       createdAt: user.createdAt,
@@ -504,54 +488,52 @@ export const authRouter = createTRPCRouter({
   }),
 
   // プロフィール更新
-  updateProfile: protectedProcedure
-    .input(updateProfileSchema)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        const updatedUser = await prisma.user.update({
-          where: { id: ctx.session.user.id },
-          data: {
-            ...input,
-            profileComplete: true,
-            updatedAt: new Date(),
-          },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            bio: true,
-            location: true,
-            website: true,
-            linkedIn: true,
-            twitter: true,
-            profileComplete: true,
-            updatedAt: true,
-          },
-        })
+  updateProfile: protectedProcedure.input(updateProfileSchema).mutation(async ({ input, ctx }) => {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: ctx.session.user.id },
+        data: {
+          ...input,
+          profileComplete: true,
+          updatedAt: new Date(),
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          bio: true,
+          location: true,
+          website: true,
+          linkedIn: true,
+          twitter: true,
+          profileComplete: true,
+          updatedAt: true,
+        },
+      })
 
-        // アクティビティ記録
-        await prisma.userActivity.create({
-          data: {
-            userId: ctx.session.user.id,
-            action: 'PROFILE_UPDATED',
-            details: {
-              updatedFields: Object.keys(input),
-            },
+      // アクティビティ記録
+      await prisma.userActivity.create({
+        data: {
+          userId: ctx.session.user.id,
+          action: 'PROFILE_UPDATED',
+          details: {
+            updatedFields: Object.keys(input),
           },
-        })
+        },
+      })
 
-        return {
-          user: updatedUser,
-          message: 'プロフィールが更新されました',
-        }
-      } catch (error) {
-        console.error('プロフィール更新エラー:', error)
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'プロフィール更新中にエラーが発生しました',
-        })
+      return {
+        user: updatedUser,
+        message: 'プロフィールが更新されました',
       }
-    }),
+    } catch (error) {
+      console.error('プロフィール更新エラー:', error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'プロフィール更新中にエラーが発生しました',
+      })
+    }
+  }),
 
   // パスワード変更
   changePassword: protectedProcedure

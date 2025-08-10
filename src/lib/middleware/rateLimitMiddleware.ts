@@ -4,42 +4,42 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  slidingWindowLimiter, 
+import {
+  slidingWindowLimiter,
   ddosProtection,
-  type RateLimitConfig 
+  type RateLimitConfig,
 } from '@/lib/security/rateLimiting'
 import { z } from 'zod'
 
 // レート制限設定の種類
 export enum RateLimitType {
-  STRICT = 'strict',     // 厳格（ログイン、パスワードリセットなど）
-  NORMAL = 'normal',     // 通常のAPI
-  LENIENT = 'lenient',   // 緩い（静的リソース、読み取り専用など）
-  PREMIUM = 'premium',   // プレミアムユーザー用
-  ADMIN = 'admin',       // 管理者用
+  STRICT = 'strict', // 厳格（ログイン、パスワードリセットなど）
+  NORMAL = 'normal', // 通常のAPI
+  LENIENT = 'lenient', // 緩い（静的リソース、読み取り専用など）
+  PREMIUM = 'premium', // プレミアムユーザー用
+  ADMIN = 'admin', // 管理者用
 }
 
 // 事前定義されたレート制限設定
 const RATE_LIMIT_CONFIGS: Record<RateLimitType, RateLimitConfig[]> = {
   [RateLimitType.STRICT]: [
-    { windowMs: 15 * 60 * 1000, maxRequests: 5 },   // 15分間に5回
-    { windowMs: 60 * 60 * 1000, maxRequests: 10 },  // 1時間に10回
+    { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 15分間に5回
+    { windowMs: 60 * 60 * 1000, maxRequests: 10 }, // 1時間に10回
   ],
   [RateLimitType.NORMAL]: [
-    { windowMs: 60 * 1000, maxRequests: 100 },      // 1分間に100回
+    { windowMs: 60 * 1000, maxRequests: 100 }, // 1分間に100回
     { windowMs: 15 * 60 * 1000, maxRequests: 1000 }, // 15分間に1000回
   ],
   [RateLimitType.LENIENT]: [
-    { windowMs: 60 * 1000, maxRequests: 300 },      // 1分間に300回
+    { windowMs: 60 * 1000, maxRequests: 300 }, // 1分間に300回
     { windowMs: 15 * 60 * 1000, maxRequests: 5000 }, // 15分間に5000回
   ],
   [RateLimitType.PREMIUM]: [
-    { windowMs: 60 * 1000, maxRequests: 500 },      // 1分間に500回
+    { windowMs: 60 * 1000, maxRequests: 500 }, // 1分間に500回
     { windowMs: 15 * 60 * 1000, maxRequests: 10000 }, // 15分間に10000回
   ],
   [RateLimitType.ADMIN]: [
-    { windowMs: 60 * 1000, maxRequests: 1000 },     // 1分間に1000回
+    { windowMs: 60 * 1000, maxRequests: 1000 }, // 1分間に1000回
     { windowMs: 15 * 60 * 1000, maxRequests: 20000 }, // 15分間に20000回
   ],
 }
@@ -60,18 +60,20 @@ const defaultKeyGenerator = (req: NextRequest): string => {
   const forwarded = req.headers.get('x-forwarded-for')
   const realIp = req.headers.get('x-real-ip')
   const remoteAddr = forwarded?.split(',')[0] || realIp || req.ip || 'unknown'
-  
+
   // 認証ユーザーの場合はユーザーIDも含める
   const userId = req.headers.get('x-user-id')
   if (userId) {
     return `${remoteAddr}:${userId}`
   }
-  
+
   return remoteAddr
 }
 
 // User-Agent解析
-const parseUserAgent = (userAgent: string | null): {
+const parseUserAgent = (
+  userAgent: string | null
+): {
   isMobile: boolean
   isBot: boolean
   browser: string
@@ -82,18 +84,28 @@ const parseUserAgent = (userAgent: string | null): {
   }
 
   const ua = userAgent.toLowerCase()
-  
+
   return {
     isMobile: /mobile|android|iphone|ipad/.test(ua),
     isBot: /bot|crawler|spider|scraper|curl|wget/.test(ua),
-    browser: ua.includes('chrome') ? 'chrome' : 
-             ua.includes('firefox') ? 'firefox' : 
-             ua.includes('safari') ? 'safari' : 'other',
-    os: ua.includes('windows') ? 'windows' :
-        ua.includes('mac') ? 'mac' :
-        ua.includes('linux') ? 'linux' : 
-        ua.includes('android') ? 'android' :
-        ua.includes('ios') ? 'ios' : 'other',
+    browser: ua.includes('chrome')
+      ? 'chrome'
+      : ua.includes('firefox')
+        ? 'firefox'
+        : ua.includes('safari')
+          ? 'safari'
+          : 'other',
+    os: ua.includes('windows')
+      ? 'windows'
+      : ua.includes('mac')
+        ? 'mac'
+        : ua.includes('linux')
+          ? 'linux'
+          : ua.includes('android')
+            ? 'android'
+            : ua.includes('ios')
+              ? 'ios'
+              : 'other',
   }
 }
 
@@ -109,9 +121,9 @@ export function withRateLimit(options: RateLimitOptions) {
       const identifier = options.keyGenerator?.(request) || defaultKeyGenerator(request)
       const userAgent = request.headers.get('user-agent')
       const userId = request.headers.get('x-user-id')
-      
+
       // スキップ条件チェック
-      if (options.skipIf && await options.skipIf(request)) {
+      if (options.skipIf && (await options.skipIf(request))) {
         return handler(request)
       }
 
@@ -139,7 +151,7 @@ export function withRateLimit(options: RateLimitOptions) {
               recommendations: ddosResult.recommendations,
               retryAfter: ddosResult.blockDuration,
             },
-            { 
+            {
               status: 429,
               headers: {
                 'Retry-After': ddosResult.blockDuration?.toString() || '60',
@@ -158,22 +170,18 @@ export function withRateLimit(options: RateLimitOptions) {
       )
 
       // いずれかの制限に引っかかった場合
-      const failedLimit = Object.values(results).find(result => !result.success)
-      
+      const failedLimit = Object.values(results).find((result) => !result.success)
+
       if (failedLimit) {
         // リミット到達時のコールバック
         options.onLimitReached?.(request, identifier)
 
         // IP reputation更新（失敗として記録）
         if (options.enableDDoSProtection) {
-          await ddosProtection.updateIpReputation(
-            identifier.split(':')[0],
-            false,
-            {
-              userAgent: userAgent || undefined,
-              endpoint: request.nextUrl.pathname,
-            }
-          )
+          await ddosProtection.updateIpReputation(identifier.split(':')[0], false, {
+            userAgent: userAgent || undefined,
+            endpoint: request.nextUrl.pathname,
+          })
         }
 
         return NextResponse.json(
@@ -185,7 +193,7 @@ export function withRateLimit(options: RateLimitOptions) {
             resetTime: failedLimit.resetTime,
             retryAfter: failedLimit.retryAfter,
           },
-          { 
+          {
             status: 429,
             headers: {
               'X-RateLimit-Limit': failedLimit.limit.toString(),
@@ -202,14 +210,10 @@ export function withRateLimit(options: RateLimitOptions) {
 
       // IP reputation更新（成功として記録）
       if (options.enableDDoSProtection && response.status < 400) {
-        await ddosProtection.updateIpReputation(
-          identifier.split(':')[0],
-          true,
-          {
-            userAgent: userAgent || undefined,
-            endpoint: request.nextUrl.pathname,
-          }
-        )
+        await ddosProtection.updateIpReputation(identifier.split(':')[0], true, {
+          userAgent: userAgent || undefined,
+          endpoint: request.nextUrl.pathname,
+        })
       }
 
       // レート制限情報をレスポンスヘッダーに追加
@@ -221,7 +225,6 @@ export function withRateLimit(options: RateLimitOptions) {
       }
 
       return response
-
     } catch (error) {
       console.error('Rate limiting middleware error:', error)
       // エラー時はリクエストを通す
@@ -263,7 +266,7 @@ export const withPremiumRateLimit = withRateLimit({
     // プレミアムユーザーかチェック
     const userPlan = req.headers.get('x-user-plan')
     const userActive = req.headers.get('x-user-active')
-    return userPlan === 'PREMIUM' || userPlan === 'ENTERPRISE' && userActive === 'true'
+    return userPlan === 'PREMIUM' || (userPlan === 'ENTERPRISE' && userActive === 'true')
   },
 })
 
@@ -272,7 +275,7 @@ export const withPremiumRateLimit = withRateLimit({
  */
 export class DynamicRateLimitManager {
   private customConfigs = new Map<string, RateLimitConfig[]>()
-  
+
   /**
    * 特定のエンドポイントまたはユーザーにカスタム制限を設定
    */
@@ -343,10 +346,7 @@ export async function getRateLimitStats(
 
   for (let i = 0; i < configs.length; i++) {
     const config = configs[i]
-    const status = await slidingWindowLimiter.getLimitStatus(
-      `limit_${i}:${identifier}`,
-      config
-    )
+    const status = await slidingWindowLimiter.getLimitStatus(`limit_${i}:${identifier}`, config)
 
     limits.push({
       windowMs: config.windowMs,

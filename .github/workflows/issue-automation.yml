@@ -1,0 +1,763 @@
+name: 🔍 Issue運用ルール監査・自動化システム
+
+on:
+  issues:
+    types: [opened, edited, closed, labeled, unlabeled, assigned, unassigned]
+  issue_comment:
+    types: [created, edited]
+  schedule:
+    # 日次レポート: 毎日 09:00 JST
+    - cron: '0 0 * * *'
+    # 週次レポート: 毎週月曜日 09:00 JST  
+    - cron: '0 0 * * 1'
+    # 月次レポート: 毎月1日 09:00 JST
+    - cron: '0 0 1 * *'
+    # SLA違反チェック: 毎時
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: '実行するアクション'
+        required: true
+        default: 'full_audit'
+        type: choice
+        options:
+          - full_audit
+          - quality_check
+          - sla_check
+          - duplicate_detection
+          - generate_reports
+          - cleanup_old_issues
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+permissions:
+  issues: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  # 1. Issue作成時の即座品質チェック
+  immediate_quality_check:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    name: 📋 Issue品質即座チェック
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js 18セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 依存関係インストール
+        run: npm ci
+
+      - name: Issue品質チェック実行
+        id: quality_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context } = require('@actions/core');
+            const issue = context.payload.issue;
+            
+            // 品質チェック結果
+            const checks = {
+              hasTitle: !!issue.title && issue.title.length > 10,
+              hasDescription: !!issue.body && issue.body.length > 50,
+              hasLabels: issue.labels && issue.labels.length > 0,
+              hasPriority: issue.labels.some(label => 
+                ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'].includes(label.name)
+              ),
+              hasComponent: issue.labels.some(label => 
+                label.name.startsWith('component:') || label.name.startsWith('area:')
+              ),
+              isSecurityIssue: issue.labels.some(label => 
+                ['security', 'vulnerability', 'critical'].includes(label.name)
+              ),
+              hasTemplate: issue.body && (
+                issue.body.includes('## Bug Description') || 
+                issue.body.includes('## Feature Summary') ||
+                issue.body.includes('## Security Issue')
+              )
+            };
+
+            // スコア計算
+            const score = Object.values(checks).filter(Boolean).length;
+            const maxScore = Object.keys(checks).length;
+            const qualityScore = Math.round((score / maxScore) * 100);
+
+            // 結果をGitHub outputに設定
+            core.setOutput('quality_score', qualityScore);
+            core.setOutput('checks', JSON.stringify(checks));
+            core.setOutput('is_security', checks.isSecurityIssue);
+            core.setOutput('needs_improvement', qualityScore < 70);
+
+            return {
+              score: qualityScore,
+              checks,
+              recommendations: []
+            };
+
+      - name: セキュリティIssueの即座エスカレーション
+        if: steps.quality_check.outputs.is_security == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // セキュリティIssueの即座処理
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['priority:critical', 'security:escalated', 'needs:immediate-attention']
+            });
+
+            // セキュリティチームにアサイン（設定されている場合）
+            const securityTeam = ['security-team-member']; // 実際のメンバーに変更
+            if (securityTeam.length > 0) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                assignees: securityTeam
+              });
+            }
+
+      - name: 品質改善提案コメント追加
+        if: steps.quality_check.outputs.needs_improvement == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const checks = JSON.parse('${{ steps.quality_check.outputs.checks }}');
+            const score = '${{ steps.quality_check.outputs.quality_score }}';
+            
+            let suggestions = [];
+            
+            if (!checks.hasTitle) {
+              suggestions.push('- 📝 **タイトル**: より具体的で説明的なタイトルを付けてください（最低10文字以上）');
+            }
+            
+            if (!checks.hasDescription) {
+              suggestions.push('- 📋 **説明**: 詳細な説明を追加してください（最低50文字以上）');
+            }
+            
+            if (!checks.hasLabels) {
+              suggestions.push('- 🏷️ **ラベル**: 適切なラベルを付けてください');
+            }
+            
+            if (!checks.hasPriority) {
+              suggestions.push('- ⚡ **優先度**: priority:critical, priority:high, priority:medium, priority:low のいずれかを選択してください');
+            }
+            
+            if (!checks.hasComponent) {
+              suggestions.push('- 🎯 **コンポーネント**: 影響する機能エリア（component:xxx または area:xxx）を指定してください');
+            }
+            
+            if (!checks.hasTemplate) {
+              suggestions.push('- 📄 **テンプレート**: Issueテンプレートを使用して構造化された情報を提供してください');
+            }
+
+            const commentBody = `
+## 🔍 Issue品質監査結果
+
+**品質スコア**: ${score}/100 ${score >= 70 ? '✅' : '⚠️'}
+
+### 改善提案:
+${suggestions.join('\n')}
+
+### 推奨アクション:
+- [ ] 上記の改善提案を確認し、Issueを編集してください
+- [ ] 必要に応じて適切なラベルを追加してください  
+- [ ] 関連するチームメンバーをアサインしてください
+
+*このコメントは自動的に生成されました。品質向上にご協力ください。* 🤖
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: commentBody
+            });
+
+      - name: Slack通知（セキュリティ・クリティカル）
+        if: steps.quality_check.outputs.is_security == 'true'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\"🚨 **SECURITY ALERT** 🚨\\n\\n**Issue #${{ github.event.issue.number }}**: ${{ github.event.issue.title }}\\n**URL**: ${{ github.event.issue.html_url }}\\n**Action**: 即座に対応が必要です\"}" \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi
+
+  # 2. SLA違反監視・アラート
+  sla_monitoring:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'sla_check')
+    runs-on: ubuntu-latest
+    name: ⏰ SLA違反監視
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: SLA違反チェック
+        id: sla_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const violations = [];
+            
+            // SLA定義（時間単位）
+            const SLA_RULES = {
+              'priority:critical': 2,    // 2時間
+              'priority:high': 24,       // 24時間
+              'priority:medium': 72,     // 3日
+              'priority:low': 168,       // 7日
+              'security': 1,             // 1時間
+              'bug': 48                  // 2日
+            };
+
+            // 未解決Issueを取得
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            for (const issue of issues) {
+              const createdAt = new Date(issue.created_at);
+              const hoursOpen = (now - createdAt) / (1000 * 60 * 60);
+              
+              let slaHours = SLA_RULES['priority:low']; // デフォルト
+              
+              // ラベルベースのSLA判定
+              for (const label of issue.labels) {
+                if (SLA_RULES[label.name]) {
+                  slaHours = Math.min(slaHours, SLA_RULES[label.name]);
+                }
+              }
+              
+              if (hoursOpen > slaHours) {
+                violations.push({
+                  number: issue.number,
+                  title: issue.title,
+                  url: issue.html_url,
+                  hoursOpen: Math.round(hoursOpen),
+                  slaHours,
+                  severity: hoursOpen > slaHours * 2 ? 'severe' : 'moderate',
+                  labels: issue.labels.map(l => l.name)
+                });
+              }
+            }
+
+            console.log(`Found ${violations.length} SLA violations`);
+            core.setOutput('violations', JSON.stringify(violations));
+            core.setOutput('has_violations', violations.length > 0);
+            
+            return violations;
+
+      - name: SLA違反アラート送信
+        if: steps.sla_check.outputs.has_violations == 'true'
+        run: |
+          violations='${{ steps.sla_check.outputs.violations }}'
+          
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            # Slackアラート送信
+            cat << EOF > slack_payload.json
+            {
+              "text": "⚠️ SLA違反アラート",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "title": "SLA違反Issues検出",
+                  "text": "対応が遅れているIssueがあります。確認と対応をお願いします。",
+                  "fields": [
+                    {
+                      "title": "違反数",
+                      "value": "$(echo '$violations' | jq '. | length')",
+                      "short": true
+                    },
+                    {
+                      "title": "リポジトリ",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+          EOF
+            
+            curl -X POST -H 'Content-type: application/json' \
+              --data @slack_payload.json \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi
+
+  # 3. 重複Issue検出
+  duplicate_detection:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    name: 🔍 重複Issue検出
+    steps:
+      - name: 重複Issue検出実行
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const currentIssue = context.payload.issue;
+            const currentTitle = currentIssue.title.toLowerCase();
+            const currentBody = currentIssue.body ? currentIssue.body.toLowerCase() : '';
+            
+            // 既存のオープンIssueを検索
+            const existingIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const duplicates = [];
+            
+            for (const issue of existingIssues) {
+              if (issue.number === currentIssue.number) continue;
+              
+              const title = issue.title.toLowerCase();
+              const body = issue.body ? issue.body.toLowerCase() : '';
+              
+              // シンプルな類似度計算（改善の余地あり）
+              const titleSimilarity = calculateSimilarity(currentTitle, title);
+              const bodySimilarity = calculateSimilarity(currentBody, body);
+              
+              if (titleSimilarity > 0.7 || bodySimilarity > 0.6) {
+                duplicates.push({
+                  number: issue.number,
+                  title: issue.title,
+                  url: issue.html_url,
+                  titleSimilarity,
+                  bodySimilarity
+                });
+              }
+            }
+            
+            if (duplicates.length > 0) {
+              // 重複可能性のコメント追加
+              let comment = `## 🔍 重複Issue検出\n\n以下のIssueと類似している可能性があります:\n\n`;
+              
+              for (const dup of duplicates) {
+                comment += `- **#${dup.number}**: [${dup.title}](${dup.url}) `;
+                comment += `(類似度: タイトル ${Math.round(dup.titleSimilarity * 100)}%, `;
+                comment += `内容 ${Math.round(dup.bodySimilarity * 100)}%)\n`;
+              }
+              
+              comment += `\n既存のIssueと重複していないか確認をお願いします。重複の場合は、このIssueを閉じて既存のIssueにコメントしてください。\n\n`;
+              comment += `*この検出は自動で行われました。誤検出の可能性もあります。* 🤖`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: currentIssue.number,
+                body: comment
+              });
+              
+              // 重複可能性ラベル追加
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: currentIssue.number,
+                labels: ['duplicate:possible']
+              });
+            }
+            
+            // 類似度計算関数
+            function calculateSimilarity(str1, str2) {
+              const words1 = str1.split(/\s+/).filter(w => w.length > 3);
+              const words2 = str2.split(/\s+/).filter(w => w.length > 3);
+              
+              if (words1.length === 0 || words2.length === 0) return 0;
+              
+              const intersection = words1.filter(w => words2.includes(w));
+              const union = [...new Set([...words1, ...words2])];
+              
+              return intersection.length / union.length;
+            }
+
+  # 4. 日次・週次・月次レポート生成
+  generate_reports:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'generate_reports')
+    runs-on: ubuntu-latest
+    name: 📊 Issue運用レポート生成
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Issue統計データ収集
+        id: collect_stats
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            // 全Issues取得
+            const allIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100,
+              since: monthAgo.toISOString()
+            });
+            
+            // 統計計算
+            const stats = {
+              total: allIssues.length,
+              open: allIssues.filter(i => i.state === 'open').length,
+              closed: allIssues.filter(i => i.state === 'closed').length,
+              daily: {
+                created: allIssues.filter(i => new Date(i.created_at) >= yesterday).length,
+                closed: allIssues.filter(i => i.closed_at && new Date(i.closed_at) >= yesterday).length
+              },
+              weekly: {
+                created: allIssues.filter(i => new Date(i.created_at) >= weekAgo).length,
+                closed: allIssues.filter(i => i.closed_at && new Date(i.closed_at) >= weekAgo).length
+              },
+              monthly: {
+                created: allIssues.filter(i => new Date(i.created_at) >= monthAgo).length,
+                closed: allIssues.filter(i => i.closed_at && new Date(i.closed_at) >= monthAgo).length
+              },
+              byPriority: {},
+              byComponent: {},
+              avgResolutionTime: 0,
+              slaViolations: 0
+            };
+            
+            // 優先度別統計
+            const priorities = ['critical', 'high', 'medium', 'low'];
+            for (const priority of priorities) {
+              stats.byPriority[priority] = allIssues.filter(i => 
+                i.labels.some(l => l.name === `priority:${priority}`)
+              ).length;
+            }
+            
+            // コンポーネント別統計
+            const components = ['frontend', 'backend', 'database', 'ui', 'api'];
+            for (const component of components) {
+              stats.byComponent[component] = allIssues.filter(i => 
+                i.labels.some(l => l.name.includes(component))
+              ).length;
+            }
+            
+            // 平均解決時間計算
+            const closedIssues = allIssues.filter(i => i.closed_at);
+            if (closedIssues.length > 0) {
+              const totalResolutionTime = closedIssues.reduce((sum, issue) => {
+                const created = new Date(issue.created_at);
+                const closed = new Date(issue.closed_at);
+                return sum + (closed - created);
+              }, 0);
+              stats.avgResolutionTime = Math.round(totalResolutionTime / closedIssues.length / (1000 * 60 * 60)); // 時間単位
+            }
+            
+            core.setOutput('stats', JSON.stringify(stats));
+            return stats;
+
+      - name: 日次レポート生成・送信
+        if: contains(github.event.schedule, '0 0 * * *') || github.event_name == 'workflow_dispatch'
+        run: |
+          stats='${{ steps.collect_stats.outputs.stats }}'
+          
+          cat << EOF > daily_report.md
+          # 📊 Issue運用 日次レポート - $(date +%Y-%m-%d)
+          
+          ## 📈 本日の概要
+          - **新規作成**: $(echo '$stats' | jq '.daily.created') Issues
+          - **解決完了**: $(echo '$stats' | jq '.daily.closed') Issues
+          - **未解決総数**: $(echo '$stats' | jq '.open') Issues
+          
+          ## 🏷️ 優先度別状況
+          - **Critical**: $(echo '$stats' | jq '.byPriority.critical // 0') Issues
+          - **High**: $(echo '$stats' | jq '.byPriority.high // 0') Issues  
+          - **Medium**: $(echo '$stats' | jq '.byPriority.medium // 0') Issues
+          - **Low**: $(echo '$stats' | jq '.byPriority.low // 0') Issues
+          
+          ## ⏱️ パフォーマンス指標
+          - **平均解決時間**: $(echo '$stats' | jq '.avgResolutionTime') 時間
+          - **SLA違反**: $(echo '$stats' | jq '.slaViolations') 件
+          
+          ---
+          *自動生成レポート - $(date +%Y-%m-%d\ %H:%M:%S)*
+          EOF
+          
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            # Slack送信
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\"$(cat daily_report.md)\"}" \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi
+
+      - name: 週次レポート生成・送信
+        if: contains(github.event.schedule, '0 0 * * 1') || github.event_name == 'workflow_dispatch'  
+        run: |
+          stats='${{ steps.collect_stats.outputs.stats }}'
+          
+          cat << EOF > weekly_report.md
+          # 📊 Issue運用 週次レポート - Week of $(date +%Y-%m-%d)
+          
+          ## 📈 今週の概要
+          - **新規作成**: $(echo '$stats' | jq '.weekly.created') Issues
+          - **解決完了**: $(echo '$stats' | jq '.weekly.closed') Issues
+          - **解決率**: $(echo "scale=2; $(echo '$stats' | jq '.weekly.closed') / $(echo '$stats' | jq '.weekly.created') * 100" | bc -l)%
+          
+          ## 🎯 コンポーネント別分析
+          - **フロントエンド**: $(echo '$stats' | jq '.byComponent.frontend // 0') Issues
+          - **バックエンド**: $(echo '$stats' | jq '.byComponent.backend // 0') Issues
+          - **データベース**: $(echo '$stats' | jq '.byComponent.database // 0') Issues
+          
+          ## 📋 運用品質指標
+          - **平均解決時間**: $(echo '$stats' | jq '.avgResolutionTime') 時間
+          - **未解決Issue総数**: $(echo '$stats' | jq '.open') Issues
+          - **今週のSLA違反**: $(echo '$stats' | jq '.slaViolations') 件
+          
+          ## 🔍 改善提案
+          - [ ] 長期未解決Issueのレビュー実施
+          - [ ] 高優先度Issueの対応状況確認
+          - [ ] 重複Issue検出精度の向上
+          
+          ---
+          *自動生成レポート - $(date +%Y-%m-%d\ %H:%M:%S)*
+          EOF
+          
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\"$(cat weekly_report.md)\"}" \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi
+
+  # 5. 古いIssue定期クリーンアップ
+  cleanup_old_issues:
+    if: contains(github.event.schedule, '0 0 1 * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'cleanup_old_issues')
+    runs-on: ubuntu-latest
+    name: 🧹 古いIssueクリーンアップ
+    steps:
+      - name: 古いIssue検出・提案
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const oldIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const staleIssues = oldIssues.filter(issue => {
+              const lastActivity = issue.updated_at ? new Date(issue.updated_at) : new Date(issue.created_at);
+              return lastActivity < sixMonthsAgo;
+            });
+            
+            console.log(`Found ${staleIssues.length} stale issues`);
+            
+            for (const issue of staleIssues) {
+              // 古いIssueにラベルとコメント追加
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['stale', 'needs:review']
+              });
+              
+              const comment = `## 🕐 Issue状態確認のお知らせ
+              
+このIssueは6ヶ月以上更新がありません。
+
+**確認事項:**
+- [ ] このIssueはまだ有効ですか？
+- [ ] 解決済みの場合は適切にクローズしてください
+- [ ] 継続的に対応が必要な場合は、現在の状況をコメントしてください
+
+**自動クリーンアップについて:**
+14日間応答がない場合、自動的に \`stale\` ラベルが追加され、その後7日間で自動クローズされる可能性があります。
+
+*このコメントは自動で生成されました。* 🤖`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+            }
+
+  # 6. 包括的な品質監査
+  comprehensive_audit:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'full_audit'
+    runs-on: ubuntu-latest
+    name: 🔍 包括的Issue品質監査
+    steps:
+      - name: 全Issue監査実行
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const auditResults = {
+              totalIssues: allIssues.length,
+              qualityScore: 0,
+              missingPriority: 0,
+              missingComponent: 0,
+              missingAssignee: 0,
+              needsTemplate: 0,
+              recommendations: []
+            };
+            
+            let totalScore = 0;
+            
+            for (const issue of allIssues) {
+              let issueScore = 0;
+              
+              // 各品質項目のチェック
+              if (issue.title && issue.title.length > 10) issueScore++;
+              if (issue.body && issue.body.length > 50) issueScore++;
+              if (issue.labels && issue.labels.length > 0) issueScore++;
+              if (issue.assignees && issue.assignees.length > 0) issueScore++;
+              else auditResults.missingAssignee++;
+              
+              const hasPriority = issue.labels.some(l => l.name.startsWith('priority:'));
+              if (hasPriority) issueScore++;
+              else auditResults.missingPriority++;
+              
+              const hasComponent = issue.labels.some(l => l.name.startsWith('component:') || l.name.startsWith('area:'));
+              if (hasComponent) issueScore++;
+              else auditResults.missingComponent++;
+              
+              const hasTemplate = issue.body && (
+                issue.body.includes('## Bug Description') || 
+                issue.body.includes('## Feature Summary')
+              );
+              if (hasTemplate) issueScore++;
+              else auditResults.needsTemplate++;
+              
+              totalScore += issueScore;
+            }
+            
+            auditResults.qualityScore = allIssues.length > 0 ? 
+              Math.round((totalScore / (allIssues.length * 7)) * 100) : 100;
+            
+            // 改善提案生成
+            if (auditResults.missingPriority > 0) {
+              auditResults.recommendations.push(`${auditResults.missingPriority}個のIssueに優先度ラベルが不足しています`);
+            }
+            if (auditResults.missingComponent > 0) {
+              auditResults.recommendations.push(`${auditResults.missingComponent}個のIssueにコンポーネントラベルが不足しています`);
+            }
+            if (auditResults.missingAssignee > 0) {
+              auditResults.recommendations.push(`${auditResults.missingAssignee}個のIssueに担当者が未アサインです`);
+            }
+            
+            // 監査レポート作成
+            const reportBody = `# 🔍 Issue品質監査レポート
+            
+## 📊 全体サマリー
+- **総Issue数**: ${auditResults.totalIssues}
+- **品質スコア**: ${auditResults.qualityScore}/100 ${auditResults.qualityScore >= 80 ? '✅' : '⚠️'}
+
+## 📋 改善項目
+- **優先度未設定**: ${auditResults.missingPriority}件
+- **コンポーネント未設定**: ${auditResults.missingComponent}件  
+- **担当者未アサイン**: ${auditResults.missingAssignee}件
+- **テンプレート未使用**: ${auditResults.needsTemplate}件
+
+## 💡 改善提案
+${auditResults.recommendations.map(r => `- ${r}`).join('\n')}
+
+## 🎯 次のアクション
+- [ ] 高優先度Issueの担当者アサイン確認
+- [ ] 長期未解決Issueのレビュー実施  
+- [ ] Issue作成者向けガイドラインの周知
+- [ ] テンプレート利用率の向上施策検討
+
+---
+*監査実行日時: ${new Date().toLocaleString('ja-JP')}*
+*自動生成レポート 🤖*`;
+
+            // 監査結果をIssueとして作成
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔍 Issue品質監査レポート - ${new Date().toLocaleDateString('ja-JP')}`,
+              body: reportBody,
+              labels: ['documentation', 'audit', 'automated']
+            });
+            
+            console.log('Comprehensive audit completed');
+            console.log(JSON.stringify(auditResults, null, 2));
+
+  # 7. 通知設定とエラーハンドリング  
+  notification_handler:
+    if: always()
+    runs-on: ubuntu-latest
+    name: 📢 通知・エラーハンドリング
+    needs: [immediate_quality_check, sla_monitoring, duplicate_detection, generate_reports, cleanup_old_issues, comprehensive_audit]
+    steps:
+      - name: ワークフロー実行結果通知
+        if: always()
+        run: |
+          status="成功"
+          color="good"
+          
+          if [[ "${{ needs.immediate_quality_check.result }}" == "failure" ]] || \
+             [[ "${{ needs.sla_monitoring.result }}" == "failure" ]] || \
+             [[ "${{ needs.duplicate_detection.result }}" == "failure" ]] || \
+             [[ "${{ needs.generate_reports.result }}" == "failure" ]] || \
+             [[ "${{ needs.cleanup_old_issues.result }}" == "failure" ]] || \
+             [[ "${{ needs.comprehensive_audit.result }}" == "failure" ]]; then
+            status="一部失敗"
+            color="warning"
+          fi
+          
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            cat << EOF > notification.json
+            {
+              "attachments": [
+                {
+                  "color": "$color",
+                  "title": "Issue運用監査システム実行完了",
+                  "text": "実行結果: $status",
+                  "fields": [
+                    {
+                      "title": "リポジトリ", 
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "実行時刻",
+                      "value": "$(date)",
+                      "short": true
+                    },
+                    {
+                      "title": "トリガー",
+                      "value": "${{ github.event_name }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+          EOF
+            
+            curl -X POST -H 'Content-type: application/json' \
+              --data @notification.json \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          fi

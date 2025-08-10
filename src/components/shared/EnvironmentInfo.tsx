@@ -1,44 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Info, Globe, Code, Clock, GitBranch, Hash, User, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react'
+import { Info, Globe, Code, Clock, GitBranch, Hash, User, Calendar } from 'lucide-react'
 
 interface DeploymentInfo {
-  environment: string;
-  deploymentType: string;
-  version: string;
-  buildTime: string;
-  branch: string;
-  prNumber: number | null;
-  url: string;
+  environment: string
+  deploymentType: string
+  version: string
+  buildTime: string
+  branch: string
+  prNumber: number | null
+  url: string
   commit: {
-    sha: string;
-    message: string;
-    author: string;
-  };
+    sha: string
+    message: string
+    author: string
+  }
 }
 
 interface EnvironmentInfoProps {
-  className?: string;
-  showDetails?: boolean;
+  className?: string
+  showDetails?: boolean
 }
 
 export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
   className = '',
-  showDetails = false
+  showDetails = false,
 }) => {
-  const [deploymentInfo, setDeploymentInfo] = useState<DeploymentInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [deploymentInfo, setDeploymentInfo] = useState<DeploymentInfo | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchDeploymentInfo = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const response = await fetch('/deployment-info.json');
+        const response = await fetch('/deployment-info.json')
         if (response.ok) {
-          const info = await response.json();
-          setDeploymentInfo(info);
+          const info = await response.json()
+          setDeploymentInfo(info)
         }
       } catch (error) {
-        console.warn('Could not fetch deployment info:', error);
+        console.warn('Could not fetch deployment info:', error)
         // Fallback to environment variables
         setDeploymentInfo({
           environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',
@@ -46,68 +46,70 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
           version: import.meta.env.VITE_APP_VERSION || 'unknown',
           buildTime: import.meta.env.VITE_APP_BUILD_TIME || '',
           branch: import.meta.env.VITE_APP_BRANCH || '',
-          prNumber: import.meta.env.VITE_APP_PR_NUMBER ? parseInt(import.meta.env.VITE_APP_PR_NUMBER) : null,
+          prNumber: import.meta.env.VITE_APP_PR_NUMBER
+            ? parseInt(import.meta.env.VITE_APP_PR_NUMBER)
+            : null,
           url: window.location.origin,
           commit: {
             sha: import.meta.env.VITE_APP_VERSION || 'unknown',
             message: '',
-            author: ''
-          }
-        });
+            author: '',
+          },
+        })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchDeploymentInfo();
-  }, []);
+    fetchDeploymentInfo()
+  }, [])
 
   if (isLoading) {
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
   if (!deploymentInfo) {
-    return null;
+    return null
   }
 
   const formatBuildTime = (buildTime: string) => {
-    if (!buildTime) return 'Unknown';
+    if (!buildTime) return 'Unknown'
     try {
-      return new Date(buildTime).toLocaleString();
+      return new Date(buildTime).toLocaleString()
     } catch {
-      return buildTime;
+      return buildTime
     }
-  };
+  }
 
   const getEnvironmentColor = (env: string) => {
     switch (env) {
       case 'production':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-green-600 bg-green-50 border-green-200'
       case 'staging':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'development':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
+        return 'text-blue-600 bg-blue-50 border-blue-200'
       default:
         if (env.startsWith('preview-pr-')) {
-          return 'text-purple-600 bg-purple-50 border-purple-200';
+          return 'text-purple-600 bg-purple-50 border-purple-200'
         }
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-gray-600 bg-gray-50 border-gray-200'
     }
-  };
+  }
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 ${className}`}>
+    <div className={`rounded-lg border border-gray-200 bg-white ${className}`}>
       <div className="p-4">
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="mb-4 flex items-center space-x-2">
           <Info className="h-5 w-5 text-gray-400" />
           <h3 className="text-lg font-semibold text-gray-900">Environment Information</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Environment */}
           <div className="flex items-center space-x-3">
             <Globe className="h-4 w-4 text-gray-400" />
@@ -115,7 +117,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
               <p className="text-sm text-gray-600">Environment</p>
               <span
                 className={`
-                  inline-flex px-2 py-1 text-xs font-medium rounded-full border
+                  inline-flex rounded-full border px-2 py-1 text-xs font-medium
                   ${getEnvironmentColor(deploymentInfo.environment)}
                 `}
               >
@@ -129,7 +131,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
             <Hash className="h-4 w-4 text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Version</p>
-              <p className="text-sm font-mono text-gray-900">
+              <p className="font-mono text-sm text-gray-900">
                 {deploymentInfo.version.substring(0, 8)}
               </p>
             </div>
@@ -141,7 +143,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
               <GitBranch className="h-4 w-4 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-600">Branch</p>
-                <p className="text-sm font-mono text-gray-900">{deploymentInfo.branch}</p>
+                <p className="font-mono text-sm text-gray-900">{deploymentInfo.branch}</p>
               </div>
             </div>
           )}
@@ -152,9 +154,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
               <Code className="h-4 w-4 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-600">Pull Request</p>
-                <p className="text-sm font-mono text-blue-600">
-                  #{deploymentInfo.prNumber}
-                </p>
+                <p className="font-mono text-sm text-blue-600">#{deploymentInfo.prNumber}</p>
               </div>
             </div>
           )}
@@ -164,9 +164,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
             <Clock className="h-4 w-4 text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Build Time</p>
-              <p className="text-sm text-gray-900">
-                {formatBuildTime(deploymentInfo.buildTime)}
-              </p>
+              <p className="text-sm text-gray-900">{formatBuildTime(deploymentInfo.buildTime)}</p>
             </div>
           </div>
 
@@ -175,7 +173,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
             <Info className="h-4 w-4 text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Deployment Type</p>
-              <p className="text-sm text-gray-900 capitalize">
+              <p className="text-sm capitalize text-gray-900">
                 {deploymentInfo.deploymentType.replace('-', ' ')}
               </p>
             </div>
@@ -183,15 +181,15 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
         </div>
 
         {showDetails && deploymentInfo.commit && (
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Commit Information</h4>
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <h4 className="mb-2 text-sm font-medium text-gray-900">Commit Information</h4>
             <div className="space-y-2">
               {deploymentInfo.commit.message && (
                 <div className="flex items-start space-x-3">
-                  <Code className="h-4 w-4 text-gray-400 mt-0.5" />
+                  <Code className="mt-0.5 h-4 w-4 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-600">Message</p>
-                    <p className="text-sm text-gray-900 font-mono">
+                    <p className="font-mono text-sm text-gray-900">
                       {deploymentInfo.commit.message}
                     </p>
                   </div>
@@ -211,18 +209,18 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
         )}
 
         {/* Health Check */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 border-t border-gray-200 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Status</span>
             <span className="flex items-center text-sm text-green-600">
-              <div className="h-2 w-2 bg-green-600 rounded-full mr-2"></div>
+              <div className="mr-2 h-2 w-2 rounded-full bg-green-600"></div>
               Healthy
             </span>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EnvironmentInfo;
+export default EnvironmentInfo

@@ -21,7 +21,10 @@ export const userFilterSchema = z.object({
   profileComplete: z.boolean().optional(),
   createdAfter: z.date().optional(),
   createdBefore: z.date().optional(),
-  sortBy: z.enum(['name', 'email', 'createdAt', 'lastLoginAt', 'totalStudyTime']).optional().default('createdAt'),
+  sortBy: z
+    .enum(['name', 'email', 'createdAt', 'lastLoginAt', 'totalStudyTime'])
+    .optional()
+    .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
   limit: z.number().min(1).max(100).optional().default(20),
   offset: z.number().min(0).optional().default(0),
@@ -49,7 +52,11 @@ export const updateUserSchema = z.object({
   location: z.string().max(100).optional(),
   website: z.string().url().optional().or(z.literal('')),
   linkedIn: z.string().url().optional().or(z.literal('')),
-  twitter: z.string().regex(/^@?[A-Za-z0-9_]{1,15}$/).optional().or(z.literal('')),
+  twitter: z
+    .string()
+    .regex(/^@?[A-Za-z0-9_]{1,15}$/)
+    .optional()
+    .or(z.literal('')),
   role: z.nativeEnum(UserRole).optional(),
   subscriptionPlan: z.nativeEnum(SubscriptionPlan).optional(),
   subscriptionActive: z.boolean().optional(),
@@ -99,7 +106,10 @@ export interface UserDetails extends User {
 // ユーザーサービスクラス
 export class UserService {
   // ユーザー検索・一覧取得
-  static async findUsers(filter: UserFilter, requesterId?: string): Promise<{
+  static async findUsers(
+    filter: UserFilter,
+    requesterId?: string
+  ): Promise<{
     users: Partial<User>[]
     pagination: {
       total: number
@@ -136,11 +146,8 @@ export class UserService {
         } else {
           where.AND = [
             { subscriptionPlan: { not: SubscriptionPlan.FREE } },
-            { 
-              OR: [
-                { subscription: null },
-                { subscription: { status: { not: 'active' } } },
-              ]
+            {
+              OR: [{ subscription: null }, { subscription: { status: { not: 'active' } } }],
             },
           ]
         }
@@ -217,10 +224,10 @@ export class UserService {
       ])
 
       return {
-        users: users.map(user => ({
+        users: users.map((user) => ({
           ...user,
-          subscriptionActive: 
-            user.subscriptionPlan === SubscriptionPlan.FREE || 
+          subscriptionActive:
+            user.subscriptionPlan === SubscriptionPlan.FREE ||
             user.subscription?.status === 'active',
         })),
         pagination: {
@@ -375,11 +382,7 @@ export class UserService {
   }
 
   // ユーザー更新
-  static async updateUser(
-    userId: string, 
-    data: UpdateUserData, 
-    updaterId?: string
-  ): Promise<User> {
+  static async updateUser(userId: string, data: UpdateUserData, updaterId?: string): Promise<User> {
     try {
       // メールアドレス重複チェック（変更時）
       if (data.email) {
@@ -454,7 +457,7 @@ export class UserService {
       // 管理者の場合、他の管理者が存在するかチェック
       if (user.role === UserRole.ADMIN) {
         const adminCount = await prisma.user.count({
-          where: { 
+          where: {
             role: UserRole.ADMIN,
             id: { not: userId },
           },
@@ -593,17 +596,23 @@ export class UserService {
       ])
 
       // データ整形
-      const roleStats = Object.values(UserRole).reduce((acc, role) => {
-        const found = usersByRole.find(item => item.role === role)
-        acc[role] = found?._count.role || 0
-        return acc
-      }, {} as Record<UserRole, number>)
+      const roleStats = Object.values(UserRole).reduce(
+        (acc, role) => {
+          const found = usersByRole.find((item) => item.role === role)
+          acc[role] = found?._count.role || 0
+          return acc
+        },
+        {} as Record<UserRole, number>
+      )
 
-      const subscriptionStats = Object.values(SubscriptionPlan).reduce((acc, plan) => {
-        const found = usersBySubscription.find(item => item.subscriptionPlan === plan)
-        acc[plan] = found?._count.subscriptionPlan || 0
-        return acc
-      }, {} as Record<SubscriptionPlan, number>)
+      const subscriptionStats = Object.values(SubscriptionPlan).reduce(
+        (acc, plan) => {
+          const found = usersBySubscription.find((item) => item.subscriptionPlan === plan)
+          acc[plan] = found?._count.subscriptionPlan || 0
+          return acc
+        },
+        {} as Record<SubscriptionPlan, number>
+      )
 
       return {
         totalUsers,
@@ -612,7 +621,7 @@ export class UserService {
         usersByRole: roleStats,
         usersBySubscription: subscriptionStats,
         averageStudyTime: Math.round(studyTimeStats._avg.totalStudyTime || 0),
-        topLearners: topLearners.map(user => ({
+        topLearners: topLearners.map((user) => ({
           id: user.id,
           name: user.name || 'Unknown',
           totalStudyTime: user.learningProgress?.totalStudyTime || 0,
@@ -650,7 +659,7 @@ export class UserService {
       // 最後の管理者の権限変更を防ぐ
       if (user.role === UserRole.ADMIN && newRole !== UserRole.ADMIN) {
         const adminCount = await prisma.user.count({
-          where: { 
+          where: {
             role: UserRole.ADMIN,
             deletedAt: null,
           },

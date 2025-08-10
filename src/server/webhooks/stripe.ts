@@ -11,7 +11,7 @@ import { StripeService } from '@/server/services/stripeService'
 import { SubscriptionPlan } from '@prisma/client'
 
 // Stripe WebHookイベント型定義
-type StripeWebHookEvent = 
+type StripeWebHookEvent =
   | 'customer.subscription.created'
   | 'customer.subscription.updated'
   | 'customer.subscription.deleted'
@@ -45,10 +45,7 @@ export async function handleStripeWebHook(req: NextRequest): Promise<NextRespons
 
     if (!signature) {
       console.error('Stripe署名ヘッダーが見つかりません')
-      return NextResponse.json(
-        { error: 'Missing stripe-signature header' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
     }
 
     // WebHook署名検証
@@ -58,7 +55,7 @@ export async function handleStripeWebHook(req: NextRequest): Promise<NextRespons
 
     // イベントタイプに応じた処理
     const handler = eventHandlers[event.type as StripeWebHookEvent]
-    
+
     if (handler) {
       await handler(event)
       console.log(`WebHookイベント処理完了: ${event.type}`)
@@ -67,14 +64,10 @@ export async function handleStripeWebHook(req: NextRequest): Promise<NextRespons
     }
 
     return NextResponse.json({ received: true }, { status: 200 })
-
   } catch (error) {
     console.error('Stripe WebHook処理エラー:', error)
-    
-    return NextResponse.json(
-      { error: 'WebHook processing failed' },
-      { status: 400 }
-    )
+
+    return NextResponse.json({ error: 'WebHook processing failed' }, { status: 400 })
   }
 }
 
@@ -131,7 +124,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
 
     // 前のイベントと比較してステータス変更を検出
     const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>
-    
+
     if (previousAttributes?.status && previousAttributes.status !== subscription.status) {
       // ステータス変更の場合
       await prisma.userActivity.create({
@@ -146,7 +139,9 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
         },
       })
 
-      console.log(`サブスクリプションステータス変更: ${subscription.id} (${previousAttributes.status} → ${subscription.status})`)
+      console.log(
+        `サブスクリプションステータス変更: ${subscription.id} (${previousAttributes.status} → ${subscription.status})`
+      )
     }
 
     // プラン変更の場合
@@ -196,7 +191,6 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
 
       console.log(`サブスクリプションキャンセル取り消し: ${subscription.id}`)
     }
-
   } catch (error) {
     console.error('サブスクリプション更新処理エラー:', error)
     throw error
@@ -249,7 +243,7 @@ async function handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
 // 支払い成功イベント
 async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
   const invoice = event.data.object as Stripe.Invoice
-  
+
   if (!invoice.subscription) {
     console.log('サブスクリプション以外の支払い成功:', invoice.id)
     return
@@ -277,7 +271,9 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
         amount: invoice.amount_paid,
         currency: invoice.currency,
         status: 'succeeded',
-        paidAt: new Date(invoice.status_transitions?.paid_at! * 1000),
+        paidAt: new Date(
+          (invoice.status_transitions?.paid_at || Math.floor(Date.now() / 1000)) * 1000
+        ),
         description: invoice.description || 'Subscription payment',
       },
     })
@@ -295,7 +291,9 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`支払い成功: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_paid} ${invoice.currency})`)
+    console.log(
+      `支払い成功: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_paid} ${invoice.currency})`
+    )
   } catch (error) {
     console.error('支払い成功処理エラー:', error)
     throw error
@@ -305,7 +303,7 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
 // 支払い失敗イベント
 async function handlePaymentFailed(event: Stripe.Event): Promise<void> {
   const invoice = event.data.object as Stripe.Invoice
-  
+
   if (!invoice.subscription) {
     console.log('サブスクリプション以外の支払い失敗:', invoice.id)
     return
@@ -355,7 +353,9 @@ async function handlePaymentFailed(event: Stripe.Event): Promise<void> {
     // 支払い失敗通知メール送信（実装に応じて）
     // await sendPaymentFailedEmail(userId, invoice)
 
-    console.log(`支払い失敗: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_due} ${invoice.currency})`)
+    console.log(
+      `支払い失敗: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_due} ${invoice.currency})`
+    )
   } catch (error) {
     console.error('支払い失敗処理エラー:', error)
     throw error
@@ -554,39 +554,42 @@ async function handleSetupIntentSucceeded(event: Stripe.Event): Promise<void> {
 }
 
 // WebHook再処理機能（失敗時のリトライ用）
-export async function retryWebHookEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+export async function retryWebHookEvent(
+  eventId: string
+): Promise<{ success: boolean; error?: string }> {
   try {
     // Stripeからイベントを再取得
     const event = await StripeService.stripe.events.retrieve(eventId)
-    
+
     const handler = eventHandlers[event.type as StripeWebHookEvent]
-    
+
     if (!handler) {
       return { success: false, error: `Unsupported event type: ${event.type}` }
     }
 
     await handler(event)
-    
+
     console.log(`WebHookイベント再処理完了: ${event.type} (${eventId})`)
     return { success: true }
-
   } catch (error) {
     console.error('WebHookイベント再処理エラー:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
 }
 
 // WebHook処理状況のログ取得
-export async function getWebHookLogs(limit: number = 50): Promise<Array<{
-  eventId: string
-  eventType: string
-  status: 'success' | 'failed'
-  processedAt: Date
-  error?: string
-}>> {
+export async function getWebHookLogs(limit: number = 50): Promise<
+  Array<{
+    eventId: string
+    eventType: string
+    status: 'success' | 'failed'
+    processedAt: Date
+    error?: string
+  }>
+> {
   try {
     // 実際の実装では、WebHookイベントの処理ログをデータベースに記録し、
     // それを取得する仕組みを構築する
@@ -605,13 +608,12 @@ export async function getWebHookLogs(limit: number = 50): Promise<Array<{
       take: limit,
     })
 
-    return activities.map(activity => ({
+    return activities.map((activity) => ({
       eventId: activity.id,
       eventType: activity.action,
       status: 'success' as const,
       processedAt: activity.createdAt,
     }))
-
   } catch (error) {
     console.error('WebHookログ取得エラー:', error)
     return []

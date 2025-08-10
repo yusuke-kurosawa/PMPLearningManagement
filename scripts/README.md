@@ -15,9 +15,10 @@ scripts/
 ### Maintenance Scripts
 
 #### health-check.sh
+
 - **Purpose**: Monitors application health and availability
 - **Usage**: `npm run health-check` or `./scripts/maintenance/health-check.sh`
-- **Features**: 
+- **Features**:
   - Checks application endpoint availability
   - Verifies key functionality
   - Reports system status

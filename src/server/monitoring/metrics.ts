@@ -38,7 +38,7 @@ export class Metrics {
 
   constructor() {
     this.register = new client.Registry()
-    
+
     // デフォルトメトリクスを収集
     if (this.collectDefaultMetrics) {
       client.collectDefaultMetrics({
@@ -204,7 +204,7 @@ export class Metrics {
     try {
       // この実装は実際のデータベース接続が必要
       // 以下は例として基本的な構造を示す
-      
+
       // アクティブユーザー数（過去1時間、過去24時間、過去7日間）
       // const activeUsersData = await this.getActiveUsersCount()
       // this.activeUsers.set({ time_period: '1h' }, activeUsersData.last1Hour)
@@ -224,12 +224,7 @@ export class Metrics {
   }
 
   // HTTPリクエストメトリクス記録
-  recordHttpRequest(
-    method: string,
-    route: string,
-    statusCode: number,
-    duration: number
-  ): void {
+  recordHttpRequest(method: string, route: string, statusCode: number, duration: number): void {
     const labels = {
       method: method.toUpperCase(),
       route,
@@ -241,12 +236,7 @@ export class Metrics {
   }
 
   // データベースクエリメトリクス記録
-  recordDatabaseQuery(
-    operation: string,
-    table: string,
-    duration: number,
-    success: boolean
-  ): void {
+  recordDatabaseQuery(operation: string, table: string, duration: number, success: boolean): void {
     const labels = {
       operation: operation.toUpperCase(),
       table,
@@ -254,18 +244,11 @@ export class Metrics {
     }
 
     this.dbQueryTotal.inc(labels)
-    this.dbQueryDuration.observe(
-      { operation: operation.toUpperCase(), table },
-      duration / 1000
-    )
+    this.dbQueryDuration.observe({ operation: operation.toUpperCase(), table }, duration / 1000)
   }
 
   // 学習セッションメトリクス記録
-  recordLearningSession(
-    knowledgeArea: string,
-    processGroup: string,
-    completed: boolean
-  ): void {
+  recordLearningSession(knowledgeArea: string, processGroup: string, completed: boolean): void {
     this.learningSessionsTotal.inc({
       knowledge_area: knowledgeArea,
       process_group: processGroup,
@@ -283,18 +266,11 @@ export class Metrics {
 
   // 収益メトリクス記録
   recordRevenue(plan: string, amount: number, paymentMethod: string): void {
-    this.revenueTotal.inc(
-      { plan, payment_method: paymentMethod },
-      amount
-    )
+    this.revenueTotal.inc({ plan, payment_method: paymentMethod }, amount)
   }
 
   // 通知送信メトリクス記録
-  recordNotificationSent(
-    type: string,
-    channel: string,
-    success: boolean
-  ): void {
+  recordNotificationSent(type: string, channel: string, success: boolean): void {
     this.notificationsSent.inc({
       type,
       channel,
@@ -349,11 +325,7 @@ export class Metrics {
   }
 
   // カスタムメトリクス作成
-  createCounter(
-    name: string,
-    help: string,
-    labelNames: string[] = []
-  ): client.Counter<string> {
+  createCounter(name: string, help: string, labelNames: string[] = []): client.Counter<string> {
     return new client.Counter({
       name,
       help,
@@ -362,11 +334,7 @@ export class Metrics {
     })
   }
 
-  createGauge(
-    name: string,
-    help: string,
-    labelNames: string[] = []
-  ): client.Gauge<string> {
+  createGauge(name: string, help: string, labelNames: string[] = []): client.Gauge<string> {
     return new client.Gauge({
       name,
       help,
@@ -441,16 +409,11 @@ export const metricsMiddleware = () => {
 
     // レスポンス終了時にメトリクス記録
     const originalSend = res.send
-    res.send = function(data: any) {
+    res.send = function (data: any) {
       const duration = Date.now() - startTime
       const route = req.route?.path || req.path
-      
-      metrics.recordHttpRequest(
-        req.method,
-        route,
-        res.statusCode,
-        duration
-      )
+
+      metrics.recordHttpRequest(req.method, route, res.statusCode, duration)
 
       return originalSend.call(this, data)
     }
@@ -476,15 +439,16 @@ export const getHealthData = async (): Promise<{
 }> => {
   const metrics = Metrics.getInstance()
   const healthMetrics = await metrics.getHealthMetrics()
-  
+
   // ヘルス状態判定
   let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-  
+
   if (healthMetrics.memoryUsage.heapUsed / healthMetrics.memoryUsage.heapTotal > 0.9) {
     status = 'degraded'
   }
-  
-  if (healthMetrics.eventLoopLag > 100) { // 100ms以上の遅延
+
+  if (healthMetrics.eventLoopLag > 100) {
+    // 100ms以上の遅延
     status = 'unhealthy'
   }
 
@@ -499,34 +463,27 @@ export const getHealthData = async (): Promise<{
 }
 
 // パフォーマンス測定デコレータ
-export const measurePerformance = (
-  metricName: string,
-  labels: Record<string, string> = {}
-) => {
+export const measurePerformance = (metricName: string, labels: Record<string, string> = {}) => {
   return (target: any, propertyName: string, descriptor: PropertyDescriptor) => {
     const method = descriptor.value
     const metrics = Metrics.getInstance()
 
-    descriptor.value = async function(...args: any[]) {
+    descriptor.value = async function (...args: any[]) {
       const startTime = Date.now()
-      
+
       try {
         const result = await method.apply(this, args)
         const duration = Date.now() - startTime
-        
+
         // カスタムメトリクス記録（必要に応じて）
         Logger.debug(`${metricName} completed`, { duration, labels })
-        
+
         return result
       } catch (error) {
         const duration = Date.now() - startTime
-        
-        metrics.recordError(
-          'method_execution',
-          propertyName,
-          'high'
-        )
-        
+
+        metrics.recordError('method_execution', propertyName, 'high')
+
         Logger.error(`${metricName} failed`, error, { duration, labels })
         throw error
       }

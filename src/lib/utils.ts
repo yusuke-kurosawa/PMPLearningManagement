@@ -10,9 +10,9 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return ''
-  
+
   const d = typeof date === 'string' ? new Date(date) : date
-  
+
   return new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric',
     month: 'long',
@@ -25,9 +25,9 @@ export function formatDate(date: Date | string | null | undefined): string {
  */
 export function formatDateTime(date: Date | string | null | undefined): string {
   if (!date) return ''
-  
+
   const d = typeof date === 'string' ? new Date(date) : date
-  
+
   return new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric',
     month: 'long',
@@ -44,14 +44,14 @@ export function formatDuration(minutes: number): string {
   if (minutes < 60) {
     return `${minutes}分`
   }
-  
+
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
-  
+
   if (mins === 0) {
     return `${hours}時間`
   }
-  
+
   return `${hours}時間${mins}分`
 }
 
@@ -70,7 +70,7 @@ export function debounce<T extends (...args: any[]) => any>(
   delay: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => func(...args), delay)
@@ -85,7 +85,7 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args)
@@ -145,12 +145,15 @@ export function isEmpty(value: any): boolean {
  * Group array by key
  */
 export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
-  return array.reduce((result, item) => {
-    const group = String(item[key])
-    if (!result[group]) result[group] = []
-    result[group].push(item)
-    return result
-  }, {} as Record<string, T[]>)
+  return array.reduce(
+    (result, item) => {
+      const group = String(item[key])
+      if (!result[group]) result[group] = []
+      result[group].push(item)
+      return result
+    },
+    {} as Record<string, T[]>
+  )
 }
 
 /**

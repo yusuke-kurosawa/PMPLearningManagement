@@ -43,7 +43,7 @@ describe('データ暗号化システム', () => {
 
     it('データを暗号化して復号化できる', () => {
       const originalData = 'これは機密情報です。テスト用データ。'
-      
+
       const encrypted = encryption.encrypt(originalData)
       const decrypted = encryption.decrypt(encrypted)
 
@@ -55,7 +55,7 @@ describe('データ暗号化システム', () => {
 
     it('キー派生を使用した暗号化・復号化', () => {
       const originalData = '重要な個人情報データ'
-      
+
       const encrypted = encryption.encrypt(originalData, true)
       const decrypted = encryption.decrypt(encrypted)
 
@@ -66,7 +66,7 @@ describe('データ暗号化システム', () => {
 
     it('ファイルの暗号化・復号化', () => {
       const originalFile = Buffer.from('これはテスト用のファイル内容です。')
-      
+
       const encrypted = encryption.encryptFile(originalFile)
       const decryptedFile = encryption.decryptFile(encrypted)
 
@@ -76,7 +76,7 @@ describe('データ暗号化システム', () => {
 
     it('異なるIVで同じデータを暗号化すると異なる結果', () => {
       const data = '同じデータ'
-      
+
       const encrypted1 = encryption.encrypt(data)
       const encrypted2 = encryption.encrypt(data)
 
@@ -120,7 +120,7 @@ describe('データ暗号化システム', () => {
 
     it('パスワードをハッシュ化して検証できる', async () => {
       const password = 'SecurePassword123!'
-      
+
       const hashResult = await hashing.hashPassword(password)
       const isValid = await hashing.verifyPassword(password, hashResult.hash)
 
@@ -133,7 +133,7 @@ describe('データ暗号化システム', () => {
     it('間違ったパスワードは検証に失敗する', async () => {
       const password = 'CorrectPassword'
       const wrongPassword = 'WrongPassword'
-      
+
       const hashResult = await hashing.hashPassword(password)
       const isValid = await hashing.verifyPassword(wrongPassword, hashResult.hash)
 
@@ -142,7 +142,7 @@ describe('データ暗号化システム', () => {
 
     it('機密データをハッシュ化できる', () => {
       const sensitiveData = 'user@example.com'
-      
+
       const hash = hashing.hashSensitiveData(sensitiveData)
 
       expect(hash).toHaveLength(64) // SHA-256 = 64hex文字
@@ -151,7 +151,7 @@ describe('データ暗号化システム', () => {
 
     it('同じデータは同じハッシュを生成する', () => {
       const data = 'consistent-data'
-      
+
       const hash1 = hashing.hashSensitiveData(data)
       const hash2 = hashing.hashSensitiveData(data)
 
@@ -160,7 +160,7 @@ describe('データ暗号化システム', () => {
 
     it('タイムスタンプ付きハッシュは毎回異なる', () => {
       const data = 'time-sensitive-data'
-      
+
       const hash1 = hashing.hashSensitiveData(data, true)
       // 時間を少し待つ
       const hash2 = hashing.hashSensitiveData(data, true)
@@ -171,7 +171,7 @@ describe('データ暗号化システム', () => {
     it('メールアドレスの匿名化ハッシュ', () => {
       const email = 'User@Example.COM'
       const normalizedExpected = hashing.hashEmailForAnalytics('user@example.com')
-      
+
       const hash = hashing.hashEmailForAnalytics(email)
 
       expect(hash).toBe(normalizedExpected)
@@ -180,7 +180,7 @@ describe('データ暗号化システム', () => {
 
     it('セッション署名の生成と検証', () => {
       const sessionData = { userId: 'user123', role: 'user', exp: Date.now() + 3600000 }
-      
+
       const signature = hashing.signSession(sessionData)
       const isValid = hashing.verifySessionSignature(sessionData, signature)
 
@@ -191,7 +191,7 @@ describe('データ暗号化システム', () => {
     it('改ざんされたセッションデータは検証に失敗する', () => {
       const originalData = { userId: 'user123', role: 'user' }
       const tamperedData = { userId: 'user123', role: 'admin' } // roleが改ざんされている
-      
+
       const signature = hashing.signSession(originalData)
       const isValid = hashing.verifySessionSignature(tamperedData, signature)
 
@@ -242,18 +242,18 @@ describe('データ暗号化システム', () => {
 
     it('期限付きトークンの生成と検証', () => {
       const payload = { userId: 'user123', action: 'reset-password' }
-      
+
       // 暗号化結果を完全に取得する必要があります
       const encryption = new SymmetricEncryption()
       const tokenData = {
         payload,
-        exp: Date.now() + (60 * 60 * 1000), // 1時間後
+        exp: Date.now() + 60 * 60 * 1000, // 1時間後
         iat: Date.now(),
         nonce: tokenGen.generateSecureToken(16),
       }
-      
+
       const encryptionResult = encryption.encrypt(JSON.stringify(tokenData), true)
-      
+
       const verifiedPayload = tokenGen.verifyTimedToken(
         encryptionResult.encrypted,
         encryptionResult.iv,
@@ -266,7 +266,7 @@ describe('データ暗号化システム', () => {
 
     it('期限切れトークンは検証に失敗する', () => {
       const payload = { userId: 'user123', action: 'expired-token' }
-      
+
       const encryption = new SymmetricEncryption()
       const tokenData = {
         payload,
@@ -274,9 +274,9 @@ describe('データ暗号化システム', () => {
         iat: Date.now() - 3600000, // 1時間前
         nonce: tokenGen.generateSecureToken(16),
       }
-      
+
       const encryptionResult = encryption.encrypt(JSON.stringify(tokenData), true)
-      
+
       const verifiedPayload = tokenGen.verifyTimedToken(
         encryptionResult.encrypted,
         encryptionResult.iv,
@@ -315,7 +315,7 @@ describe('データ暗号化システム', () => {
     it('検索可能ハッシュを生成する', () => {
       const email = 'Search@Example.COM'
       const normalizedEmail = 'search@example.com'
-      
+
       const hash1 = pii.createSearchableHash(email)
       const hash2 = pii.createSearchableHash(normalizedEmail)
 
@@ -325,13 +325,11 @@ describe('データ暗号化システム', () => {
 
     it('部分マッチング用のハッシュセットを生成する', () => {
       const name = 'yamada taro'
-      
+
       const hashes = pii.createPartialSearchHashes(name)
 
       expect(hashes.length).toBeGreaterThan(0)
-      expect(hashes).toEqual(expect.arrayContaining([
-        expect.stringMatching(/^[a-f0-9]{64}$/)
-      ]))
+      expect(hashes).toEqual(expect.arrayContaining([expect.stringMatching(/^[a-f0-9]{64}$/)]))
 
       // 重複が除去されているかチェック
       const uniqueHashes = new Set(hashes)
@@ -340,7 +338,7 @@ describe('データ暗号化システム', () => {
 
     it('短い文字列では適切な数のハッシュを生成する', () => {
       const shortName = 'ab'
-      
+
       const hashes = pii.createPartialSearchHashes(shortName)
 
       // 3文字未満なのでハッシュは生成されない
@@ -409,7 +407,7 @@ describe('データ暗号化システム', () => {
 
     it('検索ハッシュを生成する', () => {
       const searchTerm = 'Search Term Example'
-      
+
       const hash = dbEncryption.generateSearchHash(searchTerm)
 
       expect(hash).toHaveLength(64)
@@ -441,7 +439,7 @@ describe('データ暗号化システム', () => {
 
     it('不正なフォーマットのデータ復号化は失敗する', () => {
       const encryption = new SymmetricEncryption()
-      
+
       const invalidData = {
         encrypted: 'invalid-hex-data',
         iv: 'invalid-iv',
@@ -454,19 +452,19 @@ describe('データ暗号化システム', () => {
     it('メモリダンプ攻撃への対策（タイミング攻撃防止）', () => {
       const hashing = new HashingService()
       const sessionData = { userId: 'timing-test', role: 'user' }
-      
+
       const correctSignature = hashing.signSession(sessionData)
       const wrongSignature = '0'.repeat(64)
-      
+
       // 正しい署名と間違った署名の検証時間を測定
       const startCorrect = process.hrtime()
       hashing.verifySessionSignature(sessionData, correctSignature)
       const timeCorrect = process.hrtime(startCorrect)
-      
+
       const startWrong = process.hrtime()
       hashing.verifySessionSignature(sessionData, wrongSignature)
       const timeWrong = process.hrtime(startWrong)
-      
+
       // タイミング攻撃防止のため、時間差は最小限であることを期待
       const diffNs = Math.abs(timeCorrect[1] - timeWrong[1])
       expect(diffNs).toBeLessThan(10000000) // 10ms以下の差
@@ -484,30 +482,30 @@ describe('データ暗号化システム', () => {
       }
 
       const encrypted = databaseEncryption.encryptUserData(userData)
-      
+
       // 2. データベース保存シミュレーション（ハッシュベース検索）
       const emailSearchHash = databaseEncryption.generateSearchHash(userData.email)
       expect(emailSearchHash).toBe(encrypted.emailHash)
-      
+
       // 3. データ取得時の復号化
       const decrypted = databaseEncryption.decryptUserData({
-        encryptedData: encrypted.encryptedData
+        encryptedData: encrypted.encryptedData,
       })
-      
+
       expect(decrypted).toEqual(userData)
-      
+
       // 4. パスワードハッシュ化（別のワークフロー）
       const password = 'UserSecurePassword123!'
       const passwordHash = await hashingService.hashPassword(password)
       const passwordVerified = await hashingService.verifyPassword(password, passwordHash.hash)
-      
+
       expect(passwordVerified).toBe(true)
-      
+
       // 5. セッション管理
       const sessionData = { userId: 'user123', email: decrypted.email, role: 'user' }
       const sessionSignature = hashingService.signSession(sessionData)
       const sessionVerified = hashingService.verifySessionSignature(sessionData, sessionSignature)
-      
+
       expect(sessionVerified).toBe(true)
     })
   })

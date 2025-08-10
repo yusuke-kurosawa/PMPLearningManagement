@@ -1,28 +1,28 @@
-import { PrismaClient } from '@prisma/client';
-import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
-import { vi } from 'vitest';
+import { PrismaClient } from '@prisma/client'
+import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended'
+import { vi } from 'vitest'
 
 // Prisma mock client
-export const prismaMock = mockDeep<PrismaClient>() as unknown as DeepMockProxy<PrismaClient>;
+export const prismaMock = mockDeep<PrismaClient>() as unknown as DeepMockProxy<PrismaClient>
 
 // Reset database mock
 export const resetDb = () => {
-  mockReset(prismaMock);
-};
+  mockReset(prismaMock)
+}
 
 // Database test utilities
 export class TestDatabase {
-  private data: Map<string, Map<string, any>> = new Map();
-  
+  private data: Map<string, Map<string, any>> = new Map()
+
   constructor() {
-    this.reset();
+    this.reset()
   }
-  
+
   reset() {
-    this.data.clear();
-    this.initializeCollections();
+    this.data.clear()
+    this.initializeCollections()
   }
-  
+
   private initializeCollections() {
     const collections = [
       'user',
@@ -34,116 +34,116 @@ export class TestDatabase {
       'notification',
       'examResult',
       'flashcardProgress',
-    ];
-    
-    collections.forEach(collection => {
-      this.data.set(collection, new Map());
-    });
+    ]
+
+    collections.forEach((collection) => {
+      this.data.set(collection, new Map())
+    })
   }
-  
+
   create(collection: string, data: any) {
-    const id = data.id || this.generateId();
+    const id = data.id || this.generateId()
     const record = {
       ...data,
       id,
       createdAt: data.createdAt || new Date(),
       updatedAt: data.updatedAt || new Date(),
-    };
-    
-    this.getCollection(collection).set(id, record);
-    return record;
-  }
-  
-  findUnique(collection: string, where: { id?: string; email?: string }) {
-    const coll = this.getCollection(collection);
-    
-    if (where.id) {
-      return coll.get(where.id) || null;
     }
-    
+
+    this.getCollection(collection).set(id, record)
+    return record
+  }
+
+  findUnique(collection: string, where: { id?: string; email?: string }) {
+    const coll = this.getCollection(collection)
+
+    if (where.id) {
+      return coll.get(where.id) || null
+    }
+
     if (where.email) {
       for (const record of coll.values()) {
         if (record.email === where.email) {
-          return record;
+          return record
         }
       }
     }
-    
-    return null;
+
+    return null
   }
-  
+
   findMany(collection: string, where?: any) {
-    const coll = this.getCollection(collection);
-    const records = Array.from(coll.values());
-    
-    if (!where) return records;
-    
-    return records.filter(record => {
+    const coll = this.getCollection(collection)
+    const records = Array.from(coll.values())
+
+    if (!where) return records
+
+    return records.filter((record) => {
       return Object.entries(where).every(([key, value]) => {
         if (typeof value === 'object' && value !== null) {
           // Handle nested conditions
           if ('in' in value) {
-            return (value as any).in.includes(record[key]);
+            return (value as any).in.includes(record[key])
           }
           if ('contains' in value) {
-            return record[key]?.includes((value as any).contains);
+            return record[key]?.includes((value as any).contains)
           }
           if ('gte' in value) {
-            return record[key] >= (value as any).gte;
+            return record[key] >= (value as any).gte
           }
           if ('lte' in value) {
-            return record[key] <= (value as any).lte;
+            return record[key] <= (value as any).lte
           }
         }
-        return record[key] === value;
-      });
-    });
+        return record[key] === value
+      })
+    })
   }
-  
+
   update(collection: string, where: { id: string }, data: any) {
-    const record = this.findUnique(collection, where);
-    if (!record) throw new Error('Record not found');
-    
+    const record = this.findUnique(collection, where)
+    if (!record) throw new Error('Record not found')
+
     const updated = {
       ...record,
       ...data,
       updatedAt: new Date(),
-    };
-    
-    this.getCollection(collection).set(where.id, updated);
-    return updated;
+    }
+
+    this.getCollection(collection).set(where.id, updated)
+    return updated
   }
-  
+
   delete(collection: string, where: { id: string }) {
-    const record = this.findUnique(collection, where);
-    if (!record) throw new Error('Record not found');
-    
-    this.getCollection(collection).delete(where.id);
-    return record;
+    const record = this.findUnique(collection, where)
+    if (!record) throw new Error('Record not found')
+
+    this.getCollection(collection).delete(where.id)
+    return record
   }
-  
+
   count(collection: string, where?: any) {
     if (!where) {
-      return this.getCollection(collection).size;
+      return this.getCollection(collection).size
     }
-    return this.findMany(collection, where).length;
+    return this.findMany(collection, where).length
   }
-  
+
   private getCollection(name: string): Map<string, any> {
-    const collection = this.data.get(name);
+    const collection = this.data.get(name)
     if (!collection) {
-      throw new Error(`Collection "${name}" not found`);
+      throw new Error(`Collection "${name}" not found`)
     }
-    return collection;
+    return collection
   }
-  
+
   private generateId(): string {
-    return 'test-' + Math.random().toString(36).substr(2, 9);
+    return 'test-' + Math.random().toString(36).substr(2, 9)
   }
 }
 
 // Global test database instance
-export const testDb = new TestDatabase();
+export const testDb = new TestDatabase()
 
 // Mock Prisma client with test database
 export function mockPrismaClient() {
@@ -169,11 +169,11 @@ export function mockPrismaClient() {
       findMany: vi.fn((args: any) => testDb.findMany('learningProgress', args.where)),
       update: vi.fn((args: any) => testDb.update('learningProgress', args.where, args.data)),
       upsert: vi.fn((args: any) => {
-        const existing = testDb.findUnique('learningProgress', args.where);
+        const existing = testDb.findUnique('learningProgress', args.where)
         if (existing) {
-          return testDb.update('learningProgress', args.where, args.update);
+          return testDb.update('learningProgress', args.where, args.update)
         }
-        return testDb.create('learningProgress', args.create);
+        return testDb.create('learningProgress', args.create)
       }),
     },
     subscription: {
@@ -186,24 +186,24 @@ export function mockPrismaClient() {
       create: vi.fn((args: any) => testDb.create('notification', args.data)),
       findMany: vi.fn((args: any) => testDb.findMany('notification', args.where)),
       updateMany: vi.fn((args: any) => {
-        const records = testDb.findMany('notification', args.where);
+        const records = testDb.findMany('notification', args.where)
         return {
           count: records.length,
-          records: records.map(r => testDb.update('notification', { id: r.id }, args.data)),
-        };
+          records: records.map((r) => testDb.update('notification', { id: r.id }, args.data)),
+        }
       }),
     },
     $transaction: vi.fn(async (callback: any) => {
       if (Array.isArray(callback)) {
-        return Promise.all(callback);
+        return Promise.all(callback)
       }
-      return callback(mock);
+      return callback(mock)
     }),
     $connect: vi.fn(),
     $disconnect: vi.fn(),
-  };
-  
-  return mock;
+  }
+
+  return mock
 }
 
 // Seed test data
@@ -231,10 +231,10 @@ export async function seedTestData() {
       role: 'ADMIN',
       emailVerified: new Date(),
     },
-  ];
-  
-  users.forEach(user => testDb.create('user', user));
-  
+  ]
+
+  users.forEach((user) => testDb.create('user', user))
+
   // Create test subscriptions
   testDb.create('subscription', {
     id: 'sub-1',
@@ -244,8 +244,8 @@ export async function seedTestData() {
     status: 'active',
     plan: 'PREMIUM',
     currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-  });
-  
+  })
+
   // Create test learning progress
   testDb.create('learningProgress', {
     id: 'progress-1',
@@ -256,62 +256,58 @@ export async function seedTestData() {
     status: 'COMPLETED',
     completedAt: new Date(),
     score: 85,
-  });
-  
+  })
+
   return {
     users,
-  };
+  }
 }
 
 // Transaction helper
-export async function withTransaction<T>(
-  callback: (tx: any) => Promise<T>
-): Promise<T> {
-  const tx = mockPrismaClient();
+export async function withTransaction<T>(callback: (tx: any) => Promise<T>): Promise<T> {
+  const tx = mockPrismaClient()
   try {
-    const result = await callback(tx);
-    return result;
+    const result = await callback(tx)
+    return result
   } catch (error) {
     // Rollback would happen here in real implementation
-    throw error;
+    throw error
   }
 }
 
 // Query builder mock
 export class QueryBuilder {
-  private conditions: any[] = [];
-  private orderByClause: any = {};
-  private limitValue?: number;
-  private offsetValue?: number;
-  
+  private conditions: any[] = []
+  private orderByClause: any = {}
+  private limitValue?: number
+  private offsetValue?: number
+
   where(condition: any) {
-    this.conditions.push(condition);
-    return this;
+    this.conditions.push(condition)
+    return this
   }
-  
+
   orderBy(field: string, direction: 'asc' | 'desc' = 'asc') {
-    this.orderByClause[field] = direction;
-    return this;
+    this.orderByClause[field] = direction
+    return this
   }
-  
+
   limit(value: number) {
-    this.limitValue = value;
-    return this;
+    this.limitValue = value
+    return this
   }
-  
+
   offset(value: number) {
-    this.offsetValue = value;
-    return this;
+    this.offsetValue = value
+    return this
   }
-  
+
   build() {
     return {
-      where: this.conditions.length === 1 
-        ? this.conditions[0] 
-        : { AND: this.conditions },
+      where: this.conditions.length === 1 ? this.conditions[0] : { AND: this.conditions },
       orderBy: this.orderByClause,
       take: this.limitValue,
       skip: this.offsetValue,
-    };
+    }
   }
 }
