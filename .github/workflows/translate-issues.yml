@@ -71,6 +71,12 @@ jobs:
               issue = context.payload.issue;
             }
             
+            // Check if issue is closed
+            if (issue.state === 'closed') {
+              console.log('Issue is closed - skipping translation');
+              return;
+            }
+            
             // Check if already translated (has Japanese label)
             const hasJapaneseLabel = issue.labels?.some(label => 
               label.name.includes('日本語') || label.name.includes('翻訳済')
