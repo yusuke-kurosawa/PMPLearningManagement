@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDD Compliance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .status-good {
+            color: #10b981;
+        }
+        
+        .status-warning {
+            color: #f59e0b;
+        }
+        
+        .status-bad {
+            color: #ef4444;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        canvas {
+            max-height: 300px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .badge-danger {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 IDD Compliance Dashboard</h1>
+            <p>Real-time Issue-Driven Development metrics for PMPLearningManagement</p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
+                Last updated: <span id="lastUpdated"></span>
+            </p>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>30-Day Compliance</h3>
+                <div class="metric-value" id="complianceRate">--%</div>
+                <div class="metric-label">of commits reference issues</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Total Commits (30d)</h3>
+                <div class="metric-value" id="totalCommits">--</div>
+                <div class="metric-label">commits made</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Active Contributors</h3>
+                <div class="metric-value" id="uniqueAuthors">--</div>
+                <div class="metric-label">unique authors</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Open Issues</h3>
+                <div class="metric-value" id="openIssues">--</div>
+                <div class="metric-label">issues to resolve</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>PR Compliance</h3>
+                <div class="metric-value" id="prCompliance">--%</div>
+                <div class="metric-label">of PRs reference issues</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Issues Closed (30d)</h3>
+                <div class="metric-value" id="closedIssues">--</div>
+                <div class="metric-label">issues resolved</div>
+            </div>
+        </div>
+        
+        <div class="chart-grid">
+            <div class="chart-container">
+                <h2>Daily Compliance Trend</h2>
+                <canvas id="trendChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Compliance Distribution</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Weekly Compliance Heatmap</h2>
+            <canvas id="heatmapChart"></canvas>
+        </div>
+        
+        <div class="footer">
+            <p>🚀 Powered by GitHub Actions | IDD Compliance System v1.0</p>
+            <p style="margin-top: 10px;">
+                <a href="metrics.json" style="color: white;">📄 View Raw Metrics</a> | 
+                <a href="https://github.com/your-org/PMPLearningManagement" style="color: white;">📚 Repository</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // メトリクスを読み込んで表示
+        fetch('metrics.json')
+            .then(response => response.json())
+            .then(data => {
+                // 基本メトリクスを更新
+                document.getElementById('lastUpdated').textContent = new Date(data.timestamp).toLocaleString();
+                document.getElementById('complianceRate').textContent = data.last_30_days.compliance_rate + '%';
+                document.getElementById('totalCommits').textContent = data.last_30_days.total_commits;
+                document.getElementById('uniqueAuthors').textContent = data.last_30_days.unique_authors;
+                document.getElementById('openIssues').textContent = data.issues?.open || '-';
+                document.getElementById('closedIssues').textContent = data.issues?.closed_last_30_days || '-';
+                document.getElementById('prCompliance').textContent = (data.pull_requests?.compliance_rate || 0) + '%';
+                
+                // コンプライアンス率に基づいて色を設定
+                const rate = data.last_30_days.compliance_rate;
+                const rateElement = document.getElementById('complianceRate');
+                if (rate >= 95) {
+                    rateElement.className = 'metric-value status-good';
+                } else if (rate >= 80) {
+                    rateElement.className = 'metric-value status-warning';
+                } else {
+                    rateElement.className = 'metric-value status-bad';
+                }
+                
+                // トレンドチャートを描画
+                const trendCtx = document.getElementById('trendChart').getContext('2d');
+                const dailyStats = data.daily_stats || [];
+                
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dailyStats.map(d => d.date),
+                        datasets: [{
+                            label: 'Compliance Rate',
+                            data: dailyStats.map(d => d.total > 0 ? (d.compliant * 100 / d.total) : 0),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // パイチャートを描画
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Compliant', 'Non-compliant'],
+                        datasets: [{
+                            data: [
+                                data.last_30_days.compliant_commits,
+                                data.last_30_days.total_commits - data.last_30_days.compliant_commits
+                            ],
+                            backgroundColor: ['#10b981', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                // ヒートマップを描画（簡易版）
+                const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
+                const weeklyData = [];
+                const weekLabels = [];
+                
+                // 週ごとのデータを集計
+                for (let i = 0; i < 4; i++) {
+                    weekLabels.push(`Week ${i + 1}`);
+                    const weekStart = i * 7;
+                    const weekEnd = weekStart + 7;
+                    const weekStats = dailyStats.slice(weekStart, weekEnd);
+                    
+                    const weekTotal = weekStats.reduce((sum, d) => sum + d.total, 0);
+                    const weekCompliant = weekStats.reduce((sum, d) => sum + d.compliant, 0);
+                    
+                    weeklyData.push(weekTotal > 0 ? (weekCompliant * 100 / weekTotal) : 0);
+                }
+                
+                new Chart(heatmapCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: weekLabels,
+                        datasets: [{
+                            label: 'Weekly Compliance Rate',
+                            data: weeklyData,
+                            backgroundColor: weeklyData.map(rate => 
+                                rate >= 95 ? '#10b981' :
+                                rate >= 80 ? '#f59e0b' : '#ef4444'
+                            )
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading metrics:', error);
+            });
+    </script>
+</body>
+</html>

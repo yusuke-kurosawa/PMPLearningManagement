@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-08-10T00:22:40Z",
+  "repository": {
+    "total_commits": 42,
+    "total_branches": 2
+  },
+  "last_30_days": {
+    "total_commits": 20,
+    "compliant_commits": 14,
+    "compliance_rate": 70,
+    "unique_authors": 1
+  },
+  "daily_stats": [
+    {
+      "date": "2025-08-10",
+      "total": 17,
+      "compliant": 14
+    },
+    {
+      "date": "2025-08-09",
+      "total": 1,
+      "compliant": 0
+    }
+  ],
+  "issues": {
+    "open": 29,
+    "closed_last_30_days": 0,
+    "total": 29
+  },
+  "pull_requests": {
+    "total_recent": 1,
+    "compliant": 0,
+    "compliance_rate": 0
+  }
+}
