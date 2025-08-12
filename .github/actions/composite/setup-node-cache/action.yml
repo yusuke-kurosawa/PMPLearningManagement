@@ -1,0 +1,149 @@
+# ============================================================
+# Composite Action: Node.js セットアップとキャッシュ
+# Description: Node.js環境のセットアップと依存関係のキャッシュを効率的に実行
+# Usage: steps: - uses: ./.github/actions/composite/setup-node-cache
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 'Node.js セットアップとキャッシュ'
+description: 'Node.js環境のセットアップ、依存関係のインストール、キャッシュ管理を統合実行'
+
+# ------------------------------------------------------------
+# Input Parameters
+# ------------------------------------------------------------
+inputs:
+  node-version:
+    description: 'Node.jsバージョン（デフォルト: 18）'
+    required: false
+    default: '18'
+  cache-version:
+    description: 'キャッシュバージョン（デフォルト: v1）'
+    required: false
+    default: 'v1'
+  install-dependencies:
+    description: '依存関係をインストールするか（デフォルト: true）'
+    required: false
+    default: 'true'
+  cache-strategy:
+    description: 'キャッシュ戦略（npm|yarn|pnpm）'
+    required: false
+    default: 'npm'
+
+# ------------------------------------------------------------
+# Composite Steps Definition
+# ------------------------------------------------------------
+runs:
+  using: 'composite'
+  steps:
+    # ========================================
+    # Step 1: リポジトリチェックアウト
+    # ========================================
+    - name: 📂 リポジトリチェックアウト
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 完全な履歴を取得（semantic-releaseやgit操作用）
+
+    # ========================================
+    # Step 2: Node.js環境セットアップ
+    # ========================================
+    - name: 🚀 Node.js環境セットアップ
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.cache-strategy }}
+        cache-dependency-path: package-lock.json
+        # npm registryの設定（プライベートパッケージ対応）
+        registry-url: 'https://registry.npmjs.org'
+
+    # ========================================
+    # Step 3: キャッシュの復元
+    # ========================================
+    - name: 📦 依存関係キャッシュの復元
+      uses: actions/cache@v4
+      id: cache-restore
+      with:
+        path: |
+          node_modules
+          ~/.npm
+          ~/.cache/cypress
+          ~/.cache/playwright
+        key: ${{ runner.os }}-deps-${{ inputs.cache-version }}-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-${{ inputs.cache-version }}-
+          ${{ runner.os }}-deps-
+
+    # ========================================
+    # Step 4: 依存関係のインストール（キャッシュミス時）
+    # ========================================
+    - name: 📥 依存関係のインストール
+      if: inputs.install-dependencies == 'true' && steps.cache-restore.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "🔄 依存関係をインストール中..."
+        
+        # npmの設定最適化
+        npm config set fund false
+        npm config set audit false
+        npm config set progress false
+        
+        # 清潔なインストール実行
+        npm ci --prefer-offline --no-audit --no-fund
+        
+        echo "✅ 依存関係のインストールが完了しました"
+
+    # ========================================
+    # Step 5: キャッシュヒット時のメッセージ
+    # ========================================
+    - name: ⚡ キャッシュヒット確認
+      if: inputs.install-dependencies == 'true' && steps.cache-restore.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        echo "⚡ キャッシュから依存関係を復元しました"
+        echo "📊 インストール時間を大幅に短縮"
+
+    # ========================================
+    # Step 6: 環境情報の出力
+    # ========================================
+    - name: 📋 環境情報の出力
+      shell: bash
+      run: |
+        echo "=== 🛠️  環境情報 ==="
+        echo "Node.js: $(node --version)"
+        echo "npm: $(npm --version)"
+        echo "OS: $(uname -a)"
+        echo "PWD: $(pwd)"
+        echo "======================="
+        
+        # package.json の存在確認
+        if [ -f "package.json" ]; then
+          echo "✅ package.json が見つかりました"
+          echo "📦 プロジェクト: $(cat package.json | grep '"name":' | head -1)"
+        else
+          echo "⚠️  package.json が見つかりません"
+        fi
+
+    # ========================================
+    # Step 7: セキュリティ監査（オプション）
+    # ========================================
+    - name: 🔒 セキュリティ監査（軽量チェック）
+      if: inputs.install-dependencies == 'true'
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo "🔍 セキュリティ監査を実行中..."
+        
+        # 高重要度の脆弱性のみチェック
+        npm audit --audit-level=high --json > audit-results.json || true
+        
+        if [ -s audit-results.json ]; then
+          VULNS=$(cat audit-results.json | jq '.vulnerabilities | length // 0' 2>/dev/null || echo "0")
+          if [ "$VULNS" -gt "0" ]; then
+            echo "⚠️  $VULNS 個の高重要度脆弱性が見つかりました"
+          else
+            echo "✅ 高重要度の脆弱性は見つかりませんでした"
+          fi
+        else
+          echo "✅ セキュリティ監査完了"
+        fi

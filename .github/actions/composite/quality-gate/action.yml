@@ -1,0 +1,205 @@
+# ============================================================
+# Composite Action: 品質ゲート実行
+# Description: リント、TypeScript、フォーマット、テストの統合品質チェック
+# Usage: steps: - uses: ./.github/actions/composite/quality-gate
+# Author: Claude Code DevOps Team  
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: '品質ゲート実行'
+description: 'コード品質チェック、型チェック、フォーマット、セキュリティ監査を統合実行'
+
+# ------------------------------------------------------------
+# Input Parameters
+# ------------------------------------------------------------
+inputs:
+  skip-tests:
+    description: 'テストをスキップするか（デフォルト: false）'
+    required: false
+    default: 'false'
+  fail-on-lint:
+    description: 'Lintエラーで失敗させるか（デフォルト: true）'
+    required: false
+    default: 'true'
+  fail-on-format:
+    description: 'フォーマットエラーで失敗させるか（デフォルト: false）'
+    required: false
+    default: 'false'
+  skip-security:
+    description: 'セキュリティ監査をスキップするか（デフォルト: false）'
+    required: false
+    default: 'false'
+
+# ------------------------------------------------------------
+# Outputs Definition
+# ------------------------------------------------------------
+outputs:
+  lint-result:
+    description: 'Lintの結果（success/failure）'
+    value: ${{ steps.lint-check.outcome }}
+  typecheck-result:
+    description: 'TypeScriptチェックの結果（success/failure）'
+    value: ${{ steps.typecheck.outcome }}
+  format-result:
+    description: 'フォーマットチェックの結果（success/failure）'
+    value: ${{ steps.format-check.outcome }}
+  security-result:
+    description: 'セキュリティ監査の結果（success/failure）'
+    value: ${{ steps.security-audit.outcome }}
+
+# ------------------------------------------------------------
+# Composite Steps Definition
+# ------------------------------------------------------------
+runs:
+  using: 'composite'
+  steps:
+    # ========================================
+    # Step 1: ESLintによるコード品質チェック
+    # ========================================
+    - name: 🔍 ESLintコード品質チェック
+      id: lint-check
+      shell: bash
+      continue-on-error: ${{ inputs.fail-on-lint == 'false' }}
+      run: |
+        echo "🔍 ESLintによるコード品質チェックを開始..."
+        
+        if npm run lint; then
+          echo "✅ ESLint: すべてのルールに準拠しています"
+          echo "result=success" >> $GITHUB_OUTPUT
+        else
+          echo "❌ ESLint: コード品質の問題が見つかりました"
+          echo "result=failure" >> $GITHUB_OUTPUT
+          
+          if [ "${{ inputs.fail-on-lint }}" == "true" ]; then
+            echo "💥 Lintエラーのためビルドを停止します"
+            exit 1
+          else
+            echo "⚠️  Lintエラーを無視して続行します"
+          fi
+        fi
+
+    # ========================================
+    # Step 2: TypeScriptの型チェック
+    # ========================================
+    - name: 🎯 TypeScript型チェック
+      id: typecheck
+      shell: bash
+      continue-on-error: false
+      run: |
+        echo "🎯 TypeScriptの型チェックを開始..."
+        
+        if npm run typecheck; then
+          echo "✅ TypeScript: 型エラーはありません"
+          echo "result=success" >> $GITHUB_OUTPUT
+        else
+          echo "❌ TypeScript: 型エラーが見つかりました"
+          echo "result=failure" >> $GITHUB_OUTPUT
+          echo "💥 型エラーのためビルドを停止します"
+          exit 1
+        fi
+
+    # ========================================
+    # Step 3: Prettierによるフォーマットチェック
+    # ========================================
+    - name: 🎨 Prettierフォーマットチェック
+      id: format-check
+      shell: bash
+      continue-on-error: ${{ inputs.fail-on-format == 'false' }}
+      run: |
+        echo "🎨 Prettierによるフォーマットチェックを開始..."
+        
+        if npm run format:check; then
+          echo "✅ Prettier: すべてのファイルが正しくフォーマットされています"
+          echo "result=success" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Prettier: フォーマットが必要なファイルがあります"
+          echo "result=failure" >> $GITHUB_OUTPUT
+          
+          # フォーマットの自動修正を提案
+          echo "🛠️  以下のコマンドで自動修正できます:"
+          echo "   npm run format"
+          
+          if [ "${{ inputs.fail-on-format }}" == "true" ]; then
+            echo "💥 フォーマットエラーのためビルドを停止します"
+            exit 1
+          else
+            echo "⚠️  フォーマットエラーを無視して続行します"
+          fi
+        fi
+
+    # ========================================
+    # Step 4: セキュリティ監査
+    # ========================================
+    - name: 🔒 セキュリティ監査
+      id: security-audit
+      if: inputs.skip-security == 'false'
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo "🔒 セキュリティ監査を開始..."
+        
+        # 高重要度の脆弱性チェック
+        npm audit --audit-level=high --json > audit-results.json || true
+        
+        if [ -s audit-results.json ]; then
+          VULNS=$(cat audit-results.json | jq '.vulnerabilities | length // 0' 2>/dev/null || echo "0")
+          
+          if [ "$VULNS" -gt "0" ]; then
+            echo "⚠️  $VULNS 個の高重要度脆弱性が見つかりました"
+            echo "result=warning" >> $GITHUB_OUTPUT
+            
+            # 詳細な脆弱性レポート
+            echo "📋 脆弱性詳細:"
+            npm audit --audit-level=high || true
+            
+            echo "🛠️  修正コマンド:"
+            echo "   npm audit fix"
+          else
+            echo "✅ セキュリティ: 高重要度の脆弱性は見つかりませんでした"
+            echo "result=success" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "✅ セキュリティ監査完了"
+          echo "result=success" >> $GITHUB_OUTPUT
+        fi
+
+    # ========================================
+    # Step 5: 単体テスト実行（オプション）
+    # ========================================
+    - name: 🧪 単体テスト実行
+      if: inputs.skip-tests == 'false'
+      shell: bash
+      continue-on-error: false
+      run: |
+        echo "🧪 単体テストを開始..."
+        
+        if npm run test:run; then
+          echo "✅ テスト: すべてのテストが成功しました"
+        else
+          echo "❌ テスト: 失敗したテストがあります"
+          echo "💥 テスト失敗のためビルドを停止します"
+          exit 1
+        fi
+
+    # ========================================
+    # Step 6: 品質ゲートサマリー
+    # ========================================
+    - name: 📊 品質ゲートサマリー
+      shell: bash
+      run: |
+        echo "=== 📊 品質ゲート結果サマリー ==="
+        echo "🔍 ESLint: ${{ steps.lint-check.outcome }}"
+        echo "🎯 TypeScript: ${{ steps.typecheck.outcome }}"
+        echo "🎨 Prettier: ${{ steps.format-check.outcome }}"
+        echo "🔒 セキュリティ: ${{ steps.security-audit.outcome }}"
+        echo "=================================="
+        
+        # GitHub Step Summaryにレポートを追加
+        echo "## 📊 品質ゲート結果" >> $GITHUB_STEP_SUMMARY
+        echo "| チェック項目 | ステータス |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------------|-----------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔍 ESLint | ${{ steps.lint-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🎯 TypeScript | ${{ steps.typecheck.outcome }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🎨 Prettier | ${{ steps.format-check.outcome }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔒 セキュリティ | ${{ steps.security-audit.outcome }} |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,162 @@
+# ================================================================
+# Claude Rules: Code Quality Standards
+# Purpose: 世界クラスDevOps基盤のコード品質規則
+# Author: Claude Code Actions
+# Version: 1.0.0
+# ================================================================
+
+code_quality_rules:
+  # GitHub Actions ベストプラクティス
+  github_actions:
+    security:
+      - rule: "最小権限の原則"
+        description: "必要最小限の権限のみ付与"
+        example: |
+          permissions:
+            contents: read
+            pull-requests: write
+      
+      - rule: "シークレット管理"
+        description: "機密情報は必ずSecrets使用"
+        forbidden: "${{ secrets.GITHUB_TOKEN }}"
+        preferred: "${{ github.token }}"
+      
+      - rule: "サードパーティアクション検証"
+        description: "外部アクションはコミットハッシュ固定"
+        example: "uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab"
+
+    performance:
+      - rule: "ジョブ並列実行"
+        description: "可能な限りジョブを並列実行"
+        max_jobs: 10
+      
+      - rule: "キャッシュ活用"
+        description: "依存関係とビルド成果物をキャッシュ"
+        required_caches:
+          - "node_modules"
+          - "build artifacts"
+          - "test results"
+      
+      - rule: "条件実行"
+        description: "不要な実行を避ける条件分岐"
+        example: "if: github.event.action != 'closed'"
+
+    reliability:
+      - rule: "エラーハンドリング必須"
+        description: "全ステップにエラーハンドリング"
+        required_elements:
+          - "continue-on-error設定"
+          - "失敗時の通知"
+          - "ログ保存"
+      
+      - rule: "タイムアウト設定"
+        description: "全ジョブ・ステップにタイムアウト設定"
+        default_timeout:
+          job: "30分"
+          step: "10分"
+      
+      - rule: "リトライロジック"
+        description: "ネットワーク依存処理はリトライ実装"
+        max_retries: 3
+
+# ワークフロー品質メトリクス
+quality_metrics:
+  code_coverage:
+    minimum: 80
+    target: 95
+    measurement: "line coverage"
+  
+  performance:
+    build_time_max: "5分"
+    test_time_max: "10分"
+    deploy_time_max: "10分"
+  
+  reliability:
+    success_rate_min: 95
+    mttr_max: "30分"
+    availability_min: 99.9
+
+# 必須チェック項目
+mandatory_checks:
+  pre_commit:
+    - "構文チェック (YAML lint)"
+    - "セキュリティスキャン"
+    - "ワークフロー検証"
+    - "依存関係チェック"
+  
+  pre_merge:
+    - "全テスト通過"
+    - "品質ゲート通過"
+    - "セキュリティ承認"
+    - "パフォーマンス基準達成"
+
+# 自動修正ルール
+auto_fix_rules:
+  formatting:
+    - "YAML formatting"
+    - "Action version updates"
+    - "Deprecated syntax fixes"
+  
+  security:
+    - "Permission scope reduction"
+    - "Secret reference fixes"
+    - "Vulnerability patches"
+  
+  performance:
+    - "Cache configuration optimization"
+    - "Parallel execution improvements"
+    - "Resource allocation tuning"
+
+# 禁止パターン
+forbidden_patterns:
+  security_issues:
+    - pattern: "password"
+      message: "パスワードは平文で記述禁止"
+    - pattern: "hardcoded secrets"
+      message: "ハードコードされたシークレット禁止"
+  
+  performance_issues:
+    - pattern: "sleep 60"
+      message: "長時間のsleep使用禁止"
+    - pattern: "sync execution"
+      message: "不必要な同期実行禁止"
+  
+  reliability_issues:
+    - pattern: "no error handling"
+      message: "エラーハンドリング必須"
+    - pattern: "infinite loops"
+      message: "無限ループ禁止"
+
+# 品質ゲート条件
+quality_gates:
+  # ブロッキング（必須通過）
+  blocking:
+    - "全単体テスト通過"
+    - "セキュリティスキャン通過"
+    - "構文エラーゼロ"
+    - "必須コメント存在"
+  
+  # ワーニング（改善推奨）
+  warning:
+    - "コードカバレッジ80%未満"
+    - "パフォーマンス劣化"
+    - "コード重複検出"
+    - "ドキュメント不足"
+
+# 通知設定
+notification_rules:
+  success:
+    channels:
+      - "GitHub Status"
+      - "Slack #devops-success"
+    
+  failure:
+    channels:
+      - "GitHub Issues (自動作成)"
+      - "Slack #devops-alerts"
+      - "Email (Critical only)"
+    
+  improvement:
+    channels:
+      - "Slack #devops-improvements"
+      - "GitHub Discussions"

@@ -1,0 +1,648 @@
+# ================================================================
+# Workflow: 00-meta-workflow-validator
+# Purpose: 全ワークフローの検証・最適化・管理を行うメタシステム
+#          Meta-system for validating, optimizing, and managing all workflows
+# Trigger: Workflow file changes, scheduled maintenance
+# Dependencies: All other workflows
+# Author: Claude Code Actions
+# Version: 1.0.0
+# Last Updated: 2025-08-12
+# ================================================================
+
+name: "🎯 [Meta] Workflow Validator & Optimizer / ワークフロー検証・最適化"
+
+# --------------------------------
+# 📋 Permissions / 権限設定
+# --------------------------------
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+# --------------------------------
+# 🎯 Triggers / トリガー
+# --------------------------------
+on:
+  # ワークフローファイル変更時 / On workflow file changes
+  push:
+    paths:
+      - '.github/workflows/**'
+      - '.github/claude-code-actions/**'
+    branches: [main, develop]
+  
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/claude-code-actions/**'
+    branches: [main, develop]
+  
+  # 手動実行 / Manual execution
+  workflow_dispatch:
+    inputs:
+      validation_type:
+        description: 'Validation type / 検証タイプ'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - 'full'
+          - 'syntax'
+          - 'security'
+          - 'performance'
+          - 'dependencies'
+      
+      auto_fix:
+        description: 'Auto-fix issues / 自動修正'
+        required: true
+        default: true
+        type: boolean
+  
+  # スケジュール実行（毎週日曜午前1時） / Weekly on Sunday 1 AM
+  schedule:
+    - cron: '0 1 * * 0'
+
+# --------------------------------
+# 🌍 Environment / 環境設定
+# --------------------------------
+env:
+  WORKFLOW_STANDARDS_VERSION: "1.0.0"
+  MAX_WORKFLOW_RUNTIME: 60  # minutes
+  REQUIRED_COMMENT_COVERAGE: 90  # percentage
+
+# --------------------------------
+# 🔧 Jobs / ジョブ定義
+# --------------------------------
+jobs:
+  workflow-discovery:
+    # ================================
+    # Job: workflow-discovery
+    # Description: 全ワークフローの発見と分類
+    #              Discover and categorize all workflows
+    # Dependencies: Repository structure
+    # Timeout: 10分
+    # ================================
+    name: "🔍 [Discovery] Workflow Inventory"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    outputs:
+      workflow_count: ${{ steps.inventory.outputs.workflow_count }}
+      workflow_list: ${{ steps.inventory.outputs.workflow_list }}
+      validation_needed: ${{ steps.inventory.outputs.validation_needed }}
+      categories_found: ${{ steps.inventory.outputs.categories_found }}
+    
+    steps:
+      # ================
+      # Repository Checkout
+      # 目的: リポジトリ構造の取得
+      # Purpose: Get repository structure
+      # ================
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+      
+      # ================
+      # Workflow Inventory
+      # 目的: ワークフローファイルの一覧化
+      # Purpose: Inventory workflow files
+      # ================
+      - name: "📋 Create Workflow Inventory"
+        id: inventory
+        run: |
+          echo "🔍 Discovering workflow files..."
+          
+          # ワークフロー発見
+          workflows_dir=".github/workflows"
+          claude_actions_dir=".github/claude-code-actions"
+          
+          # 通常ワークフロー
+          workflow_files=""
+          workflow_count=0
+          
+          if [[ -d "$workflows_dir" ]]; then
+            while IFS= read -r -d '' file; do
+              if [[ -f "$file" ]]; then
+                workflow_files="$workflow_files $file"
+                workflow_count=$((workflow_count + 1))
+              fi
+            done < <(find "$workflows_dir" -name "*.yml" -o -name "*.yaml" -print0)
+          fi
+          
+          # ClaudeCodeActions
+          if [[ -d "$claude_actions_dir" ]]; then
+            while IFS= read -r -d '' file; do
+              if [[ -f "$file" ]]; then
+                workflow_files="$workflow_files $file"
+                workflow_count=$((workflow_count + 1))
+              fi
+            done < <(find "$claude_actions_dir" -name "*.yml" -o -name "*.yaml" -print0)
+          fi
+          
+          echo "📊 Found $workflow_count workflow files"
+          echo "workflow_count=$workflow_count" >> $GITHUB_OUTPUT
+          echo "workflow_list=$workflow_files" >> $GITHUB_OUTPUT
+          
+          # 検証必要性の判定
+          if [[ $workflow_count -gt 0 ]]; then
+            echo "validation_needed=true" >> $GITHUB_OUTPUT
+          else
+            echo "validation_needed=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # カテゴリ分類
+          categories=""
+          for file in $workflow_files; do
+            filename=$(basename "$file")
+            case "$filename" in
+              00-meta-*) categories="$categories meta" ;;
+              01-ci-*) categories="$categories ci" ;;
+              02-cd-*) categories="$categories cd" ;;
+              03-quality-*) categories="$categories quality" ;;
+              04-security-*) categories="$categories security" ;;
+              05-performance-*) categories="$categories performance" ;;
+              06-claude-*) categories="$categories claude" ;;
+              07-self-*) categories="$categories self" ;;
+              *) categories="$categories uncategorized" ;;
+            esac
+          done
+          
+          unique_categories=$(echo "$categories" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          echo "categories_found=$unique_categories" >> $GITHUB_OUTPUT
+          echo "📋 Categories found: $unique_categories"
+      
+      # ================
+      # Generate Workflow Map
+      # 目的: ワークフローマップの生成
+      # Purpose: Generate workflow map
+      # ================
+      - name: "🗺️ Generate Workflow Map"
+        run: |
+          echo "🗺️ Generating workflow dependency map..."
+          
+          mkdir -p .meta-analysis
+          
+          cat > .meta-analysis/workflow-map.md << EOF
+          # 🎯 Workflow Architecture Map
+          
+          ## 📊 Summary / サマリー
+          - **Total Workflows**: ${{ steps.inventory.outputs.workflow_count }}
+          - **Categories**: ${{ steps.inventory.outputs.categories_found }}
+          - **Analysis Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ## 🏗️ Workflow Structure / ワークフロー構造
+          EOF
+          
+          # ワークフローリスト追加
+          for file in ${{ steps.inventory.outputs.workflow_list }}; do
+            echo "- **$(basename "$file")**" >> .meta-analysis/workflow-map.md
+            if [[ -f "$file" ]]; then
+              # 目的の抽出
+              purpose=$(grep -m1 "^# Purpose:" "$file" | sed 's/^# Purpose: //' || echo "目的未記載")
+              echo "  - Purpose: $purpose" >> .meta-analysis/workflow-map.md
+            fi
+          done
+
+  syntax-validation:
+    # ================================
+    # Job: syntax-validation
+    # Description: ワークフローファイルの構文検証
+    #              Validate workflow file syntax
+    # Dependencies: workflow-discovery
+    # Timeout: 15分
+    # ================================
+    name: "✅ [Validation] Syntax Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: workflow-discovery
+    if: needs.workflow-discovery.outputs.validation_needed == 'true'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      # ================
+      # YAML Syntax Validation
+      # 目的: YAML構文の検証
+      # Purpose: Validate YAML syntax
+      # ================
+      - name: "📝 YAML Syntax Validation"
+        run: |
+          echo "📝 Validating YAML syntax..."
+          
+          validation_errors=0
+          validation_warnings=0
+          
+          # yamllintインストール
+          pip install yamllint
+          
+          # 各ワークフローファイルを検証
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            if [[ -f "$file" ]]; then
+              echo "🔍 Validating: $file"
+              
+              # YAML構文チェック
+              if ! yamllint "$file" 2>/dev/null; then
+                echo "❌ Syntax error in: $file"
+                validation_errors=$((validation_errors + 1))
+              else
+                echo "✅ Valid syntax: $file"
+              fi
+            fi
+          done
+          
+          echo "validation_errors=$validation_errors" >> $GITHUB_OUTPUT
+          echo "validation_warnings=$validation_warnings" >> $GITHUB_OUTPUT
+          
+          if [[ $validation_errors -gt 0 ]]; then
+            echo "❌ Found $validation_errors syntax errors"
+            exit 1
+          else
+            echo "✅ All workflow files have valid syntax"
+          fi
+        id: yaml-validation
+      
+      # ================
+      # GitHub Actions Schema Validation
+      # 目的: GitHub Actions スキーマ検証
+      # Purpose: Validate GitHub Actions schema
+      # ================
+      - name: "🔍 GitHub Actions Schema Validation"
+        run: |
+          echo "🔍 Validating GitHub Actions schema..."
+          
+          # action-validatorインストール（npmベース）
+          npm install -g @github/action-validator 2>/dev/null || echo "Action validator not available"
+          
+          schema_errors=0
+          
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            if [[ -f "$file" ]]; then
+              echo "📋 Schema check: $file"
+              
+              # 基本的なGitHub Actions構造チェック
+              if ! grep -q "^name:" "$file"; then
+                echo "⚠️ Missing 'name' field in: $file"
+                schema_errors=$((schema_errors + 1))
+              fi
+              
+              if ! grep -q "^on:" "$file"; then
+                echo "⚠️ Missing 'on' field in: $file"
+                schema_errors=$((schema_errors + 1))
+              fi
+              
+              if ! grep -q "^jobs:" "$file"; then
+                echo "⚠️ Missing 'jobs' field in: $file"
+                schema_errors=$((schema_errors + 1))
+              fi
+            fi
+          done
+          
+          echo "schema_errors=$schema_errors" >> $GITHUB_OUTPUT
+          
+          if [[ $schema_errors -gt 0 ]]; then
+            echo "⚠️ Found $schema_errors schema issues"
+          else
+            echo "✅ All workflows conform to GitHub Actions schema"
+          fi
+        id: schema-validation
+
+  security-validation:
+    # ================================
+    # Job: security-validation
+    # Description: ワークフローのセキュリティ検証
+    #              Validate workflow security
+    # Dependencies: workflow-discovery
+    # Timeout: 20分
+    # ================================
+    name: "🔒 [Validation] Security Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: workflow-discovery
+    if: needs.workflow-discovery.outputs.validation_needed == 'true'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      # ================
+      # Permission Analysis
+      # 目的: 権限設定の分析
+      # Purpose: Analyze permission settings
+      # ================
+      - name: "🔐 Analyze Workflow Permissions"
+        run: |
+          echo "🔐 Analyzing workflow permissions..."
+          
+          permission_violations=0
+          
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            if [[ -f "$file" ]]; then
+              echo "🔍 Checking permissions: $file"
+              
+              # 権限設定の存在確認
+              if ! grep -q "permissions:" "$file"; then
+                echo "⚠️ No permission settings in: $file"
+                permission_violations=$((permission_violations + 1))
+              else
+                # 過度な権限チェック
+                if grep -q "permissions:.*write-all" "$file"; then
+                  echo "❌ Excessive permissions (write-all) in: $file"
+                  permission_violations=$((permission_violations + 1))
+                fi
+              fi
+              
+              # シークレット使用の確認
+              if grep -q "secrets\." "$file"; then
+                echo "🔑 Secret usage detected in: $file"
+                # ハードコードされたシークレット検査
+                if grep -E "password|token|key|secret" "$file" | grep -v "secrets\."; then
+                  echo "❌ Potential hardcoded secret in: $file"
+                  permission_violations=$((permission_violations + 1))
+                fi
+              fi
+            fi
+          done
+          
+          echo "permission_violations=$permission_violations" >> $GITHUB_OUTPUT
+          
+          if [[ $permission_violations -gt 0 ]]; then
+            echo "❌ Found $permission_violations security violations"
+          else
+            echo "✅ No security violations detected"
+          fi
+        id: permission-analysis
+      
+      # ================
+      # Third-party Action Security
+      # 目的: サードパーティアクションのセキュリティ
+      # Purpose: Third-party action security
+      # ================
+      - name: "🛡️ Validate Third-party Actions"
+        run: |
+          echo "🛡️ Validating third-party actions..."
+          
+          action_security_issues=0
+          
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            if [[ -f "$file" ]]; then
+              echo "🔍 Checking actions: $file"
+              
+              # サードパーティアクションの抽出
+              grep -n "uses:" "$file" | while read -r line; do
+                action=$(echo "$line" | sed 's/.*uses: *//' | sed 's/\s*$//')
+                
+                # GitHubアクション以外をチェック
+                if [[ ! "$action" =~ ^actions/ ]] && [[ ! "$action" =~ ^github/ ]]; then
+                  echo "🔍 Third-party action found: $action"
+                  
+                  # バージョン固定チェック
+                  if [[ ! "$action" =~ @[a-f0-9]{40}$ ]] && [[ ! "$action" =~ @v[0-9]+$ ]]; then
+                    echo "⚠️ Action not pinned to specific version: $action"
+                    action_security_issues=$((action_security_issues + 1))
+                  fi
+                fi
+              done
+            fi
+          done
+          
+          echo "action_security_issues=$action_security_issues" >> $GITHUB_OUTPUT
+          echo "✅ Third-party action security check completed"
+        id: action-security
+
+  standards-compliance:
+    # ================================
+    # Job: standards-compliance
+    # Description: コーディング標準への準拠チェック
+    #              Check compliance with coding standards
+    # Dependencies: workflow-discovery
+    # Timeout: 15分
+    # ================================
+    name: "📐 [Standards] Compliance Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: workflow-discovery
+    if: needs.workflow-discovery.outputs.validation_needed == 'true'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      # ================
+      # Comment Coverage Check
+      # 目的: コメントカバレッジの確認
+      # Purpose: Check comment coverage
+      # ================
+      - name: "💬 Check Comment Coverage"
+        run: |
+          echo "💬 Checking comment coverage..."
+          
+          comment_violations=0
+          
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            if [[ -f "$file" ]]; then
+              echo "🔍 Analyzing comments: $file"
+              
+              total_lines=$(wc -l < "$file")
+              comment_lines=$(grep -c "^#" "$file" || echo "0")
+              
+              if [[ $total_lines -gt 0 ]]; then
+                comment_coverage=$(( comment_lines * 100 / total_lines ))
+                echo "📊 Comment coverage: ${comment_coverage}% in $file"
+                
+                if [[ $comment_coverage -lt ${{ env.REQUIRED_COMMENT_COVERAGE }} ]]; then
+                  echo "⚠️ Low comment coverage (${comment_coverage}%) in: $file"
+                  comment_violations=$((comment_violations + 1))
+                fi
+              fi
+              
+              # 必須ヘッダーコメントチェック
+              if ! grep -q "# =================================" "$file"; then
+                echo "⚠️ Missing standard header comment in: $file"
+                comment_violations=$((comment_violations + 1))
+              fi
+            fi
+          done
+          
+          echo "comment_violations=$comment_violations" >> $GITHUB_OUTPUT
+          echo "📋 Comment coverage analysis completed"
+        id: comment-check
+      
+      # ================
+      # Naming Convention Check
+      # 目的: 命名規則の確認
+      # Purpose: Check naming conventions
+      # ================
+      - name: "📛 Check Naming Conventions"
+        run: |
+          echo "📛 Checking naming conventions..."
+          
+          naming_violations=0
+          
+          for file in ${{ needs.workflow-discovery.outputs.workflow_list }}; do
+            filename=$(basename "$file")
+            echo "🔍 Checking naming: $filename"
+            
+            # カテゴリ別命名規則チェック
+            if [[ "$filename" =~ ^[0-9]{2}-[a-z]+-[a-z-]+\.ya?ml$ ]]; then
+              echo "✅ Naming convention compliant: $filename"
+            else
+              echo "⚠️ Naming convention violation: $filename"
+              naming_violations=$((naming_violations + 1))
+            fi
+            
+            # ワークフロー名の確認（絵文字付き）
+            if [[ -f "$file" ]]; then
+              workflow_name=$(grep -m1 "^name:" "$file" | sed 's/^name: *//' | tr -d '"')
+              if [[ ! "$workflow_name" =~ ^[🎯🔄🚀✅🔒⚡🤖🔧] ]]; then
+                echo "⚠️ Missing emoji in workflow name: $workflow_name"
+                naming_violations=$((naming_violations + 1))
+              fi
+            fi
+          done
+          
+          echo "naming_violations=$naming_violations" >> $GITHUB_OUTPUT
+          echo "📛 Naming convention check completed"
+        id: naming-check
+
+  # ================================
+  # Job: meta-validation-summary
+  # Description: メタ検証結果のサマリー
+  #              Meta validation results summary
+  # Dependencies: All validation jobs
+  # Timeout: 10分
+  # ================================
+  meta-validation-summary:
+    name: "📋 [Summary] Validation Results"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [workflow-discovery, syntax-validation, security-validation, standards-compliance]
+    if: always()
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      # ================
+      # Generate Validation Report
+      # 目的: 検証レポートの生成
+      # Purpose: Generate validation report
+      # ================
+      - name: "📋 Generate Validation Report"
+        run: |
+          echo "📋 Generating comprehensive validation report..."
+          
+          mkdir -p .meta-analysis
+          
+          cat > .meta-analysis/validation-report.md << EOF
+          # 🎯 Meta Workflow Validation Report
+          
+          ## 📊 Validation Summary / 検証サマリー
+          
+          - **Workflows Analyzed**: ${{ needs.workflow-discovery.outputs.workflow_count }}
+          - **Categories Found**: ${{ needs.workflow-discovery.outputs.categories_found }}
+          - **Analysis Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ## 🔍 Validation Results / 検証結果
+          
+          ### ✅ Syntax Validation / 構文検証
+          - **Status**: ${{ needs.syntax-validation.result }}
+          - **Errors Found**: ${{ needs.syntax-validation.outputs.validation_errors || '0' }}
+          - **Warnings**: ${{ needs.syntax-validation.outputs.validation_warnings || '0' }}
+          
+          ### 🔒 Security Validation / セキュリティ検証  
+          - **Status**: ${{ needs.security-validation.result }}
+          - **Permission Violations**: ${{ needs.security-validation.outputs.permission_violations || '0' }}
+          - **Action Security Issues**: ${{ needs.security-validation.outputs.action_security_issues || '0' }}
+          
+          ### 📐 Standards Compliance / 標準準拠
+          - **Status**: ${{ needs.standards-compliance.result }}
+          - **Comment Violations**: ${{ needs.standards-compliance.outputs.comment_violations || '0' }}
+          - **Naming Violations**: ${{ needs.standards-compliance.outputs.naming_violations || '0' }}
+          
+          ## 🎯 Overall Quality Score / 総合品質スコア
+          
+          EOF
+          
+          # 品質スコア計算（簡易版）
+          total_issues=0
+          total_issues=$(( total_issues + ${SYNTAX_ERRORS:-0} ))
+          total_issues=$(( total_issues + ${SECURITY_ISSUES:-0} ))
+          total_issues=$(( total_issues + ${STANDARDS_ISSUES:-0} ))
+          
+          if [[ $total_issues -eq 0 ]]; then
+            quality_score=100
+            quality_status="🟢 Excellent"
+          elif [[ $total_issues -le 5 ]]; then
+            quality_score=85
+            quality_status="🟡 Good"
+          else
+            quality_score=60
+            quality_status="🔴 Needs Improvement"
+          fi
+          
+          echo "**Quality Score: ${quality_score}/100** ${quality_status}" >> .meta-analysis/validation-report.md
+          
+          echo "## 🚀 Recommendations / 推奨事項" >> .meta-analysis/validation-report.md
+          echo "" >> .meta-analysis/validation-report.md
+          
+          if [[ $total_issues -gt 0 ]]; then
+            echo "1. **Address Critical Issues**: 重要な問題を優先的に修正" >> .meta-analysis/validation-report.md
+            echo "2. **Implement Auto-fixes**: 自動修正可能な問題を修正" >> .meta-analysis/validation-report.md
+            echo "3. **Review Security Settings**: セキュリティ設定を見直し" >> .meta-analysis/validation-report.md
+            echo "4. **Update Documentation**: ドキュメントの更新" >> .meta-analysis/validation-report.md
+          else
+            echo "✅ **All workflows are compliant with standards**" >> .meta-analysis/validation-report.md
+            echo "✅ **No immediate action required**" >> .meta-analysis/validation-report.md
+          fi
+          
+          echo "" >> .meta-analysis/validation-report.md
+          echo "---" >> .meta-analysis/validation-report.md
+          echo "*Generated by Meta Workflow Validator at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*" >> .meta-analysis/validation-report.md
+        env:
+          SYNTAX_ERRORS: ${{ needs.syntax-validation.outputs.validation_errors }}
+          SECURITY_ISSUES: ${{ needs.security-validation.outputs.permission_violations }}
+          STANDARDS_ISSUES: ${{ needs.standards-compliance.outputs.comment_violations }}
+      
+      # ================
+      # Post Validation Summary
+      # 目的: 検証サマリーをPRコメントに投稿
+      # Purpose: Post validation summary as PR comment
+      # ================
+      - name: "💬 Post Validation Summary"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('.meta-analysis/validation-report.md', 'utf8');
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+      
+      # ================
+      # Upload Validation Artifacts
+      # 目的: 検証結果のアーティファクト保存
+      # Purpose: Save validation results as artifacts
+      # ================
+      - name: "📦 Upload Validation Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: meta-validation-results-${{ github.run_id }}
+          path: .meta-analysis/
+          retention-days: 90
