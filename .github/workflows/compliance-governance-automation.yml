@@ -12,21 +12,6 @@
 name: ⚖️ Automated Compliance & Governance
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'policies/**'
-      - 'compliance/**'
-      - '.github/workflows/compliance-governance-automation.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'policies/**'
-      - 'compliance/**'
-  schedule:
-    - cron: '0 0 * * *' # Daily compliance check at midnight
-    - cron: '0 6 * * 1' # Weekly governance audit on Monday at 6 AM
-    - cron: '0 12 1 * *' # Monthly compliance report on 1st at noon
   workflow_dispatch:
     inputs:
       compliance_scope:

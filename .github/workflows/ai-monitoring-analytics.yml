@@ -12,11 +12,7 @@
 name: 🧠 AI Monitoring & Business Analytics
 
 on:
-  push:
-    branches: [main, develop]
-  schedule:
-    - cron: '*/15 * * * *' # AI monitoring every 15 minutes
-    - cron: '0 0 * * *' # Daily business analytics at midnight
+  # 手動実行のみ（AIサービスが設定されるまで無効化）
   workflow_dispatch:
     inputs:
       monitoring_mode:

@@ -11,43 +11,25 @@ import {
   Settings,
   Plus,
   Search,
-  Filter,
   Bell,
-  BellOff,
   Pin,
-  PinOff,
   ThumbsUp,
-  ThumbsDown,
   Reply,
   Edit3,
   Trash2,
   MoreHorizontal,
   UserPlus,
   UserMinus,
-  Crown,
-  Shield,
   Eye,
-  EyeOff,
   Clock,
-  Calendar,
   BookOpen,
-  Target,
-  TrendingUp,
   Activity,
-  Hash,
   AtSign,
   Paperclip,
   Send,
   Smile,
   Image,
-  Video,
-  Mic,
-  MicOff,
-  Volume2,
-  VolumeX,
-  PhoneCall,
-  PhoneOff,
-  ScreenShare,
+  AlertCircle,
   ScreenShareOff,
   RefreshCw,
 } from 'lucide-react'
@@ -1112,7 +1094,7 @@ const EnhancedCollaborationHub: React.FC = () => {
                   <Bell className="mx-auto mb-4 h-16 w-16 text-gray-400" />
                   <h3 className="mb-2 text-xl font-semibold text-gray-900">No Notifications</h3>
                   <p className="text-gray-600">
-                    You're all caught up! Notifications will appear here.
+                    You&apos;re all caught up! Notifications will appear here.
                   </p>
                 </div>
               )}

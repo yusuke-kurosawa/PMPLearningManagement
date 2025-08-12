@@ -11,10 +11,6 @@
 name: 🌪️ Chaos Engineering & AI Test Generation
 
 on:
-  push:
-    branches: [main, develop]
-  schedule:
-    - cron: '0 2 * * 1,3,5' # Chaos tests every Monday, Wednesday, Friday at 2 AM
   workflow_dispatch:
     inputs:
       chaos_level:

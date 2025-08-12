@@ -1,19 +1,7 @@
 name: 🔍 Issue運用ルール監査・自動化システム
 
 on:
-  issues:
-    types: [opened, edited, closed, labeled, unlabeled, assigned, unassigned]
-  issue_comment:
-    types: [created, edited]
-  schedule:
-    # 日次レポート: 毎日 09:00 JST
-    - cron: '0 0 * * *'
-    # 週次レポート: 毎週月曜日 09:00 JST  
-    - cron: '0 0 * * 1'
-    # 月次レポート: 毎月1日 09:00 JST
-    - cron: '0 0 1 * *'
-    # SLA違反チェック: 毎時
-    - cron: '0 * * * *'
+  # 手動実行のみ（スケジュール実行を一時的に無効化）
   workflow_dispatch:
     inputs:
       action_type:

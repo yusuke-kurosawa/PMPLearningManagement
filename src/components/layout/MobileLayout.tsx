@@ -154,7 +154,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       </div>
 
       {/* Safe area adjustments for iOS */}
-      <style jsx global>{`
+      <style>{`
         .safe-area-top {
           padding-top: env(safe-area-inset-top);
         }

@@ -12,12 +12,7 @@
 name: 🌌 Quantum-Ready AI/ML-Integrated CI/CD
 
 on:
-  push:
-    branches: [main, develop, feature/*]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 */6 * * *' # AI model retraining every 6 hours
+  # 手動実行のみ（実装が完了するまで無効化）
   workflow_dispatch:
     inputs:
       quantum_encryption:

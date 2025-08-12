@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import MobileBottomNavigation from './MobileBottomNavigation'
 
 const EnhancedMobileLayout = ({ children }) => {
@@ -118,7 +118,7 @@ const EnhancedMobileLayout = ({ children }) => {
   // Double tap to scroll to top
   const [lastTap, setLastTap] = useState(0)
 
-  const handleDoubleTap = (e) => {
+  const handleDoubleTap = (_e) => {
     const now = Date.now()
     const DOUBLE_TAP_DELAY = 300
 
@@ -193,8 +193,10 @@ const EnhancedMobileLayout = ({ children }) => {
       <main
         className="pb-safe-area-inset-bottom"
         onTouchStart={handleSwipeStart}
-        onTouchEnd={handleSwipeEnd}
-        onTouchEnd={handleDoubleTap}
+        onTouchEnd={(e) => {
+          handleSwipeEnd(e)
+          handleDoubleTap(e)
+        }}
       >
         {children}
       </main>

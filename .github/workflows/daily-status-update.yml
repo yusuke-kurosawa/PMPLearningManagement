@@ -1,9 +1,7 @@
 name: 📊 Daily Status Update
 
 on:
-  schedule:
-    # 毎日 09:00 UTC (JST 18:00) に実行
-    - cron: '0 9 * * *'
+  # 手動実行のみ（自動実行を無効化）
   workflow_dispatch:
     inputs:
       force_update:

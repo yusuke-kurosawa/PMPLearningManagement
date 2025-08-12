@@ -4,6 +4,7 @@ import { authHelpers, sessionManager } from '../lib/supabase'
 import { auditLogger } from '../services/auditService'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { supabase } from '../lib/auth/supabase'
 
 // Create Auth Context
 const AuthContext = createContext({})
@@ -380,16 +381,16 @@ export const useAuth = () => {
 // HOC for protected components
 export const withAuth = (Component, requiredRole = null) => {
   return (props) => {
-    const { isAuthenticated, role, loading } = useAuth()
+    const { isAuthenticated, role, loading, hasRole } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
       if (!loading && !isAuthenticated) {
         navigate('/login')
-      } else if (!loading && requiredRole && !hasRole(requiredRole)) {
+      } else if (!loading && requiredRole && hasRole && !hasRole(requiredRole)) {
         navigate('/unauthorized')
       }
-    }, [isAuthenticated, role, loading, navigate])
+    }, [isAuthenticated, role, loading, navigate, hasRole])
 
     if (loading) {
       return (

@@ -84,12 +84,13 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pmbok-validation-results
+          name: pmbok-validation-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             pmbok-validation.log
             reports/quality/pmbok-compliance-*.json
             reports/quality/latest-compliance-summary.json
           retention-days: 30
+          if-no-files-found: warn
 
       - name: 📈 PMBOK品質ゲート確認
         run: |
@@ -150,12 +151,13 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: content-quality-results
+          name: content-quality-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             content-quality.log
             reports/quality/content-quality-*.json
             reports/quality/latest-content-quality-summary.json
           retention-days: 30
+          if-no-files-found: warn
 
       - name: 🎯 PMP試験準備度確認
         run: |
@@ -211,12 +213,13 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: accessibility-results
+          name: accessibility-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             accessibility.log
             reports/quality/accessibility-*.json
             reports/quality/latest-accessibility-summary.json
           retention-days: 30
+          if-no-files-found: warn
 
       - name: 📈 WCAG準拠確認
         run: |
@@ -273,11 +276,12 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: japanese-quality-results
+          name: japanese-quality-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             japanese-quality.log
             reports/quality/japanese-quality-*.json
           retention-days: 30
+          if-no-files-found: warn
 
   # Job 5: 学習効果分析
   learning-analytics:
@@ -324,12 +328,13 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: learning-analytics-results
+          name: learning-analytics-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             learning-analytics.log
             reports/quality/learning-analytics-*.json
             reports/quality/latest-learning-analytics-summary.json
           retention-days: 30
+          if-no-files-found: warn
 
   # Job 6: 統合品質評価
   quality-gate:
@@ -463,11 +468,12 @@ jobs:
       - name: 📊 品質レポートアップロード
         uses: actions/upload-artifact@v4
         with:
-          name: quality-assurance-report
+          name: quality-assurance-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             quality-summary.md
             artifacts/**
           retention-days: 90
+          if-no-files-found: warn
 
       - name: 💬 PR コメント投稿
         if: github.event_name == 'pull_request'

@@ -1,12 +1,8 @@
 name: "Project Board Automation"
 
 on:
-  issues:
-    types: [opened, closed, assigned, unassigned, labeled, unlabeled]
-  pull_request:
-    types: [opened, closed, ready_for_review, converted_to_draft]
-  project_card:
-    types: [moved]
+  # 手動実行のみ（Project Boardが設定されるまで無効化）
+  workflow_dispatch:
 
 jobs:
   board_automation:

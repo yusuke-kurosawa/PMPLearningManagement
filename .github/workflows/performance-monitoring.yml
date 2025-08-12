@@ -117,9 +117,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-results-${{ matrix.name }}-${{ matrix.device }}-${{ github.run_id }}
+          name: lighthouse-results-${{ matrix.name }}-${{ matrix.device }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: .lighthouseci/
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Extract Core Web Vitals
         if: always()
@@ -138,9 +139,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cwv-report-${{ matrix.name }}-${{ matrix.device }}
+          name: cwv-report-${{ matrix.name }}-${{ matrix.device }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: cwv-${{ matrix.name }}-${{ matrix.device }}.md
           retention-days: 30
+          if-no-files-found: warn
 
   # Bundle Size Analysis
   bundle-analysis:

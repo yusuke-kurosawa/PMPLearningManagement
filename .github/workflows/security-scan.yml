@@ -79,9 +79,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: npm-audit-results
+          name: npm-audit-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: audit-results.json
           retention-days: 30
+          if-no-files-found: warn
 
   # Code Security Analysis with CodeQL
   codeql-analysis:
@@ -203,9 +204,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
+          name: zap-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: report_html.html
           retention-days: 30
+          if-no-files-found: warn
 
   # SBOM Generation
   sbom-generation:
@@ -234,11 +236,12 @@ jobs:
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-${{ github.sha }}
+          name: sbom-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             sbom.json
             sbom.xml
           retention-days: 90
+          if-no-files-found: warn
 
   # License Compliance Check
   license-check:
@@ -266,9 +269,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: license-report
+          name: license-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: license-report.json
           retention-days: 30
+          if-no-files-found: warn
 
   # Security Summary Report
   security-summary:

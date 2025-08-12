@@ -4,25 +4,7 @@
 name: 🔒 Security Optimization & Dependency Management
 
 on:
-  # 毎日午前2時（JST）に実行
-  schedule:
-    - cron: '0 17 * * *' # UTC 17:00 = JST 02:00
-  
-  # プルリクエスト時にセキュリティチェック実行
-  pull_request:
-    branches: [main, develop]
-    types: [opened, synchronize, reopened]
-  
-  # プッシュ時のセキュリティスキャン
-  push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/**'
-  
-  # 手動実行
+  # 手動実行のみ（自動実行を無効化）
   workflow_dispatch:
     inputs:
       scan_type:
@@ -136,9 +118,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-audit-reports
+          name: security-audit-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/security/
           retention-days: ${{ env.REPORTS_RETENTION_DAYS }}
+          if-no-files-found: warn
       
       - name: 📊 Security Audit Summary
         run: |
@@ -218,9 +201,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dependency-optimization-reports
+          name: dependency-optimization-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/dependencies/
           retention-days: ${{ env.REPORTS_RETENTION_DAYS }}
+          if-no-files-found: warn
       
       - name: 📊 Dependency Analysis Summary
         run: |
@@ -289,9 +273,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: code-security-reports
+          name: code-security-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/code-security/
           retention-days: ${{ env.REPORTS_RETENTION_DAYS }}
+          if-no-files-found: warn
       
       - name: 📤 Upload SARIF Report for GitHub Security
         uses: github/codeql-action/upload-sarif@v3
@@ -360,9 +345,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-dashboard
+          name: security-dashboard-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/security-dashboard/
           retention-days: ${{ env.REPORTS_RETENTION_DAYS }}
+          if-no-files-found: warn
       
       - name: 🌐 Deploy Dashboard to GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -575,9 +561,10 @@ jobs:
       - name: 📤 Upload ROI Report
         uses: actions/upload-artifact@v4
         with:
-          name: roi-analysis-report
+          name: roi-analysis-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: roi_report.md
           retention-days: 90  # ROI分析は長期保持
+          if-no-files-found: warn
 
 # ワークフロー完了時の処理
   cleanup:
