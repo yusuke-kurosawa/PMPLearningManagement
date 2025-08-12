@@ -29,7 +29,7 @@ export function createUser(overrides?: Partial<User>): User {
       company: faker.company.name(),
       jobTitle: faker.person.jobTitle(),
       linkedIn: faker.internet.url(),
-      twitter: faker.internet.userName(),
+      twitter: faker.internet.username(),
     },
     ...overrides,
   } as User
