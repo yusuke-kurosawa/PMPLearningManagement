@@ -15,6 +15,11 @@ import GlossaryDialog from '../learning/GlossaryDialog'
 import LearningModal from '../learning/LearningModal'
 import { useProgress } from '../../services/progressService'
 import { generateProcessId } from '../../utils/processUtils'
+import { 
+  completeKnowledgeAreas as knowledgeAreas,
+  completeProcesses as processes,
+  processITTO as processDetails 
+} from '../../data/pmbok/completeProcesses'
 
 const PMBOKMatrix = memo(() => {
   const navigate = useNavigate()
@@ -101,85 +106,9 @@ const PMBOKMatrix = memo(() => {
     [termMapping]
   )
 
-  const knowledgeAreas = [
-    { id: 'integration', name: 'プロジェクト統合マネジメント', processes: 7 },
-    { id: 'scope', name: 'プロジェクト・スコープ・マネジメント', processes: 6 },
-    { id: 'schedule', name: 'プロジェクト・スケジュール・マネジメント', processes: 6 },
-    { id: 'cost', name: 'プロジェクト・コスト・マネジメント', processes: 4 },
-    { id: 'quality', name: 'プロジェクト品質マネジメント', processes: 3 },
-    { id: 'resource', name: 'プロジェクト資源マネジメント', processes: 6 },
-    { id: 'communications', name: 'プロジェクト・コミュニケーション・マネジメント', processes: 3 },
-    { id: 'risk', name: 'プロジェクト・リスク・マネジメント', processes: 7 },
-    { id: 'procurement', name: 'プロジェクト調達マネジメント', processes: 3 },
-    { id: 'stakeholder', name: 'プロジェクト・ステークホルダー・マネジメント', processes: 4 },
-  ]
+  // knowledgeAreas, processes, processDetails は外部ファイルからインポート済み
 
-  const processes = {
-    integration: {
-      立上げ: ['プロジェクト憲章の作成'],
-      計画: ['プロジェクトマネジメント計画書の作成'],
-      実行: ['プロジェクト作業の指揮・マネジメント', 'プロジェクト知識のマネジメント'],
-      '監視・コントロール': ['プロジェクト作業の監視・コントロール', '統合変更管理'],
-      終結: ['プロジェクトやフェーズの終結'],
-    },
-    scope: {
-      計画: ['スコープ・マネジメントの計画', '要求事項の収集', 'スコープの定義', 'WBSの作成'],
-      '監視・コントロール': ['スコープの妥当性確認', 'スコープのコントロール'],
-    },
-    schedule: {
-      計画: [
-        'スケジュール・マネジメントの計画',
-        'アクティビティの定義',
-        'アクティビティの順序設定',
-        'アクティビティの所要期間見積り',
-        'スケジュールの作成',
-      ],
-      '監視・コントロール': ['スケジュールのコントロール'],
-    },
-    cost: {
-      計画: ['コスト・マネジメントの計画', 'コストの見積り', '予算の設定'],
-      '監視・コントロール': ['コストのコントロール'],
-    },
-    quality: {
-      計画: ['品質マネジメントの計画'],
-      実行: ['品質のマネジメント'],
-      '監視・コントロール': ['品質のコントロール'],
-    },
-    resource: {
-      計画: ['資源マネジメントの計画', 'アクティビティ資源の見積り'],
-      実行: ['資源の獲得', 'チームの育成', 'チームのマネジメント'],
-      '監視・コントロール': ['資源のコントロール'],
-    },
-    communications: {
-      計画: ['コミュニケーション・マネジメントの計画'],
-      実行: ['コミュニケーションのマネジメント'],
-      '監視・コントロール': ['コミュニケーションの監視'],
-    },
-    risk: {
-      計画: [
-        'リスク・マネジメントの計画',
-        'リスクの特定',
-        '定性的リスク分析',
-        '定量的リスク分析',
-        'リスク対応の計画',
-      ],
-      実行: ['リスク対応策の実行'],
-      '監視・コントロール': ['リスクの監視'],
-    },
-    procurement: {
-      計画: ['調達マネジメントの計画'],
-      実行: ['調達の実行'],
-      '監視・コントロール': ['調達のコントロール'],
-    },
-    stakeholder: {
-      立上げ: ['ステークホルダーの特定'],
-      計画: ['ステークホルダー・エンゲージメントの計画'],
-      実行: ['ステークホルダー・エンゲージメントのマネジメント'],
-      '監視・コントロール': ['ステークホルダー・エンゲージメントの監視'],
-    },
-  }
-
-  const processDetails = {
+  const originalProcessDetails = {
     プロジェクト憲章の作成: {
       inputs: ['ビジネス文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
       tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', '会議'],

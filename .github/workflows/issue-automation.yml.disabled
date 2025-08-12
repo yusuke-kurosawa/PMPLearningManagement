@@ -126,33 +126,33 @@ jobs:
             let suggestions = [];
             
             if (!checks.hasTitle) {
-              suggestions.push('- 📝 **タイトル**: より具体的で説明的なタイトルを付けてください（最低10文字以上）');
+              suggestions.push('- 📝 タイトル: より具体的で説明的なタイトルを付けてください（最低10文字以上）');
             }
             
             if (!checks.hasDescription) {
-              suggestions.push('- 📋 **説明**: 詳細な説明を追加してください（最低50文字以上）');
+              suggestions.push('- 📋 説明: 詳細な説明を追加してください（最低50文字以上）');
             }
             
             if (!checks.hasLabels) {
-              suggestions.push('- 🏷️ **ラベル**: 適切なラベルを付けてください');
+              suggestions.push('- 🏷️ ラベル: 適切なラベルを付けてください');
             }
             
             if (!checks.hasPriority) {
-              suggestions.push('- ⚡ **優先度**: priority:critical, priority:high, priority:medium, priority:low のいずれかを選択してください');
+              suggestions.push('- ⚡ 優先度: priority:critical, priority:high, priority:medium, priority:low のいずれかを選択してください');
             }
             
             if (!checks.hasComponent) {
-              suggestions.push('- 🎯 **コンポーネント**: 影響する機能エリア（component:xxx または area:xxx）を指定してください');
+              suggestions.push('- 🎯 コンポーネント: 影響する機能エリア（component:xxx または area:xxx）を指定してください');
             }
             
             if (!checks.hasTemplate) {
-              suggestions.push('- 📄 **テンプレート**: Issueテンプレートを使用して構造化された情報を提供してください');
+              suggestions.push('- 📄 テンプレート: Issueテンプレートを使用して構造化された情報を提供してください');
             }
 
             const commentBody = `
 ## 🔍 Issue品質監査結果
 
-**品質スコア**: ${score}/100 ${score >= 70 ? '✅' : '⚠️'}
+品質スコア: ${score}/100 ${score >= 70 ? '✅' : '⚠️'}
 
 ### 改善提案:
 ${suggestions.join('\n')}
@@ -177,7 +177,7 @@ ${suggestions.join('\n')}
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
-              --data "{\"text\":\"🚨 **SECURITY ALERT** 🚨\\n\\n**Issue #${{ github.event.issue.number }}**: ${{ github.event.issue.title }}\\n**URL**: ${{ github.event.issue.html_url }}\\n**Action**: 即座に対応が必要です\"}" \
+              --data "{\"text\":\"🚨 SECURITY ALERT 🚨\\n\\nIssue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}\\nURL: ${{ github.event.issue.html_url }}\\nAction: 即座に対応が必要です\"}" \
               ${{ secrets.SLACK_WEBHOOK_URL }}
           fi
 
@@ -335,7 +335,7 @@ ${suggestions.join('\n')}
               let comment = `## 🔍 重複Issue検出\n\n以下のIssueと類似している可能性があります:\n\n`;
               
               for (const dup of duplicates) {
-                comment += `- **#${dup.number}**: [${dup.title}](${dup.url}) `;
+                comment += `- #${dup.number}: [${dup.title}](${dup.url}) `;
                 comment += `(類似度: タイトル ${Math.round(dup.titleSimilarity * 100)}%, `;
                 comment += `内容 ${Math.round(dup.bodySimilarity * 100)}%)\n`;
               }
@@ -462,8 +462,8 @@ ${suggestions.join('\n')}
           # 📊 Issue運用 日次レポート - $(date +%Y-%m-%d)
           
           ## 📈 本日の概要
-          - **新規作成**: $(echo '$stats' | jq '.daily.created') Issues
-          - **解決完了**: $(echo '$stats' | jq '.daily.closed') Issues
+          - 新規作成: $(echo '$stats' | jq '.daily.created') Issues
+          - 解決完了: $(echo '$stats' | jq '.daily.closed') Issues
           - **未解決総数**: $(echo '$stats' | jq '.open') Issues
           
           ## 🏷️ 優先度別状況
