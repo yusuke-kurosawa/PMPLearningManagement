@@ -12,10 +12,7 @@
 name: 🚀 Edge Computing & WebAssembly Optimization
 
 on:
-  push:
-    branches: [main, develop]
-  schedule:
-    - cron: '0 4 * * *' # Daily edge optimization at 4 AM
+  # 手動実行のみ（自動実行を無効化）
   workflow_dispatch:
     inputs:
       optimization_level:

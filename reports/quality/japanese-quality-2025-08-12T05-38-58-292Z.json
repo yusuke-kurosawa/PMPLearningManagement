@@ -1,0 +1,5805 @@
+{
+  "report_meta": {
+    "generated_at": "2025-08-12T05:38:58.292Z",
+    "checker_version": "1.0.0",
+    "project": "PMPLearningManagement",
+    "language": "Japanese"
+  },
+  "quality_summary": {
+    "overall_score": 62.207892361965705,
+    "meets_japanese_standards": false,
+    "ready_for_japanese_learners": false
+  },
+  "detailed_scores": {
+    "grammar_accuracy": "0.0",
+    "terminology_consistency": "100.0",
+    "readability": "84.8",
+    "cultural_appropriateness": "80.0"
+  },
+  "quality_gates": {
+    "grammar_gate": false,
+    "terminology_gate": true,
+    "readability_gate": false,
+    "cultural_gate": false
+  },
+  "detailed_analysis": {
+    "grammar": {
+      "total_texts": 811,
+      "problematic_patterns": [
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "プロジェクトの進捗とパフォーマンスを追跡、レビュー、報告し、計画からの差異を特定するプロセス",
+          "source": "process_description",
+          "location": 32
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "プロジェクト・スコープとプロダクト・スコープをどのように定義、妥当性確認、コントロールするかを文書化するプロセス",
+          "source": "process_description",
+          "location": 22
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "プロジェクト・スコープとプロダクト・スコープをどのように定義、妥当性確認、コントロールするかを文書化するプロセス",
+          "source": "process_description",
+          "location": 45
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "試験まで残り日数",
+          "source": "ui_text",
+          "location": 2
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "重要な弱点は見つかりませんでした。順調に学習が進んでいます！",
+          "source": "ui_text",
+          "location": 16
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "コラボレーション機能を使用するには、ユーザー名を設定してください。",
+          "source": "ui_text",
+          "location": 15
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "学習内容をまとめて共有",
+          "source": "ui_text",
+          "location": 4
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "わからないことを質問",
+          "source": "ui_text",
+          "location": 1
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "わからないことを質問",
+          "source": "ui_text",
+          "location": 6
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "Excelなどで分析可能な形式でエクスポート",
+          "source": "ui_text",
+          "location": 5
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "CSVファイルから {importPreview.summary.rowCount} 件の進捗データを検出しました",
+          "source": "ui_text",
+          "location": 7
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "ブラウザのLocalStorageは通常5MBまで保存可能です",
+          "source": "ui_text",
+          "location": 23
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "定期的にバックアップを取ることをお勧めします",
+          "source": "ui_text",
+          "location": 14
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "{/* コメントがない場合 */}\n      {comments.length === 0 && (",
+          "source": "ui_text",
+          "location": 8
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": ")}\n\n      {/* ノートがない場合 */}\n      {notes.length === 0 && (",
+          "source": "ui_text",
+          "location": 17
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": ")}\n\n          {/* グループがない場合 */}\n          {myGroups.length === 0 && publ",
+          "source": "ui_text",
+          "location": 22
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "PMP資格取得を目指す方のための包括的な学習プラットフォーム。\n              PMBOKガイドの内容を効率的に学習し、実践的なスキルを身につけるこ",
+          "source": "ui_text",
+          "location": 30
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "。\n              PMBOKガイドの内容を効率的に学習し、実践的なスキルを身につけることができます。",
+          "source": "ui_text",
+          "location": 80
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "申し訳ありませんが、予期しないエラーが発生しました。ページを再読み込みしてお試しください。",
+          "source": "ui_text",
+          "location": 25
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "{isPassed ? '合格おめでとうございます！' : '今回は不合格でした'}",
+          "source": "ui_text",
+          "location": 25
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "{isPassed ? '合格おめでとうございます！' : '今回は不合格でした'}",
+          "source": "ui_text",
+          "location": 17
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "isPassed\n                ? 'PMP試験の合格基準（61%）を達成しました。'\n                : 'もう少しで合格です。苦手分野を重点的に復習しましょう。'",
+          "source": "ui_text",
+          "location": 51
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "試験の合格基準（61%）を達成しました。'\n                : 'もう少しで合格です。苦手分野を重点的に復習しましょう。'}",
+          "source": "ui_text",
+          "location": 82
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "した。'\n                : 'もう少しで合格です。苦手分野を重点的に復習しましょう。'}",
+          "source": "ui_text",
+          "location": 99
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "{showResetConfirm ? '本当にリセットしますか？' : '進捗をリセット'}",
+          "source": "ui_text",
+          "location": 32
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "知識エリアごとに集中して学習し、プロセス間の関係性を理解することが重要です。",
+          "source": "ui_text",
+          "location": 6
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "知識エリアごとに集中して学習し、プロセス間の関係性を理解することが重要です。",
+          "source": "ui_text",
+          "location": 31
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "学んだ知識を実際のプロジェクトに当てはめて考えることで、理解が深まります。",
+          "source": "ui_text",
+          "location": 25
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "※ 複数選択問題です。該当するものをすべて選択してください。",
+          "source": "ui_text",
+          "location": 10
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "まだメンタリングセッションがありません。メンターを探してみましょう。",
+          "source": "ui_text",
+          "location": 19
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "メンターになりませんか？",
+          "source": "ui_text",
+          "location": 4
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "申請から審査完了まで通常3-5営業日",
+          "source": "ui_text",
+          "location": 2
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "申請から審査完了まで通常3-5営業日",
+          "source": "ui_text",
+          "location": 8
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "学習者からの質問への回答",
+          "source": "ui_text",
+          "location": 3
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "メンターになる",
+          "source": "ui_text",
+          "location": 4
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "わからない",
+          "source": "ui_text",
+          "location": 1
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "目標まであと {Math.max(0, stats.weeklyGoal - stats.weeklyP",
+          "source": "ui_text",
+          "location": 2
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "知識エリアとプロセス群別に整理された49のPMBOKプロセスを表示するインタラクティブなマトリックス。検索、フィルタリング、詳細なITTO情報表示機能を備えています。',\n      icon: Gr",
+          "source": "ui_text",
+          "location": 138
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "示するインタラクティブなマトリックス。検索、フィルタリング、詳細なITTO情報表示機能を備えています。',\n      icon: Grid,\n      link: '/matrix',\n     ",
+          "source": "ui_text",
+          "location": 170
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ラム',\n      description:\n        'ITTO関係性の力学的グラフ視覚化。プロセス、インプット、ツール、アウトプット間の接続をインタラクティブなフィルタリングで探索できます",
+          "source": "ui_text",
+          "location": 330
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "。プロセス、インプット、ツール、アウトプット間の接続をインタラクティブなフィルタリングで探索できます。',\n      icon: Network,\n      link: '/network',\n ",
+          "source": "ui_text",
+          "location": 380
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "iption:\n        'マトリックスとネットワークの両方の視覚化を組み合わせた分割画面表示。包括的な分析のための調整可能なレイアウトとフルスクリーンオプション。',\n      icon: ",
+          "source": "ui_text",
+          "location": 554
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "視覚化を組み合わせた分割画面表示。包括的な分析のための調整可能なレイアウトとフルスクリーンオプション。',\n      icon: Layers,\n      link: '/integrated',",
+          "source": "ui_text",
+          "location": 588
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "  description:\n        'PMP試験に必要な重要用語を網羅した検索可能な用語集。カテゴリ別フィルタリング、関連用語の表示、日英対応で効率的な学習をサポート。',\n      ic",
+          "source": "ui_text",
+          "location": 759
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "網羅した検索可能な用語集。カテゴリ別フィルタリング、関連用語の表示、日英対応で効率的な学習をサポート。',\n      icon: BookOpen,\n      link: '/glossary',",
+          "source": "ui_text",
+          "location": 797
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": ": 'ビジュアライゼーションハブ',\n      description:\n        '新機能！プロセスフロー図、ヒートマップなど、様々な視点からPMBOKを理解できる強化されたビジュアライゼー",
+          "source": "ui_text",
+          "location": 952
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "セスフロー図、ヒートマップなど、様々な視点からPMBOKを理解できる強化されたビジュアライゼーション。',\n      icon: Sparkles,\n      link: '/visualizat",
+          "source": "ui_text",
+          "location": 1005
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "le: '学習進捗ダッシュボード',\n      description:\n        '新機能！学習の進捗状況を可視化し、知識エリア別・プロセス群別の習熟度を管理。効率的な学習計画をサポート。'",
+          "source": "ui_text",
+          "location": 1214
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "on:\n        '新機能！学習の進捗状況を可視化し、知識エリア別・プロセス群別の習熟度を管理。効率的な学習計画をサポート。',\n      icon: TrendingUp,\n      li",
+          "source": "ui_text",
+          "location": 1248
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "機能！学習の進捗状況を可視化し、知識エリア別・プロセス群別の習熟度を管理。効率的な学習計画をサポート。',\n      icon: TrendingUp,\n      link: '/progress",
+          "source": "ui_text",
+          "location": 1262
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "tle: 'フラッシュカード学習',\n      description:\n        '新機能！ITTOを効率的に暗記するインタラクティブなフラッシュカード。間隔反復学習アルゴリズムで記憶の定着",
+          "source": "ui_text",
+          "location": 1433
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ption:\n        '新機能！ITTOを効率的に暗記するインタラクティブなフラッシュカード。間隔反復学習アルゴリズムで記憶の定着をサポート。',\n      icon: Brain,\n   ",
+          "source": "ui_text",
+          "location": 1464
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "を効率的に暗記するインタラクティブなフラッシュカード。間隔反復学習アルゴリズムで記憶の定着をサポート。',\n      icon: Brain,\n      link: '/flashcards',\n",
+          "source": "ui_text",
+          "location": 1488
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": " title: 'PMP模擬試験',\n      description:\n        '新機能！実際のPMP試験形式で練習。180問・230分のフル模擬試験で、詳細な結果分析と弱点把握が可能。'",
+          "source": "ui_text",
+          "location": 1655
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "試験',\n      description:\n        '新機能！実際のPMP試験形式で練習。180問・230分のフル模擬試験で、詳細な結果分析と弱点把握が可能。',\n      icon: ",
+          "source": "ui_text",
+          "location": 1669
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "機能！実際のPMP試験形式で練習。180問・230分のフル模擬試験で、詳細な結果分析と弱点把握が可能。',\n      icon: GraduationCap,\n      link: '/mock-",
+          "source": "ui_text",
+          "location": 1703
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "title: 'AIコーチング',\n      description:\n        '革新機能！あなた専用のAIコーチが学習を分析し、最適化された個別学習パスと継続的な指導を提供。PMP合格から",
+          "source": "ui_text",
+          "location": 1910
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "   '革新機能！あなた専用のAIコーチが学習を分析し、最適化された個別学習パスと継続的な指導を提供。PMP合格から長期キャリア成功まで完全サポート。',\n      icon: Brain,\n   ",
+          "source": "ui_text",
+          "location": 1952
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "分析し、最適化された個別学習パスと継続的な指導を提供。PMP合格から長期キャリア成功まで完全サポート。',\n      icon: Brain,\n      link: '/ai-coaching',",
+          "source": "ui_text",
+          "location": 1976
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ルプロジェクト・シミュレーター',\n      description:\n        '革新機能！実際のプロジェクトシナリオでPMBOK知識を実践的に学習。リアルタイムの意思決定で本物のPMスキル",
+          "source": "ui_text",
+          "location": 2211
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "iption:\n        '革新機能！実際のプロジェクトシナリオでPMBOK知識を実践的に学習。リアルタイムの意思決定で本物のPMスキルを身につけましょう。',\n      icon: Play",
+          "source": "ui_text",
+          "location": 2240
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "トシナリオでPMBOK知識を実践的に学習。リアルタイムの意思決定で本物のPMスキルを身につけましょう。',\n      icon: Play,\n      link: '/project-simula",
+          "source": "ui_text",
+          "location": 2270
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "tle: 'メンターシップハブ',\n      description:\n        '革新機能！経験豊富なプロジェクトマネージャーとのマンツーマン指導。業界エキスパートから直接学び、実践的なスキ",
+          "source": "ui_text",
+          "location": 2498
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ription:\n        '革新機能！経験豊富なプロジェクトマネージャーとのマンツーマン指導。業界エキスパートから直接学び、実践的なスキルと深い洞察を身につけましょう。',\n      ico",
+          "source": "ui_text",
+          "location": 2526
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ジャーとのマンツーマン指導。業界エキスパートから直接学び、実践的なスキルと深い洞察を身につけましょう。',\n      icon: Users,\n      link: '/mentorship',\n",
+          "source": "ui_text",
+          "location": 2563
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "title: 'コラボレーション',\n      description:\n        '新機能！他の学習者と知識を共有。学習ノート、ディスカッション、学習グループで一緒に学習を進めましょう。',",
+          "source": "ui_text",
+          "location": 2787
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ーション',\n      description:\n        '新機能！他の学習者と知識を共有。学習ノート、ディスカッション、学習グループで一緒に学習を進めましょう。',\n      icon:",
+          "source": "ui_text",
+          "location": 2799
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "新機能！他の学習者と知識を共有。学習ノート、ディスカッション、学習グループで一緒に学習を進めましょう。',\n      icon: Users,\n      link: '/collaboration",
+          "source": "ui_text",
+          "location": 2834
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "',\n      description:\n        '新機能！プロセスフロー図、ヒートマップなど、様々な視点からPMBOKを理解できる強化されたビジュアライゼーション。',\n      ico",
+          "source": "ui_text",
+          "location": 968
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": " description:\n        '新機能！プロセスフロー図、ヒートマップなど、様々な視点からPMBOKを理解できる強化されたビジュアライゼーション。',\n      icon: Spark",
+          "source": "ui_text",
+          "location": 976
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "機能！あなた専用のAIコーチが学習を分析し、最適化された個別学習パスと継続的な指導を提供。PMP合格から長期キャリア成功まで完全サポート。',\n      icon: Brain,\n      lin",
+          "source": "ui_text",
+          "location": 1958
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "Iコーチが学習を分析し、最適化された個別学習パスと継続的な指導を提供。PMP合格から長期キャリア成功まで完全サポート。',\n      icon: Brain,\n      link: '/ai-co",
+          "source": "ui_text",
+          "location": 1968
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "        '革新機能！経験豊富なプロジェクトマネージャーとのマンツーマン指導。業界エキスパートから直接学び、実践的なスキルと深い洞察を身につけましょう。',\n      icon: Users,",
+          "source": "ui_text",
+          "location": 2535
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "統合ビューでは、より深い理解のために両方の視点を同時に確認できます",
+          "source": "ui_text",
+          "location": 5
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "このドメインは他のドメインと密接に関連しています。\n                      効果的なプロジェクトマネジメントのためには、 各ドメ",
+          "source": "ui_text",
+          "location": 24
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "関連しています。\n                      効果的なプロジェクトマネジメントのためには、 各ドメイン間の相互作用を理解し、\n                      統合的なアプロ",
+          "source": "ui_text",
+          "location": 67
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "メイン間の相互作用を理解し、\n                      統合的なアプローチを取ることが重要です。",
+          "source": "ui_text",
+          "location": 123
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "プロジェクトマネジメントの指針となる基本原則",
+          "source": "ui_text",
+          "location": 15
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "ーやステークホルダーと定期的に振り返りを行い、\n                        原則がどのように実践されているかを評価しましょう。",
+          "source": "ui_text",
+          "location": 109
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "的に振り返りを行い、\n                        原則がどのように実践されているかを評価しましょう。",
+          "source": "ui_text",
+          "location": 122
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "第6版から第7版へのマッピング",
+          "source": "ui_text",
+          "location": 3
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "第6版から第7版への移行ガイド",
+          "source": "ui_text",
+          "location": 3
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "ry))\n          }\n          alert('データのインポートが完了しました。')\n        } catch (error) {\n          alert('ファイ",
+          "source": "ui_text",
+          "location": 627
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": " catch (error) {\n          alert('ファイルの形式が正しくありません。')\n        }\n      }\n      reader.readAsText(file",
+          "source": "ui_text",
+          "location": 690
+        },
+        {
+          "rule_type": "punctuation",
+          "message": "句読点の後に適切な空白または改行が必要です",
+          "severity": "low",
+          "text_snippet": "実際のプロジェクトシナリオでPMBOK知識を実践的に学習。リアルタイムの意思決定で本物のPMスキルを身につけましょう。",
+          "source": "ui_text",
+          "location": 28
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "ヒートマップとは？",
+          "source": "ui_text",
+          "location": 6
+        },
+        {
+          "rule_type": "particles",
+          "message": "助詞の連続使用を確認してください",
+          "severity": "medium",
+          "text_snippet": "様々な視点からPMBOKプロセスを理解する",
+          "source": "ui_text",
+          "location": 5
+        }
+      ],
+      "sentence_analysis": {
+        "text_0": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_1": {
+          "sentence_count": 1,
+          "avg_sentence_length": 45,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_2": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_3": {
+          "sentence_count": 1,
+          "avg_sentence_length": 44,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_4": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_5": {
+          "sentence_count": 1,
+          "avg_sentence_length": 46,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_6": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_7": {
+          "sentence_count": 1,
+          "avg_sentence_length": 51,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_8": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_9": {
+          "sentence_count": 1,
+          "avg_sentence_length": 46,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_10": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_11": {
+          "sentence_count": 1,
+          "avg_sentence_length": 44,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_12": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_13": {
+          "sentence_count": 1,
+          "avg_sentence_length": 30,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_14": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_15": {
+          "sentence_count": 1,
+          "avg_sentence_length": 56,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_16": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_17": {
+          "sentence_count": 1,
+          "avg_sentence_length": 40,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_18": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_19": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_20": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_21": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_22": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_23": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_24": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_25": {
+          "sentence_count": 1,
+          "avg_sentence_length": 58,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_26": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_27": {
+          "sentence_count": 1,
+          "avg_sentence_length": 29,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_28": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_29": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_30": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_31": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_32": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_33": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_34": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_35": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_36": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_37": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_38": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_39": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_40": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_41": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_42": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_43": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_44": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_45": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_46": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_47": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_48": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_49": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_50": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_51": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_52": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_53": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_54": {
+          "sentence_count": 1,
+          "avg_sentence_length": 28,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_55": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_56": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_57": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_58": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_59": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_60": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_61": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_62": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_63": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_64": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_65": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_66": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_67": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_68": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_69": {
+          "sentence_count": 1,
+          "avg_sentence_length": 40,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_70": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_71": {
+          "sentence_count": 1,
+          "avg_sentence_length": 66,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_72": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_73": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_74": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_75": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_76": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_77": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_78": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_79": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_80": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_81": {
+          "sentence_count": 2,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_82": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_83": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_84": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_85": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_86": {
+          "sentence_count": 1,
+          "avg_sentence_length": 609,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_87": {
+          "sentence_count": 1,
+          "avg_sentence_length": 51,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_88": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_89": {
+          "sentence_count": 1,
+          "avg_sentence_length": 32,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_90": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_91": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_92": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_93": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_94": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_95": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_96": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_97": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_98": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_99": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_100": {
+          "sentence_count": 1,
+          "avg_sentence_length": 32,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_101": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_102": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_103": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_104": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_105": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_106": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_107": {
+          "sentence_count": 1,
+          "avg_sentence_length": 28,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_108": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_109": {
+          "sentence_count": 1,
+          "avg_sentence_length": 57,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_110": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_111": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_112": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_113": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_114": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_115": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_116": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_117": {
+          "sentence_count": 1,
+          "avg_sentence_length": 205,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_118": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_119": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_120": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_121": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_122": {
+          "sentence_count": 1,
+          "avg_sentence_length": 29,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_123": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_124": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_125": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_126": {
+          "sentence_count": 1,
+          "avg_sentence_length": 53,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_127": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_128": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_129": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_130": {
+          "sentence_count": 1,
+          "avg_sentence_length": 29,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_131": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_132": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_133": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_134": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_135": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_136": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_137": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_138": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_139": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_140": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_141": {
+          "sentence_count": 1,
+          "avg_sentence_length": 31,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_142": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_143": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_144": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_145": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_146": {
+          "sentence_count": 1,
+          "avg_sentence_length": 64,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_147": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_148": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_149": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_150": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_151": {
+          "sentence_count": 1,
+          "avg_sentence_length": 47,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_152": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_153": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_154": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_155": {
+          "sentence_count": 1,
+          "avg_sentence_length": 66,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_156": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_157": {
+          "sentence_count": 1,
+          "avg_sentence_length": 57,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_158": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_159": {
+          "sentence_count": 1,
+          "avg_sentence_length": 145,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_160": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_161": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_162": {
+          "sentence_count": 1,
+          "avg_sentence_length": 249,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_163": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_164": {
+          "sentence_count": 1,
+          "avg_sentence_length": 38,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_165": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_166": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_167": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_168": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_169": {
+          "sentence_count": 1,
+          "avg_sentence_length": 30,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_170": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_171": {
+          "sentence_count": 1,
+          "avg_sentence_length": 64,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_172": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_173": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_174": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_175": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_176": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_177": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_178": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_179": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_180": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_181": {
+          "sentence_count": 1,
+          "avg_sentence_length": 31,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_182": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_183": {
+          "sentence_count": 1,
+          "avg_sentence_length": 396,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_184": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_185": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_186": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_187": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_188": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_189": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_190": {
+          "sentence_count": 1,
+          "avg_sentence_length": 32,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_191": {
+          "sentence_count": 1,
+          "avg_sentence_length": 32,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_192": {
+          "sentence_count": 1,
+          "avg_sentence_length": 54,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_193": {
+          "sentence_count": 1,
+          "avg_sentence_length": 51,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_194": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_195": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_196": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_197": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_198": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_199": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_200": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_201": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_202": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_203": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_204": {
+          "sentence_count": 1,
+          "avg_sentence_length": 44,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_205": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_206": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_207": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_208": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_209": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_210": {
+          "sentence_count": 1,
+          "avg_sentence_length": 52,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_211": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_212": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_213": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_214": {
+          "sentence_count": 1,
+          "avg_sentence_length": 57,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_215": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_216": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_217": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_218": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_219": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_220": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_221": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_222": {
+          "sentence_count": 1,
+          "avg_sentence_length": 60,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_223": {
+          "sentence_count": 1,
+          "avg_sentence_length": 34,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_224": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_225": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_226": {
+          "sentence_count": 1,
+          "avg_sentence_length": 34,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_227": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_228": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_229": {
+          "sentence_count": 1,
+          "avg_sentence_length": 98,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_230": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_231": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_232": {
+          "sentence_count": 1,
+          "avg_sentence_length": 45,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_233": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_234": {
+          "sentence_count": 1,
+          "avg_sentence_length": 38,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_235": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_236": {
+          "sentence_count": 1,
+          "avg_sentence_length": 77,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_237": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_238": {
+          "sentence_count": 1,
+          "avg_sentence_length": 28,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_239": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_240": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_241": {
+          "sentence_count": 1,
+          "avg_sentence_length": 45,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_242": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_243": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_244": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_245": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_246": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_247": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_248": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_249": {
+          "sentence_count": 1,
+          "avg_sentence_length": 1196,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_250": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_251": {
+          "sentence_count": 2,
+          "avg_sentence_length": 42.5,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_252": {
+          "sentence_count": 1,
+          "avg_sentence_length": 49,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_253": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_254": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_255": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_256": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_257": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_258": {
+          "sentence_count": 2,
+          "avg_sentence_length": 21.5,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_259": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_260": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_261": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_262": {
+          "sentence_count": 1,
+          "avg_sentence_length": 790,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_263": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_264": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_265": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_266": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_267": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_268": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_269": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_270": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_271": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_272": {
+          "sentence_count": 1,
+          "avg_sentence_length": 1557,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_273": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_274": {
+          "sentence_count": 1,
+          "avg_sentence_length": 210,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_275": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_276": {
+          "sentence_count": 1,
+          "avg_sentence_length": 72,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_277": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_278": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_279": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_280": {
+          "sentence_count": 1,
+          "avg_sentence_length": 194,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_281": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_282": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_283": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_284": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_285": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_286": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_287": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_288": {
+          "sentence_count": 2,
+          "avg_sentence_length": 20.5,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_289": {
+          "sentence_count": 4,
+          "avg_sentence_length": 24.75,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_290": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_291": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_292": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_293": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_294": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_295": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_296": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_297": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_298": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_299": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_300": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_301": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_302": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_303": {
+          "sentence_count": 1,
+          "avg_sentence_length": 41,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_304": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_305": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_306": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_307": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_308": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_309": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_310": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_311": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_312": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_313": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_314": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_315": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_316": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_317": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_318": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_319": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_320": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_321": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_322": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_323": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_324": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_325": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_326": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_327": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_328": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_329": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_330": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_331": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_332": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_333": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_334": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_335": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_336": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_337": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_338": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_339": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_340": {
+          "sentence_count": 1,
+          "avg_sentence_length": 52,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_341": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_342": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_343": {
+          "sentence_count": 1,
+          "avg_sentence_length": 30,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_344": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_345": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_346": {
+          "sentence_count": 1,
+          "avg_sentence_length": 312,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_347": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_348": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_349": {
+          "sentence_count": 1,
+          "avg_sentence_length": 47,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_350": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_351": {
+          "sentence_count": 1,
+          "avg_sentence_length": 64,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_352": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_353": {
+          "sentence_count": 1,
+          "avg_sentence_length": 65,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_354": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_355": {
+          "sentence_count": 1,
+          "avg_sentence_length": 104,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_356": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_357": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_358": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_359": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_360": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_361": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_362": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_363": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_364": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_365": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_366": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_367": {
+          "sentence_count": 2,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_368": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_369": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_370": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_371": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_372": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_373": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_374": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_375": {
+          "sentence_count": 1,
+          "avg_sentence_length": 464,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_376": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_377": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_378": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_379": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_380": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_381": {
+          "sentence_count": 1,
+          "avg_sentence_length": 29,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_382": {
+          "sentence_count": 1,
+          "avg_sentence_length": 29,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_383": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_384": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_385": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_386": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_387": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_388": {
+          "sentence_count": 1,
+          "avg_sentence_length": 54,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_389": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_390": {
+          "sentence_count": 1,
+          "avg_sentence_length": 183,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_391": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_392": {
+          "sentence_count": 2,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_393": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_394": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_395": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_396": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_397": {
+          "sentence_count": 1,
+          "avg_sentence_length": 46,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_398": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_399": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_400": {
+          "sentence_count": 1,
+          "avg_sentence_length": 58,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_401": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_402": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_403": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_404": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_405": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_406": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_407": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_408": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_409": {
+          "sentence_count": 1,
+          "avg_sentence_length": 34,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_410": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_411": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_412": {
+          "sentence_count": 1,
+          "avg_sentence_length": 41,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_413": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_414": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_415": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_416": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_417": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_418": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_419": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_420": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_421": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_422": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_423": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_424": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_425": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_426": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_427": {
+          "sentence_count": 1,
+          "avg_sentence_length": 168,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_428": {
+          "sentence_count": 1,
+          "avg_sentence_length": 54,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_429": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_430": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_431": {
+          "sentence_count": 1,
+          "avg_sentence_length": 279,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_432": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_433": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_434": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_435": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_436": {
+          "sentence_count": 2,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_437": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_438": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_439": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_440": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_441": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_442": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_443": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_444": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_445": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_446": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_447": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_448": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_449": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_450": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_451": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_452": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_453": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_454": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_455": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_456": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_457": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_458": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_459": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_460": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_461": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_462": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_463": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_464": {
+          "sentence_count": 1,
+          "avg_sentence_length": 50,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_465": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_466": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_467": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_468": {
+          "sentence_count": 1,
+          "avg_sentence_length": 195,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_469": {
+          "sentence_count": 1,
+          "avg_sentence_length": 34,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_470": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_471": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_472": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_473": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_474": {
+          "sentence_count": 1,
+          "avg_sentence_length": 36,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_475": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_476": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_477": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_478": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_479": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_480": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_481": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_482": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_483": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_484": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_485": {
+          "sentence_count": 1,
+          "avg_sentence_length": 50,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_486": {
+          "sentence_count": 1,
+          "avg_sentence_length": 179,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_487": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_488": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_489": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_490": {
+          "sentence_count": 1,
+          "avg_sentence_length": 1138,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_491": {
+          "sentence_count": 1,
+          "avg_sentence_length": 435,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_492": {
+          "sentence_count": 1,
+          "avg_sentence_length": 544,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_493": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_494": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_495": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_496": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_497": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_498": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_499": {
+          "sentence_count": 1,
+          "avg_sentence_length": 39,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_500": {
+          "sentence_count": 1,
+          "avg_sentence_length": 41,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_501": {
+          "sentence_count": 1,
+          "avg_sentence_length": 374,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_502": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_503": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_504": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_505": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_506": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_507": {
+          "sentence_count": 1,
+          "avg_sentence_length": 63,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_508": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_509": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_510": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_511": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_512": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_513": {
+          "sentence_count": 1,
+          "avg_sentence_length": 56,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_514": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_515": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_516": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_517": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_518": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_519": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_520": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_521": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_522": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_523": {
+          "sentence_count": 32,
+          "avg_sentence_length": 92.375,
+          "long_sentences": 13,
+          "short_sentences": 0
+        },
+        "text_524": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_525": {
+          "sentence_count": 1,
+          "avg_sentence_length": 75,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_526": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_527": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_528": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_529": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_530": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_531": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_532": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_533": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_534": {
+          "sentence_count": 1,
+          "avg_sentence_length": 47,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_535": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_536": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_537": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_538": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_539": {
+          "sentence_count": 1,
+          "avg_sentence_length": 28,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_540": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_541": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_542": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_543": {
+          "sentence_count": 1,
+          "avg_sentence_length": 46,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_544": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_545": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_546": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_547": {
+          "sentence_count": 1,
+          "avg_sentence_length": 30,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_548": {
+          "sentence_count": 1,
+          "avg_sentence_length": 103,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_549": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_550": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_551": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_552": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_553": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_554": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_555": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_556": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_557": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_558": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_559": {
+          "sentence_count": 2,
+          "avg_sentence_length": 64,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_560": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_561": {
+          "sentence_count": 1,
+          "avg_sentence_length": 28,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_562": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_563": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_564": {
+          "sentence_count": 1,
+          "avg_sentence_length": 47,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_565": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_566": {
+          "sentence_count": 1,
+          "avg_sentence_length": 51,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_567": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_568": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_569": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_570": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_571": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_572": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_573": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_574": {
+          "sentence_count": 1,
+          "avg_sentence_length": 131,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_575": {
+          "sentence_count": 1,
+          "avg_sentence_length": 32,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_576": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_577": {
+          "sentence_count": 1,
+          "avg_sentence_length": 189,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_578": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_579": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_580": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_581": {
+          "sentence_count": 1,
+          "avg_sentence_length": 49,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_582": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_583": {
+          "sentence_count": 1,
+          "avg_sentence_length": 387,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_584": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_585": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_586": {
+          "sentence_count": 1,
+          "avg_sentence_length": 54,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_587": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_588": {
+          "sentence_count": 1,
+          "avg_sentence_length": 701,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_589": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_590": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_591": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_592": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_593": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_594": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_595": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_596": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_597": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_598": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_599": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_600": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_601": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_602": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_603": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_604": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_605": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_606": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_607": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_608": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_609": {
+          "sentence_count": 1,
+          "avg_sentence_length": 228,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_610": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_611": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_612": {
+          "sentence_count": 1,
+          "avg_sentence_length": 33,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_613": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_614": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_615": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_616": {
+          "sentence_count": 1,
+          "avg_sentence_length": 30,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_617": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_618": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_619": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_620": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_621": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_622": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_623": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_624": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_625": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_626": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_627": {
+          "sentence_count": 1,
+          "avg_sentence_length": 208,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_628": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_629": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_630": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_631": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_632": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_633": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_634": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_635": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_636": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_637": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_638": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_639": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_640": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_641": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_642": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_643": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_644": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_645": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_646": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_647": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_648": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_649": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_650": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_651": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_652": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_653": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_654": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_655": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_656": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_657": {
+          "sentence_count": 1,
+          "avg_sentence_length": 46,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_658": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_659": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_660": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_661": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_662": {
+          "sentence_count": 1,
+          "avg_sentence_length": 60,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_663": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_664": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_665": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_666": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_667": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_668": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_669": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_670": {
+          "sentence_count": 3,
+          "avg_sentence_length": 263,
+          "long_sentences": 2,
+          "short_sentences": 0
+        },
+        "text_671": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_672": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_673": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_674": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_675": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_676": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_677": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_678": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_679": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_680": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_681": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_682": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_683": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_684": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_685": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_686": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_687": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_688": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_689": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_690": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_691": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_692": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_693": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_694": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_695": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_696": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_697": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_698": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_699": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_700": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_701": {
+          "sentence_count": 1,
+          "avg_sentence_length": 14,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_702": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_703": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_704": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_705": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_706": {
+          "sentence_count": 2,
+          "avg_sentence_length": 28.5,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_707": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_708": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_709": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_710": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_711": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_712": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_713": {
+          "sentence_count": 1,
+          "avg_sentence_length": 56,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_714": {
+          "sentence_count": 1,
+          "avg_sentence_length": 48,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_715": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_716": {
+          "sentence_count": 1,
+          "avg_sentence_length": 35,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_717": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_718": {
+          "sentence_count": 1,
+          "avg_sentence_length": 38,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_719": {
+          "sentence_count": 1,
+          "avg_sentence_length": 3,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_720": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_721": {
+          "sentence_count": 1,
+          "avg_sentence_length": 11,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_722": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_723": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_724": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_725": {
+          "sentence_count": 1,
+          "avg_sentence_length": 34,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_726": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_727": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_728": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_729": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_730": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_731": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_732": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_733": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_734": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_735": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_736": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_737": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_738": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_739": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_740": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_741": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_742": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_743": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_744": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_745": {
+          "sentence_count": 1,
+          "avg_sentence_length": 40,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_746": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_747": {
+          "sentence_count": 1,
+          "avg_sentence_length": 73,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_748": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_749": {
+          "sentence_count": 1,
+          "avg_sentence_length": 49,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_750": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_751": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_752": {
+          "sentence_count": 1,
+          "avg_sentence_length": 605,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_753": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_754": {
+          "sentence_count": 1,
+          "avg_sentence_length": 15,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_755": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_756": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_757": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_758": {
+          "sentence_count": 1,
+          "avg_sentence_length": 40,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_759": {
+          "sentence_count": 1,
+          "avg_sentence_length": 49,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_760": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_761": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_762": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_763": {
+          "sentence_count": 1,
+          "avg_sentence_length": 40,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_764": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_765": {
+          "sentence_count": 1,
+          "avg_sentence_length": 27,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_766": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_767": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_768": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_769": {
+          "sentence_count": 1,
+          "avg_sentence_length": 8,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_770": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_771": {
+          "sentence_count": 1,
+          "avg_sentence_length": 18,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_772": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_773": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_774": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_775": {
+          "sentence_count": 1,
+          "avg_sentence_length": 16,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_776": {
+          "sentence_count": 1,
+          "avg_sentence_length": 10,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_777": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_778": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_779": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_780": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_781": {
+          "sentence_count": 1,
+          "avg_sentence_length": 4,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_782": {
+          "sentence_count": 1,
+          "avg_sentence_length": 49,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_783": {
+          "sentence_count": 1,
+          "avg_sentence_length": 1062,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_784": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_785": {
+          "sentence_count": 1,
+          "avg_sentence_length": 7,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_786": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_787": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_788": {
+          "sentence_count": 1,
+          "avg_sentence_length": 37,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_789": {
+          "sentence_count": 1,
+          "avg_sentence_length": 31,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_790": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_791": {
+          "sentence_count": 1,
+          "avg_sentence_length": 43,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_792": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_793": {
+          "sentence_count": 1,
+          "avg_sentence_length": 17,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_794": {
+          "sentence_count": 1,
+          "avg_sentence_length": 6,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_795": {
+          "sentence_count": 1,
+          "avg_sentence_length": 5,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_796": {
+          "sentence_count": 1,
+          "avg_sentence_length": 19,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_797": {
+          "sentence_count": 1,
+          "avg_sentence_length": 22,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_798": {
+          "sentence_count": 1,
+          "avg_sentence_length": 9,
+          "long_sentences": 0,
+          "short_sentences": 1
+        },
+        "text_799": {
+          "sentence_count": 1,
+          "avg_sentence_length": 54,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_800": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_801": {
+          "sentence_count": 1,
+          "avg_sentence_length": 25,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_802": {
+          "sentence_count": 1,
+          "avg_sentence_length": 202,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_803": {
+          "sentence_count": 1,
+          "avg_sentence_length": 137,
+          "long_sentences": 1,
+          "short_sentences": 0
+        },
+        "text_804": {
+          "sentence_count": 1,
+          "avg_sentence_length": 26,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_805": {
+          "sentence_count": 1,
+          "avg_sentence_length": 23,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_806": {
+          "sentence_count": 1,
+          "avg_sentence_length": 13,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_807": {
+          "sentence_count": 1,
+          "avg_sentence_length": 21,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_808": {
+          "sentence_count": 1,
+          "avg_sentence_length": 12,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_809": {
+          "sentence_count": 1,
+          "avg_sentence_length": 24,
+          "long_sentences": 0,
+          "short_sentences": 0
+        },
+        "text_810": {
+          "sentence_count": 1,
+          "avg_sentence_length": 20,
+          "long_sentences": 0,
+          "short_sentences": 0
+        }
+      },
+      "style_consistency": {
+        "is_consistent": true,
+        "dominant_style": "polite",
+        "style_distribution": {
+          "formal": 1,
+          "polite": 31,
+          "casual": 0
+        },
+        "consistency_ratio": 0.96875
+      }
+    },
+    "terminology": {
+      "pmi_terms_usage": {
+        "プロジェクト": {
+          "count": 44,
+          "inconsistencies": 0
+        },
+        "プロセス": {
+          "count": 63,
+          "inconsistencies": 0
+        },
+        "フェーズ": {
+          "count": 2,
+          "inconsistencies": 0
+        },
+        "マイルストーン": {
+          "count": 1,
+          "inconsistencies": 0
+        },
+        "ステークホルダー": {
+          "count": 9,
+          "inconsistencies": 0
+        },
+        "デリバラブル": {
+          "count": 0,
+          "inconsistencies": 0
+        },
+        "スコープ": {
+          "count": 11,
+          "inconsistencies": 0
+        },
+        "リスク": {
+          "count": 5,
+          "inconsistencies": 0
+        },
+        "リソース": {
+          "count": 1,
+          "inconsistencies": 0
+        },
+        "クライテリア": {
+          "count": 0,
+          "inconsistencies": 0
+        }
+      },
+      "terminology_variations": [
+        {
+          "base_term": "プロジェクト",
+          "variations": [
+            "プロジェクト",
+            "プロジェクト・"
+          ],
+          "recommendation": "統一用語として「プロジェクト」の使用を推奨"
+        },
+        {
+          "base_term": "プロジェクトマネジャ",
+          "variations": [
+            "プロジェクト・マネジャー",
+            "プロジェクトマネージャー"
+          ],
+          "recommendation": "統一用語として「プロジェクト・マネジャー」の使用を推奨"
+        },
+        {
+          "base_term": "プロセス",
+          "variations": [
+            "プロセス",
+            "・プロセス"
+          ],
+          "recommendation": "統一用語として「プロセス」の使用を推奨"
+        },
+        {
+          "base_term": "マネジメント",
+          "variations": [
+            "・マネジメント",
+            "マネジメント"
+          ],
+          "recommendation": "統一用語として「・マネジメント」の使用を推奨"
+        },
+        {
+          "base_term": "コントロル",
+          "variations": [
+            "・コントロール",
+            "コントロール"
+          ],
+          "recommendation": "統一用語として「・コントロール」の使用を推奨"
+        },
+        {
+          "base_term": "パフォマンスドメイン",
+          "variations": [
+            "パフォーマンス・ドメイン",
+            "パフォーマンスドメイン"
+          ],
+          "recommendation": "統一用語として「パフォーマンス・ドメイン」の使用を推奨"
+        },
+        {
+          "base_term": "カテゴリ",
+          "variations": [
+            "カテゴリー",
+            "カテゴリ"
+          ],
+          "recommendation": "統一用語として「カテゴリー」の使用を推奨"
+        }
+      ],
+      "inconsistent_usage": [],
+      "missing_terms": []
+    },
+    "readability": {
+      "character_composition": {
+        "hiragana": 1658,
+        "katakana": 4371,
+        "kanji": 2807,
+        "latin": 10553,
+        "numbers": 343,
+        "symbols": 4646,
+        "total": 24378
+      },
+      "sentence_variety": {
+        "unique_structures": 2,
+        "total_sentences": 856,
+        "variety_score": 0.002336448598130841
+      },
+      "educational_elements": {
+        "explanation_ratio": 0.002466091245376079,
+        "example_ratio": 0,
+        "transition_ratio": 0.0012330456226880395,
+        "question_ratio": 0.036991368680641186
+      },
+      "readability_issues": [
+        "文の構造に多様性が不足しています"
+      ]
+    },
+    "cultural": {
+      "politeness_level": {
+        "distribution": {
+          "very_formal": 0,
+          "formal": 31,
+          "neutral": 1,
+          "casual": 0
+        },
+        "is_appropriate": false,
+        "appropriateness_ratio": 0.03945745992601726,
+        "recommended_level": "formal_or_neutral"
+      },
+      "business_appropriateness": {
+        "business_term_frequency": 0.16399506781750925,
+        "is_business_appropriate": false,
+        "business_context_score": 0.16399506781750925
+      },
+      "educational_tone": {
+        "tone_distribution": {
+          "explanatory": 0,
+          "encouraging": 0,
+          "instructional": 0,
+          "informative": 47
+        },
+        "educational_tone_score": 0.05795314426633785,
+        "is_educational_appropriate": true
+      },
+      "cultural_sensitivity": {
+        "sensitivity_indicators": {
+          "inclusive_language": 1,
+          "gender_neutral": 0,
+          "appropriate_examples": 0,
+          "cultural_awareness": 0
+        },
+        "cultural_sensitivity_score": 0.0012330456226880395,
+        "is_culturally_appropriate": true
+      }
+    }
+  },
+  "issues": {
+    "grammar": [],
+    "terminology": []
+  },
+  "suggestions": {
+    "readability": [
+      {
+        "suggestion": "文の構造に多様性が不足しています",
+        "timestamp": "2025-08-12T05:38:58.289Z"
+      }
+    ],
+    "cultural": []
+  },
+  "improvement_plan": [
+    {
+      "priority": "HIGH",
+      "category": "文法改善",
+      "action": "文法・表現の修正と統一",
+      "details": []
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "読みやすさ向上",
+      "action": "文章構造の改善と読みやすさ向上",
+      "details": [
+        {
+          "suggestion": "文の構造に多様性が不足しています",
+          "timestamp": "2025-08-12T05:38:58.289Z"
+        }
+      ]
+    }
+  ]
+}

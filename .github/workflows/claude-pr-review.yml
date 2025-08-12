@@ -2,7 +2,8 @@ name: Claude PR Review (Legacy - Disabled)
 
 # DISABLED: Use claude-pr-review-enhanced.yml instead
 # Issues: API timeouts, poor error handling, high failure rate
-on: []
+on:
+  workflow_dispatch:
 # Original trigger was:
 #  pull_request:
 #    types: [opened, synchronize]

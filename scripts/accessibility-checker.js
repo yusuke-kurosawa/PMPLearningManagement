@@ -289,13 +289,13 @@ class AccessibilityChecker {
       // 見出しの階層
       'heading-hierarchy': {
         selector: /<h[1-6][^>]*>/g,
-        check: (matches, context) => {
-          const headings = matches.map(match => {
-            const level = parseInt(match.match(/<h(\d)/i)?.[1] || '0');
-            return level;
-          }).sort((a, b) => a - b);
-          
-          return headings.length === 0 || headings[0] === 1;
+        check: (match, context) => {
+          // 個別のマッチに対してチェック
+          const level = parseInt(match.match(/<h(\d)/i)?.[1] || '0');
+          // h1から始まるか、h1が存在しない場合は警告
+          const allHeadings = Array.from(context.matchAll(/<h[1-6][^>]*>/g));
+          const levels = allHeadings.map(h => parseInt(h[0].match(/<h(\d)/i)?.[1] || '0')).sort((a, b) => a - b);
+          return levels.length === 0 || levels[0] === 1;
         },
         severity: 'warning',
         wcag: '1.3.1',
