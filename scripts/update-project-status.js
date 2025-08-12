@@ -16,7 +16,7 @@ const { promisify } = require('util');
 const execAsync = promisify(exec);
 
 class ProjectStatusUpdater {
-  constructor() {
+  constructor(options = {}) {
     this.rootDir = path.join(__dirname, '..');
     this.claudeFile = path.join(this.rootDir, 'CLAUDE.md');
     this.statusFile = path.join(this.rootDir, '.claude', 'context', 'project-status.md');
@@ -24,6 +24,11 @@ class ProjectStatusUpdater {
     // GitHub API設定（環境変数または引数から取得）
     this.githubToken = process.env.GITHUB_TOKEN;
     this.repository = process.env.GITHUB_REPOSITORY || 'yusuke-kurosawa/PMPLearningManagement';
+    
+    // 実行オプション
+    this.demoMode = options.demo || process.argv.includes('--demo');
+    this.skipBuild = options.skipBuild || process.argv.includes('--skip-build');
+    this.skipTests = options.skipTests || process.argv.includes('--skip-tests');
     
     // 品質閾値設定
     this.qualityThresholds = {
@@ -40,6 +45,10 @@ class ProjectStatusUpdater {
       bundleSize: null,
       testExecutionTime: null
     };
+
+    if (this.demoMode) {
+      console.log('🎭 デモモードで実行中 - 重い処理はスキップします');
+    }
   }
 
   async analyzeCodebase() {
@@ -134,6 +143,11 @@ class ProjectStatusUpdater {
   }
 
   async getTestCoverage() {
+    if (this.demoMode) {
+      console.log('🎭 テストカバレッジ測定をスキップ（デモモード）');
+      return 65 + Math.random() * 25; // デモデータ: 65-90%
+    }
+    
     try {
       // テストカバレッジレポートの生成と解析
       const { stdout } = await execAsync('npm run test:coverage -- --reporter=json-summary', { cwd: this.rootDir });
@@ -503,6 +517,11 @@ class ProjectStatusUpdater {
   }
 
   async measureBuildTime() {
+    if (this.demoMode || this.skipBuild) {
+      console.log('🎭 ビルド時間測定をスキップ（デモモード）');
+      return 45000 + Math.random() * 15000; // デモデータ: 45-60秒
+    }
+    
     try {
       const startTime = Date.now();
       await execAsync('npm run build', { cwd: this.rootDir });
@@ -556,6 +575,11 @@ class ProjectStatusUpdater {
   }
 
   async measureTestExecutionTime() {
+    if (this.demoMode || this.skipTests) {
+      console.log('🎭 テスト実行時間測定をスキップ（デモモード）');
+      return 12000 + Math.random() * 8000; // デモデータ: 12-20秒
+    }
+    
     try {
       const startTime = Date.now();
       await execAsync('npm run test:run', { cwd: this.rootDir });

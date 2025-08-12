@@ -1,94 +1,107 @@
-# Auto-labeling configuration for PRs based on files changed
+# 🎯 PMP学習管理システム - 楽しい自動ラベル適用設定
+# PRの変更ファイルに基づいて楽しいラベルを自動適用
 
-# Documentation
-"📝 documentation":
+# ==========================================
+# 📄 ドキュメント関連
+# ==========================================
+"📄 ドキュメント":
   - "**/*.md"
   - "docs/**/*"
   - "README*"
+  - ".claude/**/*"
 
-# Frontend changes
-"🎨 frontend":
+# ==========================================
+# 🎨 UI・UX関連
+# ==========================================
+"🎨 UI・UX":
   - "src/components/**/*"
   - "src/pages/**/*"
   - "**/*.jsx"
   - "**/*.tsx"
   - "**/*.css"
   - "**/*.scss"
+  - "**/tailwind*"
+  - "**/postcss*"
 
-# Backend/API changes
-"⚙️ backend":
-  - "src/server/**/*"
-  - "src/api/**/*"
-  - "server/**/*"
-  - "api/**/*"
+# ==========================================
+# 📊 視覚化機能関連
+# ==========================================
+"📊 視覚化":
+  - "src/components/visualizations/**/*"
+  - "src/components/**/Enhanced*"
+  - "src/components/**/Sankey*"
+  - "src/components/**/Network*"
+  - "src/components/**/Heatmap*"
+  - "src/components/**/Graph*"
 
-# Database changes
-"🗃️ database":
-  - "prisma/**/*"
-  - "migrations/**/*"
-  - "**/*.sql"
+# ==========================================
+# 🎓 学習機能関連
+# ==========================================
+"🎓 学習機能":
+  - "src/components/learning/**/*"
+  - "src/components/**/FlashCard*"
+  - "src/components/**/MockExam*"
+  - "src/components/**/Progress*"
+  - "src/components/**/Glossary*"
 
-# Configuration changes
-"🔧 config":
+# ==========================================
+# 📱 モバイル関連
+# ==========================================
+"📱 モバイル":
+  - "src/components/mobile/**/*"
+  - "src/components/**/Mobile*"
+  - "src/lib/pwa/**/*"
+  - "**/service-worker*"
+  - "public/manifest.json"
+
+# ==========================================
+# ⚡ パフォーマンス関連
+# ==========================================
+"⚡ パフォーマンス":
+  - "**/*performance*"
+  - ".bundlesizerc*"
+  - "*lighthouse*"
+  - "src/lib/cache/**/*"
+  - "src/utils/performance*"
+
+# ==========================================
+# 🔐 セキュリティ関連
+# ==========================================
+"🔐 セキュリティ":
+  - ".github/workflows/security*.yml"
+  - "src/lib/security/**/*"
+  - "src/server/auth/**/*"
+  - "**/security/**/*"
+
+# ==========================================
+# 🌍 アクセシビリティ関連
+# ==========================================
+"🌍 アクセシビリティ":
+  - "src/test/utils/accessibility*"
+  - "**/*a11y*"
+  - "**/accessibility*"
+
+# ==========================================
+# 📚 学習コンテンツ関連
+# ==========================================
+"📚 学習コンテンツ":
+  - "src/data/**/*"
+  - "data/**/*"
+  - "**/*glossary*"
+  - "**/*processData*"
+  - "**/*pmbok*"
+  - "**/mock-exam*"
+
+# ==========================================
+# 🚀 スピードアップ（設定・最適化）
+# ==========================================
+"🚀 スピードアップ":
   - "*.config.*"
   - ".*rc*"
   - ".env*"
   - "package.json"
   - "package-lock.json"
   - "tsconfig.json"
-
-# CI/CD changes
-"🚀 ci/cd":
-  - ".github/**/*"
-  - "*.yml"
-  - "*.yaml"
-  - "Dockerfile*"
-  - "docker-compose*"
-
-# Testing
-"🧪 testing":
-  - "**/*.test.*"
-  - "**/*.spec.*"
-  - "e2e/**/*"
-  - "tests/**/*"
-  - "__tests__/**/*"
-
-# Dependencies
-"📦 dependencies":
-  - "package.json"
-  - "package-lock.json"
-  - "yarn.lock"
-
-# Security
-"🔒 security":
-  - ".github/workflows/security*.yml"
-  - "**/security/**/*"
-
-# Performance
-"⚡ performance":
-  - "**/*performance*"
-  - ".bundlesizerc*"
-  - "*lighthouse*"
-
-# Visualization components (specific to this project)
-"📊 visualization":
-  - "src/components/visualizations/**/*"
-  - "src/components/**/Enhanced*"
-  - "src/components/**/Sankey*"
-  - "src/components/**/Network*"
-  - "src/components/**/Heatmap*"
-
-# Learning/Education features
-"🎓 learning":
-  - "src/components/learning/**/*"
-  - "src/components/**/FlashCard*"
-  - "src/components/**/MockExam*"
-  - "src/components/**/Progress*"
-
-# Data and content
-"📋 data":
-  - "src/data/**/*"
-  - "data/**/*"
-  - "**/*.json"
-  - "**/processData*"
-  - "**/glossary*"
+  - "vite.config.*"
+  - "vitest.config.*"
+  - "playwright.config.*"

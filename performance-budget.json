@@ -1,0 +1,337 @@
+{
+  "version": "1.0.0",
+  "description": "PMP Learning Management PWA Performance Budget",
+  "lastUpdated": "2025-08-10T00:00:00.000Z",
+  "budgets": {
+    "lighthouse": {
+      "performance": {
+        "min": 90,
+        "warn": 95,
+        "description": "Lighthouse Performance Score"
+      },
+      "accessibility": {
+        "min": 95,
+        "warn": 98,
+        "description": "Lighthouse Accessibility Score"
+      },
+      "bestPractices": {
+        "min": 90,
+        "warn": 95,
+        "description": "Lighthouse Best Practices Score"
+      },
+      "seo": {
+        "min": 90,
+        "warn": 95,
+        "description": "Lighthouse SEO Score"
+      },
+      "pwa": {
+        "min": 90,
+        "warn": 95,
+        "description": "Lighthouse PWA Score"
+      }
+    },
+    "coreWebVitals": {
+      "lcp": {
+        "max": 2500,
+        "warn": 2000,
+        "unit": "ms",
+        "description": "Largest Contentful Paint - Time when the largest content element is rendered"
+      },
+      "fid": {
+        "max": 100,
+        "warn": 50,
+        "unit": "ms",
+        "description": "First Input Delay - Time between first user input and browser response"
+      },
+      "cls": {
+        "max": 0.1,
+        "warn": 0.05,
+        "unit": "score",
+        "description": "Cumulative Layout Shift - Visual stability metric"
+      },
+      "inp": {
+        "max": 200,
+        "warn": 100,
+        "unit": "ms",
+        "description": "Interaction to Next Paint - Responsiveness metric"
+      },
+      "ttfb": {
+        "max": 800,
+        "warn": 400,
+        "unit": "ms",
+        "description": "Time to First Byte - Server response time"
+      }
+    },
+    "performance": {
+      "fcp": {
+        "max": 1800,
+        "warn": 1500,
+        "unit": "ms",
+        "description": "First Contentful Paint"
+      },
+      "speedIndex": {
+        "max": 3000,
+        "warn": 2500,
+        "unit": "ms",
+        "description": "Speed Index - How quickly content is visually displayed"
+      },
+      "tti": {
+        "max": 5000,
+        "warn": 4000,
+        "unit": "ms",
+        "description": "Time to Interactive"
+      },
+      "tbt": {
+        "max": 300,
+        "warn": 200,
+        "unit": "ms",
+        "description": "Total Blocking Time"
+      },
+      "domContentLoaded": {
+        "max": 3000,
+        "warn": 2000,
+        "unit": "ms",
+        "description": "DOM Content Loaded event timing"
+      },
+      "loadComplete": {
+        "max": 5000,
+        "warn": 4000,
+        "unit": "ms",
+        "description": "Page load complete timing"
+      }
+    },
+    "resources": {
+      "totalSize": {
+        "max": 2097152,
+        "warn": 1572864,
+        "unit": "bytes",
+        "description": "Total bundle size (2MB max, 1.5MB warn)"
+      },
+      "jsSize": {
+        "max": 1048576,
+        "warn": 786432,
+        "unit": "bytes",
+        "description": "JavaScript bundle size (1MB max, 768KB warn)"
+      },
+      "cssSize": {
+        "max": 262144,
+        "warn": 196608,
+        "unit": "bytes",
+        "description": "CSS bundle size (256KB max, 192KB warn)"
+      },
+      "imageSize": {
+        "max": 524288,
+        "warn": 393216,
+        "unit": "bytes",
+        "description": "Total image size (512KB max, 384KB warn)"
+      },
+      "fontSize": {
+        "max": 131072,
+        "warn": 98304,
+        "unit": "bytes",
+        "description": "Font files size (128KB max, 96KB warn)"
+      },
+      "chunkSize": {
+        "max": 524288,
+        "warn": 393216,
+        "unit": "bytes",
+        "description": "Individual chunk size (512KB max, 384KB warn)"
+      }
+    },
+    "network": {
+      "requests": {
+        "max": 50,
+        "warn": 30,
+        "unit": "count",
+        "description": "Total number of network requests"
+      },
+      "criticalRequests": {
+        "max": 10,
+        "warn": 6,
+        "unit": "count",
+        "description": "Number of critical path requests"
+      },
+      "unusedJs": {
+        "max": 204800,
+        "warn": 102400,
+        "unit": "bytes",
+        "description": "Unused JavaScript (200KB max, 100KB warn)"
+      },
+      "unusedCss": {
+        "max": 51200,
+        "warn": 25600,
+        "unit": "bytes",
+        "description": "Unused CSS (50KB max, 25KB warn)"
+      },
+      "renderBlockingResources": {
+        "max": 5,
+        "warn": 3,
+        "unit": "count",
+        "description": "Number of render-blocking resources"
+      }
+    },
+    "mobile": {
+      "performance": {
+        "min": 85,
+        "warn": 90,
+        "description": "Mobile Lighthouse Performance Score"
+      },
+      "lcp": {
+        "max": 4000,
+        "warn": 3000,
+        "unit": "ms",
+        "description": "Mobile LCP (more lenient)"
+      },
+      "fcp": {
+        "max": 3000,
+        "warn": 2500,
+        "unit": "ms",
+        "description": "Mobile FCP"
+      },
+      "tti": {
+        "max": 8000,
+        "warn": 6000,
+        "unit": "ms",
+        "description": "Mobile TTI"
+      },
+      "totalSize": {
+        "max": 1572864,
+        "warn": 1048576,
+        "unit": "bytes",
+        "description": "Mobile bundle size (1.5MB max, 1MB warn)"
+      }
+    }
+  },
+  "routeSpecific": {
+    "/": {
+      "lcp": { "max": 2000, "warn": 1500 },
+      "fcp": { "max": 1500, "warn": 1200 },
+      "description": "Homepage - Critical landing page"
+    },
+    "/matrix": {
+      "lcp": { "max": 3000, "warn": 2500 },
+      "jsSize": { "max": 1572864, "warn": 1048576 },
+      "description": "PMBOK Matrix - Data-heavy visualization"
+    },
+    "/flashcards": {
+      "fcp": { "max": 2000, "warn": 1500 },
+      "tti": { "max": 4000, "warn": 3000 },
+      "description": "Flashcards - Interactive learning"
+    },
+    "/mock-exam": {
+      "lcp": { "max": 2500, "warn": 2000 },
+      "jsSize": { "max": 786432, "warn": 524288 },
+      "description": "Mock Exam - Performance critical"
+    },
+    "/visualizations": {
+      "lcp": { "max": 4000, "warn": 3000 },
+      "jsSize": { "max": 2097152, "warn": 1572864 },
+      "description": "Visualizations - Heavy D3.js usage"
+    }
+  },
+  "thirdPartyBudgets": {
+    "analytics": {
+      "maxSize": 51200,
+      "maxRequests": 3,
+      "description": "Analytics scripts (Google Analytics, etc.)"
+    },
+    "fonts": {
+      "maxSize": 131072,
+      "maxRequests": 4,
+      "description": "Web fonts (Google Fonts, custom fonts)"
+    },
+    "cdn": {
+      "maxSize": 524288,
+      "maxRequests": 10,
+      "description": "CDN resources (libraries, assets)"
+    }
+  },
+  "alerts": {
+    "slack": {
+      "enabled": false,
+      "webhook": "",
+      "channel": "#pwa-performance",
+      "notifyOn": ["violation", "warning"]
+    },
+    "email": {
+      "enabled": false,
+      "recipients": [],
+      "notifyOn": ["violation"]
+    },
+    "github": {
+      "enabled": true,
+      "createIssue": true,
+      "notifyOn": ["violation"]
+    }
+  },
+  "enforcement": {
+    "mode": "warn",
+    "failBuildOn": ["violation"],
+    "allowedViolations": 0,
+    "gracePeriod": {
+      "enabled": true,
+      "days": 7,
+      "description": "Allow violations for 7 days for new features"
+    }
+  },
+  "monitoring": {
+    "frequency": "daily",
+    "retentionDays": 90,
+    "reportingEnabled": true,
+    "trendAnalysis": true
+  },
+  "environments": {
+    "production": {
+      "strictMode": true,
+      "enforcementMode": "error"
+    },
+    "staging": {
+      "strictMode": false,
+      "enforcementMode": "warn"
+    },
+    "development": {
+      "strictMode": false,
+      "enforcementMode": "info"
+    }
+  },
+  "customMetrics": {
+    "pmpSpecific": {
+      "flashcardLoadTime": {
+        "max": 1000,
+        "warn": 500,
+        "unit": "ms",
+        "description": "Time to load flashcard data"
+      },
+      "matrixRenderTime": {
+        "max": 2000,
+        "warn": 1500,
+        "unit": "ms",
+        "description": "Time to render PMBOK matrix"
+      },
+      "examStartTime": {
+        "max": 3000,
+        "warn": 2000,
+        "unit": "ms",
+        "description": "Time from exam start to first question"
+      },
+      "visualizationLoadTime": {
+        "max": 5000,
+        "warn": 3000,
+        "unit": "ms",
+        "description": "Time to load D3.js visualizations"
+      }
+    }
+  },
+  "recommendations": [
+    "Implement route-based code splitting to reduce initial bundle size",
+    "Use WebP/AVIF images to reduce image payload",
+    "Enable text compression (gzip/brotli) for all text resources",
+    "Implement resource hints (preload, prefetch) for critical resources",
+    "Use service worker for aggressive caching of static resources",
+    "Optimize font loading with font-display: swap",
+    "Minimize unused JavaScript and CSS",
+    "Implement lazy loading for non-critical components",
+    "Use CDN for static assets to improve TTFB",
+    "Monitor and optimize third-party script impact"
+  ]
+}

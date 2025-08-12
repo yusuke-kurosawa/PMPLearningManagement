@@ -1,0 +1,502 @@
+[
+  {
+    "color": "d73a4a",
+    "description": "バグ・不具合の報告",
+    "name": "type:bug"
+  },
+  {
+    "color": "1d76db",
+    "description": "既存機能の改善",
+    "name": "type:enhancement"
+  },
+  {
+    "color": "0e8a16",
+    "description": "新機能の要求",
+    "name": "type:feature"
+  },
+  {
+    "color": "0075ca",
+    "description": "ドキュメントの更新",
+    "name": "type:docs"
+  },
+  {
+    "color": "5319e7",
+    "description": "リファクタリング",
+    "name": "type:refactor"
+  },
+  {
+    "color": "fef2c0",
+    "description": "メンテナンス作業",
+    "name": "type:chore"
+  },
+  {
+    "color": "f9d0c4",
+    "description": "テストに関する作業",
+    "name": "type:test"
+  },
+  {
+    "color": "b60205",
+    "description": "本番停止・重大な機能障害",
+    "name": "priority:critical"
+  },
+  {
+    "color": "d93f0b",
+    "description": "ユーザー体験に重大な影響",
+    "name": "priority:high"
+  },
+  {
+    "color": "bfd4f2",
+    "description": "UI/UXに関する作業",
+    "name": "area:ui"
+  },
+  {
+    "color": "0e8a16",
+    "description": "時間があるときに対応",
+    "name": "priority:low"
+  },
+  {
+    "color": "fbca04",
+    "description": "通常の優先度",
+    "name": "priority:medium"
+  },
+  {
+    "color": "d4c5f9",
+    "description": "バックエンド（API/Database）",
+    "name": "area:backend"
+  },
+  {
+    "color": "61dafb",
+    "description": "フロントエンド（React/TypeScript）",
+    "name": "area:frontend"
+  },
+  {
+    "color": "c2e0c6",
+    "description": "学習機能・コンテンツ",
+    "name": "area:learning"
+  },
+  {
+    "color": "f9d0c4",
+    "description": "モバイル対応・PWA",
+    "name": "area:mobile"
+  },
+  {
+    "color": "28a745",
+    "description": "CI/CD・インフラ・デプロイ",
+    "name": "area:devops"
+  },
+  {
+    "color": "ff6b6b",
+    "description": "視覚化・グラフ機能",
+    "name": "area:visualization"
+  },
+  {
+    "color": "ff7518",
+    "description": "パフォーマンス最適化",
+    "name": "area:performance"
+  },
+  {
+    "color": "6f42c1",
+    "description": "セキュリティ・認証",
+    "name": "area:security"
+  },
+  {
+    "color": "d4c5f9",
+    "description": "トリアージ・調査が必要",
+    "name": "status:triage"
+  },
+  {
+    "color": "0052cc",
+    "description": "作業中",
+    "name": "status:in-progress"
+  },
+  {
+    "color": "0e8a16",
+    "description": "作業開始可能",
+    "name": "status:ready"
+  },
+  {
+    "color": "fef2c0",
+    "description": "ブロック・保留中",
+    "name": "status:blocked"
+  },
+  {
+    "color": "fbca04",
+    "description": "レビュー待ち",
+    "name": "status:review"
+  },
+  {
+    "color": "9cb9d4",
+    "description": "中（1-2日程度）",
+    "name": "size:m"
+  },
+  {
+    "color": "bfd4f2",
+    "description": "小（半日程度）",
+    "name": "size:s"
+  },
+  {
+    "color": "c5def5",
+    "description": "非常に小さい（1-2時間）",
+    "name": "size:xs"
+  },
+  {
+    "color": "7b9fc1",
+    "description": "大（1週間程度）",
+    "name": "size:l"
+  },
+  {
+    "color": "5a84ae",
+    "description": "非常に大きい（複数週間）",
+    "name": "size:xl"
+  },
+  {
+    "color": "5319e7",
+    "description": "複数のissueを含む大きな機能",
+    "name": "epic"
+  },
+  {
+    "color": "7057ff",
+    "description": "新規貢献者に適した課題",
+    "name": "good-first-issue"
+  },
+  {
+    "color": "008672",
+    "description": "外部からの支援が必要",
+    "name": "help-wanted"
+  },
+  {
+    "color": "d876e3",
+    "description": "質問・ヘルプ要求",
+    "name": "question"
+  },
+  {
+    "color": "cfd3d7",
+    "description": "重複のissue",
+    "name": "duplicate"
+  },
+  {
+    "color": "ffffff",
+    "description": "対応しない",
+    "name": "wontfix"
+  },
+  {
+    "color": "d93f0b",
+    "description": "破壊的変更",
+    "name": "breaking-change"
+  },
+  {
+    "color": "d73a4a",
+    "description": "バグを退治して、学習体験をより良くしよう！勇敢なハンターを募集中",
+    "name": "🐛 バグハンター"
+  },
+  {
+    "color": "5F27CD",
+    "description": "魔法のような新機能を創造しよう！アイデアと実装力でユーザーを驚かせよう",
+    "name": "✨ 新機能の魔法使い"
+  },
+  {
+    "color": "FF9FF3",
+    "description": "アプリを光速に！最適化とパフォーマンス向上で最高の学習体験を提供しよう",
+    "name": "🚀 パフォーマンス・スピードスター"
+  },
+  {
+    "color": "00D2D3",
+    "description": "美しいUI/UXで学習を楽しく！デザインと使いやすさで感動を生み出そう",
+    "name": "🎨 デザインの芸術家"
+  },
+  {
+    "color": "FFB8B8",
+    "description": "コードを美しく磨き上げる職人技！保守性と可読性を向上させよう",
+    "name": "🔧 リファクタリングの匠"
+  },
+  {
+    "color": "7057ff",
+    "description": "学習コンテンツの充実！PMBOK情報や教材の改善提案",
+    "name": "📚 知識の伝道師"
+  },
+  {
+    "color": "6C5CE7",
+    "description": "学習者のデータと安全を守る！セキュリティ強化で信頼されるプラットフォームに",
+    "name": "🔐 セキュリティの守護者"
+  },
+  {
+    "color": "00CEC9",
+    "description": "品質を保証する実験を実施！テストで安心・安全な学習環境を構築しよう",
+    "name": "🧪 テストの科学者"
+  },
+  {
+    "color": "4834DF",
+    "description": "基礎を身につけた君に！少しチャレンジングだけど楽しめる冒険クエスト",
+    "name": "⚡ レベル2：駆け出し冒険者"
+  },
+  {
+    "color": "bfdbfe",
+    "description": "プログラミング初心者も歓迎！優しく学べる最初の一歩",
+    "name": "🌟 レベル1：初心者への贈り物"
+  },
+  {
+    "color": "FFB8B8",
+    "description": "最高峰の技術チャレンジ！アーキテクチャや設計を左右する重要な判断が必要",
+    "name": "👑 レベル4：マスター級の伝説"
+  },
+  {
+    "color": "3b82f6",
+    "description": "スキルを試す本格チャレンジ！経験豊富な開発者向け",
+    "name": "🔥 レベル3：熟練者の挑戦"
+  },
+  {
+    "color": "FF6B6B",
+    "description": "全体を見渡す統合力！フロントエンドとバックエンドをつなぐ重要な役割",
+    "name": "🎯 プロジェクト統合管理"
+  },
+  {
+    "color": "FDA7DF",
+    "description": "複数週間の壮大な冒険！チーム一丸となって大きな機能を実現する大型プロジェクト",
+    "name": "🏆 レベル5：エピック・クエスト"
+  },
+  {
+    "color": "45B7D1",
+    "description": "時間を制する者！効率的な開発スケジュールとマイルストーン管理",
+    "name": "⏰ スケジュール管理マスター"
+  },
+  {
+    "color": "4ECDC4",
+    "description": "機能要件を明確に！何を作り、何を作らないかを決める重要な判断",
+    "name": "📋 スコープ管理の専門家"
+  },
+  {
+    "color": "FFEAA7",
+    "description": "最高の学習体験を！テスト、レビュー、品質向上で満足度アップ",
+    "name": "🏅 品質管理の職人"
+  },
+  {
+    "color": "96CEB4",
+    "description": "リソース最適化！パフォーマンスと開発効率のバランスを考えよう",
+    "name": "💰 コスト管理のエキスパート"
+  },
+  {
+    "color": "FDA7DF",
+    "description": "未来を予測！セキュリティ、エラーハンドリング、障害対応の重要な備え",
+    "name": "⚠️ リスク管理の預言者"
+  },
+  {
+    "color": "DDA0DD",
+    "description": "人的資源管理！コラボレーションとコミュニティ機能で絆を深めよう",
+    "name": "👥 チームワークの達人"
+  },
+  {
+    "color": "98D8C8",
+    "description": "情報共有とUI/UX！わかりやすく、使いやすく、伝わりやすく",
+    "name": "📡 コミュニケーションの橋渡し"
+  },
+  {
+    "color": "74B9FF",
+    "description": "関係者との関係構築！ユーザー体験とフィードバック収集の重要性",
+    "name": "🎭 ステークホルダー・エンゲージメント"
+  },
+  {
+    "color": "FF6348",
+    "description": "ユーザー体験に大きく影響！優先的に取り組んで早期解決を目指そう",
+    "name": "🔥 ホット・イシュー：今すぐアクション"
+  },
+  {
+    "color": "FF3838",
+    "description": "本番環境停止！すぐに対応が必要な重大インシデント。みんなで力を合わせよう",
+    "name": "🚨 コードレッド：緊急出動"
+  },
+  {
+    "color": "FFB8B8",
+    "description": "バランスの取れた重要度！計画的に取り組んで着実に前進しよう",
+    "name": "⭐ スタンダード・クエスト：順調に進行"
+  },
+  {
+    "color": "6BCF7F",
+    "description": "時間があるときにじっくりと！リラックスして取り組める改善課題",
+    "name": "🌱 スロー・ライフ：のんびり改善"
+  },
+  {
+    "color": "8b5cf6",
+    "description": "将来への投資！長期的な視点で考える革新的なアイデアや実験",
+    "name": "💡 アイデア・インキュベーター"
+  },
+  {
+    "color": "84cc16",
+    "description": "複数人でのコラボレーション歓迎！知識を共有し、一緒に成長",
+    "name": "🌟 みんなで挑戦：チーム・クエスト"
+  },
+  {
+    "color": "f97316",
+    "description": "経験豊富な開発者の知恵を借りたい！アドバイスとサポートを募集",
+    "name": "🎓 メンター募集：教えて先輩"
+  },
+  {
+    "color": "FF7675",
+    "description": "二人三脚でコーディング！リアルタイムコラボレーションで学び合おう",
+    "name": "🎯 ペアプログラミング"
+  },
+  {
+    "color": "A29BFE",
+    "description": "技術の相談や質問、アイデア交換！気軽にコミュニケーションを楽しもう",
+    "name": "💬 雑談・ディスカッション"
+  },
+  {
+    "color": "6C5CE7",
+    "description": "プログラミングデビューに最適！温かいコミュニティでスキルアップしよう",
+    "name": "🚀 新人さん大歓迎：はじめの一歩"
+  },
+  {
+    "color": "00CEC9",
+    "description": "UI/UXの改善提案歓迎！みんなでより良いデザインを考えよう",
+    "name": "🎨 デザインレビュー：美の探求"
+  },
+  {
+    "color": "0984E3",
+    "description": "学んだことを共有しよう！ブログ、ドキュメント、チュートリアル作成",
+    "name": "📚 ナレッジシェア：知識の宝庫"
+  },
+  {
+    "color": "00B894",
+    "description": "マイルストーン到達おめでとう！チーム一丸となって成し遂げた素晴らしい成果",
+    "name": "🎉 スプリント完走：目標達成"
+  },
+  {
+    "color": "6C5CE7",
+    "description": "新技術の調査・検証！未来の可能性を探る実験的な取り組み",
+    "name": "🔬 技術研究：イノベーション"
+  },
+  {
+    "color": "FDCB6E",
+    "description": "他の開発者の参考になる素晴らしい実装！コミュニティのお手本として",
+    "name": "🌟 ベストプラクティス：模範例"
+  },
+  {
+    "color": "74B9FF",
+    "description": "コード品質向上おめでとう！保守性と可読性が大幅に改善されました",
+    "name": "💎 リファクタリング完了：美しいコード"
+  },
+  {
+    "color": "00CEC9",
+    "description": "最適化成功！ユーザー体験が大幅に向上して学習効率がアップしました",
+    "name": "🚀 パフォーマンス向上：スピードアップ"
+  },
+  {
+    "color": "0984E3",
+    "description": "分かりやすい説明ありがとう！未来の開発者への贈り物となりました",
+    "name": "📖 ドキュメント充実：知識の整理"
+  },
+  {
+    "color": "ededed",
+    "description": "情報収集と分析の段階！問題の本質を探る探偵のような作業",
+    "name": "🔍 調査フェーズ：謎解き中"
+  },
+  {
+    "color": "c5def5",
+    "description": "コーディングに集中中！創造力を発揮してアイデアを形にしよう",
+    "name": "⚡ 開発中：クリエイティブタイム"
+  },
+  {
+    "color": "00B894",
+    "description": "要件整理完了！いつでも開発をスタートできる準備万端の状態",
+    "name": "✅ 準備完了：スタートライン"
+  },
+  {
+    "color": "FFB8B8",
+    "description": "他の優先課題対応中！一息ついてからまた頑張ろう",
+    "name": "⏸️ 一時停止：小休憩"
+  },
+  {
+    "color": "00CEC9",
+    "description": "動作確認とバグ探し！安心して使える機能にするための大切な工程",
+    "name": "🎯 テスト中：品質確認"
+  },
+  {
+    "color": "f9c513",
+    "description": "品質確認の段階！みんなでコードを見て、さらに良くしよう",
+    "name": "👀 レビュー待ち：最終チェック"
+  },
+  {
+    "color": "00B894",
+    "description": "コミュニティの成長に大きく貢献！他の人の学習を支援する素晴らしい活動",
+    "name": "🏅 コミュニティ・ヒーロー"
+  },
+  {
+    "color": "A29BFE",
+    "description": "外部要因で作業停止中！みんなで解決策を考えて道を切り開こう",
+    "name": "🚫 ブロック中：道の障害物"
+  },
+  {
+    "color": "FF3838",
+    "description": "システムの大幅改善！既存機能への影響があるため慎重な対応が必要",
+    "name": "⚠️ 破壊的変更：大きな進化"
+  },
+  {
+    "color": "6C5CE7",
+    "description": "フロントエンド・バックエンドを横断する大型機能！総合的なスキルが必要",
+    "name": "🎭 複数エリア対応：オールラウンダー"
+  },
+  {
+    "color": "B2BEC3",
+    "description": "素晴らしいアイデアだけど今はタイミングではない！将来実現するかも",
+    "name": "❌ 今回は見送り：将来への期待"
+  },
+  {
+    "color": "9ca3af",
+    "description": "似たような話題を発見！過去の議論を参考に効率的に解決しよう",
+    "name": "🔄 重複問題：すでに議論済み"
+  },
+  {
+    "color": "FF6B6B",
+    "description": "最小価値製品に必要な機能！ユーザーの学習体験に直結する重要な要素",
+    "name": "🎯 MVP必須：核心機能"
+  },
+  {
+    "color": "00CEC9",
+    "description": "長期的なビジョン！今すぐではないけれど、将来実現したい素敵な機能",
+    "name": "🚀 将来の夢：未来への投資"
+  },
+  {
+    "color": "FFA500",
+    "description": "外部リソース活用！API統合、ライブラリ選定、クラウドサービス活用",
+    "name": "🤝 調達管理の交渉人"
+  },
+  {
+    "color": "ededed",
+    "description": "",
+    "name": "needs-triage"
+  },
+  {
+    "color": "ededed",
+    "description": "",
+    "name": "claude-analyzed"
+  },
+  {
+    "color": "ededed",
+    "description": "",
+    "name": "priority:null"
+  },
+  {
+    "color": "a2eeef",
+    "description": "新機能のアイデアを魔法のように実現！クリエイティブな提案を歓迎",
+    "name": "✨ アイデアマジシャン"
+  },
+  {
+    "color": "0075ca",
+    "description": "既存機能の改善でパフォーマンスアップ！より速く、より使いやすく",
+    "name": "🚀 スピードスター"
+  },
+  {
+    "color": "d876e3",
+    "description": "質問・サポート対応！みんなで助け合って成長しよう",
+    "name": "❓ サポートヒーロー"
+  },
+  {
+    "color": "0e8a16",
+    "description": "わかりやすい説明文を作成！新しい学習者の道しるべ",
+    "name": "📄 ドキュメントの芸術家"
+  },
+  {
+    "color": "d93f0b",
+    "description": "ユーザー体験に大きく影響！優先的に取り組むべき課題",
+    "name": "🔥 優先度:高い"
+  }
+]

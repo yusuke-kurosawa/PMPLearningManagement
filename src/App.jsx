@@ -50,6 +50,9 @@ const MobileOptimizedApp = React.lazy(() => import('./components/mobile/MobileOp
 // Context Management Dashboard
 const _ContextManagerDashboard = React.lazy(() => import('./components/ContextManagerDashboard'))
 
+// PWA Optimization Dashboard
+const PWAOptimizationDashboard = React.lazy(() => import('./components/PWAOptimizationDashboard'))
+
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
 const NetworkLoading = () => <NetworkLoader />
@@ -235,6 +238,19 @@ function App() {
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <UserProfile />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path="/pwa-dashboard"
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <ProtectedRoute
+                                requireAuth={true}
+                                roles={[ROLES.ADMIN, ROLES.INSTRUCTOR]}
+                              >
+                                <PWAOptimizationDashboard />
+                              </ProtectedRoute>
                             </Suspense>
                           }
                         />
@@ -435,6 +451,19 @@ function App() {
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <UserProfile />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/pwa-dashboard"
+                        element={
+                          <Suspense fallback={<LoadingSpinner />}>
+                            <ProtectedRoute
+                              requireAuth={true}
+                              roles={[ROLES.ADMIN, ROLES.INSTRUCTOR]}
+                            >
+                              <PWAOptimizationDashboard />
+                            </ProtectedRoute>
                           </Suspense>
                         }
                       />

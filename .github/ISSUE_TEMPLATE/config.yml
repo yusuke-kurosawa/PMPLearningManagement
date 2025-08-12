@@ -1,0 +1,13 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 PMP学習コミュニティ・ディスカッション
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/discussions
+    about: 質問、学習のコツ、経験談を共有しましょう！気軽な雑談も大歓迎です。
+  
+  - name: 🚀 プロジェクトのロードマップ
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/projects
+    about: 開発予定の機能や進捗状況をチェック！次に何が来るか楽しみにしていてください。
+  
+  - name: 📖 使い方ガイド・ドキュメント
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/blob/main/README.md
+    about: アプリの使い方や学習のコツをまとめたガイドです。まずはここをチェック！

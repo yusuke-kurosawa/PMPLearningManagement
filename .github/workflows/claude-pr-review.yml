@@ -1,8 +1,11 @@
-name: Claude PR Review
+name: Claude PR Review (Legacy - Disabled)
 
-on:
-  pull_request:
-    types: [opened, synchronize]
+# DISABLED: Use claude-pr-review-enhanced.yml instead
+# Issues: API timeouts, poor error handling, high failure rate
+on: []
+# Original trigger was:
+#  pull_request:
+#    types: [opened, synchronize]
 
 permissions:
   pull-requests: write
