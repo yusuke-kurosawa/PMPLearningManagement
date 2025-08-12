@@ -187,7 +187,7 @@ const GlobalSearch = () => {
               {/* 検索入力 */}
               <div className="relative border-b dark:border-gray-700">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
-                <input
+                <input aria-label="Input field" id="input-1754995293950-189"
                   ref={searchInputRef}
                   type="text"
                   value={query}

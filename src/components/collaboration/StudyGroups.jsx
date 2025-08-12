@@ -419,7 +419,7 @@ const StudyGroups = () => {
               {selectedGroup.members.includes(currentUser) && (
                 <div className="mb-3">
                   <div className="flex gap-2">
-                    <input
+                    <input aria-label="Input field" id="input-1754995293941-421"
                       type="text"
                       value={newAnnouncement}
                       onChange={(e) => setNewAnnouncement(e.target.value)}
@@ -499,7 +499,7 @@ const StudyGroups = () => {
               <div className="space-y-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium">グループ名</label>
-                  <input
+                  <input aria-label="Input field" id="input-1754995293941-501"
                     type="text"
                     value={newGroup.name}
                     onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
