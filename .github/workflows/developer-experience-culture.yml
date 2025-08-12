@@ -12,13 +12,7 @@
 name: 🚀 Developer Experience & Culture Optimization
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 9 * * 1' # Weekly DX assessment every Monday at 9 AM
-    - cron: '0 17 * * 5' # Weekly culture survey every Friday at 5 PM
+  # 手動実行のみ（自動実行を無効化）
   workflow_dispatch:
     inputs:
       dx_assessment_type:

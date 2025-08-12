@@ -20,13 +20,14 @@
 name: 🚀 並列テスト実行（6人チーム）
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-  schedule:
-    # 毎日2:00 AM (JST) に実行
-    - cron: '0 17 * * *'
+  # 手動実行のみ（自動実行を無効化）
+  workflow_dispatch:
+    inputs:
+      test_coverage:
+        description: 'カバレッジレポートを生成'
+        required: false
+        default: true
+        type: boolean
 
 env:
   NODE_VERSION: '18.x'

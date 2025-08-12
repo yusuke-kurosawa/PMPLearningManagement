@@ -4,6 +4,7 @@
   "description": "PMBOK Learning Management System - Static Site with Modern Features",
   "homepage": "https://yusuke-kurosawa.github.io/PMPLearningManagement",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
