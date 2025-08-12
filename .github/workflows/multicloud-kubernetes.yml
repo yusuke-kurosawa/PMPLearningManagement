@@ -12,18 +12,7 @@
 name: ☁️ Multi-Cloud Kubernetes & GitOps
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'k8s/**'
-      - 'helm/**'
-      - 'argocd/**'
-      - '.github/workflows/multicloud-kubernetes.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'k8s/**'
-      - 'helm/**'
+  # 手動実行のみ（Kubernetesクラスタが設定されるまで無効化）
   workflow_dispatch:
     inputs:
       target_cloud:
