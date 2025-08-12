@@ -1,46 +1,57 @@
-# ====================================================================
-# テストスイート実行パイプライン
-# ====================================================================
-# 目的: 単体テスト、統合テスト、E2Eテストを実行し、
-#      コードカバレッジの測定と品質保証を行う
-# 
-# 実行タイミング:
-#   - main/developブランチへのプッシュ時
-#   - mainブランチへのプルリクエスト時
-#   - 手動実行（workflow_dispatch）
-#   - 毎日午前2時（定期実行による回帰テスト）
-#
-# 主な処理:
-#   1. 単体テストの実行とカバレッジ測定
-#   2. 統合テストの実行
-#   3. E2Eテストの実行（Playwright）
-#   4. テスト結果のレポート生成
-#   5. カバレッジレポートのアップロード（Codecov）
-# ====================================================================
+# ============================================================
+# Workflow: Integrated Test Suite
+# Purpose: 単体テスト、E2Eテスト、アクセシビリティテスト、パフォーマンステストの実行
+# Trigger: push、PR、手動実行、毎日午前2時
+# Dependencies: Node.js 18, Playwright, Lighthouse CI
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
 
-name: 🧪 統合テストスイート実行
+name: 🧪 統合テストスイート
 
+# ------------------------------------------------------------
+# Trigger Configuration
+# ------------------------------------------------------------
 on:
+  # ブランチへのプッシュ時
   push:
     branches: [ main, develop ]
+  # mainブランチへのPR時
   pull_request:
     branches: [ main ]
+  # 手動実行
   workflow_dispatch:
+  # 毎日午前2時UTC（回帰テスト）
   schedule:
-    # Run tests every day at 2 AM UTC
     - cron: '0 2 * * *'
 
+# ------------------------------------------------------------
+# Concurrency Control
+# ------------------------------------------------------------
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# ------------------------------------------------------------
+# Environment Variables
+# ------------------------------------------------------------
 env:
   NODE_VERSION: '18'
+  CACHE_VERSION: 'v2'
+  TEST_TIMEOUT: '300000'  # 5 minutes in milliseconds
 
+# ------------------------------------------------------------
+# Jobs Definition
+# ------------------------------------------------------------
 jobs:
+  # ============================================================
+  # Job: Unit Tests
+  # Purpose: 単体テストの実行とカバレッジ測定
+  # ============================================================
   unit-tests:
-    name: 🔬 単体テスト実行
+    name: 🔬 単体テスト
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
       - name: Checkout
@@ -79,10 +90,16 @@ jobs:
             coverage/
           retention-days: 7
 
+  # ============================================================
+  # Job: E2E Tests
+  # Purpose: ブラウザでのエンドツーエンドテスト
+  # ============================================================
   e2e-tests:
-    name: E2E Tests
+    name: 🌐 E2Eテスト
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
         browser: [chromium, firefox]
         
@@ -122,9 +139,14 @@ jobs:
             playwright-report/
           retention-days: 7
 
+  # ============================================================
+  # Job: Accessibility Tests
+  # Purpose: WCAG準拠のアクセシビリティテスト
+  # ============================================================
   accessibility-tests:
-    name: Accessibility Tests
+    name: ♿ アクセシビリティテスト
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
       - name: Checkout
@@ -167,9 +189,14 @@ jobs:
             playwright-report/
           retention-days: 7
 
+  # ============================================================
+  # Job: Performance Tests
+  # Purpose: パフォーマンスとバンドルサイズのテスト
+  # ============================================================
   performance-tests:
-    name: Performance Tests
+    name: ⚡ パフォーマンステスト
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
       - name: Checkout
@@ -207,9 +234,14 @@ jobs:
           sleep 5
           lhci autorun --config=.lighthouserc.json || echo "Lighthouse tests completed with warnings"
 
+  # ============================================================
+  # Job: Test Summary
+  # Purpose: すべてのテスト結果の集約とレポート
+  # ============================================================
   test-summary:
-    name: Test Summary
+    name: 📋 テストサマリー
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [unit-tests, e2e-tests, accessibility-tests, performance-tests]
     if: always()
     

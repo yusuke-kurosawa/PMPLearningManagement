@@ -1,0 +1,75 @@
+# ============================================================
+# Reusable Action: Cache Dependencies
+# Purpose: 依存関係のキャッシュ管理
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 'Cache Dependencies'
+description: 'プロジェクトの依存関係をキャッシュします'
+
+inputs:
+  cache-key-prefix:
+    description: 'キャッシュキーのプレフィックス'
+    required: false
+    default: 'deps'
+  paths:
+    description: 'キャッシュするパス（カンマ区切り）'
+    required: false
+    default: 'node_modules'
+
+outputs:
+  cache-hit:
+    description: 'キャッシュがヒットしたか'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ------------------------------------------------------------
+    # キャッシュキーの生成
+    # ------------------------------------------------------------
+    - name: Generate cache key
+      id: cache-key
+      shell: bash
+      run: |
+        # OS とNode.jsバージョンを含むキャッシュキーを生成
+        OS_NAME="${{ runner.os }}"
+        NODE_VERSION=$(node --version | sed 's/v//')
+        
+        # package-lock.jsonのハッシュを計算
+        if [ -f "package-lock.json" ]; then
+          LOCK_HASH=${{ hashFiles('package-lock.json') }}
+        else
+          LOCK_HASH=${{ hashFiles('package.json') }}
+        fi
+        
+        CACHE_KEY="${{ inputs.cache-key-prefix }}-${OS_NAME}-node${NODE_VERSION}-${LOCK_HASH}"
+        echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+        echo "Cache key: ${CACHE_KEY}"
+
+    # ------------------------------------------------------------
+    # キャッシュの復元/保存
+    # ------------------------------------------------------------
+    - name: Cache dependencies
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.paths }}
+        key: ${{ steps.cache-key.outputs.cache-key }}
+        restore-keys: |
+          ${{ inputs.cache-key-prefix }}-${{ runner.os }}-node
+          ${{ inputs.cache-key-prefix }}-${{ runner.os }}-
+          ${{ inputs.cache-key-prefix }}-
+
+    # ------------------------------------------------------------
+    # キャッシュ状態の報告
+    # ------------------------------------------------------------
+    - name: Report cache status
+      shell: bash
+      run: |
+        if [ "${{ steps.cache.outputs.cache-hit }}" == "true" ]; then
+          echo "✅ Cache hit! Dependencies restored from cache."
+        else
+          echo "❌ Cache miss. Dependencies will be installed fresh."
+        fi

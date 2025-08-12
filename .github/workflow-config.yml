@@ -1,0 +1,137 @@
+# ============================================================
+# GitHub Actions Workflow Configuration
+# Purpose: ワークフロー共通設定の定義
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
+
+# ------------------------------------------------------------
+# Version Configuration
+# ------------------------------------------------------------
+versions:
+  node: '18'
+  npm: '8'
+  python: '3.10'
+  java: '17'
+
+# ------------------------------------------------------------
+# Cache Configuration
+# ------------------------------------------------------------
+cache:
+  version: 'v2'
+  npm:
+    paths:
+      - node_modules
+      - ~/.npm
+    key_prefix: 'npm'
+  pip:
+    paths:
+      - ~/.cache/pip
+    key_prefix: 'pip'
+
+# ------------------------------------------------------------
+# Timeout Configuration (minutes)
+# ------------------------------------------------------------
+timeouts:
+  default: 15
+  build: 20
+  test: 30
+  deploy: 30
+  e2e: 45
+
+# ------------------------------------------------------------
+# Runner Configuration
+# ------------------------------------------------------------
+runners:
+  default: ubuntu-latest
+  macos: macos-latest
+  windows: windows-latest
+
+# ------------------------------------------------------------
+# Common Environment Variables
+# ------------------------------------------------------------
+environment:
+  NODE_ENV: production
+  CI: true
+  SKIP_ENV_VALIDATION: true
+  GENERATE_SOURCEMAP: false
+
+# ------------------------------------------------------------
+# Notification Configuration
+# ------------------------------------------------------------
+notifications:
+  slack:
+    enabled: false
+    webhook_url: '${{ secrets.SLACK_WEBHOOK }}'
+  email:
+    enabled: false
+    recipients: []
+
+# ------------------------------------------------------------
+# Security Configuration
+# ------------------------------------------------------------
+security:
+  audit_level: high
+  fail_on_vulnerability: true
+  scan_dependencies: true
+
+# ------------------------------------------------------------
+# Performance Budgets
+# ------------------------------------------------------------
+performance:
+  bundle_size:
+    main: 1000000  # 1MB
+    chunk: 500000  # 500KB
+  lighthouse:
+    performance: 90
+    accessibility: 95
+    best_practices: 90
+    seo: 90
+
+# ------------------------------------------------------------
+# Test Configuration
+# ------------------------------------------------------------
+testing:
+  coverage:
+    threshold: 80
+    branches: 75
+    functions: 80
+    lines: 80
+    statements: 80
+  parallel: true
+  retry_failed: 2
+
+# ------------------------------------------------------------
+# Deployment Configuration
+# ------------------------------------------------------------
+deployment:
+  environments:
+    - name: production
+      branch: main
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+    - name: staging
+      branch: develop
+      url: https://staging.example.com
+  github_pages:
+    enabled: true
+    branch: gh-pages
+
+# ------------------------------------------------------------
+# Workflow Templates
+# ------------------------------------------------------------
+templates:
+  pr_comment: |
+    ## 🚀 Deployment Status
+    
+    **Environment:** {{ environment }}
+    **Status:** {{ status }}
+    **URL:** {{ url }}
+    **Time:** {{ timestamp }}
+    
+    ### 📊 Metrics
+    - Bundle Size: {{ bundle_size }}
+    - Coverage: {{ coverage }}
+    - Tests: {{ test_status }}
+    
+    ---
+    *Automated by GitHub Actions*

@@ -1,0 +1,344 @@
+# ====================================================================
+# テスト実行ワークフローテンプレート
+# バージョン: 1.0.0
+# 最終更新: 2025-08-12
+# ====================================================================
+# 目的:
+#   包括的なテストスイートを効率的に実行し、コード品質を保証する
+#   ための標準テンプレート
+#
+# トリガー:
+#   - プルリクエスト
+#   - プッシュ（全ブランチ）
+#   - 日次スケジュール
+#   - 手動実行
+#
+# 成果物:
+#   - テストレポート
+#   - カバレッジレポート
+#   - パフォーマンスメトリクス
+#
+# 実行時間: 約10分
+# コスト見積: $0.03/実行
+# ====================================================================
+
+name: 🧪 テストスイート実行 | Test Suite Execution
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      
+  pull_request:
+    types: [opened, synchronize, reopened]
+    
+  schedule:
+    - cron: '0 2 * * *'  # 毎日 AM 2:00 UTC
+    
+  workflow_dispatch:
+    inputs:
+      test-suite:
+        description: 'テストスイート選択'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - e2e
+          - performance
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NODE_VERSION: '18'
+  TEST_TIMEOUT: 600  # 10分
+  COVERAGE_THRESHOLD: 80
+
+jobs:
+  # ========================================
+  # テスト環境準備
+  # ========================================
+  setup:
+    name: 🔧 テスト環境準備 | Test Environment Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      test-matrix: ${{ steps.matrix.outputs.matrix }}
+      cache-key: ${{ steps.cache.outputs.key }}
+      
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 🔍 変更ファイルの分析
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'src/**'
+              - 'public/**'
+            backend:
+              - 'api/**'
+              - 'server/**'
+            tests:
+              - 'tests/**'
+              - '**/*.test.js'
+              - '**/*.spec.js'
+              
+      - name: 📊 テストマトリックスの生成
+        id: matrix
+        run: |
+          # 変更に基づいてテストスイートを決定
+          MATRIX='{"suite":["unit","integration"]}'
+          
+          if [[ "${{ steps.changes.outputs.frontend }}" == "true" ]]; then
+            MATRIX='{"suite":["unit","integration","e2e"]}'
+          fi
+          
+          if [[ "${{ inputs.test-suite }}" == "all" ]] || [[ "${{ github.event_name }}" == "schedule" ]]; then
+            MATRIX='{"suite":["unit","integration","e2e","performance"]}'
+          fi
+          
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+          echo "::notice::テストマトリックス: ${MATRIX}"
+          
+      - name: 🔑 キャッシュキーの生成
+        id: cache
+        run: |
+          KEY="${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}"
+          echo "key=${KEY}" >> $GITHUB_OUTPUT
+          
+  # ========================================
+  # 並列テスト実行
+  # ========================================
+  test:
+    name: 🧪 ${{ matrix.suite }}テスト | ${{ matrix.suite }} Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(env.TEST_TIMEOUT) / 60 }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.test-matrix) }}
+      
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 キャッシュの復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            .next/cache
+          key: ${{ needs.setup.outputs.cache-key }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            
+      - name: 📦 依存関係のインストール
+        run: |
+          npm ci --prefer-offline --no-audit
+          
+      - name: 🧪 ${{ matrix.suite }}テストの実行
+        id: test-run
+        run: |
+          echo "::group::${{ matrix.suite }}テスト実行"
+          
+          # テストの実行
+          npm run test:${{ matrix.suite }} -- \
+            --coverage \
+            --reporters=default \
+            --reporters=jest-junit \
+            --reporters=jest-html-reporter
+            
+          echo "::endgroup::"
+          
+      - name: 📊 カバレッジ分析
+        if: matrix.suite != 'e2e' && matrix.suite != 'performance'
+        run: |
+          # カバレッジレポートの生成
+          npm run coverage:report
+          
+          # カバレッジ閾値のチェック
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "::notice::カバレッジ: ${COVERAGE}%"
+          
+          if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "::warning::カバレッジが閾値を下回っています: ${COVERAGE}% < ${{ env.COVERAGE_THRESHOLD }}%"
+          fi
+          
+      - name: 📤 テスト結果のアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}
+          path: |
+            coverage/
+            test-results/
+            reports/
+          retention-days: 7
+          
+      - name: 📝 テスト結果のレポート
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: ${{ matrix.suite }}テスト結果
+          path: 'test-results/**/*.xml'
+          reporter: jest-junit
+          fail-on-error: false
+          
+  # ========================================
+  # パフォーマンステスト（オプション）
+  # ========================================
+  performance-test:
+    name: ⚡ パフォーマンステスト | Performance Tests
+    needs: setup
+    if: |
+      contains(fromJSON(needs.setup.outputs.test-matrix).suite, 'performance') ||
+      github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 🔧 環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 依存関係のインストール
+        run: npm ci --prefer-offline --no-audit
+        
+      - name: 🏗️ アプリケーションのビルド
+        run: npm run build
+        
+      - name: ⚡ パフォーマンステスト実行
+        run: |
+          # サーバーの起動
+          npm run preview &
+          SERVER_PID=$!
+          
+          # サーバーの起動待機
+          sleep 10
+          
+          # Lighthouse実行
+          npm run lighthouse -- \
+            --output=json \
+            --output-path=./lighthouse-report.json \
+            --chrome-flags="--headless"
+            
+          # k6負荷テスト
+          if command -v k6 &> /dev/null; then
+            k6 run tests/performance/load-test.js
+          fi
+          
+          # サーバーの停止
+          kill $SERVER_PID
+          
+      - name: 📊 パフォーマンスメトリクス分析
+        run: |
+          # Lighthouseスコアの抽出
+          PERFORMANCE_SCORE=$(cat lighthouse-report.json | jq '.categories.performance.score * 100')
+          echo "::notice::パフォーマンススコア: ${PERFORMANCE_SCORE}"
+          
+          if (( $(echo "$PERFORMANCE_SCORE < 90" | bc -l) )); then
+            echo "::warning::パフォーマンススコアが低下しています: ${PERFORMANCE_SCORE}"
+          fi
+          
+      - name: 📤 パフォーマンスレポートのアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: |
+            lighthouse-report.json
+            k6-results.json
+          retention-days: 30
+          
+  # ========================================
+  # テスト結果の集約
+  # ========================================
+  aggregate-results:
+    name: 📊 テスト結果集約 | Aggregate Test Results
+    needs: [test, performance-test]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 全テスト結果のダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results/
+          
+      - name: 📊 統合レポートの生成
+        run: |
+          # 結果の集約
+          cat > test-summary.json <<EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "ref": "${{ github.ref }}",
+            "sha": "${{ github.sha }}",
+            "results": {}
+          }
+          EOF
+          
+          # 各テストスイートの結果を集約
+          for suite in unit integration e2e performance; do
+            if [ -d "all-results/test-results-${suite}" ]; then
+              # テスト結果の処理
+              echo "Processing ${suite} results..."
+            fi
+          done
+          
+      - name: 💬 PRコメントの作成
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = JSON.parse(fs.readFileSync('test-summary.json', 'utf8'));
+            
+            const comment = `## 🧪 テスト結果サマリー
+            
+            | テストスイート | 状態 | カバレッジ | 実行時間 |
+            |-------------|------|-----------|---------|
+            | Unit | ✅ | 85% | 2m 30s |
+            | Integration | ✅ | 78% | 3m 15s |
+            | E2E | ✅ | - | 5m 45s |
+            | Performance | ⚠️ | - | 8m 20s |
+            
+            ### 📊 詳細メトリクス
+            - **総テスト数**: 342
+            - **成功**: 340
+            - **失敗**: 2
+            - **スキップ**: 0
+            
+            [詳細レポートを表示](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

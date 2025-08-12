@@ -1,61 +1,69 @@
-# ====================================================================
-# GitHub Pages デプロイメントパイプライン
-# ====================================================================
-# 目的: PMPLearningManagementアプリケーションをGitHub Pagesにデプロイし、
-#      PWA要件の検証とパフォーマンス監視を実行
-# 
-# 実行タイミング:
-#   - mainブランチへのプッシュ時（本番デプロイ）
-#   - developブランチへのプッシュ時（ステージング検証）
-#   - mainブランチへのプルリクエスト時（品質チェック）
-#   - 手動実行（workflow_dispatch）
-#   - 毎週月曜日の午前6時（定期パフォーマンス監査）
-#
-# 主な処理:
-#   1. コード品質チェック（ESLint、TypeScript、フォーマット）
-#   2. セキュリティ監査
-#   3. ビルドテストとアーティファクト生成
-#   4. パフォーマンスバジェット検証
-#   5. PWA要件の検証
-#   6. GitHub Pagesへのデプロイ（mainブランチのみ）
-#   7. Lighthouse CIによるパフォーマンス監査
-#   8. デプロイ後のヘルスチェック
-# ====================================================================
+# ============================================================
+# Workflow: Production Deployment & PWA Validation
+# Purpose: PMPLearningManagementをGitHub Pagesにデプロイし、PWA要件とパフォーマンスを検証
+# Trigger: main/developブランチへのpush、PR、手動実行、週次スケジュール
+# Dependencies: Node.js 18, GitHub Pages環境
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
 
 name: 📦 本番デプロイメント & PWA検証
 
+# ------------------------------------------------------------
+# Trigger Configuration
+# ------------------------------------------------------------
 on:
+  # mainブランチへのプッシュ時（本番デプロイ）
   push:
     branches: [ main, develop ]
+  # mainブランチへのPR時（品質チェック）
   pull_request:
     branches: [ main ]
+  # 手動実行
   workflow_dispatch:
+  # 毎週月曜日の午前6時（定期パフォーマンス監査）
   schedule:
-    - cron: '0 6 * * 1' # Weekly performance audit on Mondays
+    - cron: '0 6 * * 1'
 
+# ------------------------------------------------------------
+# Permissions
+# ------------------------------------------------------------
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-  checks: write
-  pull-requests: write
-  actions: write
+  contents: read              # リポジトリコンテンツの読み取り
+  pages: write               # GitHub Pagesへの書き込み
+  id-token: write            # OIDC token for pages
+  checks: write              # チェック結果の書き込み
+  pull-requests: write       # PRコメントの書き込み
+  actions: write             # ワークフロー権限
 
+# ------------------------------------------------------------
+# Concurrency Control
+# ------------------------------------------------------------
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+# ------------------------------------------------------------
+# Environment Variables
+# ------------------------------------------------------------
 env:
-  NODE_VERSION: '18'
-  CACHE_VERSION: 'v2'
+  NODE_VERSION: '18'              # Node.jsバージョン
+  CACHE_VERSION: 'v2'             # キャッシュバージョン
   LIGHTHOUSE_CI_TOKEN: ${{ secrets.LIGHTHOUSE_CI_TOKEN }}
   SITE_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
 
+# ------------------------------------------------------------
+# Jobs Definition
+# ------------------------------------------------------------
 jobs:
-  # Phase 1: Basic Quality Gates
+  # ============================================================
+  # Job: Code Quality Check
+  # Purpose: ESLint、TypeScript、フォーマットのチェック
+  # ============================================================
   lint-and-format:
-    name: 🔍 コード品質チェック（Lint & Format）
+    name: 🔍 コード品質チェック
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,10 +89,14 @@ jobs:
       - name: Check code formatting
         run: npm run format:check
 
-  # Security and Dependencies
+  # ============================================================
+  # Job: Security Audit
+  # Purpose: 依存関係のセキュリティ脆弱性チェック
+  # ============================================================
   security-audit:
     name: 🔒 セキュリティ監査
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -121,10 +133,14 @@ jobs:
             echo "✅ Security audit completed successfully"
           fi
 
-  # Build Test
+  # ============================================================
+  # Job: Build Test
+  # Purpose: アプリケーションのビルドとアーティファクト生成
+  # ============================================================
   build-test:
     name: 🏗️ ビルドテスト
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [lint-and-format]
     steps:
       - name: Checkout
@@ -181,10 +197,14 @@ jobs:
           path: dist/
           retention-days: 1
 
-  # Performance Budget Check
+  # ============================================================
+  # Job: Performance Budget Validation
+  # Purpose: バンドルサイズとパフォーマンス指標の検証
+  # ============================================================
   performance-budget:
     name: ⚡ パフォーマンスバジェット検証
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [build-test]
     steps:
       - name: Checkout
@@ -217,10 +237,14 @@ jobs:
           }
           echo "✅ Performance budget passed"
 
-  # PWA Validation
+  # ============================================================
+  # Job: PWA Validation
+  # Purpose: PWA要件の検証（manifest、service worker、icons）
+  # ============================================================
   pwa-validation:
     name: 📱 PWA要件検証
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [build-test]
     steps:
       - name: Checkout
@@ -269,10 +293,14 @@ jobs:
             echo "⚠️  PWA icons not found"
           fi
 
-  # Deploy to GitHub Pages (Only on main branch)
+  # ============================================================
+  # Job: Deploy to GitHub Pages
+  # Purpose: mainブランチのコードをGitHub Pagesにデプロイ
+  # ============================================================
   deploy-pages:
-    name: 🚀 GitHub Pagesへのデプロイ
+    name: 🚀 GitHub Pagesデプロイ
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [build-test, security-audit, performance-budget, pwa-validation]
     if: github.ref == 'refs/heads/main'
     environment:
@@ -375,10 +403,14 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Lighthouse CI Performance Audit
+  # ============================================================
+  # Job: Lighthouse Performance Audit
+  # Purpose: デプロイ後のパフォーマンス監査
+  # ============================================================
   lighthouse-ci:
-    name: 🌐 Lighthouse パフォーマンス監査
+    name: 🌐 Lighthouseパフォーマンス監査
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [deploy-pages]
     if: success() && github.ref == 'refs/heads/main'
     steps:
@@ -406,10 +438,14 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           LHCI_TOKEN: ${{ env.LIGHTHOUSE_CI_TOKEN }}
 
-  # Post-deployment health check with PWA validation
+  # ============================================================
+  # Job: Post-Deployment Health Check
+  # Purpose: デプロイ後のサイト稼働確認とPWA検証
+  # ============================================================
   health-check:
     name: ✅ デプロイ後ヘルスチェック
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [deploy-pages]
     if: success() && github.ref == 'refs/heads/main'
     steps:
@@ -460,10 +496,14 @@ jobs:
           
           echo "Health check completed successfully!"
 
-  # PR Comment for staging info
+  # ============================================================
+  # Job: PR Status Notification
+  # Purpose: PRにビルドステータスをコメント
+  # ============================================================
   pr-info:
     name: 💬 PRステータス通知
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [build-test]
     if: github.event_name == 'pull_request'
     steps:

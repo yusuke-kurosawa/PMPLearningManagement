@@ -1,0 +1,72 @@
+# ============================================================
+# Reusable Action: Node.js Setup
+# Purpose: 標準化されたNode.js環境のセットアップ
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 'Setup Node.js Environment'
+description: 'Node.js環境を標準設定でセットアップします'
+
+inputs:
+  node-version:
+    description: 'Node.jsのバージョン'
+    required: false
+    default: '18'
+  cache-dependency-path:
+    description: 'キャッシュ用の依存関係ファイルパス'
+    required: false
+    default: 'package-lock.json'
+  install-dependencies:
+    description: '依存関係を自動インストールするか'
+    required: false
+    default: 'true'
+
+outputs:
+  node-version:
+    description: 'インストールされたNode.jsのバージョン'
+    value: ${{ steps.setup.outputs.node-version }}
+  cache-hit:
+    description: 'キャッシュがヒットしたか'
+    value: ${{ steps.setup.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ------------------------------------------------------------
+    # Node.js環境のセットアップ
+    # ------------------------------------------------------------
+    - name: Setup Node.js
+      id: setup
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    # ------------------------------------------------------------
+    # バージョン情報の出力
+    # ------------------------------------------------------------
+    - name: Display versions
+      shell: bash
+      run: |
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        echo "node-version=$(node --version)" >> $GITHUB_OUTPUT
+
+    # ------------------------------------------------------------
+    # 依存関係のインストール（オプション）
+    # ------------------------------------------------------------
+    - name: Install dependencies
+      if: inputs.install-dependencies == 'true'
+      shell: bash
+      run: |
+        if [ -f "package-lock.json" ]; then
+          echo "Installing dependencies with npm ci..."
+          npm ci --prefer-offline --no-audit
+        elif [ -f "package.json" ]; then
+          echo "Installing dependencies with npm install..."
+          npm install --no-audit
+        else
+          echo "No package.json found, skipping dependency installation"
+        fi
