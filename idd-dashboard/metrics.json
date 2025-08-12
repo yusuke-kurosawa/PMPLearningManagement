@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-12T00:56:57Z",
+  "timestamp": "2025-08-12T06:18:32Z",
   "repository": {
     "total_commits": 51,
     "total_branches": 4
@@ -23,13 +23,13 @@
     }
   ],
   "issues": {
-    "open": 26,
+    "open": 25,
     "closed_last_30_days": 2,
-    "total": 28
+    "total": 27
   },
   "pull_requests": {
-    "total_recent": 2,
-    "compliant": 1,
-    "compliance_rate": 50
+    "total_recent": 3,
+    "compliant": 2,
+    "compliance_rate": 67
   }
 }
