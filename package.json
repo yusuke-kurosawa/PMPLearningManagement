@@ -72,6 +72,10 @@
     "quality:japanese": "node scripts/japanese-quality-checker.js",
     "quality:learning": "node scripts/analyze-learning-effectiveness.js",
     "quality:dashboard": "node scripts/generate-quality-dashboard.js",
+    "fix:all": "node scripts/auto-fix/fix-all-issues.js",
+    "fix:accessibility": "node scripts/fix-accessibility-violations.js",
+    "fix:pmbok": "node scripts/auto-fix/fix-pmbok-data.js",
+    "fix:japanese": "node scripts/auto-fix/fix-japanese.js",
     "quality:all": "npm run quality:pmbok && npm run quality:content && npm run quality:accessibility && npm run quality:japanese && npm run quality:learning && npm run quality:dashboard",
     "quality:quick": "npm run quality:pmbok && npm run quality:content && npm run quality:dashboard",
     "quality:report": "npm run quality:all && echo '📊 品質保証レポートが /reports/quality/ に生成されました'"
@@ -118,6 +122,7 @@
     "recharts": "^2.10.3",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
+    "web-vitals": "^5.1.0",
     "zod": "^3.22.4",
     "zustand": "^4.4.7"
   },

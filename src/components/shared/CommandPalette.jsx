@@ -364,7 +364,9 @@ const CommandPalette = () => {
             <div className="flex items-center gap-3">
               <modeInfo.icon className="h-5 w-5 text-gray-400" />
               <div className="flex-1">
-                <input aria-label="Input field" id="input-1754995293948-366"
+                <input
+                  aria-label="Input field"
+                  id="input-1754995293948-366"
                   ref={inputRef}
                   type="text"
                   value={query}

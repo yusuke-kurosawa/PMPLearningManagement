@@ -162,17 +162,20 @@ export const usePromptLog = (options = {}) => {
   /**
    * Get conversation history
    */
-  const getHistory = useCallback(async (filters = {}) => {
-    try {
-      return await promptLogService.queryLogs({
-        userId: user?.id || 'anonymous',
-        ...filters,
-      })
-    } catch (error) {
-      console.error('Failed to get history:', error)
-      return []
-    }
-  }, [user])
+  const getHistory = useCallback(
+    async (filters = {}) => {
+      try {
+        return await promptLogService.queryLogs({
+          userId: user?.id || 'anonymous',
+          ...filters,
+        })
+      } catch (error) {
+        console.error('Failed to get history:', error)
+        return []
+      }
+    },
+    [user]
+  )
 
   /**
    * Clear user logs
@@ -182,7 +185,7 @@ export const usePromptLog = (options = {}) => {
       const userLogs = await promptLogService.queryLogs({
         userId: user?.id || 'anonymous',
       })
-      
+
       // Note: This would need to be implemented in the service
       // For now, we'll just clear all logs
       if (window.confirm('Clear all your logs? This cannot be undone.')) {
@@ -211,7 +214,7 @@ export const usePromptLog = (options = {}) => {
         const exportData = await promptLogService.exportLogs(format, {
           userId: user?.id || 'anonymous',
         })
-        
+
         const blob = new Blob([exportData], {
           type: format === 'json' ? 'application/json' : 'text/plain',
         })

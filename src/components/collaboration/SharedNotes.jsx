@@ -252,7 +252,9 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
               <div className="space-y-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium">タイトル</label>
-                  <input aria-label="Input field" id="input-1754995293939-254"
+                  <input
+                    aria-label="Input field"
+                    id="input-1754995293939-254"
                     type="text"
                     value={newNote.title}
                     onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
@@ -277,7 +279,9 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
 
                 <div>
                   <label className="mb-1 block text-sm font-medium">タグ（カンマ区切り）</label>
-                  <input aria-label="Input field" id="input-1754995293939-279"
+                  <input
+                    aria-label="Input field"
+                    id="input-1754995293939-279"
                     type="text"
                     value={newNote.tags}
                     onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}

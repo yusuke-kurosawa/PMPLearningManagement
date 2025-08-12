@@ -287,9 +287,7 @@ class PromptLogService {
    */
   async getStatistics(timeRange = null) {
     const logs = await this.queryLogs({
-      range: timeRange
-        ? IDBKeyRange.bound(timeRange.start, timeRange.end)
-        : null,
+      range: timeRange ? IDBKeyRange.bound(timeRange.start, timeRange.end) : null,
     })
 
     return {
@@ -476,8 +474,7 @@ class PromptLogService {
     if (filters.userId && log.userId !== filters.userId) return false
     if (filters.type && log.type !== filters.type) return false
     if (filters.status && log.status !== filters.status) return false
-    if (filters.tags && !filters.tags.some((tag) => log.metadata?.tags?.includes(tag)))
-      return false
+    if (filters.tags && !filters.tags.some((tag) => log.metadata?.tags?.includes(tag))) return false
     if (filters.startTime && log.timestamp < filters.startTime) return false
     if (filters.endTime && log.timestamp > filters.endTime) return false
 

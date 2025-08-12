@@ -115,7 +115,9 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
       {/* コメント入力欄 */}
       <div className="mb-6">
         <div className="flex gap-2">
-          <input aria-label="Input field" id="input-1754995293935-117"
+          <input
+            aria-label="Input field"
+            id="input-1754995293935-117"
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -226,7 +228,9 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
             {replyTo === comment.id && (
               <div className="ml-11 mt-3">
                 <div className="flex gap-2">
-                  <input aria-label="Input field" id="input-1754995293936-228"
+                  <input
+                    aria-label="Input field"
+                    id="input-1754995293936-228"
                     type="text"
                     value={newReply}
                     onChange={(e) => setNewReply(e.target.value)}

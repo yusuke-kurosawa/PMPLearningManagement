@@ -106,7 +106,9 @@ const PMPGlossary = React.memo(() => {
 
           {/* 検索バー */}
           <div className="relative mb-4">
-            <input aria-label="Input field" id="input-1754995293943-108"
+            <input
+              aria-label="Input field"
+              id="input-1754995293943-108"
               type="text"
               placeholder="用語を検索..."
               className="w-full rounded-lg border px-4 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"

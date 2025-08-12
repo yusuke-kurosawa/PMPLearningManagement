@@ -1,7 +1,7 @@
 // アクセシビリティ修正用のコンポーネントとユーティリティ
 // WCAG 2.1 AA準拠のためのヘルパー関数とコンポーネント
 
-import React from 'react';
+import React from 'react'
 
 /**
  * アクセシブルなフォーム入力コンポーネント
@@ -20,18 +20,20 @@ export const AccessibleInput = ({
   ariaDescribedBy,
   ...props
 }) => {
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  
+  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
+
   return (
     <div className="form-group">
-      <label 
+      <label
         htmlFor={inputId}
-        className={`block mb-2 text-sm font-medium ${
-          darkMode ? 'text-gray-200' : 'text-gray-700'
-        }`}
+        className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="必須">*</span>}
+        {required && (
+          <span className="ml-1 text-red-500" aria-label="必須">
+            *
+          </span>
+        )}
       </label>
       <input
         id={inputId}
@@ -46,8 +48,8 @@ export const AccessibleInput = ({
         {...props}
       />
     </div>
-  );
-};
+  )
+}
 
 /**
  * アクセシブルなテキストエリアコンポーネント
@@ -65,18 +67,20 @@ export const AccessibleTextarea = ({
   ariaDescribedBy,
   ...props
 }) => {
-  const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
-  
+  const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`
+
   return (
     <div className="form-group">
-      <label 
+      <label
         htmlFor={textareaId}
-        className={`block mb-2 text-sm font-medium ${
-          darkMode ? 'text-gray-200' : 'text-gray-700'
-        }`}
+        className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="必須">*</span>}
+        {required && (
+          <span className="ml-1 text-red-500" aria-label="必須">
+            *
+          </span>
+        )}
       </label>
       <textarea
         id={textareaId}
@@ -91,8 +95,8 @@ export const AccessibleTextarea = ({
         {...props}
       />
     </div>
-  );
-};
+  )
+}
 
 /**
  * アクセシブルなセレクトコンポーネント
@@ -109,18 +113,20 @@ export const AccessibleSelect = ({
   ariaDescribedBy,
   ...props
 }) => {
-  const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
-  
+  const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`
+
   return (
     <div className="form-group">
-      <label 
+      <label
         htmlFor={selectId}
-        className={`block mb-2 text-sm font-medium ${
-          darkMode ? 'text-gray-200' : 'text-gray-700'
-        }`}
+        className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="必須">*</span>}
+        {required && (
+          <span className="ml-1 text-red-500" aria-label="必須">
+            *
+          </span>
+        )}
       </label>
       <select
         id={selectId}
@@ -139,15 +145,13 @@ export const AccessibleSelect = ({
         ))}
       </select>
     </div>
-  );
-};
+  )
+}
 
 /**
  * スクリーンリーダー専用テキスト
  */
-export const ScreenReaderOnly = ({ children }) => (
-  <span className="sr-only">{children}</span>
-);
+export const ScreenReaderOnly = ({ children }) => <span className="sr-only">{children}</span>
 
 /**
  * スキップリンクコンポーネント
@@ -159,16 +163,16 @@ export const SkipLink = ({ href = '#main-content', text = 'メインコンテン
   >
     {text}
   </a>
-);
+)
 
 /**
  * アリアライブリージョン
  */
-export const AriaLiveRegion = ({ 
-  message, 
+export const AriaLiveRegion = ({
+  message,
   politeness = 'polite', // 'polite' | 'assertive' | 'off'
   atomic = true,
-  relevant = 'additions text'
+  relevant = 'additions text',
 }) => (
   <div
     role="status"
@@ -179,7 +183,7 @@ export const AriaLiveRegion = ({
   >
     {message}
   </div>
-);
+)
 
 /**
  * フォームエラーメッセージ
@@ -189,118 +193,114 @@ export const FormError = ({ id, message, visible = false }) => (
     id={id}
     role="alert"
     aria-live="polite"
-    className={`text-sm text-red-600 mt-1 ${visible ? 'block' : 'hidden'}`}
+    className={`mt-1 text-sm text-red-600 ${visible ? 'block' : 'hidden'}`}
   >
     {message}
   </span>
-);
+)
 
 /**
  * アクセシブルなローディング状態
  */
 export const AccessibleLoading = ({ text = '読み込み中...' }) => (
   <div className="flex items-center justify-center p-4">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
     <span className="sr-only">{text}</span>
   </div>
-);
+)
 
 /**
  * フォーカストラップフック
  */
 export const useFocusTrap = (ref) => {
   React.useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) return
 
     const focusableElements = ref.current.querySelectorAll(
       'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select'
-    );
-    
-    const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
+    )
+
+    const firstFocusable = focusableElements[0]
+    const lastFocusable = focusableElements[focusableElements.length - 1]
 
     const handleTabKey = (e) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab') return
 
       if (e.shiftKey) {
         if (document.activeElement === firstFocusable) {
-          lastFocusable.focus();
-          e.preventDefault();
+          lastFocusable.focus()
+          e.preventDefault()
         }
       } else {
         if (document.activeElement === lastFocusable) {
-          firstFocusable.focus();
-          e.preventDefault();
+          firstFocusable.focus()
+          e.preventDefault()
         }
       }
-    };
+    }
 
-    ref.current.addEventListener('keydown', handleTabKey);
-    
+    ref.current.addEventListener('keydown', handleTabKey)
+
     return () => {
       if (ref.current) {
-        ref.current.removeEventListener('keydown', handleTabKey);
+        ref.current.removeEventListener('keydown', handleTabKey)
       }
-    };
-  }, [ref]);
-};
+    }
+  }, [ref])
+}
 
 /**
  * キーボードナビゲーションフック
  */
 export const useKeyboardNavigation = (items, onSelect) => {
-  const [focusedIndex, setFocusedIndex] = React.useState(-1);
+  const [focusedIndex, setFocusedIndex] = React.useState(-1)
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          e.preventDefault();
-          setFocusedIndex((prev) => 
-            prev <= 0 ? items.length - 1 : prev - 1
-          );
-          break;
+          e.preventDefault()
+          setFocusedIndex((prev) => (prev <= 0 ? items.length - 1 : prev - 1))
+          break
         case 'ArrowDown':
-          e.preventDefault();
-          setFocusedIndex((prev) => 
-            prev >= items.length - 1 ? 0 : prev + 1
-          );
-          break;
+          e.preventDefault()
+          setFocusedIndex((prev) => (prev >= items.length - 1 ? 0 : prev + 1))
+          break
         case 'Enter':
         case ' ':
-          e.preventDefault();
+          e.preventDefault()
           if (focusedIndex >= 0 && focusedIndex < items.length) {
-            onSelect(items[focusedIndex]);
+            onSelect(items[focusedIndex])
           }
-          break;
+          break
         case 'Escape':
-          setFocusedIndex(-1);
-          break;
+          setFocusedIndex(-1)
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedIndex, items, onSelect]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [focusedIndex, items, onSelect])
 
-  return { focusedIndex, setFocusedIndex };
-};
+  return { focusedIndex, setFocusedIndex }
+}
 
 /**
  * アナウンスメントフック
  */
 export const useAnnounce = () => {
-  const [announcement, setAnnouncement] = React.useState('');
+  const [announcement, setAnnouncement] = React.useState('')
 
   const announce = React.useCallback((message) => {
-    setAnnouncement('');
-    setTimeout(() => setAnnouncement(message), 100);
-  }, []);
+    setAnnouncement('')
+    setTimeout(() => setAnnouncement(message), 100)
+  }, [])
 
-  return { announcement, announce };
-};
+  return { announcement, announce }
+}
 
 export default {
   AccessibleInput,
@@ -313,5 +313,5 @@ export default {
   AccessibleLoading,
   useFocusTrap,
   useKeyboardNavigation,
-  useAnnounce
-};
+  useAnnounce,
+}

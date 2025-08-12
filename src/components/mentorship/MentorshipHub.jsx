@@ -232,7 +232,9 @@ const MentorshipHub = () => {
         <div className="mb-6 flex flex-col gap-4 md:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-            <input aria-label="Input field" id="input-1754995293945-234"
+            <input
+              aria-label="Input field"
+              id="input-1754995293945-234"
               type="text"
               placeholder="メンター、スキル、業界で検索..."
               value={searchQuery}

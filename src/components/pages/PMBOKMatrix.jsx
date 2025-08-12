@@ -15,10 +15,10 @@ import GlossaryDialog from '../learning/GlossaryDialog'
 import LearningModal from '../learning/LearningModal'
 import { useProgress } from '../../services/progressService'
 import { generateProcessId } from '../../utils/processUtils'
-import { 
+import {
   completeKnowledgeAreas as knowledgeAreas,
   completeProcesses as processes,
-  processITTO as processDetails 
+  processITTO as processDetails,
 } from '../../data/pmbok/completeProcesses'
 
 const PMBOKMatrix = memo(() => {
@@ -1052,7 +1052,9 @@ const PMBOKMatrix = memo(() => {
           </h1>
 
           <div className="relative">
-            <input aria-label="Input field" id="input-1754995293946-1054"
+            <input
+              aria-label="Input field"
+              id="input-1754995293946-1054"
               type="text"
               placeholder="プロセスを検索..."
               className="w-full rounded-lg border px-3 py-2 pl-9 pr-10 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4 sm:pl-10 sm:text-base"

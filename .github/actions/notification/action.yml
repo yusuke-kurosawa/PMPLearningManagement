@@ -1,0 +1,366 @@
+# ================================================================
+# アクション名: notification
+# 目的: Slack、Discord、GitHub Issueへの通知を統一的に処理
+# 作成者: Claude Code
+# 最終更新: 2025-08-12
+# ================================================================
+
+name: '📢 通知 / Notification'
+description: 'ワークフロー結果をSlack、Discord、GitHub Issueに通知'
+author: 'Claude Code'
+
+inputs:
+  status:
+    description: 'ワークフローステータス (success/failure/warning) / Workflow status'
+    required: true
+  
+  title:
+    description: '通知タイトル / Notification title'
+    required: true
+  
+  message:
+    description: '通知メッセージ / Notification message'
+    required: true
+  
+  notification-type:
+    description: '通知タイプ (all/slack/discord/issue/none) / Notification type'
+    required: false
+    default: 'none'
+  
+  slack-webhook:
+    description: 'Slack Webhook URL / Slack webhook URL'
+    required: false
+  
+  discord-webhook:
+    description: 'Discord Webhook URL / Discord webhook URL'
+    required: false
+  
+  create-issue:
+    description: 'GitHub Issueを作成するか / Create GitHub issue'
+    required: false
+    default: 'false'
+  
+  issue-labels:
+    description: 'Issueラベル（カンマ区切り） / Issue labels (comma-separated)'
+    required: false
+    default: 'automated,workflow'
+  
+  mention-users:
+    description: 'メンション対象ユーザー（カンマ区切り） / Users to mention'
+    required: false
+    default: ''
+  
+  include-details:
+    description: '詳細情報を含めるか / Include detailed information'
+    required: false
+    default: 'true'
+  
+  workflow-url:
+    description: 'ワークフロー実行URL / Workflow run URL'
+    required: false
+    default: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
+outputs:
+  notification-sent:
+    description: '通知送信ステータス / Notification sent status'
+    value: ${{ steps.send-notification.outputs.sent }}
+  
+  issue-url:
+    description: '作成されたIssueのURL / Created issue URL'
+    value: ${{ steps.create-issue.outputs.url }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ============================================================
+    # Step 1: 通知内容の準備
+    # Prepare notification content
+    # ============================================================
+    - name: '📋 通知内容準備 / Prepare Notification Content'
+      id: prepare-content
+      shell: bash
+      run: |
+        # ステータスに応じた絵文字設定
+        case "${{ inputs.status }}" in
+          success)
+            EMOJI="✅"
+            COLOR="28a745"
+            ;;
+          failure)
+            EMOJI="❌"
+            COLOR="dc3545"
+            ;;
+          warning)
+            EMOJI="⚠️"
+            COLOR="ffc107"
+            ;;
+          *)
+            EMOJI="ℹ️"
+            COLOR="007bff"
+            ;;
+        esac
+        
+        echo "emoji=$EMOJI" >> $GITHUB_OUTPUT
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+        
+        # 詳細情報の準備
+        if [ "${{ inputs.include-details }}" == "true" ]; then
+          DETAILS=$(cat <<EOF
+        
+        **リポジトリ / Repository:** ${{ github.repository }}
+        **ブランチ / Branch:** ${{ github.ref_name }}
+        **コミット / Commit:** ${{ github.sha }}
+        **実行者 / Actor:** ${{ github.actor }}
+        **ワークフロー / Workflow:** ${{ github.workflow }}
+        **実行ID / Run ID:** ${{ github.run_id }}
+        **URL:** ${{ inputs.workflow-url }}
+        EOF
+          )
+          echo "details<<EOF" >> $GITHUB_OUTPUT
+          echo "$DETAILS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "details=" >> $GITHUB_OUTPUT
+        fi
+
+    # ============================================================
+    # Step 2: Slack通知
+    # Send Slack notification
+    # ============================================================
+    - name: '💬 Slack通知 / Send Slack Notification'
+      if: (inputs.notification-type == 'all' || inputs.notification-type == 'slack') && inputs.slack-webhook != ''
+      shell: bash
+      run: |
+        echo "📤 Sending Slack notification..."
+        
+        # Slack用のペイロード作成
+        PAYLOAD=$(cat <<EOF
+        {
+          "text": "${{ steps.prepare-content.outputs.emoji }} ${{ inputs.title }}",
+          "attachments": [
+            {
+              "color": "${{ steps.prepare-content.outputs.color }}",
+              "title": "${{ inputs.title }}",
+              "text": "${{ inputs.message }}",
+              "fields": [
+                {
+                  "title": "Repository",
+                  "value": "${{ github.repository }}",
+                  "short": true
+                },
+                {
+                  "title": "Branch",
+                  "value": "${{ github.ref_name }}",
+                  "short": true
+                },
+                {
+                  "title": "Actor",
+                  "value": "${{ github.actor }}",
+                  "short": true
+                },
+                {
+                  "title": "Status",
+                  "value": "${{ inputs.status }}",
+                  "short": true
+                }
+              ],
+              "footer": "GitHub Actions",
+              "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              "ts": $(date +%s),
+              "actions": [
+                {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "View Workflow"
+                  },
+                  "url": "${{ inputs.workflow-url }}"
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Slack APIへ送信（エラーハンドリング付き）
+        if curl -X POST -H 'Content-type: application/json' \
+               --data "$PAYLOAD" \
+               "${{ inputs.slack-webhook }}" \
+               --silent --fail; then
+          echo "✅ Slack notification sent successfully"
+        else
+          echo "⚠️ Failed to send Slack notification"
+        fi
+
+    # ============================================================
+    # Step 3: Discord通知
+    # Send Discord notification
+    # ============================================================
+    - name: '🎮 Discord通知 / Send Discord Notification'
+      if: (inputs.notification-type == 'all' || inputs.notification-type == 'discord') && inputs.discord-webhook != ''
+      shell: bash
+      run: |
+        echo "📤 Sending Discord notification..."
+        
+        # Discord用のペイロード作成
+        PAYLOAD=$(cat <<EOF
+        {
+          "username": "GitHub Actions",
+          "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+          "content": "${{ steps.prepare-content.outputs.emoji }} **${{ inputs.title }}**",
+          "embeds": [
+            {
+              "title": "${{ inputs.title }}",
+              "description": "${{ inputs.message }}",
+              "color": $(printf '%d' 0x${{ steps.prepare-content.outputs.color }}),
+              "fields": [
+                {
+                  "name": "📁 Repository",
+                  "value": "${{ github.repository }}",
+                  "inline": true
+                },
+                {
+                  "name": "🔀 Branch",
+                  "value": "${{ github.ref_name }}",
+                  "inline": true
+                },
+                {
+                  "name": "👤 Actor",
+                  "value": "${{ github.actor }}",
+                  "inline": true
+                },
+                {
+                  "name": "📊 Status",
+                  "value": "${{ inputs.status }}",
+                  "inline": true
+                },
+                {
+                  "name": "🔗 Workflow",
+                  "value": "[View Run](${{ inputs.workflow-url }})",
+                  "inline": false
+                }
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "footer": {
+                "text": "GitHub Actions",
+                "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+              }
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Discord APIへ送信
+        if curl -X POST -H 'Content-type: application/json' \
+               --data "$PAYLOAD" \
+               "${{ inputs.discord-webhook }}" \
+               --silent --fail; then
+          echo "✅ Discord notification sent successfully"
+        else
+          echo "⚠️ Failed to send Discord notification"
+        fi
+
+    # ============================================================
+    # Step 4: GitHub Issue作成
+    # Create GitHub Issue
+    # ============================================================
+    - name: '📝 GitHub Issue作成 / Create GitHub Issue'
+      id: create-issue
+      if: inputs.create-issue == 'true' && inputs.status == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `${{ steps.prepare-content.outputs.emoji }} ${{ inputs.title }}`;
+          const body = `
+          ## ${{ inputs.message }}
+          
+          ${{ steps.prepare-content.outputs.details }}
+          
+          ---
+          
+          🤖 *This issue was automatically created by GitHub Actions*
+          `;
+          
+          const labels = '${{ inputs.issue-labels }}'.split(',').map(l => l.trim()).filter(l => l);
+          
+          try {
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: labels
+            });
+            
+            console.log(`✅ Issue created: ${issue.data.html_url}`);
+            core.setOutput('url', issue.data.html_url);
+            
+            // メンション処理
+            const mentions = '${{ inputs.mention-users }}'.split(',').map(u => u.trim()).filter(u => u);
+            if (mentions.length > 0) {
+              const mentionComment = `🔔 ${mentions.map(u => `@${u}`).join(' ')} - Please check this issue.`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.data.number,
+                body: mentionComment
+              });
+            }
+          } catch (error) {
+            console.error(`⚠️ Failed to create issue: ${error.message}`);
+            core.setOutput('url', '');
+          }
+
+    # ============================================================
+    # Step 5: 通知サマリー
+    # Notification summary
+    # ============================================================
+    - name: '📊 通知サマリー / Notification Summary'
+      id: send-notification
+      shell: bash
+      run: |
+        echo "=========================================="
+        echo "📢 通知サマリー / Notification Summary"
+        echo "=========================================="
+        echo "📌 タイトル: ${{ inputs.title }}"
+        echo "📊 ステータス: ${{ inputs.status }}"
+        echo "📝 メッセージ: ${{ inputs.message }}"
+        echo "------------------------------------------"
+        
+        SENT=false
+        
+        if [ "${{ inputs.notification-type }}" == "none" ]; then
+          echo "ℹ️ 通知は送信されませんでした（設定: none）"
+        else
+          if [ "${{ inputs.notification-type }}" == "all" ] || [ "${{ inputs.notification-type }}" == "slack" ]; then
+            if [ -n "${{ inputs.slack-webhook }}" ]; then
+              echo "💬 Slack: 送信済み"
+              SENT=true
+            else
+              echo "💬 Slack: スキップ（Webhook未設定）"
+            fi
+          fi
+          
+          if [ "${{ inputs.notification-type }}" == "all" ] || [ "${{ inputs.notification-type }}" == "discord" ]; then
+            if [ -n "${{ inputs.discord-webhook }}" ]; then
+              echo "🎮 Discord: 送信済み"
+              SENT=true
+            else
+              echo "🎮 Discord: スキップ（Webhook未設定）"
+            fi
+          fi
+          
+          if [ "${{ inputs.create-issue }}" == "true" ] && [ "${{ inputs.status }}" == "failure" ]; then
+            if [ -n "${{ steps.create-issue.outputs.url }}" ]; then
+              echo "📝 Issue: 作成済み - ${{ steps.create-issue.outputs.url }}"
+              SENT=true
+            else
+              echo "📝 Issue: 作成失敗"
+            fi
+          fi
+        fi
+        
+        echo "sent=$SENT" >> $GITHUB_OUTPUT
+        echo "=========================================="

@@ -1,48 +1,1150 @@
-<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="20.784849">
-<testsuite name="tests/navigation.spec.js" timestamp="2025-08-09T05:35:04.762Z" hostname="chromium" tests="1" failures="1" skipped="0" time="19.02" errors="0">
-<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="19.02">
-<failure message="navigation.spec.js:8:3 should display the main navigation" type="FAILURE">
-<![CDATA[  [chromium] › tests/navigation.spec.js:8:3 › Navigation › should display the main navigation ──────
-
-    Error: Timed out 10000ms waiting for expect(locator).toBeVisible()
-
-    Locator: getByText('PMBOK学習システム')
-    Expected: visible
-    Received: <element(s) not found>
-    Call log:
-      - Expect "toBeVisible" with timeout 10000ms
-      - waiting for getByText('PMBOK学習システム')
-
-
-       8 |   test('should display the main navigation', async ({ page }) => {
-       9 |     // Check that the main navigation is visible
-    > 10 |     await expect(page.getByText('PMBOK学習システム')).toBeVisible();
-         |                                                 ^
-      11 |     
-      12 |     // Check navigation items are present
-      13 |     await expect(page.getByRole('link', { name: 'ホーム' })).toBeVisible();
-        at /home/kurosawa/PMPLearningManagement/e2e/tests/navigation.spec.js:10:49
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ../test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ../test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ../test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[
-[[ATTACHMENT|test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/test-failed-1.png]]
-
-[[ATTACHMENT|test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/video.webm]]
-
-[[ATTACHMENT|test-results/tests-navigation-Navigatio-2e9a9-display-the-main-navigation-chromium/error-context.md]]
-]]>
-</system-out>
+<testsuites id="" name="" tests="273" failures="0" skipped="273" errors="0" time="0.21574800000000005">
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="chromium" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="chromium" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="chromium" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="chromium" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="firefox" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="firefox" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="firefox" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="firefox" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="webkit" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="webkit" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="webkit" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="webkit" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Chrome" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Chrome" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Chrome" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Chrome" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Safari" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Safari" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Safari" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Mobile Safari" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="Microsoft Edge" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Microsoft Edge" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Microsoft Edge" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Microsoft Edge" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="home.spec.ts" timestamp="2025-08-12T10:47:59.574Z" hostname="Google Chrome" tests="9" failures="0" skipped="9" time="0" errors="0">
+<testcase name="Home Page › should display the main heading" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show all main feature cards" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to matrix view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to network view when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to glossary when clicked" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should be responsive on mobile" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper accessibility" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should load without JavaScript errors" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have proper meta tags for SEO" classname="home.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/accessibility.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Google Chrome" tests="11" failures="0" skipped="11" time="0" errors="0">
+<testcase name="Accessibility Tests › should not have any automatically detectable accessibility issues on home page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on matrix page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should not have accessibility issues on glossary page" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support keyboard navigation throughout the application" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper color contrast" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper heading structure" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have alt text for images" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should have proper ARIA labels and roles" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should support screen reader navigation landmarks" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should handle focus management in modals and dropdowns" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Tests › should meet WCAG guidelines for interactive elements" classname="tests/accessibility.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/home.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Google Chrome" tests="12" failures="0" skipped="12" time="0" errors="0">
+<testcase name="Home Page › should display the home page with main title" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display all feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should show NEW badges on new features" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should navigate to features when cards are clicked" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should display feature descriptions" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page › should have hover effects on feature cards" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have proper heading hierarchy" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should have accessible links" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Accessibility › should support keyboard navigation" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on desktop" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on tablet" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Home Page Responsive Design › should display properly on mobile" classname="tests/home.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="tests/navigation.spec.js" timestamp="2025-08-12T10:47:59.574Z" hostname="Google Chrome" tests="7" failures="0" skipped="7" time="0" errors="0">
+<testcase name="Navigation › should display the main navigation" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should navigate to different pages" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should highlight active navigation item" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Navigation › should toggle dark mode" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should show mobile menu button on small screens" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should toggle mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Mobile Navigation › should navigate using mobile menu" classname="tests/navigation.spec.js" time="0">
+<skipped>
+</skipped>
 </testcase>
 </testsuite>
 </testsuites>

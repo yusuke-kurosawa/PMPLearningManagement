@@ -87,7 +87,7 @@ export default defineConfig({
       '@/stores': path.resolve(__dirname, './src/stores'),
     },
     include: ['**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules', 'dist', '.next', 'playwright-report'],
+    exclude: ['node_modules', 'dist', '.next', 'playwright-report', 'e2e/**/*'],
     reporters: [
       'verbose',
       'json',

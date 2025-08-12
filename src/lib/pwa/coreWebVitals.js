@@ -3,7 +3,7 @@
  * Automatically measures and optimizes LCP, FID, and CLS
  */
 
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals'
 
 class CoreWebVitalsOptimizer {
   constructor() {
@@ -12,7 +12,7 @@ class CoreWebVitalsOptimizer {
     this.isOptimizationEnabled = true
     this.thresholds = {
       lcp: { good: 2500, needsImprovement: 4000 },
-      fid: { good: 100, needsImprovement: 300 },
+      inp: { good: 200, needsImprovement: 500 },
       cls: { good: 0.1, needsImprovement: 0.25 },
       fcp: { good: 1800, needsImprovement: 3000 },
       ttfb: { good: 800, needsImprovement: 1800 },
@@ -28,14 +28,14 @@ class CoreWebVitalsOptimizer {
 
     // Track all Core Web Vitals
     this.trackLCP()
-    this.trackFID()
+    this.trackINP()
     this.trackCLS()
     this.trackFCP()
     this.trackTTFB()
 
     // Initialize optimization strategies
     this.optimizeLCP()
-    this.optimizeFID()
+    this.optimizeINP()
     this.optimizeCLS()
 
     // Send metrics to analytics
@@ -43,43 +43,58 @@ class CoreWebVitalsOptimizer {
   }
 
   trackLCP() {
-    getLCP((metric) => {
-      this.metrics.set('lcp', metric)
-      this.analyzeMetric('lcp', metric.value)
-      this.sendToAnalytics('lcp', metric)
-    }, true)
+    onLCP(
+      (metric) => {
+        this.metrics.set('lcp', metric)
+        this.analyzeMetric('lcp', metric.value)
+        this.sendToAnalytics('lcp', metric)
+      },
+      { reportAllChanges: true }
+    )
   }
 
-  trackFID() {
-    getFID((metric) => {
-      this.metrics.set('fid', metric)
-      this.analyzeMetric('fid', metric.value)
-      this.sendToAnalytics('fid', metric)
-    }, true)
+  trackINP() {
+    onINP(
+      (metric) => {
+        this.metrics.set('inp', metric)
+        this.analyzeMetric('inp', metric.value)
+        this.sendToAnalytics('inp', metric)
+      },
+      { reportAllChanges: true }
+    )
   }
 
   trackCLS() {
-    getCLS((metric) => {
-      this.metrics.set('cls', metric)
-      this.analyzeMetric('cls', metric.value)
-      this.sendToAnalytics('cls', metric)
-    }, true)
+    onCLS(
+      (metric) => {
+        this.metrics.set('cls', metric)
+        this.analyzeMetric('cls', metric.value)
+        this.sendToAnalytics('cls', metric)
+      },
+      { reportAllChanges: true }
+    )
   }
 
   trackFCP() {
-    getFCP((metric) => {
-      this.metrics.set('fcp', metric)
-      this.analyzeMetric('fcp', metric.value)
-      this.sendToAnalytics('fcp', metric)
-    }, true)
+    onFCP(
+      (metric) => {
+        this.metrics.set('fcp', metric)
+        this.analyzeMetric('fcp', metric.value)
+        this.sendToAnalytics('fcp', metric)
+      },
+      { reportAllChanges: true }
+    )
   }
 
   trackTTFB() {
-    getTTFB((metric) => {
-      this.metrics.set('ttfb', metric)
-      this.analyzeMetric('ttfb', metric.value)
-      this.sendToAnalytics('ttfb', metric)
-    }, true)
+    onTTFB(
+      (metric) => {
+        this.metrics.set('ttfb', metric)
+        this.analyzeMetric('ttfb', metric.value)
+        this.sendToAnalytics('ttfb', metric)
+      },
+      { reportAllChanges: true }
+    )
   }
 
   analyzeMetric(metricName, value) {
@@ -106,7 +121,7 @@ class CoreWebVitalsOptimizer {
   triggerOptimization(metricName, value, status) {
     const optimizations = {
       lcp: () => this.optimizeLCPDynamic(),
-      fid: () => this.optimizeFIDDynamic(),
+      inp: () => this.optimizeINPDynamic(),
       cls: () => this.optimizeCLSDynamic(),
       fcp: () => this.optimizeFCPDynamic(),
       ttfb: () => this.optimizeTTFBDynamic(),
@@ -262,8 +277,8 @@ class CoreWebVitalsOptimizer {
     })
   }
 
-  // FID Optimization Strategies
-  optimizeFID() {
+  // INP Optimization Strategies
+  optimizeINP() {
     // Break up long tasks
     this.breakUpLongTasks()
 
@@ -274,7 +289,7 @@ class CoreWebVitalsOptimizer {
     this.optimizeEventHandlers()
   }
 
-  optimizeFIDDynamic() {
+  optimizeINPDynamic() {
     // Monitor long tasks and break them up
     if ('PerformanceLongTaskTiming' in window) {
       const observer = new PerformanceObserver((list) => {
@@ -494,7 +509,7 @@ class CoreWebVitalsOptimizer {
       gtag('config', 'GA_MEASUREMENT_ID', {
         custom_map: {
           lcp: 'largest_contentful_paint',
-          fid: 'first_input_delay',
+          inp: 'interaction_to_next_paint',
           cls: 'cumulative_layout_shift',
         },
       })

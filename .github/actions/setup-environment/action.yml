@@ -1,0 +1,124 @@
+# ================================================================
+# アクション名: setup-environment 
+# 目的: 開発環境の標準セットアップとキャッシュ管理
+# 作成者: Claude Code
+# 最終更新: 2025-08-12
+# ================================================================
+
+name: '🔧 環境セットアップ / Setup Environment'
+description: 'Node.js環境のセットアップ、依存関係のインストール、キャッシュ管理を一括実行'
+author: 'Claude Code'
+
+inputs:
+  node-version:
+    description: 'Node.jsのバージョン / Node.js version'
+    required: false
+    default: '18'
+  
+  cache-key:
+    description: 'キャッシュキーのプレフィックス / Cache key prefix'
+    required: false
+    default: 'node-deps'
+  
+  install-dependencies:
+    description: '依存関係をインストールするか / Install dependencies'
+    required: false
+    default: 'true'
+  
+  working-directory:
+    description: '作業ディレクトリ / Working directory'
+    required: false
+    default: '.'
+  
+  registry-url:
+    description: 'NPMレジストリURL / NPM registry URL'
+    required: false
+    default: 'https://registry.npmjs.org'
+
+outputs:
+  node-version:
+    description: '使用されたNode.jsバージョン / Used Node.js version'
+    value: ${{ steps.setup-node.outputs.node-version }}
+  
+  cache-hit:
+    description: 'キャッシュヒットしたか / Cache hit status'
+    value: ${{ steps.cache.outputs.cache-hit }}
+  
+  npm-version:
+    description: 'NPMバージョン / NPM version'
+    value: ${{ steps.npm-info.outputs.npm-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ============================================================
+    # Step 1: Node.jsのセットアップ
+    # Node.js environment setup with caching
+    # ============================================================
+    - name: '🔧 Node.js ${{ inputs.node-version }}のセットアップ / Setup Node.js'
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: ${{ inputs.registry-url }}
+        cache: 'npm'
+        cache-dependency-path: '${{ inputs.working-directory }}/package-lock.json'
+
+    # ============================================================
+    # Step 2: NPM情報の取得
+    # Get NPM version information
+    # ============================================================
+    - name: '📊 NPM情報取得 / Get NPM Info'
+      id: npm-info
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "npm-version=$(npm --version)" >> $GITHUB_OUTPUT
+        echo "📦 NPM Version: $(npm --version)"
+        echo "🔧 Node Version: $(node --version)"
+
+    # ============================================================
+    # Step 3: 依存関係のキャッシュ
+    # Cache node_modules for faster builds
+    # ============================================================
+    - name: '💾 依存関係キャッシュ / Cache Dependencies'
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ inputs.working-directory }}/node_modules
+          ~/.npm
+        key: ${{ runner.os }}-${{ inputs.cache-key }}-${{ hashFiles(format('{0}/package-lock.json', inputs.working-directory)) }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-key }}-
+          ${{ runner.os }}-
+
+    # ============================================================
+    # Step 4: 依存関係のインストール
+    # Install dependencies if not cached or forced
+    # ============================================================
+    - name: '📦 依存関係インストール / Install Dependencies'
+      if: inputs.install-dependencies == 'true' && steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "📦 Installing dependencies..."
+        npm ci --prefer-offline --no-audit --no-fund
+        echo "✅ Dependencies installed successfully"
+
+    # ============================================================
+    # Step 5: 環境情報の出力
+    # Output environment information
+    # ============================================================
+    - name: '📋 環境情報出力 / Output Environment Info'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "=========================================="
+        echo "🔧 Environment Setup Complete"
+        echo "=========================================="
+        echo "📊 Node.js: $(node --version)"
+        echo "📦 NPM: $(npm --version)"
+        echo "💾 Cache Hit: ${{ steps.cache.outputs.cache-hit }}"
+        echo "📁 Working Directory: ${{ inputs.working-directory }}"
+        echo "=========================================="

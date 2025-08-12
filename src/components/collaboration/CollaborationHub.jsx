@@ -46,7 +46,9 @@ const CollaborationHub = () => {
             <p className={`mb-4 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               コラボレーション機能を使用するには、ユーザー名を設定してください。
             </p>
-            <label htmlFor="username-input" className="sr-only">ユーザー名</label>
+            <label htmlFor="username-input" className="sr-only">
+              ユーザー名
+            </label>
             <input
               id="username-input"
               type="text"

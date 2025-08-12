@@ -10,24 +10,11 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Badge } from '../ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { ScrollArea } from '../ui/scroll-area'
 import { Separator } from '../ui/separator'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import {
   Dialog,
   DialogContent,
@@ -340,24 +327,22 @@ const PromptLogDashboard = () => {
   }, [statistics, logs])
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto space-y-6 p-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Prompt Log Dashboard</h1>
-          <p className="text-muted-foreground">
-            Monitor and analyze AI prompt interactions
-          </p>
+          <p className="text-muted-foreground">Monitor and analyze AI prompt interactions</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={loadLogs} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
           <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Button>
             </DialogTrigger>
@@ -500,7 +485,7 @@ const PromptLogDashboard = () => {
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="flex justify-center items-center h-64">
+                <div className="flex h-64 items-center justify-center">
                   <RefreshCw className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
@@ -512,11 +497,17 @@ const PromptLogDashboard = () => {
                           <TableHead className="cursor-pointer" onClick={() => handleSort('type')}>
                             Type
                           </TableHead>
-                          <TableHead className="cursor-pointer" onClick={() => handleSort('timestamp')}>
+                          <TableHead
+                            className="cursor-pointer"
+                            onClick={() => handleSort('timestamp')}
+                          >
                             Timestamp
                           </TableHead>
                           <TableHead>User</TableHead>
-                          <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
+                          <TableHead
+                            className="cursor-pointer"
+                            onClick={() => handleSort('status')}
+                          >
                             Status
                           </TableHead>
                           <TableHead>Model</TableHead>
@@ -556,11 +547,7 @@ const PromptLogDashboard = () => {
                                 : '-'}
                             </TableCell>
                             <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedLog(log)}
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => setSelectedLog(log)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
                             </TableCell>
@@ -706,9 +693,7 @@ const PromptLogDashboard = () => {
                   <Separator />
                   <div className="flex justify-between">
                     <span>Average Cost/Request:</span>
-                    <span>
-                      ${statistics?.costAnalysis?.averageCostPerRequest.toFixed(4) || 0}
-                    </span>
+                    <span>${statistics?.costAnalysis?.averageCostPerRequest.toFixed(4) || 0}</span>
                   </div>
                 </div>
               </CardContent>
@@ -749,9 +734,7 @@ const PromptLogDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Export Logs</CardTitle>
-              <CardDescription>
-                Export filtered logs in your preferred format
-              </CardDescription>
+              <CardDescription>Export filtered logs in your preferred format</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -771,7 +754,7 @@ const PromptLogDashboard = () => {
                 </div>
                 <div className="flex items-end">
                   <Button onClick={handleExport} className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                     Export Logs
                   </Button>
                 </div>
@@ -792,11 +775,11 @@ const PromptLogDashboard = () => {
                 <h3 className="text-lg font-semibold">Maintenance</h3>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => promptLogService.cleanupOldLogs()}>
-                    <Archive className="h-4 w-4 mr-2" />
+                    <Archive className="mr-2 h-4 w-4" />
                     Archive Old Logs
                   </Button>
                   <Button variant="destructive" onClick={handleClearAll}>
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Clear All Logs
                   </Button>
                 </div>
@@ -807,9 +790,7 @@ const PromptLogDashboard = () => {
       </Tabs>
 
       {/* Log Detail Dialog */}
-      {selectedLog && (
-        <LogDetailDialog log={selectedLog} onClose={() => setSelectedLog(null)} />
-      )}
+      {selectedLog && <LogDetailDialog log={selectedLog} onClose={() => setSelectedLog(null)} />}
     </div>
   )
 }
@@ -828,12 +809,12 @@ const StatCard = ({ title, value, icon, trend }) => {
           <div className="flex items-center text-xs text-muted-foreground">
             {trend === 'up' ? (
               <>
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
                 <span className="text-green-500">Good</span>
               </>
             ) : (
               <>
-                <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
+                <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
                 <span className="text-red-500">Needs attention</span>
               </>
             )}
@@ -854,7 +835,7 @@ const LogDetailDialog = ({ log, onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Log Details</DialogTitle>
           <DialogDescription>
@@ -874,13 +855,11 @@ const LogDetailDialog = ({ log, onClose }) => {
               <div className="space-y-2">
                 <Label>Prompt</Label>
                 <div className="relative">
-                  <pre className="p-4 bg-muted rounded-lg overflow-x-auto">
-                    {log.prompt}
-                  </pre>
+                  <pre className="overflow-x-auto rounded-lg bg-muted p-4">{log.prompt}</pre>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute top-2 right-2"
+                    className="absolute right-2 top-2"
                     onClick={() => copyToClipboard(log.prompt)}
                   >
                     <Copy className="h-4 w-4" />
@@ -893,13 +872,11 @@ const LogDetailDialog = ({ log, onClose }) => {
               <div className="space-y-2">
                 <Label>Response</Label>
                 <div className="relative">
-                  <pre className="p-4 bg-muted rounded-lg overflow-x-auto">
-                    {log.response}
-                  </pre>
+                  <pre className="overflow-x-auto rounded-lg bg-muted p-4">{log.response}</pre>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute top-2 right-2"
+                    className="absolute right-2 top-2"
                     onClick={() => copyToClipboard(log.response)}
                   >
                     <Copy className="h-4 w-4" />
@@ -942,9 +919,7 @@ const LogDetailDialog = ({ log, onClose }) => {
               </div>
               <div>
                 <Label>Status</Label>
-                <Badge className={getStatusColor(log.status)}>
-                  {log.status || 'N/A'}
-                </Badge>
+                <Badge className={getStatusColor(log.status)}>{log.status || 'N/A'}</Badge>
               </div>
               {log.model && (
                 <div>
@@ -957,7 +932,7 @@ const LogDetailDialog = ({ log, onClose }) => {
             {log.metadata && (
               <div>
                 <Label>Additional Metadata</Label>
-                <pre className="p-4 bg-muted rounded-lg overflow-x-auto text-sm">
+                <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
                   {JSON.stringify(log.metadata, null, 2)}
                 </pre>
               </div>
@@ -993,9 +968,7 @@ const LogDetailDialog = ({ log, onClose }) => {
                     <div className="space-y-1">
                       <p>Prompt: ${log.metrics.cost.prompt.toFixed(4)}</p>
                       <p>Completion: ${log.metrics.cost.completion.toFixed(4)}</p>
-                      <p className="font-semibold">
-                        Total: ${log.metrics.cost.total.toFixed(4)}
-                      </p>
+                      <p className="font-semibold">Total: ${log.metrics.cost.total.toFixed(4)}</p>
                     </div>
                   </div>
                 )}
@@ -1025,7 +998,7 @@ const LogDetailDialog = ({ log, onClose }) => {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="mt-4 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -1083,9 +1056,7 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
           <Label>Retention Policy</Label>
           <Select
             value={localConfig.retentionPolicy}
-            onValueChange={(value) =>
-              setLocalConfig({ ...localConfig, retentionPolicy: value })
-            }
+            onValueChange={(value) => setLocalConfig({ ...localConfig, retentionPolicy: value })}
           >
             <SelectTrigger>
               <SelectValue />
@@ -1116,9 +1087,7 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
             type="checkbox"
             id="encryption"
             checked={localConfig.enableEncryption}
-            onChange={(e) =>
-              setLocalConfig({ ...localConfig, enableEncryption: e.target.checked })
-            }
+            onChange={(e) => setLocalConfig({ ...localConfig, enableEncryption: e.target.checked })}
           />
           <Label htmlFor="encryption">Enable Encryption</Label>
         </div>
@@ -1127,9 +1096,7 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
             type="checkbox"
             id="analytics"
             checked={localConfig.enableAnalytics}
-            onChange={(e) =>
-              setLocalConfig({ ...localConfig, enableAnalytics: e.target.checked })
-            }
+            onChange={(e) => setLocalConfig({ ...localConfig, enableAnalytics: e.target.checked })}
           />
           <Label htmlFor="analytics">Enable Analytics</Label>
         </div>
@@ -1138,9 +1105,7 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
             type="checkbox"
             id="privacy"
             checked={localConfig.privacyMode}
-            onChange={(e) =>
-              setLocalConfig({ ...localConfig, privacyMode: e.target.checked })
-            }
+            onChange={(e) => setLocalConfig({ ...localConfig, privacyMode: e.target.checked })}
           />
           <Label htmlFor="privacy">Privacy Mode (Redact PII)</Label>
         </div>
