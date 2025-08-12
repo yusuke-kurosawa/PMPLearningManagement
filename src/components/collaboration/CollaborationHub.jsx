@@ -46,12 +46,15 @@ const CollaborationHub = () => {
             <p className={`mb-4 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               コラボレーション機能を使用するには、ユーザー名を設定してください。
             </p>
+            <label htmlFor="username-input" className="sr-only">ユーザー名</label>
             <input
+              id="username-input"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSetUsername()}
               placeholder="ユーザー名を入力"
+              aria-label="ユーザー名を入力してください"
               className={`w-full rounded-lg border px-3 py-2 ${
                 settings.darkMode
                   ? 'border-gray-600 bg-gray-700 text-white'
