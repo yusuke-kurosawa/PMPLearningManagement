@@ -100,26 +100,26 @@ jobs:
           fi
           
           # JSON形式でメトリクスを生成
-          cat << EOF > metrics.json
-          {
-            "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-            "repository": {
-              "total_commits": $TOTAL_COMMITS,
-              "total_branches": $TOTAL_BRANCHES
-            },
-            "last_30_days": {
-              "total_commits": $COMMITS_30D,
-              "compliant_commits": $COMPLIANT_30D,
-              "compliance_rate": $COMPLIANCE_RATE_30D,
-              "unique_authors": $AUTHOR_COUNT
-            },
-            "daily_stats": [
-              $(echo -e "$DAILY_STATS" | grep -v '^$' | while IFS=',' read -r date total compliant; do
-                [ -n "$date" ] && echo "{\"date\":\"$date\",\"total\":$total,\"compliant\":$compliant},"
-              done | sed '$ s/,$//')
-            ]
-          }
-          EOF
+          echo "{" > metrics.json
+          echo "  \"timestamp\": \"$(date -u '+%Y-%m-%dT%H:%M:%SZ')\"," >> metrics.json
+          echo "  \"repository\": {" >> metrics.json
+          echo "    \"total_commits\": $TOTAL_COMMITS," >> metrics.json
+          echo "    \"total_branches\": $TOTAL_BRANCHES" >> metrics.json
+          echo "  }," >> metrics.json
+          echo "  \"last_30_days\": {" >> metrics.json
+          echo "    \"total_commits\": $COMMITS_30D," >> metrics.json
+          echo "    \"compliant_commits\": $COMPLIANT_30D," >> metrics.json
+          echo "    \"compliance_rate\": $COMPLIANCE_RATE_30D," >> metrics.json
+          echo "    \"unique_authors\": $AUTHOR_COUNT" >> metrics.json
+          echo "  }," >> metrics.json
+          echo "  \"daily_stats\": [" >> metrics.json
+          echo -e "$DAILY_STATS" | grep -v '^$' | while IFS=',' read -r date total compliant; do
+            [ -n "$date" ] && echo "    {\"date\":\"$date\",\"total\":$total,\"compliant\":$compliant}," >> metrics.json
+          done
+          # 最後のカンマを削除
+          sed -i '$ s/,$//' metrics.json
+          echo "  ]" >> metrics.json
+          echo "}" >> metrics.json
           
           echo "compliance_rate=$COMPLIANCE_RATE_30D" >> $GITHUB_OUTPUT
 
@@ -556,17 +556,23 @@ jobs:
       - name: Update README with Dashboard Link
         run: |
           DASHBOARD_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/idd-dashboard/"
+          COMPLIANCE_RATE="${{ steps.collect-metrics.outputs.compliance_rate }}"
           
           # READMEにダッシュボードバッジを追加
           if ! grep -q "IDD Compliance Dashboard" README.md 2>/dev/null; then
-            cat << EOF >> README.md
+            # バッジの色を決定
+            if [ "$COMPLIANCE_RATE" -ge 95 ]; then
+              BADGE_COLOR="success"
+            else
+              BADGE_COLOR="yellow"
+            fi
             
-            ## 📊 IDD Compliance Dashboard
-            
-            [![IDD Compliance](https://img.shields.io/badge/IDD%20Compliance-${{ steps.collect-metrics.outputs.compliance_rate }}%25-$([ ${{ steps.collect-metrics.outputs.compliance_rate }} -ge 95 ] && echo "success" || echo "yellow"))](${DASHBOARD_URL})
-            
-            View our real-time IDD compliance metrics: [Dashboard](${DASHBOARD_URL})
-            EOF
+            echo "" >> README.md
+            echo "## 📊 IDD Compliance Dashboard" >> README.md
+            echo "" >> README.md
+            echo "[![IDD Compliance](https://img.shields.io/badge/IDD%20Compliance-${COMPLIANCE_RATE}%25-${BADGE_COLOR})](${DASHBOARD_URL})" >> README.md
+            echo "" >> README.md
+            echo "View our real-time IDD compliance metrics: [Dashboard](${DASHBOARD_URL})" >> README.md
             
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
