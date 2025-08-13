@@ -65,7 +65,7 @@ export function formatPercentage(value: number, decimals = 0): string {
 /**
  * Debounce function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => any>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -80,7 +80,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle function
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -133,7 +133,7 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
 /**
  * Check if value is empty
  */
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
   if (value == null) return true
   if (typeof value === 'string') return value.trim().length === 0
   if (Array.isArray(value)) return value.length === 0

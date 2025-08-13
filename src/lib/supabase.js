@@ -6,7 +6,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 // Validate configuration
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase configuration is missing. Authentication features will not work.')
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('Supabase configuration is missing. Authentication features will not work.')
+  }
 }
 
 // Create Supabase client with enhanced security options
@@ -113,7 +115,9 @@ export const authHelpers = {
       .single()
 
     if (error) {
-      console.error('Error fetching user role:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching user role:', error)
+      }
       return 'guest'
     }
 
@@ -128,7 +132,9 @@ export const authHelpers = {
     })
 
     if (error) {
-      console.error('Error checking permission:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error checking permission:', error)
+      }
       return false
     }
 
@@ -146,19 +152,27 @@ export const sessionManager = {
       // Handle different auth events
       switch (event) {
         case 'SIGNED_IN':
-          console.log('User signed in')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('User signed in')
+          }
           break
         case 'SIGNED_OUT':
-          console.log('User signed out')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('User signed out')
+          }
           // Clear any cached data
           localStorage.removeItem('user_profile')
           localStorage.removeItem('user_role')
           break
         case 'TOKEN_REFRESHED':
-          console.log('Token refreshed')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Token refreshed')
+          }
           break
         case 'USER_UPDATED':
-          console.log('User updated')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('User updated')
+          }
           break
         default:
           break

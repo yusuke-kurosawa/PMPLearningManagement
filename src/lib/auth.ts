@@ -4,7 +4,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
-import type { User } from '@prisma/client'
+import type { _User } from '@prisma/client'
 
 declare module 'next-auth' {
   interface Session {
@@ -116,7 +116,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, _profile }) {
       // Allow OAuth sign in without email verification
       if (account?.provider !== 'credentials') {
         return true
@@ -136,9 +136,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn({ user, account, isNewUser }) {
+    async signIn({ user, account, _isNewUser }) {
       // Log sign in event
-      console.log(`User ${user.email} signed in via ${account?.provider}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`User ${user.email} signed in via ${account?.provider}`)
+      }
 
       // Track user activity
       if (user.id) {
@@ -148,13 +150,17 @@ export const authOptions: NextAuthOptions = {
         })
       }
     },
-    async signOut({ session, token }) {
+    async signOut({ _session, _token }) {
       // Log sign out event
-      console.log(`User signed out`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`User signed out`)
+      }
     },
     async createUser({ user }) {
       // Send welcome email
-      console.log(`New user created: ${user.email}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`New user created: ${user.email}`)
+      }
 
       // Initialize user progress
       const pmbokProcesses = await prisma.pMBOKProcess.findMany()

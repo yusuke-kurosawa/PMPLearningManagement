@@ -14,14 +14,12 @@ import {
   Database,
   ToggleLeft,
   ChevronDown,
-  ChevronRight,
   PanelLeft,
   PanelLeftClose,
   Star,
   Clock,
-  Bookmark,
 } from 'lucide-react'
-import { useTheme } from '../../contexts/ThemeContext'
+// import { useTheme } from '../../contexts/ThemeContext' // TODO: Will be used in future
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -29,7 +27,7 @@ const Sidebar = () => {
   const [recentPages, setRecentPages] = useState([])
   const [favorites, setFavorites] = useState(['/matrix', '/mock-exam'])
   const location = useLocation()
-  const { settings } = useTheme()
+  // const { settings } = useTheme() // Will be used for theme-based sidebar configuration
 
   // Track recent pages
   useEffect(() => {

@@ -6,8 +6,8 @@
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import Redis from 'ioredis'
-import { getRedisClient } from './rateLimiting'
+// import Redis from 'ioredis' // TODO: Will be used in future
+// import { getRedisClient } from './rateLimiting' // TODO: Will be used in future
 
 // 暗号化設定
 const ENCRYPTION_CONFIG = {
@@ -101,7 +101,9 @@ const getEncryptionEnv = () => {
         })(),
     })
   } catch (error) {
-    console.error('暗号化環境変数が正しく設定されていません:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('暗号化環境変数が正しく設定されていません:', error)
+    }
     throw new Error('暗号化設定エラー')
   }
 }
@@ -133,7 +135,7 @@ export interface PasswordHashResult {
  */
 export class SymmetricEncryption {
   private readonly masterKey: Buffer
-  private keyManager?: any // Circular dependency回避のため動的インポート
+  private keyManager?: unknown // Circular dependency回避のため動的インポート
 
   constructor() {
     const env = getEncryptionEnv()
@@ -146,7 +148,9 @@ export class SymmetricEncryption {
       const { keyManager } = await import('./keyManagement')
       this.keyManager = keyManager
     } catch (error) {
-      console.warn('Key manager not available, using direct master key:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Key manager not available, using direct master key:', error)
+      }
     }
   }
 
@@ -186,7 +190,9 @@ export class SymmetricEncryption {
         salt: salt?.toString('hex'),
       }
     } catch (error) {
-      console.error('暗号化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('暗号化エラー:', error)
+      }
       throw new Error('暗号化に失敗しました')
     }
   }
@@ -219,7 +225,9 @@ export class SymmetricEncryption {
 
       return decrypted
     } catch (error) {
-      console.error('復号化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('復号化エラー:', error)
+      }
       throw new Error('復号化に失敗しました')
     }
   }
@@ -268,7 +276,9 @@ export class HashingService {
         rounds,
       }
     } catch (error) {
-      console.error('パスワードハッシュ化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('パスワードハッシュ化エラー:', error)
+      }
       throw new Error('パスワードハッシュ化に失敗しました')
     }
   }
@@ -281,7 +291,9 @@ export class HashingService {
       const pepperedPassword = password + this.pepper
       return await bcrypt.compare(pepperedPassword, hash)
     } catch (error) {
-      console.error('パスワード検証エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('パスワード検証エラー:', error)
+      }
       return false
     }
   }
@@ -302,7 +314,9 @@ export class HashingService {
       hmac.update(hashData)
       return hmac.digest('hex')
     } catch (error) {
-      console.error('機密データハッシュ化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('機密データハッシュ化エラー:', error)
+      }
       throw new Error('データハッシュ化に失敗しました')
     }
   }
@@ -455,7 +469,9 @@ export class PIIEncryption {
       try {
         decrypted[key] = this.encryption.decrypt(value)
       } catch (error) {
-        console.error(`PII復号化エラー (${key}):`, error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error(`PII復号化エラー (${key}):`, error)
+        }
         // 復号化に失敗した場合は空文字を返す
         decrypted[key] = ''
       }

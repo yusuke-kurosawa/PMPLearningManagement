@@ -5,20 +5,20 @@
 
 import React, { useState, useEffect } from 'react'
 import {
-  BarChart3,
+  _BarChart3,
   TrendingUp,
   Target,
-  Calendar,
+  _Calendar,
   Clock,
   Trophy,
   Star,
-  BookOpen,
+  _BookOpen,
   Brain,
   Zap,
-  ChevronRight,
-  Settings,
+  _ChevronRight,
+  _Settings,
   Download,
-  Upload,
+  _Upload,
   RefreshCw,
   AlertCircle,
   CheckCircle2,
@@ -27,12 +27,12 @@ import {
 } from 'lucide-react'
 import {
   useProgressStore,
-  type ProcessProgress,
-  type LearningGoal,
-  type StudySession,
-  type Achievement,
+  type _ProcessProgress,
+  type _LearningGoal,
+  type _StudySession,
+  type _Achievement,
 } from '../../stores/progressStore'
-import { api } from '../../lib/api/client'
+// import { api } from '../../lib/api/client' // TODO: Will be used in future
 import { useToast } from '../../hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
@@ -58,14 +58,14 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts'
-import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
+import { format, subDays } from 'date-fns'
 
 const EnhancedProgressDashboard: React.FC = () => {
   const { toast } = useToast()
   const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'achievements'>(
     'overview'
   )
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week')
+  // //   const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week') // TODO: Will be used in future // TODO: Will be used in future
   const [isExporting, setIsExporting] = useState(false)
 
   // Store state and actions
@@ -133,7 +133,7 @@ const EnhancedProgressDashboard: React.FC = () => {
     }
   }
 
-  const handleCreateGoal = async (goalData: any) => {
+  const handleCreateGoal = async (goalData: unknown) => {
     try {
       await createGoal(goalData)
       toast({

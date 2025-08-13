@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Info, Globe, Code, Clock, GitBranch, Hash, User, Calendar } from 'lucide-react'
+import { Info, Globe, Code, Clock, GitBranch, Hash, User } from 'lucide-react'
 
 interface DeploymentInfo {
   environment: string
@@ -38,7 +38,9 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
           setDeploymentInfo(info)
         }
       } catch (error) {
-        console.warn('Could not fetch deployment info:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Could not fetch deployment info:', error)
+        }
         // Fallback to environment variables
         setDeploymentInfo({
           environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',

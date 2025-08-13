@@ -153,7 +153,9 @@ const Register = () => {
 
       // Success is handled in the AuthContext
     } catch (error) {
-      console.error('Registration error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', error)
+      }
     } finally {
       setLoading(false)
     }

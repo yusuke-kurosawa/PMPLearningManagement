@@ -16,7 +16,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 
 const CustomizationPanel = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const { settings, updateSettings, toggleDarkMode, resetSettings, colorThemes } = useTheme()
+  const { settings, updateSettings, toggleDarkMode, resetSettings } = useTheme()
 
   const colorOptions = [
     { value: 'blue', label: '青', color: 'bg-blue-600' },

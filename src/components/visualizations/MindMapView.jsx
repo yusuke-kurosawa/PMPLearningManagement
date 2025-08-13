@@ -132,7 +132,7 @@ const MindMapView = ({ data }) => {
 
     const width = dimensions.width
     const height = dimensions.height
-    const margin = { top: 20, right: 120, bottom: 20, left: 120 }
+    const _margin = { top: 20, right: 120, bottom: 20, left: 120 }
 
     // SVGのクリア
     const svg = d3.select(svgRef.current)
@@ -208,8 +208,8 @@ const MindMapView = ({ data }) => {
       終結: '#dc2626',
     }
 
-    // リンクの描画
-    const link = g
+      // リンクの描画
+      //     const link = g // TODO: Will be used in future
       .selectAll('.link')
       .data(links)
       .enter()

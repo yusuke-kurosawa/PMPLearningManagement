@@ -18,7 +18,7 @@ import {
   Play,
   AlertTriangle,
   BookOpen,
-  // BarChart3, // TODO: Use for statistics
+  // _BarChart3, // TODO: Use for statistics
   Save,
   RefreshCw,
 } from 'lucide-react'
@@ -98,7 +98,9 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
             setTimeout(() => setAutoSaveStatus('idle'), 2000)
           } catch (error) {
             setAutoSaveStatus('error')
-            console.error('Auto-save failed:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Auto-save failed:', error)
+            }
           }
         }
       }, 30000) // Auto-save every 30 seconds

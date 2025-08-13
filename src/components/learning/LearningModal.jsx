@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, CheckCircle2, Clock, BookOpen, Save, Play, Pause } from 'lucide-react'
+import { X, CheckCircle2, BookOpen, Save, Play, Pause } from 'lucide-react'
 import { useProgress, progressService } from '../../services/progressService'
 
 const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, processGroup }) => {

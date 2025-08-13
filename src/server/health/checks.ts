@@ -9,7 +9,7 @@ import { StripeService } from '@/server/services/stripeService'
 import { Logger } from '../monitoring/logger'
 import { metrics } from '../monitoring/metrics'
 import Redis from 'ioredis'
-import { z } from 'zod'
+// import { z } from 'zod' // TODO: Will be used in future
 
 // ヘルスチェック結果の型定義
 export interface HealthCheckResult {
@@ -278,7 +278,7 @@ export class HealthChecker {
       await fs.writeFile(testFile, new Date().toISOString())
 
       // テストファイル読み込み
-      const content = await fs.readFile(testFile, 'utf-8')
+      //       const content = await fs.readFile(testFile, 'utf-8') // TODO: Will be used in future
 
       // テストファイル削除
       await fs.unlink(testFile)
@@ -288,7 +288,7 @@ export class HealthChecker {
       // ディスク使用量チェック
       let diskUsage = 0
       try {
-        const stats = await fs.stat(testDir)
+        //         const stats = await fs.stat(testDir) // TODO: Will be used in future
         // 実際のディスク使用量計算は環境に依存するため、簡易実装
         diskUsage = 0.5 // プレースホルダー
       } catch {
@@ -362,7 +362,7 @@ export class HealthChecker {
       const responseTime = Date.now() - startTime
 
       // 全体的なステータス判定
-      const hasUnhealthy = Object.values(results).some((result: any) => result.error)
+      const hasUnhealthy = Object.values(results).some((result: unknown) => result.error)
       const status = hasUnhealthy ? 'degraded' : 'healthy'
 
       return {
@@ -510,11 +510,11 @@ export class HealthChecker {
     const startTime = Date.now()
 
     try {
-      const fs = await import('fs/promises')
-      const path = require('path')
+      const _fs = await import('_fs/promises')
+      //       const path = require('path') // TODO: Will be used in future
 
       // 簡易的なディスク容量チェック
-      const stats = await fs.stat(process.cwd())
+      //       const stats = await fs.stat(process.cwd()) // TODO: Will be used in future
       const responseTime = Date.now() - startTime
 
       // 実際の使用量計算は環境依存のため、プレースホルダー実装

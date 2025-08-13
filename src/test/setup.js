@@ -8,7 +8,9 @@ try {
   const serverModule = await import('./mocks/server')
   server = serverModule.server
 } catch (error) {
-  console.warn('MSW server not available, skipping mock server setup')
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('MSW server not available, skipping mock server setup')
+  }
 }
 
 // Extend expect with jest-axe matchers

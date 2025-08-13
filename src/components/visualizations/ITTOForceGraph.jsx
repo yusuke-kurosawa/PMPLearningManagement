@@ -60,15 +60,15 @@ const ITTOForceGraph = React.memo(() => {
     []
   )
 
-  const nodeTypeShapes = useMemo(
-    () => ({
-      process: 'circle',
-      input: 'diamond',
-      tool: 'square',
-      output: 'triangle',
-    }),
-    []
-  )
+  // const nodeTypeShapes = useMemo( // TODO: Will be used in future
+  //   () => ({
+  //     process: 'circle',
+  //     input: 'diamond',
+  //     tool: 'square',
+  //     output: 'triangle',
+  //   }),
+  //   []
+  // )
 
   // Check for mobile device
   useEffect(() => {

@@ -22,9 +22,9 @@ const EncryptedUserDataSchema = z.object({
   address: z.string().optional(),
 })
 
-const DecryptionInputSchema = z.object({
+// const _DecryptionInputSchema = z.object({ // TODO: Will be used in future
   encrypted: z.string(),
-  iv: z.string(),
+  iv: z.string(),;
   tag: z.string(),
   salt: z.string().optional(),
 })
@@ -93,9 +93,13 @@ export class EncryptedUserService {
         }
       })
 
-      console.log(`暗号化ユーザーデータが保存されました: ${userId}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`暗号化ユーザーデータが保存されました: ${userId}`)
+      }
     } catch (error) {
-      console.error('暗号化ユーザー作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('暗号化ユーザー作成エラー:', error)
+      }
       throw new Error('暗号化ユーザーデータの保存に失敗しました')
     }
   }
@@ -151,7 +155,9 @@ export class EncryptedUserService {
         address: decryptedUserData.address || undefined,
       }
     } catch (error) {
-      console.error('暗号化ユーザーデータ取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('暗号化ユーザーデータ取得エラー:', error)
+      }
       throw new Error('ユーザーデータの復号に失敗しました')
     }
   }
@@ -222,9 +228,13 @@ export class EncryptedUserService {
         }
       })
 
-      console.log(`暗号化ユーザーデータが更新されました: ${userId}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`暗号化ユーザーデータが更新されました: ${userId}`)
+      }
     } catch (error) {
-      console.error('暗号化ユーザーデータ更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('暗号化ユーザーデータ更新エラー:', error)
+      }
       throw new Error('ユーザーデータの更新に失敗しました')
     }
   }
@@ -245,7 +255,9 @@ export class EncryptedUserService {
 
       return result.length > 0 ? result[0].userId : null
     } catch (error) {
-      console.error('メールハッシュ検索エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('メールハッシュ検索エラー:', error)
+      }
       return null
     }
   }
@@ -272,7 +284,9 @@ export class EncryptedUserService {
 
       return result.map((r) => r.userId)
     } catch (error) {
-      console.error('部分マッチング検索エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('部分マッチング検索エラー:', error)
+      }
       return []
     }
   }
@@ -293,9 +307,13 @@ export class EncryptedUserService {
         `
       })
 
-      console.log(`暗号化ユーザーデータが削除されました: ${userId}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`暗号化ユーザーデータが削除されました: ${userId}`)
+      }
     } catch (error) {
-      console.error('暗号化ユーザーデータ削除エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('暗号化ユーザーデータ削除エラー:', error)
+      }
       throw new Error('ユーザーデータの削除に失敗しました')
     }
   }
@@ -333,7 +351,9 @@ export class EncryptedUserService {
         issueDescription: row.issue_description,
       }))
     } catch (error) {
-      console.error('データ整合性チェックエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('データ整合性チェックエラー:', error)
+      }
       throw new Error('データ整合性チェックに失敗しました')
     }
   }
@@ -369,20 +389,24 @@ export class EncryptedUserService {
           })
           migrated++
         } catch (error) {
-          console.error(`ユーザー ${user.id} の移行に失敗:`, error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`ユーザー ${user.id} の移行に失敗:`, error)
+          }
           errors++
         }
       }
 
       return { migrated, errors }
     } catch (error) {
-      console.error('データ移行エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('データ移行エラー:', error)
+      }
       throw new Error('データ移行に失敗しました')
     }
   }
 }
 
 // サービスインスタンスのエクスポート
-export const encryptedUserService = new EncryptedUserService()
+export const _encryptedUserService = new EncryptedUserService()
 
 export default EncryptedUserService

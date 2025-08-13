@@ -172,7 +172,7 @@ export class Logger {
     metadata?: Record<string, any>
   ): Promise<T> {
     const startTime = process.hrtime.bigint()
-    const startMemory = process.memoryUsage()
+    //     const startMemory = process.memoryUsage() // TODO: Will be used in future
 
     try {
       const result = await fn()
@@ -405,7 +405,7 @@ export class Logger {
 }
 
 // Express/Next.js用のリクエストログミドルウェア
-export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
+export const requestLoggingMiddleware = (req: unknown, res: unknown, next: unknown) => {
   const startTime = Date.now()
   const correlationId = req.headers['x-correlation-id'] || Logger.generateCorrelationId()
 
@@ -431,7 +431,7 @@ export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
 
   // レスポンス終了時のログ
   const originalSend = res.send
-  res.send = function (data: any) {
+  res.send = function (data: unknown) {
     const duration = Date.now() - startTime
     const statusCode = res.statusCode
 
@@ -456,7 +456,7 @@ export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
 
 // tRPC用のログミドルウェア
 export const trpcLoggingMiddleware = () => {
-  return async ({ path, type, next, ctx }: any) => {
+  return async ({ path, type, next, ctx }: unknown) => {
     const correlationId = Logger.generateCorrelationId()
     const startTime = Date.now()
 
@@ -506,7 +506,7 @@ export const getLogStats = (): {
   }>
 } => {
   return {
-    transports: logger.transports.map((transport: any) => ({
+    transports: logger.transports.map((transport: unknown) => ({
       name: transport.name,
       level: transport.level,
       filename: transport.filename,

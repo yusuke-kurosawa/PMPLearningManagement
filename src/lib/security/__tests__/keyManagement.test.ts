@@ -3,7 +3,7 @@
  * Developer 3: 包括的なキー管理機能テスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi, beforeAll } from 'vitest'
 import { KeyManagementSystem, EnhancedEncryptionService } from '../keyManagement'
 import * as fc from 'fast-check'
 import crypto from 'crypto'
@@ -219,7 +219,7 @@ describe('KeyManagementSystem', () => {
     })
 
     it('should update rotation statistics', async () => {
-      const statsBefore = await keyManager.getKeyUsageStatistics()
+      //       const statsBefore = await keyManager.getKeyUsageStatistics() // TODO: Will be used in future
 
       await keyManager.performKeyRotation()
 

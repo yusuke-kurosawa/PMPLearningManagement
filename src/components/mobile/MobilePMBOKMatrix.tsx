@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useTouchGestures, useHapticFeedback } from '@/hooks/useTouchGestures'
+import { useHapticFeedback } from '@/hooks/useTouchGestures'
 
 interface Process {
   id: string

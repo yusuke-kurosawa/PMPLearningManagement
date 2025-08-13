@@ -130,7 +130,9 @@ class ProgressService {
       }
       return this.getDefaultProgress()
     } catch (error) {
-      console.error('Error loading progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading progress:', error)
+      }
       return this.getDefaultProgress()
     }
   }
@@ -141,7 +143,9 @@ class ProgressService {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
       return true
     } catch (error) {
-      console.error('Error saving progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error saving progress:', error)
+      }
       return false
     }
   }
@@ -424,7 +428,9 @@ export const useProgress = () => {
         const stats = calculateStatistics(progressData)
         setStatistics(stats)
       } catch (error) {
-        console.error('Error loading progress data:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading progress data:', error)
+        }
         // エラーの場合もデフォルトデータで初期化
         const defaultData = progressService.getDefaultProgress()
         setProgress(defaultData)

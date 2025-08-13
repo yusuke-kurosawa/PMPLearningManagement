@@ -23,12 +23,12 @@ import {
   Grid3x3,
   List,
   ChevronDown,
-  ChevronRight,
+  _ChevronRight,
 } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 
 const UserSettingsPanel = ({ isOpen, onClose }) => {
-  const { settings, updateSettings, toggleDarkMode } = useTheme()
+  const { settings, updateSettings } = useTheme()
   const [activeTab, setActiveTab] = useState('appearance')
   const [localSettings, setLocalSettings] = useState(settings)
   const [hasChanges, setHasChanges] = useState(false)

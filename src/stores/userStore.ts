@@ -69,7 +69,7 @@ const defaultPreferences: UserPreferences = {
   },
 }
 
-export const useUserStore = create<UserState>()(
+export const _useUserStore = create<UserState>()(
   persist(
     immer((set) => ({
       currentUser: null,

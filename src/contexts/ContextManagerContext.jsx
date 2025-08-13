@@ -198,7 +198,7 @@ export const withPerformanceOptimization = (Component, options = {}) => {
   OptimizedComponent.displayName = `Optimized(${Component.displayName || Component.name})`
 
   const EnhancedComponent = (props) => {
-    const { } = usePerformanceOptimizer() // Removed unused optimizeComponent
+    usePerformanceOptimizer() // Call hook without destructuring
 
     // Apply additional optimizations if needed
     useEffect(() => {
@@ -209,9 +209,9 @@ export const withPerformanceOptimization = (Component, options = {}) => {
 
     return <OptimizedComponent {...props} />
   }
-  
+
   EnhancedComponent.displayName = `withPerformanceOptimization(${Component.displayName || Component.name || 'Component'})`
-  
+
   return EnhancedComponent
 }
 

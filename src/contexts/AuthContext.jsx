@@ -74,7 +74,10 @@ export const AuthProvider = ({ children }) => {
 
   // Handle auth state changes
   const handleAuthStateChange = async (event, session) => {
-    console.log('Auth state changed:', event)
+    // Log auth state changes in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Auth state changed:', event)
+    }
 
     switch (event) {
       case 'SIGNED_IN':
@@ -147,7 +150,9 @@ export const AuthProvider = ({ children }) => {
 
       setPermissions(rolePermissions[userRole] || [])
     } catch (error) {
-      console.error('Load permissions error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Load permissions error:', error)
+      }
     }
   }
 
@@ -245,7 +250,9 @@ export const AuthProvider = ({ children }) => {
       await authService.signOut()
       toast.success('Signed out successfully')
     } catch (error) {
-      console.error('Sign out error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Sign out error:', error)
+      }
       toast.error('Sign out failed')
     } finally {
       setLoading(false)
@@ -412,9 +419,9 @@ export const withAuth = (Component, requiredRole = null) => {
 
     return <Component {...props} />
   }
-  
+
   WrappedComponent.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`
-  
+
   return WrappedComponent
 }
 

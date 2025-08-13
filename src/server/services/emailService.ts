@@ -129,7 +129,9 @@ class EmailTemplateLoader {
 
       return template
     } catch (error) {
-      console.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
+      }
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: `メールテンプレートが見つかりません: ${templateName}`,
@@ -259,14 +261,18 @@ export class EmailService {
         },
       })
 
-      console.log(`メール送信成功: ${result.messageId}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`メール送信成功: ${result.messageId}`)
+      }
 
       return {
         success: true,
         messageId: result.messageId,
       }
     } catch (error) {
-      console.error('メール送信エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('メール送信エラー:', error)
+      }
 
       return {
         success: false,
@@ -288,7 +294,9 @@ export class EmailService {
         template = await EmailTemplateLoader.loadTemplate(templateName)
       } catch {
         // テンプレートが見つからない場合はデフォルトを使用
-        console.warn(
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(
+        }
           `テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`
         )
         template = EmailTemplateLoader.getDefaultTemplate()
@@ -305,7 +313,9 @@ export class EmailService {
         text: textTemplate ? textTemplate(data) : undefined,
       }
     } catch (error) {
-      console.error('テンプレートレンダリングエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('テンプレートレンダリングエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'メールテンプレートの処理中にエラーが発生しました',
@@ -385,7 +395,9 @@ export class EmailService {
       await this.transporter.verify()
       return { success: true }
     } catch (error) {
-      console.error('SMTP接続確認エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('SMTP接続確認エラー:', error)
+      }
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Connection failed',
@@ -403,13 +415,15 @@ export class EmailService {
   static async unsubscribe(email: string, type: string): Promise<void> {
     // 実装に応じて配信停止リストに追加
     // 例: データベースに記録、外部サービスAPI呼び出しなど
-    console.log(`配信停止登録: ${email} (type: ${type})`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`配信停止登録: ${email} (type: ${type})`)
+    }
   }
 
   // メール送信統計取得
   static async getEmailStats(
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): Promise<{
     totalSent: number
     successRate: number

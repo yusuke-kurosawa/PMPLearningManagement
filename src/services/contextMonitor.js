@@ -111,7 +111,9 @@ class ContextMonitor {
       const stats = contextManager.getStats()
       return stats.totalSizeKB * 1024
     } catch (error) {
-      console.warn('Memory estimation failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Memory estimation failed:', error)
+      }
       return 0
     }
   }
@@ -174,7 +176,9 @@ class ContextMonitor {
    * Handle critical memory situation
    */
   async handleCriticalMemory() {
-    console.warn('🚨 Critical memory usage detected, switching to aggressive rotation')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🚨 Critical memory usage detected, switching to aggressive rotation')
+    }
 
     this.currentPolicy = 'aggressive'
     await this.performEmergencyCleanup()
@@ -185,7 +189,9 @@ class ContextMonitor {
    * Handle warning memory situation
    */
   async handleWarningMemory() {
-    console.warn('⚠️ High memory usage detected, performing cleanup')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ High memory usage detected, performing cleanup')
+    }
 
     await contextManager.cleanup()
     await contextManager.archiveOldData()
@@ -195,7 +201,9 @@ class ContextMonitor {
    * Handle slow retrieval performance
    */
   handleSlowRetrieval() {
-    console.warn('🐌 Slow retrieval detected, optimizing cache')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🐌 Slow retrieval detected, optimizing cache')
+    }
 
     // Switch to more aggressive caching
     this.currentPolicy = 'aggressive'
@@ -205,7 +213,9 @@ class ContextMonitor {
    * Handle high error rate
    */
   handleHighErrorRate() {
-    console.error('❌ High error rate detected in context operations')
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ High error rate detected in context operations')
+    }
 
     // Reset context manager and clear corrupted data
     this.performDiagnostics()
@@ -232,12 +242,16 @@ class ContextMonitor {
    * Perform context rotation
    */
   async performRotation(policy) {
-    console.warn(`🔄 Performing context rotation with policy: ${this.currentPolicy}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`🔄 Performing context rotation with policy: ${this.currentPolicy}`)
+    }
 
     const archived = await contextManager.archiveOldData(policy.maxAge)
     const cleaned = await contextManager.cleanup()
 
-    console.warn(`✅ Rotation complete: archived ${archived}, cleaned ${cleaned}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`✅ Rotation complete: archived ${archived}, cleaned ${cleaned}`)
+    }
 
     // Record the cleanup
     this.metrics.lastCleanup = Date.now()
@@ -247,7 +261,9 @@ class ContextMonitor {
    * Perform emergency cleanup
    */
   async performEmergencyCleanup() {
-    console.warn('🆘 Performing emergency context cleanup')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🆘 Performing emergency context cleanup')
+    }
 
     // Archive everything older than 1 hour
     await contextManager.archiveOldData(60 * 60 * 1000)
@@ -272,19 +288,25 @@ class ContextMonitor {
    * Perform regular cleanup
    */
   async performCleanup() {
-    console.warn('🧹 Performing scheduled context cleanup')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🧹 Performing scheduled context cleanup')
+    }
 
     const cleaned = await contextManager.cleanup()
     const archived = await contextManager.archiveOldData()
 
-    console.warn(`✅ Cleanup complete: archived ${archived}, cleaned ${cleaned}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`✅ Cleanup complete: archived ${archived}, cleaned ${cleaned}`)
+    }
   }
 
   /**
    * Perform diagnostics
    */
   performDiagnostics() {
-    console.warn('🔍 Running context diagnostics...')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🔍 Running context diagnostics...')
+    }
 
     const stats = contextManager.getStats()
     const memoryUsage = this.getCurrentMemoryUsage()
@@ -304,7 +326,9 @@ class ContextMonitor {
       },
     }
 
-    console.warn('📊 Context Diagnostics:', diagnostics)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('📊 Context Diagnostics:', diagnostics)
+    }
     return diagnostics
   }
 
@@ -363,7 +387,9 @@ class ContextMonitor {
   setRotationPolicy(policy) {
     if (this.rotationPolicies[policy]) {
       this.currentPolicy = policy
-      console.warn(`🔧 Context rotation policy changed to: ${policy}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`🔧 Context rotation policy changed to: ${policy}`)
+      }
     }
   }
 

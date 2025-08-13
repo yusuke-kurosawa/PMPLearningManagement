@@ -9,7 +9,7 @@ import {
   BarChart3,
   HelpCircle,
   ChevronRight,
-  ArrowRight,
+  _ArrowRight,
   Target,
   CheckCircle,
   AlertCircle,

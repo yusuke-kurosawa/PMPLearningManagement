@@ -12,7 +12,7 @@ import {
   studySessionSchema,
   learningGoalSchema,
 } from '@/server/services/learningService'
-import { ProgressService, progressFilterSchema } from '@/server/services/progressService'
+import { ProgressService } from '@/server/services/progressService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { prisma } from '@/lib/db'
 
@@ -268,7 +268,7 @@ export const learningRouter = createTRPCRouter({
         confirmReset: z.boolean().refine((val) => val === true, '進捗リセットの確認が必要です'),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, _input }) => {
       await LearningService.resetProgress(ctx.session.user.id)
 
       await prisma.userActivity.create({

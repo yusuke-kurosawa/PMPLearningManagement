@@ -1,5 +1,5 @@
 // PMP用語集データ
-export const glossaryCategories = [
+export const _glossaryCategories = [
   { id: 'general', name: '一般', color: 'bg-gray-500' },
   { id: 'scope', name: 'スコープ', color: 'bg-blue-500' },
   { id: 'schedule', name: 'スケジュール', color: 'bg-cyan-500' },
@@ -415,7 +415,7 @@ export const glossaryTerms = [
 ]
 
 // 検索用のインデックスを作成
-export const searchIndex = glossaryTerms.reduce((acc, term) => {
+export const _searchIndex = glossaryTerms.reduce((acc, term) => {
   const searchText = `${term.term} ${term.japanese} ${term.description}`.toLowerCase()
   acc[term.id] = searchText
   return acc

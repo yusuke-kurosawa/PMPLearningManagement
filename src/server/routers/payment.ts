@@ -58,7 +58,7 @@ export const paymentRouter = createTRPCRouter({
   }),
 
   // 利用可能なプラン一覧取得
-  getPlans: protectedProcedure.query(async ({ ctx }) => {
+  getPlans: protectedProcedure.query(async ({ _ctx }) => {
     return SubscriptionService.getAvailablePlans()
   }),
 
@@ -267,7 +267,9 @@ export const paymentRouter = createTRPCRouter({
           message: '支払い方法が削除されました',
         }
       } catch (error) {
-        console.error('支払い方法削除エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('支払い方法削除エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: '支払い方法の削除中にエラーが発生しました',
@@ -419,7 +421,9 @@ export const paymentRouter = createTRPCRouter({
           paymentIntentId: paymentIntent.id,
         }
       } catch (error) {
-        console.error('PaymentIntent作成エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('PaymentIntent作成エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: '決済の準備中にエラーが発生しました',
@@ -499,7 +503,9 @@ export const paymentRouter = createTRPCRouter({
             : null,
         }
       } catch (error) {
-        console.error('請求書PDF生成エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('請求書PDF生成エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: '請求書の生成中にエラーが発生しました',
@@ -565,7 +571,9 @@ export const paymentRouter = createTRPCRouter({
           throw error
         }
 
-        console.error('プロモーションコード適用エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('プロモーションコード適用エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'プロモーションコードの適用中にエラーが発生しました',

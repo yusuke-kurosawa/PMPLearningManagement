@@ -3,7 +3,7 @@
  * Developer 4: データベース最適化・インデックス・接続プール設定のテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest'
 import {
   EnhancedPrismaClient,
   DatabaseManager,
@@ -599,7 +599,7 @@ describe('データベース最適化システム', () => {
     })
 
     it('クエリエラー時の統計記録', async () => {
-      const client = new EnhancedPrismaClient()
+      //       const client = new EnhancedPrismaClient() // TODO: Will be used in future
 
       // エラーを発生させるミドルウェアをテスト
       const middleware = vi.fn().mockRejectedValue(new Error('Query failed'))

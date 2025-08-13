@@ -87,7 +87,9 @@ class AuditLogger {
         await this.flush()
       }
     } catch (error) {
-      console.error('Audit logging error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Audit logging error:', error)
+      }
     }
   }
 
@@ -131,12 +133,16 @@ class AuditLogger {
       const { error } = await supabase.from('audit_logs').insert(batch)
 
       if (error) {
-        console.error('Failed to insert audit logs:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to insert audit logs:', error)
+        }
         // Re-add to queue on failure
         this.queue.unshift(...batch)
       }
     } catch (error) {
-      console.error('Audit flush error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Audit flush error:', error)
+      }
       // Re-add to queue on failure
       this.queue.unshift(...batch)
     }
@@ -268,7 +274,9 @@ class AuditLogger {
 
       return data
     } catch (error) {
-      console.error('Query audit logs error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Query audit logs error:', error)
+      }
       throw error
     }
   }
@@ -326,7 +334,9 @@ class AuditLogger {
 
       return metrics
     } catch (error) {
-      console.error('Get security metrics error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Get security metrics error:', error)
+      }
       throw error
     }
   }
@@ -368,7 +378,9 @@ class AuditLogger {
 
       return patterns
     } catch (error) {
-      console.error('Detect suspicious patterns error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Detect suspicious patterns error:', error)
+      }
       return null
     }
   }

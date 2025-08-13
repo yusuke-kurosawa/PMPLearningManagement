@@ -160,12 +160,12 @@ const QuickShortcuts = ({ className = '' }) => {
   }
 
   // Reorder shortcuts (simplified drag and drop)
-  const moveShortcut = (fromIndex, toIndex) => {
-    const newShortcuts = [...shortcuts]
-    const [moved] = newShortcuts.splice(fromIndex, 1)
-    newShortcuts.splice(toIndex, 0, moved)
-    setShortcuts(newShortcuts)
-  }
+  // const moveShortcut = (fromIndex, toIndex) => { // TODO: Will be used in future
+  //   const newShortcuts = [...shortcuts]
+  //   const [moved] = newShortcuts.splice(fromIndex, 1)
+  //   newShortcuts.splice(toIndex, 0, moved)
+  //   setShortcuts(newShortcuts)
+  // }
 
   if (!showShortcuts) {
     return (
@@ -213,7 +213,7 @@ const QuickShortcuts = ({ className = '' }) => {
 
       {/* Shortcuts Grid */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {shortcuts.map((shortcut, index) => {
+        {shortcuts.map((shortcut, _index) => {
           const Icon = shortcut.icon
           return (
             <div key={shortcut.id} className="group relative">

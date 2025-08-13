@@ -9,7 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/trpc'
 import { prisma } from '@/lib/db'
 import { hashPassword, verifyPassword } from '@/server/auth/providers'
-import { createPermissionChecker, Permission } from '@/server/auth/rbac'
+// import { createPermissionChecker, Permission } from '@/server/auth/rbac' // TODO: Will be used in future
 import { UserRole, SubscriptionPlan } from '@prisma/client'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
 import crypto from 'crypto'
@@ -49,9 +49,9 @@ const signUpSchema = z.object({
   agreeToTerms: z.boolean().refine((val) => val === true, '利用規約に同意する必要があります'),
 })
 
-const signInSchema = z.object({
+// const _signInSchema = z.object({ // TODO: Will be used in future
   email: z.string().email('有効なメールアドレスを入力してください').toLowerCase(),
-  password: z.string().min(1, 'パスワードを入力してください'),
+  password: z.string().min(1, 'パスワードを入力してください'),;
   remember: z.boolean().optional().default(false),
 })
 
@@ -192,7 +192,9 @@ export const authRouter = createTRPCRouter({
           },
         })
       } catch (emailError) {
-        console.error('確認メール送信エラー:', emailError)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('確認メール送信エラー:', emailError)
+        }
         // メール送信失敗でもユーザー作成は継続
       }
 
@@ -222,7 +224,9 @@ export const authRouter = createTRPCRouter({
         throw error
       }
 
-      console.error('ユーザー登録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー登録エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '登録処理中にエラーが発生しました',
@@ -278,7 +282,9 @@ export const authRouter = createTRPCRouter({
           throw error
         }
 
-        console.error('メール確認エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('メール確認エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'メール確認処理中にエラーが発生しました',
@@ -332,7 +338,9 @@ export const authRouter = createTRPCRouter({
             },
           })
         } catch (emailError) {
-          console.error('パスワードリセットメール送信エラー:', emailError)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('パスワードリセットメール送信エラー:', emailError)
+          }
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'メール送信中にエラーが発生しました',
@@ -358,7 +366,9 @@ export const authRouter = createTRPCRouter({
           throw error
         }
 
-        console.error('パスワードリセット要求エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('パスワードリセット要求エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'パスワードリセット処理中にエラーが発生しました',
@@ -415,7 +425,9 @@ export const authRouter = createTRPCRouter({
         throw error
       }
 
-      console.error('パスワードリセットエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('パスワードリセットエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'パスワードリセット処理中にエラーが発生しました',
@@ -527,7 +539,9 @@ export const authRouter = createTRPCRouter({
         message: 'プロフィールが更新されました',
       }
     } catch (error) {
-      console.error('プロフィール更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('プロフィール更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'プロフィール更新中にエラーが発生しました',
@@ -591,7 +605,9 @@ export const authRouter = createTRPCRouter({
           throw error
         }
 
-        console.error('パスワード変更エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('パスワード変更エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'パスワード変更中にエラーが発生しました',
@@ -655,7 +671,9 @@ export const authRouter = createTRPCRouter({
             },
           })
         } catch (emailError) {
-          console.error('アカウント削除確認メール送信エラー:', emailError)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('アカウント削除確認メール送信エラー:', emailError)
+          }
           // メール送信失敗でもアカウント削除は継続
         }
 
@@ -667,7 +685,9 @@ export const authRouter = createTRPCRouter({
           throw error
         }
 
-        console.error('アカウント削除エラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('アカウント削除エラー:', error)
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'アカウント削除中にエラーが発生しました',

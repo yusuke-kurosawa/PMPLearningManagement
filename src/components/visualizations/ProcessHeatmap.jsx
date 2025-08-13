@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import * as d3 from 'd3'
-import { Download, Info, Settings } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 const ProcessHeatmap = ({ data, progressData }) => {
   const svgRef = useRef(null)

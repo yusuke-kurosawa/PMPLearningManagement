@@ -216,7 +216,9 @@ export class NotificationService {
 
         results.push({ channel, success: true })
       } catch (error) {
-        console.error(`通知送信エラー (${channel}):`, error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error(`通知送信エラー (${channel}):`, error)
+        }
         results.push({
           channel,
           success: false,
@@ -282,7 +284,9 @@ export class NotificationService {
         frequency: { ...defaultSettings.frequency, ...settings?.frequency },
       }
     } catch (error) {
-      console.error('通知設定取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('通知設定取得エラー:', error)
+      }
       return null
     }
   }
@@ -334,7 +338,9 @@ export class NotificationService {
         throw error
       }
 
-      console.error('通知設定更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('通知設定更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '通知設定の更新中にエラーが発生しました',
@@ -458,7 +464,9 @@ export class NotificationService {
 
       return scheduledNotification.id
     } catch (error) {
-      console.error('スケジュール通知作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('スケジュール通知作成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'スケジュール通知の作成中にエラーが発生しました',
@@ -510,7 +518,9 @@ export class NotificationService {
 
           processed++
         } catch (error) {
-          console.error(`スケジュール通知送信エラー (${scheduled.id}):`, error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`スケジュール通知送信エラー (${scheduled.id}):`, error)
+          }
 
           // 失敗回数更新
           await prisma.scheduledNotification.update({
@@ -526,7 +536,9 @@ export class NotificationService {
         }
       }
     } catch (error) {
-      console.error('スケジュール通知処理エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('スケジュール通知処理エラー:', error)
+      }
     }
 
     return { processed, failed }
@@ -594,7 +606,9 @@ export class NotificationService {
         totalCount,
       }
     } catch (error) {
-      console.error('アプリ内通知取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('アプリ内通知取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'アプリ内通知の取得中にエラーが発生しました',
@@ -616,7 +630,9 @@ export class NotificationService {
         },
       })
     } catch (error) {
-      console.error('通知既読マークエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('通知既読マークエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '通知の既読マーク中にエラーが発生しました',
@@ -640,7 +656,9 @@ export class NotificationService {
 
       return result.count
     } catch (error) {
-      console.error('全通知既読マークエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('全通知既読マークエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '全通知の既読マーク中にエラーが発生しました',
@@ -666,7 +684,9 @@ export class NotificationService {
         },
       })
     } catch (error) {
-      console.error('通知履歴記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('通知履歴記録エラー:', error)
+      }
       // 履歴記録エラーは処理を妨げない
     }
   }
@@ -682,10 +702,14 @@ export class NotificationService {
         },
       })
 
-      console.log(`期限切れ通知削除: ${result.count}件`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`期限切れ通知削除: ${result.count}件`)
+      }
       return { deleted: result.count }
     } catch (error) {
-      console.error('期限切れ通知クリーンアップエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('期限切れ通知クリーンアップエラー:', error)
+      }
       return { deleted: 0 }
     }
   }

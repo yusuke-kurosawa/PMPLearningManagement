@@ -59,7 +59,7 @@ export class EnhancedPrismaClient extends PrismaClient {
   private slowQueryThreshold: number = 1000 // 1秒
 
   constructor(config?: ConnectionPoolConfig) {
-    const validatedConfig = ConnectionPoolConfigSchema.parse(config || {})
+    const _validatedConfig = ConnectionPoolConfigSchema.parse(config || {})
 
     super({
       datasources: {
@@ -100,7 +100,9 @@ export class EnhancedPrismaClient extends PrismaClient {
       this.recordQueryStats(e.query, e.duration)
 
       if (e.duration > this.slowQueryThreshold) {
-        console.warn(`Slow query detected (${e.duration}ms):`, {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Slow query detected (${e.duration}ms):`, {
+        }
           query: e.query.substring(0, 200),
           duration: e.duration,
           params: e.params,
@@ -110,17 +112,23 @@ export class EnhancedPrismaClient extends PrismaClient {
 
     // エラーイベント
     this.$on('error', (e) => {
-      console.error('Database error:', e)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Database error:', e)
+      }
     })
 
     // 情報イベント
     this.$on('info', (e) => {
-      console.info('Database info:', e.message)
+      if (process.env.NODE_ENV === 'development') {
+        console.info('Database info:', e.message)
+      }
     })
 
     // 警告イベント
     this.$on('warn', (e) => {
-      console.warn('Database warning:', e.message)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Database warning:', e.message)
+      }
     })
   }
 
@@ -242,7 +250,9 @@ export class EnhancedPrismaClient extends PrismaClient {
         ),
       }
     } catch (error) {
-      console.error('Failed to get connection stats:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to get connection stats:', error)
+      }
       return {
         totalConnections: 0,
         activeConnections: 0,
@@ -354,7 +364,9 @@ export class EnhancedPrismaClient extends PrismaClient {
         },
       }
     } catch (error) {
-      console.error('Health check failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Health check failed:', error)
+      }
       return {
         status: 'unhealthy',
         details: {
@@ -393,7 +405,9 @@ export class EnhancedPrismaClient extends PrismaClient {
           await this.$executeRaw`ANALYZE ${table.tablename}`
           tablesAnalyzed++
         } catch (error) {
-          console.warn(`Failed to analyze table ${table.tablename}:`, error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Failed to analyze table ${table.tablename}:`, error)
+          }
         }
       }
 
@@ -404,18 +418,24 @@ export class EnhancedPrismaClient extends PrismaClient {
             await this.$executeRaw`VACUUM ANALYZE ${table.tablename}`
             vacuumCleaned++
           } catch (error) {
-            console.warn(`Failed to vacuum table ${table.tablename}:`, error)
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(`Failed to vacuum table ${table.tablename}:`, error)
+            }
           }
         }
       }
 
-      console.log(
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+      }
         `Database optimization completed: ${tablesAnalyzed} tables analyzed, ${vacuumCleaned} tables vacuumed`
       )
 
       return { tablesAnalyzed, indexesRebuilt, vacuumCleaned }
     } catch (error) {
-      console.error('Database optimization failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Database optimization failed:', error)
+      }
       return { tablesAnalyzed, indexesRebuilt, vacuumCleaned }
     }
   }
@@ -435,9 +455,13 @@ class DatabaseManager {
       try {
         DatabaseManager.instance = new EnhancedPrismaClient(config)
         await DatabaseManager.instance.$connect()
-        console.log('Database connection pool initialized')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Database connection pool initialized')
+        }
       } catch (error) {
-        console.error('Database connection failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Database connection failed:', error)
+        }
         DatabaseManager.instance = null
         throw error
       } finally {
@@ -461,7 +485,9 @@ class DatabaseManager {
     if (DatabaseManager.instance) {
       await DatabaseManager.instance.$disconnect()
       DatabaseManager.instance = null
-      console.log('Database connection pool disconnected')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Database connection pool disconnected')
+      }
     }
   }
 
@@ -491,7 +517,9 @@ export class DatabaseMonitor {
       this.checkAlerts()
     }, intervalMs)
 
-    console.log(`Database monitoring started (interval: ${intervalMs}ms)`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Database monitoring started (interval: ${intervalMs}ms)`)
+    }
   }
 
   /**
@@ -510,7 +538,9 @@ export class DatabaseMonitor {
       this.metrics.set('successful_queries', stats.acquiredCount)
       this.metrics.set('failed_queries', stats.failedCount)
     } catch (error) {
-      console.error('Failed to collect database metrics:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to collect database metrics:', error)
+      }
     }
   }
 
@@ -553,7 +583,9 @@ export class DatabaseMonitor {
       this.alerts = this.alerts.slice(-100)
     }
 
-    console.warn(`Database alert [${type}]: ${message}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Database alert [${type}]: ${message}`)
+    }
   }
 
   /**

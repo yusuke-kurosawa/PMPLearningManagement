@@ -116,7 +116,9 @@ const AuthCallback = () => {
           }
         }
       } catch (error) {
-        console.error('Auth callback error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Auth callback error:', error)
+        }
         setStatus('error')
         setError(error.message)
         setMessage('Authentication failed. Please try again.')

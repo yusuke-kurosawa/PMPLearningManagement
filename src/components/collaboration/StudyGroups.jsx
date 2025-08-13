@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   Users,
   Plus,
-  // Calendar, // TODO: Use for scheduling
+  // _Calendar, // TODO: Use for scheduling
   Target,
   Bell,
   // UserPlus, // TODO: Use for adding users

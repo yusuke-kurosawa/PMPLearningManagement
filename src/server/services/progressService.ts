@@ -7,7 +7,7 @@
 import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { UserRole, SubscriptionPlan } from '@prisma/client'
+// import { SubscriptionPlan } from '@prisma/client' // TODO: Will be used in future
 
 // 進捗分析期間の定義
 export type AnalysisPeriod = 'week' | 'month' | 'quarter' | 'year' | 'all'
@@ -251,7 +251,9 @@ export class ProgressService {
         },
       }
     } catch (error) {
-      console.error('ユーザーメトリクス計算エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザーメトリクス計算エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'メトリクス計算中にエラーが発生しました',
@@ -402,7 +404,9 @@ export class ProgressService {
         throw error
       }
 
-      console.error('コホート比較分析エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('コホート比較分析エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'コホート比較分析中にエラーが発生しました',
@@ -444,11 +448,10 @@ export class ProgressService {
           : 0
 
       // 学習ペース分析
-      const dailyAverageTime =
-        recentSessions.length > 0
-          ? recentSessions.reduce((sum, session) => sum + session.duration, 0) /
-            recentSessions.length
-          : 1800 // デフォルト30分
+      //       const dailyAverageTime = // TODO: Will be used in future
+      recentSessions.length > 0
+        ? recentSessions.reduce((sum, session) => sum + session.duration, 0) / recentSessions.length
+        : 1800 // デフォルト30分
 
       // 認定準備度スコア計算
       const readinessFactors = {
@@ -542,7 +545,9 @@ export class ProgressService {
         throw error
       }
 
-      console.error('予測分析エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('予測分析エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '予測分析中にエラーが発生しました',
@@ -747,7 +752,9 @@ export class ProgressService {
         achievements,
       }
     } catch (error) {
-      console.error('進捗サマリー取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('進捗サマリー取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '進捗サマリー取得中にエラーが発生しました',

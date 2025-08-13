@@ -58,9 +58,9 @@ import {
   DropdownMenuSeparator,
 } from '../ui/dropdown-menu'
 import { Switch } from '../ui/switch'
-import { Separator } from '../ui/separator' // TODO: Use in UI
+// import { Separator } from '../ui/separator' // TODO: Will be used in future UI updates
 import { ScrollArea } from '../ui/scroll-area'
-import { format, formatDistanceToNow } from 'date-fns' // TODO: Use format in UI
+import { formatDistanceToNow } from 'date-fns' // format will be used in future UI updates
 
 interface StudyGroup {
   id: string

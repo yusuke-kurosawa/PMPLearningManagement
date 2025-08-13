@@ -249,7 +249,9 @@ export class LearningService {
         },
       }
     } catch (error) {
-      console.error('学習進捗取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習進捗取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習進捗の取得中にエラーが発生しました',
@@ -327,7 +329,9 @@ export class LearningService {
         throw error
       }
 
-      console.error('学習セッション記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習セッション記録エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習セッションの記録中にエラーが発生しました',
@@ -358,7 +362,7 @@ export class LearningService {
     try {
       const { limit = 20, offset = 0, knowledgeArea, processGroup, dateFrom, dateTo } = options
 
-      const where: any = { userId }
+      const where: unknown = { userId }
 
       if (knowledgeArea) where.knowledgeArea = knowledgeArea
       if (processGroup) where.processGroup = processGroup
@@ -393,7 +397,9 @@ export class LearningService {
         },
       }
     } catch (error) {
-      console.error('学習履歴取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習履歴取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習履歴の取得中にエラーが発生しました',
@@ -415,7 +421,9 @@ export class LearningService {
         },
       })
     } catch (error) {
-      console.error('学習目標設定エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習目標設定エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習目標の設定中にエラーが発生しました',
@@ -426,7 +434,7 @@ export class LearningService {
   // 学習目標取得
   static async getLearningGoals(userId: string, activeOnly: boolean = false): Promise<any[]> {
     try {
-      const where: any = { userId }
+      const where: unknown = { userId }
 
       if (activeOnly) {
         where.achieved = false
@@ -438,7 +446,9 @@ export class LearningService {
         orderBy: { createdAt: 'desc' },
       })
     } catch (error) {
-      console.error('学習目標取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習目標取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習目標の取得中にエラーが発生しました',
@@ -491,7 +501,9 @@ export class LearningService {
         priorityAreas,
       }
     } catch (error) {
-      console.error('学習推奨取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習推奨取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習推奨の取得中にエラーが発生しました',
@@ -526,7 +538,9 @@ export class LearningService {
         })
       })
     } catch (error) {
-      console.error('学習進捗リセットエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習進捗リセットエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習進捗のリセット中にエラーが発生しました',
@@ -585,7 +599,9 @@ export class LearningService {
 
       return [csvHeaders, ...csvRows].map((row) => row.join(',')).join('\n')
     } catch (error) {
-      console.error('学習データエクスポートエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('学習データエクスポートエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習データのエクスポート中にエラーが発生しました',

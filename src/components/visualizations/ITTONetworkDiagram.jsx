@@ -251,7 +251,7 @@ const ITTONetworkDiagram = () => {
   }
 
   // Calculate path for connections with curves
-  const calculatePath = (from, to) => {
+//   const calculatePath = (from, to) => { // TODO: Will be used in future
     const fromNode = allNodes.find((n) => n.id === from)
     const toNode = allNodes.find((n) => n.id === to)
 
@@ -390,7 +390,7 @@ const ITTONetworkDiagram = () => {
           {/* Render nodes */}
           {allNodes.map((node) => {
             const isHighlighted = hoveredNode === node.id || connectedNodes.has(node.id)
-            const NodeShape = getNodeShape(node)
+//             const NodeShape = getNodeShape(node) // TODO: Will be used in future
             const color = getNodeColor(node)
 
             return (

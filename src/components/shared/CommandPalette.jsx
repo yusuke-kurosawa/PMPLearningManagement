@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, _useLocation } from 'react-router-dom'
 import {
   Command,
   Search,
@@ -31,7 +31,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 
 const CommandPalette = () => {
   const navigate = useNavigate()
-  const location = useLocation()
+  //   const _location = useLocation() // TODO: Will be used in future
   const { settings, toggleDarkMode } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')

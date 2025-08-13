@@ -670,7 +670,9 @@ export const useFlashCardStore = create<FlashCardStore>()(
             cardResults: currentSession.cardResults,
           })
         } catch (error) {
-          console.warn('Failed to record study session:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to record study session:', error)
+          }
         }
       },
 
@@ -789,7 +791,9 @@ export const useFlashCardStore = create<FlashCardStore>()(
             quality,
           })
           .catch((error) => {
-            console.warn('Failed to sync spaced repetition data:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Failed to sync spaced repetition data:', error)
+            }
           })
       },
 

@@ -19,7 +19,9 @@ class CollaborationService {
       if (savedComments) this.comments = JSON.parse(savedComments)
       if (savedGroups) this.studyGroups = JSON.parse(savedGroups)
     } catch (error) {
-      console.error('コラボレーションデータの読み込みエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('コラボレーションデータの読み込みエラー:', error)
+      }
     }
   }
 
@@ -30,7 +32,9 @@ class CollaborationService {
       localStorage.setItem('comments', JSON.stringify(this.comments))
       localStorage.setItem('studyGroups', JSON.stringify(this.studyGroups))
     } catch (error) {
-      console.error('コラボレーションデータの保存エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('コラボレーションデータの保存エラー:', error)
+      }
     }
   }
 

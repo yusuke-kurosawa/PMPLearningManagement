@@ -49,12 +49,12 @@ export const publicProcedure = t.procedure
 /**
  * Middleware for timing procedures
  */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now()
+const timingMiddleware = t.middleware(async ({ next }) => {
+  const _start = Date.now()
 
   const result = await next()
 
-  const duration = Date.now() - start
+  //   const duration = Date.now() - start // TODO: Will be used in future
   // console.log(`[tRPC] ${path} took ${duration}ms`)
 
   return result

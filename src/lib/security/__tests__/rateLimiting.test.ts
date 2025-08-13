@@ -3,7 +3,7 @@
  * Developer 3: API Rate Limiting・DDoS防止・Redis実装のテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest'
 import {
   SlidingWindowRateLimiter,
   TokenBucketRateLimiter,
@@ -11,7 +11,7 @@ import {
   getRedisClient,
   disconnectRedis,
 } from '../rateLimiting'
-import Redis from 'ioredis'
+// import Redis from 'ioredis' // TODO: Will be used in future
 
 // Redis モック設定
 const mockRedis = {

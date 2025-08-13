@@ -35,7 +35,9 @@ export const LearningProgressProvider = ({ children }) => {
       const data = await progressService.loadProgress()
       setProgress(data)
     } catch (error) {
-      console.error('Failed to load progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load progress:', error)
+      }
     } finally {
       setLoading(false)
     }
@@ -51,7 +53,9 @@ export const LearningProgressProvider = ({ children }) => {
       await progressService.saveProgress(updatedProgress)
       setProgress(updatedProgress)
     } catch (error) {
-      console.error('Failed to save progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to save progress:', error)
+      }
     }
   }
 

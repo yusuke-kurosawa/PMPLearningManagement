@@ -34,7 +34,9 @@ class ContextManager {
 
       return true
     } catch (error) {
-      console.error('Context storage failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Context storage failed:', error)
+      }
       return false
     }
   }
@@ -61,7 +63,9 @@ class ContextManager {
 
       return JSON.parse(data)
     } catch (error) {
-      console.error('Context retrieval failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Context retrieval failed:', error)
+      }
       return null
     }
   }
@@ -162,7 +166,9 @@ class ContextManager {
 
     expiredKeys.forEach((key) => this.cache.delete(key))
 
-    console.warn(`Context cleanup: Removed ${expiredKeys.length} expired entries`)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Context cleanup: Removed ${expiredKeys.length} expired entries`)
+    }
     return expiredKeys.length
   }
 
@@ -244,10 +250,14 @@ class ContextManager {
         localStorage.setItem('contextArchive', JSON.stringify(archiveData))
         keysToArchive.forEach((key) => this.cache.delete(key))
 
-        console.warn(`Archived ${keysToArchive.length} context entries`)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Archived ${keysToArchive.length} context entries`)
+        }
         return keysToArchive.length
       } catch (error) {
-        console.error('Context archiving failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Context archiving failed:', error)
+        }
         return 0
       }
     }
@@ -274,7 +284,9 @@ class ContextManager {
         return this.retrieve(key)
       }
     } catch (error) {
-      console.error('Context restoration failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Context restoration failed:', error)
+      }
     }
 
     return null
@@ -310,7 +322,9 @@ class ContextManager {
       }
       return true
     } catch (error) {
-      console.error('Context import failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Context import failed:', error)
+      }
       return false
     }
   }

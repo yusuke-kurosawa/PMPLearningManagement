@@ -277,7 +277,9 @@ class SearchService {
     try {
       localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory))
     } catch (error) {
-      console.error('検索履歴の保存エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('検索履歴の保存エラー:', error)
+      }
     }
   }
 
@@ -289,7 +291,9 @@ class SearchService {
         this.searchHistory = JSON.parse(saved)
       }
     } catch (error) {
-      console.error('検索履歴の読み込みエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('検索履歴の読み込みエラー:', error)
+      }
       this.searchHistory = []
     }
   }
@@ -300,7 +304,9 @@ class SearchService {
     try {
       localStorage.removeItem('searchHistory')
     } catch (error) {
-      console.error('検索履歴のクリアエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('検索履歴のクリアエラー:', error)
+      }
     }
   }
 

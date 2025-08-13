@@ -57,7 +57,7 @@ const credentialsSchema = z.object({
 })
 
 // パスワードハッシュ化ユーティリティ
-export const hashPassword = async (password: string): Promise<string> => {
+export const _hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 12
   return await bcrypt.hash(password, saltRounds)
 }
@@ -200,7 +200,9 @@ export const authOptions: NextAuthOptions = {
             profileComplete: user.profileComplete,
           }
         } catch (error) {
-          console.error('認証エラー:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('認証エラー:', error)
+          }
           return null
         }
       },
@@ -226,7 +228,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, _profile, _email, _credentials }) {
       try {
         // OAuth プロバイダーの場合、既存ユーザーをチェック
         if (account?.provider !== 'credentials') {
@@ -246,12 +248,14 @@ export const authOptions: NextAuthOptions = {
 
         return true
       } catch (error) {
-        console.error('サインインエラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('サインインエラー:', error)
+        }
         return false
       }
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, _account }) {
       // 初回ログイン時
       if (user) {
         token.role = user.role
@@ -279,7 +283,9 @@ export const authOptions: NextAuthOptions = {
             token.profileComplete = dbUser.profileComplete
           }
         } catch (error) {
-          console.error('JWT更新エラー:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('JWT更新エラー:', error)
+          }
         }
       }
 
@@ -300,7 +306,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn({ user, account, _profile, isNewUser }) {
       // ログイン記録
       await prisma.userActivity.create({
         data: {
@@ -314,7 +320,9 @@ export const authOptions: NextAuthOptions = {
         },
       })
 
-      console.log(`ユーザーサインイン: ${user.email} (${account?.provider})`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`ユーザーサインイン: ${user.email} (${account?.provider})`)
+      }
     },
 
     async signOut({ session, token }) {
@@ -330,12 +338,16 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
-        console.log(`ユーザーサインアウト: ${session?.user?.email}`)
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`ユーザーサインアウト: ${session?.user?.email}`)
+        }
       }
     },
 
     async createUser({ user }) {
-      console.log(`新規ユーザー作成: ${user.email}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`新規ユーザー作成: ${user.email}`)
+      }
     },
   },
 
@@ -343,10 +355,14 @@ export const authOptions: NextAuthOptions = {
 
   logger: {
     error(code, metadata) {
-      console.error(`NextAuth Error [${code}]:`, metadata)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`NextAuth Error [${code}]:`, metadata)
+      }
     },
     warn(code) {
-      console.warn(`NextAuth Warning [${code}]`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`NextAuth Warning [${code}]`)
+      }
     },
     debug(code, metadata) {
       if (process.env.NODE_ENV === 'development') {
@@ -357,13 +373,13 @@ export const authOptions: NextAuthOptions = {
 }
 
 // サーバーサイド認証ヘルパー
-export const getServerAuthSession = async (req: any, res: any) => {
+// // export const _getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future // TODO: Will be used in future
   // サーバーサイドでの認証状態取得
   // 実装は使用するフレームワークによって異なる
 }
 
 // 認証状態検証ヘルパー
-export const requireAuth = (session: any) => {
+export const requireAuth = (session: unknown) => {
   if (!session?.user) {
     throw new Error('認証が必要です')
   }
@@ -371,7 +387,7 @@ export const requireAuth = (session: any) => {
 }
 
 // 管理者権限検証ヘルパー
-export const requireAdmin = (session: any) => {
+export const _requireAdmin = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.role !== UserRole.ADMIN) {
     throw new Error('管理者権限が必要です')
@@ -380,7 +396,7 @@ export const requireAdmin = (session: any) => {
 }
 
 // プレミアム権限検証ヘルパー
-export const requirePremium = (session: any) => {
+export const _requirePremium = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.subscriptionPlan === SubscriptionPlan.FREE || !user.subscriptionActive) {
     throw new Error('プレミアムプランが必要です')

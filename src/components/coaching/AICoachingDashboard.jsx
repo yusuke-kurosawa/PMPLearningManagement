@@ -59,7 +59,9 @@ const AICoachingDashboard = () => {
 
       setLearningPath(path)
     } catch (error) {
-      console.error('Error loading AI coaching:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading AI coaching:', error)
+      }
     } finally {
       setLoading(false)
     }

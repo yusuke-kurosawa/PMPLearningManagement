@@ -7,7 +7,7 @@
 import { prisma } from '@/lib/db'
 import { UserRole, SubscriptionPlan, User } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { createPermissionChecker, Permission } from '@/server/auth/rbac'
+// import { Permission } from '@/server/auth/rbac' // TODO: Will be used in future
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 
@@ -83,9 +83,9 @@ export interface UserStats {
 
 // ユーザー詳細情報（管理者向け）
 export interface UserDetails extends User {
-  settings?: any
-  learningProgress?: any
-  subscription?: any
+  settings?: unknown
+  learningProgress?: unknown
+  subscription?: unknown
   examResults: Array<{
     id: string
     score: number
@@ -108,7 +108,7 @@ export class UserService {
   // ユーザー検索・一覧取得
   static async findUsers(
     filter: UserFilter,
-    requesterId?: string
+    _requesterId?: string
   ): Promise<{
     users: Partial<User>[]
     pagination: {
@@ -120,7 +120,7 @@ export class UserService {
   }> {
     try {
       // 検索条件構築
-      const where: any = {}
+      const where: unknown = {}
 
       if (filter.search) {
         where.OR = [
@@ -170,7 +170,7 @@ export class UserService {
       }
 
       // ソート条件
-      const orderBy: any = {}
+      const orderBy: unknown = {}
       if (filter.sortBy === 'totalStudyTime') {
         orderBy.learningProgress = { totalStudyTime: filter.sortOrder }
       } else if (filter.sortBy === 'lastLoginAt') {
@@ -238,7 +238,9 @@ export class UserService {
         },
       }
     } catch (error) {
-      console.error('ユーザー検索エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー検索エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー検索中にエラーが発生しました',
@@ -247,7 +249,7 @@ export class UserService {
   }
 
   // ユーザー詳細情報取得
-  static async getUserById(userId: string, requesterId?: string): Promise<UserDetails | null> {
+  static async getUserById(userId: string, _requesterId?: string): Promise<UserDetails | null> {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -289,7 +291,9 @@ export class UserService {
 
       return user as UserDetails
     } catch (error) {
-      console.error('ユーザー詳細取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー詳細取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー詳細取得中にエラーが発生しました',
@@ -373,7 +377,9 @@ export class UserService {
         throw error
       }
 
-      console.error('ユーザー作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー作成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー作成中にエラーが発生しました',
@@ -430,7 +436,9 @@ export class UserService {
         throw error
       }
 
-      console.error('ユーザー更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー更新中にエラーが発生しました',
@@ -499,7 +507,9 @@ export class UserService {
         throw error
       }
 
-      console.error('ユーザー削除エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー削除エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー削除中にエラーが発生しました',
@@ -629,7 +639,9 @@ export class UserService {
         })),
       }
     } catch (error) {
-      console.error('ユーザー統計取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー統計取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー統計取得中にエラーが発生しました',
@@ -700,7 +712,9 @@ export class UserService {
         throw error
       }
 
-      console.error('ユーザー権限変更エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー権限変更エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー権限変更中にエラーが発生しました',
@@ -729,7 +743,9 @@ export class UserService {
 
       return { updated, errors }
     } catch (error) {
-      console.error('バッチユーザー更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('バッチユーザー更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'バッチユーザー更新中にエラーが発生しました',

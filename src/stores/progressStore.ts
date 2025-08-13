@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { api } from '../lib/api/client'
+import type { UnknownObject } from '../types/common'
 
 export interface ProcessProgress {
   processId: string
@@ -49,7 +50,7 @@ export interface Achievement {
   description: string
   icon: string
   type: 'study_time' | 'mastery' | 'consistency' | 'exam_score' | 'special'
-  criteria: Record<string, any>
+  criteria: UnknownObject
   unlockedAt?: Date
   isUnlocked: boolean
   progress: number // 0-100
@@ -162,7 +163,7 @@ export const useProgressStore = create<ProgressStore>()(
           startTime: new Date(),
           duration: 0,
           focus,
-          activities: [activity as any],
+          activities: [activity as StudySession['activities'][0]],
           effectiveness: 'medium',
         }
 
@@ -226,7 +227,9 @@ export const useProgressStore = create<ProgressStore>()(
             sessionData: completedSession,
           })
         } catch (error) {
-          console.warn('Failed to sync study session:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync study session:', error)
+          }
         }
       },
 
@@ -261,7 +264,9 @@ export const useProgressStore = create<ProgressStore>()(
             },
           })
         } catch (error) {
-          console.warn('Failed to sync process progress:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync process progress:', error)
+          }
         }
       },
 
@@ -284,7 +289,9 @@ export const useProgressStore = create<ProgressStore>()(
         try {
           await api.progress.recordQuizScore.mutate({ processId, score })
         } catch (error) {
-          console.warn('Failed to sync quiz score:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync quiz score:', error)
+          }
         }
       },
 
@@ -312,7 +319,9 @@ export const useProgressStore = create<ProgressStore>()(
         try {
           await api.progress.createGoal.mutate(goal)
         } catch (error) {
-          console.warn('Failed to sync goal creation:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync goal creation:', error)
+          }
         }
       },
 
@@ -327,7 +336,9 @@ export const useProgressStore = create<ProgressStore>()(
         try {
           await api.progress.updateGoal.mutate({ goalId, updates })
         } catch (error) {
-          console.warn('Failed to sync goal update:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync goal update:', error)
+          }
         }
       },
 
@@ -339,7 +350,9 @@ export const useProgressStore = create<ProgressStore>()(
         try {
           await api.progress.deleteGoal.mutate({ goalId })
         } catch (error) {
-          console.warn('Failed to sync goal deletion:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync goal deletion:', error)
+          }
         }
       },
 
@@ -383,7 +396,7 @@ export const useProgressStore = create<ProgressStore>()(
                 title: check.title,
                 description: check.description,
                 icon: '🏆',
-                type: check.type as any,
+                type: check.type as Achievement['type'],
                 criteria: check.criteria,
                 progress: Math.min(100, (check.current / check.threshold) * 100),
                 isUnlocked: check.current >= check.threshold,
@@ -437,7 +450,9 @@ export const useProgressStore = create<ProgressStore>()(
 
           await api.progress.syncProgress.mutate(localData)
         } catch (error) {
-          console.warn('Failed to sync with server:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to sync with server:', error)
+          }
         }
       },
 

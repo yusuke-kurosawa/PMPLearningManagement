@@ -153,7 +153,9 @@ export class GeoIPService {
       await this.cacheLocation(ip, fallbackData)
       return fallbackData
     } catch (error) {
-      console.error('GeoIP lookup error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('GeoIP lookup error:', error)
+      }
       return null
     }
   }
@@ -202,7 +204,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data),
       }
     } catch (error) {
-      console.error('IP-API fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('IP-API fetch error:', error)
+      }
       return null
     }
   }
@@ -246,7 +250,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data.security),
       }
     } catch (error) {
-      console.error('IPGeolocation fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('IPGeolocation fetch error:', error)
+      }
       return null
     }
   }
@@ -293,7 +299,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data.traits),
       }
     } catch (error) {
-      console.error('MaxMind fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('MaxMind fetch error:', error)
+      }
       return null
     }
   }
@@ -315,7 +323,9 @@ export class GeoIPService {
 
       return null
     } catch (error) {
-      console.error('Cache retrieval error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Cache retrieval error:', error)
+      }
       return null
     }
   }
@@ -331,14 +341,16 @@ export class GeoIPService {
       const cacheKey = `${this.cachePrefix}:${ip}`
       await this.redis.setex(cacheKey, this.cacheTTL, JSON.stringify(location))
     } catch (error) {
-      console.error('Cache storage error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Cache storage error:', error)
+      }
     }
   }
 
   /**
    * 脅威スコア計算
    */
-  private calculateThreatScore(securityData: any): number {
+  private calculateThreatScore(securityData: unknown): number {
     let score = 0
 
     if (securityData?.is_proxy || securityData?.proxy) score += 30
@@ -472,7 +484,9 @@ export class GeoIPService {
 
       return { allowed: true, location }
     } catch (error) {
-      console.error('Geo restriction check error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Geo restriction check error:', error)
+      }
       return {
         allowed: false,
         reason: 'Geo restriction check failed',
@@ -591,7 +605,9 @@ export class GeoIPService {
           recommendations.length > 0 ? recommendations : ['Continue normal monitoring'],
       }
     } catch (error) {
-      console.error('Anomaly detection error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Anomaly detection error:', error)
+      }
       return {
         isAnomalous: true,
         confidence: 60,
@@ -630,7 +646,9 @@ export class GeoIPService {
 
       return history
     } catch (error) {
-      console.error('Location history retrieval error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Location history retrieval error:', error)
+      }
       return []
     }
   }
@@ -651,7 +669,9 @@ export class GeoIPService {
       await this.redis.zadd(key, location.timestamp, locationData)
       await this.redis.expire(key, 30 * 24 * 60 * 60) // 30日間保持
     } catch (error) {
-      console.error('Location history save error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Location history save error:', error)
+      }
     }
   }
 
@@ -756,7 +776,9 @@ export class GeoIPService {
         proxyDetection: { proxy: 0, vpn: 0, tor: 0 }, // 実装略
       }
     } catch (error) {
-      console.error('Geo stats error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Geo stats error:', error)
+      }
       return {
         totalRequests: 0,
         uniqueCountries: 0,
@@ -786,7 +808,9 @@ export class GeoIPService {
         }
       }
     } catch (error) {
-      console.error('Cache clear error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Cache clear error:', error)
+      }
     }
   }
 }

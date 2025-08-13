@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useRef, useState, _useMemo, useCallback } from 'react'
 import * as d3 from 'd3'
 import {
   Filter,
@@ -9,7 +9,7 @@ import {
   X,
   Download,
   Maximize2,
-  Settings,
+  _Settings,
   Palette,
   Layout,
 } from 'lucide-react'
@@ -87,7 +87,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
 
   // レイアウトアルゴリズム
   const applyLayout = useCallback(
-    (nodes, links) => {
+    (nodes, _links) => {
       const centerX = dimensions.width / 2
       const centerY = dimensions.height / 2
       const radius = Math.min(dimensions.width, dimensions.height) * 0.35

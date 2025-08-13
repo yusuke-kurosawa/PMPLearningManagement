@@ -17,7 +17,7 @@ export const mockThemeContext = {
   resetSettings: vi.fn(),
 }
 
-export const MockThemeProvider = ({ children, value = mockThemeContext }) => {
+export const MockThemeProvider = ({ children }) => {
   return <div data-testid="mock-theme-provider">{children}</div>
 }
 

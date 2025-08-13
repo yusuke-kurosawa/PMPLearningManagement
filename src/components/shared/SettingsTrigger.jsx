@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Settings, User, Palette, Zap } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import UserSettingsPanel from './UserSettingsPanel'
 
 const SettingsTrigger = ({ variant = 'button', className = '' }) => {

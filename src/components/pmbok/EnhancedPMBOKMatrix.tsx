@@ -113,7 +113,7 @@ const PROCESS_GROUPS = [
   'Closing',
 ]
 
-const PMBOK7_PERFORMANCE_DOMAINS = [
+// const PMBOK7_PERFORMANCE_DOMAINS = [ // TODO: Will be used in future
   'Stakeholders',
   'Team',
   'Development Approach and Life Cycle',
@@ -138,7 +138,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
   const [selectedKnowledgeArea, setSelectedKnowledgeArea] = useState<string>('all')
   const [selectedProcessGroup, setSelectedProcessGroup] = useState<string>('all')
   const [selectedVersion, setSelectedVersion] = useState<6 | 7 | 'both'>(7)
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
+//   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all') // TODO: Will be used in future
   const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
   const [showOnlyUnstudied, setShowOnlyUnstudied] = useState(false)
 
@@ -192,7 +192,9 @@ const EnhancedPMBOKMatrix: React.FC = () => {
 
       setUserProgress(progressMap)
     } catch (error) {
-      console.error('Failed to load user progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load user progress:', error)
+      }
     }
   }
 

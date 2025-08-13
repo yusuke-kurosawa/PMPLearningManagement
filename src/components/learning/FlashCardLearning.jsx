@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Brain, Filter, Shuffle, Trophy, TrendingUp, Save } from 'lucide-react'
+import { ArrowLeft, Brain, Trophy, TrendingUp, Save } from 'lucide-react'
 import FlashCard from './FlashCard'
 import { processCategories, processGroups, progressService } from '../../services/progressService'
 

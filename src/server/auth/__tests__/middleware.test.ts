@@ -3,8 +3,8 @@
  * Developer 1: 包括的認可システム（RBAC）実装のテスト
  */
 
-import { describe, it, expect, beforeEach, jest } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { NextRequest } from 'next/server'
 import {
   validateJWT,
   generateSecureToken,
@@ -14,13 +14,13 @@ import {
 import jwt from 'jsonwebtoken'
 
 // モック設定
-jest.mock('next-auth/jwt', () => ({
-  getToken: jest.fn(),
+vi.mock('next-auth/jwt', () => ({
+  getToken: vi.fn(),
 }))
 
-jest.mock('rate-limiter-flexible', () => ({
-  RateLimiterMemory: jest.fn().mockImplementation(() => ({
-    consume: jest.fn().mockResolvedValue(null),
+vi.mock('rate-limiter-flexible', () => ({
+  RateLimiterMemory: vi.fn().mockImplementation(() => ({
+    consume: vi.fn().mockResolvedValue(null),
   })),
 }))
 
@@ -194,7 +194,7 @@ describe('JWT検証ミドルウェア', () => {
     it('正しいHMAC署名を検証する', () => {
       const secret = 'webhook-secret-key'
       const payload = '{"event":"user.created","data":{"id":"user123"}}'
-      const crypto = require('crypto')
+      const crypto = await import('crypto')
       const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
 
       const result = verifyHMACSignature(payload, expectedSignature, secret)
@@ -217,7 +217,7 @@ describe('JWT検証ミドルウェア', () => {
       const originalPayload = '{"event":"user.created","data":{"id":"user123"}}'
       const modifiedPayload = '{"event":"user.deleted","data":{"id":"user123"}}'
 
-      const crypto = require('crypto')
+      const crypto = await import('crypto')
       const signature = crypto.createHmac('sha256', secret).update(originalPayload).digest('hex')
 
       const result = verifyHMACSignature(modifiedPayload, signature, secret)

@@ -105,7 +105,9 @@ export class AdvancedCacheManager {
         timestamp: startTime,
       }
     } catch (error) {
-      console.error('Cache-Aside error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Cache-Aside error:', error)
+      }
       return {
         data: null,
         hit: false,
@@ -140,7 +142,9 @@ export class AdvancedCacheManager {
       // 依存関係の無効化
       await this.invalidateDependencies(identifier)
     } catch (error) {
-      console.error('Write-Through error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Write-Through error:', error)
+      }
       // エラー時はキャッシュを削除して整合性を保つ
       await this.cacheManager.delete(keyStrategy, identifier)
       throw error
@@ -179,13 +183,17 @@ export class AdvancedCacheManager {
             })
           }
         } catch (error) {
-          console.error('Write-Behind persist error:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Write-Behind persist error:', error)
+          }
           // 失敗時はキャッシュも無効化
           await this.cacheManager.delete(keyStrategy, identifier)
         }
       })
     } catch (error) {
-      console.error('Write-Behind error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Write-Behind error:', error)
+      }
       throw error
     }
   }
@@ -247,7 +255,9 @@ export class AdvancedCacheManager {
         refreshed: true,
       }
     } catch (error) {
-      console.error('Smart cache error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Smart cache error:', error)
+      }
 
       // エラー時は古いデータの返却を試行
       const staleData = await this.getStaleData<T>(keyStrategy, identifier, fullConfig.maxStale)
@@ -293,7 +303,9 @@ export class AdvancedCacheManager {
     })
 
     await Promise.allSettled(invalidationTasks)
-    console.log(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
+    }
   }
 
   /**
@@ -321,7 +333,9 @@ export class AdvancedCacheManager {
           })
         }
       } catch (error) {
-        console.error('Background refresh failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Background refresh failed:', error)
+        }
       } finally {
         this.refreshQueue.delete(refreshKey)
         this.refreshCallbacks.delete(refreshKey)
@@ -354,7 +368,9 @@ export class AdvancedCacheManager {
 
       return null
     } catch (error) {
-      console.error('Get stale data error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Get stale data error:', error)
+      }
       return null
     }
   }
@@ -367,7 +383,9 @@ export class AdvancedCacheManager {
       const refreshTasks = Array.from(this.refreshCallbacks.values())
       if (refreshTasks.length === 0) return
 
-      console.log(`Processing ${refreshTasks.length} background refresh tasks`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Processing ${refreshTasks.length} background refresh tasks`)
+      }
 
       // 並列数を制限してリフレッシュを実行
       const concurrencyLimit = 5
@@ -396,13 +414,17 @@ export class AdvancedCacheManager {
           const result = await this.cacheAside(keyStrategy, identifier, dataFetcher, config)
           if (!result.hit) warmedUp++
         } catch (error) {
-          console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+          }
         }
       }
     )
 
     await Promise.allSettled(warmupTasks)
-    console.log(`Cache warmup completed: ${warmedUp} entries loaded`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Cache warmup completed: ${warmedUp} entries loaded`)
+    }
     return warmedUp
   }
 
@@ -410,7 +432,7 @@ export class AdvancedCacheManager {
    * キャッシュ分析とレポート
    */
   async generateCacheReport(): Promise<{
-    stats: any
+    stats: unknown
     topKeys: Array<{ key: string; hitCount: number }>
     recommendations: string[]
   }> {
@@ -541,8 +563,8 @@ export class PMPCacheStrategies {
       `questions:${examType}:${difficulty}`,
       dataFetcher,
       [
-        { name: 'hot', ttl: 300, condition: (data: any) => data.length > 10 },
-        { name: 'warm', ttl: 1800, condition: (data: any) => data.length > 0 },
+        { name: 'hot', ttl: 300, condition: (data: unknown) => data.length > 10 },
+        { name: 'warm', ttl: 1800, condition: (data: unknown) => data.length > 0 },
         { name: 'cold', ttl: 7200 }, // すべてのデータ
       ]
     )
@@ -553,8 +575,8 @@ export class PMPCacheStrategies {
    */
   async updateLearningStats(
     userId: string,
-    stats: any,
-    dataPersister: (stats: any) => Promise<void>
+    stats: unknown,
+    dataPersister: (stats: unknown) => Promise<void>
   ) {
     await this.advancedCache.writeBehind(
       CacheKeyStrategy.ANALYTICS_DATA,
@@ -574,8 +596,8 @@ export class PMPCacheStrategies {
    */
   async updateUserSession(
     userId: string,
-    sessionData: any,
-    dataPersister: (data: any) => Promise<void>
+    sessionData: unknown,
+    dataPersister: (data: unknown) => Promise<void>
   ) {
     await this.advancedCache.writeThrough(
       CacheKeyStrategy.SESSION_DATA,

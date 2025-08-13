@@ -24,7 +24,9 @@ class ExportService {
         data.data.progress = JSON.parse(progressData)
       }
     } catch (error) {
-      console.error('進捗データの収集エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('進捗データの収集エラー:', error)
+      }
     }
 
     // カスタマイズ設定
@@ -34,7 +36,9 @@ class ExportService {
         data.data.settings = JSON.parse(themeSettings)
       }
     } catch (error) {
-      console.error('設定データの収集エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('設定データの収集エラー:', error)
+      }
     }
 
     // コラボレーションデータ
@@ -49,7 +53,9 @@ class ExportService {
         groups: studyGroups ? JSON.parse(studyGroups) : [],
       }
     } catch (error) {
-      console.error('コラボレーションデータの収集エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('コラボレーションデータの収集エラー:', error)
+      }
     }
 
     // 検索履歴
@@ -59,7 +65,9 @@ class ExportService {
         data.data.searchHistory = JSON.parse(searchHistory)
       }
     } catch (error) {
-      console.error('検索履歴の収集エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('検索履歴の収集エラー:', error)
+      }
     }
 
     // ユーザー情報
@@ -227,7 +235,9 @@ class ExportService {
       const data = localStorage.getItem('learningProgress')
       return data ? JSON.parse(data) : null
     } catch (error) {
-      console.error('進捗データの取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('進捗データの取得エラー:', error)
+      }
       return null
     }
   }

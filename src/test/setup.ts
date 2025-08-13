@@ -52,7 +52,7 @@ window.URL.revokeObjectURL = vi.fn()
 // Suppress console warnings in tests
 const originalWarn = console.warn
 beforeAll(() => {
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     if (typeof args[0] === 'string' && args[0].includes('React Router Future Flag Warning')) {
       return
     }

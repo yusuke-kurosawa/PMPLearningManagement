@@ -94,10 +94,14 @@ class PerformanceOptimizer {
       this.lazyLoadCache.set(componentKey, component)
       this.enforceMaxCacheSize()
 
-      console.warn(`📦 Lazy loaded ${componentKey} in ${loadTime.toFixed(2)}ms`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`📦 Lazy loaded ${componentKey} in ${loadTime.toFixed(2)}ms`)
+      }
       return component
     } catch (error) {
-      console.error(`❌ Failed to lazy load ${componentKey}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`❌ Failed to lazy load ${componentKey}:`, error)
+      }
       throw error
     }
   }
@@ -133,14 +137,18 @@ class PerformanceOptimizer {
     const memoryPressure = usedJSHeapSize / jsHeapSizeLimit
 
     if (usedJSHeapSize > this.config.gcSuggestionThreshold) {
-      console.warn('🚨 High memory usage detected, suggesting cleanup')
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('🚨 High memory usage detected, suggesting cleanup')
+      }
       this.performMemoryCleanup()
     }
 
     // Log memory stats periodically
     if (Math.random() < 0.1) {
       // 10% chance
-      console.warn('📊 Memory Stats:', {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('📊 Memory Stats:', {
+      }
         usedMB: Math.round(usedJSHeapSize / 1024 / 1024),
         totalMB: Math.round(totalJSHeapSize / 1024 / 1024),
         limitMB: Math.round(jsHeapSizeLimit / 1024 / 1024),
@@ -164,7 +172,9 @@ class PerformanceOptimizer {
       window.gc()
     }
 
-    console.warn('🧹 Memory cleanup performed')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🧹 Memory cleanup performed')
+    }
   }
 
   /**
@@ -180,7 +190,9 @@ class PerformanceOptimizer {
 
         observer.observe({ entryTypes: ['measure', 'navigation', 'resource'] })
       } catch (error) {
-        console.warn('Performance Observer not supported:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Performance Observer not supported:', error)
+        }
       }
     }
   }
@@ -191,11 +203,15 @@ class PerformanceOptimizer {
   processPerformanceEntries(entries) {
     entries.forEach((entry) => {
       if (entry.entryType === 'measure' && entry.duration > 100) {
-        console.warn(`⚠️ Slow operation: ${entry.name} took ${entry.duration.toFixed(2)}ms`)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`⚠️ Slow operation: ${entry.name} took ${entry.duration.toFixed(2)}ms`)
+        }
       }
 
       if (entry.entryType === 'resource' && entry.duration > 1000) {
-        console.warn(`🐌 Slow resource load: ${entry.name} took ${entry.duration.toFixed(2)}ms`)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`🐌 Slow resource load: ${entry.name} took ${entry.duration.toFixed(2)}ms`)
+        }
       }
     })
   }
@@ -232,7 +248,9 @@ class PerformanceOptimizer {
       try {
         await Component.preload()
       } catch (error) {
-        console.warn('Failed to preload component:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to preload component:', error)
+        }
       }
     }
   }
@@ -299,7 +317,9 @@ class PerformanceOptimizer {
           try {
             return op()
           } catch (error) {
-            console.error('Batched DOM operation failed:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Batched DOM operation failed:', error)
+            }
             return null
           }
         })
@@ -453,7 +473,9 @@ class MemoryLeakDetector {
     this.timeouts.forEach((id) => clearTimeout(id))
     this.timeouts.clear()
 
-    console.warn('🧹 Memory leak detection and cleanup completed')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🧹 Memory leak detection and cleanup completed')
+    }
   }
 
   /**

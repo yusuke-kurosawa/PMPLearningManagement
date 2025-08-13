@@ -129,14 +129,14 @@ interface ExamStore {
   reset: () => void
 }
 
-const DEFAULT_EXAM_SETTINGS: ExamSettings = {
-  questionsCount: 180,
-  timeLimit: 230, // 230 minutes
-  practiceMode: false,
-  showExplanations: false,
-  randomizeQuestions: true,
-  randomizeOptions: true,
-}
+// const DEFAULT_EXAM_SETTINGS: ExamSettings = { // TODO: Will be used in future
+//   questionsCount: 180,
+//   timeLimit: 230, // 230 minutes;
+//   practiceMode: false,
+//   showExplanations: false,
+//   randomizeQuestions: true,
+//   randomizeOptions: true,
+// }
 
 export const useExamStore = create<ExamStore>()(
   persist(
@@ -420,7 +420,7 @@ export const useExamStore = create<ExamStore>()(
 // Timer hook for automatic updates
 let timerInterval: NodeJS.Timeout | null = null
 
-export const useExamTimer = () => {
+export const _useExamTimer = () => {
   const updateTimer = useExamStore((state) => state.updateTimer)
   const currentSession = useExamStore((state) => state.currentSession)
 

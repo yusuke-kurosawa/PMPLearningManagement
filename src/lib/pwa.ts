@@ -61,7 +61,9 @@ class PWAManager {
       try {
         this.registration = await navigator.serviceWorker.register('/sw.js')
 
-        console.log('Service Worker registered successfully:', this.registration)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Service Worker registered successfully:', this.registration)
+        }
 
         // Handle updates
         this.registration.addEventListener('updatefound', () => {
@@ -78,7 +80,9 @@ class PWAManager {
 
         return this.registration
       } catch (error) {
-        console.error('Service Worker registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Service Worker registration failed:', error)
+        }
         return null
       }
     }
@@ -102,7 +106,9 @@ class PWAManager {
 
       return false
     } catch (error) {
-      console.error('Error installing PWA:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error installing PWA:', error)
+      }
       return false
     }
   }
@@ -146,7 +152,9 @@ class PWAManager {
 
       return subscription
     } catch (error) {
-      console.error('Error subscribing to notifications:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error subscribing to notifications:', error)
+      }
       return null
     }
   }
@@ -172,14 +180,16 @@ class PWAManager {
   }
 
   // Offline storage management
-  async cacheUserData(key: string, data: any): Promise<void> {
+  async cacheUserData(key: string, data: unknown): Promise<void> {
     if ('caches' in window) {
       try {
         const cache = await caches.open('user-data')
         const response = new Response(JSON.stringify(data))
         await cache.put(key, response)
       } catch (error) {
-        console.error('Error caching user data:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error caching user data:', error)
+        }
       }
     }
   }
@@ -193,14 +203,16 @@ class PWAManager {
           return await response.json()
         }
       } catch (error) {
-        console.error('Error retrieving cached data:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error retrieving cached data:', error)
+        }
       }
     }
     return null
   }
 
   // Background sync
-  async syncWhenOnline(tag: string, data?: any): Promise<void> {
+  async syncWhenOnline(tag: string, data?: unknown): Promise<void> {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready
@@ -212,7 +224,9 @@ class PWAManager {
 
         await registration.sync.register(tag)
       } catch (error) {
-        console.error('Background sync registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Background sync registration failed:', error)
+        }
       }
     }
   }

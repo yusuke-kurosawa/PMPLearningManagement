@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, _useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   TrendingUp,
@@ -15,7 +15,7 @@ import { useProgress, processCategories, processGroups } from '../../services/pr
 
 const LearningProgressDashboard = () => {
   const navigate = useNavigate()
-  const { progress, statistics, updateStudyTime, resetProgress } = useProgress()
+  const { statistics, resetProgress } = useProgress()
   const [selectedView, setSelectedView] = useState('overview')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 

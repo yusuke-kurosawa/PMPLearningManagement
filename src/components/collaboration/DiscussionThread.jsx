@@ -5,7 +5,7 @@ import {
   Heart,
   Reply,
   User,
-  // Calendar, // TODO: Implement calendar features
+  // _Calendar, // TODO: Implement calendar features
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'

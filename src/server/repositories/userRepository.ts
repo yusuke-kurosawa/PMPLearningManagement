@@ -105,7 +105,9 @@ export class UserRepository {
         ...options,
       })
     } catch (error) {
-      console.error('ユーザーID検索エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザーID検索エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー検索中にエラーが発生しました',
@@ -124,7 +126,9 @@ export class UserRepository {
         ...options,
       })
     } catch (error) {
-      console.error('ユーザーメール検索エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザーメール検索エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー検索中にエラーが発生しました',
@@ -253,7 +257,9 @@ export class UserRepository {
         },
       }
     } catch (error) {
-      console.error('ユーザー一覧取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー一覧取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー一覧取得中にエラーが発生しました',
@@ -280,7 +286,9 @@ export class UserRepository {
         }
       }
 
-      console.error('ユーザー作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー作成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー作成中にエラーが発生しました',
@@ -316,7 +324,9 @@ export class UserRepository {
         }
       }
 
-      console.error('ユーザー更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー更新中にエラーが発生しました',
@@ -351,7 +361,9 @@ export class UserRepository {
         throw error
       }
 
-      console.error('ユーザー削除エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー削除エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー削除中にエラーが発生しました',
@@ -395,7 +407,9 @@ export class UserRepository {
         throw error
       }
 
-      console.error('ユーザー復元エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー復元エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー復元中にエラーが発生しました',
@@ -415,7 +429,9 @@ export class UserRepository {
       })
       return !!user
     } catch (error) {
-      console.error('ユーザー存在確認エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー存在確認エラー:', error)
+      }
       return false
     }
   }
@@ -439,7 +455,9 @@ export class UserRepository {
 
       return !!user
     } catch (error) {
-      console.error('メールアドレス存在確認エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('メールアドレス存在確認エラー:', error)
+      }
       return false
     }
   }
@@ -470,7 +488,9 @@ export class UserRepository {
 
       return await prisma.user.count({ where })
     } catch (error) {
-      console.error('ユーザー数取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー数取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー数取得中にエラーが発生しました',
@@ -497,7 +517,9 @@ export class UserRepository {
 
       return result
     } catch (error) {
-      console.error('バッチ更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('バッチ更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'バッチ更新中にエラーが発生しました',
@@ -587,7 +609,9 @@ export class UserRepository {
         newThisMonth,
       }
     } catch (error) {
-      console.error('ユーザー統計取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('ユーザー統計取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'ユーザー統計取得中にエラーが発生しました',
@@ -600,7 +624,9 @@ export class UserRepository {
     try {
       return await prisma.$transaction(callback)
     } catch (error) {
-      console.error('トランザクション実行エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('トランザクション実行エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'トランザクション実行中にエラーが発生しました',

@@ -55,7 +55,9 @@ const EnhancedMobileLayout = ({ children }) => {
         // Trigger page refresh or reload data
         window.location.reload()
       } catch (error) {
-        console.error('Refresh failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Refresh failed:', error)
+        }
       } finally {
         setIsRefreshing(false)
       }

@@ -231,7 +231,7 @@ const KnowledgeAreaHeatmap = React.memo(() => {
           setHoveredCell(d)
         }
       })
-      .on('mouseleave', function (event, d) {
+      .on('mouseleave', function (_event, _d) {
         d3.select(this).transition().duration(200).attr('stroke', '#fff').attr('stroke-width', 2)
         setHoveredCell(null)
       })

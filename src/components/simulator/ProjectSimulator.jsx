@@ -14,7 +14,7 @@ import {
   Clock,
   TrendingUp,
   BookOpen,
-  Settings,
+  _Settings,
   Lightbulb,
   Star,
   BarChart3,
@@ -22,6 +22,7 @@ import {
 
 const ProjectSimulator = () => {
   const [currentScenario, setCurrentScenario] = useState(null)
+  const _linkStrength = 1
   const [simulationState, setSimulationState] = useState('menu') // menu, running, paused, complete
   const [projectMetrics, setProjectMetrics] = useState({
     budget: 100000,

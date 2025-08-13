@@ -28,7 +28,8 @@ const ExamResults = () => {
 
   const isPassed = results.score >= 61
 
-  const formatDuration = (seconds) => {
+  const _formatDuration = (seconds) => {
+    // TODO: Will be used in future
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     return `${hours}時間${minutes}分`

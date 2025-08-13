@@ -77,7 +77,9 @@ class AuthService {
 
       return { user: data.user, session: data.session }
     } catch (error) {
-      console.error('Registration error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', error)
+      }
       throw error
     }
   }
@@ -136,7 +138,9 @@ class AuthService {
 
       return { user: data.user, session: data.session, role: userRole }
     } catch (error) {
-      console.error('Sign in error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Sign in error:', error)
+      }
       throw error
     }
   }
@@ -161,7 +165,9 @@ class AuthService {
 
       return data
     } catch (error) {
-      console.error('OAuth sign in error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('OAuth sign in error:', error)
+      }
       throw error
     }
   }
@@ -187,7 +193,9 @@ class AuthService {
 
       return true
     } catch (error) {
-      console.error('Sign out error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Sign out error:', error)
+      }
       throw error
     }
   }
@@ -208,7 +216,9 @@ class AuthService {
 
       return true
     } catch (error) {
-      console.error('Password reset error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Password reset error:', error)
+      }
       throw error
     }
   }
@@ -236,7 +246,9 @@ class AuthService {
 
       return true
     } catch (error) {
-      console.error('Update password error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Update password error:', error)
+      }
       throw error
     }
   }
@@ -257,7 +269,9 @@ class AuthService {
 
       return true
     } catch (error) {
-      console.error('Email verification error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Email verification error:', error)
+      }
       throw error
     }
   }
@@ -281,7 +295,9 @@ class AuthService {
 
       return data
     } catch (error) {
-      console.error('Enable MFA error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Enable MFA error:', error)
+      }
       throw error
     }
   }
@@ -302,7 +318,9 @@ class AuthService {
 
       return data
     } catch (error) {
-      console.error('MFA verification error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('MFA verification error:', error)
+      }
       throw error
     }
   }

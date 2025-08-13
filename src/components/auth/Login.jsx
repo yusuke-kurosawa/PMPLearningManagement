@@ -96,7 +96,9 @@ const Login = () => {
         localStorage.removeItem('rememberEmail')
       }
     } catch (error) {
-      console.error('Login error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', error)
+      }
     } finally {
       setLoading(false)
     }
@@ -108,7 +110,9 @@ const Login = () => {
     try {
       await signInWithOAuth(provider)
     } catch (error) {
-      console.error(`${provider} login error:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`${provider} login error:`, error)
+      }
     } finally {
       setLoading(false)
     }

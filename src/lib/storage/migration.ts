@@ -81,7 +81,9 @@ export class MigrationService {
         progress: 0,
       }
     } catch (error) {
-      console.error('Failed to get migration status:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to get migration status:', error)
+      }
       return {
         version: this.CURRENT_VERSION,
         completed: false,
@@ -128,7 +130,9 @@ export class MigrationService {
 
       return true
     } catch (error) {
-      console.error('Failed to create backup:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to create backup:', error)
+      }
       await this.updateMigrationStatus({
         errors: [error instanceof Error ? error.message : 'Backup creation failed'],
       })
@@ -184,7 +188,7 @@ export class MigrationService {
       if (flashCardData) {
         try {
           const parsed = JSON.parse(flashCardData)
-          Object.entries(parsed).forEach(([key, value], index) => {
+          Object.entries(parsed).forEach(([key, value], _index) => {
             try {
               LegacyFlashCardSchema.parse(value)
             } catch (err) {
@@ -245,7 +249,9 @@ export class MigrationService {
 
       return 1
     } catch (error) {
-      console.error('Failed to migrate learning progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to migrate learning progress:', error)
+      }
       throw error
     }
   }
@@ -278,14 +284,18 @@ export class MigrationService {
             await this.storage.setItem(`exam-result-${modernResult.id}`, modernResult)
             await this.syncQueue.add('exam-result-create', modernResult)
           } catch (err) {
-            console.warn('Skipping invalid exam result:', err)
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Skipping invalid exam result:', err)
+            }
           }
         }
       }
 
       return validResults.length
     } catch (error) {
-      console.error('Failed to migrate exam results:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to migrate exam results:', error)
+      }
       throw error
     }
   }
@@ -317,13 +327,17 @@ export class MigrationService {
           await this.storage.setItem(`flashcard-${processId}`, modernProgress)
           await this.syncQueue.add('flashcard-update', modernProgress)
         } catch (err) {
-          console.warn(`Skipping invalid flashcard progress for ${processId}:`, err)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Skipping invalid flashcard progress for ${processId}:`, err)
+          }
         }
       }
 
       return migratedCount
     } catch (error) {
-      console.error('Failed to migrate flashcard progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to migrate flashcard progress:', error)
+      }
       throw error
     }
   }
@@ -359,14 +373,18 @@ export class MigrationService {
             await this.syncQueue.add('setting-update', modernSetting)
             migratedCount++
           } catch (err) {
-            console.warn(`Failed to migrate setting ${key}:`, err)
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(`Failed to migrate setting ${key}:`, err)
+            }
           }
         }
       }
 
       return migratedCount
     } catch (error) {
-      console.error('Failed to migrate user settings:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to migrate user settings:', error)
+      }
       throw error
     }
   }
@@ -514,4 +532,4 @@ export class MigrationService {
   }
 }
 
-export const migrationService = new MigrationService()
+export const _migrationService = new MigrationService()

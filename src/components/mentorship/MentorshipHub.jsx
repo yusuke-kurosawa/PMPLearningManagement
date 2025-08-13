@@ -3,7 +3,7 @@ import {
   Users,
   Star,
   MessageSquare,
-  Calendar,
+  _Calendar,
   MapPin,
   Briefcase,
   Clock,
@@ -12,21 +12,22 @@ import {
   Heart,
   Trophy,
   Award,
-  BookOpen,
+  _BookOpen,
   Video,
-  Phone,
-  Mail,
+  _Phone,
+  _Mail,
   CheckCircle,
   AlertCircle,
-  User,
+  _User,
   Target,
   TrendingUp,
   Globe,
-  Languages,
+  _Languages,
   Building,
 } from 'lucide-react'
 
 const MentorshipHub = () => {
+  const [connections, setConnections] = useState([])
   const [activeTab, setActiveTab] = useState('find-mentor') // find-mentor, my-connections, become-mentor
   const [mentors, setMentors] = useState([])
   const [filteredMentors, setFilteredMentors] = useState([])
@@ -38,14 +39,14 @@ const MentorshipHub = () => {
     availability: '',
     language: '',
   })
-  const [userProfile, setUserProfile] = useState({
-    role: 'learner',
-    experience: 'beginner',
-    goals: [],
-    industry: '',
-    location: '',
-  })
-  const [connections, setConnections] = useState([])
+  //   const [userProfile, setUserProfile] = useState({ // TODO: Will be used in future
+  //     role: 'learner',
+  //     experience: 'beginner',
+  //     goals: [],
+  //     industry: '',
+  //     location: '',
+  //   })
+  //   const [connections, setConnections] = useState([]) // TODO: Will be used in future
   const [mentorshipRequests, setMentorshipRequests] = useState([])
 
   // Mock mentor data

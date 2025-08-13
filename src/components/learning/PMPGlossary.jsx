@@ -9,7 +9,7 @@ const PMPGlossary = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategories, setSelectedCategories] = useState(new Set())
   const [selectedTerm, setSelectedTerm] = useState(null)
-  const [viewMode, setViewMode] = useState('list') // list or card
+  // //   const [viewMode, setViewMode] = useState('list') // list or card // TODO: Will be used in future // TODO: Will be used in future
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 

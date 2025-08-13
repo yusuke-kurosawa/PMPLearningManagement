@@ -8,7 +8,7 @@ import Stripe from 'stripe'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import { SubscriptionPlan, PaymentStatus } from '@prisma/client'
+import { SubscriptionPlan } from '@prisma/client'
 
 // Stripe初期化
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -141,7 +141,9 @@ export class StripeService {
 
       return customer
     } catch (error) {
-      console.error('Stripe顧客作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Stripe顧客作成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '顧客情報の作成中にエラーが発生しました',
@@ -232,7 +234,9 @@ export class StripeService {
         throw error
       }
 
-      console.error('サブスクリプション作成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('サブスクリプション作成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプションの作成中にエラーが発生しました',
@@ -292,7 +296,9 @@ export class StripeService {
         throw error
       }
 
-      console.error('サブスクリプション更新エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('サブスクリプション更新エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプションの更新中にエラーが発生しました',
@@ -333,7 +339,9 @@ export class StripeService {
         throw error
       }
 
-      console.error('サブスクリプションキャンセルエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('サブスクリプションキャンセルエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプションのキャンセル中にエラーが発生しました',
@@ -375,7 +383,9 @@ export class StripeService {
 
       return paymentMethod
     } catch (error) {
-      console.error('支払い方法追加エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('支払い方法追加エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '支払い方法の追加中にエラーが発生しました',
@@ -402,7 +412,9 @@ export class StripeService {
 
       return invoices.data
     } catch (error) {
-      console.error('請求書履歴取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('請求書履歴取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '請求書履歴の取得中にエラーが発生しました',
@@ -428,7 +440,9 @@ export class StripeService {
 
       return paymentMethods.data
     } catch (error) {
-      console.error('支払い方法取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('支払い方法取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '支払い方法の取得中にエラーが発生しました',
@@ -442,7 +456,9 @@ export class StripeService {
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
       return stripe.webhooks.constructEvent(payload, signature, endpointSecret)
     } catch (error) {
-      console.error('WebHook署名検証エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('WebHook署名検証エラー:', error)
+      }
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: 'WebHook署名の検証に失敗しました',
@@ -486,7 +502,9 @@ export class StripeService {
         },
       })
     } catch (error) {
-      console.error('データベース同期エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('データベース同期エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプションの同期中にエラーが発生しました',
@@ -529,7 +547,7 @@ export class StripeService {
     }
   }> {
     try {
-      const [studySessions, examResults, aiUsage, dataExports] = await Promise.all([
+// //       const [studySessions, examResults, aiUsage, dataExports] = await Promise.all([ // TODO: Will be used in future // TODO: Will be used in future
         prisma.studySession.findMany({
           where: {
             userId,
@@ -573,7 +591,9 @@ export class StripeService {
         },
       }
     } catch (error) {
-      console.error('使用量レポート生成エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('使用量レポート生成エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '使用量レポートの生成中にエラーが発生しました',

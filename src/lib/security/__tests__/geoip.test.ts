@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
 import nock from 'nock'
-import { GeoIPService, geoIPService } from '../geoip'
+import { GeoIPService } from '../geoip'
 import * as fc from 'fast-check'
 
 // Redis モック

@@ -46,11 +46,11 @@ import {
 import { Button } from '../ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet'
 import { Badge } from '../ui/badge'
-import { Card, CardContent } from '../ui/card'
+// import { Card } from '../ui/card' // TODO: Will be used in future
 import { useToast } from '../../hooks/use-toast'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
+// import { Tabs } from '../ui/tabs' // TODO: Will be used in future
 import { Switch } from '../ui/switch'
-import { Progress } from '../ui/progress'
+// import { Progress } from '../ui/progress' // TODO: Will be used in future
 
 interface PWACapabilities {
   isInstalled: boolean
@@ -141,8 +141,8 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   // Touch and Gesture State
   const [touchStart, setTouchStart] = useState<{ x: number; y: number; time: number } | null>(null)
   const [activeGestures, setActiveGestures] = useState<TouchGesture[]>([])
-  const [swipeThreshold, setSwipeThreshold] = useState(100)
-  const [longPressThreshold, setLongPressThreshold] = useState(500)
+//   const [swipeThreshold, setSwipeThreshold] = useState(100) // TODO: Will be used in future
+//   const [longPressThreshold, setLongPressThreshold] = useState(500) // TODO: Will be used in future
 
   // App State
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -228,9 +228,13 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js')
-        console.log('Service Worker registered:', registration)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Service Worker registered:', registration)
+        }
       } catch (error) {
-        console.error('Service Worker registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Service Worker registration failed:', error)
+        }
       }
     }
   }
@@ -276,7 +280,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     }, longPressThreshold)
   }
 
-  const handleTouchMove = (e: TouchEvent) => {
+//   const handleTouchMove = (e: TouchEvent) => { // TODO: Will be used in future
     // Clear long press timeout on move
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
@@ -395,7 +399,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
             },
           }))
         } catch (error) {
-          console.log('Battery API not supported')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Battery API not supported')
+          }
         }
       }
     }
@@ -439,12 +445,16 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       const result = await installPromptEvent.prompt()
-      console.log('Install prompt result:', result)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Install prompt result:', result)
+      }
 
       setInstallPromptEvent(null)
       setPwaCapabilities((prev) => ({ ...prev, canInstall: false }))
     } catch (error) {
-      console.error('Install prompt failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Install prompt failed:', error)
+      }
     }
   }
 
@@ -457,7 +467,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           url: window.location.href,
         })
       } catch (error) {
-        console.error('Share failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Share failed:', error)
+        }
       }
     } else {
       // Fallback: copy to clipboard

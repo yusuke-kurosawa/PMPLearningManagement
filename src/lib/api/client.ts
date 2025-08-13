@@ -44,7 +44,9 @@ export const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error, query) => {
-      console.error(`Query error for key ${query.queryKey}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Query error for key ${query.queryKey}:`, error)
+      }
     },
   }),
 })
@@ -153,10 +155,14 @@ export const offlineUtils = {
       for (const item of queue) {
         try {
           // Process queued mutations
-          console.log('Processing offline mutation:', item)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Processing offline mutation:', item)
+          }
           // Implementation would depend on specific mutation types
         } catch (error) {
-          console.error('Failed to process offline mutation:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to process offline mutation:', error)
+          }
         }
       }
 
@@ -175,7 +181,9 @@ export const performanceUtils = {
       return {
         end: () => {
           const duration = performance.now() - start
-          console.log(`API call ${name} took ${duration.toFixed(2)}ms`)
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`API call ${name} took ${duration.toFixed(2)}ms`)
+          }
 
           // Report to analytics if configured
           if (window.gtag) {

@@ -19,7 +19,7 @@ const STATIC_ASSETS = [
 ]
 
 // API endpoints to cache
-const CACHE_API_ROUTES = [
+// const CACHE_API_ROUTES = [ // TODO: Will be used in future
   '/api/pmbok/processes',
   '/api/flashcards/decks',
   '/api/progress/overview',
@@ -28,28 +28,38 @@ const CACHE_API_ROUTES = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event: ExtendableEvent) => {
-  console.log('Service Worker: Installing...')
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Installing...')
+  }
 
   event.waitUntil(
     caches
       .open(STATIC_CACHE_NAME)
       .then((cache) => {
-        console.log('Service Worker: Caching static assets')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Service Worker: Caching static assets')
+        }
         return cache.addAll(STATIC_ASSETS)
       })
       .then(() => {
-        console.log('Service Worker: Static assets cached successfully')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Service Worker: Static assets cached successfully')
+        }
         return self.skipWaiting()
       })
       .catch((error) => {
-        console.error('Service Worker: Failed to cache static assets:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Service Worker: Failed to cache static assets:', error)
+        }
       })
   )
 })
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event: ExtendableEvent) => {
-  console.log('Service Worker: Activating...')
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Activating...')
+  }
 
   event.waitUntil(
     caches
@@ -59,14 +69,18 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
           cacheNames.map((cacheName) => {
             // Delete old cache versions
             if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
-              console.log('Service Worker: Deleting old cache:', cacheName)
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Service Worker: Deleting old cache:', cacheName)
+              }
               return caches.delete(cacheName)
             }
           })
         )
       })
       .then(() => {
-        console.log('Service Worker: Activated successfully')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Service Worker: Activated successfully')
+        }
         return self.clients.claim()
       })
   )
@@ -148,7 +162,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
 // Handle API requests with caching strategy
 async function handleApiRequest(request: Request): Promise<Response> {
-  const url = new URL(request.url)
+//   const url = new URL(request.url) // TODO: Will be used in future
 
   // Try network first for fresh data
   try {
@@ -163,7 +177,9 @@ async function handleApiRequest(request: Request): Promise<Response> {
 
     throw new Error(`Network response not ok: ${networkResponse.status}`)
   } catch (error) {
-    console.log('Service Worker: Network failed for API request, trying cache')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: Network failed for API request, trying cache')
+    }
 
     // Fall back to cache
     const cachedResponse = await caches.match(request)
@@ -186,8 +202,10 @@ async function handleApiRequest(request: Request): Promise<Response> {
 }
 
 // Background sync for offline actions
-self.addEventListener('sync', (event: any) => {
-  console.log('Service Worker: Background sync triggered:', event.tag)
+self.addEventListener('sync', (event: React.MouseEvent) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Background sync triggered:', event.tag)
+  }
 
   if (event.tag === 'background-sync-progress') {
     event.waitUntil(syncProgressData())
@@ -213,9 +231,13 @@ async function syncProgressData() {
 
     // Clear synced data
     await clearStoredSyncData('progress-sync')
-    console.log('Service Worker: Progress data synced successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: Progress data synced successfully')
+    }
   } catch (error) {
-    console.error('Service Worker: Failed to sync progress data:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Service Worker: Failed to sync progress data:', error)
+    }
   }
 }
 
@@ -233,9 +255,13 @@ async function syncExamResults() {
     }
 
     await clearStoredSyncData('exam-results-sync')
-    console.log('Service Worker: Exam results synced successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: Exam results synced successfully')
+    }
   } catch (error) {
-    console.error('Service Worker: Failed to sync exam results:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Service Worker: Failed to sync exam results:', error)
+    }
   }
 }
 
@@ -253,9 +279,13 @@ async function syncFlashcardProgress() {
     }
 
     await clearStoredSyncData('flashcard-progress-sync')
-    console.log('Service Worker: Flashcard progress synced successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: Flashcard progress synced successfully')
+    }
   } catch (error) {
-    console.error('Service Worker: Failed to sync flashcard progress:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Service Worker: Failed to sync flashcard progress:', error)
+    }
   }
 }
 
@@ -304,8 +334,10 @@ async function clearStoredSyncData(storeName: string): Promise<void> {
 }
 
 // Push notification handling
-self.addEventListener('push', (event: any) => {
-  console.log('Service Worker: Push message received')
+self.addEventListener('push', (event: React.MouseEvent) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Push message received')
+  }
 
   const options = {
     body: 'New activity in your study group!',
@@ -331,7 +363,9 @@ self.addEventListener('push', (event: any) => {
       options.body = data.message || options.body
       options.data = data
     } catch (error) {
-      console.error('Service Worker: Error parsing push data:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Service Worker: Error parsing push data:', error)
+      }
     }
   }
 
@@ -339,8 +373,10 @@ self.addEventListener('push', (event: any) => {
 })
 
 // Notification click handling
-self.addEventListener('notificationclick', (event: any) => {
-  console.log('Service Worker: Notification clicked')
+self.addEventListener('notificationclick', (event: React.MouseEvent) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Notification clicked')
+  }
 
   event.notification.close()
 
@@ -368,8 +404,10 @@ self.addEventListener('notificationclick', (event: any) => {
 })
 
 // Handle messages from main thread
-self.addEventListener('message', (event: any) => {
-  console.log('Service Worker: Message received:', event.data)
+self.addEventListener('message', (event: React.MouseEvent) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker: Message received:', event.data)
+  }
 
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
@@ -385,14 +423,18 @@ async function cacheUrls(urls: string[]) {
   try {
     const cache = await caches.open(DYNAMIC_CACHE_NAME)
     await cache.addAll(urls)
-    console.log('Service Worker: URLs cached successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: URLs cached successfully')
+    }
   } catch (error) {
-    console.error('Service Worker: Failed to cache URLs:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Service Worker: Failed to cache URLs:', error)
+    }
   }
 }
 
 // Periodic background sync (if supported)
-self.addEventListener('periodicsync', (event: any) => {
+self.addEventListener('periodicsync', (event: React.MouseEvent) => {
   if (event.tag === 'content-sync') {
     event.waitUntil(syncContent())
   }
@@ -406,9 +448,13 @@ async function syncContent() {
     // Sync user progress
     await syncProgressData()
 
-    console.log('Service Worker: Periodic sync completed')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Worker: Periodic sync completed')
+    }
   } catch (error) {
-    console.error('Service Worker: Periodic sync failed:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Service Worker: Periodic sync failed:', error)
+    }
   }
 }
 

@@ -31,7 +31,7 @@ const axe = configureAxe({
 
 export const checkA11y = async (
   container: HTMLElement | Document = document.body,
-  options?: any
+  options?: unknown
 ) => {
   const results = await axe(container, options)
 

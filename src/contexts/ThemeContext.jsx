@@ -27,7 +27,9 @@ export const ThemeProvider = ({ children }) => {
       const saved = localStorage.getItem('themeSettings')
       return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings
     } catch (error) {
-      console.error('テーマ設定の読み込みエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('テーマ設定の読み込みエラー:', error)
+      }
       return defaultSettings
     }
   }
@@ -39,7 +41,9 @@ export const ThemeProvider = ({ children }) => {
     try {
       localStorage.setItem('themeSettings', JSON.stringify(settings))
     } catch (error) {
-      console.error('テーマ設定の保存エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('テーマ設定の保存エラー:', error)
+      }
     }
   }, [settings])
 

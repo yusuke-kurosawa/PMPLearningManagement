@@ -10,10 +10,14 @@ export function PWAManager() {
       pwaManager
         .registerServiceWorker()
         .then((registration) => {
-          console.warn('SW registered: ', registration)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('SW registered: ', registration)
+          }
         })
         .catch((registrationError) => {
-          console.error('SW registration failed: ', registrationError)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('SW registration failed: ', registrationError)
+          }
         })
     }
   }, [])

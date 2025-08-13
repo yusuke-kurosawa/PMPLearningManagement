@@ -57,21 +57,29 @@ class RedisClient {
         RedisClient.instance = new Redis(REDIS_CONFIG)
 
         RedisClient.instance.on('connect', () => {
-          console.log('Redis connected successfully')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Redis connected successfully')
+          }
         })
 
         RedisClient.instance.on('error', (error) => {
-          console.error('Redis connection error:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Redis connection error:', error)
+          }
         })
 
         RedisClient.instance.on('close', () => {
-          console.log('Redis connection closed')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Redis connection closed')
+          }
         })
 
         // 接続テスト
         await RedisClient.instance.ping()
       } catch (error) {
-        console.error('Redis initialization failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Redis initialization failed:', error)
+        }
         RedisClient.instance = null
         throw error
       } finally {
@@ -152,7 +160,7 @@ export class SlidingWindowRateLimiter {
         end
       `
 
-      const result = (await redis.eval(
+      const _result = (await redis.eval(
         luaScript,
         1,
         key,
@@ -162,7 +170,7 @@ export class SlidingWindowRateLimiter {
         Math.ceil(config.windowMs / 1000).toString()
       )) as [number, number, number]
 
-      const [allowed, currentRequests, remaining] = result
+      //       const [allowed, currentRequests, remaining] = result // TODO: Will be used in future
       const resetTime = new Date(now + config.windowMs)
 
       return {
@@ -173,7 +181,9 @@ export class SlidingWindowRateLimiter {
         retryAfter: allowed === 0 ? Math.ceil(config.windowMs / 1000) : undefined,
       }
     } catch (error) {
-      console.error('Rate limiting error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Rate limiting error:', error)
+      }
       // Redis エラー時はデフォルトで許可
       return {
         success: true,
@@ -210,7 +220,9 @@ export class SlidingWindowRateLimiter {
       const key = `${this.keyPrefix}:${identifier}`
       await redis.del(key)
     } catch (error) {
-      console.error('Rate limit reset error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Rate limit reset error:', error)
+      }
     }
   }
 
@@ -236,7 +248,9 @@ export class SlidingWindowRateLimiter {
         resetTime: new Date(now + config.windowMs),
       }
     } catch (error) {
-      console.error('Get limit status error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Get limit status error:', error)
+      }
       return {
         current: 0,
         limit: config.maxRequests,
@@ -330,7 +344,9 @@ export class TokenBucketRateLimiter {
           allowed === 0 ? Math.ceil((requested - remainingTokens) / refillRate) : undefined,
       }
     } catch (error) {
-      console.error('Token bucket error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Token bucket error:', error)
+      }
       return {
         success: true,
         limit: capacity,
@@ -452,7 +468,9 @@ export class DDoSProtection {
         recommendations: recommendations.length > 0 ? recommendations : ['Normal traffic pattern'],
       }
     } catch (error) {
-      console.error('DDoS protection error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('DDoS protection error:', error)
+      }
       return {
         allowed: true, // エラー時はデフォルトで許可
         recommendations: ['DDoS protection system error'],
@@ -523,7 +541,9 @@ export class DDoSProtection {
 
       return Math.min(100, score)
     } catch (error) {
-      console.error('Suspicious score calculation error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Suspicious score calculation error:', error)
+      }
       return 0
     }
   }
@@ -585,7 +605,9 @@ export class DDoSProtection {
 
       return { isAnomalous: false }
     } catch (error) {
-      console.error('Geographic anomaly check error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Geographic anomaly check error:', error)
+      }
       return { isAnomalous: false }
     }
   }
@@ -605,7 +627,9 @@ export class DDoSProtection {
 
       return count
     } catch (error) {
-      console.error('Request frequency check error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Request frequency check error:', error)
+      }
       return 0
     }
   }
@@ -616,7 +640,7 @@ export class DDoSProtection {
   async updateIpReputation(
     clientIp: string,
     success: boolean,
-    additionalData?: { userAgent?: string; endpoint?: string }
+    _additionalData?: { userAgent?: string; endpoint?: string }
   ): Promise<void> {
     try {
       const redis = await this.getRedis()
@@ -665,7 +689,9 @@ export class DDoSProtection {
       await redis.zadd(freqKey, now, now)
       await redis.expire(freqKey, 10) // 10秒間保持
     } catch (error) {
-      console.error('IP reputation update error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('IP reputation update error:', error)
+      }
     }
   }
 
@@ -683,9 +709,13 @@ export class DDoSProtection {
         await redis.del(...keys)
       }
 
-      console.log(`IP ${clientIp} unblocked manually`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`IP ${clientIp} unblocked manually`)
+      }
     } catch (error) {
-      console.error('IP unblock error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('IP unblock error:', error)
+      }
     }
   }
 }

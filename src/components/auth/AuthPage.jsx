@@ -35,7 +35,9 @@ const AuthPage = () => {
     try {
       await signInWithOAuth(provider)
     } catch (error) {
-      console.error('OAuth sign in error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('OAuth sign in error:', error)
+      }
     }
   }
 

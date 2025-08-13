@@ -58,12 +58,12 @@ export class QueryOptimizer {
    */
   static buildPaginatedQuery<T>(
     options: PaginationOptions,
-    baseQuery: any = {}
+    baseQuery: unknown = {}
   ): {
     skip: number
     take: number
-    orderBy: any
-    where: any
+    orderBy: unknown
+    where: unknown
   } {
     const { page, limit, sortBy, sortOrder } = PaginationSchema.parse(options)
     const skip = (page - 1) * limit
@@ -189,7 +189,7 @@ export class QueryOptimizer {
       masteryLevel?: { min?: number; max?: number }
     }
   ) {
-    const where: any = { userId }
+    const where: unknown = { userId }
 
     if (filters) {
       if (filters.knowledgeAreas && filters.knowledgeAreas.length > 0) {
@@ -210,7 +210,7 @@ export class QueryOptimizer {
       }
 
       if (filters.masteryLevel) {
-        const masteryFilter: any = {}
+        const masteryFilter: unknown = {}
         if (filters.masteryLevel.min !== undefined) {
           masteryFilter.gte = filters.masteryLevel.min
         }
@@ -252,7 +252,7 @@ export class QueryOptimizer {
       dateRange?: { start?: Date; end?: Date }
     }
   ) {
-    const where: any = {}
+    const where: unknown = {}
 
     if (userId) {
       where.userId = userId
@@ -264,7 +264,7 @@ export class QueryOptimizer {
       }
 
       if (filters.scoreRange) {
-        const scoreFilter: any = {}
+        const scoreFilter: unknown = {}
         if (filters.scoreRange.min !== undefined) {
           scoreFilter.gte = filters.scoreRange.min
         }
@@ -374,7 +374,7 @@ export class QueryOptimizer {
     cursor?: { id: string }
     orderBy: { id: 'asc' }
   } {
-    const query: any = {
+    const query: unknown = {
       take: batchSize,
       orderBy: { id: 'asc' as const },
     }
@@ -410,7 +410,7 @@ export class QueryOptimizer {
  * クエリキャッシュマネージャー
  */
 export class QueryCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   private defaultTTL = 5 * 60 * 1000 // 5分
 
   /**

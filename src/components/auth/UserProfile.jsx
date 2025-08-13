@@ -117,7 +117,9 @@ const UserProfile = () => {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
-      console.error('Profile update error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Profile update error:', error)
+      }
     }
   }
 
@@ -136,7 +138,9 @@ const UserProfile = () => {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
-      console.error('Password update error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Password update error:', error)
+      }
     }
   }
 

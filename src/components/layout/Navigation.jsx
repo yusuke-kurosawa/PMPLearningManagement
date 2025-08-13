@@ -19,7 +19,6 @@ import {
   ToggleLeft,
   ChevronRight,
   User,
-  Settings,
   LogIn,
   LogOut,
   UserPlus,

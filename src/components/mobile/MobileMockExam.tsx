@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   Clock,
-  Bookmark,
+  _Bookmark,
   Flag,
   ChevronLeft,
   ChevronRight,
@@ -32,7 +32,7 @@ interface Question {
 interface MobileMockExamProps {
   questions: Question[]
   timeLimit: number // in minutes
-  onComplete?: (results: any) => void
+  onComplete?: (results: unknown) => void
 }
 
 export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockExamProps) {
@@ -46,7 +46,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
 
   const currentQuestion = questions[currentQuestionIndex]
   const progress = (Object.keys(answers).length / questions.length) * 100
-  const isAnswered = currentQuestion?.id in answers
+  //   const _isAnswered = currentQuestion?.id in answers // TODO: Will be used in future
   const isFlagged = flaggedQuestions.has(currentQuestion?.id)
 
   // Timer
