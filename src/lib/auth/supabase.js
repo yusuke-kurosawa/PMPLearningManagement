@@ -265,21 +265,31 @@ export const setupAuthListeners = (onAuthStateChange) => {
     // Handle auth state changes
     switch (event) {
       case 'SIGNED_IN':
-        console.log('User signed in:', session?.user?.email)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User signed in:', session?.user?.email)
+        }
         break
       case 'SIGNED_OUT':
-        console.log('User signed out')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User signed out')
+        }
         // Clear any cached data
         localStorage.removeItem('pmp-user-preferences')
         break
       case 'TOKEN_REFRESHED':
-        console.log('Token refreshed')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token refreshed')
+        }
         break
       case 'USER_UPDATED':
-        console.log('User updated')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User updated')
+        }
         break
       case 'PASSWORD_RECOVERY':
-        console.log('Password recovery initiated')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Password recovery initiated')
+        }
         break
       default:
         break
