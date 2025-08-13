@@ -338,7 +338,7 @@ export const authValidation = {
     if (checks.requirements.hasNumber) score += 25
 
     // Additional points for special characters
-    if (/[!@#$%^&*(),.?\":{}|<>]/.test(password)) score += 10
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 10
 
     // Additional points for length beyond minimum
     if (password.length > 12) score += 10

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authService, UserRoles } from '../services/authService'
-import { authHelpers, sessionManager } from '../lib/supabase'
+import { supabase, authHelpers, sessionManager } from '../lib/supabase'
 import { auditLogger } from '../services/auditService'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -52,7 +52,10 @@ export const AuthProvider = ({ children }) => {
         // Setup auto-refresh
         sessionManager.setupAutoRefresh()
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        // Silently handle initialization errors in production
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Auth initialization error:', error)
+        }
         setAuthError(error.message)
       } finally {
         setLoading(false)
@@ -379,8 +382,8 @@ export const useAuth = () => {
 
 // HOC for protected components
 export const withAuth = (Component, requiredRole = null) => {
-  return (props) => {
-    const { isAuthenticated, role, loading } = useAuth()
+  const WrappedComponent = (props) => {
+    const { isAuthenticated, role, loading, hasRole } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -409,6 +412,10 @@ export const withAuth = (Component, requiredRole = null) => {
 
     return <Component {...props} />
   }
+  
+  WrappedComponent.displayName = `withAuth(${Component.displayName || Component.name || 'Component'})`
+  
+  return WrappedComponent
 }
 
 export default AuthContext

@@ -197,8 +197,8 @@ export const withPerformanceOptimization = (Component, options = {}) => {
 
   OptimizedComponent.displayName = `Optimized(${Component.displayName || Component.name})`
 
-  return (props) => {
-    const { optimizeComponent } = usePerformanceOptimizer()
+  const EnhancedComponent = (props) => {
+    const { } = usePerformanceOptimizer() // Removed unused optimizeComponent
 
     // Apply additional optimizations if needed
     useEffect(() => {
@@ -209,6 +209,10 @@ export const withPerformanceOptimization = (Component, options = {}) => {
 
     return <OptimizedComponent {...props} />
   }
+  
+  EnhancedComponent.displayName = `withPerformanceOptimization(${Component.displayName || Component.name || 'Component'})`
+  
+  return EnhancedComponent
 }
 
 export default ContextManagerContext
