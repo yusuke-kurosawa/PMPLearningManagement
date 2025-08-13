@@ -379,3 +379,8 @@ chore: 雑務 #901
 ---
 
 **注**: PMBOK、PMP、PMIはProject Management Institute, Inc.の登録商標です。
+## 📊 IDD Compliance Dashboard
+
+[![IDD Compliance](https://img.shields.io/badge/IDD%20Compliance-66%25-yellow)](https://yusuke-kurosawa.github.io/PMPLearningManagement/idd-dashboard/)
+
+View our real-time IDD compliance metrics: [Dashboard](https://yusuke-kurosawa.github.io/PMPLearningManagement/idd-dashboard/)
