@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react'
 import {
   Users,
   Plus,
-  Calendar,
+  // Calendar, // TODO: Use for scheduling
   Target,
   Bell,
-  UserPlus,
+  // UserPlus, // TODO: Use for adding users
   Lock,
   Globe,
   TrendingUp,
-  MessageSquare,
+  // MessageSquare, // TODO: Use for messages
   Share2,
   LogOut,
 } from 'lucide-react'

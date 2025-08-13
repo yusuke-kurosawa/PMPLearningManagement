@@ -51,6 +51,7 @@ export async function handleStripeWebHook(req: NextRequest): Promise<NextRespons
     // WebHook署名検証
     const event = StripeService.verifyWebhookSignature(body, signature)
 
+    // eslint-disable-next-line no-console
     console.log(`Stripe WebHookイベント受信: ${event.type} (${event.id})`)
 
     // イベントタイプに応じた処理

@@ -58,9 +58,9 @@ import {
   DropdownMenuSeparator,
 } from '../ui/dropdown-menu'
 import { Switch } from '../ui/switch'
-import { Separator } from '../ui/separator'
+import { Separator } from '../ui/separator' // TODO: Use in UI
 import { ScrollArea } from '../ui/scroll-area'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns' // TODO: Use format in UI
 
 interface StudyGroup {
   id: string
@@ -198,7 +198,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   // Core state
   const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([])
   const [activeGroup, setActiveGroup] = useState<StudyGroup | null>(null)
-  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([])
+  const [_groupMembers, setGroupMembers] = useState<GroupMember[]>([])
   const [discussions, setDiscussions] = useState<DiscussionThread[]>([])
   const [activeThread, setActiveThread] = useState<DiscussionThread | null>(null)
   const [replies, setReplies] = useState<DiscussionReply[]>([])
@@ -214,15 +214,15 @@ const EnhancedCollaborationHub: React.FC = () => {
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false)
   const [showCreateThreadDialog, setShowCreateThreadDialog] = useState(false)
   const [showCreateNoteDialog, setShowCreateNoteDialog] = useState(false)
-  const [showGroupSettingsDialog, setShowGroupSettingsDialog] = useState(false)
+  const [_showGroupSettingsDialog, _setShowGroupSettingsDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'alphabetical'>('recent')
 
   // Real-time state
-  const [isOnline, setIsOnline] = useState(true)
-  const [onlineMembers, setOnlineMembers] = useState<Set<string>>(new Set())
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [isOnline, _setIsOnline] = useState(true)
+  const [onlineMembers, _setOnlineMembers] = useState<Set<string>>(new Set())
+  const [_typingUsers, _setTypingUsers] = useState<Set<string>>(new Set())
 
   // Form state
   const [newGroup, setNewGroup] = useState({

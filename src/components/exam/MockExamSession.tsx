@@ -3,7 +3,7 @@
  * Developer 1: Mock Exam Lead Implementation
  */
 
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Clock,
@@ -18,7 +18,7 @@ import {
   Play,
   AlertTriangle,
   BookOpen,
-  BarChart3,
+  // BarChart3, // TODO: Use for statistics
   Save,
   RefreshCw,
 } from 'lucide-react'
