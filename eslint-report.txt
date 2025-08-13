@@ -1,0 +1,1017 @@
+
+/home/kurosawa/PMPLearningManagement/src/components/ContextManagerDashboard.jsx
+  56:9  warning  'formatBytes' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/PWAOptimizationDashboard.jsx
+   21:10  warning  'realTimeData' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  126:11  warning  'vitals' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/auth/AuthCallback.jsx
+  40:23  warning  'data' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  70:23  warning  'data' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/auth/ProtectedRoute.jsx
+  15:37  warning  'role' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/collaboration/CollaborationHub.jsx
+  2:54  warning  'ArrowRight' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/collaboration/DiscussionThread.jsx
+  8:3  warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/collaboration/EnhancedCollaborationHub.tsx
+    33:3   warning  'ScreenShareOff' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+    43:18  warning  'AvatarContent' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+    62:10  warning  'Separator' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+    64:10  warning  'format' is defined but never used. Allowed unused vars must match /^_/u                               @typescript-eslint/no-unused-vars
+   190:24  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+   202:10  warning  'groupMembers' is assigned a value but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   218:10  warning  'showGroupSettingsDialog' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   218:35  warning  'setShowGroupSettingsDialog' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   224:20  warning  'setIsOnline' is assigned a value but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   225:25  warning  'setOnlineMembers' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   226:10  warning  'typingUsers' is assigned a value but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   226:23  warning  'setTypingUsers' is assigned a value but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+   683:66  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+   711:66  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+  1219:44  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/components/collaboration/SharedNotes.jsx
+  12:3  warning  'Edit' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/collaboration/StudyGroups.jsx
+   5:3  warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   8:3  warning  'UserPlus' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  12:3  warning  'MessageSquare' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/exam/MockExamSession.tsx
+   6:28  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  21:3   warning  'BarChart3' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/layout/MobileNavigation.tsx
+  14:3  warning  'X' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/layout/Navigation.jsx
+  22:3  warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/layout/Sidebar.jsx
+  17:3   warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  22:3   warning  'Bookmark' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  32:11  warning  'settings' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/EnhancedFlashCardSystem.tsx
+    6:38  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   14:3   warning  'Pause' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   15:3   warning  'RotateCcw' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+   16:3   warning  'Share2' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   18:3   warning  'Upload' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   19:3   warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   22:3   warning  'EyeOff' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   23:3   warning  'Volume2' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   24:3   warning  'VolumeX' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   28:3   warning  'Target' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   30:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   33:3   warning  'Shuffle' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   38:3   warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   41:3   warning  'Award' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   46:8   warning  'FlashCard' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+   47:8   warning  'FlashCardDeck' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   48:8   warning  'StudySession' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+   85:5   warning  'cards' is assigned a value but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   98:5   warning  'updateCard' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   99:5   warning  'deleteCard' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  101:5   warning  'updateDeck' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  116:5   warning  'searchCards' is assigned a value but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  118:5   warning  'importDeck' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  119:5   warning  'updateStudySettings' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  127:10  warning  'showCreateDeckDialog' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  128:10  warning  'showSettingsDialog' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  130:10  warning  'studyStartTime' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  282:9   warning  'handleCreateDeck' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  540:66  warning  Unexpected any. Specify a different type                                                         @typescript-eslint/no-explicit-any
+  580:23  warning  'deckStats' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  961:48  warning  Unexpected any. Specify a different type                                                         @typescript-eslint/no-explicit-any
+  982:48  warning  Unexpected any. Specify a different type                                                         @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/EnhancedProgressDashboard.tsx
+    8:3   warning  'BarChart3' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   11:3   warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   15:3   warning  'BookOpen' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   18:3   warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   19:3   warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   21:3   warning  'Upload' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   30:8   warning  'ProcessProgress' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   31:8   warning  'LearningGoal' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   32:8   warning  'StudySession' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   33:8   warning  'Achievement' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+   35:10  warning  'api' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   61:27  warning  'startOfWeek' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+   61:40  warning  'endOfWeek' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   68:10  warning  'dateRange' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+   68:21  warning  'setDateRange' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   74:5   warning  'studySessions' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   90:5   warning  'updateGoal' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  136:45  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  339:66  warning  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/ExamResults.jsx
+   8:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  31:9  warning  'formatDuration' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/FlashCardLearning.jsx
+  3:28  warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  3:36  warning  'Shuffle' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/LearningModal.jsx
+  2:27  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/LearningProgressDashboard.jsx
+   1:27  warning  'useEffect' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  18:11  warning  'progress' is assigned a value but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  18:33  warning  'updateStudyTime' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/learning/PMPGlossary.jsx
+  12:10  warning  'viewMode' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  12:20  warning  'setViewMode' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/logging/PromptLogDashboard.jsx
+  26:10  warning  'Progress' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  45:3   warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  51:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  59:3   warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  62:3   warning  'Activity' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  65:3   warning  'Share2' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  66:3   warning  'Flag' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  67:3   warning  'ThumbsUp' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  68:3   warning  'ThumbsDown' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  72:39  warning  'startOfDay' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  72:51  warning  'endOfDay' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  72:61  warning  'subDays' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  90:20  warning  'setPageSize' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  95:10  warning  'refreshInterval' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/mentorship/MentorshipHub.jsx
+   6:3   warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  15:3   warning  'BookOpen' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  17:3   warning  'Phone' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  18:3   warning  'Mail' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  21:3   warning  'User' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  25:3   warning  'Languages' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+  41:10  warning  'userProfile' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  41:23  warning  'setUserProfile' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  48:23  warning  'setConnections' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/mobile/MobileMockExam.tsx
+   4:3   warning  'Bookmark' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  35:26  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  49:9   warning  'isAnswered' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/mobile/MobileOptimizedApp.tsx
+   15:3   warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   20:3   warning  'BellOff' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   22:3   warning  'Plus' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   23:3   warning  'Search' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   24:3   warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   25:3   warning  'ArrowLeft' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+   26:3   warning  'MoreVertical' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   28:3   warning  'Monitor' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   29:3   warning  'Tablet' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   30:3   warning  'RefreshCw' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+   32:3   warning  'Signal' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   33:3   warning  'Volume2' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   34:3   warning  'VolumeX' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   35:3   warning  'Sun' is defined but never used. Allowed unused vars must match /^_/u                             @typescript-eslint/no-unused-vars
+   36:3   warning  'Moon' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   37:3   warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u                             @typescript-eslint/no-unused-vars
+   38:3   warning  'Globe' is defined but never used. Allowed unused vars must match /^_/u                           @typescript-eslint/no-unused-vars
+   42:3   warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+   49:10  warning  'Card' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   49:16  warning  'CardContent' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   51:10  warning  'Tabs' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   51:16  warning  'TabsContent' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   51:29  warning  'TabsList' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   51:39  warning  'TabsTrigger' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   53:10  warning  'Progress' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+  144:26  warning  'setSwipeThreshold' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  145:30  warning  'setLongPressThreshold' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  151:64  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  174:28  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  231:9   warning  Unexpected console statement                                                                      no-console
+  279:28  warning  'e' is defined but never used. Allowed unused args must match /^_/u                               @typescript-eslint/no-unused-vars
+  387:47  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  398:11  warning  Unexpected console statement                                                                      no-console
+  406:42  warning  Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  442:7   warning  Unexpected console statement                                                                      no-console
+  681:16  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                   react/no-unescaped-entities
+
+/home/kurosawa/PMPLearningManagement/src/components/mobile/MobilePMBOKMatrix.tsx
+  10:10  warning  'useTouchGestures' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/mobile/MobileProgressDashboard.tsx
+  15:10  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/pages/PMBOK7PerformanceDomains.jsx
+  12:3  warning  'ArrowRight' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/pages/PMBOKMatrix.jsx
+  111:9  warning  'originalProcessDetails' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/pmbok/EnhancedPMBOKMatrix.tsx
+     9:3   warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u                               @typescript-eslint/no-unused-vars
+    14:3   warning  'StarOff' is defined but never used. Allowed unused vars must match /^_/u                              @typescript-eslint/no-unused-vars
+    19:3   warning  'RotateCcw' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+    25:3   warning  'Users' is defined but never used. Allowed unused vars must match /^_/u                                @typescript-eslint/no-unused-vars
+    26:3   warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u                           @typescript-eslint/no-unused-vars
+    27:3   warning  'Info' is defined but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+   116:7   warning  'PMBOK7_PERFORMANCE_DOMAINS' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   141:30  warning  'setSelectedDifficulty' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   552:75  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+   595:74  warning  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+  1243:77  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                        react/no-unescaped-entities
+
+/home/kurosawa/PMPLearningManagement/src/components/providers/PWAProvider.tsx
+    9:3   warning  'PWAInstallPromptManager' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   55:26  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+   95:19  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  161:9   warning  Unexpected console statement                                                               no-console
+  192:22  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  204:22  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  259:94  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  262:32  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  267:7   warning  Unexpected console statement                                                               no-console
+  302:40  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  463:40  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  468:9   warning  Unexpected console statement                                                               no-console
+  471:7   warning  Unexpected console statement                                                               no-console
+  520:33  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  539:36  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/CommandPalette.jsx
+   4:3  warning  'Command' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   7:3  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  11:3  warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  27:3  warning  'Hash' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  28:3  warning  'Terminal' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  34:9  warning  'location' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/CustomizationPanel.jsx
+  19:68  warning  'colorThemes' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/EnvironmentBanner.tsx
+  2:40  warning  'Globe' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/EnvironmentInfo.tsx
+  2:59  warning  'Calendar' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/GlobalSearch.jsx
+   1:46  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  27:10  warning  'showHistory' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/QuickShortcuts.jsx
+    5:3   warning  'Star' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  163:9   warning  'moveShortcut' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  216:35  warning  'index' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/SettingsTrigger.jsx
+  2:20  warning  'User' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  2:26  warning  'Palette' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  2:35  warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/shared/UserSettingsPanel.jsx
+   6:3   warning  'Monitor' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   7:3   warning  'Smartphone' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   8:3   warning  'Globe' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  10:3   warning  'Lock' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  17:3   warning  'Eye' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  18:3   warning  'Volume2' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  19:3   warning  'VolumeX' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  21:3   warning  'Zap' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  22:3   warning  'Layers' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  23:3   warning  'Grid3x3' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  24:3   warning  'List' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  25:3   warning  'ChevronDown' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  26:3   warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  31:37  warning  'toggleDarkMode' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/simulator/ProjectSimulator.jsx
+   7:3   warning  'AlertTriangle' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  12:3   warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  13:3   warning  'XCircle' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  15:3   warning  'TrendingUp' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  17:3   warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  18:3   warning  'Lightbulb' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  37:18  warning  'setBadges' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/EnhancedNetworkGraph.jsx
+    1:46  warning  'useMemo' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+    4:3   warning  'Filter' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+    5:3   warning  'RotateCcw' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+    6:3   warning  'ZoomIn' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+    7:3   warning  'ZoomOut' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+    8:3   warning  'Menu' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+    9:3   warning  'X' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   12:3   warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   13:3   warning  'Palette' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+   14:3   warning  'Layout' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   25:24  warning  'setLinkStrength' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   90:13  warning  'links' is defined but never used. Allowed unused args must match /^_/u                     @typescript-eslint/no-unused-vars
+  150:11  error    Unexpected lexical declaration in case block                                                no-case-declarations
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/ITTOForceGraph.jsx
+  63:9  warning  'nodeTypeShapes' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/ITTONetworkDiagram.jsx
+    8:10  warning  'dimensions' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  254:9   warning  'calculatePath' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  393:19  warning  'NodeShape' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/IntegratedView.jsx
+  1:40  warning  'useMemo' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/KnowledgeAreaHeatmap.jsx
+  234:35  warning  'event' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  234:42  warning  'd' is defined but never used. Allowed unused args must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/MindMapView.jsx
+  135:11  warning  'margin' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  212:11  warning  'link' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/ProcessFlowDiagram.jsx
+  3:34  warning  'Info' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/ProcessHeatmap.jsx
+  3:20  warning  'Info' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  3:26  warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/components/visualizations/SankeyDiagram.jsx
+  13:3  warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  14:3  warning  'Palette' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/contexts/AuthContext.jsx
+   75:5   warning  Unexpected console statement                  no-console
+  383:10  error    Component definition is missing display name  react/display-name
+
+/home/kurosawa/PMPLearningManagement/src/contexts/ContextManagerContext.jsx
+  200:10  error    Component definition is missing display name                                                  react/display-name
+  201:13  warning  'optimizeComponent' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/hooks/usePromptLog.js
+  185:13  warning  'userLogs' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/lib/api/client.ts
+  109:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:11  warning  Unexpected console statement              no-console
+  178:11  warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/auth.ts
+    7:15  warning  'User' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   29:37  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  100:31  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  119:35  warning  'profile' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+  139:35  warning  'isNewUser' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  141:7   warning  Unexpected console statement                                                 no-console
+  151:21  warning  'session' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+  151:30  warning  'token' is defined but never used. Allowed unused args must match /^_/u      @typescript-eslint/no-unused-vars
+  153:7   warning  Unexpected console statement                                                 no-console
+  157:7   warning  Unexpected console statement                                                 no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/auth/supabase.js
+  268:9   warning  Unexpected console statement      no-console
+  271:9   warning  Unexpected console statement      no-console
+  276:9   warning  Unexpected console statement      no-console
+  279:9   warning  Unexpected console statement      no-console
+  282:9   warning  Unexpected console statement      no-console
+  341:24  error    Unnecessary escape character: \"  no-useless-escape
+
+/home/kurosawa/PMPLearningManagement/src/lib/cache/__tests__/redisCache.test.ts
+    6:66  warning  'afterAll' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   13:8   warning  'CacheStats' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   15:52  warning  'CacheStrategy' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  334:26  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  388:26  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  407:15  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  409:30  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  691:53  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  692:55  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/cache/cacheStrategies.ts
+   59:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  296:5   warning  Unexpected console statement              no-console
+  342:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  370:7   warning  Unexpected console statement              no-console
+  388:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  405:5   warning  Unexpected console statement              no-console
+  413:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  504:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  538:93  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  544:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  545:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  556:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  557:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  577:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  578:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/cache/redisCache.ts
+   22:33  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   93:9   warning  Unexpected console statement                    no-console
+  112:39  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  131:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+  139:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+  154:41  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  207:41  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  264:41  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  292:41  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  336:41  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  543:9   warning  Unexpected console statement                    no-console
+  576:7   warning  Unexpected console statement                    no-console
+  587:33  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  592:25  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  593:27  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  593:50  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  596:33  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  646:55  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  656:59  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  668:51  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  680:51  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/db.ts
+    4:3   error    Unexpected var, use let or const instead                             no-var
+   39:18  warning  'T' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   40:12  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   50:15  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   51:17  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   52:17  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   82:31  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   95:27  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  103:24  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/db/__tests__/connectionPool.test.ts
+    6:66  warning  'afterAll' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   11:8   warning  'DatabaseStats' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  238:25  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  253:25  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  602:13  warning  'client' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/lib/db/connectionPool.ts
+   62:11  warning  'validatedConfig' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  118:7   warning  Unexpected console statement                                                                no-console
+  412:7   warning  Unexpected console statement                                                                no-console
+  438:9   warning  Unexpected console statement                                                                no-console
+  464:7   warning  Unexpected console statement                                                                no-console
+  494:5   warning  Unexpected console statement                                                                no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/db/queryOptimizer.ts
+   59:30  warning  'T' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   61:16  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   65:14  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   66:12  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  111:21  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  114:34  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  137:75  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  138:33  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  192:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  213:30  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  255:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  267:28  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  369:26  warning  'T' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  377:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  413:43  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  521:37  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/middleware/geoMiddleware.ts
+  130:30  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  130:55  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  186:30  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  197:39  warning  'baseLimit' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  308:46  warning  'next' is defined but never used. Allowed unused args must match /^_/u                @typescript-eslint/no-unused-vars
+  311:31  warning  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/middleware/rateLimitMiddleware.ts
+   12:10  warning  'z' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   74:7   warning  'parseUserAgent' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  245:5   warning  Unexpected console statement                                                               no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/monitoring/healthCheck.ts
+   39:27  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  410:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+/home/kurosawa/PMPLearningManagement/src/lib/monitoring/metricsCollector.ts
+  492:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  559:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  559:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  568:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  574:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  629:5   warning  Unexpected console statement              no-console
+  639:7   warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/pwa.ts
+   53:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:9   warning  Unexpected console statement              no-console
+  175:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/pwa/coreWebVitals.js
+   27:5   warning  Unexpected console statement                                                       no-console
+  111:5   warning  Unexpected console statement                                                       no-console
+  121:35  warning  'value' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  121:42  warning  'status' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  131:7   warning  Unexpected console statement                                                       no-console
+  351:25  warning  'result' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  354:13  warning  Unexpected console statement                                                       no-console
+  367:28  warning  'eventType' is defined but never used. Allowed unused args must match /^_/u        @typescript-eslint/no-unused-vars
+  494:7   error    'gtag' is not defined                                                              no-undef
+  509:7   error    'gtag' is not defined                                                              no-undef
+  615:5   warning  Unexpected console statement                                                       no-console
+  639:5   warning  Unexpected console statement                                                       no-console
+  643:5   warning  Unexpected console statement                                                       no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/pwa/installPrompt.ts
+   71:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:73  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:5   warning  Unexpected console statement              no-console
+  117:5   warning  Unexpected console statement              no-console
+  284:7   warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/pwa/serviceWorker.ts
+   22:7   warning  'CACHE_API_ROUTES' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   31:3   warning  Unexpected console statement                                                                 no-console
+   37:9   warning  Unexpected console statement                                                                 no-console
+   41:9   warning  Unexpected console statement                                                                 no-console
+   52:3   warning  Unexpected console statement                                                                 no-console
+   62:15  warning  Unexpected console statement                                                                 no-console
+   69:9   warning  Unexpected console statement                                                                 no-console
+  151:9   warning  'url' is assigned a value but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  166:5   warning  Unexpected console statement                                                                 no-console
+  189:39  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  190:3   warning  Unexpected console statement                                                                 no-console
+  216:5   warning  Unexpected console statement                                                                 no-console
+  236:5   warning  Unexpected console statement                                                                 no-console
+  256:5   warning  Unexpected console statement                                                                 no-console
+  263:62  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  307:39  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  308:3   warning  Unexpected console statement                                                                 no-console
+  342:52  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  343:3   warning  Unexpected console statement                                                                 no-console
+  371:42  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  372:3   warning  Unexpected console statement                                                                 no-console
+  388:5   warning  Unexpected console statement                                                                 no-console
+  395:47  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  409:5   warning  Unexpected console statement                                                                 no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/pwa/serviceWorkerManager.js
+   32:7   warning  Unexpected console statement  no-console
+   49:7   warning  Unexpected console statement  no-console
+   64:9   warning  Unexpected console statement  no-console
+   76:7   warning  Unexpected console statement  no-console
+  102:11  warning  Unexpected console statement  no-console
+  113:9   warning  Unexpected console statement  no-console
+  118:9   warning  Unexpected console statement  no-console
+  135:9   warning  Unexpected console statement  no-console
+  145:5   warning  Unexpected console statement  no-console
+  169:7   warning  Unexpected console statement  no-console
+  196:5   warning  Unexpected console statement  no-console
+  289:7   warning  Unexpected console statement  no-console
+  390:5   warning  Unexpected console statement  no-console
+  461:9   warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/__tests__/csrf.test.ts
+  337:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  345:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/__tests__/encryption.test.ts
+   14:3   warning  'symmetricEncryption' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   16:3   warning  'tokenGenerator' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   17:3   warning  'piiEncryption' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  355:55  warning  Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/__tests__/geoip.test.ts
+  8:24  warning  'geoIPService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/__tests__/keyManagement.test.ts
+    6:70  warning  'afterAll' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  222:13  warning  'statsBefore' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  339:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  350:45  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/__tests__/rateLimiting.test.ts
+   6:44  warning  'afterEach' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  14:8   warning  'Redis' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/csrf.ts
+  312:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  361:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  380:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  555:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  617:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  644:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  748:13  warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/encryption.ts
+    9:8   warning  'Redis' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+   10:10  warning  'getRedisClient' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  136:24  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/geoip.ts
+  341:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/keyManagement.ts
+   43:7   warning  Unexpected console statement                                                   no-console
+   65:5   warning  Unexpected console statement                                                   no-console
+   99:5   warning  Unexpected console statement                                                   no-console
+  130:9   warning  Unexpected console statement                                                   no-console
+  176:7   warning  Unexpected console statement                                                   no-console
+  192:7   warning  Unexpected console statement                                                   no-console
+  218:5   warning  Unexpected console statement                                                   no-console
+  295:7   warning  Unexpected console statement                                                   no-console
+  359:7   warning  Unexpected console statement                                                   no-console
+  433:11  warning  Unexpected console statement                                                   no-console
+  518:24  warning  'iv' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  530:40  warning  'oldKeyId' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  530:58  warning  'limit' is defined but never used. Allowed unused args must match /^_/u        @typescript-eslint/no-unused-vars
+  530:82  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  545:5   warning  Unexpected console statement                                                   no-console
+  583:58  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  607:5   warning  Unexpected console statement                                                   no-console
+  615:5   warning  Unexpected console statement                                                   no-console
+  623:5   warning  Unexpected console statement                                                   no-console
+  631:5   warning  Unexpected console statement                                                   no-console
+  643:5   warning  Unexpected console statement                                                   no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/rateLimiting.ts
+   60:11  warning  Unexpected console statement                                                                no-console
+   68:11  warning  Unexpected console statement                                                                no-console
+  165:23  warning  'currentRequests' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  619:5   warning  'additionalData' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  686:7   warning  Unexpected console statement                                                                no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/sanitization.ts
+   23:7   error    Unnecessary escape character: \-          no-useless-escape
+   23:9   error    Unnecessary escape character: \-          no-useless-escape
+   23:12  error    Unnecessary escape character: \;          no-useless-escape
+  218:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  243:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  345:38  error    Unnecessary escape character: \.          no-useless-escape
+  345:46  error    Unnecessary escape character: \.          no-useless-escape
+  405:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  407:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/security/validation.ts
+  309:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/storage/indexedDb.ts
+    1:32  warning  'IDBPTransaction' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    5:10  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   78:37  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   92:19  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  120:20  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  120:60  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  238:22  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  238:55  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  256:48  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  264:40  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  285:43  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  317:26  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  331:47  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  356:37  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/storage/migration.ts
+  108:36  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+  187:57  warning  'index' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/lib/storage/syncQueue.ts
+   11:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  245:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  302:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  321:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/lib/supabase.js
+  149:11  warning  Unexpected console statement  no-console
+  152:11  warning  Unexpected console statement  no-console
+  158:11  warning  Unexpected console statement  no-console
+  161:11  warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/lib/utils.ts
+   68:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   83:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   83:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/main.jsx
+  15:7  warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/auth/__tests__/middleware.test.ts
+    7:23  warning  'NextResponse' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  197:22  error    Require statement not part of import statement                                  @typescript-eslint/no-var-requires
+  220:22  error    Require statement not part of import statement                                  @typescript-eslint/no-var-requires
+  234:28  error    Require statement not part of import statement                                  @typescript-eslint/no-var-requires
+  251:28  error    Require statement not part of import statement                                  @typescript-eslint/no-var-requires
+  264:28  error    Require statement not part of import statement                                  @typescript-eslint/no-var-requires
+
+/home/kurosawa/PMPLearningManagement/src/server/auth/__tests__/rbac.test.ts
+   8:3   warning  'PermissionChecker' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  17:3   warning  'PermissionError' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  40:31  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/auth/middleware.ts
+   10:10  warning  'z' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+   88:7   warning  'publicRoutes' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  111:20  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  288:40  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  295:44  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  365:13  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/auth/providers.ts
+  120:37  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  229:35  warning  'profile' is defined but never used. Allowed unused args must match /^_/u      @typescript-eslint/no-unused-vars
+  229:44  warning  'email' is defined but never used. Allowed unused args must match /^_/u        @typescript-eslint/no-unused-vars
+  229:51  warning  'credentials' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  254:30  warning  'account' is defined but never used. Allowed unused args must match /^_/u      @typescript-eslint/no-unused-vars
+  303:35  warning  'profile' is defined but never used. Allowed unused args must match /^_/u      @typescript-eslint/no-unused-vars
+  317:7   warning  Unexpected console statement                                                   no-console
+  333:9   warning  Unexpected console statement                                                   no-console
+  338:7   warning  Unexpected console statement                                                   no-console
+  353:9   warning  Unexpected console statement                                                   no-console
+  360:44  warning  'req' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+  360:49  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  360:54  warning  'res' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+  360:59  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  366:38  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  374:39  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+  383:41  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/auth/rbac.ts
+  270:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/cache/hierarchy.ts
+   92:43  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+   96:35  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  106:47  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  205:11  error    Unexpected lexical declaration in case block  no-case-declarations
+  209:11  error    Unexpected lexical declaration in case block  no-case-declarations
+  210:11  error    Unexpected lexical declaration in case block  no-case-declarations
+  223:11  error    Unexpected lexical declaration in case block  no-case-declarations
+  236:11  error    Unexpected lexical declaration in case block  no-case-declarations
+  266:31  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  357:39  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  428:7   warning  Unexpected console statement                  no-console
+  435:9   warning  Unexpected console statement                  no-console
+  445:7   warning  Unexpected console statement                  no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/cache/memory-manager.ts
+   23:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:5   warning  Unexpected console statement              no-console
+  202:7   warning  Unexpected console statement              no-console
+  211:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:5   warning  Unexpected console statement              no-console
+  345:7   warning  Unexpected console statement              no-console
+  382:7   warning  Unexpected console statement              no-console
+  527:11  warning  Unexpected console statement              no-console
+  581:7   warning  Unexpected console statement              no-console
+  591:7   warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/health/checks.ts
+   12:10  warning  'z' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+   19:28  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+   88:47  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  281:13  warning  'content' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  291:15  warning  'stats' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  330:35  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  365:65  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  514:13  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  514:20  error    Require statement not part of import statement                                      @typescript-eslint/no-var-requires
+  517:13  warning  'stats' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  639:23  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/monitoring/logger.ts
+   40:29  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  172:31  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  175:11  warning  'startMemory' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  209:84  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  216:29  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  225:58  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  229:58  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  248:59  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  252:61  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  257:74  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  270:29  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  285:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  300:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  369:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  383:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  397:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  408:47  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  408:57  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  408:68  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  434:30  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  459:44  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  509:51  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/monitoring/metrics.ts
+    8:10  warning  'AsyncLocalStorage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  407:16  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  407:26  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  407:37  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  412:32  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  467:19  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+  471:49  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/monitoring/slo-manager.ts
+    9:10  warning  'metrics' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    9:19  warning  'Metrics' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   48:12  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  127:52  error    Unnecessary escape character: \"                                           no-useless-escape
+  127:57  error    Unnecessary escape character: \"                                           no-useless-escape
+  177:46  error    Unnecessary escape character: \"                                           no-useless-escape
+  177:52  error    Unnecessary escape character: \"                                           no-useless-escape
+  193:53  error    Unnecessary escape character: \"                                           no-useless-escape
+  193:59  error    Unnecessary escape character: \"                                           no-useless-escape
+  210:43  error    Unnecessary escape character: \"                                           no-useless-escape
+  210:52  error    Unnecessary escape character: \"                                           no-useless-escape
+  226:49  error    Unnecessary escape character: \"                                           no-useless-escape
+  226:54  error    Unnecessary escape character: \"                                           no-useless-escape
+  521:62  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  543:41  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  551:41  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  559:45  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  567:41  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/repositories/userRepository.ts
+  142:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/routers/auth.ts
+  12:35  warning  'Permission' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  52:7   warning  'signInSchema' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/server/routers/learning.ts
+   15:27  warning  'progressFilterSchema' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  271:29  warning  'input' is defined but never used. Allowed unused args must match /^_/u                 @typescript-eslint/no-unused-vars
+  424:67  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  431:75  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  474:65  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  481:75  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/routers/payment.ts
+   61:47  warning  'ctx' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  484:28  warning  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/routers/user.ts
+    9:28  warning  'publicProcedure' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+  145:15  warning  'hashedPassword' is assigned a value but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  145:31  warning  'emailVerificationToken' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  145:55  warning  'passwordResetToken' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  225:17  warning  'role' is assigned a value but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  225:23  warning  'subscriptionPlan' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  225:41  warning  'subscriptionActive' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/server/services/emailService.ts
+  262:7   warning  Unexpected console statement                                                 no-console
+  281:26  warning  Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  406:5   warning  Unexpected console statement                                                 no-console
+  411:5   warning  'startDate' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  412:5   warning  'endDate' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/server/services/encryptedUserService.ts
+   10:3  warning  'tokenGenerator' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   25:7  warning  'DecryptionInputSchema' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   96:7  warning  Unexpected console statement                                                                      no-console
+  225:7  warning  Unexpected console statement                                                                      no-console
+  296:7  warning  Unexpected console statement                                                                      no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/services/learningService.ts
+  116:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  361:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  405:85  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  427:87  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  429:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/services/notificationService.ts
+   81:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  277:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  497:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  549:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  591:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  685:7   warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/services/progressService.ts
+   10:10  warning  'UserRole' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+   10:20  warning  'SubscriptionPlan' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  118:9   error    Unexpected lexical declaration in case block                                                 no-case-declarations
+  446:13  warning  'dailyAverageTime' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  474:54  warning  Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/services/pushNotificationService.ts
+  125:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  495:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  617:7   warning  Unexpected console statement              no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/services/stripeService.ts
+   11:28  warning  'PaymentStatus' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  532:42  warning  'aiUsage' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  532:51  warning  'dataExports' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/server/services/subscriptionService.ts
+   10:28  warning  'PaymentStatus' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   12:10  warning  'createPermissionChecker' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  140:66  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  360:11  error    Unexpected lexical declaration in case block                                               no-case-declarations
+  372:11  error    Unexpected lexical declaration in case block                                               no-case-declarations
+  453:16  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  563:14  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/server/services/userService.ts
+   10:10  warning  'createPermissionChecker' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   10:35  warning  'Permission' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   86:14  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+   87:22  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+   88:18  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  111:5   warning  'requesterId' is defined but never used. Allowed unused args must match /^_/u              @typescript-eslint/no-unused-vars
+  123:20  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  173:22  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  250:44  warning  'requesterId' is defined but never used. Allowed unused args must match /^_/u              @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/server/trpc.ts
+  58:3  warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/server/webhooks/stripe.ts
+   54:5  warning  Unexpected console statement  no-console
+   61:7  warning  Unexpected console statement  no-console
+   63:7  warning  Unexpected console statement  no-console
+  104:5  warning  Unexpected console statement  no-console
+  142:7  warning  Unexpected console statement  no-console
+  161:7  warning  Unexpected console statement  no-console
+  177:7  warning  Unexpected console statement  no-console
+  192:7  warning  Unexpected console statement  no-console
+  236:5  warning  Unexpected console statement  no-console
+  248:5  warning  Unexpected console statement  no-console
+  294:5  warning  Unexpected console statement  no-console
+  308:5  warning  Unexpected console statement  no-console
+  356:5  warning  Unexpected console statement  no-console
+  391:5  warning  Unexpected console statement  no-console
+  412:7  warning  Unexpected console statement  no-console
+  430:5  warning  Unexpected console statement  no-console
+  443:5  warning  Unexpected console statement  no-console
+  474:5  warning  Unexpected console statement  no-console
+  487:5  warning  Unexpected console statement  no-console
+  519:5  warning  Unexpected console statement  no-console
+  532:5  warning  Unexpected console statement  no-console
+  549:5  warning  Unexpected console statement  no-console
+  572:5  warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/services/promptLogService.js
+   46:9   warning  Unexpected console statement  no-console
+  217:7   warning  Unexpected console statement  no-console
+  357:11  warning  Unexpected console statement  no-console
+  725:5   warning  Unexpected console statement  no-console
+  774:9   warning  Unexpected console statement  no-console
+  787:5   warning  Unexpected console statement  no-console
+
+/home/kurosawa/PMPLearningManagement/src/stores/examStore.ts
+  132:7  warning  'DEFAULT_EXAM_SETTINGS' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/stores/progressStore.ts
+   52:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  386:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/test-claude-review.js
+   5:3   warning  Unexpected console statement                                                          no-console
+  18:7   warning  'unusedVar' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  21:10  warning  'divideNumbers' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  26:10  warning  'findDuplicates' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/test/mocks/theme-context.jsx
+  20:47  warning  'value' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/test/setup.ts
+  55:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/test/utils/accessibility.ts
+  34:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/kurosawa/PMPLearningManagement/src/utils/quality/contentEnhancer.js
+  234:31  warning  'content' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/home/kurosawa/PMPLearningManagement/src/utils/quality/japaneseFixer.js
+  238:9  warning  'longVowelRules' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 766 problems (41 errors, 725 warnings)
+

@@ -678,7 +678,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         <div className="fixed left-0 right-0 top-0 z-50 bg-yellow-500 py-2 text-center text-white">
           <div className="flex items-center justify-center gap-2 text-sm">
             <WifiOff className="h-4 w-4" />
-            You're offline - changes will sync when connection is restored
+            You&apos;re offline - changes will sync when connection is restored
           </div>
         </div>
       )}

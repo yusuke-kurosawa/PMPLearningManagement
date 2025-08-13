@@ -491,7 +491,7 @@ class CoreWebVitalsOptimizer {
   sendToAnalytics(metricName, metric) {
     // Google Analytics 4
     if (typeof gtag !== 'undefined') {
-      gtag('event', metricName, {
+      window.gtag('event', metricName, {
         event_category: 'Core Web Vitals',
         event_label: metricName.toUpperCase(),
         value: Math.round(metric.value),
@@ -506,7 +506,7 @@ class CoreWebVitalsOptimizer {
   sendToGoogleAnalytics() {
     // Enhanced ecommerce tracking for performance
     if (typeof gtag !== 'undefined') {
-      gtag('config', 'GA_MEASUREMENT_ID', {
+      window.gtag('config', 'GA_MEASUREMENT_ID', {
         custom_map: {
           lcp: 'largest_contentful_paint',
           inp: 'interaction_to_next_paint',
