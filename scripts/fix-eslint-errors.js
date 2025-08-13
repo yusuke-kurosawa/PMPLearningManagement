@@ -12,10 +12,10 @@
  * - Case declarations
  */
 
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const util = require('util');
+import fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import util from 'util';
 
 const execPromise = util.promisify(exec);
 
