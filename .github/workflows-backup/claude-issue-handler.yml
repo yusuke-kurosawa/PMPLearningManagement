@@ -1,0 +1,97 @@
+name: Claude Issue Handler
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  analyze-and-label:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Analyze issue with Claude
+      id: analyze
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        ISSUE_TITLE="${{ github.event.issue.title }}"
+        ISSUE_BODY="${{ github.event.issue.body }}"
+        
+        # Call Claude API to analyze the issue
+        RESPONSE=$(curl -s -X POST https://api.anthropic.com/v1/messages \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: $ANTHROPIC_API_KEY" \
+          -H "anthropic-version: 2023-06-01" \
+          -d @- <<EOF
+        {
+          "model": "claude-3-sonnet-20240229",
+          "max_tokens": 512,
+          "messages": [
+            {
+              "role": "user",
+              "content": "Analyze this GitHub issue and suggest appropriate labels and priority. Issue Title: $ISSUE_TITLE. Issue Body: $ISSUE_BODY. Return a JSON object with 'labels' (array of strings) and 'priority' (string: low/medium/high/critical). Be concise."
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Extract and parse the response
+        CLAUDE_ANALYSIS=$(echo "$RESPONSE" | jq -r '.content[0].text')
+        
+        # Try to extract JSON from the response
+        LABELS=$(echo "$CLAUDE_ANALYSIS" | jq -r '.labels[]' 2>/dev/null || echo "needs-triage")
+        PRIORITY=$(echo "$CLAUDE_ANALYSIS" | jq -r '.priority' 2>/dev/null || echo "medium")
+        
+        echo "labels=$LABELS" >> $GITHUB_OUTPUT
+        echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
+
+    - name: Apply labels to issue
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const labels = `${{ steps.analyze.outputs.labels }}`.split('\n').filter(Boolean);
+          const priority = `${{ steps.analyze.outputs.priority }}`;
+          
+          // Add priority as a label
+          if (priority) {
+            labels.push(`priority:${priority}`);
+          }
+          
+          // Add default label for Claude-analyzed issues
+          labels.push('claude-analyzed');
+          
+          // Apply labels to the issue
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+          }
+          
+          // Add a comment with the analysis
+          const comment = `
+          ## Issue Analysis by Claude AI
+          
+          **Suggested Labels:** ${labels.join(', ')}
+          **Priority:** ${priority}
+          
+          This issue has been automatically analyzed and labeled.
+          `;
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });

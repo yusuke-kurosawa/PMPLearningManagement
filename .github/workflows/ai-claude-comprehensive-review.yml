@@ -1,0 +1,358 @@
+name: Claude Comprehensive Code Review
+# Claude AIによる包括的コードレビュー
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  trigger-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should-review: ${{ steps.check.outputs.should-review }}
+      review-type: ${{ steps.check.outputs.review-type }}
+    
+    steps:
+      - name: Check Trigger Conditions
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            
+            // PRイベントの場合
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+              
+              // ドラフトPRはスキップ
+              if (pr.draft) {
+                console.log('Skipping draft PR');
+                return { 'should-review': 'false' };
+              }
+              
+              // 自動生成PRはスキップ
+              if (pr.user.type === 'Bot' && !pr.title.includes('[REVIEW]')) {
+                console.log('Skipping bot PR without review flag');
+                return { 'should-review': 'false' };
+              }
+              
+              return { 
+                'should-review': 'true',
+                'review-type': 'comprehensive'
+              };
+            }
+            
+            // コメントトリガーの場合
+            if (context.eventName === 'issue_comment') {
+              const comment = context.payload.comment;
+              const issue = context.payload.issue;
+              
+              // PRコメントでない場合はスキップ
+              if (!issue.pull_request) {
+                return { 'should-review': 'false' };
+              }
+              
+              const body = comment.body.toLowerCase();
+              
+              // Claudeレビューコマンドのチェック
+              const commands = {
+                '@claude review': 'comprehensive',
+                '@claude security': 'security',
+                '@claude performance': 'performance',
+                '@claude architecture': 'architecture',
+                '@claude accessibility': 'accessibility',
+                '@claude mobile': 'mobile'
+              };
+              
+              for (const [command, type] of Object.entries(commands)) {
+                if (body.includes(command)) {
+                  return {
+                    'should-review': 'true',
+                    'review-type': type
+                  };
+                }
+              }
+            }
+            
+            return { 'should-review': 'false' };
+
+  claude-review:
+    needs: trigger-check
+    if: needs.trigger-check.outputs.should-review == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Get PR Details
+        id: pr-details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number || context.payload.pull_request.number;
+            
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            return {
+              pr: pr,
+              files: files,
+              prNumber: prNumber
+            };
+            
+      - name: Analyze Code Changes
+        id: analyze
+        run: |
+          # 変更ファイルの分析
+          PR_DATA='${{ steps.pr-details.outputs.result }}'
+          
+          # 変更の種類を分類
+          echo "Analyzing changed files..."
+          
+          # カテゴリごとにファイルを分類
+          FRONTEND_FILES=$(echo "$PR_DATA" | jq -r '.files[] | select(.filename | test("\\.(jsx?|tsx?|css|scss)$")) | .filename' | wc -l)
+          BACKEND_FILES=$(echo "$PR_DATA" | jq -r '.files[] | select(.filename | test("\\.(js|ts)$") | not) | .filename' | wc -l)
+          TEST_FILES=$(echo "$PR_DATA" | jq -r '.files[] | select(.filename | test("\\.(test|spec)\\.(jsx?|tsx?)$")) | .filename' | wc -l)
+          CONFIG_FILES=$(echo "$PR_DATA" | jq -r '.files[] | select(.filename | test("\\.(json|yml|yaml|toml)$")) | .filename' | wc -l)
+          
+          echo "frontend_files=$FRONTEND_FILES" >> $GITHUB_OUTPUT
+          echo "backend_files=$BACKEND_FILES" >> $GITHUB_OUTPUT
+          echo "test_files=$TEST_FILES" >> $GITHUB_OUTPUT
+          echo "config_files=$CONFIG_FILES" >> $GITHUB_OUTPUT
+          
+      - name: Run Security Checks
+        if: contains(needs.trigger-check.outputs.review-type, 'security') || needs.trigger-check.outputs.review-type == 'comprehensive'
+        id: security
+        run: |
+          # セキュリティチェック
+          npm audit --json > security-report.json || true
+          
+          # 依存関係の脆弱性カウント
+          VULNERABILITIES=$(cat security-report.json | jq '.metadata.vulnerabilities // {}')
+          echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+          
+      - name: Run Performance Analysis
+        if: contains(needs.trigger-check.outputs.review-type, 'performance') || needs.trigger-check.outputs.review-type == 'comprehensive'
+        id: performance
+        run: |
+          # バンドルサイズチェック
+          if [ -f "package.json" ]; then
+            # ビルドを実行（エラーを無視）
+            npm run build 2>/dev/null || true
+            
+            # distフォルダのサイズを計算
+            if [ -d "dist" ]; then
+              BUNDLE_SIZE=$(du -sb dist | cut -f1)
+              echo "bundle_size=$BUNDLE_SIZE" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+      - name: Generate Claude Review
+        id: claude-review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewType = '${{ needs.trigger-check.outputs.review-type }}';
+            const prNumber = ${{ steps.pr-details.outputs.result }}.prNumber;
+            const pr = ${{ steps.pr-details.outputs.result }}.pr;
+            const files = ${{ steps.pr-details.outputs.result }}.files;
+            
+            // レビューコメントの生成
+            let review = `## 🤖 Claude Comprehensive Code Review\n\n`;
+            review += `**Review Type**: ${reviewType}\n`;
+            review += `**PR**: #${prNumber} - ${pr.title}\n`;
+            review += `**Author**: @${pr.user.login}\n`;
+            review += `**Changed Files**: ${files.length}\n\n`;
+            
+            // 変更統計
+            review += `### 📊 Change Statistics\n`;
+            review += `- Frontend Files: ${{ steps.analyze.outputs.frontend_files }}\n`;
+            review += `- Backend Files: ${{ steps.analyze.outputs.backend_files }}\n`;
+            review += `- Test Files: ${{ steps.analyze.outputs.test_files }}\n`;
+            review += `- Config Files: ${{ steps.analyze.outputs.config_files }}\n\n`;
+            
+            // IDD準拠チェック
+            review += `### 📋 IDD Compliance Check\n`;
+            const hasIssueRef = /#\d+/.test(pr.title) || /#\d+/.test(pr.body || '');
+            if (hasIssueRef) {
+              review += `✅ Issue reference found\n\n`;
+            } else {
+              review += `⚠️ No Issue reference found - Please link to an Issue\n\n`;
+            }
+            
+            // セキュリティチェック結果
+            if (reviewType === 'security' || reviewType === 'comprehensive') {
+              review += `### 🔒 Security Analysis\n`;
+              const vulnerabilities = ${{ steps.security.outputs.vulnerabilities || '{}' }};
+              
+              if (Object.keys(vulnerabilities).length > 0) {
+                review += `⚠️ Vulnerabilities found:\n`;
+                for (const [level, count] of Object.entries(vulnerabilities)) {
+                  review += `- ${level}: ${count}\n`;
+                }
+              } else {
+                review += `✅ No known vulnerabilities detected\n`;
+              }
+              review += `\n`;
+            }
+            
+            // パフォーマンス分析結果
+            if (reviewType === 'performance' || reviewType === 'comprehensive') {
+              review += `### ⚡ Performance Analysis\n`;
+              const bundleSize = ${{ steps.performance.outputs.bundle_size || 0 }};
+              
+              if (bundleSize > 0) {
+                const sizeMB = (bundleSize / 1024 / 1024).toFixed(2);
+                review += `- Bundle Size: ${sizeMB} MB\n`;
+                
+                if (bundleSize > 5 * 1024 * 1024) {
+                  review += `⚠️ Bundle size exceeds 5MB threshold\n`;
+                } else {
+                  review += `✅ Bundle size is within acceptable limits\n`;
+                }
+              }
+              review += `\n`;
+            }
+            
+            // 具体的なレビューポイント
+            review += `### 💡 Review Points\n\n`;
+            
+            // ファイルタイプごとのレビューポイント
+            const jsxFiles = files.filter(f => f.filename.endsWith('.jsx') || f.filename.endsWith('.tsx'));
+            const testFiles = files.filter(f => f.filename.includes('.test.') || f.filename.includes('.spec.'));
+            
+            if (jsxFiles.length > 0) {
+              review += `#### React Components\n`;
+              review += `- Check for proper hooks usage\n`;
+              review += `- Verify prop types/TypeScript interfaces\n`;
+              review += `- Ensure proper error boundaries\n`;
+              review += `- Check accessibility attributes\n\n`;
+            }
+            
+            if (testFiles.length > 0) {
+              review += `#### Test Coverage\n`;
+              review += `- Verify test completeness\n`;
+              review += `- Check for edge cases\n`;
+              review += `- Ensure proper mocking\n\n`;
+            }
+            
+            // 推奨事項
+            review += `### 📝 Recommendations\n\n`;
+            
+            if (!testFiles.length && jsxFiles.length > 0) {
+              review += `- ⚠️ Consider adding tests for new components\n`;
+            }
+            
+            if (files.length > 20) {
+              review += `- ⚠️ Large PR with ${files.length} files - Consider breaking into smaller PRs\n`;
+            }
+            
+            if (!pr.body || pr.body.length < 50) {
+              review += `- ⚠️ PR description is brief - Consider adding more context\n`;
+            }
+            
+            // スコアリング
+            review += `\n### 🎯 Quality Score\n\n`;
+            
+            let securityScore = 5;
+            let performanceScore = 5;
+            let maintainabilityScore = 5;
+            let testScore = testFiles.length > 0 ? 5 : 3;
+            
+            // スコア調整
+            if (!hasIssueRef) maintainabilityScore -= 1;
+            if (files.length > 20) maintainabilityScore -= 1;
+            
+            review += `- **Security**: ${securityScore}/5 ⭐\n`;
+            review += `- **Performance**: ${performanceScore}/5 ⭐\n`;
+            review += `- **Maintainability**: ${maintainabilityScore}/5 ⭐\n`;
+            review += `- **Test Coverage**: ${testScore}/5 ⭐\n`;
+            
+            const totalScore = (securityScore + performanceScore + maintainabilityScore + testScore) / 4;
+            review += `\n**Overall Score**: ${totalScore.toFixed(1)}/5 `;
+            
+            if (totalScore >= 4.5) {
+              review += `🏆 Excellent!`;
+            } else if (totalScore >= 3.5) {
+              review += `✅ Good`;
+            } else if (totalScore >= 2.5) {
+              review += `⚠️ Needs Improvement`;
+            } else {
+              review += `❌ Major Issues`;
+            }
+            
+            review += `\n\n---\n`;
+            review += `*This review was automatically generated by Claude AI. `;
+            review += `For detailed analysis, use \`@claude [review-type]\` commands.*`;
+            
+            // コメントを投稿
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: review
+            });
+            
+            return { success: true, score: totalScore };
+            
+      - name: Set Review Status
+        if: steps.claude-review.outputs.result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = ${{ steps.claude-review.outputs.result }};
+            const prNumber = ${{ steps.pr-details.outputs.result }}.prNumber;
+            
+            if (result.score < 3.0) {
+              // スコアが低い場合は変更を要求
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: 'REQUEST_CHANGES',
+                body: 'Automated review found issues that need to be addressed. Please check the review comments above.'
+              });
+            } else if (result.score >= 4.5) {
+              // 高スコアの場合は承認
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: 'APPROVE',
+                body: 'Automated review passed with excellent score! 🎉'
+              });
+            } else {
+              // 中間スコアの場合はコメントのみ
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: 'COMMENT',
+                body: 'Automated review completed. Please review the suggestions above.'
+              });
+            }

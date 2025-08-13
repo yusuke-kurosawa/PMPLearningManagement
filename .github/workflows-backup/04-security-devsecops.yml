@@ -1,0 +1,766 @@
+# ================================================================
+# Workflow: 04-security-devsecops
+# Purpose: 包括的DevSecOpsパイプライン（シフトレフトセキュリティ）
+#          Comprehensive DevSecOps pipeline with shift-left security
+# Trigger: Push, Pull Request, Schedule
+# Dependencies: Security tools, SAST/DAST, Container scanning
+# Author: Claude Code Actions
+# Version: 1.0.0
+# Last Updated: 2025-08-12
+# ================================================================
+
+name: "🔒 [Security] DevSecOps Pipeline / DevSecOps パイプライン"
+
+# --------------------------------
+# 📋 Permissions / 権限設定
+# --------------------------------
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+# --------------------------------
+# 🎯 Triggers / トリガー
+# --------------------------------
+on:
+  # プッシュ時（メインブランチ） / On push to main branches
+  push:
+    branches: [main, develop, 'release/**']
+  
+  # プルリクエスト時 / On pull requests
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+  
+  # 手動実行 / Manual execution
+  workflow_dispatch:
+    inputs:
+      scan_intensity:
+        description: 'Security scan intensity / セキュリティスキャン強度'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - 'light'
+          - 'standard'
+          - 'comprehensive'
+          - 'penetration'
+      
+      include_dast:
+        description: 'Include DAST scan / DAST スキャン含む'
+        required: true
+        default: true
+        type: boolean
+  
+  # スケジュール実行（毎日午前3時） / Daily at 3 AM
+  schedule:
+    - cron: '0 3 * * *'
+
+# --------------------------------
+# 🌍 Environment / 環境設定
+# --------------------------------
+env:
+  SECURITY_BASELINE_VERSION: "1.0.0"
+  MAX_CRITICAL_VULNS: 0
+  MAX_HIGH_VULNS: 3
+  DAST_TARGET_URL: "https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+
+# --------------------------------
+# 🔧 Jobs / ジョブ定義
+# --------------------------------
+jobs:
+  security-baseline:
+    # ================================
+    # Job: security-baseline
+    # Description: セキュリティベースライン確立
+    #              Establish security baseline
+    # Dependencies: Repository analysis
+    # Timeout: 15分
+    # ================================
+    name: "📊 [Baseline] Security Assessment"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      security_score: ${{ steps.baseline.outputs.security_score }}
+      critical_count: ${{ steps.baseline.outputs.critical_count }}
+      high_count: ${{ steps.baseline.outputs.high_count }}
+      baseline_established: ${{ steps.baseline.outputs.baseline_established }}
+    
+    steps:
+      # ================
+      # Repository Setup
+      # 目的: セキュアなリポジトリ設定
+      # Purpose: Secure repository setup
+      # ================
+      - name: "📥 Secure Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js (Security Hardened)"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # Security Baseline Analysis
+      # 目的: セキュリティベースライン分析
+      # Purpose: Security baseline analysis
+      # ================
+      - name: "📊 Establish Security Baseline"
+        id: baseline
+        run: |
+          echo "📊 Establishing security baseline..."
+          
+          # セキュリティ分析ディレクトリ作成
+          mkdir -p .security-analysis
+          
+          # 依存関係のセキュリティ分析
+          echo "📦 Analyzing dependency security..."
+          if [[ -f "package.json" ]]; then
+            npm audit --json > .security-analysis/npm-audit.json 2>/dev/null || true
+            
+            # 脆弱性カウント
+            critical_count=$(jq -r '.metadata.vulnerabilities.critical // 0' .security-analysis/npm-audit.json)
+            high_count=$(jq -r '.metadata.vulnerabilities.high // 0' .security-analysis/npm-audit.json)
+            medium_count=$(jq -r '.metadata.vulnerabilities.moderate // 0' .security-analysis/npm-audit.json)
+            
+            echo "🔍 Critical vulnerabilities: $critical_count"
+            echo "🔍 High vulnerabilities: $high_count"
+            echo "🔍 Medium vulnerabilities: $medium_count"
+          else
+            critical_count=0
+            high_count=0
+            medium_count=0
+          fi
+          
+          # セキュリティスコア計算（100点満点）
+          security_score=100
+          security_score=$((security_score - critical_count * 25))
+          security_score=$((security_score - high_count * 10))
+          security_score=$((security_score - medium_count * 3))
+          security_score=$((security_score < 0 ? 0 : security_score))
+          
+          echo "📊 Security Score: ${security_score}/100"
+          
+          # 出力設定
+          echo "security_score=$security_score" >> $GITHUB_OUTPUT
+          echo "critical_count=$critical_count" >> $GITHUB_OUTPUT
+          echo "high_count=$high_count" >> $GITHUB_OUTPUT
+          echo "baseline_established=true" >> $GITHUB_OUTPUT
+          
+          # ベースライン情報を保存
+          cat > .security-analysis/baseline.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "security_score": $security_score,
+            "vulnerabilities": {
+              "critical": $critical_count,
+              "high": $high_count,
+              "medium": $medium_count
+            },
+            "scan_type": "${{ github.event.inputs.scan_intensity || 'standard' }}"
+          }
+          EOF
+      
+      # ================
+      # Security Policy Validation
+      # 目的: セキュリティポリシーの検証
+      # Purpose: Validate security policies
+      # ================
+      - name: "📋 Validate Security Policies"
+        run: |
+          echo "📋 Validating security policies..."
+          
+          policy_violations=0
+          
+          # .env ファイルの gitignore 確認
+          if [[ -f ".gitignore" ]]; then
+            if ! grep -q ".env" .gitignore; then
+              echo "⚠️ .env files not in .gitignore"
+              policy_violations=$((policy_violations + 1))
+            fi
+          else
+            echo "⚠️ .gitignore file not found"
+            policy_violations=$((policy_violations + 1))
+          fi
+          
+          # セキュリティヘッダーの確認
+          if [[ -f "public/_headers" ]]; then
+            echo "✅ Security headers configuration found"
+          else
+            echo "⚠️ Security headers configuration missing"
+            policy_violations=$((policy_violations + 1))
+          fi
+          
+          # 機密情報のハードコーディング検査
+          echo "🔍 Scanning for hardcoded secrets..."
+          secret_patterns=(
+            "password.*=.*['\"].*['\"]"
+            "api[_-]?key.*=.*['\"].*['\"]"
+            "secret.*=.*['\"].*['\"]"
+            "token.*=.*['\"].*['\"]"
+          )
+          
+          for pattern in "${secret_patterns[@]}"; do
+            if grep -r -i -E "$pattern" src/ 2>/dev/null | grep -v node_modules; then
+              echo "❌ Potential hardcoded secret detected"
+              policy_violations=$((policy_violations + 1))
+            fi
+          done
+          
+          echo "📊 Policy violations: $policy_violations"
+          echo "policy_violations=$policy_violations" >> $GITHUB_OUTPUT
+        id: policy-validation
+
+  sast-analysis:
+    # ================================
+    # Job: sast-analysis
+    # Description: 静的アプリケーションセキュリティテスト
+    #              Static Application Security Testing
+    # Dependencies: security-baseline
+    # Timeout: 25分
+    # ================================
+    name: "🔍 [SAST] Static Security Analysis"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: security-baseline
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # ESLint Security Analysis
+      # 目的: ESLint セキュリティプラグインによる分析
+      # Purpose: ESLint security plugin analysis
+      # ================
+      - name: "🔍 ESLint Security Analysis"
+        run: |
+          echo "🔍 Running ESLint security analysis..."
+          
+          # セキュリティプラグインのインストール
+          npm install eslint-plugin-security --save-dev 2>/dev/null || true
+          
+          # ESLint実行（セキュリティルール）
+          npx eslint src/ --ext .js,.jsx,.ts,.tsx --format json > eslint-security.json 2>/dev/null || true
+          
+          # 結果分析
+          if [[ -f "eslint-security.json" ]]; then
+            security_issues=$(jq '[.[] | .messages[] | select(.ruleId | contains("security"))] | length' eslint-security.json 2>/dev/null || echo "0")
+            echo "📊 ESLint security issues: $security_issues"
+          else
+            echo "ℹ️ ESLint analysis not available"
+          fi
+        id: eslint-security
+      
+      # ================
+      # Semgrep SAST Scan
+      # 目的: Semgrep による高度な静的解析
+      # Purpose: Advanced static analysis with Semgrep
+      # ================
+      - name: "🎯 Semgrep SAST Scan"
+        run: |
+          echo "🎯 Running Semgrep SAST scan..."
+          
+          # Semgrep インストールと実行
+          pip3 install semgrep
+          
+          # JavaScript/TypeScript/React ルールセットで実行
+          semgrep --config=auto --json --output=semgrep-results.json src/ || true
+          
+          # 結果分析
+          if [[ -f "semgrep-results.json" ]]; then
+            # 重要度別カウント
+            critical_findings=$(jq '[.results[] | select(.extra.severity == "ERROR")] | length' semgrep-results.json 2>/dev/null || echo "0")
+            high_findings=$(jq '[.results[] | select(.extra.severity == "WARNING")] | length' semgrep-results.json 2>/dev/null || echo "0")
+            
+            echo "📊 Semgrep Critical findings: $critical_findings"
+            echo "📊 Semgrep High findings: $high_findings"
+            
+            echo "semgrep_critical=$critical_findings" >> $GITHUB_OUTPUT
+            echo "semgrep_high=$high_findings" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ Semgrep analysis not available"
+            echo "semgrep_critical=0" >> $GITHUB_OUTPUT
+            echo "semgrep_high=0" >> $GITHUB_OUTPUT
+          fi
+        id: semgrep-scan
+      
+      # ================
+      # CodeQL Security Analysis
+      # 目的: GitHub CodeQL による深度のあるセキュリティ分析
+      # Purpose: Deep security analysis with GitHub CodeQL
+      # ================
+      - name: "🧬 Initialize CodeQL"
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+          queries: security-and-quality
+      
+      - name: "🏗️ Autobuild for CodeQL"
+        uses: github/codeql-action/autobuild@v2
+      
+      - name: "🧬 Perform CodeQL Analysis"
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+
+  dependency-security:
+    # ================================
+    # Job: dependency-security
+    # Description: 依存関係セキュリティスキャン
+    #              Dependency security scanning
+    # Dependencies: security-baseline (parallel)
+    # Timeout: 20分
+    # ================================
+    name: "📦 [Dependencies] Security Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: security-baseline
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # Dependency Vulnerability Scan
+      # 目的: 依存関係の脆弱性スキャン
+      # Purpose: Dependency vulnerability scanning
+      # ================
+      - name: "🔍 Comprehensive Dependency Scan"
+        run: |
+          echo "🔍 Running comprehensive dependency security scan..."
+          
+          # 基本的なnpm audit
+          echo "📦 Running npm audit..."
+          npm audit --json > npm-audit-full.json 2>/dev/null || true
+          
+          # Snyk インストールと実行（オープンソース版）
+          echo "🛡️ Installing and running Snyk..."
+          npm install -g snyk 2>/dev/null || true
+          snyk test --json > snyk-results.json 2>/dev/null || true
+          
+          # OWASP Dependency Check（Java-based tool）
+          echo "🎯 Running OWASP Dependency Check..."
+          wget -q -O dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip || true
+          if [[ -f "dependency-check.zip" ]]; then
+            unzip -q dependency-check.zip
+            ./dependency-check/bin/dependency-check.sh --project "PMPLearning" --scan ./ --format JSON --out ./owasp-dc-results.json || true
+          fi
+          
+          # 結果の統合分析
+          echo "📊 Analyzing scan results..."
+          
+          total_critical=0
+          total_high=0
+          total_medium=0
+          
+          # npm audit 結果
+          if [[ -f "npm-audit-full.json" ]]; then
+            npm_critical=$(jq -r '.metadata.vulnerabilities.critical // 0' npm-audit-full.json)
+            npm_high=$(jq -r '.metadata.vulnerabilities.high // 0' npm-audit-full.json)
+            npm_medium=$(jq -r '.metadata.vulnerabilities.moderate // 0' npm-audit-full.json)
+            
+            total_critical=$((total_critical + npm_critical))
+            total_high=$((total_high + npm_high))
+            total_medium=$((total_medium + npm_medium))
+          fi
+          
+          # Snyk 結果
+          if [[ -f "snyk-results.json" ]]; then
+            snyk_high=$(jq -r '.vulnerabilities[] | select(.severity == "high") | length' snyk-results.json 2>/dev/null | wc -l)
+            total_high=$((total_high + snyk_high))
+          fi
+          
+          echo "📊 Total Critical: $total_critical"
+          echo "📊 Total High: $total_high"
+          echo "📊 Total Medium: $total_medium"
+          
+          # 閾値チェック
+          if [[ $total_critical -gt ${{ env.MAX_CRITICAL_VULNS }} ]]; then
+            echo "❌ Critical vulnerabilities exceed threshold ($total_critical > ${{ env.MAX_CRITICAL_VULNS }})"
+            echo "threshold_exceeded=true" >> $GITHUB_OUTPUT
+          elif [[ $total_high -gt ${{ env.MAX_HIGH_VULNS }} ]]; then
+            echo "⚠️ High vulnerabilities exceed threshold ($total_high > ${{ env.MAX_HIGH_VULNS }})"
+            echo "threshold_exceeded=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Vulnerability levels within acceptable thresholds"
+            echo "threshold_exceeded=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "total_critical=$total_critical" >> $GITHUB_OUTPUT
+          echo "total_high=$total_high" >> $GITHUB_OUTPUT
+          echo "total_medium=$total_medium" >> $GITHUB_OUTPUT
+        id: dependency-scan
+      
+      # ================
+      # License Compliance Check
+      # 目的: ライセンス準拠性チェック
+      # Purpose: License compliance check
+      # ================
+      - name: "📜 License Compliance Check"
+        run: |
+          echo "📜 Checking license compliance..."
+          
+          # license-checker インストールと実行
+          npm install -g license-checker 2>/dev/null || true
+          license-checker --json > license-report.json 2>/dev/null || true
+          
+          if [[ -f "license-report.json" ]]; then
+            # 問題のあるライセンスをチェック
+            restrictive_licenses=("GPL-2.0" "GPL-3.0" "AGPL-1.0" "AGPL-3.0")
+            license_issues=0
+            
+            for license in "${restrictive_licenses[@]}"; do
+              if jq -r '.[].licenses' license-report.json 2>/dev/null | grep -i "$license"; then
+                echo "⚠️ Restrictive license detected: $license"
+                license_issues=$((license_issues + 1))
+              fi
+            done
+            
+            echo "📊 License issues found: $license_issues"
+            echo "license_issues=$license_issues" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ License check not available"
+            echo "license_issues=0" >> $GITHUB_OUTPUT
+          fi
+        id: license-check
+
+  dast-analysis:
+    # ================================
+    # Job: dast-analysis
+    # Description: 動的アプリケーションセキュリティテスト
+    #              Dynamic Application Security Testing
+    # Dependencies: security-baseline
+    # Timeout: 30分
+    # ================================
+    name: "🌐 [DAST] Dynamic Security Testing"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: security-baseline
+    if: github.event.inputs.include_dast != 'false' && (github.event_name == 'schedule' || github.event.inputs.scan_intensity == 'comprehensive')
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # Build and Deploy Test Instance
+      # 目的: テスト用インスタンスの構築・デプロイ
+      # Purpose: Build and deploy test instance
+      # ================
+      - name: "🏗️ Build Test Application"
+        run: |
+          echo "🏗️ Building test application for DAST..."
+          npm ci
+          npm run build
+          
+          # テスト用サーバー起動
+          npm run preview &
+          SERVER_PID=$!
+          echo "server_pid=$SERVER_PID" >> $GITHUB_OUTPUT
+          
+          # サーバー起動待機
+          sleep 15
+          
+          # ヘルスチェック
+          curl -f http://localhost:4173 || echo "⚠️ Test server may not be ready"
+        id: build-test-app
+      
+      # ================
+      # OWASP ZAP Baseline Scan
+      # 目的: OWASP ZAP による動的スキャン
+      # Purpose: Dynamic scanning with OWASP ZAP
+      # ================
+      - name: "🕷️ OWASP ZAP Baseline Scan"
+        run: |
+          echo "🕷️ Running OWASP ZAP baseline scan..."
+          
+          # OWASP ZAP Docker実行
+          docker run -v $(pwd):/zap/wrk/:rw \
+            -t owasp/zap2docker-stable zap-baseline.py \
+            -t http://host.docker.internal:4173 \
+            -J zap-baseline-report.json \
+            -r zap-baseline-report.html || true
+          
+          # 結果分析
+          if [[ -f "zap-baseline-report.json" ]]; then
+            high_alerts=$(jq -r '[.site[0].alerts[] | select(.riskdesc | contains("High"))] | length' zap-baseline-report.json 2>/dev/null || echo "0")
+            medium_alerts=$(jq -r '[.site[0].alerts[] | select(.riskdesc | contains("Medium"))] | length' zap-baseline-report.json 2>/dev/null || echo "0")
+            
+            echo "📊 ZAP High alerts: $high_alerts"
+            echo "📊 ZAP Medium alerts: $medium_alerts"
+            
+            echo "zap_high=$high_alerts" >> $GITHUB_OUTPUT
+            echo "zap_medium=$medium_alerts" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ ZAP scan results not available"
+            echo "zap_high=0" >> $GITHUB_OUTPUT
+            echo "zap_medium=0" >> $GITHUB_OUTPUT
+          fi
+        id: zap-scan
+      
+      # ================
+      # Security Headers Check
+      # 目的: セキュリティヘッダーのチェック
+      # Purpose: Security headers check
+      # ================
+      - name: "🛡️ Security Headers Verification"
+        run: |
+          echo "🛡️ Verifying security headers..."
+          
+          # セキュリティヘッダーチェック
+          response=$(curl -I -s http://localhost:4173 || echo "")
+          
+          headers_check=0
+          required_headers=(
+            "X-Frame-Options"
+            "X-Content-Type-Options"
+            "X-XSS-Protection"
+            "Strict-Transport-Security"
+            "Content-Security-Policy"
+          )
+          
+          for header in "${required_headers[@]}"; do
+            if echo "$response" | grep -i "$header" >/dev/null; then
+              echo "✅ $header header present"
+            else
+              echo "❌ $header header missing"
+              headers_check=$((headers_check + 1))
+            fi
+          done
+          
+          echo "📊 Missing security headers: $headers_check"
+          echo "missing_headers=$headers_check" >> $GITHUB_OUTPUT
+        id: headers-check
+      
+      # ================
+      # Cleanup Test Server
+      # 目的: テストサーバーのクリーンアップ
+      # Purpose: Cleanup test server
+      # ================
+      - name: "🧹 Cleanup Test Server"
+        if: always()
+        run: |
+          echo "🧹 Cleaning up test server..."
+          if [[ -n "${{ steps.build-test-app.outputs.server_pid }}" ]]; then
+            kill "${{ steps.build-test-app.outputs.server_pid }}" || true
+          fi
+
+  # ================================
+  # Job: security-compliance-report
+  # Description: セキュリティコンプライアンスレポート
+  #              Security compliance reporting
+  # Dependencies: All security jobs
+  # Timeout: 15分
+  # ================================
+  security-compliance-report:
+    name: "📋 [Report] Security Compliance"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [security-baseline, sast-analysis, dependency-security, dast-analysis]
+    if: always()
+    
+    steps:
+      - name: "📋 Generate Security Compliance Report"
+        run: |
+          echo "📋 Generating comprehensive security compliance report..."
+          
+          cat > security-compliance-report.md << EOF
+          # 🔒 DevSecOps Security Compliance Report
+          
+          ## 📊 Executive Summary / エグゼクティブサマリー
+          
+          - **Security Baseline Score**: ${{ needs.security-baseline.outputs.security_score }}/100
+          - **Scan Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          - **Scan Intensity**: ${{ github.event.inputs.scan_intensity || 'standard' }}
+          - **Overall Status**: $([ "${{ needs.security-baseline.outputs.security_score }}" -gt "85" ] && echo "🟢 SECURE" || echo "🟡 REQUIRES ATTENTION")
+          
+          ## 🔍 Security Analysis Results / セキュリティ分析結果
+          
+          ### 📊 Baseline Assessment / ベースライン評価
+          - **Job Status**: ${{ needs.security-baseline.result }}
+          - **Critical Vulnerabilities**: ${{ needs.security-baseline.outputs.critical_count }}
+          - **High Vulnerabilities**: ${{ needs.security-baseline.outputs.high_count }}
+          
+          ### 🎯 SAST Analysis / 静的解析
+          - **Job Status**: ${{ needs.sast-analysis.result }}
+          - **CodeQL Analysis**: Completed with GitHub Security
+          - **ESLint Security**: Code quality with security rules
+          - **Semgrep Findings**: Advanced pattern detection
+          
+          ### 📦 Dependency Security / 依存関係セキュリティ
+          - **Job Status**: ${{ needs.dependency-security.result }}
+          - **Total Critical**: ${{ needs.dependency-security.outputs.total_critical || 'N/A' }}
+          - **Total High**: ${{ needs.dependency-security.outputs.total_high || 'N/A' }}
+          - **License Issues**: ${{ needs.dependency-security.outputs.license_issues || 'N/A' }}
+          - **Threshold Status**: ${{ needs.dependency-security.outputs.threshold_exceeded || 'N/A' }}
+          
+          ### 🌐 DAST Analysis / 動的解析
+          - **Job Status**: ${{ needs.dast-analysis.result }}
+          EOF
+          
+          if [[ "${{ needs.dast-analysis.result }}" == "success" ]]; then
+            cat >> security-compliance-report.md << EOF
+          - **ZAP High Alerts**: ${{ needs.dast-analysis.outputs.zap_high || 'N/A' }}
+          - **ZAP Medium Alerts**: ${{ needs.dast-analysis.outputs.zap_medium || 'N/A' }}
+          - **Missing Security Headers**: ${{ needs.dast-analysis.outputs.missing_headers || 'N/A' }}
+          EOF
+          else
+            echo "- **DAST Scan**: Skipped or failed" >> security-compliance-report.md
+          fi
+          
+          cat >> security-compliance-report.md << EOF
+          
+          ## 🎯 Compliance Status / コンプライアンス状況
+          
+          ### ✅ Security Controls Implemented / 実装されたセキュリティ制御
+          - Static Application Security Testing (SAST)
+          - Dynamic Application Security Testing (DAST)
+          - Software Composition Analysis (SCA)
+          - License Compliance Checking
+          - Security Policy Validation
+          - Automated Vulnerability Management
+          
+          ### 📋 Compliance Frameworks / 準拠フレームワーク
+          - **OWASP Top 10**: Regular scanning and mitigation
+          - **NIST Cybersecurity Framework**: Core implementation
+          - **DevSecOps Best Practices**: Shift-left security integration
+          - **Supply Chain Security**: Dependency and license management
+          
+          ## 🚀 Remediation Recommendations / 修復推奨事項
+          
+          ### 🔴 Critical Priority / 重要優先度
+          EOF
+          
+          # 重要な修復事項の追加
+          critical_count="${{ needs.security-baseline.outputs.critical_count }}"
+          if [[ "$critical_count" -gt 0 ]]; then
+            echo "- **Address Critical Vulnerabilities**: $critical_count critical issues require immediate attention"
+          else
+            echo "- ✅ No critical vulnerabilities detected"
+          fi >> security-compliance-report.md
+          
+          cat >> security-compliance-report.md << EOF
+          
+          ### 🟡 High Priority / 高優先度
+          - Review and update dependency versions
+          - Implement missing security headers
+          - Enhanced input validation and sanitization
+          - Regular security training for development team
+          
+          ### 🟢 Medium Priority / 中優先度
+          - Implement advanced monitoring and alerting
+          - Regular penetration testing
+          - Security architecture review
+          - Incident response plan enhancement
+          
+          ## 📈 Security Metrics Trends / セキュリティメトリクストレンド
+          
+          - **Security Score Improvement**: Target 90+ for next assessment
+          - **Vulnerability Resolution Time**: Target <48 hours for critical
+          - **Security Test Coverage**: Target 95%+ code coverage
+          - **Compliance Automation**: Target 100% automated checks
+          
+          ## 📞 Next Steps / 次のステップ
+          
+          1. **Immediate Actions**: Address any critical vulnerabilities
+          2. **Weekly Reviews**: Schedule regular security review meetings
+          3. **Continuous Monitoring**: Implement 24/7 security monitoring
+          4. **Training Programs**: Enhance security awareness training
+          5. **Tool Integration**: Integrate security tools in IDE and CI/CD
+          
+          ---
+          *Generated by DevSecOps Pipeline at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+          *Next scheduled scan: $(date -u -d '+1 day' '+%Y-%m-%d %H:%M:%S UTC')*
+          EOF
+          
+          echo "✅ Security compliance report generated"
+      
+      # ================
+      # Create Security Issue (if needed)
+      # 目的: セキュリティ問題のIssue作成
+      # Purpose: Create security issue if needed
+      # ================
+      - name: "🚨 Create Security Issue"
+        if: needs.security-baseline.outputs.critical_count > 0 || needs.dependency-security.outputs.threshold_exceeded == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const criticalCount = '${{ needs.security-baseline.outputs.critical_count }}';
+            const highCount = '${{ needs.security-baseline.outputs.high_count }}';
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Critical Security Vulnerabilities Detected - ${criticalCount} Critical, ${highCount} High`,
+              body: `
+            ## 🚨 Security Alert - Immediate Action Required
+            
+            **Critical Vulnerabilities**: ${criticalCount}
+            **High Vulnerabilities**: ${highCount}
+            **Detection Date**: ${new Date().toISOString()}
+            
+            ### 📋 Required Actions
+            1. Review security compliance report
+            2. Address critical vulnerabilities within 24 hours
+            3. Update affected dependencies
+            4. Verify fixes with security re-scan
+            
+            ### 🔗 Related Reports
+            - Security Compliance Report: Available in workflow artifacts
+            - SAST Analysis: ${{ needs.sast-analysis.result }}
+            - DAST Analysis: ${{ needs.dast-analysis.result }}
+            
+            **This issue was automatically created by the DevSecOps pipeline.**
+              `,
+              labels: ['security', 'critical', 'vulnerability', 'auto-generated']
+            });
+      
+      # ================
+      # Upload Security Reports
+      # 目的: セキュリティレポートのアーティファクト保存
+      # Purpose: Save security reports as artifacts
+      # ================
+      - name: "📦 Upload Security Reports"
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-compliance-report-${{ github.run_id }}
+          path: |
+            security-compliance-report.md
+            npm-audit-full.json
+            snyk-results.json
+            semgrep-results.json
+            zap-baseline-report.html
+            license-report.json
+          retention-days: 90

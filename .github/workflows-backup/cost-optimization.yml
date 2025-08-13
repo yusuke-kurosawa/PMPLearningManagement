@@ -1,0 +1,247 @@
+name: 💰 GitHub Actions コスト最適化監視
+
+on:
+  schedule:
+    # 週次でコスト分析（日曜日 9:00 JST）
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # 手動実行も可能
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  cost-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: GitHub Actions使用状況分析
+      id: usage-analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # 過去30日間のワークフロー実行統計を取得
+        echo "## GitHub Actions 使用状況分析（過去30日間）" > cost_report.md
+        echo "" >> cost_report.md
+        
+        # 実行回数の多いワークフロー上位10位
+        echo "### 🔥 実行回数上位ワークフロー" >> cost_report.md
+        gh run list --limit 1000 --json workflowName,conclusion,createdAt \
+          | jq -r '.[] | select(.createdAt >= (now - 30*24*3600 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .workflowName' \
+          | sort | uniq -c | sort -nr | head -10 \
+          | awk '{print "- " $2 ": " $1 "回"}' >> cost_report.md
+        
+        echo "" >> cost_report.md
+        
+        # 失敗率の高いワークフロー
+        echo "### ❌ 失敗率の高いワークフロー" >> cost_report.md
+        gh run list --limit 500 --json workflowName,conclusion \
+          | jq -r 'group_by(.workflowName) | map({workflow: .[0].workflowName, total: length, failed: map(select(.conclusion == "failure")) | length}) | map(select(.total > 5)) | map(. + {failure_rate: (.failed / .total * 100)}) | sort_by(-.failure_rate) | .[:5][] | "- " + .workflow + ": " + (.failure_rate | tostring | .[:4]) + "%"' >> cost_report.md
+        
+        echo "" >> cost_report.md
+        
+        # 現在のワークフロー数
+        WORKFLOW_COUNT=$(find .github/workflows -name "*.yml" | grep -v cost-optimization.yml | wc -l)
+        echo "### 📊 全体統計" >> cost_report.md
+        echo "- **総ワークフロー数**: $WORKFLOW_COUNT" >> cost_report.md
+        
+        # スケジュール実行ワークフロー数
+        SCHEDULED_COUNT=$(grep -r "schedule:" .github/workflows --include="*.yml" | grep -v cost-optimization.yml | wc -l)
+        echo "- **スケジュール実行**: $SCHEDULED_COUNT ワークフロー" >> cost_report.md
+        
+        # 推定月間実行数
+        ESTIMATED_MONTHLY_RUNS=$((SCHEDULED_COUNT * 30 + 100))  # スケジュール + PR/pushイベント
+        echo "- **推定月間実行数**: $ESTIMATED_MONTHLY_RUNS" >> cost_report.md
+        
+        echo "" >> cost_report.md
+        
+        # コスト最適化提案
+        echo "### 💡 コスト最適化提案" >> cost_report.md
+        
+        if [ $WORKFLOW_COUNT -gt 30 ]; then
+          echo "⚠️ **ワークフロー数が多すぎます**: $WORKFLOW_COUNT 個" >> cost_report.md
+          echo "   - 類似機能のワークフローを統合" >> cost_report.md
+          echo "   - 使用頻度の低いワークフローの無効化" >> cost_report.md
+          echo "" >> cost_report.md
+        fi
+        
+        if [ $SCHEDULED_COUNT -gt 20 ]; then
+          echo "⚠️ **スケジュール実行が多すぎます**: $SCHEDULED_COUNT 個" >> cost_report.md
+          echo "   - 実行頻度の見直し（daily → weekly）" >> cost_report.md
+          echo "   - 条件付き実行の実装" >> cost_report.md
+          echo "" >> cost_report.md
+        fi
+        
+        echo "### ✅ 推奨改善策" >> cost_report.md
+        echo "1. **失敗率の高いワークフローの修正** - リソース浪費を防ぐ" >> cost_report.md
+        echo "2. **条件分岐の追加** - 不要な実行をスキップ" >> cost_report.md
+        echo "3. **実行時間の制限** - timeout設定の追加" >> cost_report.md
+        echo "4. **軽量ランナーの採用** - ubuntu-latest の見直し" >> cost_report.md
+        echo "5. **キャッシュの活用** - 依存関係のキャッシュ" >> cost_report.md
+        echo "" >> cost_report.md
+        
+        # レポート内容を出力変数に設定
+        echo "report<<EOF" >> $GITHUB_OUTPUT
+        cat cost_report.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # 警告レベルの設定
+        if [ $WORKFLOW_COUNT -gt 40 ] || [ $SCHEDULED_COUNT -gt 25 ]; then
+          echo "alert_level=high" >> $GITHUB_OUTPUT
+        elif [ $WORKFLOW_COUNT -gt 30 ] || [ $SCHEDULED_COUNT -gt 15 ]; then
+          echo "alert_level=medium" >> $GITHUB_OUTPUT
+        else
+          echo "alert_level=low" >> $GITHUB_OUTPUT
+        fi
+
+    - name: ワークフロー最適化提案の作成
+      id: optimization
+      run: |
+        # 最適化用の設定ファイルを生成
+        cat > workflow_optimization_config.json << 'EOF'
+        {
+          "cost_optimization_rules": {
+            "max_workflows": 30,
+            "max_scheduled_workflows": 15,
+            "max_timeout_minutes": 30,
+            "recommended_schedule_frequencies": {
+              "daily": ["security-scan", "dependency-check"],
+              "weekly": ["performance-monitoring", "compliance-audit"],
+              "monthly": ["dependency-roadmap", "world-class-devops-benchmark"]
+            },
+            "conditional_execution_patterns": [
+              "if: github.event_name != 'schedule' || (github.event.schedule == '0 0 * * 0' && github.repository.default_branch == github.ref_name)",
+              "if: github.event.pull_request.changed_files <= 20",
+              "if: contains(github.event.head_commit.message, '[skip-expensive]') == false"
+            ]
+          },
+          "performance_optimizations": {
+            "use_cache": true,
+            "parallel_jobs": true,
+            "minimal_checkout": true,
+            "lightweight_runners": ["ubuntu-latest", "ubuntu-22.04"]
+          }
+        }
+        EOF
+        
+        echo "optimization_config<<EOF" >> $GITHUB_OUTPUT
+        cat workflow_optimization_config.json >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Issueでコスト分析レポートを作成
+      if: steps.usage-analysis.outputs.alert_level != 'low'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const report = `${{ steps.usage-analysis.outputs.report }}`;
+          const alertLevel = '${{ steps.usage-analysis.outputs.alert_level }}';
+          const optimizationConfig = `${{ steps.optimization.outputs.optimization_config }}`;
+          
+          const alertEmoji = alertLevel === 'high' ? '🚨' : '⚠️';
+          const priorityLabel = alertLevel === 'high' ? 'high' : 'medium';
+          
+          const issueBody = `
+          ${alertEmoji} **GitHub Actions コスト最適化が必要です**
+          
+          ${report}
+          
+          ### 🔧 最適化設定
+          
+          <details>
+          <summary>詳細設定を表示</summary>
+          
+          \`\`\`json
+          ${optimizationConfig}
+          \`\`\`
+          
+          </details>
+          
+          ### 📋 アクションプラン
+          
+          - [ ] 失敗率の高いワークフローの修正
+          - [ ] 不要なスケジュール実行の削除
+          - [ ] 条件分岐による実行制御の追加
+          - [ ] タイムアウト設定の見直し
+          - [ ] キャッシュ戦略の実装
+          
+          ### 📈 期待効果
+          
+          - **実行回数**: 20-30%削減
+          - **実行時間**: 15-25%短縮  
+          - **リソース使用量**: 25-40%削減
+          - **月間コスト**: 推定30-50%削減
+          
+          ---
+          
+          *🤖 このレポートは自動生成されました。週次で更新されます。*
+          *⏰ 作成日時: ${new Date().toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'})}*
+          `;
+          
+          // 既存のコスト最適化Issueをチェック
+          const { data: issues } = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: 'cost-optimization',
+            state: 'open'
+          });
+          
+          if (issues.length > 0) {
+            // 既存Issueを更新
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issues[0].number,
+              body: `## 📊 週次コスト分析レポート\n\n${issueBody}`
+            });
+            
+            console.log(`Updated existing cost optimization issue #${issues[0].number}`);
+          } else {
+            // 新規Issueを作成
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${alertEmoji} GitHub Actions コスト最適化 - ${alertLevel}優先度`,
+              body: issueBody,
+              labels: ['cost-optimization', 'devops', priorityLabel, 'automated']
+            });
+            
+            console.log(`Created new cost optimization issue #${issue.data.number}`);
+          }
+
+    - name: 最適化設定ファイルの保存
+      run: |
+        # 設定ファイルをリポジトリに保存
+        mkdir -p .github/config
+        mv workflow_optimization_config.json .github/config/
+        
+        # README作成
+        cat > .github/config/README.md << 'EOF'
+        # GitHub Actions コスト最適化設定
+        
+        このディレクトリには、GitHub Actionsのコスト最適化に関する設定ファイルが含まれています。
+        
+        ## ファイル一覧
+        
+        - `workflow_optimization_config.json`: 最適化ルールとパフォーマンス設定
+        
+        ## 使用方法
+        
+        1. 週次コスト分析レポートを確認
+        2. 設定ファイルに基づいてワークフローを最適化
+        3. 効果測定を実施
+        
+        ## 監視指標
+        
+        - ワークフロー実行回数
+        - 失敗率
+        - 実行時間
+        - リソース使用量
+        EOF
+        
+        echo "✅ 最適化設定ファイルを保存しました"

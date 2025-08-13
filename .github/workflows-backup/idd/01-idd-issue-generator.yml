@@ -1,0 +1,381 @@
+# ================================================================
+# IDD Compliant Workflow / IDD準拠ワークフロー
+# ================================================================
+# Issue: #68 #4
+# Category: IDD
+# Purpose: コード分析に基づくIssue自動生成
+#          Automatic Issue generation based on code analysis
+# Author: Claude Code Actions + yusuke-kurosawa
+# Version: 1.0.0
+# Compliance: IDD 100% Compliant
+# ================================================================
+
+name: "🤖 IDD | Issue Generator - AI駆動自動生成"
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 毎日深夜に実行
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      analysis_type:
+        description: '分析タイプ'
+        required: true
+        default: 'comprehensive'
+        type: choice
+        options:
+          - 'comprehensive'  # 包括的分析
+          - 'bugs'           # バグ検出のみ
+          - 'performance'    # パフォーマンス分析
+          - 'security'       # セキュリティ分析
+          - 'enhancement'    # 改善提案
+
+# --------------------------------
+# 📋 IDD Compliance Check
+# --------------------------------
+# This workflow is IDD compliant
+# Issue: #68 #4
+# Branch: feature/issue-68-idd-devops-enhancement
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # ================================================================
+  # Job 1: コード分析とIssue候補生成
+  # ================================================================
+  analyze-and-generate:
+    name: "🔍 コード分析 & Issue生成"
+    runs-on: ubuntu-latest
+    
+    outputs:
+      issues_json: ${{ steps.generate.outputs.issues }}
+      total_issues: ${{ steps.generate.outputs.total }}
+      
+    steps:
+      # --------------------------------
+      # Step 1: チェックアウト
+      # --------------------------------
+      - name: "📥 リポジトリチェックアウト"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      # --------------------------------
+      # Step 2: Node.js セットアップ
+      # --------------------------------
+      - name: "📦 Node.js セットアップ"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      # --------------------------------
+      # Step 3: 依存関係インストール
+      # --------------------------------
+      - name: "📦 依存関係インストール"
+        run: |
+          npm ci
+          npm install --save-dev @typescript-eslint/parser @typescript-eslint/eslint-plugin
+          
+      # --------------------------------
+      # Step 4: ESLint分析
+      # --------------------------------
+      - name: "🔍 ESLint分析実行"
+        id: eslint
+        continue-on-error: true
+        run: |
+          echo "=== ESLint分析開始 ==="
+          
+          # ESLint実行（JSON形式で出力）
+          npx eslint . \
+            --ext .js,.jsx,.ts,.tsx \
+            --format json \
+            --output-file eslint-report.json || true
+            
+          # 問題数カウント
+          if [ -f eslint-report.json ]; then
+            ERRORS=$(cat eslint-report.json | jq '[.[] | .errorCount] | add')
+            WARNINGS=$(cat eslint-report.json | jq '[.[] | .warningCount] | add')
+            echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+            echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+            echo "📊 検出: エラー ${ERRORS}件、警告 ${WARNINGS}件"
+          fi
+          
+      # --------------------------------
+      # Step 5: セキュリティ分析
+      # --------------------------------
+      - name: "🔒 セキュリティ分析"
+        id: security
+        continue-on-error: true
+        run: |
+          echo "=== セキュリティ分析開始 ==="
+          
+          # npm audit実行
+          npm audit --json > audit-report.json || true
+          
+          if [ -f audit-report.json ]; then
+            VULNERABILITIES=$(cat audit-report.json | jq '.metadata.vulnerabilities.total // 0')
+            CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
+            HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
+            
+            echo "total_vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+            echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+            echo "high=$HIGH" >> $GITHUB_OUTPUT
+            echo "📊 脆弱性: 合計 ${VULNERABILITIES}件（Critical: ${CRITICAL}, High: ${HIGH}）"
+          fi
+          
+      # --------------------------------
+      # Step 6: パフォーマンス分析
+      # --------------------------------
+      - name: "⚡ パフォーマンス分析"
+        id: performance
+        continue-on-error: true
+        run: |
+          echo "=== パフォーマンス分析開始 ==="
+          
+          # バンドルサイズチェック
+          npm run build --if-present || true
+          
+          if [ -d "dist" ]; then
+            BUNDLE_SIZE=$(du -sh dist | cut -f1)
+            echo "bundle_size=$BUNDLE_SIZE" >> $GITHUB_OUTPUT
+            echo "📦 バンドルサイズ: $BUNDLE_SIZE"
+            
+            # 大きなファイルを検出
+            find dist -type f -size +500k -exec ls -lh {} \; > large-files.txt
+            if [ -s large-files.txt ]; then
+              echo "⚠️ 500KB以上のファイルが検出されました"
+              cat large-files.txt
+            fi
+          fi
+          
+      # --------------------------------
+      # Step 7: コード複雑度分析
+      # --------------------------------
+      - name: "📊 コード複雑度分析"
+        id: complexity
+        continue-on-error: true
+        run: |
+          echo "=== コード複雑度分析開始 ==="
+          
+          # 複雑なファイルを検出（100行以上の関数など）
+          find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | while read file; do
+            # 長い関数を検出
+            awk '/function|const.*=.*=>|class/ {start=NR} 
+                 /^}/ {if(NR-start>100) print FILENAME":"start"-"NR" ("NR-start" lines)"}' "$file"
+          done > complex-functions.txt
+          
+          if [ -s complex-functions.txt ]; then
+            COMPLEX_COUNT=$(wc -l < complex-functions.txt)
+            echo "complex_functions=$COMPLEX_COUNT" >> $GITHUB_OUTPUT
+            echo "📊 複雑な関数: ${COMPLEX_COUNT}個検出"
+          fi
+          
+      # --------------------------------
+      # Step 8: Issue候補生成
+      # --------------------------------
+      - name: "🤖 AI駆動Issue生成"
+        id: generate
+        run: |
+          echo "=== Issue候補生成開始 ==="
+          
+          # Issue候補を格納するJSON配列を初期化
+          echo '[]' > issues.json
+          
+          # 1. ESLintエラーからIssue生成
+          if [ "${{ steps.eslint.outputs.errors }}" -gt "10" ]; then
+            cat >> issues.json << EOF
+          [{
+            "title": "🐛 ESLintエラーの修正が必要",
+            "body": "## 概要\nESLint分析により${{{ steps.eslint.outputs.errors }}}件のエラーが検出されました。\n\n## 詳細\n- エラー: ${{ steps.eslint.outputs.errors }}件\n- 警告: ${{ steps.eslint.outputs.warnings }}件\n\n## 対応内容\n- [ ] ESLintエラーを0件にする\n- [ ] 警告を可能な限り削減する\n- [ ] ESLint設定の見直し\n\n## 自動生成\nこのIssueはIDD Issue Generatorにより自動生成されました。",
+            "labels": ["bug", "code-quality", "auto-generated"],
+            "priority": "high"
+          }]
+          EOF
+          fi
+          
+          # 2. セキュリティ脆弱性からIssue生成
+          if [ "${{ steps.security.outputs.critical }}" -gt "0" ]; then
+            jq '. += [{
+              "title": "🔒 Critical脆弱性の即時修正が必要",
+              "body": "## 概要\nセキュリティ監査により重大な脆弱性が検出されました。\n\n## 詳細\n- Critical: ${{ steps.security.outputs.critical }}件\n- High: ${{ steps.security.outputs.high }}件\n- 合計: ${{ steps.security.outputs.total_vulnerabilities }}件\n\n## 対応内容\n- [ ] Critical脆弱性をすべて修正\n- [ ] High脆弱性を確認\n- [ ] 依存関係の更新\n- [ ] セキュリティテストの実行\n\n## 自動生成\nこのIssueはIDD Issue Generatorにより自動生成されました。",
+              "labels": ["security", "critical", "auto-generated"],
+              "priority": "critical"
+            }]' issues.json > tmp.json && mv tmp.json issues.json
+          fi
+          
+          # 3. パフォーマンス問題からIssue生成
+          if [ -s large-files.txt ]; then
+            jq --arg files "$(cat large-files.txt)" '. += [{
+              "title": "⚡ バンドルサイズ最適化が必要",
+              "body": "## 概要\n大きなファイルが検出されました。バンドルサイズの最適化が必要です。\n\n## 詳細\nバンドルサイズ: ${{ steps.performance.outputs.bundle_size }}\n\n### 500KB以上のファイル\n```\n" + $files + "\n```\n\n## 対応内容\n- [ ] コード分割の実装\n- [ ] 動的インポートの活用\n- [ ] 不要な依存関係の削除\n- [ ] 画像・アセットの最適化\n\n## 自動生成\nこのIssueはIDD Issue Generatorにより自動生成されました。",
+              "labels": ["performance", "optimization", "auto-generated"],
+              "priority": "medium"
+            }]' issues.json > tmp.json && mv tmp.json issues.json
+          fi
+          
+          # 4. コード複雑度からIssue生成
+          if [ "${{ steps.complexity.outputs.complex_functions }}" -gt "5" ]; then
+            jq '. += [{
+              "title": "♻️ コードリファクタリングの推奨",
+              "body": "## 概要\n複雑度の高い関数が検出されました。リファクタリングを推奨します。\n\n## 詳細\n- 複雑な関数: ${{ steps.complexity.outputs.complex_functions }}個\n- 100行以上の関数が存在\n\n## 対応内容\n- [ ] 大きな関数を分割\n- [ ] 単一責任の原則を適用\n- [ ] ユニットテストの追加\n- [ ] コードドキュメントの改善\n\n## 自動生成\nこのIssueはIDD Issue Generatorにより自動生成されました。",
+              "labels": ["enhancement", "refactoring", "auto-generated"],
+              "priority": "low"
+            }]' issues.json > tmp.json && mv tmp.json issues.json
+          fi
+          
+          # 5. 定期メンテナンス提案
+          DAYS_SINCE_UPDATE=$(git log -1 --format="%ct" package.json | xargs -I{} expr \( $(date +%s) - {} \) / 86400)
+          if [ "$DAYS_SINCE_UPDATE" -gt "30" ]; then
+            jq '. += [{
+              "title": "📦 依存関係の定期更新",
+              "body": "## 概要\npackage.jsonが30日以上更新されていません。依存関係の更新を推奨します。\n\n## 詳細\n- 最終更新: " + ($DAYS_SINCE_UPDATE | tostring) + "日前\n\n## 対応内容\n- [ ] npm outdatedの確認\n- [ ] 依存関係の更新\n- [ ] テストの実行\n- [ ] 互換性の確認\n\n## 自動生成\nこのIssueはIDD Issue Generatorにより自動生成されました。",
+              "labels": ["maintenance", "dependencies", "auto-generated"],
+              "priority": "low"
+            }]' issues.json > tmp.json && mv tmp.json issues.json
+          fi
+          
+          # 結果出力
+          TOTAL=$(jq '. | length' issues.json)
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "issues=$(cat issues.json | jq -c .)" >> $GITHUB_OUTPUT
+          
+          echo "📊 生成されたIssue候補: ${TOTAL}件"
+          cat issues.json | jq '.[].title'
+
+  # ================================================================
+  # Job 2: Issue作成
+  # ================================================================
+  create-issues:
+    name: "📝 Issue作成"
+    runs-on: ubuntu-latest
+    needs: analyze-and-generate
+    if: needs.analyze-and-generate.outputs.total_issues > 0
+    
+    steps:
+      # --------------------------------
+      # Step 1: Issue作成
+      # --------------------------------
+      - name: "📝 Issue作成"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = ${{ needs.analyze-and-generate.outputs.issues_json }};
+            
+            console.log(`📝 ${issues.length}件のIssueを作成します`);
+            
+            for (const issue of issues) {
+              // 重複チェック
+              const existingIssues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'auto-generated'
+              });
+              
+              const duplicate = existingIssues.data.find(i => 
+                i.title === issue.title
+              );
+              
+              if (duplicate) {
+                console.log(`⏭️ スキップ（既存）: ${issue.title}`);
+                continue;
+              }
+              
+              // Issue作成
+              try {
+                const created = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issue.title,
+                  body: issue.body,
+                  labels: issue.labels
+                });
+                
+                console.log(`✅ 作成完了: #${created.data.number} - ${issue.title}`);
+                
+                // 優先度に応じてプロジェクトに追加（オプション）
+                if (issue.priority === 'critical' || issue.priority === 'high') {
+                  // プロジェクトへの追加ロジック
+                  console.log(`🚨 高優先度Issue: #${created.data.number}`);
+                }
+                
+              } catch (error) {
+                console.error(`❌ 作成失敗: ${issue.title}`);
+                console.error(error);
+              }
+              
+              // レート制限対策
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+  # ================================================================
+  # Job 3: レポート生成
+  # ================================================================
+  generate-report:
+    name: "📊 分析レポート生成"
+    runs-on: ubuntu-latest
+    needs: [analyze-and-generate, create-issues]
+    if: always()
+    
+    steps:
+      # --------------------------------
+      # Step 1: レポート生成
+      # --------------------------------
+      - name: "📊 分析レポート生成"
+        run: |
+          cat > issue-generation-report.md << 'EOF'
+          # 📊 Issue自動生成レポート
+          
+          **実行日時**: $(date '+%Y-%m-%d %H:%M:%S')
+          **ワークフロー実行**: #${{ github.run_number }}
+          
+          ## 📈 分析結果サマリー
+          
+          | カテゴリ | 検出数 | 生成Issue |
+          |---------|--------|-----------|
+          | ESLintエラー | ${{ needs.analyze-and-generate.outputs.eslint_errors || 0 }} | - |
+          | セキュリティ脆弱性 | ${{ needs.analyze-and-generate.outputs.security_vulnerabilities || 0 }} | - |
+          | パフォーマンス問題 | - | - |
+          | コード複雑度 | ${{ needs.analyze-and-generate.outputs.complex_functions || 0 }} | - |
+          
+          ## 📝 生成されたIssue
+          
+          **合計**: ${{ needs.analyze-and-generate.outputs.total_issues || 0 }}件
+          
+          ## 🎯 次のアクション
+          
+          1. 生成されたIssueの確認と優先順位付け
+          2. Critical/Highラベルの付いたIssueの即時対応
+          3. 自動生成されたIssueの精査と調整
+          
+          ## 📊 トレンド分析
+          
+          過去30日間の自動生成Issue統計:
+          - バグ関連: -件
+          - セキュリティ: -件
+          - パフォーマンス: -件
+          - リファクタリング: -件
+          
+          ---
+          *このレポートはIDD Issue Generatorにより自動生成されました*
+          EOF
+          
+          echo "📊 レポート生成完了"
+          
+      # --------------------------------
+      # Step 2: アーティファクトアップロード
+      # --------------------------------
+      - name: "📤 レポートアップロード"
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-generation-report
+          path: issue-generation-report.md
+          retention-days: 30

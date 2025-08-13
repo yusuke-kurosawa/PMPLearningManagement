@@ -1,0 +1,154 @@
+name: Claude AI Assistant
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  claude-response:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Extract Claude mention
+      id: extract
+      run: |
+        if [ "${{ github.event_name }}" == "issues" ]; then
+          BODY="${{ github.event.issue.body }}"
+        else
+          BODY="${{ github.event.comment.body }}"
+        fi
+        
+        # Extract text after @claude mention
+        CLAUDE_REQUEST=$(echo "$BODY" | sed -n 's/.*@claude\s*\(.*\)/\1/p')
+        
+        # Clean and validate the request
+        if [ -z "$CLAUDE_REQUEST" ]; then
+          CLAUDE_REQUEST="How can I help you with this issue?"
+        fi
+        
+        # Escape special characters for JSON
+        CLAUDE_REQUEST=$(echo "$CLAUDE_REQUEST" | sed 's/"/\\"/g' | sed 's/$//' | tr '\n' ' ')
+        
+        echo "request=$CLAUDE_REQUEST" >> $GITHUB_OUTPUT
+        echo "Extracted request: $CLAUDE_REQUEST" >&2
+
+    - name: Call Claude API
+      id: claude
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        REQUEST="${{ steps.extract.outputs.request }}"
+        
+        echo "Making API request with content: $REQUEST" >&2
+        
+        # Create JSON payload using jq to ensure proper escaping
+        JSON_PAYLOAD=$(jq -n \
+          --arg model "claude-3-sonnet-20240229" \
+          --arg content "You are a helpful assistant for the PMP Learning Management project. Context: This is a project management professional learning system with React frontend, comprehensive testing, and AI integrations. Please provide helpful, accurate, and concise assistance. Request: $REQUEST" \
+          '{
+            model: $model,
+            max_tokens: 1024,
+            messages: [
+              {
+                role: "user",
+                content: $content
+              }
+            ]
+          }')
+        
+        echo "API payload created" >&2
+        
+        # Make API request with proper error handling
+        HTTP_STATUS=$(curl -s -w "%{http_code}" -o response.json \
+          -X POST https://api.anthropic.com/v1/messages \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: $ANTHROPIC_API_KEY" \
+          -H "anthropic-version: 2023-06-01" \
+          -d "$JSON_PAYLOAD")
+        
+        echo "HTTP Status: $HTTP_STATUS" >&2
+        
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+          # Parse successful response
+          CLAUDE_RESPONSE=$(cat response.json | jq -r '.content[0].text // "Unable to parse response"')
+          echo "API call successful" >&2
+        else
+          # Handle API errors
+          ERROR_MSG=$(cat response.json | jq -r '.error.message // "Unknown API error"' 2>/dev/null || echo "Failed to parse error response")
+          CLAUDE_RESPONSE="I'm currently experiencing technical difficulties (HTTP $HTTP_STATUS: $ERROR_MSG). Please try again in a few minutes, or contact the DevOps team if this persists."
+          echo "API call failed with status $HTTP_STATUS: $ERROR_MSG" >&2
+        fi
+        
+        # Clean up
+        rm -f response.json
+        
+        # Save response for next step
+        echo "response<<EOF" >> $GITHUB_OUTPUT
+        echo "$CLAUDE_RESPONSE" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Post Claude response
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const response = `${{ steps.claude.outputs.response }}`;
+          const request = `${{ steps.extract.outputs.request }}`;
+          
+          // Create formatted response with better styling
+          const comment = `
+          ## 🤖 Claude AI Assistant
+          
+          **Your Request**: ${request.substring(0, 100)}${request.length > 100 ? '...' : ''}
+          
+          **Response**:
+          ${response}
+          
+          ---
+          
+          ### 💡 Need More Help?
+          - For technical issues: Create a new issue with the \`question\` label
+          - For urgent matters: Contact the DevOps team directly
+          - For feature requests: Use the \`enhancement\` label
+          
+          *🔧 This response was generated automatically by Claude AI Assistant*  
+          *⏱️ Response generated at: ${new Date().toISOString()}*
+          `;
+          
+          try {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+            
+            console.log('Claude AI response posted successfully');
+          } catch (error) {
+            console.error('Failed to post Claude AI response:', error);
+            
+            // Fallback simple comment if formatting fails
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🤖 **Claude AI Response**: ${response}\n\n*Automated response generated at ${new Date().toISOString()}*`
+            });
+          }

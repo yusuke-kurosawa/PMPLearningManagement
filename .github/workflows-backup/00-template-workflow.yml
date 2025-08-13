@@ -1,0 +1,424 @@
+# ====================================================================
+# ワークフローテンプレート - 標準仕様準拠サンプル
+# ====================================================================
+# 目的: 日本語チーム向けワークフロー作成時の標準テンプレート
+#      すべてのワークフローはこの形式に従って作成すること
+# 
+# 実行タイミング:
+#   - このテンプレートは実行されません（手動トリガーのみ）
+#   - 新しいワークフロー作成時の参考として使用
+#
+# 主な処理:
+#   1. 標準的なワークフロー構造のデモンストレーション
+#   2. 日本語コメントの記載方法の例示
+#   3. ジョブとステップの命名規則の実例
+#   4. セキュリティベストプラクティスの適用
+#
+# 依存関係: なし（独立実行）
+# 実行時間目安: 約5分
+# リソース使用量: 低（CPU: 1コア、メモリ: 2GB）
+# チーム責任者: DevOpsエンジニア
+# ====================================================================
+
+name: 🎯 ワークフローテンプレート
+
+# トリガー設定 - 手動実行のみ
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '実行環境を選択してください'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - development
+          - testing
+      debug_mode:
+        description: 'デバッグモードを有効にする'
+        required: false
+        default: false
+        type: boolean
+
+# 権限設定 - 最小権限の原則
+permissions:
+  contents: read              # リポジトリコンテンツの読み取り
+  pull-requests: write        # PRコメントの書き込み
+  checks: write              # チェック結果の書き込み
+  security-events: read      # セキュリティイベントの読み取り
+
+# 同時実行制御
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# 環境変数の標準定義
+env:
+  NODE_VERSION: '18'              # Node.jsバージョン統一
+  CACHE_VERSION: 'v2'             # キャッシュバージョン管理
+  TIMEOUT_MINUTES: 15             # デフォルトタイムアウト
+  RETRY_COUNT: 3                  # リトライ回数
+  DEBUG_MODE: ${{ inputs.debug_mode || 'false' }}
+
+jobs:
+  # ========================================
+  # フェーズ1: 準備・検証ジョブ
+  # ========================================
+  setup-validation:
+    name: 🔧 環境設定・事前検証
+    # 🎯 目的: 実行環境の準備と基本的な検証を行う
+    # ⏱️ 推定時間: 2-3分
+    # 🔧 主要処理: 依存関係インストール、環境変数検証、基本チェック
+    # 📋 成果物: セットアップ完了フラグ、環境情報レポート
+    # ⚠️ 注意点: このジョブが失敗すると後続ジョブは実行されない
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(env.TIMEOUT_MINUTES) }}
+    
+    # アウトプット定義
+    outputs:
+      setup-success: ${{ steps.validation.outputs.success }}
+      environment-info: ${{ steps.env-info.outputs.environment }}
+    
+    steps:
+      - name: リポジトリコードの取得
+        # 💡 処理内容: ワークフロー実行に必要なコードベースを取得
+        # 🔗 依存: なし（初期ステップ）
+        # 📊 メトリクス: 取得時間は通常10-30秒
+        # 🚨 エラーハンドリング: リポジトリアクセス権限エラーの場合は即座に失敗
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # 浅いクローンで高速化
+
+      - name: Node.js実行環境のセットアップ
+        # 💡 処理内容: Node.js環境をセットアップし、npmキャッシュを活用
+        # 🔗 依存: checkout完了後
+        # 📊 メトリクス: キャッシュヒット時は30-60秒の短縮効果
+        # 🚨 エラーハンドリング: Node.jsバージョン不整合時は自動修正
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: 依存関係のインストール
+        # 💡 処理内容: package.jsonに基づいてnpm依存関係をインストール
+        # 🔗 依存: Node.jsセットアップ完了後
+        # 📊 メトリクス: 通常1-2分、キャッシュヒット時は30秒以内
+        # 🚨 エラーハンドリング: インストール失敗時は詳細エラーログを出力
+        run: |
+          # インストール開始ログ
+          echo "📦 依存関係のインストールを開始します..."
+          
+          # npm ciを使用してクリーンインストール実行
+          npm ci --prefer-offline || {
+            echo "❌ 依存関係のインストールに失敗しました"
+            echo "📝 詳細ログ："
+            npm ci --verbose
+            exit 1
+          }
+          
+          echo "✅ 依存関係のインストールが完了しました"
+
+      - name: 環境変数・設定の検証
+        # 💡 処理内容: 必要な環境変数と設定の存在を確認
+        # 🔗 依存: 依存関係インストール完了後
+        # 📊 メトリクス: 検証項目数に応じて10-30秒
+        # 🚨 エラーハンドリング: 必須設定不足時は具体的な修正方法を提示
+        id: validation
+        run: |
+          echo "🔍 環境設定の検証を開始します..."
+          
+          # 必須ファイルの存在確認
+          REQUIRED_FILES=(
+            "package.json"
+            "package-lock.json"
+            ".github/workflows"
+          )
+          
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [[ -f "$file" ]] || [[ -d "$file" ]]; then
+              echo "✅ $file が存在します"
+            else
+              echo "❌ 必須ファイル $file が見つかりません"
+              exit 1
+            fi
+          done
+          
+          # Node.jsバージョン確認
+          NODE_ACTUAL=$(node --version | sed 's/v//')
+          echo "📊 Node.js バージョン: $NODE_ACTUAL"
+          
+          # デバッグモード設定の確認
+          if [[ "${{ env.DEBUG_MODE }}" == "true" ]]; then
+            echo "🐛 デバッグモードが有効になっています"
+          fi
+          
+          # 成功フラグを設定
+          echo "success=true" >> $GITHUB_OUTPUT
+          echo "✅ すべての環境設定検証が完了しました"
+
+      - name: 実行環境情報の取得
+        # 💡 処理内容: 実行環境の詳細情報を収集・レポート
+        # 🔗 依存: 環境検証完了後
+        # 📊 メトリクス: 情報取得は10秒以内
+        # 🚨 エラーハンドリング: 情報取得失敗は警告のみ（継続実行）
+        id: env-info
+        run: |
+          echo "📋 実行環境情報を収集します..."
+          
+          # システム情報の取得
+          ENV_INFO=$(cat <<EOF
+          {
+            "os": "${{ runner.os }}",
+            "runner": "${{ runner.name }}",
+            "workflow": "${{ github.workflow }}",
+            "ref": "${{ github.ref }}",
+            "sha": "${{ github.sha }}",
+            "node_version": "$(node --version)",
+            "npm_version": "$(npm --version)",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+          )
+          
+          echo "environment=$ENV_INFO" >> $GITHUB_OUTPUT
+          echo "📊 環境情報："
+          echo "$ENV_INFO" | jq '.' || echo "$ENV_INFO"
+
+  # ========================================
+  # フェーズ2: メイン処理ジョブ
+  # ========================================
+  main-process:
+    name: ⚙️ メイン処理実行
+    # 🎯 目的: ワークフローの中核となる処理を実行
+    # ⏱️ 推定時間: 3-5分
+    # 🔧 主要処理: サンプル処理、テスト実行、結果生成
+    # 📋 成果物: 処理結果レポート、メトリクス情報
+    # ⚠️ 注意点: setup-validationジョブの成功が前提条件
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(env.TIMEOUT_MINUTES) }}
+    needs: setup-validation
+    if: needs.setup-validation.outputs.setup-success == 'true'
+    
+    # 実行戦略の定義（マトリックス実行の例）
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: ['unit', 'integration']
+        include:
+          - test-type: 'unit'
+            description: '単体テスト'
+            timeout: 10
+          - test-type: 'integration'
+            description: '統合テスト'
+            timeout: 15
+    
+    steps:
+      - name: ワークスペースの準備
+        # 💡 処理内容: 前ジョブの成果物を取得して実行環境を準備
+        # 🔗 依存: setup-validationジョブ完了
+        # 📊 メトリクス: 準備時間30-60秒
+        # 🚨 エラーハンドリング: 成果物取得失敗時は即座にリトライ
+        uses: actions/checkout@v4
+
+      - name: キャッシュされた環境の復元
+        # 💡 処理内容: 前ジョブで作成したキャッシュを復元して高速化
+        # 🔗 依存: ワークスペース準備完了後
+        # 📊 メトリクス: キャッシュヒット率90%以上を目標
+        # 🚨 エラーハンドリング: キャッシュ失敗時はセットアップを再実行
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: ${{ matrix.description }}の実行
+        # 💡 処理内容: マトリックス戦略に基づいた各種テストの実行
+        # 🔗 依存: 環境復元完了後
+        # 📊 メトリクス: テストタイプごとの実行時間とカバレッジ
+        # 🚨 エラーハンドリング: テスト失敗時は詳細ログと修正提案を出力
+        timeout-minutes: ${{ matrix.timeout }}
+        run: |
+          echo "🧪 ${{ matrix.description }}を実行します..."
+          
+          # テストタイプに応じた処理分岐
+          case "${{ matrix.test-type }}" in
+            "unit")
+              echo "📊 単体テストを実行中..."
+              # npm run test:unit || echo "⚠️ 単体テストでエラーが発生しました"
+              echo "✅ 単体テスト完了（サンプル）"
+              ;;
+            "integration")
+              echo "🔗 統合テストを実行中..."
+              # npm run test:integration || echo "⚠️ 統合テストでエラーが発生しました"
+              echo "✅ 統合テスト完了（サンプル）"
+              ;;
+            *)
+              echo "❌ 不明なテストタイプ: ${{ matrix.test-type }}"
+              exit 1
+              ;;
+          esac
+
+      - name: 処理結果の保存
+        # 💡 処理内容: テスト結果とレポートをアーティファクトとして保存
+        # 🔗 依存: メイン処理完了後
+        # 📊 メトリクス: アップロード時間10-30秒
+        # 🚨 エラーハンドリング: 保存失敗は警告のみ（次ジョブには影響しない）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-type }}
+          path: |
+            test-results/
+            coverage/
+            *.log
+          retention-days: 7
+
+  # ========================================
+  # フェーズ3: 結果通知・レポートジョブ
+  # ========================================
+  notification-report:
+    name: 📢 結果通知・レポート生成
+    # 🎯 目的: ワークフロー実行結果の通知とレポート生成
+    # ⏱️ 推定時間: 1-2分
+    # 🔧 主要処理: 結果集約、通知送信、レポート生成
+    # 📋 成果物: 実行サマリー、メトリクス集計
+    # ⚠️ 注意点: 前ジョブの成功・失敗に関わらず実行される
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [setup-validation, main-process]
+    if: always()  # 前ジョブの結果に関わらず実行
+    
+    steps:
+      - name: ワークフロー実行結果の集約
+        # 💡 処理内容: 各ジョブの実行結果を集約して総合評価を生成
+        # 🔗 依存: なし（独立処理）
+        # 📊 メトリクス: 集約処理は10秒以内
+        # 🚨 エラーハンドリング: 集約失敗時もレポートは生成
+        id: result-summary
+        run: |
+          echo "📊 ワークフロー実行結果を集約します..."
+          
+          # 各ジョブの結果を確認
+          SETUP_STATUS="${{ needs.setup-validation.result }}"
+          MAIN_STATUS="${{ needs.main-process.result }}"
+          
+          echo "🔧 環境設定ジョブ: $SETUP_STATUS"
+          echo "⚙️ メイン処理ジョブ: $MAIN_STATUS"
+          
+          # 総合ステータスの決定
+          if [[ "$SETUP_STATUS" == "success" && "$MAIN_STATUS" == "success" ]]; then
+            OVERALL_STATUS="✅ 成功"
+            STATUS_EMOJI="✅"
+            STATUS_COLOR="good"
+          elif [[ "$SETUP_STATUS" == "failure" || "$MAIN_STATUS" == "failure" ]]; then
+            OVERALL_STATUS="❌ 失敗"
+            STATUS_EMOJI="❌"
+            STATUS_COLOR="danger"
+          else
+            OVERALL_STATUS="⚠️ 部分的成功"
+            STATUS_EMOJI="⚠️"
+            STATUS_COLOR="warning"
+          fi
+          
+          echo "overall-status=$OVERALL_STATUS" >> $GITHUB_OUTPUT
+          echo "status-emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
+          echo "status-color=$STATUS_COLOR" >> $GITHUB_OUTPUT
+          
+          echo "📋 総合ステータス: $OVERALL_STATUS"
+
+      - name: 実行メトリクスの計算
+        # 💡 処理内容: ワークフロー実行時間やリソース使用量を計算
+        # 🔗 依存: 結果集約完了後
+        # 📊 メトリクス: 計算処理は5秒以内
+        # 🚨 エラーハンドリング: 計算エラーは警告レベル
+        id: metrics
+        run: |
+          echo "📈 実行メトリクスを計算します..."
+          
+          # 実行時間の計算（簡易版）
+          START_TIME="${{ github.event.head_commit.timestamp }}"
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "⏰ ワークフロー開始時刻: $START_TIME"
+          echo "⏰ 現在時刻: $CURRENT_TIME"
+          
+          # メトリクス情報の作成
+          METRICS_INFO="実行環境: ${{ runner.os }}, Node.js: ${{ env.NODE_VERSION }}"
+          echo "metrics=$METRICS_INFO" >> $GITHUB_OUTPUT
+          
+          echo "✅ メトリクス計算完了"
+
+      - name: ワークフロー完了通知
+        # 💡 処理内容: 実行結果をGitHubコメントまたは外部システムに通知
+        # 🔗 依存: メトリクス計算完了後
+        # 📊 メトリクス: 通知送信は5-10秒
+        # 🚨 エラーハンドリング: 通知失敗は警告のみ（ワークフロー成功に影響なし）
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.result-summary.outputs.overall-status }}';
+            const emoji = '${{ steps.result-summary.outputs.status-emoji }}';
+            const metrics = '${{ steps.metrics.outputs.metrics }}';
+            
+            const body = `## ${emoji} ワークフローテンプレート実行結果
+            
+            **ステータス:** ${status}
+            **実行環境:** ${metrics}
+            **実行時刻:** ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+            
+            ### 📊 実行詳細
+            - 🔧 環境設定: ${{ needs.setup-validation.result }}
+            - ⚙️ メイン処理: ${{ needs.main-process.result }}
+            
+            ### 🎯 このテンプレートについて
+            このワークフローは日本語チーム向けの標準テンプレートです。
+            新しいワークフロー作成時の参考としてご利用ください。
+            
+            ---
+            🤖 このコメントは自動生成されました`;
+            
+            // PRにコメントを投稿
+            if (context.issue.number) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+
+# ====================================================================
+# テンプレート使用時の注意事項
+# ====================================================================
+#
+# 1. ワークフロー名の変更
+#    - name: を適切な日本語名に変更してください
+#    - 絵文字は該当カテゴリに応じて選択してください
+#
+# 2. トリガーの設定
+#    - on: セクションを実際の要件に合わせて調整してください
+#    - 不要なトリガーは削除し、必要なものを追加してください
+#
+# 3. 権限の調整
+#    - permissions: セクションで最小権限の原則を守ってください
+#    - 不要な権限は削除し、必要な権限のみを付与してください
+#
+# 4. 環境変数の更新
+#    - env: セクションをプロジェクト固有の値に更新してください
+#    - シークレット情報は必ず ${{ secrets.XXX }} 形式で参照してください
+#
+# 5. ジョブの実装
+#    - サンプルジョブを実際の処理内容に置き換えてください
+#    - 各ジョブの依存関係（needs:）を適切に設定してください
+#
+# 6. エラーハンドリング
+#    - 各ステップで適切なエラーハンドリングを実装してください
+#    - 失敗時のリトライやフォールバック処理を検討してください
+#
+# 7. セキュリティの考慮
+#    - 外部アクションは信頼できるものを使用してください
+#    - バージョンは commit SHA またはタグで固定してください
+#
+# ====================================================================

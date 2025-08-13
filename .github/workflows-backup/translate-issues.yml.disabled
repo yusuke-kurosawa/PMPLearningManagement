@@ -1,0 +1,387 @@
+name: 🌐 Translate Issues to Japanese
+
+on:
+  # 手動実行のみ（APIキーが設定されるまで無効化）
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to translate'
+        required: false
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  translate-issue:
+    name: 📝 Translate Issue to Japanese
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issues' || 
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/translate'))
+    
+    steps:
+      - name: 🔍 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: |
+          npm install @google-cloud/translate openai axios
+
+      - name: 🤖 Translate Issue
+        id: translate
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Load translation guide
+            const guideFile = path.join(process.env.GITHUB_WORKSPACE, 'docs/ISSUE_TRANSLATION_GUIDE.md');
+            let translationGuide = '';
+            if (fs.existsSync(guideFile)) {
+              translationGuide = fs.readFileSync(guideFile, 'utf8');
+            }
+            
+            // Get issue data
+            let issue;
+            if (context.eventName === 'workflow_dispatch') {
+              const issueNumber = context.payload.inputs?.issue_number || context.issue.number;
+              issue = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(issueNumber)
+              });
+              issue = issue.data;
+            } else {
+              issue = context.payload.issue;
+            }
+            
+            // Check if issue is closed
+            if (issue.state === 'closed') {
+              console.log('Issue is closed - skipping translation');
+              return;
+            }
+            
+            // Check if already translated (has Japanese label)
+            const hasJapaneseLabel = issue.labels?.some(label => 
+              label.name.includes('日本語') || label.name.includes('翻訳済')
+            );
+            
+            if (hasJapaneseLabel) {
+              console.log('Issue already translated');
+              return;
+            }
+            
+            // Prepare translation prompt
+            const translatePrompt = `
+            Translate the following GitHub issue from English to Japanese.
+            Follow these guidelines:
+            1. Use natural Japanese expressions
+            2. Keep technical terms in English when appropriate
+            3. Maintain the original formatting
+            4. Use です・ます調 (polite form)
+            
+            Title: ${issue.title}
+            
+            Body:
+            ${issue.body || ''}
+            
+            Please provide:
+            1. Translated title (format: [種別] 日本語タイトル)
+            2. Translated body (maintain markdown formatting)
+            `;
+            
+            try {
+              // Try Claude AI translation first, fallback to simple mapping
+              let useClaudeTranslation = false;
+              let translatedTitle = issue.title;
+              let translatedBody = issue.body || '';
+              
+              // Check if Claude API is available
+              const claudeApiKey = process.env.ANTHROPIC_API_KEY;
+              if (claudeApiKey) {
+                try {
+                  console.log('🤖 Using Claude AI for high-quality translation');
+                  
+                  // Create Claude API request for translation
+                  const claudePayload = {
+                    model: "claude-3-haiku-20240307",
+                    max_tokens: 2048,
+                    messages: [{
+                      role: "user",
+                      content: "あなたは技術文書の専門翻訳者です。以下のGitHub Issueを英語から日本語に翻訳してください。\\n\\n## 翻訳ガイドライン\\n1. 自然で読みやすい日本語を使用\\n2. 技術用語は適切に日本語化（例：Bug→バグ、Feature→機能）\\n3. Markdownフォーマットを維持\\n4. です・ます調の丁寧語を使用\\n5. GitHub Issue特有の表現を適切に翻訳\\n\\n## 翻訳対象\\n\\n### タイトル\\n" + issue.title + "\\n\\n### 本文\\n" + (issue.body || "本文なし") + "\\n\\n## 出力フォーマット\\n以下のJSONフォーマットで返答してください：\\n```json\\n{\\n  \\"title\\": \\"翻訳されたタイトル\\",\\n  \\"body\\": \\"翻訳された本文（Markdownフォーマット維持）\\"\\n}\\n```\\n\\n翻訳品質を最優先に、PMPLearningManagementプロジェクトのコンテキストを考慮して翻訳してください。"
+                    }]
+                  };
+
+                  // Call Claude API using Node.js https module
+                  const https = require('https');
+                  const response = await new Promise((resolve, reject) => {
+                    const postData = JSON.stringify(claudePayload);
+                    const options = {
+                      hostname: 'api.anthropic.com',
+                      port: 443,
+                      path: '/v1/messages',
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': claudeApiKey,
+                        'anthropic-version': '2023-06-01',
+                        'Content-Length': Buffer.byteLength(postData)
+                      }
+                    };
+
+                    const req = https.request(options, (res) => {
+                      let data = '';
+                      res.on('data', (chunk) => data += chunk);
+                      res.on('end', () => {
+                        resolve({ ok: res.statusCode === 200, json: () => Promise.resolve(JSON.parse(data)) });
+                      });
+                    });
+
+                    req.on('error', reject);
+                    req.write(postData);
+                    req.end();
+                  });
+
+                  if (response.ok) {
+                    const claudeData = await response.json();
+                    const claudeResponse = claudeData.content[0].text;
+                    
+                    // Extract JSON from Claude response
+                    const jsonMatch = claudeResponse.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+                    if (jsonMatch) {
+                      const translationResult = JSON.parse(jsonMatch[1]);
+                      translatedTitle = translationResult.title || issue.title;
+                      translatedBody = translationResult.body || issue.body;
+                      useClaudeTranslation = true;
+                      console.log('✅ Claude AI translation successful');
+                    } else {
+                      console.log('⚠️ Claude response format unexpected, falling back to simple translation');
+                    }
+                  } else {
+                    console.log('⚠️ Claude API call failed, falling back to simple translation');
+                  }
+                  
+                } catch (claudeError) {
+                  console.log('⚠️ Claude translation error:', claudeError.message);
+                  console.log('Falling back to simple pattern-based translation');
+                }
+              }
+              
+              // Fallback: Simple pattern-based translation
+              if (!useClaudeTranslation) {
+                console.log('🔄 Using fallback pattern-based translation');
+                const titleMappings = {
+                  'Bug': 'バグ',
+                  'Feature': '機能', 
+                  'Enhancement': '機能強化',
+                  'Security': 'セキュリティ',
+                  'Performance': 'パフォーマンス',
+                  'UI': 'UI',
+                  'Backend': 'バックエンド',
+                  'Test': 'テスト',
+                  'Documentation': 'ドキュメント'
+                };
+              
+                // Simple pattern-based title translation
+                let titlePrefix = '';
+                for (const [eng, jpn] of Object.entries(titleMappings)) {
+                  if (issue.title.toLowerCase().includes(eng.toLowerCase())) {
+                    titlePrefix = `[${jpn}] `;
+                    break;
+                  }
+                }
+                translatedTitle = titlePrefix + issue.title;
+                translatedBody = issue.body || '';
+              }
+              
+              // Create translation comment with appropriate method indicator
+              const translationMethod = useClaudeTranslation ? 
+                '🤖 **Claude AI 高品質翻訳**' : 
+                '🔄 **パターンベース翻訳**';
+              
+              const translationComment = `
+## 🌐 日本語翻訳 / Japanese Translation
+
+${translationMethod}
+
+### タイトル
+${translatedTitle}
+
+### 説明
+${translatedBody ? translatedBody : '説明なし'}
+
+---
+${useClaudeTranslation ? 
+  '*この翻訳はClaude AIにより生成されました。高品質な翻訳を心がけています。*' :
+  '*この翻訳は自動パターンマッチングにより生成されました。必要に応じて修正してください。*'
+}
+*Translation generated on: ${new Date().toISOString()}*
+              `;
+              
+              // Add comment with translation
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: translationComment
+              });
+              
+              // Add Japanese label
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['🌐 日本語対応']
+              });
+              
+            } catch (error) {
+              console.error('Translation error:', error);
+              core.setFailed(`Translation failed: ${error.message}`);
+            }
+
+      - name: 📊 Translation Summary
+        if: success()
+        run: |
+          echo "✅ Issue translation completed successfully!"
+          echo "📝 Issue #${{ github.event.issue.number }} has been translated to Japanese"
+
+  batch-translate:
+    name: 🔄 Batch Translate All Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number == ''
+    
+    steps:
+      - name: 🔍 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🗂️ Get all open issues
+        id: get-issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const untranslatedIssues = issues.filter(issue => 
+              !issue.labels.some(label => 
+                label.name.includes('日本語') || label.name.includes('翻訳済')
+              )
+            );
+            
+            console.log(`Found ${untranslatedIssues.length} untranslated issues`);
+            return untranslatedIssues.map(i => i.number);
+
+      - name: 📝 Translate each issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumbers = ${{ steps.get-issues.outputs.result }};
+            
+            for (const number of issueNumbers) {
+              console.log(`Translating issue #${number}...`);
+              
+              // Trigger translation workflow for each issue
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'translate-issues.yml',
+                ref: 'main',
+                inputs: {
+                  issue_number: number.toString()
+                }
+              });
+              
+              // Add delay to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+  create-translation-report:
+    name: 📊 Create Translation Report
+    runs-on: ubuntu-latest
+    needs: [translate-issue, batch-translate]
+    if: always()
+    
+    steps:
+      - name: 📈 Generate Translation Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100
+            });
+            
+            const translated = issues.filter(i => 
+              i.labels.some(l => l.name.includes('日本語'))
+            ).length;
+            
+            const total = issues.length;
+            const percentage = ((translated / total) * 100).toFixed(2);
+            
+            const report = `
+# 📊 Issue Translation Report
+            
+## Summary
+- **Total Issues**: ${total}
+- **Translated**: ${translated}
+- **Remaining**: ${total - translated}
+- **Progress**: ${percentage}%
+            
+## Status by Category
+- 🐛 Bugs: ${issues.filter(i => i.labels.some(l => l.name.includes('bug'))).length}
+- ✨ Features: ${issues.filter(i => i.labels.some(l => l.name.includes('feature'))).length}
+- 🔒 Security: ${issues.filter(i => i.labels.some(l => l.name.includes('security'))).length}
+- ⚡ Performance: ${issues.filter(i => i.labels.some(l => l.name.includes('performance'))).length}
+            
+## Recent Translations
+${issues.slice(0, 5).map(i => `- #${i.number}: ${i.title}`).join('\n')}
+            
+---
+*Report generated on ${new Date().toISOString()}*
+            `;
+            
+            // Create or update translation report issue
+            const reportIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'translation-report',
+              state: 'open'
+            });
+            
+            if (reportIssues.data.length > 0) {
+              // Update existing report
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: reportIssues.data[0].number,
+                body: report
+              });
+            } else {
+              // Create new report
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '📊 Issue Translation Progress Report',
+                body: report,
+                labels: ['translation-report', '📊 レポート']
+              });
+            }

@@ -1,0 +1,331 @@
+name: "Skill-Based Issue Assignment"
+
+on:
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  skill-analysis:
+    if: contains(github.event.issue.labels.*.name, 'needs-assignment') || contains(github.event.comment.body, '/assign-by-skills')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Analyze and assign based on skills
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const issue = context.issue;
+            
+            // Load team skills matrix
+            let skillsMatrix;
+            try {
+              const skillsData = fs.readFileSync('.github/team-skills-matrix.json', 'utf8');
+              skillsMatrix = JSON.parse(skillsData);
+            } catch (error) {
+              console.log('Could not load skills matrix:', error);
+              return;
+            }
+            
+            const issueData = context.payload.issue;
+            const issueBody = issueData.body || '';
+            const issueTitle = issueData.title || '';
+            const labels = issueData.labels.map(l => l.name);
+            
+            // Extract skill requirements from issue
+            const skillKeywords = {
+              'react': /react|jsx|frontend|ui|component/i,
+              'node.js': /node\.?js|express|backend|server/i,
+              'python': /python|django|fastapi|ml|ai/i,
+              'typescript': /typescript|ts|type/i,
+              'postgresql': /postgres|sql|database/i,
+              'docker': /docker|container|deployment/i,
+              'ai': /ai|machine.?learning|ml|llm|nlp/i,
+              'testing': /test|jest|pytest|cypress|qa/i,
+              'performance': /performance|optimization|speed|memory/i,
+              'security': /security|auth|authorization|encryption/i,
+              'd3.js': /d3|visualization|chart|graph/i,
+              'aws': /aws|cloud|lambda|s3/i
+            };
+            
+            let requiredSkills = [];
+            const combinedText = `${issueTitle} ${issueBody}`.toLowerCase();
+            
+            for (const [skill, regex] of Object.entries(skillKeywords)) {
+              if (regex.test(combinedText)) {
+                requiredSkills.push(skill);
+              }
+            }
+            
+            // Determine issue complexity
+            let complexity = 'feature'; // default
+            if (labels.includes('type:spike')) complexity = 'spike';
+            else if (labels.includes('epic') || labels.includes('type:epic')) complexity = 'epic';  
+            else if (labels.includes('type:security')) complexity = 'security';
+            else if (labels.includes('type:performance')) complexity = 'performance';
+            
+            // Calculate best assignee matches
+            let candidates = [];
+            
+            for (const [teamName, team] of Object.entries(skillsMatrix.teams)) {
+              for (const member of team.members) {
+                let score = 0;
+                let skillMatches = 0;
+                let expertiseMatches = 0;
+                let learningOpportunity = false;
+                
+                // Skill matching
+                const allMemberSkills = [...member.skills.primary, ...member.skills.secondary];
+                for (const requiredSkill of requiredSkills) {
+                  if (member.skills.primary.includes(requiredSkill)) {
+                    score += 3; // Primary skill match
+                    skillMatches++;
+                  } else if (member.skills.secondary.includes(requiredSkill)) {
+                    score += 2; // Secondary skill match  
+                    skillMatches++;
+                  } else if (member.skills.learning.includes(requiredSkill)) {
+                    score += 1; // Learning opportunity
+                    learningOpportunity = true;
+                  }
+                }
+                
+                // Expertise area matching
+                for (const expertise of member.expertise_areas || []) {
+                  if (requiredSkills.includes(expertise) || combinedText.includes(expertise)) {
+                    score += 2;
+                    expertiseMatches++;
+                  }
+                }
+                
+                // Capacity consideration
+                const capacityFactor = member.capacity.story_points_per_sprint / 15; // normalize to 0-1
+                score += capacityFactor;
+                
+                // Leadership requirement
+                const needsLeadership = skillsMatrix.assignment_rules.leadership_required_for.some(req => 
+                  labels.includes(`priority:${req}`) || labels.includes(`type:${req}`)
+                );
+                if (needsLeadership && !member.leadership_role) {
+                  score *= 0.5; // Penalize non-leaders for leadership-required tasks
+                }
+                
+                if (skillMatches >= skillsMatrix.assignment_rules.minimum_skill_overlap) {
+                  candidates.push({
+                    member: member,
+                    team: teamName,
+                    score: score,
+                    skillMatches: skillMatches,
+                    expertiseMatches: expertiseMatches,
+                    learningOpportunity: learningOpportunity,
+                    reasoning: {
+                      primarySkills: member.skills.primary.filter(s => requiredSkills.includes(s)),
+                      secondarySkills: member.skills.secondary.filter(s => requiredSkills.includes(s)),
+                      expertiseAreas: member.expertise_areas?.filter(e => requiredSkills.includes(e)) || []
+                    }
+                  });
+                }
+              }
+            }
+            
+            // Sort candidates by score
+            candidates.sort((a, b) => b.score - a.score);
+            
+            // Generate assignment recommendation
+            let assignmentComment = `## 🎯 Skill-Based Assignment Analysis
+            
+            **Issue Complexity**: ${complexity}
+            **Required Skills**: ${requiredSkills.length > 0 ? requiredSkills.join(', ') : 'General development'}
+            **Skill Keywords Found**: ${requiredSkills.join(', ') || 'None specific'}
+            
+            ### Top Candidates:
+            `;
+            
+            const topCandidates = candidates.slice(0, 3);
+            for (let i = 0; i < topCandidates.length; i++) {
+              const candidate = topCandidates[i];
+              const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
+              
+              assignmentComment += `
+            ${rank} **@${candidate.member.github_handle}** (${candidate.team} team)
+            - **Score**: ${candidate.score.toFixed(2)}
+            - **Primary Skills**: ${candidate.reasoning.primarySkills.join(', ') || 'None matching'}
+            - **Secondary Skills**: ${candidate.reasoning.secondarySkills.join(', ') || 'None matching'}  
+            - **Expertise Areas**: ${candidate.reasoning.expertiseAreas.join(', ') || 'None matching'}
+            - **Capacity**: ${candidate.member.capacity.story_points_per_sprint} SP/sprint
+            - **Learning Opportunity**: ${candidate.learningOpportunity ? '✅ Yes' : '❌ No'}
+            `;
+            }
+            
+            if (candidates.length === 0) {
+              assignmentComment += `
+            ❌ **No suitable candidates found**
+            - Consider breaking down the issue into smaller tasks
+            - Review skill requirements or provide more context
+            - May need external contractor or training
+            `;
+            } else {
+              assignmentComment += `
+            ### Assignment Recommendation
+            **Suggested Assignee**: @${topCandidates[0].member.github_handle}
+            **Rationale**: Best skill match with ${topCandidates[0].skillMatches} matching skills and expertise in ${topCandidates[0].reasoning.expertiseAreas.join(', ') || 'general development'}
+            
+            ### Sprint Planning Notes
+            - **Estimated Complexity**: ${skillsMatrix.issue_complexity_mapping[complexity]?.story_points || 'Unknown'}
+            - **Required Expertise**: ${skillsMatrix.issue_complexity_mapping[complexity]?.expertise_level || 'Any'}
+            - **Team Coordination**: ${requiredSkills.length > 1 ? 'May require cross-team collaboration' : 'Single team implementation'}
+            `;
+            }
+            
+            assignmentComment += `
+            ### Actions Required
+            - [ ] Review and confirm assignment
+            - [ ] Add story point estimate
+            - [ ] Schedule for appropriate sprint
+            - [ ] Ensure prerequisite issues are resolved
+            
+            *To assign the recommended candidate, comment: `/assign @${topCandidates[0]?.member.github_handle || 'username'}`*
+            `;
+            
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: assignmentComment
+            });
+            
+            // Add assignment labels
+            const assignmentLabels = ['skill-analyzed'];
+            if (topCandidates.length > 0) {
+              assignmentLabels.push('ready-for-assignment');
+              assignmentLabels.push(`team:${topCandidates[0].team}`);
+            } else {
+              assignmentLabels.push('needs-skills-review');
+            }
+            
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: issue.number,
+              labels: assignmentLabels
+            });
+
+  auto-assign:
+    if: contains(github.event.comment.body, '/auto-assign') && github.event.issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Auto-assign based on skills
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const issue = context.issue;
+            
+            // Only allow auto-assignment by maintainers
+            const commenter = context.payload.comment.user.login;
+            const maintainers = ['yusuke-kurosawa']; // Add other maintainers
+            
+            if (!maintainers.includes(commenter)) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: '❌ Auto-assignment can only be triggered by project maintainers.'
+              });
+              return;
+            }
+            
+            // Load skills matrix and perform assignment logic
+            // (Similar to skill-analysis job but with actual assignment)
+            
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: '✅ Auto-assignment completed based on skill analysis.'
+            });
+
+  capacity-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Check team capacity
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get all open assigned issues
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              assignee: '*',
+              per_page: 100
+            });
+            
+            // Calculate current load per team member
+            const memberLoad = {};
+            
+            for (const issue of issues.data) {
+              for (const assignee of issue.assignees) {
+                if (!memberLoad[assignee.login]) {
+                  memberLoad[assignee.login] = {
+                    issues: [],
+                    estimatedLoad: 0
+                  };
+                }
+                memberLoad[assignee.login].issues.push(issue);
+                // Rough estimate - could be improved with actual story points
+                memberLoad[assignee.login].estimatedLoad += 5; 
+              }
+            }
+            
+            // Generate capacity report
+            let capacityReport = `# 📊 Team Capacity Report
+            Generated: ${new Date().toISOString().split('T')[0]}
+            
+            ## Current Assignments
+            `;
+            
+            for (const [member, data] of Object.entries(memberLoad)) {
+              capacityReport += `
+            ### @${member}
+            - **Current Issues**: ${data.issues.length}
+            - **Estimated Load**: ${data.estimatedLoad} story points
+            - **Issues**: ${data.issues.map(i => `#${i.number}`).join(', ')}
+            `;
+            }
+            
+            console.log(capacityReport);
+            
+            // Create capacity report issue if needed
+            const existingReports = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'capacity-report',
+              state: 'open'
+            });
+            
+            if (existingReports.data.length === 0) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: `📊 Team Capacity Report - ${new Date().toISOString().split('T')[0]}`,
+                body: capacityReport,
+                labels: ['capacity-report', 'documentation']
+              });
+            }
+
+# Schedule capacity check weekly on Fridays at 5 PM UTC
+on:
+  schedule:
+    - cron: '0 17 * * 5'

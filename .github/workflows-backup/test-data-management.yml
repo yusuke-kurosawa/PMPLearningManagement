@@ -1,0 +1,962 @@
+# ====================================================================
+# テストデータ管理&環境セットアップパイプライン
+# ====================================================================
+# 目的: テストデータの管理とテスト環境の自動セットアップを行い、
+#      一貫性のあるテスト実行環境を提供する
+# 
+# 実行タイミング:
+#   - main/developブランチへのプッシュ時
+#   - 毎日午前0時（テストデータリフレッシュ）
+#   - 手動実行（workflow_dispatch）
+#
+# 主な処理:
+#   1. テストデータベースのセットアップ
+#   2. モックデータの生成
+#   3. テストフィクスチャの準備
+#   4. テスト環境の検証
+#   5. データスナップショットの作成
+# ====================================================================
+
+name: 🗄️ テストデータ管理&環境セットアップ
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Test data management action'
+        required: true
+        default: 'setup'
+        type: choice
+        options:
+          - setup
+          - reset
+          - validate
+          - backup
+          - restore
+          - generate
+      environment:
+        description: 'Target environment'
+        required: false
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - testing
+          - staging
+          - all
+  schedule:
+    # Weekly test data validation on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  push:
+    branches: [main]
+    paths:
+      - 'src/data/**'
+      - 'src/test/**'
+      - 'e2e/**'
+
+permissions:
+  contents: write
+  actions: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: '18'
+  TEST_DATA_VERSION: '1.0.0'
+
+jobs:
+  # Test Data Setup and Validation
+  test-data-setup:
+    name: Test Data Setup
+    runs-on: ubuntu-latest
+    if: inputs.action == 'setup' || inputs.action == 'generate' || github.event_name == 'schedule'
+    
+    outputs:
+      data-version: ${{ steps.setup.outputs.data-version }}
+      setup-status: ${{ steps.setup.outputs.status }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          install-deps: true
+          
+      - name: Setup test data environment
+        id: setup
+        run: |
+          echo "🗂️ Setting up test data environment..."
+          
+          # Create test data directories
+          mkdir -p {src/test/fixtures,src/test/mocks,src/data/fixtures,e2e/fixtures}
+          
+          # Generate comprehensive test data
+          cat > src/test/fixtures/pmbok-processes.json << 'EOF'
+          {
+            "version": "6.0",
+            "processes": [
+              {
+                "id": "4.1",
+                "name": "Develop Project Charter",
+                "knowledgeArea": "Integration Management",
+                "processGroup": "Initiating",
+                "inputs": ["Business Case", "Benefits Management Plan"],
+                "tools": ["Expert Judgment", "Data Gathering"],
+                "outputs": ["Project Charter", "Assumption Log"]
+              },
+              {
+                "id": "4.2", 
+                "name": "Develop Project Management Plan",
+                "knowledgeArea": "Integration Management",
+                "processGroup": "Planning",
+                "inputs": ["Project Charter", "Outputs from Other Processes"],
+                "tools": ["Expert Judgment", "Data Gathering", "Meetings"],
+                "outputs": ["Project Management Plan"]
+              }
+            ]
+          }
+          EOF
+          
+          # Generate mock exam questions
+          cat > src/test/fixtures/mock-exam-questions.json << 'EOF'
+          {
+            "version": "1.0",
+            "questions": [
+              {
+                "id": "q001",
+                "type": "multiple-choice",
+                "question": "Which process group contains the processes performed to complete the work defined in the project management plan?",
+                "options": [
+                  "Initiating",
+                  "Planning", 
+                  "Executing",
+                  "Monitoring and Controlling"
+                ],
+                "correct": 2,
+                "explanation": "The Executing Process Group contains the processes performed to complete the work defined in the project management plan to satisfy the project requirements.",
+                "knowledgeArea": "Integration Management",
+                "difficulty": "easy"
+              },
+              {
+                "id": "q002",
+                "type": "multiple-choice",
+                "question": "What is the primary output of the Develop Project Charter process?",
+                "options": [
+                  "Project Management Plan",
+                  "Project Charter",
+                  "Statement of Work",
+                  "Business Case"
+                ],
+                "correct": 1,
+                "explanation": "The Project Charter is the primary output of the Develop Project Charter process.",
+                "knowledgeArea": "Integration Management", 
+                "difficulty": "easy"
+              }
+            ]
+          }
+          EOF
+          
+          # Generate user progress test data
+          cat > src/test/fixtures/user-progress.json << 'EOF'
+          {
+            "userId": "test-user-001",
+            "progress": {
+              "Integration Management": {
+                "completed": 3,
+                "total": 7,
+                "lastStudied": "2023-12-01T10:00:00Z"
+              },
+              "Scope Management": {
+                "completed": 2,
+                "total": 6,
+                "lastStudied": "2023-12-02T14:30:00Z"
+              }
+            },
+            "studyTime": 7200,
+            "examResults": [
+              {
+                "date": "2023-12-03T09:00:00Z",
+                "score": 85,
+                "totalQuestions": 20,
+                "correctAnswers": 17
+              }
+            ]
+          }
+          EOF
+          
+          # Generate glossary test data
+          cat > src/test/fixtures/glossary-terms.json << 'EOF'
+          {
+            "terms": [
+              {
+                "id": "activity",
+                "term": "Activity",
+                "definition": "A distinct, scheduled portion of work performed during the course of a project.",
+                "category": "Schedule Management",
+                "relatedTerms": ["Work Package", "Task"]
+              },
+              {
+                "id": "baseline",
+                "term": "Baseline", 
+                "definition": "The approved version of a work product that can be changed only through formal change control procedures.",
+                "category": "Integration Management",
+                "relatedTerms": ["Change Control", "Configuration Management"]
+              }
+            ]
+          }
+          EOF
+          
+          echo "data-version=${{ env.TEST_DATA_VERSION }}" >> $GITHUB_OUTPUT
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "✅ Test data setup completed"
+
+      - name: Generate E2E test fixtures
+        run: |
+          echo "🎭 Generating E2E test fixtures..."
+          
+          # Create E2E specific test data
+          cat > e2e/fixtures/navigation-tests.json << 'EOF'
+          {
+            "navigationPaths": [
+              {
+                "name": "Home to Matrix",
+                "path": "/ -> /#/matrix",
+                "expectedElements": ["#pmbok-matrix", ".process-card"]
+              },
+              {
+                "name": "Matrix to Network",
+                "path": "/#/matrix -> /#/network", 
+                "expectedElements": ["#network-graph", ".node"]
+              },
+              {
+                "name": "Glossary Search",
+                "path": "/#/glossary",
+                "expectedElements": ["#search-input", ".glossary-term"]
+              }
+            ]
+          }
+          EOF
+          
+          # Create visual regression baseline data
+          cat > e2e/fixtures/visual-baselines.json << 'EOF'
+          {
+            "baselines": [
+              {
+                "name": "home-page",
+                "viewport": {"width": 1920, "height": 1080},
+                "path": "/",
+                "threshold": 0.2
+              },
+              {
+                "name": "pmbok-matrix",
+                "viewport": {"width": 1920, "height": 1080},
+                "path": "/#/matrix",
+                "threshold": 0.1
+              },
+              {
+                "name": "mobile-home",
+                "viewport": {"width": 375, "height": 667},
+                "path": "/",
+                "threshold": 0.3
+              }
+            ]
+          }
+          EOF
+          
+          echo "✅ E2E test fixtures generated"
+
+      - name: Create test database seeds
+        run: |
+          echo "🌱 Creating test database seeds..."
+          
+          # Create SQL seeds for future database implementation
+          mkdir -p src/test/seeds
+          
+          cat > src/test/seeds/001_test_users.sql << 'EOF'
+          -- Test Users Seed Data
+          INSERT INTO users (id, username, email, role, created_at) VALUES 
+          ('test-user-001', 'testuser1', 'test1@example.com', 'student', NOW()),
+          ('test-user-002', 'testuser2', 'test2@example.com', 'student', NOW()),
+          ('admin-user-001', 'admin', 'admin@example.com', 'admin', NOW());
+          EOF
+          
+          cat > src/test/seeds/002_test_progress.sql << 'EOF'
+          -- Test Progress Seed Data
+          INSERT INTO user_progress (user_id, knowledge_area, completed_processes, total_processes, study_time) VALUES
+          ('test-user-001', 'Integration Management', 3, 7, 3600),
+          ('test-user-001', 'Scope Management', 2, 6, 2400),
+          ('test-user-002', 'Time Management', 4, 8, 4800);
+          EOF
+          
+          cat > src/test/seeds/003_test_exams.sql << 'EOF'
+          -- Test Exam Results Seed Data
+          INSERT INTO exam_results (id, user_id, exam_type, score, total_questions, correct_answers, completed_at) VALUES
+          ('exam-001', 'test-user-001', 'practice', 85, 20, 17, NOW() - INTERVAL '1 day'),
+          ('exam-002', 'test-user-001', 'mock', 78, 180, 140, NOW() - INTERVAL '3 days'),
+          ('exam-003', 'test-user-002', 'practice', 92, 20, 18, NOW() - INTERVAL '2 days');
+          EOF
+          
+          echo "✅ Test database seeds created"
+
+      - name: Setup test utilities
+        run: |
+          echo "🛠️ Setting up test utilities..."
+          
+          # Create test data factory
+          cat > src/test/helpers/testDataFactory.js << 'EOF'
+          // Test Data Factory
+          export class TestDataFactory {
+            static createUser(overrides = {}) {
+              return {
+                id: `user-${Date.now()}`,
+                username: `testuser-${Math.random().toString(36).substr(2, 9)}`,
+                email: `test-${Math.random().toString(36).substr(2, 5)}@example.com`,
+                role: 'student',
+                createdAt: new Date().toISOString(),
+                ...overrides
+              };
+            }
+            
+            static createProgress(userId, overrides = {}) {
+              return {
+                userId,
+                knowledgeArea: 'Integration Management',
+                completedProcesses: 3,
+                totalProcesses: 7,
+                studyTime: 3600,
+                lastStudied: new Date().toISOString(),
+                ...overrides
+              };
+            }
+            
+            static createExamResult(userId, overrides = {}) {
+              return {
+                id: `exam-${Date.now()}`,
+                userId,
+                examType: 'practice',
+                score: 85,
+                totalQuestions: 20,
+                correctAnswers: 17,
+                completedAt: new Date().toISOString(),
+                ...overrides
+              };
+            }
+            
+            static createMockExamQuestion(overrides = {}) {
+              return {
+                id: `q${Math.random().toString(36).substr(2, 9)}`,
+                type: 'multiple-choice',
+                question: 'Sample test question?',
+                options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                correct: 0,
+                explanation: 'Sample explanation',
+                knowledgeArea: 'Integration Management',
+                difficulty: 'easy',
+                ...overrides
+              };
+            }
+            
+            static createGlossaryTerm(overrides = {}) {
+              return {
+                id: Math.random().toString(36).substr(2, 9),
+                term: 'Sample Term',
+                definition: 'Sample definition of the term.',
+                category: 'General',
+                relatedTerms: [],
+                ...overrides
+              };
+            }
+          }
+          
+          // Test Data Loader
+          export class TestDataLoader {
+            static async loadFixture(fixtureName) {
+              try {
+                const response = await fetch(`/test/fixtures/${fixtureName}.json`);
+                return await response.json();
+              } catch (error) {
+                console.warn(`Failed to load fixture: ${fixtureName}`, error);
+                return null;
+              }
+            }
+            
+            static async setupTestEnvironment() {
+              // Clear existing test data
+              localStorage.clear();
+              sessionStorage.clear();
+              
+              // Load default test data
+              const userData = await this.loadFixture('user-progress');
+              if (userData) {
+                localStorage.setItem('userProgress', JSON.stringify(userData));
+              }
+              
+              return true;
+            }
+            
+            static async teardownTestEnvironment() {
+              localStorage.clear();
+              sessionStorage.clear();
+              return true;
+            }
+          }
+          EOF
+          
+          echo "✅ Test utilities created"
+
+      - name: Create test environment configuration
+        run: |
+          echo "⚙️ Creating test environment configuration..."
+          
+          # Create test-specific configurations
+          cat > src/test/config/test.config.js << 'EOF'
+          // Test Environment Configuration
+          export const testConfig = {
+            api: {
+              baseUrl: 'http://localhost:3000',
+              timeout: 5000,
+              retries: 3
+            },
+            database: {
+              name: 'pmp_learning_test',
+              seedData: true,
+              resetBetweenTests: true
+            },
+            features: {
+              enableDebugMode: true,
+              enableTestData: true,
+              skipAnimations: true,
+              mockExternalAPIs: true
+            },
+            timeouts: {
+              short: 1000,
+              medium: 5000,
+              long: 30000
+            },
+            viewport: {
+              desktop: { width: 1920, height: 1080 },
+              tablet: { width: 768, height: 1024 },
+              mobile: { width: 375, height: 667 }
+            }
+          };
+          
+          // Environment-specific overrides
+          export const environmentConfigs = {
+            development: {
+              ...testConfig,
+              api: {
+                ...testConfig.api,
+                baseUrl: 'http://localhost:3000'
+              }
+            },
+            testing: {
+              ...testConfig,
+              api: {
+                ...testConfig.api,
+                baseUrl: 'http://localhost:4173'
+              }
+            },
+            staging: {
+              ...testConfig,
+              api: {
+                ...testConfig.api,
+                baseUrl: 'https://yusuke-kurosawa.github.io/PMPLearningManagement-staging/'
+              },
+              features: {
+                ...testConfig.features,
+                enableDebugMode: false
+              }
+            }
+          };
+          
+          export function getTestConfig(environment = 'development') {
+            return environmentConfigs[environment] || testConfig;
+          }
+          EOF
+          
+          echo "✅ Test environment configuration created"
+
+      - name: Upload test data artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data-setup-${{ env.TEST_DATA_VERSION }}
+          path: |
+            src/test/
+            e2e/fixtures/
+          retention-days: 30
+
+  # Test Data Validation
+  test-data-validation:
+    name: Test Data Validation
+    runs-on: ubuntu-latest
+    needs: [test-data-setup]
+    if: always() && (inputs.action == 'validate' || github.event_name == 'schedule')
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          install-deps: true
+          
+      - name: Download test data
+        if: needs.test-data-setup.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: test-data-setup-${{ env.TEST_DATA_VERSION }}
+          path: ./
+          
+      - name: Validate test data integrity
+        run: |
+          echo "🔍 Validating test data integrity..."
+          
+          # Create validation script
+          cat > validate-test-data.js << 'EOF'
+          import fs from 'fs';
+          import path from 'path';
+          
+          class TestDataValidator {
+            constructor() {
+              this.errors = [];
+              this.warnings = [];
+            }
+            
+            validateJSON(filePath) {
+              try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                JSON.parse(content);
+                console.log(`✅ Valid JSON: ${filePath}`);
+                return true;
+              } catch (error) {
+                this.errors.push(`❌ Invalid JSON in ${filePath}: ${error.message}`);
+                return false;
+              }
+            }
+            
+            validateFixtures() {
+              console.log('📋 Validating test fixtures...');
+              
+              const fixturesPath = 'src/test/fixtures';
+              if (!fs.existsSync(fixturesPath)) {
+                this.errors.push(`❌ Fixtures directory not found: ${fixturesPath}`);
+                return;
+              }
+              
+              const fixtures = fs.readdirSync(fixturesPath);
+              fixtures.forEach(fixture => {
+                if (fixture.endsWith('.json')) {
+                  this.validateJSON(path.join(fixturesPath, fixture));
+                }
+              });
+            }
+            
+            validateE2EFixtures() {
+              console.log('🎭 Validating E2E fixtures...');
+              
+              const e2ePath = 'e2e/fixtures';
+              if (!fs.existsSync(e2ePath)) {
+                this.warnings.push(`⚠️ E2E fixtures directory not found: ${e2ePath}`);
+                return;
+              }
+              
+              const fixtures = fs.readdirSync(e2ePath);
+              fixtures.forEach(fixture => {
+                if (fixture.endsWith('.json')) {
+                  this.validateJSON(path.join(e2ePath, fixture));
+                }
+              });
+            }
+            
+            validateSeeds() {
+              console.log('🌱 Validating database seeds...');
+              
+              const seedsPath = 'src/test/seeds';
+              if (!fs.existsSync(seedsPath)) {
+                this.warnings.push(`⚠️ Seeds directory not found: ${seedsPath}`);
+                return;
+              }
+              
+              const seeds = fs.readdirSync(seedsPath);
+              if (seeds.length === 0) {
+                this.warnings.push('⚠️ No seed files found');
+              } else {
+                console.log(`✅ Found ${seeds.length} seed files`);
+              }
+            }
+            
+            validateHelpers() {
+              console.log('🛠️ Validating test helpers...');
+              
+              const helpersPath = 'src/test/helpers';
+              if (!fs.existsSync(helpersPath)) {
+                this.errors.push(`❌ Helpers directory not found: ${helpersPath}`);
+                return;
+              }
+              
+              const helpers = fs.readdirSync(helpersPath);
+              if (!helpers.includes('testDataFactory.js')) {
+                this.errors.push('❌ testDataFactory.js not found');
+              } else {
+                console.log('✅ Test data factory found');
+              }
+            }
+            
+            generateReport() {
+              const report = {
+                timestamp: new Date().toISOString(),
+                status: this.errors.length === 0 ? 'valid' : 'invalid',
+                errors: this.errors,
+                warnings: this.warnings,
+                summary: {
+                  totalErrors: this.errors.length,
+                  totalWarnings: this.warnings.length
+                }
+              };
+              
+              fs.writeFileSync('test-data-validation-report.json', JSON.stringify(report, null, 2));
+              
+              console.log('\n📊 Validation Summary:');
+              console.log(`Errors: ${this.errors.length}`);
+              console.log(`Warnings: ${this.warnings.length}`);
+              
+              if (this.errors.length > 0) {
+                console.log('\n❌ Errors found:');
+                this.errors.forEach(error => console.log(`  ${error}`));
+              }
+              
+              if (this.warnings.length > 0) {
+                console.log('\n⚠️ Warnings:');
+                this.warnings.forEach(warning => console.log(`  ${warning}`));
+              }
+              
+              return this.errors.length === 0;
+            }
+            
+            run() {
+              console.log('🔍 Starting test data validation...');
+              
+              this.validateFixtures();
+              this.validateE2EFixtures();
+              this.validateSeeds();
+              this.validateHelpers();
+              
+              return this.generateReport();
+            }
+          }
+          
+          const validator = new TestDataValidator();
+          const isValid = validator.run();
+          
+          process.exit(isValid ? 0 : 1);
+          EOF
+          
+          # Run validation
+          node validate-test-data.js
+          
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data-validation-report
+          path: test-data-validation-report.json
+          retention-days: 30
+
+  # Automated Environment Setup
+  automated-environment-setup:
+    name: Automated Environment Setup
+    runs-on: ${{ matrix.os }}
+    needs: [test-data-setup]
+    if: inputs.action == 'setup' || inputs.environment == 'all'
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [16, 18, 20]
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup automated environment
+        run: |
+          echo "🤖 Setting up automated environment on ${{ matrix.os }} with Node ${{ matrix.node-version }}"
+          
+          # Create platform-specific setup script
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            SCRIPT_EXT=".bat"
+            SHELL_CMD="cmd /c"
+          else
+            SCRIPT_EXT=".sh"
+            SHELL_CMD="bash"
+          fi
+          
+          cat > "setup-dev-environment${SCRIPT_EXT}" << 'EOF'
+          #!/bin/bash
+          # Automated Development Environment Setup Script
+          
+          echo "🚀 PMP Learning Management - Development Environment Setup"
+          echo "=========================================================="
+          
+          # Check prerequisites
+          echo "🔍 Checking prerequisites..."
+          
+          if ! command -v node &> /dev/null; then
+              echo "❌ Node.js not found. Please install Node.js 18+"
+              exit 1
+          fi
+          
+          if ! command -v npm &> /dev/null; then
+              echo "❌ npm not found. Please install npm"
+              exit 1
+          fi
+          
+          if ! command -v git &> /dev/null; then
+              echo "❌ Git not found. Please install Git"
+              exit 1
+          fi
+          
+          echo "✅ All prerequisites found"
+          
+          # Install dependencies
+          echo "📦 Installing dependencies..."
+          npm ci
+          
+          # Run initial build
+          echo "🔨 Running initial build..."
+          npm run build
+          
+          # Run tests to verify setup
+          echo "🧪 Running tests to verify setup..."
+          npm run test:run
+          
+          # Create local development config
+          echo "⚙️ Creating local development configuration..."
+          cat > .env.local << 'ENVEOF'
+          # Local Development Configuration
+          NODE_ENV=development
+          VITE_APP_ENVIRONMENT=development
+          VITE_APP_DEBUG=true
+          VITE_APP_TEST_DATA=true
+          ENVEOF
+          
+          echo "✅ Development environment setup complete!"
+          echo ""
+          echo "🎯 Quick commands:"
+          echo "  npm run dev     - Start development server"
+          echo "  npm run test    - Run tests"
+          echo "  npm run build   - Build for production"
+          echo "  npm run lint    - Check code quality"
+          echo ""
+          echo "🌐 Development server will be available at:"
+          echo "  http://localhost:3000"
+          EOF
+          
+          # Make script executable on Unix systems
+          if [ "${{ runner.os }}" != "Windows" ]; then
+            chmod +x "setup-dev-environment${SCRIPT_EXT}"
+          fi
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: Test automated setup script
+        run: |
+          echo "🧪 Testing automated setup script..."
+          
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cmd /c setup-dev-environment.bat
+          else
+            bash setup-dev-environment.sh
+          fi
+          
+      - name: Verify environment setup
+        run: |
+          echo "✅ Verifying environment setup..."
+          
+          # Check if key files exist
+          FILES=(".env.local" "node_modules" "dist")
+          for file in "${FILES[@]}"; do
+            if [ -e "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ $file missing"
+            fi
+          done
+          
+          # Test key commands
+          echo "🧪 Testing key commands..."
+          npm run lint > /dev/null 2>&1 && echo "✅ Lint command works" || echo "❌ Lint command failed"
+          npm run typecheck > /dev/null 2>&1 && echo "✅ TypeCheck command works" || echo "❌ TypeCheck command failed"
+          
+      - name: Upload setup scripts
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-scripts-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: setup-dev-environment*
+          retention-days: 30
+
+  # Test Data Backup and Restore
+  test-data-backup:
+    name: Test Data Backup & Restore
+    runs-on: ubuntu-latest
+    if: inputs.action == 'backup' || inputs.action == 'restore' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Create test data backup
+        if: inputs.action == 'backup' || github.event_name == 'schedule'
+        run: |
+          echo "💾 Creating test data backup..."
+          
+          # Create backup directory
+          mkdir -p backups/$(date +%Y%m%d)
+          
+          # Backup test fixtures
+          if [ -d "src/test/fixtures" ]; then
+            cp -r src/test/fixtures backups/$(date +%Y%m%d)/
+          fi
+          
+          # Backup E2E fixtures
+          if [ -d "e2e/fixtures" ]; then
+            cp -r e2e/fixtures backups/$(date +%Y%m%d)/e2e-fixtures
+          fi
+          
+          # Create backup manifest
+          cat > backups/$(date +%Y%m%d)/manifest.json << EOF
+          {
+            "backupDate": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "version": "${{ env.TEST_DATA_VERSION }}",
+            "commit": "${{ github.sha }}",
+            "contents": [
+              "test-fixtures",
+              "e2e-fixtures"
+            ]
+          }
+          EOF
+          
+          # Create archive
+          cd backups
+          tar -czf "test-data-backup-$(date +%Y%m%d).tar.gz" $(date +%Y%m%d)/
+          cd ..
+          
+          echo "✅ Test data backup created"
+          
+      - name: Upload backup
+        if: inputs.action == 'backup' || github.event_name == 'schedule'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data-backup-$(date +%Y%m%d)
+          path: backups/test-data-backup-*.tar.gz
+          retention-days: 90
+
+  # Generate comprehensive test data report
+  test-data-summary:
+    name: Test Data Management Summary
+    runs-on: ubuntu-latest
+    needs: [test-data-setup, test-data-validation, automated-environment-setup]
+    if: always()
+    
+    steps:
+      - name: Generate summary report
+        run: |
+          echo "📊 Generating test data management summary..."
+          
+          cat > test-data-management-report.md << EOF
+          # Test Data Management Report
+          
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Action:** ${{ inputs.action || 'scheduled' }}
+          **Environment:** ${{ inputs.environment || 'all' }}
+          **Data Version:** ${{ env.TEST_DATA_VERSION }}
+          
+          ## 📋 Summary
+          
+          | Component | Status |
+          |-----------|--------|
+          | Test Data Setup | ${{ needs.test-data-setup.result == 'success' && '✅ Success' || '❌ Failed' }} |
+          | Data Validation | ${{ needs.test-data-validation.result == 'success' && '✅ Success' || needs.test-data-validation.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+          | Environment Setup | ${{ needs.automated-environment-setup.result == 'success' && '✅ Success' || needs.automated-environment-setup.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+          
+          ## 🗂️ Test Data Components
+          
+          ### Generated Test Fixtures
+          - ✅ PMBOK process data
+          - ✅ Mock exam questions
+          - ✅ User progress data
+          - ✅ Glossary terms
+          - ✅ E2E test scenarios
+          
+          ### Test Utilities
+          - ✅ Test data factory
+          - ✅ Data loader utilities
+          - ✅ Environment configuration
+          - ✅ Database seeds
+          
+          ### Automated Setup Scripts
+          - ✅ Cross-platform setup scripts
+          - ✅ Environment verification
+          - ✅ Dependency validation
+          
+          ## 🎯 Usage Instructions
+          
+          ### Manual Setup
+          \`\`\`bash
+          # Run setup script
+          ./setup-dev-environment.sh
+          
+          # Start development
+          npm run dev
+          \`\`\`
+          
+          ### Test Data Operations
+          \`\`\`bash
+          # Reset test data
+          npm run test:data:reset
+          
+          # Validate test data
+          npm run test:data:validate
+          
+          # Generate new test data
+          npm run test:data:generate
+          \`\`\`
+          
+          ## 📊 Next Steps
+          
+          ${{ needs.test-data-setup.result != 'success' && '- ❗ Fix test data setup issues' || '' }}
+          ${{ needs.test-data-validation.result == 'failure' && '- ❗ Address data validation errors' || '' }}
+          - 🔄 Set up automated test data refresh
+          - 📈 Implement test data versioning
+          - 🔧 Add more comprehensive test scenarios
+          
+          ---
+          *Report generated by Test Data Management workflow*
+          EOF
+          
+      - name: Upload summary report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data-management-report
+          path: test-data-management-report.md
+          retention-days: 90
+
+      - name: Create step summary
+        run: |
+          echo "## 🗂️ Test Data Management Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ inputs.action || 'scheduled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Setup | ${{ needs.test-data-setup.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Validation | ${{ needs.test-data-validation.result == 'success' && '✅' || needs.test-data-validation.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ needs.automated-environment-setup.result == 'success' && '✅' || needs.automated-environment-setup.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY

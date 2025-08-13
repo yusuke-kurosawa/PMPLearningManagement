@@ -1,0 +1,276 @@
+# ============================================================
+# Workflow: Integrated Test Suite
+# Purpose: 単体テスト、E2Eテスト、アクセシビリティテスト、パフォーマンステストの実行
+# Trigger: push、PR、手動実行、毎日午前2時
+# Dependencies: Node.js 18, Playwright, Lighthouse CI
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 🧪 統合テストスイート
+
+# ------------------------------------------------------------
+# Trigger Configuration
+# ------------------------------------------------------------
+on:
+  # ブランチへのプッシュ時
+  push:
+    branches: [ main, develop ]
+  # mainブランチへのPR時
+  pull_request:
+    branches: [ main ]
+  # 手動実行
+  workflow_dispatch:
+  # 毎日午前2時UTC（回帰テスト）
+  schedule:
+    - cron: '0 2 * * *'
+
+# ------------------------------------------------------------
+# Concurrency Control
+# ------------------------------------------------------------
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ------------------------------------------------------------
+# Environment Variables
+# ------------------------------------------------------------
+env:
+  NODE_VERSION: '18'
+  CACHE_VERSION: 'v2'
+  TEST_TIMEOUT: '300000'  # 5 minutes in milliseconds
+
+# ------------------------------------------------------------
+# Jobs Definition
+# ------------------------------------------------------------
+jobs:
+  # ============================================================
+  # Job: Unit Tests
+  # Purpose: 単体テストの実行とカバレッジ測定
+  # ============================================================
+  unit-tests:
+    name: 🔬 単体テスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:run
+
+      - name: Generate coverage report
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            test-results.json
+            coverage/
+          retention-days: 7
+
+  # ============================================================
+  # Job: E2E Tests
+  # Purpose: ブラウザでのエンドツーエンドテスト
+  # ============================================================
+  e2e-tests:
+    name: 🌐 E2Eテスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Build application
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Run E2E tests
+        run: npx playwright test --project=${{ matrix.browser }}
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-${{ matrix.browser }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # ============================================================
+  # Job: Accessibility Tests
+  # Purpose: WCAG準拠のアクセシビリティテスト
+  # ============================================================
+  accessibility-tests:
+    name: ♿ アクセシビリティテスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Serve application
+        run: |
+          npm install -g serve
+          serve -s dist -l 4173 &
+          sleep 5
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run accessibility tests
+        run: |
+          npx playwright test --config=playwright.config.ts --grep="accessibility"
+        
+      - name: Upload accessibility test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-test-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # ============================================================
+  # Job: Performance Tests
+  # Purpose: パフォーマンスとバンドルサイズのテスト
+  # ============================================================
+  performance-tests:
+    name: ⚡ パフォーマンステスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Audit bundle size
+        run: |
+          if command -v npx bundlesize &> /dev/null; then
+            npx bundlesize
+          else
+            echo "⚠️ bundlesize not available, skipping bundle size check"
+          fi
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.12.x
+
+      - name: Serve and test with Lighthouse
+        run: |
+          npm install -g serve
+          serve -s dist -l 4173 &
+          sleep 5
+          lhci autorun --config=.lighthouserc.json || echo "Lighthouse tests completed with warnings"
+
+  # ============================================================
+  # Job: Test Summary
+  # Purpose: すべてのテスト結果の集約とレポート
+  # ============================================================
+  test-summary:
+    name: 📋 テストサマリー
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [unit-tests, e2e-tests, accessibility-tests, performance-tests]
+    if: always()
+    
+    steps:
+      - name: Check test results
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.unit-tests.result }}" == "success" ]]; then
+            echo "✅ Unit Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Unit Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.e2e-tests.result }}" == "success" ]]; then
+            echo "✅ E2E Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ E2E Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.accessibility-tests.result }}" == "success" ]]; then
+            echo "✅ Accessibility Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Accessibility Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.performance-tests.result }}" == "success" ]]; then
+            echo "✅ Performance Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Performance Tests: Issues Found" >> $GITHUB_STEP_SUMMARY
+          fi

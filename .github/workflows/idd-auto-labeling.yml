@@ -1,0 +1,163 @@
+name: IDD Auto Labeling
+# Issue作成時の自動ラベリングワークフロー
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    name: Auto Apply Labels
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Issue/PR Information
+        id: extract
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { issue, pull_request } = context.payload;
+            const item = issue || pull_request;
+            
+            if (!item) {
+              console.log('No issue or PR found');
+              return;
+            }
+            
+            const title = item.title.toLowerCase();
+            const body = (item.body || '').toLowerCase();
+            const content = title + ' ' + body;
+            
+            // ラベル判定ロジック
+            const labels = [];
+            
+            // 種類の判定
+            if (content.includes('bug') || content.includes('バグ') || content.includes('不具合')) {
+              labels.push('種類:バグ');
+            }
+            if (content.includes('feat') || content.includes('新機能') || content.includes('new feature')) {
+              labels.push('種類:新機能');
+            }
+            if (content.includes('改善') || content.includes('improvement') || content.includes('enhance')) {
+              labels.push('種類:改善');
+            }
+            if (content.includes('doc') || content.includes('ドキュメント') || content.includes('documentation')) {
+              labels.push('種類:ドキュメント');
+            }
+            if (content.includes('test') || content.includes('テスト')) {
+              labels.push('種類:テスト');
+            }
+            if (content.includes('refactor') || content.includes('リファクタ')) {
+              labels.push('種類:リファクタリング');
+            }
+            
+            // 優先度の判定
+            if (content.includes('urgent') || content.includes('緊急') || content.includes('critical')) {
+              labels.push('優先度:緊急');
+            } else if (content.includes('high priority') || content.includes('重要')) {
+              labels.push('優先度:高');
+            } else if (content.includes('low priority') || content.includes('低優先')) {
+              labels.push('優先度:低');
+            } else {
+              labels.push('優先度:中');
+            }
+            
+            // 領域の判定
+            if (content.includes('ui') || content.includes('ux') || content.includes('デザイン')) {
+              labels.push('領域:UI/UX');
+            }
+            if (content.includes('frontend') || content.includes('フロント') || content.includes('react')) {
+              labels.push('領域:フロントエンド');
+            }
+            if (content.includes('backend') || content.includes('api') || content.includes('サーバー')) {
+              labels.push('領域:バックエンド');
+            }
+            if (content.includes('devops') || content.includes('ci/cd') || content.includes('github actions')) {
+              labels.push('領域:DevOps');
+            }
+            if (content.includes('ai') || content.includes('claude') || content.includes('機械学習')) {
+              labels.push('領域:AI/ML');
+            }
+            if (content.includes('セキュリティ') || content.includes('security') || content.includes('認証')) {
+              labels.push('領域:認証・認可');
+            }
+            
+            // 状態の設定（新規作成時）
+            if (context.eventName === 'issues' && context.payload.action === 'opened') {
+              labels.push('状態:新規');
+            }
+            if (context.eventName === 'pull_request' && context.payload.action === 'opened') {
+              labels.push('状態:レビュー待ち');
+            }
+            
+            // IDD関連
+            if (content.includes('idd') || content.includes('issue-driven')) {
+              labels.push('IDD:準拠');
+            }
+            
+            return labels;
+
+      - name: Apply Labels
+        if: steps.extract.outputs.result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ${{ steps.extract.outputs.result }};
+            
+            if (labels && labels.length > 0) {
+              const { issue, pull_request } = context.payload;
+              const number = (issue || pull_request).number;
+              
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: number,
+                  labels: labels
+                });
+                
+                console.log(`Applied labels: ${labels.join(', ')}`);
+              } catch (error) {
+                console.error('Error applying labels:', error);
+              }
+            }
+
+      - name: Add Comment with Label Summary
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ${{ steps.extract.outputs.result || '[]' }};
+            const { issue, pull_request } = context.payload;
+            const number = (issue || pull_request).number;
+            const itemType = issue ? 'Issue' : 'PR';
+            
+            if (labels && labels.length > 0) {
+              const comment = `
+### 🏷️ 自動ラベル付与完了
+
+この${itemType}に以下のラベルが自動的に付与されました：
+
+${labels.map(label => `- \`${label}\``).join('\n')}
+
+---
+*このコメントは自動生成されています。ラベルの変更が必要な場合は手動で編集してください。*
+              `;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: number,
+                body: comment
+              });
+            }

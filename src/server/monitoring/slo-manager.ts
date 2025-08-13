@@ -1,1 +1,729 @@
-/**\n * Enterprise SLO/SLI Management System\n * 10,000+ 同時ユーザー対応の包括的サービスレベル監視\n */\n\nimport { EventEmitter } from 'events'\nimport client from 'prom-client'\nimport { Logger } from './logger'\nimport { metrics, Metrics } from './metrics'\n\n// SLO Target Definition\ninterface SLOTarget {\n  id: string\n  name: string\n  description: string\n  threshold: number // 0.0 - 1.0\n  timeWindow: string // '1m', '5m', '1h', '24h', '7d', '30d'\n  category: SLOCategory\n  severity: SLOSeverity\n  query: string // Prometheus query\n  alertThresholds: {\n    warning: number\n    critical: number\n    emergency: number\n  }\n}\n\nenumerable SLOCategory {\n  AVAILABILITY = 'availability',\n  PERFORMANCE = 'performance',\n  QUALITY = 'quality',\n  BUSINESS = 'business'\n}\n\nenum SLOSeverity {\n  LOW = 'low',\n  MEDIUM = 'medium',\n  HIGH = 'high',\n  CRITICAL = 'critical'\n}\n\ninterface SLOViolation {\n  sloId: string\n  timestamp: Date\n  currentValue: number\n  threshold: number\n  severity: SLOSeverity\n  details: any\n  resolved: boolean\n  resolvedAt?: Date\n}\n\ninterface AlertConfig {\n  channels: string[] // ['slack', 'email', 'pagerduty']\n  recipients: string[]\n  cooldownPeriod: number // minutes\n  escalationDelay: number // minutes\n}\n\n/**\n * SLO/SLI Management System\n */\nexport class SLOManager extends EventEmitter {\n  private sloTargets: Map<string, SLOTarget> = new Map()\n  private violations: Map<string, SLOViolation[]> = new Map()\n  private alertConfigs: Map<string, AlertConfig> = new Map()\n  private monitoringInterval: NodeJS.Timer | null = null\n  private prometheusRegistry: client.Registry\n  \n  // SLO Compliance Metrics\n  private sloComplianceGauge: client.Gauge<string>\n  private sloViolationsCounter: client.Counter<string>\n  private alertsSentCounter: client.Counter<string>\n  private errorBudgetGauge: client.Gauge<string>\n  \n  constructor() {\n    super()\n    this.prometheusRegistry = new client.Registry()\n    this.initializeMetrics()\n    this.setupDefaultSLOs()\n    this.startMonitoring()\n    \n    Logger.info('SLO Manager initialized with enterprise monitoring')\n  }\n  \n  private initializeMetrics(): void {\n    this.sloComplianceGauge = new client.Gauge({\n      name: 'pmp_learning_slo_compliance_ratio',\n      help: 'SLO compliance ratio (0-1)',\n      labelNames: ['slo_id', 'slo_name', 'category', 'time_window'],\n      registers: [this.prometheusRegistry]\n    })\n    \n    this.sloViolationsCounter = new client.Counter({\n      name: 'pmp_learning_slo_violations_total',\n      help: 'Total number of SLO violations',\n      labelNames: ['slo_id', 'severity', 'category'],\n      registers: [this.prometheusRegistry]\n    })\n    \n    this.alertsSentCounter = new client.Counter({\n      name: 'pmp_learning_alerts_sent_total',\n      help: 'Total number of alerts sent',\n      labelNames: ['slo_id', 'channel', 'severity'],\n      registers: [this.prometheusRegistry]\n    })\n    \n    this.errorBudgetGauge = new client.Gauge({\n      name: 'pmp_learning_error_budget_remaining',\n      help: 'Remaining error budget (0-1)',\n      labelNames: ['slo_id', 'time_window'],\n      registers: [this.prometheusRegistry]\n    })\n  }\n  \n  private setupDefaultSLOs(): void {\n    // === 可用性 SLO ===\n    this.addSLO({\n      id: 'availability_99_9',\n      name: 'Service Availability 99.9%',\n      description: 'API endpoints must be available 99.9% of the time',\n      threshold: 0.999,\n      timeWindow: '24h',\n      category: SLOCategory.AVAILABILITY,\n      severity: SLOSeverity.CRITICAL,\n      query: 'sum(rate(http_requests_total{status_code!~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))',\n      alertThresholds: {\n        warning: 0.995,\n        critical: 0.99,\n        emergency: 0.985\n      }\n    })\n    \n    // === パフォーマンス SLO ===\n    this.addSLO({\n      id: 'latency_p95_500ms',\n      name: 'Response Time P95 < 500ms',\n      description: '95% of requests must complete within 500ms',\n      threshold: 0.5,\n      timeWindow: '5m',\n      category: SLOCategory.PERFORMANCE,\n      severity: SLOSeverity.HIGH,\n      query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))',\n      alertThresholds: {\n        warning: 0.4,\n        critical: 0.6,\n        emergency: 1.0\n      }\n    })\n    \n    this.addSLO({\n      id: 'latency_p99_1s',\n      name: 'Response Time P99 < 1s',\n      description: '99% of requests must complete within 1 second',\n      threshold: 1.0,\n      timeWindow: '5m',\n      category: SLOCategory.PERFORMANCE,\n      severity: SLOSeverity.MEDIUM,\n      query: 'histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))',\n      alertThresholds: {\n        warning: 0.8,\n        critical: 1.2,\n        emergency: 2.0\n      }\n    })\n    \n    // === ビジネス品質 SLO ===\n    this.addSLO({\n      id: 'exam_pass_rate_75',\n      name: 'Exam Pass Rate > 75%',\n      description: 'Monthly exam pass rate should exceed 75%',\n      threshold: 0.75,\n      timeWindow: '30d',\n      category: SLOCategory.BUSINESS,\n      severity: SLOSeverity.MEDIUM,\n      query: 'sum(exam_attempts_total{result=\"pass\"}) / sum(exam_attempts_total)',\n      alertThresholds: {\n        warning: 0.7,\n        critical: 0.65,\n        emergency: 0.6\n      }\n    })\n    \n    this.addSLO({\n      id: 'learning_completion_80',\n      name: 'Learning Completion Rate > 80%',\n      description: 'Weekly learning completion rate should exceed 80%',\n      threshold: 0.8,\n      timeWindow: '7d',\n      category: SLOCategory.BUSINESS,\n      severity: SLOSeverity.LOW,\n      query: 'sum(learning_sessions_total{completed=\"true\"}) / sum(learning_sessions_total)',\n      alertThresholds: {\n        warning: 0.75,\n        critical: 0.7,\n        emergency: 0.65\n      }\n    })\n    \n    // === データ品質 SLO ===\n    this.addSLO({\n      id: 'data_accuracy_99_5',\n      name: 'Data Accuracy > 99.5%',\n      description: 'Database operations must have 99.5% accuracy',\n      threshold: 0.995,\n      timeWindow: '1h',\n      category: SLOCategory.QUALITY,\n      severity: SLOSeverity.HIGH,\n      query: 'sum(db_queries_total{status=\"success\"}) / sum(db_queries_total)',\n      alertThresholds: {\n        warning: 0.99,\n        critical: 0.985,\n        emergency: 0.98\n      }\n    })\n    \n    this.addSLO({\n      id: 'cache_hit_rate_90',\n      name: 'Cache Hit Rate > 90%',\n      description: 'Cache hit rate should exceed 90%',\n      threshold: 0.9,\n      timeWindow: '15m',\n      category: SLOCategory.PERFORMANCE,\n      severity: SLOSeverity.MEDIUM,\n      query: 'sum(cache_operations_total{result=\"hit\"}) / sum(cache_operations_total)',\n      alertThresholds: {\n        warning: 0.85,\n        critical: 0.8,\n        emergency: 0.7\n      }\n    })\n    \n    Logger.info(`Initialized ${this.sloTargets.size} default SLOs`)\n  }\n  \n  /**\n   * Add new SLO target\n   */\n  addSLO(slo: SLOTarget): void {\n    this.sloTargets.set(slo.id, slo)\n    this.violations.set(slo.id, [])\n    \n    Logger.info(`SLO added: ${slo.name}`, {\n      id: slo.id,\n      threshold: slo.threshold,\n      timeWindow: slo.timeWindow\n    })\n  }\n  \n  /**\n   * Configure alerts for SLO\n   */\n  configureAlerts(sloId: string, config: AlertConfig): void {\n    this.alertConfigs.set(sloId, config)\n    Logger.info(`Alert configuration updated for SLO: ${sloId}`)\n  }\n  \n  /**\n   * Start SLO monitoring\n   */\n  private startMonitoring(): void {\n    // Check SLOs every 30 seconds\n    this.monitoringInterval = setInterval(() => {\n      this.checkAllSLOs()\n    }, 30000)\n    \n    Logger.info('SLO monitoring started (30 second intervals)')\n  }\n  \n  /**\n   * Check all SLO targets\n   */\n  private async checkAllSLOs(): Promise<void> {\n    const promises = Array.from(this.sloTargets.values()).map(slo => \n      this.checkSLO(slo).catch(error => {\n        Logger.error(`SLO check failed for ${slo.id}:`, error)\n      })\n    )\n    \n    await Promise.allSettled(promises)\n  }\n  \n  /**\n   * Check individual SLO\n   */\n  private async checkSLO(slo: SLOTarget): Promise<void> {\n    try {\n      const currentValue = await this.executeSLOQuery(slo)\n      \n      // Update compliance metric\n      this.sloComplianceGauge.set(\n        { \n          slo_id: slo.id, \n          slo_name: slo.name, \n          category: slo.category,\n          time_window: slo.timeWindow \n        }, \n        currentValue\n      )\n      \n      // Calculate error budget\n      const errorBudget = this.calculateErrorBudget(slo, currentValue)\n      this.errorBudgetGauge.set(\n        { slo_id: slo.id, time_window: slo.timeWindow },\n        errorBudget\n      )\n      \n      // Check for violations\n      await this.evaluateSLOCompliance(slo, currentValue)\n      \n    } catch (error) {\n      Logger.error(`SLO evaluation error for ${slo.id}:`, error)\n    }\n  }\n  \n  /**\n   * Execute SLO query (simplified - would use Prometheus API in production)\n   */\n  private async executeSLOQuery(slo: SLOTarget): Promise<number> {\n    // This is a simplified implementation\n    // In production, this would query Prometheus HTTP API\n    \n    switch (slo.id) {\n      case 'availability_99_9':\n        return 0.9995 // 99.95% (above threshold)\n      case 'latency_p95_500ms':\n        return 0.45 // 450ms (below threshold)\n      case 'latency_p99_1s':\n        return 0.85 // 850ms (below threshold)\n      case 'exam_pass_rate_75':\n        return 0.78 // 78% (above threshold)\n      case 'learning_completion_80':\n        return 0.82 // 82% (above threshold)\n      case 'data_accuracy_99_5':\n        return 0.996 // 99.6% (above threshold)\n      case 'cache_hit_rate_90':\n        return 0.89 // 89% (below threshold - will trigger alert)\n      default:\n        return Math.random() // Random for unknown SLOs\n    }\n  }\n  \n  /**\n   * Calculate error budget remaining\n   */\n  private calculateErrorBudget(slo: SLOTarget, currentValue: number): number {\n    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {\n      // For availability/quality SLOs, error budget is based on allowed failures\n      const allowedFailureRate = 1 - slo.threshold\n      const currentFailureRate = 1 - currentValue\n      return Math.max(0, (allowedFailureRate - currentFailureRate) / allowedFailureRate)\n    } else {\n      // For performance SLOs, error budget is based on threshold deviation\n      const deviation = Math.abs(currentValue - slo.threshold) / slo.threshold\n      return Math.max(0, 1 - deviation)\n    }\n  }\n  \n  /**\n   * Evaluate SLO compliance and handle violations\n   */\n  private async evaluateSLOCompliance(slo: SLOTarget, currentValue: number): Promise<void> {\n    const isViolation = this.isThresholdViolated(slo, currentValue)\n    \n    if (isViolation) {\n      await this.handleSLOViolation(slo, currentValue)\n    } else {\n      await this.handleSLOCompliance(slo, currentValue)\n    }\n  }\n  \n  /**\n   * Check if threshold is violated\n   */\n  private isThresholdViolated(slo: SLOTarget, currentValue: number): boolean {\n    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {\n      return currentValue < slo.threshold\n    } else {\n      // For performance metrics (latency), values should be below threshold\n      return currentValue > slo.threshold\n    }\n  }\n  \n  /**\n   * Handle SLO violation\n   */\n  private async handleSLOViolation(slo: SLOTarget, currentValue: number): Promise<void> {\n    const severity = this.determineSeverity(slo, currentValue)\n    const existingViolations = this.violations.get(slo.id) || []\n    \n    // Check if this is a new violation or ongoing\n    const latestViolation = existingViolations[existingViolations.length - 1]\n    const isNewViolation = !latestViolation || latestViolation.resolved\n    \n    if (isNewViolation) {\n      const violation: SLOViolation = {\n        sloId: slo.id,\n        timestamp: new Date(),\n        currentValue,\n        threshold: slo.threshold,\n        severity,\n        details: { category: slo.category, timeWindow: slo.timeWindow },\n        resolved: false\n      }\n      \n      existingViolations.push(violation)\n      this.violations.set(slo.id, existingViolations)\n      \n      // Record violation metric\n      this.sloViolationsCounter.inc({\n        slo_id: slo.id,\n        severity: severity,\n        category: slo.category\n      })\n      \n      // Send alerts\n      await this.sendViolationAlert(slo, violation)\n      \n      // Emit event for external handling\n      this.emit('slo_violation', {\n        slo,\n        violation,\n        severity\n      })\n      \n      Logger.error(`SLO VIOLATION: ${slo.name}`, {\n        sloId: slo.id,\n        currentValue,\n        threshold: slo.threshold,\n        severity\n      })\n    }\n  }\n  \n  /**\n   * Handle SLO compliance (resolve violations)\n   */\n  private async handleSLOCompliance(slo: SLOTarget, currentValue: number): Promise<void> {\n    const violations = this.violations.get(slo.id) || []\n    const activeViolations = violations.filter(v => !v.resolved)\n    \n    if (activeViolations.length > 0) {\n      // Resolve active violations\n      activeViolations.forEach(violation => {\n        violation.resolved = true\n        violation.resolvedAt = new Date()\n      })\n      \n      this.emit('slo_compliance_restored', {\n        slo,\n        currentValue,\n        resolvedViolations: activeViolations.length\n      })\n      \n      Logger.info(`SLO compliance restored: ${slo.name}`, {\n        sloId: slo.id,\n        currentValue,\n        resolvedCount: activeViolations.length\n      })\n    }\n  }\n  \n  /**\n   * Determine violation severity\n   */\n  private determineSeverity(slo: SLOTarget, currentValue: number): SLOSeverity {\n    const { warning, critical, emergency } = slo.alertThresholds\n    \n    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {\n      if (currentValue <= emergency) return SLOSeverity.CRITICAL\n      if (currentValue <= critical) return SLOSeverity.HIGH\n      if (currentValue <= warning) return SLOSeverity.MEDIUM\n      return SLOSeverity.LOW\n    } else {\n      // For performance metrics\n      if (currentValue >= emergency) return SLOSeverity.CRITICAL\n      if (currentValue >= critical) return SLOSeverity.HIGH\n      if (currentValue >= warning) return SLOSeverity.MEDIUM\n      return SLOSeverity.LOW\n    }\n  }\n  \n  /**\n   * Send violation alert\n   */\n  private async sendViolationAlert(slo: SLOTarget, violation: SLOViolation): Promise<void> {\n    const alertConfig = this.alertConfigs.get(slo.id)\n    \n    if (!alertConfig) {\n      Logger.warn(`No alert configuration found for SLO: ${slo.id}`)\n      return\n    }\n    \n    const alertMessage = {\n      title: `🚨 SLO Violation: ${slo.name}`,\n      description: slo.description,\n      severity: violation.severity,\n      currentValue: violation.currentValue,\n      threshold: violation.threshold,\n      timeWindow: slo.timeWindow,\n      timestamp: violation.timestamp.toISOString(),\n      runbook: this.generateRunbookUrl(slo.id)\n    }\n    \n    // Send to configured channels\n    for (const channel of alertConfig.channels) {\n      try {\n        await this.sendAlertToChannel(channel, alertMessage)\n        \n        this.alertsSentCounter.inc({\n          slo_id: slo.id,\n          channel,\n          severity: violation.severity\n        })\n        \n      } catch (error) {\n        Logger.error(`Failed to send alert to ${channel}:`, error)\n      }\n    }\n  }\n  \n  /**\n   * Send alert to specific channel\n   */\n  private async sendAlertToChannel(channel: string, message: any): Promise<void> {\n    switch (channel) {\n      case 'slack':\n        await this.sendSlackAlert(message)\n        break\n      case 'email':\n        await this.sendEmailAlert(message)\n        break\n      case 'pagerduty':\n        await this.sendPagerDutyAlert(message)\n        break\n      case 'teams':\n        await this.sendTeamsAlert(message)\n        break\n      default:\n        Logger.warn(`Unknown alert channel: ${channel}`)\n    }\n  }\n  \n  /**\n   * Send Slack alert (simplified)\n   */\n  private async sendSlackAlert(message: any): Promise<void> {\n    // Implementation would integrate with Slack API\n    Logger.info('Slack alert sent:', message.title)\n  }\n  \n  /**\n   * Send email alert (simplified)\n   */\n  private async sendEmailAlert(message: any): Promise<void> {\n    // Implementation would integrate with email service\n    Logger.info('Email alert sent:', message.title)\n  }\n  \n  /**\n   * Send PagerDuty alert (simplified)\n   */\n  private async sendPagerDutyAlert(message: any): Promise<void> {\n    // Implementation would integrate with PagerDuty API\n    Logger.info('PagerDuty alert sent:', message.title)\n  }\n  \n  /**\n   * Send Microsoft Teams alert (simplified)\n   */\n  private async sendTeamsAlert(message: any): Promise<void> {\n    // Implementation would integrate with Teams webhook\n    Logger.info('Teams alert sent:', message.title)\n  }\n  \n  /**\n   * Generate runbook URL\n   */\n  private generateRunbookUrl(sloId: string): string {\n    return `https://runbooks.pmp-learning.com/slo/${sloId}`\n  }\n  \n  /**\n   * Get SLO status summary\n   */\n  getSLOStatus(): {\n    summary: {\n      total: number\n      healthy: number\n      degraded: number\n      violating: number\n    }\n    slos: Array<{\n      id: string\n      name: string\n      category: string\n      status: 'healthy' | 'degraded' | 'violating'\n      compliance: number\n      errorBudget: number\n      lastViolation?: Date\n    }>\n  } {\n    const sloStatus = Array.from(this.sloTargets.entries()).map(([id, slo]) => {\n      const violations = this.violations.get(id) || []\n      const activeViolations = violations.filter(v => !v.resolved)\n      const lastViolation = violations.length > 0 ? \n        violations[violations.length - 1].timestamp : undefined\n      \n      let status: 'healthy' | 'degraded' | 'violating'\n      if (activeViolations.length > 0) {\n        status = 'violating'\n      } else if (violations.length > 0 && \n                 Date.now() - violations[violations.length - 1].timestamp.getTime() < 300000) {\n        status = 'degraded'\n      } else {\n        status = 'healthy'\n      }\n      \n      return {\n        id,\n        name: slo.name,\n        category: slo.category,\n        status,\n        compliance: 0.95, // Would be calculated from actual metrics\n        errorBudget: 0.8,  // Would be calculated from actual metrics\n        lastViolation\n      }\n    })\n    \n    const summary = {\n      total: sloStatus.length,\n      healthy: sloStatus.filter(s => s.status === 'healthy').length,\n      degraded: sloStatus.filter(s => s.status === 'degraded').length,\n      violating: sloStatus.filter(s => s.status === 'violating').length\n    }\n    \n    return { summary, slos: sloStatus }\n  }\n  \n  /**\n   * Get violation history\n   */\n  getViolationHistory(sloId?: string, timeRange?: string): SLOViolation[] {\n    if (sloId) {\n      return this.violations.get(sloId) || []\n    }\n    \n    // Return all violations\n    const allViolations = Array.from(this.violations.values()).flat()\n    \n    if (timeRange) {\n      const cutoffTime = this.parseTimeRange(timeRange)\n      return allViolations.filter(v => v.timestamp >= cutoffTime)\n    }\n    \n    return allViolations\n  }\n  \n  /**\n   * Parse time range string\n   */\n  private parseTimeRange(timeRange: string): Date {\n    const now = new Date()\n    const value = parseInt(timeRange.slice(0, -1))\n    const unit = timeRange.slice(-1)\n    \n    switch (unit) {\n      case 'm': return new Date(now.getTime() - value * 60 * 1000)\n      case 'h': return new Date(now.getTime() - value * 60 * 60 * 1000)\n      case 'd': return new Date(now.getTime() - value * 24 * 60 * 60 * 1000)\n      default: return new Date(0)\n    }\n  }\n  \n  /**\n   * Get Prometheus metrics\n   */\n  async getMetrics(): Promise<string> {\n    return await this.prometheusRegistry.metrics()\n  }\n  \n  /**\n   * Stop monitoring\n   */\n  stopMonitoring(): void {\n    if (this.monitoringInterval) {\n      clearInterval(this.monitoringInterval)\n      this.monitoringInterval = null\n      Logger.info('SLO monitoring stopped')\n    }\n  }\n  \n  /**\n   * Cleanup\n   */\n  destroy(): void {\n    this.stopMonitoring()\n    this.removeAllListeners()\n    this.prometheusRegistry.clear()\n  }\n}\n\n// Global SLO Manager instance\nexport const sloManager = new SLOManager()\n\n// Default alert configurations\nsloManager.configureAlerts('availability_99_9', {\n  channels: ['slack', 'pagerduty', 'email'],\n  recipients: ['sre-team@pmp-learning.com', 'on-call@pmp-learning.com'],\n  cooldownPeriod: 15,\n  escalationDelay: 30\n})\n\nsloManager.configureAlerts('latency_p95_500ms', {\n  channels: ['slack'],\n  recipients: ['dev-team@pmp-learning.com'],\n  cooldownPeriod: 10,\n  escalationDelay: 20\n})\n\n// Export for use in other modules\nexport default {\n  SLOManager,\n  sloManager,\n  SLOCategory,\n  SLOSeverity\n}"
+/**
+ * Enterprise SLO/SLI Management System
+ * 10,000+ 同時ユーザー対応の包括的サービスレベル監視
+ */
+
+import { EventEmitter } from 'events'
+import client from 'prom-client'
+import { Logger } from './logger'
+import { metrics, Metrics } from './metrics'
+
+// SLO Target Definition
+interface SLOTarget {
+  id: string
+  name: string
+  description: string
+  threshold: number // 0.0 - 1.0
+  timeWindow: string // '1m', '5m', '1h', '24h', '7d', '30d'
+  category: SLOCategory
+  severity: SLOSeverity
+  query: string // Prometheus query
+  alertThresholds: {
+    warning: number
+    critical: number
+    emergency: number
+  }
+}
+
+enum SLOCategory {
+  AVAILABILITY = 'availability',
+  PERFORMANCE = 'performance',
+  QUALITY = 'quality',
+  BUSINESS = 'business',
+}
+
+enum SLOSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+interface SLOViolation {
+  sloId: string
+  timestamp: Date
+  currentValue: number
+  threshold: number
+  severity: SLOSeverity
+  details: any
+  resolved: boolean
+  resolvedAt?: Date
+}
+
+interface AlertConfig {
+  channels: string[] // ['slack', 'email', 'pagerduty']
+  recipients: string[]
+  cooldownPeriod: number // minutes
+  escalationDelay: number // minutes
+}
+
+/**
+ * SLO/SLI Management System
+ */
+export class SLOManager extends EventEmitter {
+  private sloTargets: Map<string, SLOTarget> = new Map()
+  private violations: Map<string, SLOViolation[]> = new Map()
+  private alertConfigs: Map<string, AlertConfig> = new Map()
+  private monitoringInterval: NodeJS.Timer | null = null
+  private prometheusRegistry: client.Registry
+
+  // SLO Compliance Metrics
+  private sloComplianceGauge: client.Gauge<string>
+  private sloViolationsCounter: client.Counter<string>
+  private alertsSentCounter: client.Counter<string>
+  private errorBudgetGauge: client.Gauge<string>
+
+  constructor() {
+    super()
+    this.prometheusRegistry = new client.Registry()
+    this.initializeMetrics()
+    this.setupDefaultSLOs()
+    this.startMonitoring()
+
+    Logger.info('SLO Manager initialized with enterprise monitoring')
+  }
+
+  private initializeMetrics(): void {
+    this.sloComplianceGauge = new client.Gauge({
+      name: 'pmp_learning_slo_compliance_ratio',
+      help: 'SLO compliance ratio (0-1)',
+      labelNames: ['slo_id', 'slo_name', 'category', 'time_window'],
+      registers: [this.prometheusRegistry],
+    })
+
+    this.sloViolationsCounter = new client.Counter({
+      name: 'pmp_learning_slo_violations_total',
+      help: 'Total number of SLO violations',
+      labelNames: ['slo_id', 'severity', 'category'],
+      registers: [this.prometheusRegistry],
+    })
+
+    this.alertsSentCounter = new client.Counter({
+      name: 'pmp_learning_alerts_sent_total',
+      help: 'Total number of alerts sent',
+      labelNames: ['slo_id', 'channel', 'severity'],
+      registers: [this.prometheusRegistry],
+    })
+
+    this.errorBudgetGauge = new client.Gauge({
+      name: 'pmp_learning_error_budget_remaining',
+      help: 'Remaining error budget (0-1)',
+      labelNames: ['slo_id', 'time_window'],
+      registers: [this.prometheusRegistry],
+    })
+  }
+
+  private setupDefaultSLOs(): void {
+    // === 可用性 SLO ===
+    this.addSLO({
+      id: 'availability_99_9',
+      name: 'Service Availability 99.9%',
+      description: 'API endpoints must be available 99.9% of the time',
+      threshold: 0.999,
+      timeWindow: '24h',
+      category: SLOCategory.AVAILABILITY,
+      severity: SLOSeverity.CRITICAL,
+      query:
+        'sum(rate(http_requests_total{status_code!~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))',
+      alertThresholds: {
+        warning: 0.995,
+        critical: 0.99,
+        emergency: 0.985,
+      },
+    })
+
+    // === パフォーマンス SLO ===
+    this.addSLO({
+      id: 'latency_p95_500ms',
+      name: 'Response Time P95 < 500ms',
+      description: '95% of requests must complete within 500ms',
+      threshold: 0.5,
+      timeWindow: '5m',
+      category: SLOCategory.PERFORMANCE,
+      severity: SLOSeverity.HIGH,
+      query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))',
+      alertThresholds: {
+        warning: 0.4,
+        critical: 0.6,
+        emergency: 1.0,
+      },
+    })
+
+    this.addSLO({
+      id: 'latency_p99_1s',
+      name: 'Response Time P99 < 1s',
+      description: '99% of requests must complete within 1 second',
+      threshold: 1.0,
+      timeWindow: '5m',
+      category: SLOCategory.PERFORMANCE,
+      severity: SLOSeverity.MEDIUM,
+      query: 'histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))',
+      alertThresholds: {
+        warning: 0.8,
+        critical: 1.2,
+        emergency: 2.0,
+      },
+    })
+
+    // === ビジネス品質 SLO ===
+    this.addSLO({
+      id: 'exam_pass_rate_75',
+      name: 'Exam Pass Rate > 75%',
+      description: 'Monthly exam pass rate should exceed 75%',
+      threshold: 0.75,
+      timeWindow: '30d',
+      category: SLOCategory.BUSINESS,
+      severity: SLOSeverity.MEDIUM,
+      query: 'sum(exam_attempts_total{result=\"pass\"}) / sum(exam_attempts_total)',
+      alertThresholds: {
+        warning: 0.7,
+        critical: 0.65,
+        emergency: 0.6,
+      },
+    })
+
+    this.addSLO({
+      id: 'learning_completion_80',
+      name: 'Learning Completion Rate > 80%',
+      description: 'Weekly learning completion rate should exceed 80%',
+      threshold: 0.8,
+      timeWindow: '7d',
+      category: SLOCategory.BUSINESS,
+      severity: SLOSeverity.LOW,
+      query: 'sum(learning_sessions_total{completed=\"true\"}) / sum(learning_sessions_total)',
+      alertThresholds: {
+        warning: 0.75,
+        critical: 0.7,
+        emergency: 0.65,
+      },
+    })
+
+    // === データ品質 SLO ===
+    this.addSLO({
+      id: 'data_accuracy_99_5',
+      name: 'Data Accuracy > 99.5%',
+      description: 'Database operations must have 99.5% accuracy',
+      threshold: 0.995,
+      timeWindow: '1h',
+      category: SLOCategory.QUALITY,
+      severity: SLOSeverity.HIGH,
+      query: 'sum(db_queries_total{status=\"success\"}) / sum(db_queries_total)',
+      alertThresholds: {
+        warning: 0.99,
+        critical: 0.985,
+        emergency: 0.98,
+      },
+    })
+
+    this.addSLO({
+      id: 'cache_hit_rate_90',
+      name: 'Cache Hit Rate > 90%',
+      description: 'Cache hit rate should exceed 90%',
+      threshold: 0.9,
+      timeWindow: '15m',
+      category: SLOCategory.PERFORMANCE,
+      severity: SLOSeverity.MEDIUM,
+      query: 'sum(cache_operations_total{result=\"hit\"}) / sum(cache_operations_total)',
+      alertThresholds: {
+        warning: 0.85,
+        critical: 0.8,
+        emergency: 0.7,
+      },
+    })
+
+    Logger.info(`Initialized ${this.sloTargets.size} default SLOs`)
+  }
+
+  /**
+   * Add new SLO target
+   */
+  addSLO(slo: SLOTarget): void {
+    this.sloTargets.set(slo.id, slo)
+    this.violations.set(slo.id, [])
+
+    Logger.info(`SLO added: ${slo.name}`, {
+      id: slo.id,
+      threshold: slo.threshold,
+      timeWindow: slo.timeWindow,
+    })
+  }
+
+  /**
+   * Configure alerts for SLO
+   */
+  configureAlerts(sloId: string, config: AlertConfig): void {
+    this.alertConfigs.set(sloId, config)
+    Logger.info(`Alert configuration updated for SLO: ${sloId}`)
+  }
+
+  /**
+   * Start SLO monitoring
+   */
+  private startMonitoring(): void {
+    // Check SLOs every 30 seconds
+    this.monitoringInterval = setInterval(() => {
+      this.checkAllSLOs()
+    }, 30000)
+
+    Logger.info('SLO monitoring started (30 second intervals)')
+  }
+
+  /**
+   * Check all SLO targets
+   */
+  private async checkAllSLOs(): Promise<void> {
+    const promises = Array.from(this.sloTargets.values()).map((slo) =>
+      this.checkSLO(slo).catch((error) => {
+        Logger.error(`SLO check failed for ${slo.id}:`, error)
+      })
+    )
+
+    await Promise.allSettled(promises)
+  }
+
+  /**
+   * Check individual SLO
+   */
+  private async checkSLO(slo: SLOTarget): Promise<void> {
+    try {
+      const currentValue = await this.executeSLOQuery(slo)
+
+      // Update compliance metric
+      this.sloComplianceGauge.set(
+        {
+          slo_id: slo.id,
+          slo_name: slo.name,
+          category: slo.category,
+          time_window: slo.timeWindow,
+        },
+        currentValue
+      )
+
+      // Calculate error budget
+      const errorBudget = this.calculateErrorBudget(slo, currentValue)
+      this.errorBudgetGauge.set({ slo_id: slo.id, time_window: slo.timeWindow }, errorBudget)
+
+      // Check for violations
+      await this.evaluateSLOCompliance(slo, currentValue)
+    } catch (error) {
+      Logger.error(`SLO evaluation error for ${slo.id}:`, error)
+    }
+  }
+
+  /**
+   * Execute SLO query (simplified - would use Prometheus API in production)
+   */
+  private async executeSLOQuery(slo: SLOTarget): Promise<number> {
+    // This is a simplified implementation
+    // In production, this would query Prometheus HTTP API
+
+    switch (slo.id) {
+      case 'availability_99_9':
+        return 0.9995 // 99.95% (above threshold)
+      case 'latency_p95_500ms':
+        return 0.45 // 450ms (below threshold)
+      case 'latency_p99_1s':
+        return 0.85 // 850ms (below threshold)
+      case 'exam_pass_rate_75':
+        return 0.78 // 78% (above threshold)
+      case 'learning_completion_80':
+        return 0.82 // 82% (above threshold)
+      case 'data_accuracy_99_5':
+        return 0.996 // 99.6% (above threshold)
+      case 'cache_hit_rate_90':
+        return 0.89 // 89% (below threshold - will trigger alert)
+      default:
+        return Math.random() // Random for unknown SLOs
+    }
+  }
+
+  /**
+   * Calculate error budget remaining
+   */
+  private calculateErrorBudget(slo: SLOTarget, currentValue: number): number {
+    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {
+      // For availability/quality SLOs, error budget is based on allowed failures
+      const allowedFailureRate = 1 - slo.threshold
+      const currentFailureRate = 1 - currentValue
+      return Math.max(0, (allowedFailureRate - currentFailureRate) / allowedFailureRate)
+    } else {
+      // For performance SLOs, error budget is based on threshold deviation
+      const deviation = Math.abs(currentValue - slo.threshold) / slo.threshold
+      return Math.max(0, 1 - deviation)
+    }
+  }
+
+  /**
+   * Evaluate SLO compliance and handle violations
+   */
+  private async evaluateSLOCompliance(slo: SLOTarget, currentValue: number): Promise<void> {
+    const isViolation = this.isThresholdViolated(slo, currentValue)
+
+    if (isViolation) {
+      await this.handleSLOViolation(slo, currentValue)
+    } else {
+      await this.handleSLOCompliance(slo, currentValue)
+    }
+  }
+
+  /**
+   * Check if threshold is violated
+   */
+  private isThresholdViolated(slo: SLOTarget, currentValue: number): boolean {
+    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {
+      return currentValue < slo.threshold
+    } else {
+      // For performance metrics (latency), values should be below threshold
+      return currentValue > slo.threshold
+    }
+  }
+
+  /**
+   * Handle SLO violation
+   */
+  private async handleSLOViolation(slo: SLOTarget, currentValue: number): Promise<void> {
+    const severity = this.determineSeverity(slo, currentValue)
+    const existingViolations = this.violations.get(slo.id) || []
+
+    // Check if this is a new violation or ongoing
+    const latestViolation = existingViolations[existingViolations.length - 1]
+    const isNewViolation = !latestViolation || latestViolation.resolved
+
+    if (isNewViolation) {
+      const violation: SLOViolation = {
+        sloId: slo.id,
+        timestamp: new Date(),
+        currentValue,
+        threshold: slo.threshold,
+        severity,
+        details: { category: slo.category, timeWindow: slo.timeWindow },
+        resolved: false,
+      }
+
+      existingViolations.push(violation)
+      this.violations.set(slo.id, existingViolations)
+
+      // Record violation metric
+      this.sloViolationsCounter.inc({
+        slo_id: slo.id,
+        severity: severity,
+        category: slo.category,
+      })
+
+      // Send alerts
+      await this.sendViolationAlert(slo, violation)
+
+      // Emit event for external handling
+      this.emit('slo_violation', {
+        slo,
+        violation,
+        severity,
+      })
+
+      Logger.error(`SLO VIOLATION: ${slo.name}`, {
+        sloId: slo.id,
+        currentValue,
+        threshold: slo.threshold,
+        severity,
+      })
+    }
+  }
+
+  /**
+   * Handle SLO compliance (resolve violations)
+   */
+  private async handleSLOCompliance(slo: SLOTarget, currentValue: number): Promise<void> {
+    const violations = this.violations.get(slo.id) || []
+    const activeViolations = violations.filter((v) => !v.resolved)
+
+    if (activeViolations.length > 0) {
+      // Resolve active violations
+      activeViolations.forEach((violation) => {
+        violation.resolved = true
+        violation.resolvedAt = new Date()
+      })
+
+      this.emit('slo_compliance_restored', {
+        slo,
+        currentValue,
+        resolvedViolations: activeViolations.length,
+      })
+
+      Logger.info(`SLO compliance restored: ${slo.name}`, {
+        sloId: slo.id,
+        currentValue,
+        resolvedCount: activeViolations.length,
+      })
+    }
+  }
+
+  /**
+   * Determine violation severity
+   */
+  private determineSeverity(slo: SLOTarget, currentValue: number): SLOSeverity {
+    const { warning, critical, emergency } = slo.alertThresholds
+
+    if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {
+      if (currentValue <= emergency) return SLOSeverity.CRITICAL
+      if (currentValue <= critical) return SLOSeverity.HIGH
+      if (currentValue <= warning) return SLOSeverity.MEDIUM
+      return SLOSeverity.LOW
+    } else {
+      // For performance metrics
+      if (currentValue >= emergency) return SLOSeverity.CRITICAL
+      if (currentValue >= critical) return SLOSeverity.HIGH
+      if (currentValue >= warning) return SLOSeverity.MEDIUM
+      return SLOSeverity.LOW
+    }
+  }
+
+  /**
+   * Send violation alert
+   */
+  private async sendViolationAlert(slo: SLOTarget, violation: SLOViolation): Promise<void> {
+    const alertConfig = this.alertConfigs.get(slo.id)
+
+    if (!alertConfig) {
+      Logger.warn(`No alert configuration found for SLO: ${slo.id}`)
+      return
+    }
+
+    const alertMessage = {
+      title: `🚨 SLO Violation: ${slo.name}`,
+      description: slo.description,
+      severity: violation.severity,
+      currentValue: violation.currentValue,
+      threshold: violation.threshold,
+      timeWindow: slo.timeWindow,
+      timestamp: violation.timestamp.toISOString(),
+      runbook: this.generateRunbookUrl(slo.id),
+    }
+
+    // Send to configured channels
+    for (const channel of alertConfig.channels) {
+      try {
+        await this.sendAlertToChannel(channel, alertMessage)
+
+        this.alertsSentCounter.inc({
+          slo_id: slo.id,
+          channel,
+          severity: violation.severity,
+        })
+      } catch (error) {
+        Logger.error(`Failed to send alert to ${channel}:`, error)
+      }
+    }
+  }
+
+  /**
+   * Send alert to specific channel
+   */
+  private async sendAlertToChannel(channel: string, message: any): Promise<void> {
+    switch (channel) {
+      case 'slack':
+        await this.sendSlackAlert(message)
+        break
+      case 'email':
+        await this.sendEmailAlert(message)
+        break
+      case 'pagerduty':
+        await this.sendPagerDutyAlert(message)
+        break
+      case 'teams':
+        await this.sendTeamsAlert(message)
+        break
+      default:
+        Logger.warn(`Unknown alert channel: ${channel}`)
+    }
+  }
+
+  /**
+   * Send Slack alert (simplified)
+   */
+  private async sendSlackAlert(message: any): Promise<void> {
+    // Implementation would integrate with Slack API
+    Logger.info('Slack alert sent:', message.title)
+  }
+
+  /**
+   * Send email alert (simplified)
+   */
+  private async sendEmailAlert(message: any): Promise<void> {
+    // Implementation would integrate with email service
+    Logger.info('Email alert sent:', message.title)
+  }
+
+  /**
+   * Send PagerDuty alert (simplified)
+   */
+  private async sendPagerDutyAlert(message: any): Promise<void> {
+    // Implementation would integrate with PagerDuty API
+    Logger.info('PagerDuty alert sent:', message.title)
+  }
+
+  /**
+   * Send Microsoft Teams alert (simplified)
+   */
+  private async sendTeamsAlert(message: any): Promise<void> {
+    // Implementation would integrate with Teams webhook
+    Logger.info('Teams alert sent:', message.title)
+  }
+
+  /**
+   * Generate runbook URL
+   */
+  private generateRunbookUrl(sloId: string): string {
+    return `https://runbooks.pmp-learning.com/slo/${sloId}`
+  }
+
+  /**
+   * Get SLO status summary
+   */
+  getSLOStatus(): {
+    summary: {
+      total: number
+      healthy: number
+      degraded: number
+      violating: number
+    }
+    slos: Array<{
+      id: string
+      name: string
+      category: string
+      status: 'healthy' | 'degraded' | 'violating'
+      compliance: number
+      errorBudget: number
+      lastViolation?: Date
+    }>
+  } {
+    const sloStatus = Array.from(this.sloTargets.entries()).map(([id, slo]) => {
+      const violations = this.violations.get(id) || []
+      const activeViolations = violations.filter((v) => !v.resolved)
+      const lastViolation =
+        violations.length > 0 ? violations[violations.length - 1].timestamp : undefined
+
+      let status: 'healthy' | 'degraded' | 'violating'
+      if (activeViolations.length > 0) {
+        status = 'violating'
+      } else if (
+        violations.length > 0 &&
+        Date.now() - violations[violations.length - 1].timestamp.getTime() < 300000
+      ) {
+        status = 'degraded'
+      } else {
+        status = 'healthy'
+      }
+
+      return {
+        id,
+        name: slo.name,
+        category: slo.category,
+        status,
+        compliance: 0.95, // Would be calculated from actual metrics
+        errorBudget: 0.8, // Would be calculated from actual metrics
+        lastViolation,
+      }
+    })
+
+    const summary = {
+      total: sloStatus.length,
+      healthy: sloStatus.filter((s) => s.status === 'healthy').length,
+      degraded: sloStatus.filter((s) => s.status === 'degraded').length,
+      violating: sloStatus.filter((s) => s.status === 'violating').length,
+    }
+
+    return { summary, slos: sloStatus }
+  }
+
+  /**
+   * Get violation history
+   */
+  getViolationHistory(sloId?: string, timeRange?: string): SLOViolation[] {
+    if (sloId) {
+      return this.violations.get(sloId) || []
+    }
+
+    // Return all violations
+    const allViolations = Array.from(this.violations.values()).flat()
+
+    if (timeRange) {
+      const cutoffTime = this.parseTimeRange(timeRange)
+      return allViolations.filter((v) => v.timestamp >= cutoffTime)
+    }
+
+    return allViolations
+  }
+
+  /**
+   * Parse time range string
+   */
+  private parseTimeRange(timeRange: string): Date {
+    const now = new Date()
+    const value = parseInt(timeRange.slice(0, -1))
+    const unit = timeRange.slice(-1)
+
+    switch (unit) {
+      case 'm':
+        return new Date(now.getTime() - value * 60 * 1000)
+      case 'h':
+        return new Date(now.getTime() - value * 60 * 60 * 1000)
+      case 'd':
+        return new Date(now.getTime() - value * 24 * 60 * 60 * 1000)
+      default:
+        return new Date(0)
+    }
+  }
+
+  /**
+   * Get Prometheus metrics
+   */
+  async getMetrics(): Promise<string> {
+    return await this.prometheusRegistry.metrics()
+  }
+
+  /**
+   * Stop monitoring
+   */
+  stopMonitoring(): void {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval)
+      this.monitoringInterval = null
+      Logger.info('SLO monitoring stopped')
+    }
+  }
+
+  /**
+   * Cleanup
+   */
+  destroy(): void {
+    this.stopMonitoring()
+    this.removeAllListeners()
+    this.prometheusRegistry.clear()
+  }
+}
+
+// Global SLO Manager instance
+export const sloManager = new SLOManager()
+
+// Default alert configurations
+sloManager.configureAlerts('availability_99_9', {
+  channels: ['slack', 'pagerduty', 'email'],
+  recipients: ['sre-team@pmp-learning.com', 'on-call@pmp-learning.com'],
+  cooldownPeriod: 15,
+  escalationDelay: 30,
+})
+
+sloManager.configureAlerts('latency_p95_500ms', {
+  channels: ['slack'],
+  recipients: ['dev-team@pmp-learning.com'],
+  cooldownPeriod: 10,
+  escalationDelay: 20,
+})
+
+// Export for use in other modules
+export default {
+  SLOManager,
+  sloManager,
+  SLOCategory,
+  SLOSeverity,
+}

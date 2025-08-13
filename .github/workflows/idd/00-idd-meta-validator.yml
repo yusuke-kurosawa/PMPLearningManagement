@@ -1,0 +1,393 @@
+# ================================================================
+# IDD Compliant Workflow / IDD準拠ワークフロー
+# ================================================================
+# Issue: #68 #4
+# Category: IDD
+# Purpose: IDD準拠率の監視と100%維持
+#          Monitor and maintain 100% IDD compliance rate
+# Author: Claude Code Actions + yusuke-kurosawa
+# Version: 1.0.0
+# Compliance: IDD 100% Compliant
+# ================================================================
+
+name: "🎯 IDD | Meta Validator - 準拠率100%監視"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'fix/**'
+  schedule:
+    - cron: '0 */6 * * *'  # 6時間ごとに実行
+  workflow_dispatch:
+    inputs:
+      detailed_report:
+        description: '詳細レポートを生成'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+# --------------------------------
+# 📋 IDD Compliance Check
+# --------------------------------
+# This workflow is IDD compliant
+# Issue: #68 #4
+# Branch: feature/issue-68-idd-devops-enhancement
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: write
+
+jobs:
+  # ================================================================
+  # Job 1: コミットメッセージ検証
+  # ================================================================
+  validate-commits:
+    name: "📝 コミットメッセージ検証"
+    runs-on: ubuntu-latest
+    
+    outputs:
+      compliance_rate: ${{ steps.calculate.outputs.rate }}
+      non_compliant_commits: ${{ steps.analyze.outputs.non_compliant }}
+      
+    steps:
+      # --------------------------------
+      # Step 1: チェックアウト
+      # --------------------------------
+      - name: "📥 リポジトリチェックアウト"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得
+          
+      # --------------------------------
+      # Step 2: コミット分析
+      # --------------------------------
+      - name: "🔍 コミットメッセージ分析"
+        id: analyze
+        run: |
+          echo "=== IDD準拠率分析開始 ==="
+          
+          # 対象コミットの取得
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+            COMMITS=$(git log --format="%H %s" $BASE_SHA..$HEAD_SHA)
+          else
+            COMMITS=$(git log --format="%H %s" -n 50)
+          fi
+          
+          # 準拠率計算
+          TOTAL=0
+          COMPLIANT=0
+          NON_COMPLIANT=""
+          
+          while IFS= read -r commit; do
+            if [ -z "$commit" ]; then continue; fi
+            
+            TOTAL=$((TOTAL + 1))
+            SHA=$(echo "$commit" | cut -d' ' -f1)
+            MSG=$(echo "$commit" | cut -d' ' -f2-)
+            
+            # Issue番号チェック（#数字）
+            if echo "$MSG" | grep -qE '#[0-9]+'; then
+              COMPLIANT=$((COMPLIANT + 1))
+              echo "✅ 準拠: $MSG"
+            else
+              NON_COMPLIANT="$NON_COMPLIANT\n- $SHA: $MSG"
+              echo "❌ 非準拠: $MSG"
+            fi
+          done <<< "$COMMITS"
+          
+          # 結果出力
+          echo "non_compliant<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$NON_COMPLIANT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "total_commits=$TOTAL" >> $GITHUB_OUTPUT
+          echo "compliant_commits=$COMPLIANT" >> $GITHUB_OUTPUT
+          
+      # --------------------------------
+      # Step 3: 準拠率計算
+      # --------------------------------
+      - name: "📊 準拠率計算"
+        id: calculate
+        run: |
+          TOTAL=${{ steps.analyze.outputs.total_commits }}
+          COMPLIANT=${{ steps.analyze.outputs.compliant_commits }}
+          
+          if [ "$TOTAL" -eq 0 ]; then
+            RATE=100
+          else
+            RATE=$((COMPLIANT * 100 / TOTAL))
+          fi
+          
+          echo "rate=$RATE" >> $GITHUB_OUTPUT
+          echo "📊 IDD準拠率: ${RATE}%"
+          echo "📈 準拠コミット: $COMPLIANT / $TOTAL"
+          
+          # 準拠率チェック
+          if [ "$RATE" -lt 100 ]; then
+            echo "⚠️ 警告: IDD準拠率が100%未満です！"
+            exit 1
+          fi
+
+  # ================================================================
+  # Job 2: ブランチ命名規則検証
+  # ================================================================
+  validate-branch:
+    name: "🌿 ブランチ命名規則検証"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      # --------------------------------
+      # Step 1: ブランチ名検証
+      # --------------------------------
+      - name: "🔍 ブランチ名検証"
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "検証対象ブランチ: $BRANCH_NAME"
+          
+          # 許可されるパターン
+          # - feature/issue-[番号]-[説明]
+          # - fix/issue-[番号]-[説明]
+          # - hotfix/issue-[番号]-[説明]
+          # - release/v[バージョン]
+          # - main, develop
+          
+          if echo "$BRANCH_NAME" | grep -qE '^(feature|fix|hotfix)/issue-[0-9]+-[a-z0-9-]+$'; then
+            echo "✅ ブランチ名がIDD規則に準拠しています"
+            
+            # Issue番号抽出
+            ISSUE_NUM=$(echo "$BRANCH_NAME" | grep -oE 'issue-[0-9]+' | cut -d'-' -f2)
+            echo "📋 関連Issue: #$ISSUE_NUM"
+            
+          elif echo "$BRANCH_NAME" | grep -qE '^(release/v[0-9]+\.[0-9]+\.[0-9]+|main|develop)$'; then
+            echo "✅ 特別ブランチとして許可されています"
+            
+          else
+            echo "❌ ブランチ名がIDD規則に準拠していません"
+            echo "期待される形式:"
+            echo "  - feature/issue-[番号]-[説明]"
+            echo "  - fix/issue-[番号]-[説明]"
+            echo "  - hotfix/issue-[番号]-[説明]"
+            exit 1
+          fi
+
+  # ================================================================
+  # Job 3: PR-Issue連携検証
+  # ================================================================
+  validate-pr-issue-link:
+    name: "🔗 PR-Issue連携検証"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      # --------------------------------
+      # Step 1: PR本文検証
+      # --------------------------------
+      - name: "📄 PR本文のIssue参照検証"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "=== PR-Issue連携検証 ==="
+          
+          # タイトルまたは本文にIssue番号があるか確認
+          if echo "$PR_TITLE $PR_BODY" | grep -qE '#[0-9]+'; then
+            echo "✅ PRにIssue参照が含まれています"
+            
+            # Issue番号抽出
+            ISSUES=$(echo "$PR_TITLE $PR_BODY" | grep -oE '#[0-9]+' | sort -u)
+            echo "📋 参照されているIssue:"
+            echo "$ISSUES"
+          else
+            echo "❌ PRにIssue参照が含まれていません"
+            echo "PRタイトルまたは本文にIssue番号（#123）を含めてください"
+            exit 1
+          fi
+
+  # ================================================================
+  # Job 4: 準拠率レポート生成
+  # ================================================================
+  generate-report:
+    name: "📊 準拠率レポート生成"
+    runs-on: ubuntu-latest
+    needs: [validate-commits, validate-branch, validate-pr-issue-link]
+    if: always()
+    
+    steps:
+      # --------------------------------
+      # Step 1: チェックアウト
+      # --------------------------------
+      - name: "📥 リポジトリチェックアウト"
+        uses: actions/checkout@v4
+        
+      # --------------------------------
+      # Step 2: Node.js セットアップ
+      # --------------------------------
+      - name: "📦 Node.js セットアップ"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      # --------------------------------
+      # Step 3: レポート生成
+      # --------------------------------
+      - name: "📊 IDD準拠率レポート生成"
+        run: |
+          cat > idd-compliance-report.md << 'EOF'
+          # 📊 IDD準拠率レポート
+          
+          **生成日時**: $(date '+%Y-%m-%d %H:%M:%S')
+          **ワークフロー実行**: ${{ github.run_number }}
+          
+          ## 📈 準拠率サマリー
+          
+          | 項目 | ステータス | 準拠率 |
+          |------|-----------|--------|
+          | コミットメッセージ | ${{ needs.validate-commits.result == 'success' && '✅' || '❌' }} | ${{ needs.validate-commits.outputs.compliance_rate }}% |
+          | ブランチ命名規則 | ${{ needs.validate-branch.result == 'success' && '✅' || needs.validate-branch.result == 'skipped' && '➖' || '❌' }} | - |
+          | PR-Issue連携 | ${{ needs.validate-pr-issue-link.result == 'success' && '✅' || needs.validate-pr-issue-link.result == 'skipped' && '➖' || '❌' }} | - |
+          
+          ## 📋 詳細分析
+          
+          ### コミットメッセージ準拠状況
+          - 総コミット数: ${{ needs.validate-commits.outputs.total_commits || 0 }}
+          - 準拠コミット: ${{ needs.validate-commits.outputs.compliant_commits || 0 }}
+          - 準拠率: **${{ needs.validate-commits.outputs.compliance_rate || 100 }}%**
+          
+          ### 非準拠コミット
+          ${{ needs.validate-commits.outputs.non_compliant_commits || 'なし' }}
+          
+          ## 🎯 目標達成状況
+          
+          - **目標準拠率**: 100%
+          - **現在の準拠率**: ${{ needs.validate-commits.outputs.compliance_rate || 100 }}%
+          - **ステータス**: ${{ needs.validate-commits.outputs.compliance_rate == '100' && '✅ 達成' || '⚠️ 未達成' }}
+          
+          ## 📝 推奨事項
+          
+          1. すべてのコミットメッセージにIssue番号を含める
+          2. ブランチ名は `feature/issue-[番号]-[説明]` 形式を使用
+          3. PRには必ず関連Issueを参照する
+          4. `git commit -m "feat: 機能追加 #123"` の形式を推奨
+          
+          ---
+          *このレポートはIDD Meta Validatorにより自動生成されました*
+          EOF
+          
+          echo "📊 レポート生成完了"
+          cat idd-compliance-report.md
+          
+      # --------------------------------
+      # Step 4: アーティファクトアップロード
+      # --------------------------------
+      - name: "📤 レポートアップロード"
+        uses: actions/upload-artifact@v4
+        with:
+          name: idd-compliance-report
+          path: idd-compliance-report.md
+          retention-days: 30
+          
+      # --------------------------------
+      # Step 5: PRコメント投稿
+      # --------------------------------
+      - name: "💬 PRコメント投稿"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('idd-compliance-report.md', 'utf8');
+            
+            // 既存のコメントを検索
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('IDD準拠率レポート')
+            );
+            
+            if (botComment) {
+              // 既存コメントを更新
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report
+              });
+            } else {
+              // 新規コメントを作成
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }
+
+  # ================================================================
+  # Job 5: Slack通知（オプション）
+  # ================================================================
+  notify-slack:
+    name: "📢 Slack通知"
+    runs-on: ubuntu-latest
+    needs: [generate-report]
+    if: always() && vars.SLACK_WEBHOOK_URL != ''
+    
+    steps:
+      - name: "📢 Slack通知送信"
+        env:
+          SLACK_WEBHOOK_URL: ${{ vars.SLACK_WEBHOOK_URL }}
+        run: |
+          COMPLIANCE_RATE="${{ needs.validate-commits.outputs.compliance_rate || 100 }}"
+          
+          if [ "$COMPLIANCE_RATE" -eq 100 ]; then
+            COLOR="good"
+            EMOJI="✅"
+            MESSAGE="IDD準拠率100%を維持しています！"
+          else
+            COLOR="warning"
+            EMOJI="⚠️"
+            MESSAGE="IDD準拠率が${COMPLIANCE_RATE}%に低下しました"
+          fi
+          
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"attachments\": [{
+                \"color\": \"$COLOR\",
+                \"title\": \"$EMOJI IDD準拠率レポート\",
+                \"text\": \"$MESSAGE\",
+                \"fields\": [
+                  {
+                    \"title\": \"リポジトリ\",
+                    \"value\": \"${{ github.repository }}\",
+                    \"short\": true
+                  },
+                  {
+                    \"title\": \"準拠率\",
+                    \"value\": \"${COMPLIANCE_RATE}%\",
+                    \"short\": true
+                  }
+                ],
+                \"footer\": \"IDD Meta Validator\",
+                \"ts\": $(date +%s)
+              }]
+            }"

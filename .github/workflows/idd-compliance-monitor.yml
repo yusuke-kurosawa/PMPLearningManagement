@@ -1,0 +1,720 @@
+# ================================================================
+# Workflow: IDD準拠監視システム
+# Category: IDD (Issue-Driven Development)
+# Purpose: Issue-Driven Development準拠率の監視と自動改善
+# Trigger: Issue/PR作成、コミット、定期実行
+# Dependencies: GitHub API、IDD検証スクリプト、メトリクス収集
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# Issue: #79
+# ================================================================
+
+name: 🎯 IDD準拠監視システム
+
+# ------------------------------------------------------------
+# トリガー設定
+# IDD準拠率99%以上を維持するための包括的監視
+# ------------------------------------------------------------
+on:
+  # Issue関連イベント
+  issues:
+    types: [opened, edited, closed, reopened, labeled, assigned]
+  
+  # プルリクエスト関連イベント
+  pull_request:
+    types: [opened, edited, synchronize, closed, labeled]
+  
+  # プッシュ時（コミットメッセージ検証）
+  push:
+    branches: [main, develop, feature/**, bugfix/**]
+  
+  # 定期実行（準拠率監視）
+  schedule:
+    # 毎日午前9時（JST）と午後6時に実行
+    - cron: '0 0 * * *'   # 09:00 JST
+    - cron: '0 9 * * *'   # 18:00 JST
+  
+  # 手動実行（IDD分析・修正）
+  workflow_dispatch:
+    inputs:
+      analysis_type:
+        description: 'IDD分析タイプ'
+        type: choice
+        options:
+          - full-compliance-check
+          - issue-validation
+          - commit-validation  
+          - metrics-analysis
+          - auto-fix-attempt
+        default: 'full-compliance-check'
+      days_to_analyze:
+        description: '分析対象日数'
+        type: number
+        default: 7
+        required: false
+
+# ------------------------------------------------------------
+# 権限設定（IDD管理に必要な権限）
+# ------------------------------------------------------------
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+
+# ------------------------------------------------------------
+# 環境変数
+# ------------------------------------------------------------
+env:
+  IDD_TARGET_COMPLIANCE: '99'  # 目標準拠率
+  ANALYSIS_PERIOD: ${{ github.event.inputs.days_to_analyze || '7' }}
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ------------------------------------------------------------
+jobs:
+  # ============================================================
+  # ジョブ1: Issue準拠チェック
+  # ============================================================
+  issue-compliance-check:
+    name: 📋 Issue準拠チェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'issues' || github.event_name == 'workflow_dispatch'
+    
+    outputs:
+      issue-compliant: ${{ steps.check-issue.outputs.compliant }}
+      missing-elements: ${{ steps.check-issue.outputs.missing-elements }}
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: Issue形式検証
+      # ----------------------------------------------------------
+      - name: 📋 Issue形式検証
+        id: check-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('📋 Issue形式検証を開始...');
+            
+            // 対象Issue取得
+            let issueNumber, issueData;
+            if (context.eventName === 'issues') {
+              issueNumber = context.issue.number;
+              issueData = context.payload.issue;
+            } else if (context.eventName === 'workflow_dispatch') {
+              // 手動実行時は最新のIssueを分析
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 1
+              });
+              if (issues.length === 0) {
+                console.log('✅ 分析対象のIssueがありません');
+                return;
+              }
+              issueNumber = issues[0].number;
+              issueData = issues[0];
+            }
+            
+            console.log(`🔍 Issue #${issueNumber} を分析中...`);
+            
+            const title = issueData.title;
+            const body = issueData.body || '';
+            const labels = issueData.labels.map(label => label.name);
+            
+            // IDD準拠チェック項目
+            let compliance = {
+              hasTypePrefix: false,
+              hasDescription: false,
+              hasAcceptanceCriteria: false,
+              hasLabels: false,
+              hasRelatedIssues: false
+            };
+            
+            let missingElements = [];
+            
+            // タイトル形式チェック（種別プレフィックス）
+            const typePrefixes = ['feat:', 'fix:', 'docs:', 'style:', 'refactor:', 'test:', 'chore:'];
+            const hasTypePrefix = typePrefixes.some(prefix => 
+              title.toLowerCase().startsWith(prefix) || 
+              title.includes('🐛') || title.includes('✨') || title.includes('📚')
+            );
+            
+            if (hasTypePrefix) {
+              compliance.hasTypePrefix = true;
+            } else {
+              missingElements.push('種別プレフィックス（feat:, fix:, docs: など）');
+            }
+            
+            // 説明の詳細度チェック
+            if (body.length > 50) {
+              compliance.hasDescription = true;
+            } else {
+              missingElements.push('詳細な説明（50文字以上）');
+            }
+            
+            // 受け入れ条件チェック
+            const hasAcceptanceCriteria = 
+              body.includes('受け入れ条件') || 
+              body.includes('Acceptance Criteria') ||
+              body.includes('- [ ]') ||
+              body.includes('チェックリスト');
+            
+            if (hasAcceptanceCriteria) {
+              compliance.hasAcceptanceCriteria = true;
+            } else {
+              missingElements.push('受け入れ条件またはチェックリスト');
+            }
+            
+            // ラベルチェック
+            if (labels.length > 0) {
+              compliance.hasLabels = true;
+            } else {
+              missingElements.push('適切なラベル');
+            }
+            
+            // 関連Issue参照チェック
+            const hasRelatedIssues = body.includes('#') && /\#\d+/.test(body);
+            if (hasRelatedIssues) {
+              compliance.hasRelatedIssues = true;
+            }
+            
+            // 総合準拠判定
+            const requiredElements = ['hasTypePrefix', 'hasDescription', 'hasAcceptanceCriteria', 'hasLabels'];
+            const compliantCount = requiredElements.filter(element => compliance[element]).length;
+            const isCompliant = compliantCount >= 3; // 4項目中3項目以上
+            
+            console.log(`📊 Issue #${issueNumber} 準拠率: ${compliantCount}/4`);
+            console.log(`✅ 準拠状況: ${isCompliant ? 'COMPLIANT' : 'NON-COMPLIANT'}`);
+            
+            core.setOutput('compliant', isCompliant);
+            core.setOutput('missing-elements', missingElements.join(', '));
+            
+            // 非準拠の場合、改善提案コメント投稿
+            if (!isCompliant && context.eventName === 'issues') {
+              const improvementComment = `## 📋 IDD準拠改善提案
+              
+              このIssueは現在IDD準拠率 **${compliantCount}/4** です。以下の改善をお願いします：
+              
+              ### ❌ 不足している要素
+              ${missingElements.map(element => `- ${element}`).join('\n')}
+              
+              ### ✅ 改善方法
+              1. **種別プレフィックス**: タイトルに \`feat:\`, \`fix:\`, \`docs:\` などを追加
+              2. **詳細説明**: 問題の背景、解決策、影響範囲を詳しく記載
+              3. **受け入れ条件**: \`- [ ]\` 形式のチェックリストを追加
+              4. **ラベル**: 適切なカテゴリ・優先度ラベルを設定
+              
+              ### 📝 テンプレート例
+              \`\`\`
+              ## 概要
+              [問題の説明]
+              
+              ## 解決策
+              [実装すべき内容]
+              
+              ## 受け入れ条件
+              - [ ] 条件1
+              - [ ] 条件2
+              - [ ] 条件3
+              \`\`\`
+              
+              ---
+              🤖 IDD自動改善提案 | Issue #79`;
+              
+              await github.rest.issues.createComment({
+                issue_number: issueNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: improvementComment
+              });
+              
+              console.log('💡 改善提案コメントを投稿しました');
+            }
+
+  # ============================================================
+  # ジョブ2: PR準拠チェック
+  # ============================================================
+  pr-compliance-check:
+    name: 🔄 PR準拠チェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    
+    outputs:
+      pr-compliant: ${{ steps.check-pr.outputs.compliant }}
+      linked-issues: ${{ steps.check-pr.outputs.linked-issues }}
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: PR形式検証
+      # ----------------------------------------------------------
+      - name: 🔄 PR形式検証
+        id: check-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('🔄 PR形式検証を開始...');
+            
+            // 対象PR取得
+            let prNumber, prData;
+            if (context.eventName === 'pull_request') {
+              prNumber = context.issue.number;
+              prData = context.payload.pull_request;
+            } else {
+              // 手動実行時は最新のPRを分析
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 1
+              });
+              if (prs.length === 0) {
+                console.log('✅ 分析対象のPRがありません');
+                return;
+              }
+              prNumber = prs[0].number;
+              prData = prs[0];
+            }
+            
+            console.log(`🔍 PR #${prNumber} を分析中...`);
+            
+            const title = prData.title;
+            const body = prData.body || '';
+            
+            // Issue番号抽出
+            const issueReferences = body.match(/(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi) || [];
+            const issueNumbers = issueReferences.map(ref => ref.match(/#(\d+)/)[1]);
+            
+            console.log(`🔗 リンクされたIssue: ${issueNumbers.join(', ')}`);
+            
+            // PR準拠チェック
+            let compliance = {
+              hasIssueReference: issueNumbers.length > 0,
+              hasDescription: body.length > 50,
+              hasTestInfo: false,
+              hasBreakingChanges: false
+            };
+            
+            // テスト情報チェック
+            const testKeywords = ['test', 'テスト', 'tested', '動作確認', 'coverage'];
+            compliance.hasTestInfo = testKeywords.some(keyword => 
+              body.toLowerCase().includes(keyword)
+            );
+            
+            // 破壊的変更チェック
+            const breakingKeywords = ['breaking', '破壊的', 'BREAKING CHANGE'];
+            compliance.hasBreakingChanges = breakingKeywords.some(keyword => 
+              title.includes(keyword) || body.includes(keyword)
+            );
+            
+            // 総合準拠判定
+            const requiredElements = ['hasIssueReference', 'hasDescription'];
+            const compliantCount = requiredElements.filter(element => compliance[element]).length;
+            const isCompliant = compliantCount === 2;
+            
+            console.log(`📊 PR #${prNumber} 準拠率: ${compliantCount}/2`);
+            console.log(`✅ 準拠状況: ${isCompliant ? 'COMPLIANT' : 'NON-COMPLIANT'}`);
+            
+            core.setOutput('compliant', isCompliant);
+            core.setOutput('linked-issues', issueNumbers.join(','));
+            
+            // 非準拠の場合、改善提案
+            if (!isCompliant && context.eventName === 'pull_request') {
+              let suggestions = [];
+              
+              if (!compliance.hasIssueReference) {
+                suggestions.push('関連するIssue番号を `Closes #123` 形式で記載');
+              }
+              if (!compliance.hasDescription) {
+                suggestions.push('変更内容の詳細説明を追加');
+              }
+              
+              const improvementComment = `## 🔄 PR準拠改善提案
+              
+              このPRは現在IDD準拠率 **${compliantCount}/2** です。
+              
+              ### 🚨 改善が必要な項目
+              ${suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
+              
+              ### ✅ 推奨PR説明形式
+              \`\`\`
+              ## 変更内容
+              [具体的な変更の説明]
+              
+              ## 関連Issue
+              Closes #123
+              
+              ## テスト
+              - [ ] 単体テスト追加
+              - [ ] 手動テスト実行
+              - [ ] 既存機能の回帰テスト
+              
+              ## 破壊的変更
+              なし / [破壊的変更の詳細]
+              \`\`\`
+              
+              ---
+              🤖 IDD自動改善提案 | Issue #79`;
+              
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: improvementComment
+              });
+            }
+
+  # ============================================================
+  # ジョブ3: コミット準拠チェック
+  # ============================================================
+  commit-compliance-check:
+    name: 📝 コミット準拠チェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: リポジトリチェックアウト
+      # ----------------------------------------------------------
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10  # 直近10コミットを取得
+      
+      # ----------------------------------------------------------
+      # ステップ2: コミットメッセージ検証
+      # ----------------------------------------------------------
+      - name: 📝 コミットメッセージ検証
+        run: |
+          echo "📝 コミットメッセージ準拠チェック実行中..."
+          
+          # 直近のコミットを分析
+          COMMITS=$(git log --oneline -n 10 --format="%H %s")
+          TOTAL_COMMITS=0
+          COMPLIANT_COMMITS=0
+          NON_COMPLIANT_COMMITS=""
+          
+          while IFS= read -r commit_line; do
+            if [ -z "$commit_line" ]; then
+              continue
+            fi
+            
+            COMMIT_HASH=$(echo "$commit_line" | cut -d' ' -f1)
+            COMMIT_MSG=$(echo "$commit_line" | cut -d' ' -f2-)
+            
+            TOTAL_COMMITS=$((TOTAL_COMMITS + 1))
+            
+            echo "🔍 チェック中: $COMMIT_MSG"
+            
+            # IDD準拠チェック
+            IS_COMPLIANT=false
+            
+            # Issue番号チェック（#123形式）
+            if echo "$COMMIT_MSG" | grep -qE "#[0-9]+"; then
+              IS_COMPLIANT=true
+              COMPLIANT_COMMITS=$((COMPLIANT_COMMITS + 1))
+              echo "  ✅ Issue番号あり"
+            else
+              # 種別プレフィックスチェック
+              if echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert):"; then
+                IS_COMPLIANT=true
+                COMPLIANT_COMMITS=$((COMPLIANT_COMMITS + 1))
+                echo "  ✅ 種別プレフィックスあり"
+              else
+                NON_COMPLIANT_COMMITS="$NON_COMPLIANT_COMMITS\n- $COMMIT_HASH: $COMMIT_MSG"
+                echo "  ❌ Issue番号または種別プレフィックスが不足"
+              fi
+            fi
+          done <<< "$COMMITS"
+          
+          # 準拠率計算
+          if [ $TOTAL_COMMITS -gt 0 ]; then
+            COMPLIANCE_RATE=$((COMPLIANT_COMMITS * 100 / TOTAL_COMMITS))
+            echo "📊 コミット準拠率: $COMPLIANCE_RATE% ($COMPLIANT_COMMITS/$TOTAL_COMMITS)"
+            
+            if [ $COMPLIANCE_RATE -lt 90 ]; then
+              echo "⚠️ コミット準拠率が90%を下回っています"
+              echo "❌ 非準拠コミット:$NON_COMPLIANT_COMMITS"
+              
+              # Issue #79にコメント投稿
+              if [ -n "$GITHUB_TOKEN" ]; then
+                curl -X POST \
+                  -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/79/comments" \
+                  -d "{\"body\":\"## ⚠️ コミット準拠率低下アラート\\n\\n現在のコミット準拠率: **$COMPLIANCE_RATE%**\\n\\n非準拠コミット:$NON_COMPLIANT_COMMITS\\n\\n### 改善方法\\n- Issue番号を含める: \\\`fix: バグ修正 #123\\\`\\n- 種別プレフィックスを使用: \\\`feat: 新機能追加\\\`\\n\\n---\\n🤖 IDD自動監視 | Issue #79\"}"
+              fi
+            else
+              echo "✅ コミット準拠率は基準を満たしています"
+            fi
+          else
+            echo "📋 分析対象のコミットがありません"
+          fi
+
+  # ============================================================
+  # ジョブ4: IDD準拠率レポート生成
+  # ============================================================
+  idd-compliance-report:
+    name: 📊 IDD準拠率レポート
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [issue-compliance-check, pr-compliance-check, commit-compliance-check]
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: 包括的IDD分析
+      # ----------------------------------------------------------
+      - name: 📊 包括的IDD分析
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('📊 包括的IDD分析を開始...');
+            
+            const analysisDate = new Date().toLocaleDateString('ja-JP');
+            const analysisPeriod = ${{ env.ANALYSIS_PERIOD }};
+            
+            // 分析期間の開始日計算
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - analysisPeriod);
+            
+            console.log(`📅 分析期間: ${startDate.toISOString().split('T')[0]} ～ ${new Date().toISOString().split('T')[0]}`);
+            
+            // Issue分析
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: startDate.toISOString(),
+              per_page: 100
+            });
+            
+            // PR分析
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: startDate.toISOString(),
+              per_page: 100
+            });
+            
+            // Issue準拠率分析
+            let issueCompliance = {
+              total: 0,
+              compliant: 0,
+              nonCompliantReasons: {}
+            };
+            
+            for (const issue of issues) {
+              issueCompliance.total++;
+              
+              const title = issue.title;
+              const body = issue.body || '';
+              const labels = issue.labels;
+              
+              let compliantCount = 0;
+              const reasons = [];
+              
+              // 種別プレフィックスチェック
+              const typePrefixes = ['feat:', 'fix:', 'docs:', 'style:', 'refactor:', 'test:', 'chore:'];
+              if (typePrefixes.some(prefix => title.toLowerCase().startsWith(prefix)) || 
+                  title.includes('🐛') || title.includes('✨') || title.includes('📚')) {
+                compliantCount++;
+              } else {
+                reasons.push('種別プレフィックス不足');
+              }
+              
+              // 説明詳細度チェック
+              if (body.length > 50) {
+                compliantCount++;
+              } else {
+                reasons.push('説明不足');
+              }
+              
+              // 受け入れ条件チェック
+              if (body.includes('受け入れ条件') || body.includes('- [ ]')) {
+                compliantCount++;
+              } else {
+                reasons.push('受け入れ条件なし');
+              }
+              
+              // ラベルチェック
+              if (labels.length > 0) {
+                compliantCount++;
+              } else {
+                reasons.push('ラベルなし');
+              }
+              
+              // 準拠判定（4項目中3項目以上）
+              if (compliantCount >= 3) {
+                issueCompliance.compliant++;
+              } else {
+                reasons.forEach(reason => {
+                  issueCompliance.nonCompliantReasons[reason] = 
+                    (issueCompliance.nonCompliantReasons[reason] || 0) + 1;
+                });
+              }
+            }
+            
+            // PR準拠率分析
+            let prCompliance = {
+              total: 0,
+              compliant: 0,
+              withIssueLink: 0
+            };
+            
+            for (const pr of prs) {
+              prCompliance.total++;
+              
+              const body = pr.body || '';
+              
+              // Issue番号リンクチェック
+              const hasIssueLink = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/i.test(body);
+              if (hasIssueLink) {
+                prCompliance.withIssueLink++;
+              }
+              
+              // 基本準拠チェック（Issue番号 + 詳細説明）
+              if (hasIssueLink && body.length > 50) {
+                prCompliance.compliant++;
+              }
+            }
+            
+            // 準拠率計算
+            const issueComplianceRate = issueCompliance.total > 0 ? 
+              Math.round((issueCompliance.compliant / issueCompliance.total) * 100) : 100;
+            const prComplianceRate = prCompliance.total > 0 ? 
+              Math.round((prCompliance.compliant / prCompliance.total) * 100) : 100;
+            const overallComplianceRate = Math.round((issueComplianceRate + prComplianceRate) / 2);
+            
+            console.log(`📊 Issue準拠率: ${issueComplianceRate}%`);
+            console.log(`📊 PR準拠率: ${prComplianceRate}%`);
+            console.log(`📊 総合準拠率: ${overallComplianceRate}%`);
+            
+            // 詳細レポート生成
+            const reportTitle = `📊 IDD準拠率レポート - ${analysisDate}`;
+            const reportBody = `## 📊 Issue-Driven Development 準拠率レポート
+            
+            **📅 分析期間**: ${analysisPeriod}日間（${startDate.toLocaleDateString('ja-JP')} ～ ${analysisDate}）
+            **🎯 目標準拠率**: ${process.env.IDD_TARGET_COMPLIANCE}%
+            
+            ### 📈 準拠率サマリー
+            | 項目 | 準拠率 | 対象数 | 準拠数 | ステータス |
+            |------|--------|--------|--------|------------|
+            | 📋 Issue | **${issueComplianceRate}%** | ${issueCompliance.total} | ${issueCompliance.compliant} | ${issueComplianceRate >= 99 ? '🟢 目標達成' : issueComplianceRate >= 90 ? '🟡 改善必要' : '🔴 要対策'} |
+            | 🔄 PR | **${prComplianceRate}%** | ${prCompliance.total} | ${prCompliance.compliant} | ${prComplianceRate >= 99 ? '🟢 目標達成' : prComplianceRate >= 90 ? '🟡 改善必要' : '🔴 要対策'} |
+            | 🎯 **総合** | **${overallComplianceRate}%** | - | - | ${overallComplianceRate >= 99 ? '🟢 目標達成' : overallComplianceRate >= 90 ? '🟡 改善必要' : '🔴 要対策'} |
+            
+            ### 📊 詳細分析
+            
+            #### 📋 Issue分析
+            - **総Issue数**: ${issueCompliance.total}件
+            - **準拠Issue数**: ${issueCompliance.compliant}件
+            - **Issue番号リンク率**: ${prCompliance.total > 0 ? Math.round((prCompliance.withIssueLink / prCompliance.total) * 100) : 0}%
+            
+            ${Object.keys(issueCompliance.nonCompliantReasons).length > 0 ? 
+              '**主な非準拠理由**:\n' + 
+              Object.entries(issueCompliance.nonCompliantReasons)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5)
+                .map(([reason, count]) => `- ${reason}: ${count}件`)
+                .join('\n') : 
+              '✅ すべてのIssueが準拠基準を満たしています'
+            }
+            
+            #### 🔄 PR分析
+            - **総PR数**: ${prCompliance.total}件
+            - **準拠PR数**: ${prCompliance.compliant}件
+            - **Issue番号リンク**: ${prCompliance.withIssueLink}件 (${prCompliance.total > 0 ? Math.round((prCompliance.withIssueLink / prCompliance.total) * 100) : 0}%)
+            
+            ### 🚀 改善アクション
+            
+            ${overallComplianceRate >= 99 ? 
+              '🎉 **素晴らしい！** 目標準拠率を達成しています。現在の品質を維持してください。' :
+              overallComplianceRate >= 90 ?
+              `🔧 **改善推奨**: 準拠率${99 - overallComplianceRate}%向上で目標達成です。
+              
+              **優先改善項目**:
+              ${issueComplianceRate < 99 ? '- Issue作成時のテンプレート使用徹底' : ''}
+              ${prComplianceRate < 99 ? '- PR作成時のIssue番号リンク徹底' : ''}
+              - Git commit message規約の遵守
+              - 定期的なIDD研修実施` :
+              
+              `🚨 **緊急対策必要**: 準拠率が基準を大幅に下回っています。
+              
+              **即座に実施**:
+              - IDD研修の緊急実施
+              - Issue/PRテンプレートの必須化
+              - Git pre-commit hookの強化
+              - レビュープロセスの見直し`
+            }
+            
+            ### 📈 トレンド分析
+            - 前回比較: ${overallComplianceRate >= 95 ? '📈 維持・向上' : overallComplianceRate >= 85 ? '📊 横ばい' : '📉 要改善'}
+            - 予測: ${overallComplianceRate >= 95 ? '目標継続達成見込み' : '改善取り組み必要'}
+            
+            ### 🎯 次回目標
+            - Issue準拠率: ${Math.min(issueComplianceRate + 5, 100)}%
+            - PR準拠率: ${Math.min(prComplianceRate + 5, 100)}%
+            - 総合準拠率: ${Math.min(overallComplianceRate + 5, 100)}%
+            
+            ### 📚 参考リソース
+            - [IDD実装ガイド](./docs/IDD_IMPLEMENTATION_STATUS.md)
+            - [IDDルール定義](./.claude/rules/idd-rules.md)
+            - [Issue作成テンプレート](./.github/ISSUE_TEMPLATE/)
+            
+            ---
+            🤖 **自動生成レポート** | Issue #79 | 次回更新: ${new Date(Date.now() + 24*60*60*1000).toLocaleDateString('ja-JP')}
+            
+            ${overallComplianceRate < 90 ? '⚠️ このレポートは関係者に自動通知されます' : ''}`;
+            
+            // Issue #79にレポート投稿
+            await github.rest.issues.createComment({
+              issue_number: 79,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: reportBody
+            });
+            
+            console.log('✅ IDD準拠率レポート投稿完了');
+            
+            // 準拠率が低い場合、警告Issue作成
+            if (overallComplianceRate < 85) {
+              const warningIssue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 IDD準拠率低下アラート - ${overallComplianceRate}%`,
+                body: `## 🚨 緊急: IDD準拠率が大幅に低下
+                
+                現在のIDD準拠率が**${overallComplianceRate}%**まで低下しています。
+                
+                ### 📊 現状
+                - Issue準拠率: ${issueComplianceRate}%
+                - PR準拠率: ${prComplianceRate}%
+                - 目標: ${process.env.IDD_TARGET_COMPLIANCE}%
+                
+                ### 🚀 緊急対策
+                1. 全チームメンバーへのIDD研修実施
+                2. Issue/PRテンプレートの必須化
+                3. Git hooks強化による自動チェック
+                4. 週次進捗確認の実施
+                
+                詳細は Issue #79 のレポートを確認してください。
+                
+                ---
+                🤖 自動生成アラート | 優先度: 🔴 Critical`,
+                labels: ['priority/critical', 'idd', 'process-improvement']
+              });
+              
+              console.log(`🚨 警告Issue作成: #${warningIssue.data.number}`);
+            }
+
+# ------------------------------------------------------------
+# IDD準拠監視システム完了
+# 99%準拠率維持と継続的改善プロセスの確立
+# ------------------------------------------------------------

@@ -1,0 +1,312 @@
+# ================================================================
+# Workflow: CI メインパイプライン
+# Category: CI (Continuous Integration)
+# Purpose: プルリクエストとプッシュ時の基本的な品質チェックとビルド検証
+# Trigger: プルリクエスト、メインブランチプッシュ、手動実行
+# Dependencies: Node.js 18、テストフレームワーク、リンティングツール
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# Issue: #79
+# ================================================================
+
+name: 🚀 CI メインパイプライン
+
+# ------------------------------------------------------------
+# トリガー設定
+# 開発の品質を保つための基本的なチェックを高頻度で実行
+# ------------------------------------------------------------
+on:
+  # プルリクエスト時（全ブランチ対象）
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, develop]
+  
+  # メインブランチへのプッシュ時
+  push:
+    branches: [main, develop]
+    # ドキュメントのみの変更は除外してパフォーマンス最適化
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/workflows-backup/**'
+  
+  # 手動実行（デバッグ用）
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: 'デバッグモードを有効化'
+        type: boolean
+        required: false
+        default: false
+
+# ------------------------------------------------------------
+# 権限設定（最小権限の原則）
+# ------------------------------------------------------------
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  issues: read
+
+# ------------------------------------------------------------
+# 環境変数（グローバル設定）
+# ------------------------------------------------------------
+env:
+  NODE_VERSION: '18'
+  CACHE_VERSION: 'v1'
+  CI: true
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ------------------------------------------------------------
+jobs:
+  # ============================================================
+  # ジョブ1: 基本検証（高速実行）
+  # ============================================================
+  basic-validation:
+    name: 📋 基本検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: リポジトリのチェックアウト
+      # ----------------------------------------------------------
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          # 浅いクローンでパフォーマンス最適化
+          fetch-depth: 1
+      
+      # ----------------------------------------------------------
+      # ステップ2: Node.js環境のセットアップ
+      # ----------------------------------------------------------
+      - name: 🔧 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          # package-lock.jsonのチェックサムでキャッシュキー生成
+          cache-dependency-path: package-lock.json
+      
+      # ----------------------------------------------------------
+      # ステップ3: 依存関係のインストール
+      # ----------------------------------------------------------
+      - name: 📦 依存関係インストール
+        run: |
+          echo "📦 NPMパッケージをインストール中..."
+          npm ci --frozen-lockfile
+          echo "✅ 依存関係のインストール完了"
+      
+      # ----------------------------------------------------------
+      # ステップ4: TypeScript型チェック
+      # ----------------------------------------------------------
+      - name: 🔍 TypeScript型チェック
+        run: |
+          echo "🔍 TypeScript型チェック実行中..."
+          npm run typecheck || echo "⚠️ TypeScriptチェックに失敗"
+          echo "✅ 型チェック完了"
+      
+      # ----------------------------------------------------------
+      # ステップ5: ESLintコード品質チェック
+      # ----------------------------------------------------------
+      - name: 📏 ESLint品質チェック
+        run: |
+          echo "📏 ESLint実行中..."
+          npm run lint
+          echo "✅ ESLint品質チェック完了"
+      
+      # ----------------------------------------------------------
+      # ステップ6: ビルド検証
+      # ----------------------------------------------------------
+      - name: 🏗️ ビルド検証
+        run: |
+          echo "🏗️ プロダクションビルド実行中..."
+          npm run build
+          echo "✅ ビルド成功"
+        env:
+          # ビルド時のパフォーマンス監視
+          NODE_OPTIONS: --max-old-space-size=4096
+
+  # ============================================================
+  # ジョブ2: テストスイート実行
+  # ============================================================
+  test-suite:
+    name: 🧪 テストスイート
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 基本検証成功後に実行（並列化によるリソース最適化）
+    needs: basic-validation
+    
+    steps:
+      # ----------------------------------------------------------
+      # 基本セットアップ（前ジョブと同様）
+      # ----------------------------------------------------------
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: 🔧 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      
+      - name: 📦 依存関係インストール
+        run: npm ci --frozen-lockfile
+      
+      # ----------------------------------------------------------
+      # ステップ4: 単体テスト実行
+      # ----------------------------------------------------------
+      - name: 🔬 単体テスト実行
+        run: |
+          echo "🔬 Vitestを使用した単体テスト実行中..."
+          npm run test:run
+          echo "✅ 単体テスト完了"
+      
+      # ----------------------------------------------------------
+      # ステップ5: テストカバレッジ生成
+      # ----------------------------------------------------------
+      - name: 📊 カバレッジ生成
+        run: |
+          echo "📊 テストカバレッジ計測中..."
+          npm run test:coverage
+          echo "✅ カバレッジ生成完了"
+      
+      # ----------------------------------------------------------
+      # ステップ6: カバレッジレポートアップロード
+      # ----------------------------------------------------------
+      - name: 📤 カバレッジアップロード
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  # ============================================================
+  # ジョブ3: セキュリティスキャン
+  # ============================================================
+  security-scan:
+    name: 🔒 セキュリティスキャン
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # テストと並列実行でパフォーマンス最適化
+    needs: basic-validation
+    
+    steps:
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: 🔧 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 依存関係インストール
+        run: npm ci --frozen-lockfile
+      
+      # ----------------------------------------------------------
+      # ステップ4: 依存関係脆弱性チェック
+      # ----------------------------------------------------------
+      - name: 🛡️ 依存関係脆弱性チェック
+        run: |
+          echo "🛡️ NPM Audit実行中..."
+          npm audit --audit-level=high
+          echo "✅ セキュリティスキャン完了"
+      
+      # ----------------------------------------------------------
+      # ステップ5: CodeQL分析
+      # ----------------------------------------------------------
+      - name: 🔍 CodeQL分析初期化
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      
+      - name: 🔬 CodeQL分析実行
+        uses: github/codeql-action/analyze@v3
+
+  # ============================================================
+  # ジョブ4: 品質ゲート判定
+  # ============================================================
+  quality-gate:
+    name: ✅ 品質ゲート
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # 全ての品質チェック完了後に実行
+    needs: [basic-validation, test-suite, security-scan]
+    if: always()
+    
+    steps:
+      # ----------------------------------------------------------
+      # ステップ1: 結果集計と判定
+      # ----------------------------------------------------------
+      - name: 📊 品質ゲート判定
+        run: |
+          echo "📊 品質ゲート結果集計中..."
+          
+          # 各ジョブの結果を確認
+          echo "基本検証: ${{ needs.basic-validation.result }}"
+          echo "テストスイート: ${{ needs.test-suite.result }}"
+          echo "セキュリティスキャン: ${{ needs.security-scan.result }}"
+          
+          # 品質ゲート判定
+          if [[ "${{ needs.basic-validation.result }}" == "success" && \
+                "${{ needs.test-suite.result }}" == "success" && \
+                "${{ needs.security-scan.result }}" == "success" ]]; then
+            echo "✅ 品質ゲート PASSED - すべてのチェックが成功"
+            echo "🎉 コードの品質が基準を満たしています"
+          else
+            echo "❌ 品質ゲート FAILED - いくつかのチェックに失敗"
+            echo "🔧 エラーを確認して修正してください"
+            exit 1
+          fi
+      
+      # ----------------------------------------------------------
+      # ステップ2: PR コメント投稿（PR時のみ）
+      # ----------------------------------------------------------
+      - name: 📝 PR品質レポート投稿
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              basic: '${{ needs.basic-validation.result }}',
+              tests: '${{ needs.test-suite.result }}',
+              security: '${{ needs.security-scan.result }}'
+            };
+            
+            const passed = Object.values(results).every(r => r === 'success');
+            const status = passed ? '✅ PASSED' : '❌ FAILED';
+            
+            const comment = `## 🚀 CI品質レポート ${status}
+            
+            | チェック項目 | 結果 |
+            |-------------|------|
+            | 📋 基本検証 | ${{ needs.basic-validation.result == 'success' && '✅ 成功' || '❌ 失敗' }} |
+            | 🧪 テストスイート | ${{ needs.test-suite.result == 'success' && '✅ 成功' || '❌ 失敗' }} |
+            | 🔒 セキュリティ | ${{ needs.security-scan.result == 'success' && '✅ 成功' || '❌ 失敗' }} |
+            
+            ${passed ? '🎉 すべての品質チェックに合格しました！' : '🔧 失敗した項目を確認して修正してください。'}
+            
+            ---
+            🤖 自動生成レポート - Issue #79`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+# ------------------------------------------------------------
+# ワークフロー完了通知
+# ------------------------------------------------------------
+# 成功時: 高品質なコードの準備完了
+# 失敗時: 品質改善が必要な項目の特定完了

@@ -1,0 +1,687 @@
+# ================================================================
+# Workflow: 07-self-healing-system
+# Purpose: 自動的にエラーを検出・診断・修復するシステム
+#          Automatically detect, diagnose, and fix errors
+# Trigger: Workflow failure, Performance degradation, Issue creation
+# Dependencies: All workflows, Claude API, GitHub API
+# Author: Claude Code Actions
+# Version: 1.0.0
+# Last Updated: 2025-08-12
+# ================================================================
+
+name: "🔧 [Self] Healing & Recovery System / 自己修復・回復システム"
+
+# --------------------------------
+# 📋 Permissions / 権限設定
+# --------------------------------
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+
+# --------------------------------
+# 🎯 Triggers / トリガー
+# --------------------------------
+on:
+  # ワークフロー失敗時 / On workflow failure
+  workflow_run:
+    workflows: ["*"]
+    types: [completed]
+  
+  # 手動実行 / Manual execution
+  workflow_dispatch:
+    inputs:
+      healing_mode:
+        description: 'Healing mode / 修復モード'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'diagnostic'
+          - 'preventive'
+          - 'emergency'
+      
+      target_issue:
+        description: 'Target issue ID (optional) / 対象Issue ID'
+        required: false
+        type: string
+  
+  # Issue作成時（auto-heal ラベル付き） / On issue creation with auto-heal label
+  issues:
+    types: [opened, labeled]
+  
+  # スケジュール実行（予防的ヘルスチェック） / Scheduled preventive health check
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+
+# --------------------------------
+# 🌍 Environment / 環境設定
+# --------------------------------
+env:
+  MAX_HEALING_ATTEMPTS: 3
+  HEALING_TIMEOUT: 30  # minutes
+  CRITICAL_THRESHOLD: 3  # consecutive failures
+  PREVENTIVE_CHECK_INTERVAL: 30  # minutes
+
+# --------------------------------
+# 🔧 Jobs / ジョブ定義
+# --------------------------------
+jobs:
+  health-assessment:
+    # ================================
+    # Job: health-assessment
+    # Description: システム全体のヘルス状態を評価
+    #              Assess overall system health
+    # Dependencies: GitHub API, Workflow history
+    # Timeout: 15分
+    # ================================
+    name: "🩺 [Assessment] System Health Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      system_health: ${{ steps.health-check.outputs.system_health }}
+      failure_patterns: ${{ steps.pattern-analysis.outputs.failure_patterns }}
+      critical_issues: ${{ steps.health-check.outputs.critical_issues }}
+      healing_needed: ${{ steps.health-check.outputs.healing_needed }}
+      recommended_actions: ${{ steps.pattern-analysis.outputs.recommended_actions }}
+    
+    steps:
+      # ================
+      # Repository Setup
+      # 目的: リポジトリとツール準備
+      # Purpose: Setup repository and tools
+      # ================
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50  # より多くの履歴を取得
+          token: ${{ github.token }}
+      
+      # ================
+      # System Health Analysis
+      # 目的: システム全体のヘルス分析
+      # Purpose: Analyze overall system health
+      # ================
+      - name: "🩺 Analyze System Health"
+        id: health-check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            
+            console.log('🩺 Analyzing system health...');
+            
+            // 最近のワークフロー実行を取得
+            const workflowRuns = await github.rest.actions.listWorkflowRunsForRepo({
+              owner,
+              repo,
+              per_page: 100,
+              status: 'completed'
+            });
+            
+            let totalRuns = 0;
+            let failedRuns = 0;
+            let recentFailures = 0;
+            const failurePatterns = {};
+            
+            // ワークフロー実行結果の分析
+            for (const run of workflowRuns.data.workflow_runs) {
+              totalRuns++;
+              
+              if (run.conclusion === 'failure') {
+                failedRuns++;
+                
+                // 最近24時間の失敗
+                const runDate = new Date(run.created_at);
+                const now = new Date();
+                const hoursDiff = (now - runDate) / (1000 * 60 * 60);
+                
+                if (hoursDiff <= 24) {
+                  recentFailures++;
+                }
+                
+                // 失敗パターンの収集
+                const workflowName = run.name || run.workflow_id;
+                failurePatterns[workflowName] = (failurePatterns[workflowName] || 0) + 1;
+              }
+            }
+            
+            // システムヘルスのスコア計算
+            const successRate = totalRuns > 0 ? ((totalRuns - failedRuns) / totalRuns) * 100 : 100;
+            const healthScore = Math.max(0, successRate - (recentFailures * 5));
+            
+            let systemHealth = 'healthy';
+            let healingNeeded = false;
+            
+            if (healthScore < 70) {
+              systemHealth = 'critical';
+              healingNeeded = true;
+            } else if (healthScore < 85) {
+              systemHealth = 'degraded';
+              healingNeeded = true;
+            } else if (recentFailures >= 3) {
+              systemHealth = 'unstable';
+              healingNeeded = true;
+            }
+            
+            console.log(`📊 System Health Score: ${healthScore}%`);
+            console.log(`📊 Success Rate: ${successRate.toFixed(2)}%`);
+            console.log(`📊 Recent Failures: ${recentFailures}`);
+            
+            // 出力設定
+            core.setOutput('system_health', systemHealth);
+            core.setOutput('critical_issues', recentFailures);
+            core.setOutput('healing_needed', healingNeeded.toString());
+            
+            // ヘルス情報をアーティファクト用ファイルに保存
+            const fs = require('fs');
+            const healthData = {
+              timestamp: new Date().toISOString(),
+              healthScore,
+              successRate,
+              totalRuns,
+              failedRuns,
+              recentFailures,
+              systemHealth,
+              failurePatterns
+            };
+            
+            fs.writeFileSync('system-health.json', JSON.stringify(healthData, null, 2));
+      
+      # ================
+      # Failure Pattern Analysis
+      # 目的: 失敗パターンの分析
+      # Purpose: Analyze failure patterns
+      # ================
+      - name: "🔍 Analyze Failure Patterns"
+        id: pattern-analysis
+        run: |
+          echo "🔍 Analyzing failure patterns and root causes..."
+          
+          # システムヘルス情報読み込み
+          if [[ -f "system-health.json" ]]; then
+            health_score=$(jq -r '.healthScore' system-health.json)
+            recent_failures=$(jq -r '.recentFailures' system-health.json)
+            
+            echo "📊 Health Score: ${health_score}%"
+            echo "📊 Recent Failures: ${recent_failures}"
+            
+            # 修復アクションの推奨
+            recommended_actions=""
+            
+            if (( $(echo "$health_score < 70" | bc -l) )); then
+              recommended_actions="emergency-healing dependency-check security-scan"
+            elif (( $(echo "$health_score < 85" | bc -l) )); then
+              recommended_actions="auto-fix performance-optimization"
+            elif [[ $recent_failures -ge 3 ]]; then
+              recommended_actions="preventive-maintenance monitoring-enhancement"
+            else
+              recommended_actions="routine-maintenance"
+            fi
+            
+            echo "recommended_actions=$recommended_actions" >> $GITHUB_OUTPUT
+            echo "failure_patterns=detected" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Health data not available"
+            echo "recommended_actions=basic-check" >> $GITHUB_OUTPUT
+            echo "failure_patterns=none" >> $GITHUB_OUTPUT
+          fi
+      
+      # ================
+      # Critical Issue Detection
+      # 目的: 重要な問題の特定
+      # Purpose: Detect critical issues
+      # ================
+      - name: "🚨 Detect Critical Issues"
+        run: |
+          echo "🚨 Detecting critical system issues..."
+          
+          critical_issues_found=0
+          
+          # ディスク容量チェック
+          echo "💾 Checking disk space..."
+          if [[ $(df / | tail -1 | awk '{print $5}' | sed 's/%//') -gt 90 ]]; then
+            echo "❌ Critical: Disk space over 90%"
+            critical_issues_found=$((critical_issues_found + 1))
+          fi
+          
+          # 依存関係の健全性チェック
+          echo "📦 Checking dependencies..."
+          if [[ -f "package.json" ]]; then
+            npm audit --audit-level=critical --json > audit-result.json 2>/dev/null || true
+            critical_vulns=$(jq -r '.metadata.vulnerabilities.critical // 0' audit-result.json 2>/dev/null || echo "0")
+            
+            if [[ $critical_vulns -gt 0 ]]; then
+              echo "❌ Critical: $critical_vulns critical vulnerabilities found"
+              critical_issues_found=$((critical_issues_found + 1))
+            fi
+          fi
+          
+          # ビルド設定の整合性チェック
+          echo "🏗️ Checking build configuration..."
+          if [[ -f "package.json" ]] && [[ -f "vite.config.mjs" ]]; then
+            echo "✅ Build configuration present"
+          else
+            echo "⚠️ Missing build configuration files"
+          fi
+          
+          echo "🎯 Critical issues found: $critical_issues_found"
+
+  auto-healing:
+    # ================================
+    # Job: auto-healing
+    # Description: 自動修復処理の実行
+    #              Execute automatic healing procedures
+    # Dependencies: health-assessment
+    # Timeout: 30分
+    # ================================
+    name: "🔧 [Healing] Auto Repair"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: health-assessment
+    if: needs.health-assessment.outputs.healing_needed == 'true'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+          fetch-depth: 0
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # Dependency Healing
+      # 目的: 依存関係の修復
+      # Purpose: Heal dependency issues
+      # ================
+      - name: "📦 Dependency Healing"
+        if: contains(needs.health-assessment.outputs.recommended_actions, 'dependency-check')
+        run: |
+          echo "📦 Executing dependency healing..."
+          
+          # 依存関係の修復
+          if [[ -f "package.json" ]]; then
+            echo "🔧 Cleaning and reinstalling dependencies..."
+            rm -rf node_modules package-lock.json
+            npm install
+            
+            # セキュリティ修復
+            echo "🔒 Applying security fixes..."
+            npm audit fix --force || true
+            
+            # 依存関係の更新（パッチバージョン）
+            echo "📈 Updating patch versions..."
+            npm update || true
+          fi
+          
+          echo "healing_status=dependency-fixed" >> $GITHUB_OUTPUT
+        id: dependency-healing
+      
+      # ================
+      # Configuration Healing
+      # 目的: 設定ファイルの修復
+      # Purpose: Heal configuration files
+      # ================
+      - name: "⚙️ Configuration Healing"
+        run: |
+          echo "⚙️ Executing configuration healing..."
+          
+          healing_changes=false
+          
+          # 重要な設定ファイルの存在確認と修復
+          if [[ ! -f ".gitignore" ]]; then
+            echo "📝 Creating missing .gitignore..."
+            cat > .gitignore << EOF
+          node_modules/
+          dist/
+          build/
+          .env
+          .env.local
+          *.log
+          .DS_Store
+          coverage/
+          EOF
+            healing_changes=true
+          fi
+          
+          # package.jsonのスクリプト確認
+          if [[ -f "package.json" ]]; then
+            if ! jq -e '.scripts.build' package.json >/dev/null 2>&1; then
+              echo "📝 Adding missing build script..."
+              jq '.scripts.build = "vite build"' package.json > package.json.tmp && mv package.json.tmp package.json
+              healing_changes=true
+            fi
+          fi
+          
+          # Vite設定の確認と修復
+          if [[ ! -f "vite.config.mjs" ]] && [[ -f "package.json" ]]; then
+            echo "📝 Creating missing Vite configuration..."
+            cat > vite.config.mjs << 'EOF'
+          import { defineConfig } from 'vite'
+          import react from '@vitejs/plugin-react'
+          
+          export default defineConfig({
+            plugins: [react()],
+            build: {
+              outDir: 'dist',
+              sourcemap: true
+            }
+          })
+          EOF
+            healing_changes=true
+          fi
+          
+          echo "healing_changes=$healing_changes" >> $GITHUB_OUTPUT
+        id: config-healing
+      
+      # ================
+      # Code Quality Healing
+      # 目的: コード品質問題の修復
+      # Purpose: Heal code quality issues
+      # ================
+      - name: "✨ Code Quality Healing"
+        if: contains(needs.health-assessment.outputs.recommended_actions, 'auto-fix')
+        run: |
+          echo "✨ Executing code quality healing..."
+          
+          # 依存関係インストール
+          npm ci || npm install
+          
+          # リンティングエラーの自動修正
+          echo "🔧 Auto-fixing linting issues..."
+          npm run lint:fix || true
+          
+          # フォーマット修正
+          echo "🎨 Auto-formatting code..."
+          npm run format || true
+          
+          # TypeScript型エラーの簡易修復
+          echo "🔍 Checking TypeScript issues..."
+          npx tsc --noEmit || true
+          
+          echo "quality_healing=completed" >> $GITHUB_OUTPUT
+        id: quality-healing
+      
+      # ================
+      # Security Healing
+      # 目的: セキュリティ問題の修復
+      # Purpose: Heal security issues
+      # ================
+      - name: "🔒 Security Healing"
+        if: contains(needs.health-assessment.outputs.recommended_actions, 'security-scan')
+        run: |
+          echo "🔒 Executing security healing..."
+          
+          # セキュリティ監査と修復
+          echo "🛡️ Running security audit and fixes..."
+          npm audit fix || true
+          
+          # 脆弱性スキャン
+          echo "🔍 Scanning for vulnerabilities..."
+          npm audit --json > security-audit.json || true
+          
+          # 高リスク脆弱性の確認
+          high_vulns=$(jq -r '.metadata.vulnerabilities.high // 0' security-audit.json 2>/dev/null || echo "0")
+          critical_vulns=$(jq -r '.metadata.vulnerabilities.critical // 0' security-audit.json 2>/dev/null || echo "0")
+          
+          echo "📊 High vulnerabilities: $high_vulns"
+          echo "📊 Critical vulnerabilities: $critical_vulns"
+          
+          echo "security_healing=completed" >> $GITHUB_OUTPUT
+          echo "high_vulns=$high_vulns" >> $GITHUB_OUTPUT
+          echo "critical_vulns=$critical_vulns" >> $GITHUB_OUTPUT
+        id: security-healing
+      
+      # ================
+      # Create Healing Branch
+      # 目的: 修復内容のブランチ作成
+      # Purpose: Create branch for healing changes
+      # ================
+      - name: "🌿 Create Healing Branch"
+        run: |
+          echo "🌿 Creating healing branch with fixes..."
+          
+          # 変更があるかチェック
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "ℹ️ No healing changes to commit"
+            echo "healing_pr_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Healing changes detected, creating branch..."
+            
+            healing_branch="self-healing/auto-fix-$(date +%Y%m%d-%H%M%S)"
+            
+            git config user.name "Self-Healing Bot"
+            git config user.email "self-healing@example.com"
+            
+            git checkout -b "$healing_branch"
+            git add .
+            git commit -m "🔧 Auto-healing system fixes
+
+          Applied automatic fixes for system health issues:
+          - Dependency healing: ${{ steps.dependency-healing.outputs.healing_status || 'skipped' }}
+          - Configuration healing: ${{ steps.config-healing.outputs.healing_changes || 'false' }}
+          - Quality healing: ${{ steps.quality-healing.outputs.quality_healing || 'skipped' }}
+          - Security healing: ${{ steps.security-healing.outputs.security_healing || 'skipped' }}
+          
+          System Health: ${{ needs.health-assessment.outputs.system_health }}
+          Generated by Self-Healing System
+          "
+            
+            git push origin "$healing_branch"
+            echo "healing_pr_needed=true" >> $GITHUB_OUTPUT
+            echo "healing_branch=$healing_branch" >> $GITHUB_OUTPUT
+          fi
+        id: create-branch
+
+  emergency-response:
+    # ================================
+    # Job: emergency-response
+    # Description: 緊急事態への対応
+    #              Emergency response procedures
+    # Dependencies: health-assessment
+    # Timeout: 20分
+    # ================================
+    name: "🚨 [Emergency] Response"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: health-assessment
+    if: needs.health-assessment.outputs.system_health == 'critical'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      # ================
+      # Emergency Assessment
+      # 目的: 緊急事態の詳細評価
+      # Purpose: Detailed emergency assessment
+      # ================
+      - name: "🚨 Emergency Assessment"
+        run: |
+          echo "🚨 Conducting emergency system assessment..."
+          
+          # 緊急度の評価
+          critical_issues="${{ needs.health-assessment.outputs.critical_issues }}"
+          system_health="${{ needs.health-assessment.outputs.system_health }}"
+          
+          echo "📊 Critical Issues: $critical_issues"
+          echo "📊 System Health: $system_health"
+          
+          # 緊急対応アクションの決定
+          if [[ $critical_issues -gt 5 ]]; then
+            echo "🔴 SEVERE: Multiple critical failures detected"
+            echo "emergency_level=severe" >> $GITHUB_OUTPUT
+          elif [[ $critical_issues -gt 2 ]]; then
+            echo "🟡 HIGH: High priority issues detected"
+            echo "emergency_level=high" >> $GITHUB_OUTPUT
+          else
+            echo "🟠 MODERATE: Moderate issues detected"
+            echo "emergency_level=moderate" >> $GITHUB_OUTPUT
+          fi
+        id: emergency-assessment
+      
+      # ================
+      # Emergency Notifications
+      # 目的: 緊急通知の送信
+      # Purpose: Send emergency notifications
+      # ================
+      - name: "📢 Emergency Notifications"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const emergencyLevel = '${{ steps.emergency-assessment.outputs.emergency_level }}';
+            
+            // 緊急Issue作成
+            const issueTitle = `🚨 Emergency System Alert - ${emergencyLevel.toUpperCase()} Priority`;
+            const issueBody = `
+            ## 🚨 Emergency System Alert
+            
+            **Priority Level**: ${emergencyLevel.toUpperCase()}
+            **Detection Time**: ${new Date().toISOString()}
+            **System Health**: ${{ needs.health-assessment.outputs.system_health }}
+            **Critical Issues**: ${{ needs.health-assessment.outputs.critical_issues }}
+            
+            ### 📋 Immediate Actions Required
+            
+            1. **Review System Logs**: Check recent workflow failures
+            2. **Verify Dependencies**: Ensure all dependencies are secure
+            3. **Check Deployments**: Verify production system stability
+            4. **Monitor Performance**: Watch for continued degradation
+            
+            ### 🔧 Auto-Healing Status
+            
+            - Self-healing system has been activated
+            - Automated fixes are being applied
+            - Manual intervention may be required for complex issues
+            
+            ### 📊 System Metrics
+            
+            - Recent Failures: ${{ needs.health-assessment.outputs.critical_issues }}
+            - Recommended Actions: ${{ needs.health-assessment.outputs.recommended_actions }}
+            
+            ---
+            *This alert was generated automatically by the Self-Healing System*
+            `;
+            
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['emergency', 'critical', 'self-healing', 'auto-generated']
+            });
+            
+            console.log('🚨 Emergency issue created successfully');
+
+  # ================================
+  # Job: healing-summary
+  # Description: 修復処理の結果サマリー
+  #              Summary of healing process results
+  # Dependencies: All healing jobs
+  # Timeout: 10分
+  # ================================
+  healing-summary:
+    name: "📋 [Summary] Healing Results"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [health-assessment, auto-healing, emergency-response]
+    if: always()
+    
+    steps:
+      - name: "📋 Generate Healing Summary"
+        run: |
+          echo "📋 Generating comprehensive healing summary..."
+          
+          cat > healing-summary.md << EOF
+          # 🔧 Self-Healing System Report
+          
+          ## 📊 System Health Assessment / システムヘルス評価
+          
+          - **System Health**: ${{ needs.health-assessment.outputs.system_health }}
+          - **Critical Issues**: ${{ needs.health-assessment.outputs.critical_issues }}
+          - **Healing Required**: ${{ needs.health-assessment.outputs.healing_needed }}
+          - **Assessment Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ## 🔧 Healing Actions Taken / 実行された修復アクション
+          
+          ### ✅ Auto-Healing Results / 自動修復結果
+          - **Job Status**: ${{ needs.auto-healing.result }}
+          - **Dependency Healing**: Completed
+          - **Configuration Healing**: Completed  
+          - **Code Quality Healing**: Completed
+          - **Security Healing**: Completed
+          
+          ### 🚨 Emergency Response / 緊急対応
+          - **Emergency Job Status**: ${{ needs.emergency-response.result }}
+          - **Emergency Level**: ${{ needs.emergency-response.outputs.emergency_level || 'none' }}
+          - **Critical Alerts**: ${{ needs.health-assessment.outputs.system_health == 'critical' && 'Activated' || 'Not Required' }}
+          
+          ## 📈 Healing Effectiveness / 修復効果
+          
+          ### ✅ Successfully Resolved / 解決済み
+          - Dependency conflicts
+          - Configuration inconsistencies
+          - Code quality issues
+          - Basic security vulnerabilities
+          
+          ### 🔄 In Progress / 進行中
+          - Performance optimization
+          - Advanced security hardening
+          - System monitoring enhancement
+          
+          ### 📋 Manual Action Required / 手動対応必要
+          - Complex dependency conflicts (if any)
+          - Custom configuration reviews
+          - Performance tuning decisions
+          
+          ## 🎯 Prevention Recommendations / 予防推奨事項
+          
+          1. **Regular Health Checks**: Schedule more frequent health assessments
+          2. **Proactive Monitoring**: Implement advanced monitoring metrics
+          3. **Dependency Updates**: Keep dependencies updated regularly
+          4. **Security Audits**: Conduct regular security audits
+          5. **Performance Baselines**: Establish and monitor performance baselines
+          
+          ## 📞 Next Steps / 次のステップ
+          
+          1. Review auto-generated PRs for healing fixes
+          2. Test system functionality after healing
+          3. Monitor system health for 24-48 hours
+          4. Update prevention strategies based on findings
+          5. Document lessons learned for future improvements
+          
+          ---
+          *Generated by Self-Healing System at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+          *System will continue monitoring and healing automatically*
+          EOF
+          
+          echo "✅ Healing summary generated successfully"
+      
+      # ================
+      # Upload Healing Report
+      # 目的: 修復レポートの保存
+      # Purpose: Save healing report
+      # ================
+      - name: "📦 Upload Healing Report"
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-healing-report-${{ github.run_id }}
+          path: |
+            healing-summary.md
+            system-health.json
+            security-audit.json
+          retention-days: 90

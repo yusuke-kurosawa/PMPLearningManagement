@@ -1,0 +1,534 @@
+name: 01 IDD Core Validation
+# Issue-Driven Development（IDD）のコア検証ワークフロー
+# 全てのIssueとPRがIDD原則に準拠していることを確認
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+  pull_request:
+    types: [opened, edited, synchronize, closed]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: 'デバッグモードを有効化'
+        type: boolean
+        required: false
+        default: false
+
+# 権限を明示的に設定
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+  checks: write
+
+env:
+  # Node.jsバージョンの統一
+  NODE_VERSION: '20'
+  # タイムゾーン設定
+  TZ: 'Asia/Tokyo'
+
+jobs:
+  # ========================================
+  # Issue検証ジョブ
+  # ========================================
+  validate-issue:
+    name: Issue検証
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    outputs:
+      compliance: ${{ steps.check.outputs.compliance }}
+      
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Issue テンプレート準拠チェック
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            const title = issue.title || '';
+            
+            // デバッグログ
+            if (${{ inputs.debug_mode || false }}) {
+              console.log('Issue Title:', title);
+              console.log('Issue Body:', body.substring(0, 200));
+            }
+            
+            // テンプレートセクションの検証
+            const requiredSections = {
+              description: /##?\s*(📋|概要|Description)/i,
+              details: /##?\s*(🔍|詳細|Details|Steps)/i,
+              acceptance: /##?\s*(✅|完了条件|Acceptance)/i
+            };
+            
+            const missingSection= [];
+            let isCompliant = true;
+            
+            for (const [name, pattern] of Object.entries(requiredSections)) {
+              if (!pattern.test(body)) {
+                missingSections.push(name);
+                isCompliant = false;
+              }
+            }
+            
+            // 結果の記録
+            core.setOutput('compliance', isCompliant);
+            
+            if (!isCompliant) {
+              // 不足セクションをコメント
+              const comment = `### ⚠️ Issue テンプレート検証失敗
+              
+              このIssueは必要なセクションが不足しています：
+              ${missingSections.map(s => `- ${s}`).join('\n')}
+              
+              以下のテンプレートを使用してください：
+              - [機能要望テンプレート](.github/ISSUE_TEMPLATE/feature_request.md)
+              - [バグ報告テンプレート](.github/ISSUE_TEMPLATE/bug_report.md)
+              
+              **対応方法**:
+              1. Issueを編集して必要なセクションを追加
+              2. テンプレートを参考に内容を記載
+              3. 保存すると自動で再検証されます`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+              
+              // ラベル付与
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['needs-template', 'idd-violation']
+              });
+            } else {
+              // 準拠している場合はラベル更新
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name: 'needs-template'
+                });
+              } catch (e) {
+                // ラベルが存在しない場合は無視
+              }
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['idd-compliant']
+              });
+              
+              console.log('✅ Issue はIDD準拠しています');
+            }
+
+      - name: 自動ラベリング
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const labels = [];
+            
+            // タイプ判定
+            if (title.includes('bug') || title.includes('fix') || body.includes('bug')) {
+              labels.push('type:bug');
+            } else if (title.includes('feat') || title.includes('feature')) {
+              labels.push('type:feature');
+            } else if (title.includes('docs') || title.includes('documentation')) {
+              labels.push('type:documentation');
+            } else if (title.includes('test')) {
+              labels.push('type:test');
+            }
+            
+            // 優先度判定
+            if (title.includes('🚨') || title.includes('urgent') || title.includes('critical')) {
+              labels.push('priority:critical');
+            } else if (title.includes('high')) {
+              labels.push('priority:high');
+            }
+            
+            // エリア判定
+            if (body.includes('github action') || body.includes('workflow')) {
+              labels.push('area:ci-cd');
+            }
+            if (body.includes('ui') || body.includes('frontend')) {
+              labels.push('area:frontend');
+            }
+            if (body.includes('api') || body.includes('backend')) {
+              labels.push('area:backend');
+            }
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+              console.log(`自動ラベル付与: ${labels.join(', ')}`);
+            }
+
+  # ========================================
+  # PR検証ジョブ
+  # ========================================
+  validate-pr:
+    name: PR検証
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Issue参照チェック
+        id: issue-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const title = pr.title || '';
+            
+            // Issue参照パターン
+            const patterns = [
+              /(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#\d+/gi,
+              /(?:refs?|references?|see)\s+#\d+/gi,
+              /#\d+/gi
+            ];
+            
+            let hasReference = false;
+            const referencedIssues = new Set();
+            
+            // タイトルとボディから Issue番号を抽出
+            const text = `${title} ${body}`;
+            for (const pattern of patterns) {
+              const matches = text.match(pattern);
+              if (matches) {
+                hasReference = true;
+                matches.forEach(match => {
+                  const issueNum = match.match(/#(\d+)/);
+                  if (issueNum) {
+                    referencedIssues.add(parseInt(issueNum[1]));
+                  }
+                });
+              }
+            }
+            
+            if (!hasReference) {
+              // Issue参照がない場合
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                event: 'REQUEST_CHANGES',
+                body: `## 🚫 IDD違反: Issue参照が必要です
+                
+                このPRは少なくとも1つのIssueを参照する必要があります。
+                
+                ### 修正方法:
+                1. PR説明に以下のいずれかを追加:
+                   - \`Closes #123\` - Issueを自動クローズ
+                   - \`Fixes #123\` - バグ修正の場合
+                   - \`Refs #123\` - 関連Issue参照
+                
+                2. 複数のIssueを参照可能:
+                   \`\`\`
+                   Closes #123
+                   Refs #124, #125
+                   \`\`\`
+                
+                ### なぜ必要？
+                - 変更の追跡可能性を確保
+                - プロジェクト管理の透明性向上
+                - 自動リリースノート生成のため`
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['needs-issue-link', 'idd-violation']
+              });
+              
+              core.setFailed('PR must reference at least one issue');
+            } else {
+              // 参照されたIssueの検証
+              console.log(`✅ ${referencedIssues.size} 個のIssueが参照されています`);
+              
+              for (const issueNum of referencedIssues) {
+                try {
+                  const issue = await github.rest.issues.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNum
+                  });
+                  
+                  if (issue.data.state === 'closed') {
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      body: `⚠️ 注意: Issue #${issueNum} は既にクローズされています。意図的な場合は問題ありません。`
+                    });
+                  }
+                } catch (error) {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: `❌ エラー: Issue #${issueNum} が存在しません。正しいIssue番号を参照してください。`
+                  });
+                  core.setFailed(`Invalid issue reference: #${issueNum}`);
+                }
+              }
+              
+              // 準拠ラベル付与
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['idd-compliant']
+              });
+            }
+
+      - name: コミットメッセージ検証
+        run: |
+          echo "📝 コミットメッセージの検証を開始..."
+          
+          # PR の場合はベースとヘッドのSHAを取得
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            # pushイベントの場合は直近5コミットをチェック
+            base_sha=$(git rev-parse HEAD~5 2>/dev/null || git rev-list --max-parents=0 HEAD)
+            head_sha=$(git rev-parse HEAD)
+          fi
+          
+          # コミットメッセージ検証
+          invalid_commits=""
+          commit_count=0
+          valid_count=0
+          
+          for commit in $(git rev-list --reverse ${base_sha}..${head_sha} 2>/dev/null || git rev-list --reverse HEAD); do
+            commit_count=$((commit_count + 1))
+            message=$(git log -1 --pretty=format:"%s %b" $commit)
+            short_sha=$(git log -1 --pretty=format:"%h" $commit)
+            
+            # Issue参照チェック（#番号 または キーワード）
+            if echo "$message" | grep -qE "(#[0-9]+|closes|fixes|resolves|refs|references)"; then
+              echo "✅ $short_sha: 準拠"
+              valid_count=$((valid_count + 1))
+            else
+              echo "❌ $short_sha: Issue参照なし"
+              invalid_commits="${invalid_commits}${short_sha}: ${message}\n"
+            fi
+          done
+          
+          # 結果サマリー
+          echo ""
+          echo "========================================="
+          echo "コミット検証結果: ${valid_count}/${commit_count} 準拠"
+          echo "========================================="
+          
+          if [ -n "$invalid_commits" ]; then
+            echo ""
+            echo "⚠️ Issue参照がないコミット:"
+            echo -e "$invalid_commits"
+            echo ""
+            echo "修正方法:"
+            echo "1. git rebase -i でコミットメッセージを編集"
+            echo "2. メッセージに #Issue番号 を追加"
+            echo "3. 例: 'feat: 新機能追加 #123'"
+            exit 1
+          fi
+          
+          echo "✅ 全コミットがIDD準拠しています"
+
+  # ========================================
+  # 統計レポート生成ジョブ
+  # ========================================
+  generate-metrics:
+    name: IDD メトリクス生成
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: メトリクス収集と分析
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // 30日前の日付を計算
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            // Issues と PRs を取得
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: thirtyDaysAgo.toISOString(),
+              per_page: 100
+            });
+            
+            // PRとIssueを分離
+            const pulls = issues.filter(item => item.pull_request);
+            const actualIssues = issues.filter(item => !item.pull_request);
+            
+            // メトリクス計算
+            const metrics = {
+              // PR関連
+              totalPRs: pulls.length,
+              prsWithIssues: 0,
+              averagePRAge: 0,
+              
+              // Issue関連
+              totalIssues: actualIssues.length,
+              openIssues: actualIssues.filter(i => i.state === 'open').length,
+              closedIssues: actualIssues.filter(i => i.state === 'closed').length,
+              
+              // ラベル統計
+              labelStats: {},
+              
+              // 時間統計
+              averageTimeToClose: 0,
+            };
+            
+            // PR のIssue参照チェック
+            for (const pr of pulls) {
+              const body = pr.body || '';
+              if (/#\d+/.test(body)) {
+                metrics.prsWithIssues++;
+              }
+            }
+            
+            // ラベル統計
+            for (const issue of actualIssues) {
+              for (const label of issue.labels) {
+                const name = label.name;
+                metrics.labelStats[name] = (metrics.labelStats[name] || 0) + 1;
+              }
+            }
+            
+            // 平均クローズ時間計算
+            const closedIssues = actualIssues.filter(i => i.state === 'closed' && i.closed_at);
+            if (closedIssues.length > 0) {
+              const totalTime = closedIssues.reduce((sum, issue) => {
+                const created = new Date(issue.created_at);
+                const closed = new Date(issue.closed_at);
+                return sum + (closed - created);
+              }, 0);
+              metrics.averageTimeToClose = Math.round(totalTime / closedIssues.length / (1000 * 60 * 60 * 24)); // 日数
+            }
+            
+            // 準拠率計算
+            const prCompliance = metrics.totalPRs > 0 
+              ? (metrics.prsWithIssues / metrics.totalPRs * 100).toFixed(1)
+              : 100;
+            
+            // レポート生成
+            const report = `# 📊 IDD準拠レポート
+            
+            **生成日時**: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+            **対象期間**: 過去30日間
+            
+            ## 📈 サマリー
+            
+            | 指標 | 値 | ステータス |
+            |------|-----|-----------|
+            | PR準拠率 | ${prCompliance}% | ${prCompliance >= 90 ? '✅' : '⚠️'} |
+            | オープンIssue | ${metrics.openIssues} | ${metrics.openIssues > 50 ? '⚠️' : '✅'} |
+            | 平均解決日数 | ${metrics.averageTimeToClose}日 | ${metrics.averageTimeToClose > 14 ? '⚠️' : '✅'} |
+            
+            ## 📊 詳細統計
+            
+            ### Pull Request
+            - 総PR数: ${metrics.totalPRs}
+            - Issue参照あり: ${metrics.prsWithIssues}
+            - 準拠率: ${prCompliance}%
+            
+            ### Issue
+            - 総Issue数: ${metrics.totalIssues}
+            - オープン: ${metrics.openIssues}
+            - クローズ済み: ${metrics.closedIssues}
+            - 平均解決時間: ${metrics.averageTimeToClose}日
+            
+            ### ラベル分布 (Top 10)
+            ${Object.entries(metrics.labelStats)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 10)
+              .map(([label, count]) => `- ${label}: ${count}`)
+              .join('\n')}
+            
+            ## 🎯 改善提案
+            
+            ${prCompliance < 90 ? '- ⚠️ PR準拠率を90%以上に改善してください' : '- ✅ PR準拠率は良好です'}
+            ${metrics.openIssues > 50 ? '- ⚠️ オープンIssueが多すぎます。優先順位を付けて対応してください' : '- ✅ Issue管理は適切です'}
+            ${metrics.averageTimeToClose > 14 ? '- ⚠️ Issue解決に時間がかかりすぎています。プロセスを見直してください' : '- ✅ Issue解決速度は良好です'}
+            
+            ---
+            *このレポートは自動生成されました by IDD Core Validation Workflow*`;
+            
+            // レポートをIssueとして作成
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[IDD Report] 週次準拠レポート - ${new Date().toLocaleDateString('ja-JP')}`,
+              body: report,
+              labels: ['idd-report', 'automated', 'metrics']
+            });
+            
+            console.log('✅ IDD準拠レポートを生成しました');
+
+  # ========================================
+  # 通知ジョブ（失敗時）
+  # ========================================
+  notify-failure:
+    name: 失敗通知
+    if: failure()
+    needs: [validate-issue, validate-pr]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 失敗通知作成
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflow = context.workflow;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            // コンテキストに応じたメッセージ作成
+            let message = `## ⚠️ IDD検証失敗
+            
+            **ワークフロー**: ${workflow}
+            **実行URL**: [詳細を確認](${runUrl})
+            **トリガー**: ${context.eventName}
+            
+            IDD準拠のため、以下を確認してください：
+            - Issueテンプレートの使用
+            - PR でのIssue参照
+            - コミットメッセージでのIssue番号記載
+            
+            詳細はワークフロー実行ログを確認してください。`;
+            
+            console.log(message);
+            
+            // 必要に応じてSlack/Discord通知を追加

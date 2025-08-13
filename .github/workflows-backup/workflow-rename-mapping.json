@@ -1,0 +1,261 @@
+{
+  "rename_mappings": {
+    "core": [
+      {
+        "old": "deploy.yml",
+        "new": "core-01-deploy.yml",
+        "description": "本番デプロイメント & PWA検証"
+      },
+      {
+        "old": "pr-validation.yml",
+        "new": "core-02-pr-validation.yml",
+        "description": "プルリクエスト品質検証"
+      },
+      {
+        "old": "test.yml",
+        "new": "core-03-build-test.yml",
+        "description": "統合テストスイート実行"
+      }
+    ],
+    "test": [
+      {
+        "old": "integration-test.yml",
+        "new": "test-01-unit-integration.yml",
+        "description": "統合テストスイート（基本）"
+      },
+      {
+        "old": "test-parallel.yml",
+        "new": "test-02-parallel.yml",
+        "description": "並列テスト実行（6人チーム）"
+      },
+      {
+        "old": "advanced-testing.yml",
+        "new": "test-03-advanced.yml",
+        "description": "高度テストスイート"
+      },
+      {
+        "old": "test-data-management.yml",
+        "new": "test-05-data-management.yml",
+        "description": "テストデータ管理"
+      },
+      {
+        "old": "chaos-engineering.yml",
+        "new": "test-06-chaos.yml",
+        "description": "カオステスト&AI生成"
+      }
+    ],
+    "security": [
+      {
+        "old": "security-scan.yml",
+        "new": "sec-01-vulnerability-scan.yml",
+        "description": "セキュリティ脆弱性監査"
+      },
+      {
+        "old": "zero-trust-security.yml",
+        "new": "sec-02-zero-trust.yml",
+        "description": "ゼロトラストセキュリティ"
+      },
+      {
+        "old": "infrastructure-security.yml",
+        "new": "sec-03-infrastructure.yml",
+        "description": "インフラセキュリティ監査"
+      },
+      {
+        "old": "compliance-audit.yml",
+        "new": "sec-04-compliance.yml",
+        "description": "コンプライアンス監査"
+      },
+      {
+        "old": "compliance-governance-automation.yml",
+        "new": "sec-05-governance.yml",
+        "description": "自動ガバナンス"
+      }
+    ],
+    "monitor": [
+      {
+        "old": "performance-monitoring.yml",
+        "new": "mon-01-performance.yml",
+        "description": "パフォーマンス継続監視"
+      },
+      {
+        "old": "observability.yml",
+        "new": "mon-02-observability.yml",
+        "description": "オブザーバビリティデプロイ"
+      },
+      {
+        "old": "monitoring-setup.yml",
+        "new": "mon-03-monitoring-setup.yml",
+        "description": "監視システムセットアップ"
+      },
+      {
+        "old": "advanced-quality-gates.yml",
+        "new": "mon-04-quality-gates.yml",
+        "description": "高度品質ゲート"
+      },
+      {
+        "old": "ai-monitoring-analytics.yml",
+        "new": "mon-05-ai-analytics.yml",
+        "description": "AI監視&分析"
+      }
+    ],
+    "auto": [
+      {
+        "old": "ai-assisted-review.yml",
+        "new": "auto-01-ai-review.yml",
+        "description": "AI支援コードレビュー"
+      },
+      {
+        "old": "dependabot-auto-merge.yml",
+        "new": "auto-02-dependabot.yml",
+        "description": "Dependabot自動マージ"
+      },
+      {
+        "old": "claude-pr-review.yml",
+        "new": "auto-03-claude-pr.yml",
+        "description": "Claude PRレビュー"
+      },
+      {
+        "old": "claude-issue-handler.yml",
+        "new": "auto-04-claude-issue.yml",
+        "description": "Claude Issue処理"
+      },
+      {
+        "old": "claude-assistant.yml",
+        "new": "auto-05-claude-assistant.yml",
+        "description": "Claude AIアシスタント"
+      },
+      {
+        "old": "issue-automation.yml",
+        "new": "auto-06-issue-automation.yml",
+        "description": "Issue自動化"
+      },
+      {
+        "old": "project-board-automation.yml",
+        "new": "auto-07-project-board.yml",
+        "description": "プロジェクトボード自動化"
+      },
+      {
+        "old": "translate-issues.yml",
+        "new": "auto-08-translate.yml",
+        "description": "Issue日本語翻訳"
+      }
+    ],
+    "dev": [
+      {
+        "old": "developer-experience.yml",
+        "new": "dev-01-experience.yml",
+        "description": "開発者体験向上"
+      },
+      {
+        "old": "developer-experience-culture.yml",
+        "new": "dev-02-dx-culture.yml",
+        "description": "DX&文化最適化"
+      },
+      {
+        "old": "dependency-health-check.yml",
+        "new": "dev-03-dependency-health.yml",
+        "description": "依存関係ヘルスチェック"
+      },
+      {
+        "old": "dependency-roadmap.yml",
+        "new": "dev-04-dependency-roadmap.yml",
+        "description": "依存関係ロードマップ"
+      },
+      {
+        "old": "feature-management.yml",
+        "new": "dev-05-feature-mgmt.yml",
+        "description": "機能管理&価値提供"
+      },
+      {
+        "old": "issue-driven-development.yml",
+        "new": "dev-06-idd-workflow.yml",
+        "description": "Issue駆動開発"
+      },
+      {
+        "old": "idd-compliance.yml",
+        "new": "dev-07-idd-compliance.yml",
+        "description": "IDD準拠チェック"
+      },
+      {
+        "old": "idd-metrics-collector.yml",
+        "new": "dev-08-idd-metrics.yml",
+        "description": "IDDメトリクス収集"
+      },
+      {
+        "old": "skill-based-assignment.yml",
+        "new": "dev-09-skill-assign.yml",
+        "description": "スキルベース割当"
+      },
+      {
+        "old": "technical-spike-management.yml",
+        "new": "dev-10-technical-spike.yml",
+        "description": "技術スパイク管理"
+      },
+      {
+        "old": "stakeholder-validation.yml",
+        "new": "dev-11-stakeholder.yml",
+        "description": "ステークホルダー検証"
+      }
+    ],
+    "notify": [
+      {
+        "old": "notifications.yml",
+        "new": "notify-01-notifications.yml",
+        "description": "通知&監視"
+      },
+      {
+        "old": "world-class-devops-benchmark.yml",
+        "new": "notify-02-benchmark.yml",
+        "description": "DevOpsベンチマーク"
+      }
+    ],
+    "advanced": [
+      {
+        "old": "edge-wasm-optimization.yml",
+        "new": "adv-01-edge-wasm.yml",
+        "description": "Edge&WebAssembly最適化"
+      },
+      {
+        "old": "multicloud-kubernetes.yml",
+        "new": "adv-02-multicloud-k8s.yml",
+        "description": "マルチクラウドK8s"
+      },
+      {
+        "old": "quantum-cicd.yml",
+        "new": "adv-03-quantum-cicd.yml",
+        "description": "量子対応AI/ML CI/CD"
+      },
+      {
+        "old": "green-devops-esg.yml",
+        "new": "adv-04-green-devops.yml",
+        "description": "Green DevOps&ESG"
+      }
+    ]
+  },
+  "statistics": {
+    "total_workflows": 44,
+    "categorized": {
+      "core": 3,
+      "test": 5,
+      "security": 5,
+      "monitor": 5,
+      "auto": 8,
+      "dev": 11,
+      "notify": 2,
+      "advanced": 4
+    }
+  },
+  "naming_convention": {
+    "pattern": "[category]-[number]-[feature].yml",
+    "categories": {
+      "core": "コア機能（デプロイ、ビルド、基本テスト）",
+      "test": "テスト関連（単体、統合、E2E、高度なテスト）",
+      "sec": "セキュリティ・コンプライアンス",
+      "mon": "監視・パフォーマンス・オブザーバビリティ",
+      "auto": "自動化・AI支援・効率化",
+      "dev": "開発支援・開発者体験",
+      "notify": "通知・レポート・コミュニケーション",
+      "adv": "先進的・実験的機能"
+    }
+  }
+}

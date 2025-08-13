@@ -1,0 +1,450 @@
+# ================================================================
+# IDD Compliant Workflow / IDD準拠ワークフロー
+# ================================================================
+# Issue: #68 #4
+# Category: IDD
+# Purpose: Issue駆動のPR自動化とブランチ管理
+#          Automated PR creation and branch management driven by Issues
+# Author: Claude Code Actions + yusuke-kurosawa
+# Version: 1.0.0
+# Compliance: IDD 100% Compliant
+# ================================================================
+
+name: "🔄 IDD | PR Automation - Issue駆動自動化"
+
+on:
+  issues:
+    types: [opened, labeled, assigned]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue番号'
+        required: true
+        type: number
+      action:
+        description: 'アクション'
+        required: true
+        type: choice
+        options:
+          - 'create-branch'
+          - 'create-pr'
+          - 'update-pr'
+          - 'auto-merge'
+
+# --------------------------------
+# 📋 IDD Compliance Check
+# --------------------------------
+# This workflow is IDD compliant
+# Issue: #68 #4
+# Branch: feature/issue-68-idd-devops-enhancement
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ================================================================
+  # Job 1: Issue分析とブランチ作成
+  # ================================================================
+  analyze-issue:
+    name: "📋 Issue分析"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issues' || 
+      (github.event_name == 'issue_comment' && 
+       contains(github.event.comment.body, '/create-branch'))
+    
+    outputs:
+      issue_number: ${{ steps.parse.outputs.number }}
+      issue_title: ${{ steps.parse.outputs.title }}
+      branch_name: ${{ steps.generate.outputs.branch }}
+      should_create_branch: ${{ steps.check.outputs.should_create }}
+      
+    steps:
+      # --------------------------------
+      # Step 1: Issue情報解析
+      # --------------------------------
+      - name: "📋 Issue情報解析"
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let issueNumber, issueTitle;
+            
+            if (context.eventName === 'issues') {
+              issueNumber = context.issue.number;
+              issueTitle = context.payload.issue.title;
+            } else if (context.eventName === 'issue_comment') {
+              issueNumber = context.issue.number;
+              const issue = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              issueTitle = issue.data.title;
+            } else if (context.eventName === 'workflow_dispatch') {
+              issueNumber = context.payload.inputs.issue_number;
+              const issue = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              issueTitle = issue.data.title;
+            }
+            
+            core.setOutput('number', issueNumber);
+            core.setOutput('title', issueTitle);
+            
+            console.log(`📋 Issue #${issueNumber}: ${issueTitle}`);
+            
+      # --------------------------------
+      # Step 2: ブランチ名生成
+      # --------------------------------
+      - name: "🌿 ブランチ名生成"
+        id: generate
+        run: |
+          ISSUE_NUMBER="${{ steps.parse.outputs.number }}"
+          ISSUE_TITLE="${{ steps.parse.outputs.title }}"
+          
+          # タイトルからブランチタイプを判定
+          if echo "$ISSUE_TITLE" | grep -qi "bug\|fix\|修正"; then
+            BRANCH_TYPE="fix"
+          elif echo "$ISSUE_TITLE" | grep -qi "feature\|機能\|追加"; then
+            BRANCH_TYPE="feature"
+          elif echo "$ISSUE_TITLE" | grep -qi "hotfix\|緊急"; then
+            BRANCH_TYPE="hotfix"
+          else
+            BRANCH_TYPE="feature"
+          fi
+          
+          # タイトルをブランチ名用に変換
+          SAFE_TITLE=$(echo "$ISSUE_TITLE" | \
+            sed 's/[^a-zA-Z0-9]/-/g' | \
+            tr '[:upper:]' '[:lower:]' | \
+            sed 's/--*/-/g' | \
+            sed 's/^-//' | \
+            sed 's/-$//' | \
+            cut -c1-50)
+          
+          BRANCH_NAME="${BRANCH_TYPE}/issue-${ISSUE_NUMBER}-${SAFE_TITLE}"
+          
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "🌿 生成されたブランチ名: $BRANCH_NAME"
+          
+      # --------------------------------
+      # Step 3: ブランチ作成チェック
+      # --------------------------------
+      - name: "✅ ブランチ作成チェック"
+        id: check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = '${{ steps.generate.outputs.branch }}';
+            
+            // ラベルチェック
+            const issue = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.parse.outputs.number }}
+            });
+            
+            const labels = issue.data.labels.map(l => l.name);
+            
+            // 自動ブランチ作成の条件
+            const shouldCreate = 
+              labels.includes('ready-for-development') ||
+              labels.includes('approved') ||
+              context.eventName === 'issue_comment' ||
+              context.eventName === 'workflow_dispatch';
+            
+            core.setOutput('should_create', shouldCreate);
+            
+            if (shouldCreate) {
+              console.log('✅ ブランチ作成条件を満たしています');
+            } else {
+              console.log('⏸️ ブランチ作成待機中（ready-for-developmentラベルが必要）');
+            }
+
+  # ================================================================
+  # Job 2: ブランチ作成
+  # ================================================================
+  create-branch:
+    name: "🌿 ブランチ作成"
+    runs-on: ubuntu-latest
+    needs: analyze-issue
+    if: needs.analyze-issue.outputs.should_create_branch == 'true'
+    
+    steps:
+      # --------------------------------
+      # Step 1: チェックアウト
+      # --------------------------------
+      - name: "📥 リポジトリチェックアウト"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      # --------------------------------
+      # Step 2: ブランチ作成
+      # --------------------------------
+      - name: "🌿 ブランチ作成"
+        run: |
+          BRANCH_NAME="${{ needs.analyze-issue.outputs.branch_name }}"
+          
+          # ブランチが既に存在するか確認
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "⚠️ ブランチ '$BRANCH_NAME' は既に存在します"
+            exit 0
+          fi
+          
+          # ブランチ作成
+          git checkout -b "$BRANCH_NAME"
+          
+          # 初期コミット（READMEまたは空のファイル）
+          echo "# Issue #${{ needs.analyze-issue.outputs.issue_number }}" > .issue-metadata.md
+          echo "" >> .issue-metadata.md
+          echo "このブランチはIssue #${{ needs.analyze-issue.outputs.issue_number }}の解決用です。" >> .issue-metadata.md
+          echo "" >> .issue-metadata.md
+          echo "## Issue情報" >> .issue-metadata.md
+          echo "- タイトル: ${{ needs.analyze-issue.outputs.issue_title }}" >> .issue-metadata.md
+          echo "- ブランチ: $BRANCH_NAME" >> .issue-metadata.md
+          echo "- 作成日時: $(date '+%Y-%m-%d %H:%M:%S')" >> .issue-metadata.md
+          
+          git add .issue-metadata.md
+          git commit -m "chore: Issue #${{ needs.analyze-issue.outputs.issue_number }}用ブランチ初期化"
+          
+          # プッシュ
+          git push -u origin "$BRANCH_NAME"
+          
+          echo "✅ ブランチ '$BRANCH_NAME' を作成しました"
+          
+      # --------------------------------
+      # Step 3: Issueコメント投稿
+      # --------------------------------
+      - name: "💬 Issueコメント投稿"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = '${{ needs.analyze-issue.outputs.branch_name }}';
+            const issueNumber = ${{ needs.analyze-issue.outputs.issue_number }};
+            
+            const comment = `## 🌿 ブランチが作成されました
+            
+            **ブランチ名**: \`${branchName}\`
+            
+            ### 次のステップ
+            
+            1. ブランチをチェックアウト:
+               \`\`\`bash
+               git fetch origin
+               git checkout ${branchName}
+               \`\`\`
+            
+            2. 実装を開始
+            
+            3. コミット時はIssue番号を含める:
+               \`\`\`bash
+               git commit -m "feat: 機能実装 #${issueNumber}"
+               \`\`\`
+            
+            4. PRを作成（自動的にこのIssueとリンクされます）
+            
+            ---
+            *このコメントはIDD PR Automationにより自動生成されました*`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: comment
+            });
+
+  # ================================================================
+  # Job 3: PR自動作成
+  # ================================================================
+  create-pr:
+    name: "📝 PR自動作成"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' && 
+      contains(github.ref, 'issue-')
+    
+    steps:
+      # --------------------------------
+      # Step 1: Issue番号抽出
+      # --------------------------------
+      - name: "🔍 Issue番号抽出"
+        id: extract
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oE 'issue-[0-9]+' | cut -d'-' -f2)
+          
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "📋 Issue番号: #$ISSUE_NUMBER"
+          
+      # --------------------------------
+      # Step 2: PR存在チェック
+      # --------------------------------
+      - name: "🔍 PR存在チェック"
+        id: check-pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = '${{ steps.extract.outputs.branch_name }}';
+            
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branchName}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length > 0) {
+              console.log(`⚠️ PRは既に存在します: #${prs.data[0].number}`);
+              core.setOutput('exists', 'true');
+              core.setOutput('pr_number', prs.data[0].number);
+            } else {
+              console.log('✅ 新しいPRを作成します');
+              core.setOutput('exists', 'false');
+            }
+            
+      # --------------------------------
+      # Step 3: PR作成
+      # --------------------------------
+      - name: "📝 PR作成"
+        if: steps.check-pr.outputs.exists == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = ${{ steps.extract.outputs.issue_number }};
+            const branchName = '${{ steps.extract.outputs.branch_name }}';
+            
+            // Issue情報取得
+            const issue = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+            
+            // PR本文生成
+            const prBody = `## 📋 関連Issue
+            
+            Closes #${issueNumber}
+            
+            ## 📝 変更内容
+            
+            ${issue.data.body || '（Issue本文を参照）'}
+            
+            ## ✅ チェックリスト
+            
+            - [ ] コードがIDD準拠（Issue番号含む）
+            - [ ] テストを追加/更新
+            - [ ] ドキュメントを更新
+            - [ ] レビュー準備完了
+            
+            ## 🧪 テスト方法
+            
+            （テスト方法を記載）
+            
+            ## 📸 スクリーンショット
+            
+            （必要に応じて）
+            
+            ---
+            *このPRはIDD PR Automationにより自動生成されました*`;
+            
+            // PR作成
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issue.data.title,
+              body: prBody,
+              head: branchName,
+              base: 'main',
+              draft: true  // ドラフトとして作成
+            });
+            
+            console.log(`✅ PR #${pr.data.number} を作成しました`);
+            
+            // ラベル付与
+            if (issue.data.labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.data.number,
+                labels: issue.data.labels.map(l => l.name)
+              });
+            }
+            
+            // Issueにコメント
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `📝 PR #${pr.data.number} が作成されました\n\n[PRを確認する](${pr.data.html_url})`
+            });
+
+  # ================================================================
+  # Job 4: PR自動更新
+  # ================================================================
+  update-pr:
+    name: "🔄 PR自動更新"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+      # --------------------------------
+      # Step 1: PR情報取得
+      # --------------------------------
+      - name: "📋 PR情報取得"
+        id: get-pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length > 0) {
+              const pr = prs.data[0];
+              core.setOutput('pr_number', pr.number);
+              core.setOutput('pr_exists', 'true');
+              
+              // コミット情報取得
+              const commits = await github.rest.pulls.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              
+              // IDD準拠チェック
+              const nonCompliant = commits.data.filter(c => 
+                !c.commit.message.includes('#')
+              );
+              
+              if (nonCompliant.length > 0) {
+                console.log('⚠️ IDD非準拠のコミットが検出されました');
+                
+                // PRにコメント
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `⚠️ **IDD準拠警告**\n\n以下のコミットにIssue番号が含まれていません:\n${nonCompliant.map(c => `- ${c.sha.substring(0, 7)}: ${c.commit.message}`).join('\n')}`
+                });
+              }
+            }

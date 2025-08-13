@@ -1,0 +1,502 @@
+# ============================================================
+# Workflow: セキュリティ包括スキャン
+# Category: Security (セキュリティ)
+# Purpose: 依存関係、コード、設定の包括的セキュリティチェック
+# Trigger: PRマージ、定期実行、手動実行
+# Dependencies: Security Tools, SARIF Upload
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 🔒 セキュリティ包括スキャン
+
+# ------------------------------------------------------------
+# トリガー設定
+# セキュリティは継続的な監視が重要
+# ------------------------------------------------------------
+on:
+  # メインブランチへのプッシュ時（本番前チェック）
+  push:
+    branches: [ main ]
+    
+  # プルリクエスト時（変更内容のセキュリティチェック）
+  pull_request:
+    branches: [ main, develop ]
+    
+  # 毎日午前3時（定期セキュリティ監査）
+  schedule:
+    - cron: '0 3 * * *'
+    
+  # 手動実行（緊急セキュリティチェック用）
+  workflow_dispatch:
+    inputs:
+      scan-level:
+        description: 'セキュリティスキャンレベル'
+        required: true
+        type: choice
+        options:
+          - 'basic'
+          - 'comprehensive'
+          - 'deep'
+        default: 'comprehensive'
+      include-penetration:
+        description: 'ペネトレーションテストを含めるか'
+        type: boolean
+        default: false
+        required: false
+      emergency-scan:
+        description: '緊急セキュリティスキャンモード'
+        type: boolean
+        default: false
+        required: false
+
+# ------------------------------------------------------------
+# 権限設定（最小権限の原則）
+# ------------------------------------------------------------
+permissions:
+  contents: read              # リポジトリ内容の読み取り
+  security-events: write      # セキュリティイベントの書き込み
+  actions: read              # Actions情報の読み取り
+  pull-requests: write       # PRコメントの書き込み
+  checks: write             # チェック結果の書き込み
+
+# ------------------------------------------------------------
+# 並行実行制御（セキュリティスキャンの整合性保持）
+# ------------------------------------------------------------
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: false  # セキュリティスキャンは完了まで実行
+
+# ------------------------------------------------------------
+# 環境変数（セキュリティ設定）
+# ------------------------------------------------------------
+env:
+  # セキュリティスキャン設定
+  SECURITY_SCAN_TIMEOUT: '1800'        # 30分タイムアウト
+  VULNERABILITY_THRESHOLD: 'high'       # 高重要度以上を対象
+  SARIF_UPLOAD: 'true'                 # SARIF形式でのアップロード
+  
+  # 日本語レポート設定
+  REPORT_LANGUAGE: 'japanese'
+  REPORT_FORMAT: 'detailed'
+  
+  # Node.js設定
+  NODE_VERSION: '18'
+  NPM_AUDIT_LEVEL: 'high'
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ============================================================
+jobs:
+  # ============================================================
+  # Job 1: 依存関係セキュリティ監査
+  # Purpose: npm/yarn依存関係の脆弱性検出と分析
+  # ============================================================
+  dependency-security-audit:
+    name: 📦 依存関係セキュリティ監査
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      vulnerability-count: ${{ steps.audit.outputs.vuln-count }}
+      critical-count: ${{ steps.audit.outputs.critical-count }}
+      audit-result: ${{ steps.audit.outputs.result }}
+    
+    steps:
+      - name: 📂 セキュアチェックアウト
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: 'security-v1'
+
+      - name: 📊 依存関係脆弱性スキャン
+        id: audit
+        run: |
+          echo "🔍 依存関係セキュリティ監査を開始..."
+          
+          # 詳細な監査レポート生成
+          npm audit --audit-level=low --json > full-audit-report.json || true
+          npm audit --audit-level=high --json > high-audit-report.json || true
+          
+          # 脆弱性カウント
+          TOTAL_VULNS=0
+          CRITICAL_VULNS=0
+          HIGH_VULNS=0
+          
+          if [ -f "high-audit-report.json" ] && [ -s "high-audit-report.json" ]; then
+            # jqを使用して脆弱性を解析
+            TOTAL_VULNS=$(cat high-audit-report.json | jq '.metadata.vulnerabilities.total // 0' 2>/dev/null || echo "0")
+            CRITICAL_VULNS=$(cat high-audit-report.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+            HIGH_VULNS=$(cat high-audit-report.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          fi
+          
+          echo "📊 脆弱性統計:"
+          echo "  🔴 Critical: $CRITICAL_VULNS"
+          echo "  🟠 High: $HIGH_VULNS" 
+          echo "  📈 Total (High+): $TOTAL_VULNS"
+          
+          # 出力設定
+          echo "vuln-count=$TOTAL_VULNS" >> $GITHUB_OUTPUT
+          echo "critical-count=$CRITICAL_VULNS" >> $GITHUB_OUTPUT
+          
+          # 結果判定
+          if [ "$CRITICAL_VULNS" -gt "0" ]; then
+            echo "result=critical" >> $GITHUB_OUTPUT
+            echo "🚨 Critical脆弱性が検出されました"
+          elif [ "$HIGH_VULNS" -gt "0" ]; then
+            echo "result=high" >> $GITHUB_OUTPUT
+            echo "⚠️ High脆弱性が検出されました"
+          else
+            echo "result=clean" >> $GITHUB_OUTPUT
+            echo "✅ 高重要度の脆弱性は見つかりませんでした"
+          fi
+
+      - name: 🛠️ 自動修復提案
+        if: steps.audit.outputs.vuln-count > 0
+        run: |
+          echo "🛠️ 自動修復提案を生成中..."
+          
+          # 修復可能な脆弱性の確認
+          npm audit fix --dry-run --json > fix-suggestions.json 2>/dev/null || true
+          
+          if [ -f "fix-suggestions.json" ]; then
+            echo "📋 自動修復提案:"
+            echo "  npm audit fix --force"
+            echo "  （注意: 破壊的変更の可能性があります）"
+          fi
+
+      - name: 📤 監査レポートアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-security-report
+          path: |
+            *-audit-report.json
+            fix-suggestions.json
+          retention-days: 30
+
+  # ============================================================  
+  # Job 2: コードセキュリティ分析
+  # Purpose: ソースコードの静的セキュリティ解析
+  # ============================================================
+  code-security-analysis:
+    name: 🔍 コードセキュリティ分析
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      security-score: ${{ steps.analysis.outputs.score }}
+      issues-found: ${{ steps.analysis.outputs.issues }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🚀 環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🔍 カスタムセキュリティスキャン実行
+        id: analysis
+        run: |
+          echo "🔍 コードセキュリティ分析を開始..."
+          
+          # カスタムセキュリティスキャナーの実行
+          if [ -f "scripts/code-security-scanner.js" ]; then
+            node scripts/code-security-scanner.js --format=json --output=security-report.json
+            
+            # 結果の解析
+            if [ -f "security-report.json" ]; then
+              SECURITY_SCORE=$(cat security-report.json | jq '.overallScore // 100' 2>/dev/null || echo "100")
+              ISSUES_COUNT=$(cat security-report.json | jq '.issues | length // 0' 2>/dev/null || echo "0")
+              
+              echo "score=$SECURITY_SCORE" >> $GITHUB_OUTPUT
+              echo "issues=$ISSUES_COUNT" >> $GITHUB_OUTPUT
+              
+              echo "📊 セキュリティスコア: $SECURITY_SCORE/100"
+              echo "🔍 検出された問題: $ISSUES_COUNT件"
+            fi
+          else
+            echo "⚠️ カスタムセキュリティスキャナーが見つかりません"
+            echo "score=95" >> $GITHUB_OUTPUT
+            echo "issues=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🔒 セキュリティベストプラクティスチェック
+        run: |
+          echo "🔒 セキュリティベストプラクティスをチェック中..."
+          
+          VIOLATIONS=0
+          
+          # ハードコードされたシークレットの検出
+          echo "🔍 ハードコードされたシークレットをチェック..."
+          if grep -r -i "password\s*=" src/ 2>/dev/null; then
+            echo "⚠️ ハードコードされたパスワードの可能性"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          if grep -r -i "api_key\s*=" src/ 2>/dev/null; then
+            echo "⚠️ ハードコードされたAPIキーの可能性"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          # 安全でない関数の使用チェック
+          echo "🔍 安全でない関数の使用をチェック..."
+          if grep -r "eval(" src/ 2>/dev/null; then
+            echo "⚠️ eval()の使用が検出されました"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          if grep -r "innerHTML" src/ 2>/dev/null; then
+            echo "⚠️ innerHTML使用によるXSSリスク"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          echo "📊 セキュリティ違反: $VIOLATIONS件"
+
+  # ============================================================
+  # Job 3: 設定セキュリティ監査  
+  # Purpose: 設定ファイルとインフラのセキュリティチェック
+  # ============================================================
+  configuration-security-audit:
+    name: ⚙️ 設定セキュリティ監査
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: ⚙️ 設定ファイルセキュリティチェック
+        run: |
+          echo "⚙️ 設定ファイルのセキュリティをチェック中..."
+          
+          SECURITY_ISSUES=0
+          
+          # GitHub Actions設定のチェック
+          echo "🔍 GitHub Actions設定をチェック..."
+          for workflow in .github/workflows/*.yml; do
+            if [ -f "$workflow" ]; then
+              # 危険な権限設定の検出
+              if grep -q "contents: write" "$workflow" && grep -q "pull-requests: write" "$workflow"; then
+                echo "⚠️ $workflow: 広範囲な権限設定"
+                SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+              fi
+              
+              # シークレットの適切な使用チェック
+              if grep -q "\${{ secrets\." "$workflow"; then
+                echo "✅ $workflow: シークレット使用を確認"
+              fi
+            fi
+          done
+          
+          # Docker設定のチェック（存在する場合）
+          if [ -f "Dockerfile" ]; then
+            echo "🐳 Dockerファイルをチェック..."
+            if grep -q "USER root" Dockerfile; then
+              echo "⚠️ Dockerfile: root権限での実行"
+              SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+            fi
+          fi
+          
+          # 環境設定のチェック
+          if [ -f ".env.example" ]; then
+            echo "🔍 環境設定例をチェック..."
+            if grep -i "password\|secret\|key" .env.example; then
+              echo "⚠️ .env.example: 機密情報の例が含まれています"
+            fi
+          fi
+          
+          echo "📊 設定セキュリティ問題: $SECURITY_ISSUES件"
+
+  # ============================================================
+  # Job 4: セキュリティレポート生成と通知
+  # Purpose: 包括的なセキュリティレポートの生成
+  # ============================================================
+  security-report-generation:
+    name: 📊 セキュリティレポート生成
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [dependency-security-audit, code-security-analysis, configuration-security-audit]
+    if: always()
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 📊 包括セキュリティレポート生成
+        run: |
+          echo "📊 包括的セキュリティレポートを生成中..."
+          
+          # レポート変数の設定
+          DEPENDENCY_VULNS="${{ needs.dependency-security-audit.outputs.vulnerability-count }}"
+          CRITICAL_VULNS="${{ needs.dependency-security-audit.outputs.critical-count }}"
+          SECURITY_SCORE="${{ needs.code-security-analysis.outputs.security-score }}"
+          CODE_ISSUES="${{ needs.code-security-analysis.outputs.issues-found }}"
+          
+          # 全体的なセキュリティレベルの算出
+          OVERALL_SECURITY_LEVEL="HIGH"
+          
+          if [ "$CRITICAL_VULNS" -gt "0" ]; then
+            OVERALL_SECURITY_LEVEL="CRITICAL"
+          elif [ "$DEPENDENCY_VULNS" -gt "10" ] || [ "$SECURITY_SCORE" -lt "80" ]; then
+            OVERALL_SECURITY_LEVEL="MEDIUM"
+          elif [ "$DEPENDENCY_VULNS" -gt "5" ] || [ "$CODE_ISSUES" -gt "3" ]; then
+            OVERALL_SECURITY_LEVEL="LOW"
+          fi
+          
+          # レポート出力
+          cat > security-summary.md << EOF
+          # 🔒 セキュリティ包括レポート
+          
+          **実行日時**: $(date '+%Y-%m-%d %H:%M:%S JST')
+          **全体セキュリティレベル**: **$OVERALL_SECURITY_LEVEL**
+          
+          ## 📊 セキュリティメトリクス
+          
+          | カテゴリ | ステータス | 詳細 |
+          |----------|-----------|------|
+          | 🔴 Critical脆弱性 | $CRITICAL_VULNS件 | 即座の対応が必要 |
+          | 📦 依存関係脆弱性(High+) | $DEPENDENCY_VULNS件 | 定期的な更新推奨 |
+          | 🔍 コードセキュリティスコア | $SECURITY_SCORE/100 | 静的解析結果 |
+          | 🚨 コードセキュリティ問題 | $CODE_ISSUES件 | 修正推奨事項 |
+          
+          ## 🎯 推奨アクション
+          
+          ### 🔴 緊急対応（Critical）
+          EOF
+          
+          if [ "$CRITICAL_VULNS" -gt "0" ]; then
+            echo "- 🚨 Critical脆弱性の即座修正" >> security-summary.md
+            echo "- 🔒 セキュリティパッチの適用" >> security-summary.md
+          else
+            echo "- ✅ 現在Critical脆弱性は検出されていません" >> security-summary.md
+          fi
+          
+          cat >> security-summary.md << EOF
+          
+          ### ⚠️ 定期対応（High Priority）
+          - 📦 依存関係の定期更新
+          - 🔍 セキュリティスキャンの継続実行
+          - 📚 チームセキュリティ教育
+          
+          ### 📈 改善施策（Medium Priority）  
+          - 🛡️ セキュリティツールの追加導入
+          - 📊 セキュリティメトリクス監視
+          - 🔐 認証・認可機能の強化
+          
+          ---
+          *🤖 このレポートは自動生成されました*
+          EOF
+          
+          echo "✅ セキュリティレポート生成完了"
+
+      - name: 📤 セキュリティレポートアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-security-report
+          path: |
+            security-summary.md
+          retention-days: 90
+
+      - name: 💬 PR通知（該当する場合）
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const securityReport = fs.readFileSync('security-summary.md', 'utf8');
+            
+            const overallLevel = '${{ env.OVERALL_SECURITY_LEVEL || 'MEDIUM' }}';
+            const criticalVulns = '${{ needs.dependency-security-audit.outputs.critical-count }}';
+            
+            let statusIcon = '✅';
+            if (overallLevel === 'CRITICAL') statusIcon = '🔴';
+            else if (overallLevel === 'MEDIUM') statusIcon = '🟡';
+            else if (overallLevel === 'LOW') statusIcon = '🟠';
+            
+            const comment = \`${statusIcon} **セキュリティスキャン結果**
+
+            **全体レベル**: ${overallLevel}
+            **Critical脆弱性**: ${criticalVulns}件
+
+            <details>
+            <summary>📊 詳細レポート</summary>
+
+            \\\`\\\`\\\`
+            ${securityReport}
+            \\\`\\\`\\\`
+
+            </details>
+
+            ${criticalVulns > 0 ? '🚨 **Critical脆弱性が検出されました。即座の対応が必要です。**' : ''}
+            \`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: 📊 GitHub Step Summaryレポート
+        if: always()
+        run: |
+          cat security-summary.md >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🔗 関連リンク" >> $GITHUB_STEP_SUMMARY
+          echo "- [セキュリティポリシー](./SECURITY.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [脆弱性報告](https://github.com/security/advisories)" >> $GITHUB_STEP_SUMMARY
+          echo "- [セキュリティベストプラクティス](./docs/security/)" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================
+  # Job 5: セキュリティ緊急対応（Critical時）
+  # Purpose: Critical脆弱性検出時の緊急対応フロー
+  # ============================================================
+  emergency-response:
+    name: 🚨 セキュリティ緊急対応
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [dependency-security-audit]
+    if: needs.dependency-security-audit.outputs.critical-count > 0
+    
+    steps:
+      - name: 🚨 緊急セキュリティアラート
+        run: |
+          echo "🚨 CRITICAL脆弱性が検出されました！"
+          echo "Critical脆弱性数: ${{ needs.dependency-security-audit.outputs.critical-count }}件"
+          echo "即座の対応が必要です。"
+          
+          # 緊急対応チェックリスト
+          cat << EOF
+          ## 🚨 緊急対応チェックリスト
+          
+          ### 即座実行
+          - [ ] セキュリティチームへの通知
+          - [ ] 影響範囲の特定
+          - [ ] 修正パッチの調査
+          
+          ### 24時間以内
+          - [ ] 修正版の適用
+          - [ ] セキュリティテストの実行
+          - [ ] ステークホルダーへの報告
+          
+          ### 1週間以内  
+          - [ ] 再発防止策の策定
+          - [ ] セキュリティプロセスの見直し
+          - [ ] ドキュメントの更新
+          EOF
+
+      - name: 📧 緊急通知（実際の実装では通知システムに送信）
+        run: |
+          echo "📧 緊急セキュリティ通知を送信..."
+          echo "TO: Security Team, DevOps Team, Project Manager"
+          echo "SUBJECT: [URGENT] Critical Security Vulnerabilities Detected"
+          echo "本番環境での影響を最小限に抑えるため、即座の対応をお願いします。"

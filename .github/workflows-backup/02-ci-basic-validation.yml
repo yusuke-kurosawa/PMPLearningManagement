@@ -1,0 +1,369 @@
+name: 02 CI Basic Validation
+# 基本的な継続的インテグレーション検証
+# コード品質、テスト、ビルドの基本チェック
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: 'v1'
+
+jobs:
+  # ========================================
+  # 依存関係とセットアップ
+  # ========================================
+  setup:
+    name: セットアップと依存関係
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+      
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 依存関係キャッシュ
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-
+
+      - name: 依存関係インストール
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          echo "📦 依存関係をインストール中..."
+          npm ci --prefer-offline --no-audit
+          echo "✅ インストール完了"
+
+      - name: 依存関係の脆弱性チェック
+        run: |
+          echo "🔍 脆弱性をチェック中..."
+          npm audit --audit-level=high || true
+          echo "✅ チェック完了"
+
+  # ========================================
+  # コード品質チェック
+  # ========================================
+  lint:
+    name: コード品質チェック
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: キャッシュ復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: ESLint実行
+        id: eslint
+        run: |
+          echo "🔍 ESLintでコード品質をチェック中..."
+          npm run lint 2>&1 | tee eslint-report.txt || true
+          
+          # エラー数をカウント
+          errors=$(grep -c "error" eslint-report.txt || echo "0")
+          warnings=$(grep -c "warning" eslint-report.txt || echo "0")
+          
+          echo "errors=$errors" >> $GITHUB_OUTPUT
+          echo "warnings=$warnings" >> $GITHUB_OUTPUT
+          
+          if [ "$errors" -gt 0 ]; then
+            echo "❌ ESLintエラーが${errors}件見つかりました"
+            exit 1
+          elif [ "$warnings" -gt 0 ]; then
+            echo "⚠️ ESLint警告が${warnings}件見つかりました"
+          else
+            echo "✅ ESLintチェック完了（エラーなし）"
+          fi
+
+      - name: Prettier フォーマットチェック
+        run: |
+          echo "🎨 Prettierでフォーマットをチェック中..."
+          npm run format:check || {
+            echo "❌ フォーマットエラーが見つかりました"
+            echo "修正方法: npm run format:fix"
+            exit 1
+          }
+          echo "✅ フォーマットチェック完了"
+
+      - name: 結果をPRにコメント
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const errors = ${{ steps.eslint.outputs.errors || 0 }};
+            const warnings = ${{ steps.eslint.outputs.warnings || 0 }};
+            
+            const status = errors > 0 ? '❌ 失敗' : '✅ 成功';
+            const emoji = errors > 0 ? '🚨' : warnings > 0 ? '⚠️' : '✅';
+            
+            const comment = `## ${emoji} コード品質チェック結果
+            
+            **ステータス**: ${status}
+            **ESLintエラー**: ${errors}件
+            **ESLint警告**: ${warnings}件
+            
+            ${errors > 0 ? '### 対処法\n1. `npm run lint` でエラー詳細を確認\n2. `npm run lint:fix` で自動修正を試行\n3. 手動で残りのエラーを修正' : ''}
+            ${warnings > 0 ? '### 推奨事項\n警告も可能な限り解消することを推奨します。' : ''}
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+  # ========================================
+  # ユニットテスト
+  # ========================================
+  test:
+    name: ユニットテスト
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: キャッシュ復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: テスト実行
+        id: test
+        run: |
+          echo "🧪 ユニットテストを実行中..."
+          npm run test:ci 2>&1 | tee test-report.txt || true
+          
+          # テスト結果を解析
+          if grep -q "PASS" test-report.txt; then
+            passed=$(grep -c "PASS" test-report.txt || echo "0")
+            echo "passed=$passed" >> $GITHUB_OUTPUT
+          fi
+          
+          if grep -q "FAIL" test-report.txt; then
+            failed=$(grep -c "FAIL" test-report.txt || echo "0")
+            echo "failed=$failed" >> $GITHUB_OUTPUT
+            echo "❌ テストが失敗しました"
+            exit 1
+          else
+            echo "✅ 全テストが成功しました"
+          fi
+
+      - name: カバレッジレポート生成
+        if: success()
+        run: |
+          echo "📊 カバレッジレポートを生成中..."
+          npm run test:coverage || true
+          
+          # カバレッジ率を取得（簡易版）
+          if [ -f coverage/coverage-summary.json ]; then
+            coverage=$(node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              const avg = (total.lines.pct + total.statements.pct + total.functions.pct + total.branches.pct) / 4;
+              console.log(avg.toFixed(1));
+            ")
+            echo "coverage=$coverage" >> $GITHUB_OUTPUT
+            echo "📊 カバレッジ: ${coverage}%"
+          fi
+
+      - name: テスト結果アップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test-report.txt
+            coverage/
+          retention-days: 7
+
+  # ========================================
+  # ビルド検証
+  # ========================================
+  build:
+    name: ビルド検証
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: キャッシュ復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: プロダクションビルド
+        id: build
+        run: |
+          echo "🔨 プロダクションビルドを実行中..."
+          start_time=$(date +%s)
+          
+          npm run build 2>&1 | tee build-log.txt
+          
+          end_time=$(date +%s)
+          build_time=$((end_time - start_time))
+          
+          echo "build_time=$build_time" >> $GITHUB_OUTPUT
+          echo "✅ ビルド完了（${build_time}秒）"
+
+      - name: ビルド成果物の検証
+        run: |
+          echo "📦 ビルド成果物を検証中..."
+          
+          # distディレクトリの存在確認
+          if [ ! -d "dist" ]; then
+            echo "❌ distディレクトリが見つかりません"
+            exit 1
+          fi
+          
+          # ファイルサイズチェック
+          total_size=$(du -sh dist | cut -f1)
+          echo "📊 ビルドサイズ: $total_size"
+          
+          # 主要ファイルの存在確認
+          required_files=("index.html")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "dist/$file" ]; then
+              echo "❌ 必須ファイル dist/$file が見つかりません"
+              exit 1
+            fi
+          done
+          
+          echo "✅ ビルド成果物の検証完了"
+
+      - name: ビルド成果物アップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  # ========================================
+  # 統合レポート
+  # ========================================
+  report:
+    name: CI統合レポート
+    needs: [setup, lint, test, build]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 結果集計とレポート生成
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ジョブ結果の取得
+            const jobs = {
+              setup: '${{ needs.setup.result }}',
+              lint: '${{ needs.lint.result }}',
+              test: '${{ needs.test.result }}',
+              build: '${{ needs.build.result }}'
+            };
+            
+            // 全体のステータス判定
+            const failed = Object.values(jobs).includes('failure');
+            const skipped = Object.values(jobs).includes('skipped');
+            const cancelled = Object.values(jobs).includes('cancelled');
+            
+            let overallStatus = '✅ 成功';
+            let statusEmoji = '✅';
+            if (failed) {
+              overallStatus = '❌ 失敗';
+              statusEmoji = '❌';
+            } else if (cancelled) {
+              overallStatus = '⚠️ キャンセル';
+              statusEmoji = '⚠️';
+            } else if (skipped) {
+              overallStatus = '⏭️ スキップあり';
+              statusEmoji = '⏭️';
+            }
+            
+            // レポート生成
+            const report = `# ${statusEmoji} CI検証結果レポート
+            
+            **全体ステータス**: ${overallStatus}
+            **実行日時**: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+            
+            ## 📊 ジョブ結果
+            
+            | ジョブ | ステータス | 詳細 |
+            |--------|-----------|------|
+            | セットアップ | ${jobs.setup === 'success' ? '✅' : '❌'} | 依存関係のインストール |
+            | コード品質 | ${jobs.lint === 'success' ? '✅' : '❌'} | ESLint & Prettier |
+            | テスト | ${jobs.test === 'success' ? '✅' : '❌'} | ユニットテスト |
+            | ビルド | ${jobs.build === 'success' ? '✅' : '❌'} | プロダクションビルド |
+            
+            ## 📝 次のステップ
+            
+            ${failed ? `### 失敗したジョブの修正
+            1. ワークフロー実行ログを確認
+            2. エラーメッセージに従って修正
+            3. 修正後、再度プッシュ` : '### デプロイ準備完了\nこのコードはデプロイ可能な状態です。'}
+            
+            ---
+            *Generated by CI Basic Validation Workflow*`;
+            
+            console.log(report);
+            
+            // PRへのコメント（PR の場合）
+            if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }

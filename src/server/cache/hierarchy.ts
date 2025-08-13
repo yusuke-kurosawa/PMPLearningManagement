@@ -1,1 +1,664 @@
-/**\n * 階層キャッシュシステム - Enterprise Grade\n * 10,000+ 同時ユーザー対応の高性能キャッシュ階層\n */\n\nimport LRU from 'lru-cache'\nimport { EventEmitter } from 'events'\nimport { performance } from 'perf_hooks'\nimport { gzipSync, gunzipSync } from 'zlib'\nimport crypto from 'crypto'\nimport { RedisCache } from '../../lib/cache/redisCache'\n\n// キャッシュレイヤー定義\nexport enum CacheLayer {\n  L1_MEMORY = 'L1_MEMORY',      // インメモリ（最高速）\n  L2_REDIS = 'L2_REDIS',        // Redis（高速）\n  L3_DATABASE = 'L3_DATABASE',   // データベース（基本速度）\n}\n\n// キャッシュ戦略\nexport enum CacheStrategy {\n  WRITE_THROUGH = 'WRITE_THROUGH',     // 書き込み時に全レイヤー更新\n  WRITE_BACK = 'WRITE_BACK',           // 書き込みをL1のみで行い、後でL2,L3に同期\n  WRITE_AROUND = 'WRITE_AROUND',       // 書き込み時はL1をスキップしてL2以降に直接書き込み\n  READ_THROUGH = 'READ_THROUGH',       // 読み込み時に下位レイヤーから自動取得\n  CACHE_ASIDE = 'CACHE_ASIDE',         // アプリケーションが明示的にキャッシュを管理\n}\n\n// LRU/LFU 戦略\nexport enum EvictionStrategy {\n  LRU = 'LRU',   // Least Recently Used\n  LFU = 'LFU',   // Least Frequently Used\n  TTL = 'TTL',   // Time To Live\n  FIFO = 'FIFO', // First In First Out\n}\n\n// キャッシュ設定\nexport interface CacheConfig {\n  strategy: CacheStrategy\n  eviction: EvictionStrategy\n  ttl: {\n    L1: number  // ミリ秒\n    L2: number  // ミリ秒\n    L3?: number // データベースはTTLなし\n  }\n  maxSize: {\n    L1: number  // エントリ数\n    L2: string  // Redis memory (例: '100mb')\n  }\n  compression: boolean\n  encryption: boolean\n  warmupOnStart: boolean\n  batchSize: number\n  syncInterval: number\n}\n\n// パフォーマンスメトリクス\ninterface CacheMetrics {\n  hits: number\n  misses: number\n  evictions: number\n  totalRequests: number\n  averageLatency: number\n  memoryUsage: {\n    L1: number\n    L2: number\n  }\n  hitRateByLayer: {\n    L1: number\n    L2: number\n    L3: number\n  }\n}\n\n// キャッシュエントリー\ninterface CacheEntry<T> {\n  data: T\n  timestamp: number\n  ttl: number\n  accessCount: number\n  lastAccessed: number\n  size: number\n  compressed?: boolean\n  encrypted?: boolean\n}\n\n/**\n * 階層キャッシュマネージャー - ENHANCED VERSION\n * 大規模同時アクセス対応の統合キャッシュシステム\n */\nexport class HierarchicalCacheManager extends EventEmitter {\n  private L1Cache: LRU<string, CacheEntry<any>>\n  private redisCache: RedisCache\n  private config: CacheConfig\n  private metrics: CacheMetrics\n  private batchQueue: Map<string, any> = new Map()\n  private syncTimer: NodeJS.Timer | null = null\n  private encryptionKey: Buffer\n\n  constructor(config: CacheConfig, redisCache: RedisCache) {\n    super()\n    this.config = config\n    this.redisCache = redisCache\n    \n    // L1キャッシュ初期化（LRU Cache使用）\n    this.L1Cache = new LRU<string, CacheEntry<any>>({\n      max: config.maxSize.L1,\n      ttl: config.ttl.L1,\n      updateAgeOnGet: config.eviction === EvictionStrategy.LRU,\n      allowStale: false,\n      dispose: (key, entry) => {\n        this.metrics.evictions++\n        this.emit('eviction', { layer: 'L1', key, size: entry.size })\n      }\n    })\n    \n    // メトリクス初期化\n    this.metrics = {\n      hits: 0,\n      misses: 0,\n      evictions: 0,\n      totalRequests: 0,\n      averageLatency: 0,\n      memoryUsage: { L1: 0, L2: 0 },\n      hitRateByLayer: { L1: 0, L2: 0, L3: 0 }\n    }\n    \n    // 暗号化キー生成\n    this.encryptionKey = crypto.randomBytes(32)\n    \n    // バッチ同期の開始\n    if (config.strategy === CacheStrategy.WRITE_BACK) {\n      this.startBatchSync()\n    }\n    \n    // 定期メトリクス出力\n    setInterval(() => {\n      this.updateMetrics()\n      this.emit('metrics', this.getMetrics())\n    }, 30000)\n    \n    // ウォームアップ実行\n    if (config.warmupOnStart) {\n      this.warmupCache()\n    }\n  }\n\n  /**\n   * データの取得（階層キャッシュ）- 高性能版\n   */\n  async get<T>(key: string): Promise<T | null> {\n    const startTime = performance.now()\n    this.metrics.totalRequests++\n    \n    try {\n      // L1キャッシュをチェック\n      const l1Entry = this.L1Cache.get(key)\n      if (l1Entry && !this.isExpired(l1Entry)) {\n        l1Entry.accessCount++\n        l1Entry.lastAccessed = Date.now()\n        this.metrics.hits++\n        this.recordLatency(performance.now() - startTime)\n        this.emit('cache_hit', { layer: 'L1', key, duration: performance.now() - startTime })\n        return this.deserializeData<T>(l1Entry.data)\n      }\n\n      // L2キャッシュ（Redis）をチェック\n      const redisData = await this.redisCache.get<string>(key)\n      if (redisData !== null) {\n        const deserializedData = this.deserializeData<T>(redisData)\n        this.metrics.hits++\n        \n        // L1にプロモート（効率的な階層管理）\n        await this.setL1(key, deserializedData, this.config.ttl.L1)\n        \n        this.recordLatency(performance.now() - startTime)\n        this.emit('cache_hit', { layer: 'L2', key, duration: performance.now() - startTime })\n        return deserializedData\n      }\n\n      // キャッシュミス\n      this.metrics.misses++\n      this.recordLatency(performance.now() - startTime)\n      this.emit('cache_miss', { key, duration: performance.now() - startTime })\n      return null\n\n    } catch (error) {\n      this.emit('cache_error', { key, error, layer: 'get' })\n      return null\n    }\n  }\n\n  /**\n   * データの設定（戦略に応じて階層更新）- 高性能版\n   */\n  async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {\n    const startTime = performance.now()\n    \n    try {\n      const serializedData = this.serializeData(value)\n      const effectiveTtl = ttl || this.config.ttl.L2\n      \n      switch (this.config.strategy) {\n        case CacheStrategy.WRITE_THROUGH:\n          // 全レイヤーに同期書き込み\n          const promises = [\n            this.setL1(key, value, effectiveTtl),\n            this.redisCache.set(key, serializedData, { ttl: effectiveTtl })\n          ]\n          const results = await Promise.allSettled(promises)\n          const success = results.every(r => r.status === 'fulfilled' && r.value)\n          \n          this.emit('cache_write', { \n            strategy: 'WRITE_THROUGH', \n            key, \n            duration: performance.now() - startTime,\n            success,\n            size: this.getDataSize(serializedData)\n          })\n          return success\n\n        case CacheStrategy.WRITE_BACK:\n          // L1のみに書き込み、バッチでL2に同期\n          const writeBackSuccess = this.setL1(key, value, effectiveTtl)\n          this.queueForBatchSync(key, serializedData, effectiveTtl)\n          \n          this.emit('cache_write', { \n            strategy: 'WRITE_BACK', \n            key, \n            duration: performance.now() - startTime,\n            success: writeBackSuccess\n          })\n          return writeBackSuccess\n\n        case CacheStrategy.WRITE_AROUND:\n          // L1をスキップしてL2に直接書き込み\n          const writeAroundSuccess = await this.redisCache.set(key, serializedData, { ttl: effectiveTtl })\n          this.emit('cache_write', { \n            strategy: 'WRITE_AROUND', \n            key, \n            duration: performance.now() - startTime,\n            success: writeAroundSuccess,\n            size: this.getDataSize(serializedData)\n          })\n          return writeAroundSuccess\n\n        default:\n          // CACHE_ASIDE: アプリケーションが明示的に管理\n          return false\n      }\n    } catch (error) {\n      this.emit('cache_error', { key, error, layer: 'set' })\n      return false\n    }\n  }\n\n  /**\n   * L1キャッシュへの設定 - 最適化版\n   */\n  private setL1<T>(key: string, value: T, ttl?: number): boolean {\n    try {\n      const serializedData = this.serializeData(value)\n      const dataSize = this.getDataSize(serializedData)\n      \n      const entry: CacheEntry<any> = {\n        data: serializedData,\n        timestamp: Date.now(),\n        ttl: ttl || this.config.ttl.L1,\n        accessCount: 1,\n        lastAccessed: Date.now(),\n        size: dataSize,\n        compressed: this.config.compression,\n        encrypted: this.config.encryption\n      }\n      \n      this.L1Cache.set(key, entry)\n      this.metrics.memoryUsage.L1 += dataSize\n      \n      return true\n    } catch (error) {\n      console.error('L1 cache set error:', error)\n      return false\n    }\n  }\n\n  /**\n   * データのシリアライゼーション（圧縮・暗号化対応）\n   */\n  private serializeData<T>(data: T): string {\n    try {\n      let serialized = JSON.stringify(data)\n      \n      // 圧縮\n      if (this.config.compression && serialized.length > 1024) {\n        const compressed = gzipSync(Buffer.from(serialized))\n        serialized = compressed.toString('base64')\n      }\n      \n      // 暗号化\n      if (this.config.encryption) {\n        const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey)\n        let encrypted = cipher.update(serialized, 'utf8', 'hex')\n        encrypted += cipher.final('hex')\n        serialized = encrypted\n      }\n      \n      return serialized\n    } catch (error) {\n      console.error('Serialization error:', error)\n      return JSON.stringify(data)\n    }\n  }\n\n  /**\n   * データのデシリアライゼーション\n   */\n  private deserializeData<T>(serialized: string): T {\n    try {\n      let data = serialized\n      \n      // 復号化\n      if (this.config.encryption) {\n        const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey)\n        let decrypted = decipher.update(data, 'hex', 'utf8')\n        decrypted += decipher.final('utf8')\n        data = decrypted\n      }\n      \n      // 展開\n      if (this.config.compression) {\n        try {\n          const decompressed = gunzipSync(Buffer.from(data, 'base64'))\n          data = decompressed.toString()\n        } catch {\n          // 圧縮されていないデータの場合はそのまま\n        }\n      }\n      \n      return JSON.parse(data)\n    } catch (error) {\n      console.error('Deserialization error:', error)\n      return JSON.parse(serialized)\n    }\n  }\n\n  /**\n   * データサイズ計算\n   */\n  private getDataSize(data: string): number {\n    return Buffer.byteLength(data, 'utf8')\n  }\n\n  /**\n   * エントリーの有効期限チェック\n   */\n  private isExpired(entry: CacheEntry<any>): boolean {\n    return Date.now() > (entry.timestamp + entry.ttl)\n  }\n\n  /**\n   * バッチ同期キューに追加\n   */\n  private queueForBatchSync(key: string, data: string, ttl: number): void {\n    this.batchQueue.set(key, { data, ttl, timestamp: Date.now() })\n    \n    // バッチサイズに達したら即座に同期\n    if (this.batchQueue.size >= this.config.batchSize) {\n      this.processBatchSync()\n    }\n  }\n\n  /**\n   * バッチ同期処理\n   */\n  private async processBatchSync(): Promise<void> {\n    if (this.batchQueue.size === 0) return\n    \n    const batch = Array.from(this.batchQueue.entries())\n    this.batchQueue.clear()\n    \n    const promises = batch.map(([key, { data, ttl }]) => \n      this.redisCache.set(key, data, { ttl })\n    )\n    \n    try {\n      await Promise.allSettled(promises)\n      this.emit('batch_sync_completed', { count: batch.length })\n    } catch (error) {\n      this.emit('batch_sync_error', { error, count: batch.length })\n    }\n  }\n\n  /**\n   * バッチ同期タイマー開始\n   */\n  private startBatchSync(): void {\n    this.syncTimer = setInterval(() => {\n      this.processBatchSync()\n    }, this.config.syncInterval)\n  }\n\n  /**\n   * レイテンシ記録\n   */\n  private recordLatency(latency: number): void {\n    this.metrics.averageLatency = \n      (this.metrics.averageLatency * (this.metrics.totalRequests - 1) + latency) / \n      this.metrics.totalRequests\n  }\n\n  /**\n   * メトリクス更新\n   */\n  private updateMetrics(): void {\n    this.metrics.hitRateByLayer.L1 = \n      this.metrics.totalRequests > 0 ? \n      (this.L1Cache.size / this.metrics.totalRequests) : 0\n      \n    this.metrics.memoryUsage.L1 = \n      Array.from(this.L1Cache.values())\n        .reduce((total, entry) => total + entry.size, 0)\n  }\n\n  /**\n   * キャッシュウォームアップ\n   */\n  private async warmupCache(): Promise<void> {\n    try {\n      console.log('🔥 Starting cache warmup...')\n      \n      // 頻繁にアクセスされるデータを事前ロード\n      const warmupKeys = [\n        'user_progress_*',\n        'exam_questions_*',\n        'leaderboard_*',\n        'process_data_*'\n      ]\n      \n      for (const pattern of warmupKeys) {\n        const keys = await this.redisCache.keys(pattern)\n        console.log(`Warming up ${keys.length} keys for pattern: ${pattern}`)\n        \n        // 並列でウォームアップ（制限付き）\n        const chunkSize = 50\n        for (let i = 0; i < keys.length; i += chunkSize) {\n          const chunk = keys.slice(i, i + chunkSize)\n          await Promise.allSettled(\n            chunk.map(key => this.get(key))\n          )\n        }\n      }\n      \n      console.log('✅ Cache warmup completed')\n      this.emit('warmup_completed', { patterns: warmupKeys.length })\n      \n    } catch (error) {\n      console.error('❌ Cache warmup failed:', error)\n      this.emit('warmup_failed', { error })\n    }\n  }\n\n  /**\n   * キャッシュクリア\n   */\n  async clear(): Promise<void> {\n    this.L1Cache.clear()\n    await this.redisCache.clear()\n    this.batchQueue.clear()\n    this.resetMetrics()\n    this.emit('cache_cleared')\n  }\n\n  /**\n   * メトリクスリセット\n   */\n  private resetMetrics(): void {\n    this.metrics = {\n      hits: 0,\n      misses: 0,\n      evictions: 0,\n      totalRequests: 0,\n      averageLatency: 0,\n      memoryUsage: { L1: 0, L2: 0 },\n      hitRateByLayer: { L1: 0, L2: 0, L3: 0 }\n    }\n  }\n\n  /**\n   * メトリクスの取得 - 詳細版\n   */\n  getMetrics(): CacheMetrics {\n    return {\n      ...this.metrics,\n      hitRateByLayer: {\n        L1: this.metrics.totalRequests > 0 ? \n          this.metrics.hitRateByLayer.L1 : 0,\n        L2: this.metrics.totalRequests > 0 ? \n          this.metrics.hitRateByLayer.L2 : 0,\n        L3: this.metrics.totalRequests > 0 ? \n          this.metrics.hitRateByLayer.L3 : 0\n      }\n    }\n  }\n\n  /**\n   * ヘルスチェック\n   */\n  async healthCheck(): Promise<{\n    status: 'healthy' | 'degraded' | 'unhealthy'\n    metrics: CacheMetrics\n    layers: {\n      L1: { status: string; size: number }\n      L2: { status: string; connected: boolean }\n    }\n  }> {\n    try {\n      const l2Health = await this.redisCache.healthCheck()\n      const hitRate = this.metrics.totalRequests > 0 ? \n        this.metrics.hits / this.metrics.totalRequests : 0\n      \n      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'\n      \n      if (!l2Health.connected || hitRate < 0.5) {\n        status = 'degraded'\n      }\n      if (!l2Health.connected && hitRate < 0.2) {\n        status = 'unhealthy'\n      }\n      \n      return {\n        status,\n        metrics: this.getMetrics(),\n        layers: {\n          L1: {\n            status: this.L1Cache.size < this.config.maxSize.L1 ? 'healthy' : 'full',\n            size: this.L1Cache.size\n          },\n          L2: {\n            status: l2Health.connected ? 'healthy' : 'unhealthy',\n            connected: l2Health.connected\n          }\n        }\n      }\n    } catch (error) {\n      return {\n        status: 'unhealthy',\n        metrics: this.getMetrics(),\n        layers: {\n          L1: { status: 'error', size: 0 },\n          L2: { status: 'error', connected: false }\n        }\n      }\n    }\n  }\n\n  /**\n   * クリーンアップ\n   */\n  async destroy(): Promise<void> {\n    if (this.syncTimer) {\n      clearInterval(this.syncTimer)\n      this.syncTimer = null\n    }\n    \n    // 残りのバッチを同期\n    await this.processBatchSync()\n    \n    this.L1Cache.clear()\n    this.batchQueue.clear()\n    this.removeAllListeners()\n  }\n}\n\n/**\n * メモリ使用量監視とアラート\n */\nexport class CacheMemoryManager {\n  private readonly WARNING_THRESHOLD = 0.8\n  private readonly CRITICAL_THRESHOLD = 0.95\n  \n  constructor(private cacheManager: HierarchicalCacheManager) {\n    // メモリ監視の開始\n    setInterval(() => {\n      this.checkMemoryUsage()\n    }, 60000) // 1分ごと\n  }\n  \n  private checkMemoryUsage(): void {\n    const metrics = this.cacheManager.getMetrics()\n    const utilizationRate = metrics.memoryUsage.L1 / (this.cacheManager['config'].maxSize.L1 * 1024) // 概算\n    \n    if (utilizationRate >= this.CRITICAL_THRESHOLD) {\n      this.cacheManager.emit('memory_critical', {\n        utilizationRate,\n        usage: metrics.memoryUsage.L1\n      })\n    } else if (utilizationRate >= this.WARNING_THRESHOLD) {\n      this.cacheManager.emit('memory_warning', {\n        utilizationRate,\n        usage: metrics.memoryUsage.L1\n      })\n    }\n  }\n}\n\n/**\n * 事前定義されたキャッシュ設定\n */\nexport const CacheConfigurations = {\n  // 高パフォーマンス設定（本番環境）\n  HIGH_PERFORMANCE: {\n    strategy: CacheStrategy.WRITE_THROUGH,\n    eviction: EvictionStrategy.LRU,\n    ttl: {\n      L1: 5 * 60 * 1000,      // 5分\n      L2: 30 * 60 * 1000,     // 30分\n    },\n    maxSize: {\n      L1: 10000,              // 10K エントリ\n      L2: '500mb',            // 500MB\n    },\n    compression: true,\n    encryption: false,\n    warmupOnStart: true,\n    batchSize: 100,\n    syncInterval: 5000\n  } as CacheConfig,\n  \n  // メモリ効率設定\n  MEMORY_EFFICIENT: {\n    strategy: CacheStrategy.WRITE_BACK,\n    eviction: EvictionStrategy.LFU,\n    ttl: {\n      L1: 2 * 60 * 1000,      // 2分\n      L2: 15 * 60 * 1000,     // 15分\n    },\n    maxSize: {\n      L1: 5000,               // 5K エントリ\n      L2: '200mb',            // 200MB\n    },\n    compression: true,\n    encryption: false,\n    warmupOnStart: false,\n    batchSize: 50,\n    syncInterval: 10000\n  } as CacheConfig,\n  \n  // 開発環境設定\n  DEVELOPMENT: {\n    strategy: CacheStrategy.CACHE_ASIDE,\n    eviction: EvictionStrategy.TTL,\n    ttl: {\n      L1: 30 * 1000,          // 30秒\n      L2: 2 * 60 * 1000,      // 2分\n    },\n    maxSize: {\n      L1: 1000,               // 1K エントリ\n      L2: '50mb',             // 50MB\n    },\n    compression: false,\n    encryption: false,\n    warmupOnStart: false,\n    batchSize: 10,\n    syncInterval: 5000\n  } as CacheConfig\n}\n\n// デフォルトエクスポート\nexport default {\n  HierarchicalCacheManager,\n  CacheMemoryManager,\n  CacheStrategy,\n  CacheLayer,\n  EvictionStrategy,\n  CacheConfigurations,\n}"
+/**
+ * 階層キャッシュシステム - Enterprise Grade
+ * 10,000+ 同時ユーザー対応の高性能キャッシュ階層
+ */
+
+import LRU from 'lru-cache'
+import { EventEmitter } from 'events'
+import { performance } from 'perf_hooks'
+import { gzipSync, gunzipSync } from 'zlib'
+import crypto from 'crypto'
+import { RedisCache } from '../../lib/cache/redisCache'
+
+// キャッシュレイヤー定義
+export enum CacheLayer {
+  L1_MEMORY = 'L1_MEMORY', // インメモリ（最高速）
+  L2_REDIS = 'L2_REDIS', // Redis（高速）
+  L3_DATABASE = 'L3_DATABASE', // データベース（基本速度）
+}
+
+// キャッシュ戦略
+export enum CacheStrategy {
+  WRITE_THROUGH = 'WRITE_THROUGH', // 書き込み時に全レイヤー更新
+  WRITE_BACK = 'WRITE_BACK', // 書き込みをL1のみで行い、後でL2,L3に同期
+  WRITE_AROUND = 'WRITE_AROUND', // 書き込み時はL1をスキップしてL2以降に直接書き込み
+  READ_THROUGH = 'READ_THROUGH', // 読み込み時に下位レイヤーから自動取得
+  CACHE_ASIDE = 'CACHE_ASIDE', // アプリケーションが明示的にキャッシュを管理
+}
+
+// LRU/LFU 戦略
+export enum EvictionStrategy {
+  LRU = 'LRU', // Least Recently Used
+  LFU = 'LFU', // Least Frequently Used
+  TTL = 'TTL', // Time To Live
+  FIFO = 'FIFO', // First In First Out
+}
+
+// キャッシュ設定
+export interface CacheConfig {
+  strategy: CacheStrategy
+  eviction: EvictionStrategy
+  ttl: {
+    L1: number // ミリ秒
+    L2: number // ミリ秒
+    L3?: number // データベースはTTLなし
+  }
+  maxSize: {
+    L1: number // エントリ数
+    L2: string // Redis memory (例: '100mb')
+  }
+  compression: boolean
+  encryption: boolean
+  warmupOnStart: boolean
+  batchSize: number
+  syncInterval: number
+}
+
+// パフォーマンスメトリクス
+interface CacheMetrics {
+  hits: number
+  misses: number
+  evictions: number
+  totalRequests: number
+  averageLatency: number
+  memoryUsage: {
+    L1: number
+    L2: number
+  }
+  hitRateByLayer: {
+    L1: number
+    L2: number
+    L3: number
+  }
+}
+
+// キャッシュエントリー
+interface CacheEntry<T> {
+  data: T
+  timestamp: number
+  ttl: number
+  accessCount: number
+  lastAccessed: number
+  size: number
+  compressed?: boolean
+  encrypted?: boolean
+}
+
+/**
+ * 階層キャッシュマネージャー - ENHANCED VERSION
+ * 大規模同時アクセス対応の統合キャッシュシステム
+ */
+export class HierarchicalCacheManager extends EventEmitter {
+  private L1Cache: LRU<string, CacheEntry<any>>
+  private redisCache: RedisCache
+  private config: CacheConfig
+  private metrics: CacheMetrics
+  private batchQueue: Map<string, any> = new Map()
+  private syncTimer: NodeJS.Timer | null = null
+  private encryptionKey: Buffer
+
+  constructor(config: CacheConfig, redisCache: RedisCache) {
+    super()
+    this.config = config
+    this.redisCache = redisCache
+
+    // L1キャッシュ初期化（LRU Cache使用）
+    this.L1Cache = new LRU<string, CacheEntry<any>>({
+      max: config.maxSize.L1,
+      ttl: config.ttl.L1,
+      updateAgeOnGet: config.eviction === EvictionStrategy.LRU,
+      allowStale: false,
+      dispose: (key, entry) => {
+        this.metrics.evictions++
+        this.emit('eviction', { layer: 'L1', key, size: entry.size })
+      },
+    })
+
+    // メトリクス初期化
+    this.metrics = {
+      hits: 0,
+      misses: 0,
+      evictions: 0,
+      totalRequests: 0,
+      averageLatency: 0,
+      memoryUsage: { L1: 0, L2: 0 },
+      hitRateByLayer: { L1: 0, L2: 0, L3: 0 },
+    }
+
+    // 暗号化キー生成
+    this.encryptionKey = crypto.randomBytes(32)
+
+    // バッチ同期の開始
+    if (config.strategy === CacheStrategy.WRITE_BACK) {
+      this.startBatchSync()
+    }
+
+    // 定期メトリクス出力
+    setInterval(() => {
+      this.updateMetrics()
+      this.emit('metrics', this.getMetrics())
+    }, 30000)
+
+    // ウォームアップ実行
+    if (config.warmupOnStart) {
+      this.warmupCache()
+    }
+  }
+
+  /**
+   * データの取得（階層キャッシュ）- 高性能版
+   */
+  async get<T>(key: string): Promise<T | null> {
+    const startTime = performance.now()
+    this.metrics.totalRequests++
+
+    try {
+      // L1キャッシュをチェック
+      const l1Entry = this.L1Cache.get(key)
+      if (l1Entry && !this.isExpired(l1Entry)) {
+        l1Entry.accessCount++
+        l1Entry.lastAccessed = Date.now()
+        this.metrics.hits++
+        this.recordLatency(performance.now() - startTime)
+        this.emit('cache_hit', { layer: 'L1', key, duration: performance.now() - startTime })
+        return this.deserializeData<T>(l1Entry.data)
+      }
+
+      // L2キャッシュ（Redis）をチェック
+      const redisData = await this.redisCache.get<string>(key)
+      if (redisData !== null) {
+        const deserializedData = this.deserializeData<T>(redisData)
+        this.metrics.hits++
+
+        // L1にプロモート（効率的な階層管理）
+        await this.setL1(key, deserializedData, this.config.ttl.L1)
+
+        this.recordLatency(performance.now() - startTime)
+        this.emit('cache_hit', { layer: 'L2', key, duration: performance.now() - startTime })
+        return deserializedData
+      }
+
+      // キャッシュミス
+      this.metrics.misses++
+      this.recordLatency(performance.now() - startTime)
+      this.emit('cache_miss', { key, duration: performance.now() - startTime })
+      return null
+    } catch (error) {
+      this.emit('cache_error', { key, error, layer: 'get' })
+      return null
+    }
+  }
+
+  /**
+   * データの設定（戦略に応じて階層更新）- 高性能版
+   */
+  async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+    const startTime = performance.now()
+
+    try {
+      const serializedData = this.serializeData(value)
+      const effectiveTtl = ttl || this.config.ttl.L2
+
+      switch (this.config.strategy) {
+        case CacheStrategy.WRITE_THROUGH:
+          // 全レイヤーに同期書き込み
+          const promises = [
+            this.setL1(key, value, effectiveTtl),
+            this.redisCache.set(key, serializedData, { ttl: effectiveTtl }),
+          ]
+          const results = await Promise.allSettled(promises)
+          const success = results.every((r) => r.status === 'fulfilled' && r.value)
+
+          this.emit('cache_write', {
+            strategy: 'WRITE_THROUGH',
+            key,
+            duration: performance.now() - startTime,
+            success,
+            size: this.getDataSize(serializedData),
+          })
+          return success
+
+        case CacheStrategy.WRITE_BACK:
+          // L1のみに書き込み、バッチでL2に同期
+          const writeBackSuccess = this.setL1(key, value, effectiveTtl)
+          this.queueForBatchSync(key, serializedData, effectiveTtl)
+
+          this.emit('cache_write', {
+            strategy: 'WRITE_BACK',
+            key,
+            duration: performance.now() - startTime,
+            success: writeBackSuccess,
+          })
+          return writeBackSuccess
+
+        case CacheStrategy.WRITE_AROUND:
+          // L1をスキップしてL2に直接書き込み
+          const writeAroundSuccess = await this.redisCache.set(key, serializedData, {
+            ttl: effectiveTtl,
+          })
+          this.emit('cache_write', {
+            strategy: 'WRITE_AROUND',
+            key,
+            duration: performance.now() - startTime,
+            success: writeAroundSuccess,
+            size: this.getDataSize(serializedData),
+          })
+          return writeAroundSuccess
+
+        default:
+          // CACHE_ASIDE: アプリケーションが明示的に管理
+          return false
+      }
+    } catch (error) {
+      this.emit('cache_error', { key, error, layer: 'set' })
+      return false
+    }
+  }
+
+  /**
+   * L1キャッシュへの設定 - 最適化版
+   */
+  private setL1<T>(key: string, value: T, ttl?: number): boolean {
+    try {
+      const serializedData = this.serializeData(value)
+      const dataSize = this.getDataSize(serializedData)
+
+      const entry: CacheEntry<any> = {
+        data: serializedData,
+        timestamp: Date.now(),
+        ttl: ttl || this.config.ttl.L1,
+        accessCount: 1,
+        lastAccessed: Date.now(),
+        size: dataSize,
+        compressed: this.config.compression,
+        encrypted: this.config.encryption,
+      }
+
+      this.L1Cache.set(key, entry)
+      this.metrics.memoryUsage.L1 += dataSize
+
+      return true
+    } catch (error) {
+      console.error('L1 cache set error:', error)
+      return false
+    }
+  }
+
+  /**
+   * データのシリアライゼーション（圧縮・暗号化対応）
+   */
+  private serializeData<T>(data: T): string {
+    try {
+      let serialized = JSON.stringify(data)
+
+      // 圧縮
+      if (this.config.compression && serialized.length > 1024) {
+        const compressed = gzipSync(Buffer.from(serialized))
+        serialized = compressed.toString('base64')
+      }
+
+      // 暗号化
+      if (this.config.encryption) {
+        const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey)
+        let encrypted = cipher.update(serialized, 'utf8', 'hex')
+        encrypted += cipher.final('hex')
+        serialized = encrypted
+      }
+
+      return serialized
+    } catch (error) {
+      console.error('Serialization error:', error)
+      return JSON.stringify(data)
+    }
+  }
+
+  /**
+   * データのデシリアライゼーション
+   */
+  private deserializeData<T>(serialized: string): T {
+    try {
+      let data = serialized
+
+      // 復号化
+      if (this.config.encryption) {
+        const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey)
+        let decrypted = decipher.update(data, 'hex', 'utf8')
+        decrypted += decipher.final('utf8')
+        data = decrypted
+      }
+
+      // 展開
+      if (this.config.compression) {
+        try {
+          const decompressed = gunzipSync(Buffer.from(data, 'base64'))
+          data = decompressed.toString()
+        } catch {
+          // 圧縮されていないデータの場合はそのまま
+        }
+      }
+
+      return JSON.parse(data)
+    } catch (error) {
+      console.error('Deserialization error:', error)
+      return JSON.parse(serialized)
+    }
+  }
+
+  /**
+   * データサイズ計算
+   */
+  private getDataSize(data: string): number {
+    return Buffer.byteLength(data, 'utf8')
+  }
+
+  /**
+   * エントリーの有効期限チェック
+   */
+  private isExpired(entry: CacheEntry<any>): boolean {
+    return Date.now() > entry.timestamp + entry.ttl
+  }
+
+  /**
+   * バッチ同期キューに追加
+   */
+  private queueForBatchSync(key: string, data: string, ttl: number): void {
+    this.batchQueue.set(key, { data, ttl, timestamp: Date.now() })
+
+    // バッチサイズに達したら即座に同期
+    if (this.batchQueue.size >= this.config.batchSize) {
+      this.processBatchSync()
+    }
+  }
+
+  /**
+   * バッチ同期処理
+   */
+  private async processBatchSync(): Promise<void> {
+    if (this.batchQueue.size === 0) return
+
+    const batch = Array.from(this.batchQueue.entries())
+    this.batchQueue.clear()
+
+    const promises = batch.map(([key, { data, ttl }]) => this.redisCache.set(key, data, { ttl }))
+
+    try {
+      await Promise.allSettled(promises)
+      this.emit('batch_sync_completed', { count: batch.length })
+    } catch (error) {
+      this.emit('batch_sync_error', { error, count: batch.length })
+    }
+  }
+
+  /**
+   * バッチ同期タイマー開始
+   */
+  private startBatchSync(): void {
+    this.syncTimer = setInterval(() => {
+      this.processBatchSync()
+    }, this.config.syncInterval)
+  }
+
+  /**
+   * レイテンシ記録
+   */
+  private recordLatency(latency: number): void {
+    this.metrics.averageLatency =
+      (this.metrics.averageLatency * (this.metrics.totalRequests - 1) + latency) /
+      this.metrics.totalRequests
+  }
+
+  /**
+   * メトリクス更新
+   */
+  private updateMetrics(): void {
+    this.metrics.hitRateByLayer.L1 =
+      this.metrics.totalRequests > 0 ? this.L1Cache.size / this.metrics.totalRequests : 0
+
+    this.metrics.memoryUsage.L1 = Array.from(this.L1Cache.values()).reduce(
+      (total, entry) => total + entry.size,
+      0
+    )
+  }
+
+  /**
+   * キャッシュウォームアップ
+   */
+  private async warmupCache(): Promise<void> {
+    try {
+      console.log('🔥 Starting cache warmup...')
+
+      // 頻繁にアクセスされるデータを事前ロード
+      const warmupKeys = ['user_progress_*', 'exam_questions_*', 'leaderboard_*', 'process_data_*']
+
+      for (const pattern of warmupKeys) {
+        const keys = await this.redisCache.keys(pattern)
+        console.log(`Warming up ${keys.length} keys for pattern: ${pattern}`)
+
+        // 並列でウォームアップ（制限付き）
+        const chunkSize = 50
+        for (let i = 0; i < keys.length; i += chunkSize) {
+          const chunk = keys.slice(i, i + chunkSize)
+          await Promise.allSettled(chunk.map((key) => this.get(key)))
+        }
+      }
+
+      console.log('✅ Cache warmup completed')
+      this.emit('warmup_completed', { patterns: warmupKeys.length })
+    } catch (error) {
+      console.error('❌ Cache warmup failed:', error)
+      this.emit('warmup_failed', { error })
+    }
+  }
+
+  /**
+   * キャッシュクリア
+   */
+  async clear(): Promise<void> {
+    this.L1Cache.clear()
+    await this.redisCache.clear()
+    this.batchQueue.clear()
+    this.resetMetrics()
+    this.emit('cache_cleared')
+  }
+
+  /**
+   * メトリクスリセット
+   */
+  private resetMetrics(): void {
+    this.metrics = {
+      hits: 0,
+      misses: 0,
+      evictions: 0,
+      totalRequests: 0,
+      averageLatency: 0,
+      memoryUsage: { L1: 0, L2: 0 },
+      hitRateByLayer: { L1: 0, L2: 0, L3: 0 },
+    }
+  }
+
+  /**
+   * メトリクスの取得 - 詳細版
+   */
+  getMetrics(): CacheMetrics {
+    return {
+      ...this.metrics,
+      hitRateByLayer: {
+        L1: this.metrics.totalRequests > 0 ? this.metrics.hitRateByLayer.L1 : 0,
+        L2: this.metrics.totalRequests > 0 ? this.metrics.hitRateByLayer.L2 : 0,
+        L3: this.metrics.totalRequests > 0 ? this.metrics.hitRateByLayer.L3 : 0,
+      },
+    }
+  }
+
+  /**
+   * ヘルスチェック
+   */
+  async healthCheck(): Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy'
+    metrics: CacheMetrics
+    layers: {
+      L1: { status: string; size: number }
+      L2: { status: string; connected: boolean }
+    }
+  }> {
+    try {
+      const l2Health = await this.redisCache.healthCheck()
+      const hitRate =
+        this.metrics.totalRequests > 0 ? this.metrics.hits / this.metrics.totalRequests : 0
+
+      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
+
+      if (!l2Health.connected || hitRate < 0.5) {
+        status = 'degraded'
+      }
+      if (!l2Health.connected && hitRate < 0.2) {
+        status = 'unhealthy'
+      }
+
+      return {
+        status,
+        metrics: this.getMetrics(),
+        layers: {
+          L1: {
+            status: this.L1Cache.size < this.config.maxSize.L1 ? 'healthy' : 'full',
+            size: this.L1Cache.size,
+          },
+          L2: {
+            status: l2Health.connected ? 'healthy' : 'unhealthy',
+            connected: l2Health.connected,
+          },
+        },
+      }
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        metrics: this.getMetrics(),
+        layers: {
+          L1: { status: 'error', size: 0 },
+          L2: { status: 'error', connected: false },
+        },
+      }
+    }
+  }
+
+  /**
+   * クリーンアップ
+   */
+  async destroy(): Promise<void> {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer)
+      this.syncTimer = null
+    }
+
+    // 残りのバッチを同期
+    await this.processBatchSync()
+
+    this.L1Cache.clear()
+    this.batchQueue.clear()
+    this.removeAllListeners()
+  }
+}
+
+/**
+ * メモリ使用量監視とアラート
+ */
+export class CacheMemoryManager {
+  private readonly WARNING_THRESHOLD = 0.8
+  private readonly CRITICAL_THRESHOLD = 0.95
+
+  constructor(private cacheManager: HierarchicalCacheManager) {
+    // メモリ監視の開始
+    setInterval(() => {
+      this.checkMemoryUsage()
+    }, 60000) // 1分ごと
+  }
+
+  private checkMemoryUsage(): void {
+    const metrics = this.cacheManager.getMetrics()
+    const utilizationRate = metrics.memoryUsage.L1 / (this.cacheManager['config'].maxSize.L1 * 1024) // 概算
+
+    if (utilizationRate >= this.CRITICAL_THRESHOLD) {
+      this.cacheManager.emit('memory_critical', {
+        utilizationRate,
+        usage: metrics.memoryUsage.L1,
+      })
+    } else if (utilizationRate >= this.WARNING_THRESHOLD) {
+      this.cacheManager.emit('memory_warning', {
+        utilizationRate,
+        usage: metrics.memoryUsage.L1,
+      })
+    }
+  }
+}
+
+/**
+ * 事前定義されたキャッシュ設定
+ */
+export const CacheConfigurations = {
+  // 高パフォーマンス設定（本番環境）
+  HIGH_PERFORMANCE: {
+    strategy: CacheStrategy.WRITE_THROUGH,
+    eviction: EvictionStrategy.LRU,
+    ttl: {
+      L1: 5 * 60 * 1000, // 5分
+      L2: 30 * 60 * 1000, // 30分
+    },
+    maxSize: {
+      L1: 10000, // 10K エントリ
+      L2: '500mb', // 500MB
+    },
+    compression: true,
+    encryption: false,
+    warmupOnStart: true,
+    batchSize: 100,
+    syncInterval: 5000,
+  } as CacheConfig,
+
+  // メモリ効率設定
+  MEMORY_EFFICIENT: {
+    strategy: CacheStrategy.WRITE_BACK,
+    eviction: EvictionStrategy.LFU,
+    ttl: {
+      L1: 2 * 60 * 1000, // 2分
+      L2: 15 * 60 * 1000, // 15分
+    },
+    maxSize: {
+      L1: 5000, // 5K エントリ
+      L2: '200mb', // 200MB
+    },
+    compression: true,
+    encryption: false,
+    warmupOnStart: false,
+    batchSize: 50,
+    syncInterval: 10000,
+  } as CacheConfig,
+
+  // 開発環境設定
+  DEVELOPMENT: {
+    strategy: CacheStrategy.CACHE_ASIDE,
+    eviction: EvictionStrategy.TTL,
+    ttl: {
+      L1: 30 * 1000, // 30秒
+      L2: 2 * 60 * 1000, // 2分
+    },
+    maxSize: {
+      L1: 1000, // 1K エントリ
+      L2: '50mb', // 50MB
+    },
+    compression: false,
+    encryption: false,
+    warmupOnStart: false,
+    batchSize: 10,
+    syncInterval: 5000,
+  } as CacheConfig,
+}
+
+// デフォルトエクスポート
+export default {
+  HierarchicalCacheManager,
+  CacheMemoryManager,
+  CacheStrategy,
+  CacheLayer,
+  EvictionStrategy,
+  CacheConfigurations,
+}

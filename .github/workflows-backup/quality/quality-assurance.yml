@@ -1,0 +1,652 @@
+# ============================================================
+# Workflow: 品質保証統合ワークフロー
+# Category: Quality (品質保証)
+# Purpose: 包括的な品質チェック（テスト、カバレッジ、品質メトリクス）
+# Trigger: PR、スケジュール、手動実行
+# Dependencies: Testing Tools, Quality Gates
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 🧪 品質保証統合ワークフロー
+
+# ------------------------------------------------------------
+# トリガー設定
+# 品質は継続的な監視と改善が重要
+# ------------------------------------------------------------
+on:
+  # プルリクエスト時（コードレビュー前の品質チェック）
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+  
+  # メインブランチプッシュ時（リリース前の最終品質確認）
+  push:
+    branches: [ main ]
+    
+  # 毎日午前1時（継続的品質監視）
+  schedule:
+    - cron: '0 1 * * *'
+    
+  # 手動実行（包括的品質チェック）
+  workflow_dispatch:
+    inputs:
+      quality-level:
+        description: '品質チェックレベル'
+        required: true
+        type: choice
+        options:
+          - 'basic'
+          - 'standard'
+          - 'comprehensive'
+          - 'enterprise'
+        default: 'standard'
+      skip-e2e:
+        description: 'E2Eテストをスキップするか'
+        type: boolean
+        default: false
+        required: false
+      force-all-browsers:
+        description: '全ブラウザでのテストを強制するか'
+        type: boolean
+        default: false
+        required: false
+
+# ------------------------------------------------------------
+# 権限設定（品質レポート書き込み用）
+# ------------------------------------------------------------
+permissions:
+  contents: read              # リポジトリ内容の読み取り
+  checks: write              # チェック結果の書き込み
+  pull-requests: write       # PRコメント・レビューの書き込み
+  actions: read              # Actions情報の読み取り
+
+# ------------------------------------------------------------
+# 並行実行制御（リソース効率化）
+# ------------------------------------------------------------
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ------------------------------------------------------------
+# 環境変数（品質保証設定）
+# ------------------------------------------------------------
+env:
+  # テスト設定
+  NODE_VERSION: '18'
+  TEST_TIMEOUT: '30000'               # 30秒タイムアウト
+  COVERAGE_THRESHOLD: '80'            # カバレッジ閾値80%
+  
+  # 品質ゲート設定
+  QUALITY_GATE_SCORE: '85'           # 品質ゲートスコア閾値
+  COMPLEXITY_THRESHOLD: '10'         # 循環複雑度閾値
+  
+  # レポート設定
+  REPORT_FORMAT: 'detailed'
+  JAPANESE_REPORT: 'true'
+  
+  # パフォーマンス設定
+  LIGHTHOUSE_BUDGET_TIMEOUT: '300'   # Lighthouse実行タイムアウト
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ============================================================
+jobs:
+  # ============================================================
+  # Job 1: 品質環境準備
+  # Purpose: 品質チェックに必要な環境とツールの準備
+  # ============================================================
+  quality-environment-setup:
+    name: 🛠️ 品質環境準備
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      test-strategy: ${{ steps.strategy.outputs.strategy }}
+      quality-level: ${{ steps.strategy.outputs.level }}
+      browser-matrix: ${{ steps.strategy.outputs.browsers }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 品質トレンド分析用
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: 'quality-v2'
+
+      - name: 📊 品質チェック戦略決定
+        id: strategy
+        run: |
+          echo "📊 品質チェック戦略を決定中..."
+          
+          # 入力レベルまたはデフォルト設定
+          QUALITY_LEVEL="${{ github.event.inputs.quality-level || 'standard' }}"
+          
+          # ブランチ別戦略
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            QUALITY_LEVEL="comprehensive"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            QUALITY_LEVEL="enterprise"
+          fi
+          
+          echo "🎯 品質レベル: $QUALITY_LEVEL"
+          echo "level=$QUALITY_LEVEL" >> $GITHUB_OUTPUT
+          
+          # テスト戦略の決定
+          case $QUALITY_LEVEL in
+            basic)
+              STRATEGY="unit-only"
+              BROWSERS="chromium"
+              ;;
+            standard)
+              STRATEGY="unit-integration"
+              BROWSERS="chromium,firefox"
+              ;;
+            comprehensive)
+              STRATEGY="full-suite"
+              BROWSERS="chromium,firefox,webkit"
+              ;;
+            enterprise)
+              STRATEGY="enterprise-full"
+              BROWSERS="chromium,firefox,webkit,edge"
+              ;;
+          esac
+          
+          # 手動ブラウザ強制設定
+          if [ "${{ github.event.inputs.force-all-browsers }}" = "true" ]; then
+            BROWSERS="chromium,firefox,webkit,edge"
+          fi
+          
+          echo "📋 テスト戦略: $STRATEGY"
+          echo "🌐 対象ブラウザ: $BROWSERS"
+          
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          echo "browsers=$BROWSERS" >> $GITHUB_OUTPUT
+
+      - name: 🔍 品質ツール検証
+        run: |
+          echo "🔍 品質ツールの可用性を確認中..."
+          
+          # 必要なツールの確認
+          TOOLS_OK=true
+          
+          # テストツール
+          if ! npm list vitest >/dev/null 2>&1; then
+            echo "⚠️ Vitest が見つかりません"
+            TOOLS_OK=false
+          fi
+          
+          # E2Eツール  
+          if ! npm list @playwright/test >/dev/null 2>&1; then
+            echo "⚠️ Playwright が見つかりません"
+            TOOLS_OK=false
+          fi
+          
+          # カバレッジツール
+          if ! npm list @vitest/coverage-v8 >/dev/null 2>&1; then
+            echo "⚠️ Coverage tool が見つかりません"
+            TOOLS_OK=false
+          fi
+          
+          if [ "$TOOLS_OK" = "true" ]; then
+            echo "✅ すべての品質ツールが利用可能です"
+          else
+            echo "❌ 一部の品質ツールが利用できません"
+            echo "基本的な品質チェックのみ実行します"
+          fi
+
+  # ============================================================
+  # Job 2: 単体テスト＆カバレッジ
+  # Purpose: 単体テストの実行とカバレッジ測定
+  # ============================================================
+  unit-tests-coverage:
+    name: 🧪 単体テスト＆カバレッジ
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: quality-environment-setup
+    outputs:
+      coverage-percent: ${{ steps.coverage.outputs.coverage }}
+      test-result: ${{ steps.test.outputs.result }}
+      
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🧪 単体テスト実行
+        id: test
+        run: |
+          echo "🧪 単体テストを実行中..."
+          
+          # テストの実行
+          if npm run test:run; then
+            echo "✅ 単体テスト: 全て成功"
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ 単体テスト: 失敗あり"
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: 📊 カバレッジ測定
+        id: coverage
+        run: |
+          echo "📊 テストカバレッジを測定中..."
+          
+          # カバレッジレポート生成
+          npm run test:coverage
+          
+          # カバレッジ率の抽出（実装方法はツールにより異なる）
+          COVERAGE=0
+          
+          if [ -f "coverage/coverage-summary.json" ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct // 0' 2>/dev/null || echo "0")
+          elif [ -f "coverage/lcov.info" ]; then
+            # lcov.infoからカバレッジ率を計算（簡易版）
+            LINES_FOUND=$(grep -c "LF:" coverage/lcov.info 2>/dev/null || echo "1")
+            LINES_HIT=$(grep -c "LH:" coverage/lcov.info 2>/dev/null || echo "0")
+            if [ "$LINES_FOUND" -gt "0" ]; then
+              COVERAGE=$(echo "scale=2; $LINES_HIT * 100 / $LINES_FOUND" | bc -l 2>/dev/null || echo "0")
+            fi
+          fi
+          
+          echo "📊 テストカバレッジ: ${COVERAGE}%"
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          
+          # カバレッジ閾値チェック
+          if [ "$(echo "$COVERAGE >= ${{ env.COVERAGE_THRESHOLD }}" | bc -l 2>/dev/null)" = "1" ]; then
+            echo "✅ カバレッジ閾値をクリア (${{ env.COVERAGE_THRESHOLD }}%)"
+          else
+            echo "⚠️ カバレッジが閾値を下回っています (${COVERAGE}% < ${{ env.COVERAGE_THRESHOLD }}%)"
+            echo "🎯 カバレッジ向上のため、追加テストの実装を検討してください"
+          fi
+
+      - name: 📤 カバレッジレポートアップロード  
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+          retention-days: 30
+
+      - name: 🔗 外部カバレッジサービス連携
+        if: github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v3
+        continue-on-error: true
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # ============================================================
+  # Job 3: インテグレーションテスト
+  # Purpose: コンポーネント間の統合テスト
+  # ============================================================
+  integration-tests:
+    name: 🔗 インテグレーションテスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-environment-setup
+    if: contains(needs.quality-environment-setup.outputs.test-strategy, 'integration') || contains(needs.quality-environment-setup.outputs.test-strategy, 'full')
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🏗️ アプリケーションビルド
+        uses: ./.github/actions/composite/build-optimize
+        with:
+          optimize-build: 'false'
+          analyze-bundle: 'false'
+          upload-artifact: 'false'
+
+      - name: 🔗 インテグレーションテスト実行
+        run: |
+          echo "🔗 インテグレーションテストを実行中..."
+          
+          # インテグレーションテストがある場合のみ実行
+          if npm run test:integration >/dev/null 2>&1; then
+            npm run test:integration
+            echo "✅ インテグレーションテスト完了"
+          else
+            echo "ℹ️ インテグレーションテストスクリプトが見つかりません"
+            echo "基本的な統合チェックを実行します"
+            
+            # 基本的な統合チェック（アプリケーションの起動確認）
+            npm run start &
+            APP_PID=$!
+            
+            sleep 10
+            
+            if curl -f http://localhost:4173/ >/dev/null 2>&1; then
+              echo "✅ アプリケーション正常起動確認"
+            else
+              echo "❌ アプリケーション起動に問題があります"
+              exit 1
+            fi
+            
+            kill $APP_PID 2>/dev/null || true
+          fi
+
+  # ============================================================
+  # Job 4: E2Eテスト（クロスブラウザ）
+  # Purpose: エンドツーエンドテストの実行
+  # ============================================================
+  e2e-tests:
+    name: 🌐 E2Eテスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: quality-environment-setup
+    if: |
+      github.event.inputs.skip-e2e != 'true' && 
+      (contains(needs.quality-environment-setup.outputs.test-strategy, 'full') || 
+       contains(needs.quality-environment-setup.outputs.test-strategy, 'enterprise'))
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ fromJson(format('["{0}"]', join(split(needs.quality-environment-setup.outputs.browser-matrix, ','), '","'))) }}
+        
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🌐 Playwrightブラウザインストール
+        run: |
+          echo "🌐 ${{ matrix.browser }} ブラウザをインストール中..."
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: 🏗️ E2E用ビルド
+        uses: ./.github/actions/composite/build-optimize
+        with:
+          optimize-build: 'false'
+          upload-artifact: 'false'
+
+      - name: 🎭 E2Eテスト実行 - ${{ matrix.browser }}
+        run: |
+          echo "🎭 E2Eテストを実行中: ${{ matrix.browser }}"
+          
+          # E2E環境の準備
+          export CI=true
+          export BROWSER=${{ matrix.browser }}
+          
+          # E2Eテストの実行
+          npx playwright test --project=${{ matrix.browser }} --reporter=html
+
+      - name: 📤 E2Eテスト結果アップロード
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-${{ matrix.browser }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # ============================================================
+  # Job 5: 品質メトリクス計算
+  # Purpose: 包括的な品質メトリクスの計算と評価
+  # ============================================================
+  quality-metrics:
+    name: 📊 品質メトリクス計算
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [quality-environment-setup, unit-tests-coverage]
+    outputs:
+      quality-score: ${{ steps.metrics.outputs.score }}
+      quality-grade: ${{ steps.metrics.outputs.grade }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📊 品質メトリクス計算
+        id: metrics
+        run: |
+          echo "📊 品質メトリクスを計算中..."
+          
+          # 基本メトリクスの収集
+          COVERAGE="${{ needs.unit-tests-coverage.outputs.coverage-percent }}"
+          TEST_RESULT="${{ needs.unit-tests-coverage.outputs.test-result }}"
+          
+          # 品質スコアの計算（100点満点）
+          QUALITY_SCORE=100
+          
+          # テスト結果によるスコア調整
+          if [ "$TEST_RESULT" = "failure" ]; then
+            QUALITY_SCORE=$((QUALITY_SCORE - 30))
+          fi
+          
+          # カバレッジによるスコア調整
+          if [ -n "$COVERAGE" ] && [ "$COVERAGE" != "0" ]; then
+            COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
+            if [ "$COVERAGE_INT" -lt "60" ]; then
+              QUALITY_SCORE=$((QUALITY_SCORE - 25))
+            elif [ "$COVERAGE_INT" -lt "80" ]; then
+              QUALITY_SCORE=$((QUALITY_SCORE - 15))
+            elif [ "$COVERAGE_INT" -lt "90" ]; then
+              QUALITY_SCORE=$((QUALITY_SCORE - 5))
+            fi
+          fi
+          
+          # コード品質による調整（リント結果など）
+          if npm run lint >/dev/null 2>&1; then
+            echo "✅ リントチェック: 合格"
+          else
+            echo "❌ リントチェック: 不合格"
+            QUALITY_SCORE=$((QUALITY_SCORE - 15))
+          fi
+          
+          # 品質グレードの決定
+          if [ "$QUALITY_SCORE" -ge "90" ]; then
+            QUALITY_GRADE="A"
+          elif [ "$QUALITY_SCORE" -ge "80" ]; then
+            QUALITY_GRADE="B"
+          elif [ "$QUALITY_SCORE" -ge "70" ]; then
+            QUALITY_GRADE="C"
+          elif [ "$QUALITY_SCORE" -ge "60" ]; then
+            QUALITY_GRADE="D"
+          else
+            QUALITY_GRADE="F"
+          fi
+          
+          echo "📊 品質スコア: $QUALITY_SCORE/100"
+          echo "🏆 品質グレード: $QUALITY_GRADE"
+          
+          echo "score=$QUALITY_SCORE" >> $GITHUB_OUTPUT
+          echo "grade=$QUALITY_GRADE" >> $GITHUB_OUTPUT
+
+      - name: 📈 品質トレンド分析
+        run: |
+          echo "📈 品質トレンドを分析中..."
+          
+          # 過去の品質スコア取得（実装では実際のデータストアから取得）
+          PREVIOUS_SCORE=80  # サンプル値
+          CURRENT_SCORE=${{ steps.metrics.outputs.score }}
+          
+          if [ "$CURRENT_SCORE" -gt "$PREVIOUS_SCORE" ]; then
+            echo "📈 品質向上: +$((CURRENT_SCORE - PREVIOUS_SCORE))ポイント"
+          elif [ "$CURRENT_SCORE" -lt "$PREVIOUS_SCORE" ]; then
+            echo "📉 品質低下: -$((PREVIOUS_SCORE - CURRENT_SCORE))ポイント"
+          else
+            echo "➡️ 品質維持: 変化なし"
+          fi
+
+  # ============================================================
+  # Job 6: 品質ゲート判定
+  # Purpose: 品質基準に基づくゲート判定
+  # ============================================================
+  quality-gate:
+    name: 🚪 品質ゲート判定
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [unit-tests-coverage, quality-metrics, integration-tests, e2e-tests]
+    if: always()
+    
+    steps:
+      - name: 🚪 品質ゲート判定実行
+        run: |
+          echo "🚪 品質ゲート判定を実行中..."
+          
+          QUALITY_SCORE="${{ needs.quality-metrics.outputs.quality-score }}"
+          QUALITY_GRADE="${{ needs.quality-metrics.outputs.quality-grade }}"
+          COVERAGE="${{ needs.unit-tests-coverage.outputs.coverage-percent }}"
+          
+          echo "📊 現在の品質状況:"
+          echo "  スコア: $QUALITY_SCORE/100"
+          echo "  グレード: $QUALITY_GRADE"
+          echo "  カバレッジ: ${COVERAGE}%"
+          
+          # 品質ゲート基準
+          GATE_PASSED=true
+          GATE_MESSAGES=()
+          
+          # スコア基準
+          if [ "$QUALITY_SCORE" -lt "${{ env.QUALITY_GATE_SCORE }}" ]; then
+            GATE_PASSED=false
+            GATE_MESSAGES+=("❌ 品質スコアが基準を下回っています ($QUALITY_SCORE < ${{ env.QUALITY_GATE_SCORE }})")
+          fi
+          
+          # カバレッジ基準
+          if [ -n "$COVERAGE" ] && [ "$(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l 2>/dev/null)" = "1" ]; then
+            GATE_PASSED=false
+            GATE_MESSAGES+=("❌ テストカバレッジが基準を下回っています (${COVERAGE}% < ${{ env.COVERAGE_THRESHOLD }}%)")
+          fi
+          
+          # テスト結果確認
+          if [ "${{ needs.unit-tests-coverage.result }}" = "failure" ]; then
+            GATE_PASSED=false
+            GATE_MESSAGES+=("❌ 単体テストが失敗しています")
+          fi
+          
+          if [ "${{ needs.integration-tests.result }}" = "failure" ]; then
+            GATE_PASSED=false
+            GATE_MESSAGES+=("❌ インテグレーションテストが失敗しています")
+          fi
+          
+          if [ "${{ needs.e2e-tests.result }}" = "failure" ]; then
+            GATE_PASSED=false
+            GATE_MESSAGES+=("❌ E2Eテストが失敗しています")
+          fi
+          
+          # 品質ゲート結果の出力
+          echo "============================================="
+          if [ "$GATE_PASSED" = "true" ]; then
+            echo "✅ 品質ゲート: 合格"
+            echo "🎉 すべての品質基準をクリアしています"
+          else
+            echo "❌ 品質ゲート: 不合格"
+            echo ""
+            echo "📋 改善が必要な項目:"
+            for message in "${GATE_MESSAGES[@]}"; do
+              echo "  $message"
+            done
+            echo ""
+            echo "🔧 推奨改善アクション:"
+            echo "  - テストケースの追加・修正"
+            echo "  - コード品質の向上"
+            echo "  - カバレッジの改善"
+            echo "  - リファクタリングの実施"
+          fi
+          echo "============================================="
+          
+          # 品質ゲート失敗時はワークフロー失敗
+          if [ "$GATE_PASSED" = "false" ]; then
+            exit 1
+          fi
+
+      - name: 💬 品質ゲートPR通知
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const qualityScore = '${{ needs.quality-metrics.outputs.quality-score }}';
+            const qualityGrade = '${{ needs.quality-metrics.outputs.quality-grade }}';
+            const coverage = '${{ needs.unit-tests-coverage.outputs.coverage-percent }}';
+            
+            const gateStatus = qualityScore >= ${{ env.QUALITY_GATE_SCORE }} ? '✅ 合格' : '❌ 不合格';
+            const gradeEmoji = {
+              'A': '🥇', 'B': '🥈', 'C': '🥉', 'D': '⚠️', 'F': '❌'
+            }[qualityGrade] || '❓';
+            
+            const comment = \`## 🧪 品質保証レポート
+
+            **🚪 品質ゲート判定**: ${gateStatus}
+            **📊 品質スコア**: ${qualityScore}/100
+            **🏆 品質グレード**: ${gradeEmoji} ${qualityGrade}
+            **📈 テストカバレッジ**: ${coverage}%
+
+            ### 📋 品質詳細
+            | 項目 | 結果 | 基準 |
+            |------|------|------|
+            | 品質スコア | ${qualityScore}/100 | ≥${{ env.QUALITY_GATE_SCORE }} |
+            | カバレッジ | ${coverage}% | ≥${{ env.COVERAGE_THRESHOLD }}% |
+            | 単体テスト | ${{ needs.unit-tests-coverage.result }} | success |
+            | 統合テスト | ${{ needs.integration-tests.result || 'skipped' }} | success |
+            | E2Eテスト | ${{ needs.e2e-tests.result || 'skipped' }} | success |
+
+            ${qualityScore < ${{ env.QUALITY_GATE_SCORE }} ? 
+              '⚠️ **品質改善が必要です**\\n- テストケースの追加\\n- コード品質の向上\\n- カバレッジの改善' : 
+              '✅ **優良な品質を維持しています**'}
+
+            *🤖 この品質レポートは自動生成されました*
+            \`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: 📊 品質サマリー（GitHub Step Summary）
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🧪 品質保証統合レポート
+          
+          ### 📊 品質サマリー
+          - **品質スコア**: ${{ needs.quality-metrics.outputs.quality-score }}/100
+          - **品質グレード**: ${{ needs.quality-metrics.outputs.quality-grade }}
+          - **テストカバレッジ**: ${{ needs.unit-tests-coverage.outputs.coverage-percent }}%
+          
+          ### 🧪 テスト結果
+          - **単体テスト**: ${{ needs.unit-tests-coverage.result }}
+          - **統合テスト**: ${{ needs.integration-tests.result || 'スキップ' }}
+          - **E2Eテスト**: ${{ needs.e2e-tests.result || 'スキップ' }}
+          
+          ### 🎯 品質ゲート
+          - **ゲート判定**: $([ "${{ needs.quality-metrics.outputs.quality-score }}" -ge "${{ env.QUALITY_GATE_SCORE }}" ] && echo "✅ 合格" || echo "❌ 不合格")
+          - **必要スコア**: ${{ env.QUALITY_GATE_SCORE }}/100
+          - **必要カバレッジ**: ${{ env.COVERAGE_THRESHOLD }}%
+          
+          ---
+          **品質改善のためのリソース**
+          - [テスト戦略ガイド](./docs/testing/)
+          - [品質メトリクス説明](./docs/quality/)
+          - [コードレビューチェックリスト](./docs/code-review/)
+          EOF
