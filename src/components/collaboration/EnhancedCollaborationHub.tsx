@@ -11,45 +11,26 @@ import {
   Settings,
   Plus,
   Search,
-  Filter,
   Bell,
-  BellOff,
   Pin,
-  PinOff,
   ThumbsUp,
-  ThumbsDown,
   Reply,
   Edit3,
   Trash2,
   MoreHorizontal,
   UserPlus,
   UserMinus,
-  Crown,
-  Shield,
   Eye,
-  EyeOff,
   Clock,
-  Calendar,
   BookOpen,
-  Target,
-  TrendingUp,
   Activity,
-  Hash,
   AtSign,
   Paperclip,
   Send,
   Smile,
   Image,
-  Video,
-  Mic,
-  MicOff,
-  Volume2,
-  VolumeX,
-  PhoneCall,
-  PhoneOff,
-  ScreenShare,
-  ScreenShareOff,
   RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { api } from '../../lib/api/client'
 import { useToast } from '../../hooks/use-toast'
@@ -58,7 +39,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { Badge } from '../ui/badge'
-import { Avatar, AvatarContent, AvatarImage, AvatarFallback } from '../ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import {
@@ -205,7 +186,7 @@ interface Notification {
     | 'study_reminder'
   title: string
   message: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   isRead: boolean
   createdAt: Date
   expiresAt?: Date
@@ -698,7 +679,11 @@ const EnhancedCollaborationHub: React.FC = () => {
           </div>
         </div>
 
-        <Tabs value={activeView} onValueChange={setActiveView as any} className="space-y-6">
+        <Tabs
+          value={activeView}
+          onValueChange={(value) => setActiveView(value as typeof activeView)}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="groups">Study Groups</TabsTrigger>
             <TabsTrigger value="discussions">Discussions</TabsTrigger>
@@ -726,7 +711,7 @@ const EnhancedCollaborationHub: React.FC = () => {
                 />
               </div>
 
-              <Select value={sortBy} onValueChange={setSortBy as any}>
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
@@ -1112,7 +1097,7 @@ const EnhancedCollaborationHub: React.FC = () => {
                   <Bell className="mx-auto mb-4 h-16 w-16 text-gray-400" />
                   <h3 className="mb-2 text-xl font-semibold text-gray-900">No Notifications</h3>
                   <p className="text-gray-600">
-                    You're all caught up! Notifications will appear here.
+                    You&apos;re all caught up! Notifications will appear here.
                   </p>
                 </div>
               )}
@@ -1234,7 +1219,9 @@ const EnhancedCollaborationHub: React.FC = () => {
                   <label className="mb-2 block text-sm font-medium text-gray-700">Category</label>
                   <Select
                     value={newThread.category}
-                    onValueChange={(value: any) => setNewThread({ ...newThread, category: value })}
+                    onValueChange={(value) =>
+                      setNewThread({ ...newThread, category: value as typeof newThread.category })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />

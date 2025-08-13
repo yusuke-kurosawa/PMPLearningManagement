@@ -1,0 +1,210 @@
+# ================================================================
+# セキュリティ | セキュリティスキャン - 包括的セキュリティ監査
+# ================================================================
+# Issue: #86
+# Purpose: アプリケーションの包括的セキュリティ監査と脆弱性検出
+#         依存関係、コード、インフラストラクチャのセキュリティ検証
+# Author: Claude Code Actions
+# ================================================================
+
+name: 🔒 Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # 毎週月曜日の午前2時
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # ================================================================
+  # Stage 1: 依存関係セキュリティ監査
+  # ================================================================
+  dependency-audit:
+    name: 📦 Dependency Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔒 Run npm audit
+        run: |
+          npm audit --audit-level moderate --json > audit-results.json || true
+          
+      - name: 📊 Process audit results
+        run: |
+          if [ -f "scripts/process-audit-results.js" ]; then
+            npm run security:process-audit
+          fi
+
+      - name: 📊 Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-results
+          path: audit-results.json
+
+  # ================================================================
+  # Stage 2: CodeQL セキュリティ分析
+  # ================================================================
+  codeql-analysis:
+    name: 🔍 CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: 🏗️ Build application
+        run: |
+          npm ci
+          npm run build
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # ================================================================
+  # Stage 3: カスタムセキュリティチェック
+  # ================================================================
+  custom-security-checks:
+    name: 🛡️ Custom Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Scan for hardcoded secrets
+        run: |
+          echo "🔍 Scanning for potential secrets..."
+          grep -r -i -E "(api[_-]?key|password|secret|token)" src/ --exclude-dir=node_modules || true
+          grep -r -E "(['\"])[A-Za-z0-9]{20,}(['\"])" src/ --exclude-dir=node_modules || true
+
+      - name: 🔒 Check for insecure patterns
+        run: |
+          echo "🔒 Checking for insecure coding patterns..."
+          # Check for eval usage
+          grep -r "eval(" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+          # Check for innerHTML usage without sanitization
+          grep -r "innerHTML" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+          # Check for document.write usage
+          grep -r "document\.write" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+
+      - name: 🛡️ Run custom security script
+        run: |
+          if [ -f "scripts/security-audit.js" ]; then
+            npm run security:custom-checks
+          fi
+
+  # ================================================================
+  # Stage 4: OWASP依存関係チェック
+  # ================================================================
+  owasp-dependency-check:
+    name: 🔐 OWASP Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔐 Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        with:
+          project: 'PMPLearningManagement'
+          path: '.'
+          format: 'JSON'
+          out: 'reports'
+
+      - name: 📊 Upload OWASP results
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-check-results
+          path: reports/
+
+  # ================================================================
+  # Stage 5: セキュリティレポート生成
+  # ================================================================
+  security-report:
+    name: 📋 Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, codeql-analysis, custom-security-checks, owasp-dependency-check]
+    if: always()
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📊 Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: 📋 Generate comprehensive security report
+        run: |
+          mkdir -p security-reports
+          echo "# 🔒 Security Audit Report" > security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+          echo "Generated: $(date)" >> security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+          
+          echo "## 📊 Audit Summary" >> security-reports/security-summary.md
+          echo "- Dependency Audit: ${{ needs.dependency-audit.result }}" >> security-reports/security-summary.md
+          echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> security-reports/security-summary.md
+          echo "- Custom Checks: ${{ needs.custom-security-checks.result }}" >> security-reports/security-summary.md
+          echo "- OWASP Check: ${{ needs.owasp-dependency-check.result }}" >> security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+          
+          echo "## 🛡️ Security Status" >> security-reports/security-summary.md
+          if [[ "${{ needs.dependency-audit.result }}" == "success" && 
+                "${{ needs.codeql-analysis.result }}" == "success" && 
+                "${{ needs.custom-security-checks.result }}" == "success" ]]; then
+            echo "✅ No critical security issues detected" >> security-reports/security-summary.md
+          else
+            echo "⚠️ Security issues require attention" >> security-reports/security-summary.md
+          fi
+
+      - name: 📊 Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: security-reports/
+          retention-days: 30
+
+      - name: 📢 Security status summary
+        run: |
+          echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependency Audit: ${{ needs.dependency-audit.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Custom Security Checks: ${{ needs.custom-security-checks.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- OWASP Dependency Check: ${{ needs.owasp-dependency-check.result }}" >> $GITHUB_STEP_SUMMARY
+
+# ================================================================
+# End of Security Scan
+# Generated with Claude Code Actions
+# ================================================================

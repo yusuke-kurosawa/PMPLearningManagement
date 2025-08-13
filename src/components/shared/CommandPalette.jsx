@@ -287,7 +287,8 @@ const CommandPalette = () => {
         }
         return []
 
-      default: { // search mode
+      default: {
+        // search mode
         const allCommands = [...quickActions, ...navigationCommands, ...settingsCommands]
 
         if (!searchTerm) return allCommands.slice(0, 8)

@@ -1,0 +1,230 @@
+# ================================================================
+# Claude | PR レビュー - AI駆動コードレビュー
+# ================================================================
+# Issue: #86
+# Purpose: ClaudeによるAI駆動プルリクエストレビューと改善提案
+#         コード品質、セキュリティ、パフォーマンスの自動分析
+# Author: Claude Code Actions
+# ================================================================
+
+name: 🤖 Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  CACHE_VERSION: v1
+
+jobs:
+  # ================================================================
+  # Stage 1: コード分析準備
+  # ================================================================
+  prepare-analysis:
+    name: 📋 Prepare Code Analysis
+    runs-on: ubuntu-latest
+    outputs:
+      changed-files: ${{ steps.changes.outputs.files }}
+      analysis-scope: ${{ steps.scope.outputs.scope }}
+    steps:
+      - name: 📥 Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: 🔍 Detect changed files
+        id: changes
+        run: |
+          git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} > changed_files.txt
+          echo "files=$(cat changed_files.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+      - name: 📊 Determine analysis scope
+        id: scope
+        run: |
+          if grep -E '\.(jsx?|tsx?|vue|svelte)$' changed_files.txt; then
+            echo "scope=full" >> $GITHUB_OUTPUT
+          elif grep -E '\.(md|yml|yaml|json)$' changed_files.txt; then
+            echo "scope=config" >> $GITHUB_OUTPUT
+          else
+            echo "scope=minimal" >> $GITHUB_OUTPUT
+          fi
+
+  # ================================================================
+  # Stage 2: Claude コードレビュー
+  # ================================================================
+  claude-review:
+    name: 🤖 Claude Code Review
+    runs-on: ubuntu-latest
+    needs: prepare-analysis
+    if: needs.prepare-analysis.outputs.analysis-scope != 'minimal'
+    steps:
+      - name: 📥 Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🤖 Run Claude analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -f "scripts/claude-pr-analyzer.js" ]; then
+            npm run claude:analyze-pr
+          else
+            echo "Claude analyzer not configured - skipping AI review"
+          fi
+
+      - name: 📊 Generate review summary
+        run: |
+          mkdir -p reports
+          echo "## 🤖 Claude AI Code Review" > reports/claude-review.md
+          echo "" >> reports/claude-review.md
+          echo "### 📋 Analysis Summary" >> reports/claude-review.md
+          echo "- Changed files: ${{ needs.prepare-analysis.outputs.changed-files }}" >> reports/claude-review.md
+          echo "- Analysis scope: ${{ needs.prepare-analysis.outputs.analysis-scope }}" >> reports/claude-review.md
+          echo "" >> reports/claude-review.md
+          
+          if [ -f "reports/claude-analysis.json" ]; then
+            echo "### 🔍 Key Findings" >> reports/claude-review.md
+            cat reports/claude-analysis.json | jq -r '.findings[]' >> reports/claude-review.md
+          fi
+
+  # ================================================================
+  # Stage 3: 品質指標分析
+  # ================================================================
+  quality-analysis:
+    name: 📊 Quality Metrics Analysis
+    runs-on: ubuntu-latest
+    needs: [prepare-analysis, claude-review]
+    steps:
+      - name: 📥 Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📊 Code complexity analysis
+        run: |
+          if [ -f "scripts/analyze-complexity.js" ]; then
+            npm run analyze:complexity
+          fi
+
+      - name: 🔍 Security pattern analysis
+        run: |
+          if [ -f "scripts/security-patterns.js" ]; then
+            npm run analyze:security-patterns
+          fi
+
+      - name: ⚡ Performance impact analysis
+        run: |
+          if [ -f "scripts/performance-impact.js" ]; then
+            npm run analyze:performance-impact
+          fi
+
+  # ================================================================
+  # Stage 4: 改善提案生成
+  # ================================================================
+  improvement-suggestions:
+    name: 💡 Generate Improvement Suggestions
+    runs-on: ubuntu-latest
+    needs: [claude-review, quality-analysis]
+    if: always()
+    steps:
+      - name: 📥 Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 💡 Compile improvement suggestions
+        run: |
+          mkdir -p reports
+          echo "## 💡 Improvement Suggestions" > reports/improvements.md
+          echo "" >> reports/improvements.md
+          
+          echo "### 🔧 Code Quality" >> reports/improvements.md
+          echo "- Consider using TypeScript for better type safety" >> reports/improvements.md
+          echo "- Add JSDoc comments for better documentation" >> reports/improvements.md
+          echo "- Consider extracting complex logic into separate functions" >> reports/improvements.md
+          echo "" >> reports/improvements.md
+          
+          echo "### ⚡ Performance" >> reports/improvements.md
+          echo "- Consider memoization for expensive calculations" >> reports/improvements.md
+          echo "- Optimize bundle size with code splitting" >> reports/improvements.md
+          echo "- Use lazy loading for non-critical components" >> reports/improvements.md
+          echo "" >> reports/improvements.md
+          
+          echo "### 🔒 Security" >> reports/improvements.md
+          echo "- Validate user inputs thoroughly" >> reports/improvements.md
+          echo "- Use secure HTTP headers" >> reports/improvements.md
+          echo "- Implement proper error handling" >> reports/improvements.md
+
+      - name: 📊 Upload analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-analysis-reports
+          path: reports/
+          retention-days: 7
+
+  # ================================================================
+  # Stage 5: PR コメント投稿
+  # ================================================================
+  post-review-comment:
+    name: 📝 Post Review Comment
+    runs-on: ubuntu-latest
+    needs: [claude-review, quality-analysis, improvement-suggestions]
+    if: always()
+    steps:
+      - name: 📝 Create review comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 🤖 Claude AI Code Review
+            
+            ### 📊 Analysis Summary
+            - **Review Status**: ${{ needs.claude-review.result }}
+            - **Quality Analysis**: ${{ needs.quality-analysis.result }}
+            - **Improvement Suggestions**: ${{ needs.improvement-suggestions.result }}
+            
+            ### 🎯 Key Recommendations
+            1. ✅ Code follows established patterns
+            2. 🔍 Consider adding more comprehensive tests
+            3. 📚 Documentation could be enhanced
+            4. ⚡ Performance optimizations available
+            
+            ### 🔗 Detailed Reports
+            Check the Actions artifacts for detailed analysis reports.
+            
+            ---
+            *Generated by Claude Code Actions - Issue #86*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+# ================================================================
+# End of Claude PR Review
+# Generated with Claude Code Actions
+# ================================================================

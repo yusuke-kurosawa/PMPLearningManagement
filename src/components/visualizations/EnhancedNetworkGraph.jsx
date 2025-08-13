@@ -145,7 +145,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
           break
         }
 
-        case 'grid':
+        case 'grid': {
           // グリッドレイアウト
           const cols = Math.ceil(Math.sqrt(nodes.length))
           nodes.forEach((node, i) => {
@@ -155,6 +155,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
               (Math.ceil(nodes.length / cols) + 1)
           })
           break
+        }
 
         default:
           // 力学モデル（デフォルト）

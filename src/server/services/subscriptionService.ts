@@ -352,7 +352,7 @@ export class SubscriptionService {
       const usage = await this.calculateUsage(userId)
 
       switch (action) {
-        case 'exam_attempt':
+        case 'exam_attempt': {
           if (limits.examAttemptsPerMonth === null) {
             return { allowed: true } // 無制限
           }
@@ -363,8 +363,9 @@ export class SubscriptionService {
             reason: examRemaining <= 0 ? '今月の模擬試験上限に達しています' : undefined,
             remaining: examRemaining,
           }
+        }
 
-        case 'ai_query':
+        case 'ai_query': {
           if (limits.aiQueriesPerMonth === null) {
             return { allowed: true } // 無制限
           }
@@ -375,14 +376,16 @@ export class SubscriptionService {
             reason: aiRemaining <= 0 ? '今月のAI質問上限に達しています' : undefined,
             remaining: aiRemaining,
           }
+        }
 
-        case 'data_export':
+        case 'data_export': {
           if (limits.dataExportsPerMonth === null) {
             return { allowed: true } // 無制限
           }
 
           // データエクスポート回数は別途追跡が必要（実装に応じて調整）
           return { allowed: true }
+        }
 
         default:
           return { allowed: false, reason: '不明なアクション' }

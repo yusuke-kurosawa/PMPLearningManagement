@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Loader2, Lock, AlertCircle } from 'lucide-react'
@@ -12,7 +12,7 @@ const ProtectedRoute = ({
   fallback = null,
 }) => {
   const location = useLocation()
-  const { isAuthenticated, loading, role, hasRole, hasPermission } = useAuth()
+  const { isAuthenticated, loading, role: _role, hasRole, hasPermission } = useAuth()
 
   // Show loading state
   if (loading) {

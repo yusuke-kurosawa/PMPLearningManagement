@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Users, FileText, MessageSquare, TrendingUp, ArrowRight } from 'lucide-react'
+import { Users, FileText, MessageSquare, TrendingUp } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import SharedNotes from './SharedNotes'
 import DiscussionThread from './DiscussionThread'

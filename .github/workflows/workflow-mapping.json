@@ -1,0 +1,36 @@
+{
+  "workflow_rename_mapping": {
+    "01-core-ci-cd.yml": "deploy.yml",
+    "01-core-test.yml": "test.yml",
+    "01-core-integration.yml": "integration-test.yml",
+    "02-quality-pr-validation.yml": "pr-validation.yml",
+    "02-quality-advanced-testing.yml": "advanced-testing.yml",
+    "02-quality-test-parallel.yml": "test-parallel.yml",
+    "02-quality-test-data-mgmt.yml": "test-data-management.yml",
+    "03-security-scan.yml": "security-scan.yml",
+    "03-security-zero-trust.yml": "zero-trust-security.yml",
+    "03-security-infrastructure.yml": "infrastructure-security.yml",
+    "04-performance-monitoring.yml": "performance-monitoring.yml",
+    "04-performance-optimization.yml": "cost-optimization.yml",
+    "05-docs-claude-sync.yml": "claude-docs-sync.yml",
+    "06-claude-pr-review.yml": "claude-pr-review.yml",
+    "06-claude-pr-enhanced.yml": "claude-pr-review-enhanced.yml",
+    "06-claude-assistant.yml": "claude-assistant.yml",
+    "06-claude-issue-handler.yml": "claude-issue-handler.yml",
+    "06-claude-monitoring.yml": "claude-ai-weekly-monitoring.yml",
+    "07-release-dependabot.yml": "dependabot-auto-merge.yml",
+    "idd-compliance.yml": "idd-compliance.yml",
+    "idd-metrics-collector.yml": "idd-metrics-collector.yml",
+    "issue-driven-development.yml": "issue-driven-development.yml"
+  },
+  "deprecated_workflows": [
+    "chaos-engineering.yml",
+    "quantum-cicd.yml",
+    "multicloud-kubernetes.yml",
+    "edge-wasm-optimization.yml",
+    "world-class-devops-benchmark.yml",
+    "ai-monitoring-analytics.yml",
+    "green-devops-esg.yml",
+    "compliance-governance-automation.yml"
+  ]
+}

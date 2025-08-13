@@ -55,7 +55,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next()
 
   const duration = Date.now() - start
-  console.log(`[tRPC] ${path} took ${duration}ms`)
+  // console.log(`[tRPC] ${path} took ${duration}ms`)
 
   return result
 })

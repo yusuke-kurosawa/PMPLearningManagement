@@ -154,7 +154,9 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       </div>
 
       {/* Safe area adjustments for iOS */}
-      <style jsx global>{`
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .safe-area-top {
           padding-top: env(safe-area-inset-top);
         }
@@ -241,7 +243,9 @@ export function MobileLayout({ children }: MobileLayoutProps) {
           -moz-text-size-adjust: 100%;
           -ms-text-size-adjust: 100%;
         }
-      `}</style>
+      `,
+        }}
+      ></style>
     </div>
   )
 }

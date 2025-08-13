@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, Github, Chrome } from 'lucide-react'
 import { motion } from 'framer-motion'
-import toast from 'react-hot-toast'
+// import toast from 'react-hot-toast' // TODO: Implement toast notifications
 
 const Login = () => {
   const navigate = useNavigate()

@@ -193,8 +193,10 @@ const EnhancedMobileLayout = ({ children }) => {
       <main
         className="pb-safe-area-inset-bottom"
         onTouchStart={handleSwipeStart}
-        onTouchEnd={handleSwipeEnd}
-        onTouchEnd={handleDoubleTap}
+        onTouchEnd={(e) => {
+          handleSwipeEnd(e)
+          handleDoubleTap(e)
+        }}
       >
         {children}
       </main>

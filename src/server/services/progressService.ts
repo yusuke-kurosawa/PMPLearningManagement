@@ -114,12 +114,13 @@ export class ProgressService {
         previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
         previousEnd = new Date(now.getFullYear(), now.getMonth(), 0)
         break
-      case 'quarter':
+      case 'quarter': {
         const quarter = Math.floor(now.getMonth() / 3)
         start = new Date(now.getFullYear(), quarter * 3, 1)
         previousStart = new Date(now.getFullYear(), (quarter - 1) * 3, 1)
         previousEnd = new Date(now.getFullYear(), quarter * 3, 0)
         break
+      }
       case 'year':
         start = new Date(now.getFullYear(), 0, 1)
         previousStart = new Date(now.getFullYear() - 1, 0, 1)
