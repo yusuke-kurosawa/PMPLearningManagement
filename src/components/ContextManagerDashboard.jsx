@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useContextMonitoring } from '../contexts/ContextManagerContext'
-import {
 import { logger } from '../services/logger'
+import {
   Activity,
   Database,
   Gauge,

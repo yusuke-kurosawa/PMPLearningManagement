@@ -4,8 +4,8 @@
  */
 
 import { prisma } from '@/lib/db'
-import {
 import { logger } from '../../services/logger'
+import {
   databaseEncryption,
   hashingService,
   tokenGenerator,
@@ -23,9 +23,10 @@ const EncryptedUserDataSchema = z.object({
   address: z.string().optional(),
 })
 
-// const _DecryptionInputSchema = z.object({ // TODO: Will be used in future
+const _DecryptionInputSchema = z.object({
+  // TODO: Will be used in future
   encrypted: z.string(),
-  iv: z.string(),;
+  iv: z.string(),
   tag: z.string(),
   salt: z.string().optional(),
 })

@@ -548,7 +548,8 @@ export class StripeService {
     }
   }> {
     try {
-// //       const [studySessions, examResults, aiUsage, dataExports] = await Promise.all([ // TODO: Will be used in future // TODO: Will be used in future
+      const [studySessions, examResults] = await Promise.all([
+        // TODO: Will be used in future for aiUsage, dataExports
         prisma.studySession.findMany({
           where: {
             userId,
@@ -561,10 +562,6 @@ export class StripeService {
             completedAt: { gte: startDate, lte: endDate },
           },
         }),
-        // AI使用量は実装に応じて調整
-        Promise.resolve([]),
-        // データエクスポートは実装に応じて調整
-        Promise.resolve([]),
       ])
 
       const studyHours =

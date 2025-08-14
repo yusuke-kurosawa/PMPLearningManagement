@@ -149,12 +149,12 @@ class PerformanceOptimizer {
       // 10% chance
       if (process.env.NODE_ENV === 'development') {
         logger.warn('📊 Memory Stats:', {
+          usedMB: Math.round(usedJSHeapSize / 1024 / 1024),
+          totalMB: Math.round(totalJSHeapSize / 1024 / 1024),
+          limitMB: Math.round(jsHeapSizeLimit / 1024 / 1024),
+          pressure: Math.round(memoryPressure * 100) + '%',
+        })
       }
-        usedMB: Math.round(usedJSHeapSize / 1024 / 1024),
-        totalMB: Math.round(totalJSHeapSize / 1024 / 1024),
-        limitMB: Math.round(jsHeapSizeLimit / 1024 / 1024),
-        pressure: Math.round(memoryPressure * 100) + '%',
-      })
     }
   }
 

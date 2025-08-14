@@ -42,10 +42,10 @@ class Logger {
   error(message: string, error?: Error | unknown, context?: LogContext): void {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const fullMessage = error ? `${message}: ${errorMessage}` : message
-    
+
     if (!this.isTest) {
       logger.error(this.formatMessage('error', fullMessage, context))
-      
+
       if (error instanceof Error && error.stack && this.isDevelopment) {
         logger.error(error.stack)
       }
@@ -70,25 +70,24 @@ class Logger {
    * Create a child logger with a specific context
    */
   child(defaultContext: LogContext): Logger {
-    const parentLogger = this
     return {
       isDevelopment: this.isDevelopment,
       isTest: this.isTest,
       formatMessage: this.formatMessage.bind(this),
-      debug(message: string, context?: LogContext) {
-        parentLogger.debug(message, { ...defaultContext, ...context })
+      debug: (message: string, context?: LogContext) => {
+        this.debug(message, { ...defaultContext, ...context })
       },
-      info(message: string, context?: LogContext) {
-        parentLogger.info(message, { ...defaultContext, ...context })
+      info: (message: string, context?: LogContext) => {
+        this.info(message, { ...defaultContext, ...context })
       },
-      warn(message: string, context?: LogContext) {
-        parentLogger.warn(message, { ...defaultContext, ...context })
+      warn: (message: string, context?: LogContext) => {
+        this.warn(message, { ...defaultContext, ...context })
       },
-      error(message: string, error?: Error | unknown, context?: LogContext) {
-        parentLogger.error(message, error, { ...defaultContext, ...context })
+      error: (message: string, error?: Error | unknown, context?: LogContext) => {
+        this.error(message, error, { ...defaultContext, ...context })
       },
-      logIf: parentLogger.logIf.bind(parentLogger),
-      child: parentLogger.child.bind(parentLogger),
+      logIf: this.logIf.bind(this),
+      child: this.child.bind(this),
     } as Logger
   }
 }

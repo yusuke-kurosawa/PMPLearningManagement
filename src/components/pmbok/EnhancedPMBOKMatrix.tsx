@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
-import {
 import { logger } from '../../services/logger'
+import {
   Search,
   Filter,
   BookOpen,
@@ -1244,7 +1244,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         <div className="rounded border border-blue-200 bg-blue-50 p-4">
                           <h4 className="mb-2 font-medium text-blue-900">📚 Study Focus Areas</h4>
                           <ul className="space-y-1 text-sm text-blue-800">
-                            <li>• Understand the process purpose and when it's performed</li>
+                            <li>• Understand the process purpose and when it&apos;s performed</li>
                             <li>• Memorize key inputs, tools & techniques, and outputs</li>
                             <li>• Know the relationships with other processes</li>
                             <li>• Practice with sample scenarios and questions</li>

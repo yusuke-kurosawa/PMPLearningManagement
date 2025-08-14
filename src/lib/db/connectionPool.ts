@@ -103,11 +103,11 @@ export class EnhancedPrismaClient extends PrismaClient {
       if (e.duration > this.slowQueryThreshold) {
         if (process.env.NODE_ENV === 'development') {
           logger.warn(`Slow query detected (${e.duration}ms):`, {
+            query: e.query.substring(0, 200),
+            duration: e.duration,
+            params: e.params,
+          })
         }
-          query: e.query.substring(0, 200),
-          duration: e.duration,
-          params: e.params,
-        })
       }
     })
 
@@ -428,9 +428,9 @@ export class EnhancedPrismaClient extends PrismaClient {
 
       if (process.env.NODE_ENV === 'development') {
         logger.debug(
+          `Database optimization completed: ${tablesAnalyzed} tables analyzed, ${vacuumCleaned} tables vacuumed`
+        )
       }
-        `Database optimization completed: ${tablesAnalyzed} tables analyzed, ${vacuumCleaned} tables vacuumed`
-      )
 
       return { tablesAnalyzed, indexesRebuilt, vacuumCleaned }
     } catch (error) {

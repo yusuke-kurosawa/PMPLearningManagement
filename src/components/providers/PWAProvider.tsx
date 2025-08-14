@@ -4,8 +4,8 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import {
 import { logger } from '../../services/logger'
+import {
   getInstallPromptManager,
   PWAInstallPromptManager,
   InstallPromptState,

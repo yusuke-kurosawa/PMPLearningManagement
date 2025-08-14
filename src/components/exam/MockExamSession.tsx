@@ -5,8 +5,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
 import { logger } from '../../services/logger'
+import {
   Clock,
   ChevronLeft,
   ChevronRight,

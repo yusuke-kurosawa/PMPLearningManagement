@@ -62,7 +62,7 @@ export interface PMBOKProcess {
   prerequisites?: string[]
 }
 
-export type ProcessGroup = 
+export type ProcessGroup =
   | 'Initiating'
   | 'Planning'
   | 'Executing'
@@ -144,7 +144,7 @@ export interface Achievement {
   rarity: 'common' | 'rare' | 'epic' | 'legendary'
 }
 
-export type AchievementCategory = 
+export type AchievementCategory =
   | 'study-streak'
   | 'exam-performance'
   | 'completion'

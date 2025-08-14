@@ -148,11 +148,11 @@ export function anomalyDetectionMiddleware() {
         // 高信頼度の異常パターンを検知
         if (process.env.NODE_ENV === 'development') {
           logger.warn(`Anomalous access pattern detected: User ${userId}, IP ${clientIP}`, {
+            confidence: anomalyResult.confidence,
+            riskScore: anomalyResult.riskScore,
+            reasons: anomalyResult.reasons,
+          })
         }
-          confidence: anomalyResult.confidence,
-          riskScore: anomalyResult.riskScore,
-          reasons: anomalyResult.reasons,
-        })
 
         // 高リスクの場合はアクセスを制限
         if (anomalyResult.riskScore > 80) {

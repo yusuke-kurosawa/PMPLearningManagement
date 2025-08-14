@@ -374,10 +374,10 @@ export const authOptions: NextAuthOptions = {
 }
 
 // サーバーサイド認証ヘルパー
-// // export const _getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future // TODO: Will be used in future
-  // サーバーサイドでの認証状態取得
-  // 実装は使用するフレームワークによって異なる
-}
+// export const _getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future
+//   // サーバーサイドでの認証状態取得
+//   // 実装は使用するフレームワークによって異なる
+// }
 
 // 認証状態検証ヘルパー
 export const requireAuth = (session: unknown) => {

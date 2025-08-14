@@ -518,13 +518,13 @@ export class CSRFProtection {
         if (!validation.valid) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('CSRF validation failed:', {
+              ip: req.ip,
+              userAgent: req.get('User-Agent'),
+              userId: req.user?.id,
+              error: validation.error,
+              riskScore: validation.riskScore,
+            })
           }
-            ip: req.ip,
-            userAgent: req.get('User-Agent'),
-            userId: req.user?.id,
-            error: validation.error,
-            riskScore: validation.riskScore,
-          })
 
           return res.status(403).json({
             error: 'CSRF validation failed',
@@ -539,12 +539,12 @@ export class CSRFProtection {
         if (validation.riskScore && validation.riskScore > 40) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('High-risk CSRF validation:', {
+              ip: req.ip,
+              userId: req.user?.id,
+              riskScore: validation.riskScore,
+              recommendations: validation.recommendations,
+            })
           }
-            ip: req.ip,
-            userId: req.user?.id,
-            riskScore: validation.riskScore,
-            recommendations: validation.recommendations,
-          })
         }
 
         next()
@@ -760,9 +760,9 @@ export class CSRFProtection {
 
             if (process.env.NODE_ENV === 'development') {
               logger.info(
+                `Token rotated for user ${userId}: ${oldToken.substring(0, 8)}... -> ${newToken.substring(0, 8)}...`
+              )
             }
-              `Token rotated for user ${userId}: ${oldToken.substring(0, 8)}... -> ${newToken.substring(0, 8)}...`
-            )
           }
         }
       }

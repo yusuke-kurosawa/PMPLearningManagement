@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import {
 import { logger } from '../../services/logger'
+import {
   Brain,
   Target,
   Calendar,

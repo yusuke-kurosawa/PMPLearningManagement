@@ -246,9 +246,9 @@ export class KeyManagementSystem {
 
     if (process.env.NODE_ENV === 'development') {
       logger.info(
+        `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
+      )
     }
-      `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
-    )
   }
 
   /**
@@ -331,9 +331,9 @@ export class KeyManagementSystem {
 
       if (process.env.NODE_ENV === 'development') {
         logger.info(
+          `Re-encryption batch completed: ${processed} processed, ${failed} failed, completed: ${completed}`
+        )
       }
-        `Re-encryption batch completed: ${processed} processed, ${failed} failed, completed: ${completed}`
-      )
 
       return { processed, failed, completed }
     } catch (error) {

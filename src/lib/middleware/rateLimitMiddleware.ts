@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import {
 import { logger } from '../../services/logger'
+import {
   slidingWindowLimiter,
   ddosProtection,
   type RateLimitConfig,
@@ -72,7 +72,8 @@ const defaultKeyGenerator = (req: NextRequest): string => {
 }
 
 // User-Agent解析
-// const _parseUserAgent = ( // TODO: Will be used in future
+const _parseUserAgent = (
+  // TODO: Will be used in future
   userAgent: string | null
 ): {
   isMobile: boolean

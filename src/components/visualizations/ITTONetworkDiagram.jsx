@@ -390,7 +390,7 @@ const ITTONetworkDiagram = () => {
           {/* Render nodes */}
           {allNodes.map((node) => {
             const isHighlighted = hoveredNode === node.id || connectedNodes.has(node.id)
-//             const NodeShape = getNodeShape(node) // TODO: Will be used in future
+            //             const NodeShape = getNodeShape(node) // TODO: Will be used in future
             const color = getNodeColor(node)
 
             return (

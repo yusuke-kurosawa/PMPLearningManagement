@@ -21,7 +21,8 @@ const STATIC_ASSETS = [
 ]
 
 // API endpoints to cache
-// const CACHE_API_ROUTES = [ // TODO: Will be used in future
+const CACHE_API_ROUTES = [
+  // TODO: Will be used in future
   '/api/pmbok/processes',
   '/api/flashcards/decks',
   '/api/progress/overview',
@@ -164,7 +165,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
 // Handle API requests with caching strategy
 async function handleApiRequest(request: Request): Promise<Response> {
-//   const url = new URL(request.url) // TODO: Will be used in future
+  //   const url = new URL(request.url) // TODO: Will be used in future
 
   // Try network first for fresh data
   try {

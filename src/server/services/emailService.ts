@@ -297,9 +297,9 @@ export class EmailService {
         // テンプレートが見つからない場合はデフォルトを使用
         if (process.env.NODE_ENV === 'development') {
           logger.warn(
+            `テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`
+          )
         }
-          `テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`
-        )
         template = EmailTemplateLoader.getDefaultTemplate()
       }
 

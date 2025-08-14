@@ -336,7 +336,13 @@ const EnhancedProgressDashboard: React.FC = () => {
           </Card>
         </div>
 
-        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'overview' | 'analytics' | 'goals' | 'achievements')} className="space-y-6">
+        <Tabs
+          value={activeView}
+          onValueChange={(value) =>
+            setActiveView(value as 'overview' | 'analytics' | 'goals' | 'achievements')
+          }
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>

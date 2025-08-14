@@ -407,7 +407,7 @@ export class DiskHealthChecker implements HealthChecker {
     try {
       // Node.js環境では詳細なディスク情報は取得困難なため、
       // ファイルシステムの基本的な読み書き確認を行う
-      import fs from 'fs'.promises;
+      const fs = await import('fs').then((m) => m.promises)
       const tmpFile = `/tmp/health-check-${Date.now()}`
 
       await fs.writeFile(tmpFile, 'health check')
