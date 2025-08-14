@@ -1,8 +1,6 @@
-import { logger } from '../services/logger'
-
 /**
- * Logger Utility
- * Provides environment-aware logging with structured output
+ * Logger Service
+ * Centralized logging service for production-ready logging
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
@@ -11,7 +9,7 @@ interface LogContext {
   [key: string]: unknown
 }
 
-class Logger {
+class LoggerService {
   private isDevelopment = process.env.NODE_ENV === 'development'
   private isTest = process.env.NODE_ENV === 'test'
 
@@ -23,19 +21,23 @@ class Logger {
 
   debug(message: string, context?: LogContext): void {
     if (this.isDevelopment && !this.isTest) {
-      logger.debug(this.formatMessage('debug', message, context))
+      console.log(this.formatMessage('debug', message, context))
     }
   }
 
   info(message: string, context?: LogContext): void {
     if (!this.isTest) {
-      logger.info(this.formatMessage('info', message, context))
+      console.info(this.formatMessage('info', message, context))
     }
+  }
+
+  log(message: string, context?: LogContext): void {
+    this.info(message, context)
   }
 
   warn(message: string, context?: LogContext): void {
     if (!this.isTest) {
-      logger.warn(this.formatMessage('warn', message, context))
+      console.warn(this.formatMessage('warn', message, context))
     }
   }
 
@@ -44,16 +46,16 @@ class Logger {
     const fullMessage = error ? `${message}: ${errorMessage}` : message
     
     if (!this.isTest) {
-      logger.error(this.formatMessage('error', fullMessage, context))
+      console.error(this.formatMessage('error', fullMessage, context))
       
       if (error instanceof Error && error.stack && this.isDevelopment) {
-        logger.error(error.stack)
+        console.error(error.stack)
       }
     }
 
-    // In production, you might want to send errors to a service like Sentry
+    // In production, send errors to monitoring service
     if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error tracking service
+      // TODO: Send to error tracking service like Sentry
     }
   }
 
@@ -69,7 +71,7 @@ class Logger {
   /**
    * Create a child logger with a specific context
    */
-  child(defaultContext: LogContext): Logger {
+  child(defaultContext: LogContext): LoggerService {
     const parentLogger = this
     return {
       isDevelopment: this.isDevelopment,
@@ -81,6 +83,9 @@ class Logger {
       info(message: string, context?: LogContext) {
         parentLogger.info(message, { ...defaultContext, ...context })
       },
+      log(message: string, context?: LogContext) {
+        parentLogger.log(message, { ...defaultContext, ...context })
+      },
       warn(message: string, context?: LogContext) {
         parentLogger.warn(message, { ...defaultContext, ...context })
       },
@@ -89,12 +94,12 @@ class Logger {
       },
       logIf: parentLogger.logIf.bind(parentLogger),
       child: parentLogger.child.bind(parentLogger),
-    } as Logger
+    } as LoggerService
   }
 }
 
 // Export singleton instance
-export const logger = new Logger()
+export const logger = new LoggerService()
 
 // Export for use in other modules
 export default logger

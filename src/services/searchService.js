@@ -1,4 +1,5 @@
 import { glossaryTerms } from '../data/schemas/glossary/pmpGlossary'
+import { logger } from './logger'
 
 // Fuse.jsのような検索ライブラリを使わず、カスタム実装
 class SearchService {
@@ -278,7 +279,7 @@ class SearchService {
       localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('検索履歴の保存エラー:', error)
+        logger.error('検索履歴の保存エラー:', error)
       }
     }
   }
@@ -292,7 +293,7 @@ class SearchService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('検索履歴の読み込みエラー:', error)
+        logger.error('検索履歴の読み込みエラー:', error)
       }
       this.searchHistory = []
     }
@@ -305,7 +306,7 @@ class SearchService {
       localStorage.removeItem('searchHistory')
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('検索履歴のクリアエラー:', error)
+        logger.error('検索履歴のクリアエラー:', error)
       }
     }
   }

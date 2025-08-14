@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '../services/logger'
 
 // Supabase configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
@@ -7,7 +8,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 // Validate configuration
 if (!supabaseUrl || !supabaseAnonKey) {
   if (process.env.NODE_ENV === 'development') {
-    console.warn('Supabase configuration is missing. Authentication features will not work.')
+    logger.warn('Supabase configuration is missing. Authentication features will not work.')
   }
 }
 
@@ -116,7 +117,7 @@ export const authHelpers = {
 
     if (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching user role:', error)
+        logger.error('Error fetching user role:', error)
       }
       return 'guest'
     }
@@ -133,7 +134,7 @@ export const authHelpers = {
 
     if (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error checking permission:', error)
+        logger.error('Error checking permission:', error)
       }
       return false
     }
@@ -153,12 +154,12 @@ export const sessionManager = {
       switch (event) {
         case 'SIGNED_IN':
           if (process.env.NODE_ENV === 'development') {
-            console.log('User signed in')
+            logger.debug('User signed in')
           }
           break
         case 'SIGNED_OUT':
           if (process.env.NODE_ENV === 'development') {
-            console.log('User signed out')
+            logger.debug('User signed out')
           }
           // Clear any cached data
           localStorage.removeItem('user_profile')
@@ -166,12 +167,12 @@ export const sessionManager = {
           break
         case 'TOKEN_REFRESHED':
           if (process.env.NODE_ENV === 'development') {
-            console.log('Token refreshed')
+            logger.debug('Token refreshed')
           }
           break
         case 'USER_UPDATED':
           if (process.env.NODE_ENV === 'development') {
-            console.log('User updated')
+            logger.debug('User updated')
           }
           break
         default:

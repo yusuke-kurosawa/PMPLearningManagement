@@ -1,4 +1,5 @@
 import { openDB, IDBPDatabase } from 'idb'
+import { logger } from '../../services/logger'
 
 export interface StorageItem {
   key: string
@@ -61,13 +62,13 @@ export class IndexedDBStorage {
 
         blocked() {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('IndexedDB upgrade blocked')
+            logger.warn('IndexedDB upgrade blocked')
           }
         },
 
         blocking() {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('IndexedDB is blocking a newer version')
+            logger.warn('IndexedDB is blocking a newer version')
           }
         },
       })
@@ -101,7 +102,7 @@ export class IndexedDBStorage {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Failed to store item ${key}:`, error)
+        logger.error(`Failed to store item ${key}:`, error)
       }
       throw new Error(`Storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -133,7 +134,7 @@ export class IndexedDBStorage {
         : item.value
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Failed to retrieve item ${key}:`, error)
+        logger.error(`Failed to retrieve item ${key}:`, error)
       }
       return null
     }
@@ -151,7 +152,7 @@ export class IndexedDBStorage {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Failed to remove item ${key}:`, error)
+        logger.error(`Failed to remove item ${key}:`, error)
       }
       throw new Error(`Remove failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -171,7 +172,7 @@ export class IndexedDBStorage {
       return keys as string[]
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get keys:', error)
+        logger.error('Failed to get keys:', error)
       }
       return []
     }
@@ -189,7 +190,7 @@ export class IndexedDBStorage {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to clear storage:', error)
+        logger.error('Failed to clear storage:', error)
       }
       throw new Error(`Clear failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -211,7 +212,7 @@ export class IndexedDBStorage {
       return { used: 0, quota: 0 }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get storage estimate:', error)
+        logger.error('Failed to get storage estimate:', error)
       }
       return { used: 0, quota: 0 }
     }
@@ -232,7 +233,7 @@ export class IndexedDBStorage {
       return items
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get items by user:', error)
+        logger.error('Failed to get items by user:', error)
       }
       return []
     }
@@ -264,7 +265,7 @@ export class IndexedDBStorage {
       return cleanedCount
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to cleanup expired items:', error)
+        logger.error('Failed to cleanup expired items:', error)
       }
       return 0
     }
@@ -295,7 +296,7 @@ export class IndexedDBStorage {
       return exported
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to export data:', error)
+        logger.error('Failed to export data:', error)
       }
       return {}
     }
@@ -329,7 +330,7 @@ export class IndexedDBStorage {
       return importedCount
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to import data:', error)
+        logger.error('Failed to import data:', error)
       }
       throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -345,7 +346,7 @@ export class IndexedDBStorage {
       return `compressed:${compressed}`
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Compression failed, storing as-is:', error)
+        logger.warn('Compression failed, storing as-is:', error)
       }
       return data
     }
@@ -365,7 +366,7 @@ export class IndexedDBStorage {
       return JSON.parse(json)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Decompression failed:', error)
+        logger.warn('Decompression failed:', error)
       }
       return compressedData
     }
@@ -407,7 +408,7 @@ export class FallbackStorage {
       return parsed.value
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Failed to get item ${key}:`, error)
+        logger.error(`Failed to get item ${key}:`, error)
       }
       return null
     }

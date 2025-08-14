@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+import { logger } from '../../services/logger'
   Eye,
   EyeOff,
   Lock,
@@ -154,7 +155,7 @@ const Register = () => {
       // Success is handled in the AuthContext
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Registration error:', error)
+        logger.error('Registration error:', error)
       }
     } finally {
       setLoading(false)

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '../../services/logger'
 
 // Supabase client configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -266,29 +267,29 @@ export const setupAuthListeners = (onAuthStateChange) => {
     switch (event) {
       case 'SIGNED_IN':
         if (process.env.NODE_ENV === 'development') {
-          console.log('User signed in:', session?.user?.email)
+          logger.debug('User signed in:', session?.user?.email)
         }
         break
       case 'SIGNED_OUT':
         if (process.env.NODE_ENV === 'development') {
-          console.log('User signed out')
+          logger.debug('User signed out')
         }
         // Clear any cached data
         localStorage.removeItem('pmp-user-preferences')
         break
       case 'TOKEN_REFRESHED':
         if (process.env.NODE_ENV === 'development') {
-          console.log('Token refreshed')
+          logger.debug('Token refreshed')
         }
         break
       case 'USER_UPDATED':
         if (process.env.NODE_ENV === 'development') {
-          console.log('User updated')
+          logger.debug('User updated')
         }
         break
       case 'PASSWORD_RECOVERY':
         if (process.env.NODE_ENV === 'development') {
-          console.log('Password recovery initiated')
+          logger.debug('Password recovery initiated')
         }
         break
       default:

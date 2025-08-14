@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { IndexedDBStorage } from './indexedDb'
 import { SyncQueue } from './syncQueue'
+import { logger } from '../../services/logger'
 
 // Migration schemas for data validation
 export const LegacyProgressSchema = z.object({
@@ -82,7 +83,7 @@ export class MigrationService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get migration status:', error)
+        logger.error('Failed to get migration status:', error)
       }
       return {
         version: this.CURRENT_VERSION,
@@ -131,7 +132,7 @@ export class MigrationService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to create backup:', error)
+        logger.error('Failed to create backup:', error)
       }
       await this.updateMigrationStatus({
         errors: [error instanceof Error ? error.message : 'Backup creation failed'],
@@ -250,7 +251,7 @@ export class MigrationService {
       return 1
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to migrate learning progress:', error)
+        logger.error('Failed to migrate learning progress:', error)
       }
       throw error
     }
@@ -285,7 +286,7 @@ export class MigrationService {
             await this.syncQueue.add('exam-result-create', modernResult)
           } catch (err) {
             if (process.env.NODE_ENV === 'development') {
-              console.warn('Skipping invalid exam result:', err)
+              logger.warn('Skipping invalid exam result:', err)
             }
           }
         }
@@ -294,7 +295,7 @@ export class MigrationService {
       return validResults.length
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to migrate exam results:', error)
+        logger.error('Failed to migrate exam results:', error)
       }
       throw error
     }
@@ -328,7 +329,7 @@ export class MigrationService {
           await this.syncQueue.add('flashcard-update', modernProgress)
         } catch (err) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn(`Skipping invalid flashcard progress for ${processId}:`, err)
+            logger.warn(`Skipping invalid flashcard progress for ${processId}:`, err)
           }
         }
       }
@@ -336,7 +337,7 @@ export class MigrationService {
       return migratedCount
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to migrate flashcard progress:', error)
+        logger.error('Failed to migrate flashcard progress:', error)
       }
       throw error
     }
@@ -374,7 +375,7 @@ export class MigrationService {
             migratedCount++
           } catch (err) {
             if (process.env.NODE_ENV === 'development') {
-              console.warn(`Failed to migrate setting ${key}:`, err)
+              logger.warn(`Failed to migrate setting ${key}:`, err)
             }
           }
         }
@@ -383,7 +384,7 @@ export class MigrationService {
       return migratedCount
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to migrate user settings:', error)
+        logger.error('Failed to migrate user settings:', error)
       }
       throw error
     }

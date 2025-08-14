@@ -2,6 +2,7 @@ import '@testing-library/jest-dom'
 import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
+import { logger } from '../services/logger'
 // Conditionally import server only if MSW is needed
 let server
 try {
@@ -9,7 +10,7 @@ try {
   server = serverModule.server
 } catch (error) {
   if (process.env.NODE_ENV === 'development') {
-    console.warn('MSW server not available, skipping mock server setup')
+    logger.warn('MSW server not available, skipping mock server setup')
   }
 }
 

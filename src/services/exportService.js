@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 // データエクスポートサービス
 class ExportService {
   constructor() {
@@ -25,7 +27,7 @@ class ExportService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('進捗データの収集エラー:', error)
+        logger.error('進捗データの収集エラー:', error)
       }
     }
 
@@ -37,7 +39,7 @@ class ExportService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('設定データの収集エラー:', error)
+        logger.error('設定データの収集エラー:', error)
       }
     }
 
@@ -54,7 +56,7 @@ class ExportService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('コラボレーションデータの収集エラー:', error)
+        logger.error('コラボレーションデータの収集エラー:', error)
       }
     }
 
@@ -66,7 +68,7 @@ class ExportService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('検索履歴の収集エラー:', error)
+        logger.error('検索履歴の収集エラー:', error)
       }
     }
 
@@ -236,7 +238,7 @@ class ExportService {
       return data ? JSON.parse(data) : null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('進捗データの取得エラー:', error)
+        logger.error('進捗データの取得エラー:', error)
       }
       return null
     }

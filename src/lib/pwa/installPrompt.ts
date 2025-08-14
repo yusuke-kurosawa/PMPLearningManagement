@@ -1,3 +1,5 @@
+import { logger } from '../../services/logger'
+
 /**
  * PWA Install Prompt Manager
  * Developer 6: PWA & Mobile Developer Implementation
@@ -112,14 +114,14 @@ class PWAInstallPromptManager {
     this.updateState({ canInstall: true })
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('PWA Install Prompt: Ready to show install prompt')
+      logger.debug('PWA Install Prompt: Ready to show install prompt')
     }
     this.callbacks.onPromptReady?.()
   }
 
   private handleAppInstalled(): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log('PWA Install Prompt: App installed successfully')
+      logger.debug('PWA Install Prompt: App installed successfully')
     }
 
     this.promptEvent = null
@@ -201,7 +203,7 @@ class PWAInstallPromptManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('PWA Install Prompt: Failed to load state:', error)
+        logger.error('PWA Install Prompt: Failed to load state:', error)
       }
     }
 
@@ -223,7 +225,7 @@ class PWAInstallPromptManager {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('PWA Install Prompt: Failed to save state:', error)
+        logger.error('PWA Install Prompt: Failed to save state:', error)
       }
     }
   }
@@ -273,14 +275,14 @@ class PWAInstallPromptManager {
   public async showInstallPrompt(): Promise<'accepted' | 'dismissed' | 'unavailable'> {
     if (!this.promptEvent) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('PWA Install Prompt: No install prompt event available')
+        logger.warn('PWA Install Prompt: No install prompt event available')
       }
       return 'unavailable'
     }
 
     if (!this.canShowPrompt()) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('PWA Install Prompt: Conditions not met to show prompt')
+        logger.warn('PWA Install Prompt: Conditions not met to show prompt')
       }
       return 'unavailable'
     }
@@ -296,7 +298,7 @@ class PWAInstallPromptManager {
       const userChoice = await this.promptEvent.userChoice
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('PWA Install Prompt: User choice:', userChoice.outcome)
+        logger.debug('PWA Install Prompt: User choice:', userChoice.outcome)
       }
 
       if (userChoice.outcome === 'dismissed') {
@@ -313,7 +315,7 @@ class PWAInstallPromptManager {
       return userChoice.outcome
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('PWA Install Prompt: Failed to show prompt:', error)
+        logger.error('PWA Install Prompt: Failed to show prompt:', error)
       }
       return 'unavailable'
     }

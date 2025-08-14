@@ -5,6 +5,7 @@
 
 import { RedisCacheManager, CacheKeyStrategy } from './redisCache'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // キャッシング戦略の定義
 export enum CacheStrategy {
@@ -106,7 +107,7 @@ export class AdvancedCacheManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache-Aside error:', error)
+        logger.error('Cache-Aside error:', error)
       }
       return {
         data: null,
@@ -143,7 +144,7 @@ export class AdvancedCacheManager {
       await this.invalidateDependencies(identifier)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Write-Through error:', error)
+        logger.error('Write-Through error:', error)
       }
       // エラー時はキャッシュを削除して整合性を保つ
       await this.cacheManager.delete(keyStrategy, identifier)
@@ -184,7 +185,7 @@ export class AdvancedCacheManager {
           }
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('Write-Behind persist error:', error)
+            logger.error('Write-Behind persist error:', error)
           }
           // 失敗時はキャッシュも無効化
           await this.cacheManager.delete(keyStrategy, identifier)
@@ -192,7 +193,7 @@ export class AdvancedCacheManager {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Write-Behind error:', error)
+        logger.error('Write-Behind error:', error)
       }
       throw error
     }
@@ -256,7 +257,7 @@ export class AdvancedCacheManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Smart cache error:', error)
+        logger.error('Smart cache error:', error)
       }
 
       // エラー時は古いデータの返却を試行
@@ -304,7 +305,7 @@ export class AdvancedCacheManager {
 
     await Promise.allSettled(invalidationTasks)
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
+      logger.debug(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
     }
   }
 
@@ -334,7 +335,7 @@ export class AdvancedCacheManager {
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Background refresh failed:', error)
+          logger.error('Background refresh failed:', error)
         }
       } finally {
         this.refreshQueue.delete(refreshKey)
@@ -369,7 +370,7 @@ export class AdvancedCacheManager {
       return null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Get stale data error:', error)
+        logger.error('Get stale data error:', error)
       }
       return null
     }
@@ -384,7 +385,7 @@ export class AdvancedCacheManager {
       if (refreshTasks.length === 0) return
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Processing ${refreshTasks.length} background refresh tasks`)
+        logger.debug(`Processing ${refreshTasks.length} background refresh tasks`)
       }
 
       // 並列数を制限してリフレッシュを実行
@@ -415,7 +416,7 @@ export class AdvancedCacheManager {
           if (!result.hit) warmedUp++
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+            logger.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
           }
         }
       }
@@ -423,7 +424,7 @@ export class AdvancedCacheManager {
 
     await Promise.allSettled(warmupTasks)
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Cache warmup completed: ${warmedUp} entries loaded`)
+      logger.debug(`Cache warmup completed: ${warmedUp} entries loaded`)
     }
     return warmedUp
   }

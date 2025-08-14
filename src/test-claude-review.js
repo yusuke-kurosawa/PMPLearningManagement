@@ -1,14 +1,16 @@
+import { logger } from './services/logger'
+
 // Test file for Claude AI review
 export function testFunction(a, b) {
   // This function needs improvement
   const result = a + b
-  // console.log(result)
+  // logger.debug(result)
   return result
 }
 
 // Potential security issue
 // eslint-disable-next-line no-eval
-eval('console.log("test")')
+eval('logger.debug("test")')
 
 // Performance issue
 for (let i = 0; i < 1000000; i++) {

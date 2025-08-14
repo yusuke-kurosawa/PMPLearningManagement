@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import {
+import { logger } from '../../services/logger'
   slidingWindowLimiter,
   ddosProtection,
   type RateLimitConfig,
@@ -227,7 +228,7 @@ export function withRateLimit(options: RateLimitOptions) {
       return response
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Rate limiting middleware error:', error)
+        logger.error('Rate limiting middleware error:', error)
       }
       // エラー時はリクエストを通す
       return handler(request)
@@ -245,7 +246,7 @@ export const withAuthRateLimit = withRateLimit({
   enableDDoSProtection: true,
   onLimitReached: (req, identifier) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Auth rate limit reached for ${identifier} at ${req.nextUrl.pathname}`)
+      logger.debug(`Auth rate limit reached for ${identifier} at ${req.nextUrl.pathname}`)
     }
   },
 })

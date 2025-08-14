@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
 import type { _User } from '@prisma/client'
+import { logger } from '../services/logger'
 
 declare module 'next-auth' {
   interface Session {
@@ -139,7 +140,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, _isNewUser }) {
       // Log sign in event
       if (process.env.NODE_ENV === 'development') {
-        console.log(`User ${user.email} signed in via ${account?.provider}`)
+        logger.debug(`User ${user.email} signed in via ${account?.provider}`)
       }
 
       // Track user activity
@@ -153,13 +154,13 @@ export const authOptions: NextAuthOptions = {
     async signOut({ _session, _token }) {
       // Log sign out event
       if (process.env.NODE_ENV === 'development') {
-        console.log(`User signed out`)
+        logger.debug(`User signed out`)
       }
     },
     async createUser({ user }) {
       // Send welcome email
       if (process.env.NODE_ENV === 'development') {
-        console.log(`New user created: ${user.email}`)
+        logger.debug(`New user created: ${user.email}`)
       }
 
       // Initialize user progress

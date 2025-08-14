@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
+import { logger } from '../../services/logger'
   Brain,
   Target,
   Calendar,
@@ -60,7 +61,7 @@ const AICoachingDashboard = () => {
       setLearningPath(path)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error loading AI coaching:', error)
+        logger.error('Error loading AI coaching:', error)
       }
     } finally {
       setLoading(false)

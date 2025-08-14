@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Info, Globe, Code, Clock, GitBranch, Hash, User } from 'lucide-react'
+import { logger } from '../../services/logger'
 
 interface DeploymentInfo {
   environment: string
@@ -39,7 +40,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Could not fetch deployment info:', error)
+          logger.warn('Could not fetch deployment info:', error)
         }
         // Fallback to environment variables
         setDeploymentInfo({

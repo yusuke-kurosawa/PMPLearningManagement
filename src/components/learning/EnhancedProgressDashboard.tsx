@@ -71,7 +71,7 @@ const EnhancedProgressDashboard: React.FC = () => {
   // Store state and actions
   const {
     processProgress,
-    studySessions,
+    // studySessions, // TODO: Will be used in future
     achievements,
     goals,
     studyStreak,
@@ -87,7 +87,7 @@ const EnhancedProgressDashboard: React.FC = () => {
     getStrongAreas,
     getRecommendedStudy,
     createGoal,
-    updateGoal,
+    // updateGoal, // TODO: Will be used in future
     checkAchievements,
     exportProgress,
   } = useProgressStore()
@@ -336,7 +336,7 @@ const EnhancedProgressDashboard: React.FC = () => {
           </Card>
         </div>
 
-        <Tabs value={activeView} onValueChange={setActiveView as any} className="space-y-6">
+        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'overview' | 'analytics' | 'goals' | 'achievements')} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { progressService } from '../../services/progressService'
+import { logger } from '../services/logger'
 
 const LearningProgressContext = createContext()
 
@@ -36,7 +37,7 @@ export const LearningProgressProvider = ({ children }) => {
       setProgress(data)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to load progress:', error)
+        logger.error('Failed to load progress:', error)
       }
     } finally {
       setLoading(false)
@@ -54,7 +55,7 @@ export const LearningProgressProvider = ({ children }) => {
       setProgress(updatedProgress)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to save progress:', error)
+        logger.error('Failed to save progress:', error)
       }
     }
   }

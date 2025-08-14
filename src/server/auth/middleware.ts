@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
+import { logger } from '../../services/logger'
 // import { z } from 'zod' // TODO: Will be used in future
 import { UserRole } from '@prisma/client'
 import jwt from 'jsonwebtoken'
@@ -259,7 +260,7 @@ export async function authMiddleware(request: NextRequest) {
     return setSecurityHeaders(response)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('認証ミドルウェアエラー:', error)
+      logger.error('認証ミドルウェアエラー:', error)
     }
 
     const response = NextResponse.json(
@@ -434,7 +435,7 @@ export const validateJWT = async (request: NextRequest): Promise<JWTValidation> 
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.error('JWT validation error:', error)
+      logger.error('JWT validation error:', error)
     }
     return { isValid: false, reason: 'Token validation failed' }
   }

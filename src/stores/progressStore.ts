@@ -8,6 +8,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { api } from '../lib/api/client'
 import type { UnknownObject } from '../types/common'
+import { logger } from '../services/logger'
 
 export interface ProcessProgress {
   processId: string
@@ -228,7 +229,7 @@ export const useProgressStore = create<ProgressStore>()(
           })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync study session:', error)
+            logger.warn('Failed to sync study session:', error)
           }
         }
       },
@@ -265,7 +266,7 @@ export const useProgressStore = create<ProgressStore>()(
           })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync process progress:', error)
+            logger.warn('Failed to sync process progress:', error)
           }
         }
       },
@@ -290,7 +291,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.recordQuizScore.mutate({ processId, score })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync quiz score:', error)
+            logger.warn('Failed to sync quiz score:', error)
           }
         }
       },
@@ -320,7 +321,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.createGoal.mutate(goal)
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync goal creation:', error)
+            logger.warn('Failed to sync goal creation:', error)
           }
         }
       },
@@ -337,7 +338,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.updateGoal.mutate({ goalId, updates })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync goal update:', error)
+            logger.warn('Failed to sync goal update:', error)
           }
         }
       },
@@ -351,7 +352,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.deleteGoal.mutate({ goalId })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync goal deletion:', error)
+            logger.warn('Failed to sync goal deletion:', error)
           }
         }
       },
@@ -451,7 +452,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.syncProgress.mutate(localData)
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to sync with server:', error)
+            logger.warn('Failed to sync with server:', error)
           }
         }
       },

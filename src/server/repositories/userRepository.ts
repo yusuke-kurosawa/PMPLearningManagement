@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/db'
 import { User, UserRole, SubscriptionPlan, Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { logger } from '../../services/logger'
 
 // 拡張ユーザー型定義
 export type UserWithRelations = Prisma.UserGetPayload<{
@@ -106,7 +107,7 @@ export class UserRepository {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザーID検索エラー:', error)
+        logger.error('ユーザーID検索エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -127,7 +128,7 @@ export class UserRepository {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザーメール検索エラー:', error)
+        logger.error('ユーザーメール検索エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -258,7 +259,7 @@ export class UserRepository {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー一覧取得エラー:', error)
+        logger.error('ユーザー一覧取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -287,7 +288,7 @@ export class UserRepository {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー作成エラー:', error)
+        logger.error('ユーザー作成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -325,7 +326,7 @@ export class UserRepository {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー更新エラー:', error)
+        logger.error('ユーザー更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -362,7 +363,7 @@ export class UserRepository {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー削除エラー:', error)
+        logger.error('ユーザー削除エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -408,7 +409,7 @@ export class UserRepository {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー復元エラー:', error)
+        logger.error('ユーザー復元エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -430,7 +431,7 @@ export class UserRepository {
       return !!user
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー存在確認エラー:', error)
+        logger.error('ユーザー存在確認エラー:', error)
       }
       return false
     }
@@ -456,7 +457,7 @@ export class UserRepository {
       return !!user
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('メールアドレス存在確認エラー:', error)
+        logger.error('メールアドレス存在確認エラー:', error)
       }
       return false
     }
@@ -489,7 +490,7 @@ export class UserRepository {
       return await prisma.user.count({ where })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー数取得エラー:', error)
+        logger.error('ユーザー数取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -518,7 +519,7 @@ export class UserRepository {
       return result
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('バッチ更新エラー:', error)
+        logger.error('バッチ更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -610,7 +611,7 @@ export class UserRepository {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー統計取得エラー:', error)
+        logger.error('ユーザー統計取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -625,7 +626,7 @@ export class UserRepository {
       return await prisma.$transaction(callback)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('トランザクション実行エラー:', error)
+        logger.error('トランザクション実行エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/db'
 import { UserRole, SubscriptionPlan, User } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { logger } from '../../services/logger'
 // import { Permission } from '@/server/auth/rbac' // TODO: Will be used in future
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
@@ -239,7 +240,7 @@ export class UserService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー検索エラー:', error)
+        logger.error('ユーザー検索エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -292,7 +293,7 @@ export class UserService {
       return user as UserDetails
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー詳細取得エラー:', error)
+        logger.error('ユーザー詳細取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -378,7 +379,7 @@ export class UserService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー作成エラー:', error)
+        logger.error('ユーザー作成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -437,7 +438,7 @@ export class UserService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー更新エラー:', error)
+        logger.error('ユーザー更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -508,7 +509,7 @@ export class UserService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー削除エラー:', error)
+        logger.error('ユーザー削除エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -640,7 +641,7 @@ export class UserService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー統計取得エラー:', error)
+        logger.error('ユーザー統計取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -713,7 +714,7 @@ export class UserService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー権限変更エラー:', error)
+        logger.error('ユーザー権限変更エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -744,7 +745,7 @@ export class UserService {
       return { updated, errors }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('バッチユーザー更新エラー:', error)
+        logger.error('バッチユーザー更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

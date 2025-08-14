@@ -10,6 +10,7 @@ import { z } from 'zod'
 import fs from 'fs/promises'
 import path from 'path'
 import Handlebars from 'handlebars'
+import { logger } from '../../services/logger'
 
 // メール設定
 const EMAIL_CONFIG = {
@@ -130,7 +131,7 @@ class EmailTemplateLoader {
       return template
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
+        logger.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
       }
       throw new TRPCError({
         code: 'NOT_FOUND',
@@ -262,7 +263,7 @@ export class EmailService {
       })
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`メール送信成功: ${result.messageId}`)
+        logger.debug(`メール送信成功: ${result.messageId}`)
       }
 
       return {
@@ -271,7 +272,7 @@ export class EmailService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('メール送信エラー:', error)
+        logger.error('メール送信エラー:', error)
       }
 
       return {
@@ -295,7 +296,7 @@ export class EmailService {
       } catch {
         // テンプレートが見つからない場合はデフォルトを使用
         if (process.env.NODE_ENV === 'development') {
-          console.warn(
+          logger.warn(
         }
           `テンプレート ${templateName} が見つかりません。デフォルトテンプレートを使用します。`
         )
@@ -314,7 +315,7 @@ export class EmailService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('テンプレートレンダリングエラー:', error)
+        logger.error('テンプレートレンダリングエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -396,7 +397,7 @@ export class EmailService {
       return { success: true }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('SMTP接続確認エラー:', error)
+        logger.error('SMTP接続確認エラー:', error)
       }
       return {
         success: false,
@@ -416,7 +417,7 @@ export class EmailService {
     // 実装に応じて配信停止リストに追加
     // 例: データベースに記録、外部サービスAPI呼び出しなど
     if (process.env.NODE_ENV === 'development') {
-      console.log(`配信停止登録: ${email} (type: ${type})`)
+      logger.debug(`配信停止登録: ${email} (type: ${type})`)
     }
   }
 

@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { api } from '../lib/api/client'
+import { logger } from '../services/logger'
 
 export interface FlashCard {
   id: string
@@ -671,7 +672,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to record study session:', error)
+            logger.warn('Failed to record study session:', error)
           }
         }
       },
@@ -792,7 +793,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
           .catch((error) => {
             if (process.env.NODE_ENV === 'development') {
-              console.warn('Failed to sync spaced repetition data:', error)
+              logger.warn('Failed to sync spaced repetition data:', error)
             }
           })
       },

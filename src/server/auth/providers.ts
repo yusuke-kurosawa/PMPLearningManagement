@@ -14,6 +14,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { UserRole, SubscriptionPlan } from '@prisma/client'
 import type { DefaultSession } from 'next-auth'
+import { logger } from '../../services/logger'
 
 // NextAuth型拡張
 declare module 'next-auth' {
@@ -201,7 +202,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('認証エラー:', error)
+            logger.error('認証エラー:', error)
           }
           return null
         }
@@ -249,7 +250,7 @@ export const authOptions: NextAuthOptions = {
         return true
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('サインインエラー:', error)
+          logger.error('サインインエラー:', error)
         }
         return false
       }
@@ -284,7 +285,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('JWT更新エラー:', error)
+            logger.error('JWT更新エラー:', error)
           }
         }
       }
@@ -321,7 +322,7 @@ export const authOptions: NextAuthOptions = {
       })
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`ユーザーサインイン: ${user.email} (${account?.provider})`)
+        logger.debug(`ユーザーサインイン: ${user.email} (${account?.provider})`)
       }
     },
 
@@ -339,14 +340,14 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (process.env.NODE_ENV === 'development') {
-          console.log(`ユーザーサインアウト: ${session?.user?.email}`)
+          logger.debug(`ユーザーサインアウト: ${session?.user?.email}`)
         }
       }
     },
 
     async createUser({ user }) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`新規ユーザー作成: ${user.email}`)
+        logger.debug(`新規ユーザー作成: ${user.email}`)
       }
     },
   },
@@ -356,12 +357,12 @@ export const authOptions: NextAuthOptions = {
   logger: {
     error(code, metadata) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`NextAuth Error [${code}]:`, metadata)
+        logger.error(`NextAuth Error [${code}]:`, metadata)
       }
     },
     warn(code) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`NextAuth Warning [${code}]`)
+        logger.warn(`NextAuth Warning [${code}]`)
       }
     },
     debug(code, metadata) {

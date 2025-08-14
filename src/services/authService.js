@@ -1,5 +1,6 @@
 import { supabase, authHelpers } from '../lib/supabase'
 import { auditLogger } from './auditService'
+import { logger } from './logger'
 
 // User roles enum
 export const UserRoles = {
@@ -78,7 +79,7 @@ class AuthService {
       return { user: data.user, session: data.session }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Registration error:', error)
+        logger.error('Registration error:', error)
       }
       throw error
     }
@@ -139,7 +140,7 @@ class AuthService {
       return { user: data.user, session: data.session, role: userRole }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Sign in error:', error)
+        logger.error('Sign in error:', error)
       }
       throw error
     }
@@ -166,7 +167,7 @@ class AuthService {
       return data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('OAuth sign in error:', error)
+        logger.error('OAuth sign in error:', error)
       }
       throw error
     }
@@ -194,7 +195,7 @@ class AuthService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Sign out error:', error)
+        logger.error('Sign out error:', error)
       }
       throw error
     }
@@ -217,7 +218,7 @@ class AuthService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Password reset error:', error)
+        logger.error('Password reset error:', error)
       }
       throw error
     }
@@ -247,7 +248,7 @@ class AuthService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Update password error:', error)
+        logger.error('Update password error:', error)
       }
       throw error
     }
@@ -270,7 +271,7 @@ class AuthService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Email verification error:', error)
+        logger.error('Email verification error:', error)
       }
       throw error
     }
@@ -296,7 +297,7 @@ class AuthService {
       return data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Enable MFA error:', error)
+        logger.error('Enable MFA error:', error)
       }
       throw error
     }
@@ -319,7 +320,7 @@ class AuthService {
       return data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('MFA verification error:', error)
+        logger.error('MFA verification error:', error)
       }
       throw error
     }

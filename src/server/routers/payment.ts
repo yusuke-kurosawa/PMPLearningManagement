@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure } from '@/server/trpc'
 import { StripeService, paymentMethodSchema } from '@/server/services/stripeService'
 import {
+import { logger } from '../../services/logger'
   SubscriptionService,
   planChangeSchema,
   USAGE_LIMITS,
@@ -268,7 +269,7 @@ export const paymentRouter = createTRPCRouter({
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('支払い方法削除エラー:', error)
+          logger.error('支払い方法削除エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -422,7 +423,7 @@ export const paymentRouter = createTRPCRouter({
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('PaymentIntent作成エラー:', error)
+          logger.error('PaymentIntent作成エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -504,7 +505,7 @@ export const paymentRouter = createTRPCRouter({
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('請求書PDF生成エラー:', error)
+          logger.error('請求書PDF生成エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -572,7 +573,7 @@ export const paymentRouter = createTRPCRouter({
         }
 
         if (process.env.NODE_ENV === 'development') {
-          console.error('プロモーションコード適用エラー:', error)
+          logger.error('プロモーションコード適用エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

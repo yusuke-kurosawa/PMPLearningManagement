@@ -1,3 +1,5 @@
+import { logger } from '../services/logger'
+
 // PWA utilities and service worker management
 
 export interface PWAInstallPrompt {
@@ -62,7 +64,7 @@ class PWAManager {
         this.registration = await navigator.serviceWorker.register('/sw.js')
 
         if (process.env.NODE_ENV === 'development') {
-          console.log('Service Worker registered successfully:', this.registration)
+          logger.debug('Service Worker registered successfully:', this.registration)
         }
 
         // Handle updates
@@ -81,7 +83,7 @@ class PWAManager {
         return this.registration
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Service Worker registration failed:', error)
+          logger.error('Service Worker registration failed:', error)
         }
         return null
       }
@@ -107,7 +109,7 @@ class PWAManager {
       return false
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error installing PWA:', error)
+        logger.error('Error installing PWA:', error)
       }
       return false
     }
@@ -153,7 +155,7 @@ class PWAManager {
       return subscription
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error subscribing to notifications:', error)
+        logger.error('Error subscribing to notifications:', error)
       }
       return null
     }
@@ -188,7 +190,7 @@ class PWAManager {
         await cache.put(key, response)
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error caching user data:', error)
+          logger.error('Error caching user data:', error)
         }
       }
     }
@@ -204,7 +206,7 @@ class PWAManager {
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error retrieving cached data:', error)
+          logger.error('Error retrieving cached data:', error)
         }
       }
     }
@@ -225,7 +227,7 @@ class PWAManager {
         await registration.sync.register(tag)
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Background sync registration failed:', error)
+          logger.error('Background sync registration failed:', error)
         }
       }
     }

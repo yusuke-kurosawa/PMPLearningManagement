@@ -1,7 +1,9 @@
+import { logger } from './services/logger'
+
 // Phase 1 DevOps基盤安定化改善の動作検証テストファイル
 // このファイルは以下の改善が実際に動作するかをテストします：
 
-// console.log('🚀 Phase 1 Verification Test Starting')
+// logger.debug('🚀 Phase 1 Verification Test Starting')
 
 // 1. 改良版PRレビューシステムのテスト
 export function testEnhancedPRReview() {
@@ -10,7 +12,7 @@ export function testEnhancedPRReview() {
 
   // セキュリティ問題（Claude should detect）
   // eslint-disable-next-line no-eval
-  eval('console.log("Security issue")') // Security vulnerability
+  eval('logger.debug("Security issue")') // Security vulnerability
 
   // パフォーマンス問題
   for (let i = 0; i < 100000; i++) {
@@ -54,12 +56,12 @@ function typeUnsafeFunction(param) {
   return param.toString().toUpperCase().split('') // No type checking
 }
 
-// console.log('📊 Test scenarios prepared for:')
-// console.log('- Code quality detection')
-// console.log('- Security vulnerability scanning')
-// console.log('- Performance issue identification')
-// console.log('- React best practices validation')
-// console.log('- Error handling improvements')
-// console.log('- Algorithm optimization suggestions')
+// logger.debug('📊 Test scenarios prepared for:')
+// logger.debug('- Code quality detection')
+// logger.debug('- Security vulnerability scanning')
+// logger.debug('- Performance issue identification')
+// logger.debug('- React best practices validation')
+// logger.debug('- Error handling improvements')
+// logger.debug('- Algorithm optimization suggestions')
 
 export { riskyFunction, inefficientSort, typeUnsafeFunction }

@@ -1,3 +1,5 @@
+import { logger } from '../../services/logger'
+
 /**
  * Service Worker for PWA functionality
  * Developer 6: PWA & Mobile Developer Implementation
@@ -29,7 +31,7 @@ const STATIC_ASSETS = [
 // Install event - cache static assets
 self.addEventListener('install', (event: ExtendableEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Installing...')
+    logger.debug('Service Worker: Installing...')
   }
 
   event.waitUntil(
@@ -37,19 +39,19 @@ self.addEventListener('install', (event: ExtendableEvent) => {
       .open(STATIC_CACHE_NAME)
       .then((cache) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('Service Worker: Caching static assets')
+          logger.debug('Service Worker: Caching static assets')
         }
         return cache.addAll(STATIC_ASSETS)
       })
       .then(() => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('Service Worker: Static assets cached successfully')
+          logger.debug('Service Worker: Static assets cached successfully')
         }
         return self.skipWaiting()
       })
       .catch((error) => {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Service Worker: Failed to cache static assets:', error)
+          logger.error('Service Worker: Failed to cache static assets:', error)
         }
       })
   )
@@ -58,7 +60,7 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event: ExtendableEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Activating...')
+    logger.debug('Service Worker: Activating...')
   }
 
   event.waitUntil(
@@ -70,7 +72,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
             // Delete old cache versions
             if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
               if (process.env.NODE_ENV === 'development') {
-                console.log('Service Worker: Deleting old cache:', cacheName)
+                logger.debug('Service Worker: Deleting old cache:', cacheName)
               }
               return caches.delete(cacheName)
             }
@@ -79,7 +81,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
       })
       .then(() => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('Service Worker: Activated successfully')
+          logger.debug('Service Worker: Activated successfully')
         }
         return self.clients.claim()
       })
@@ -178,7 +180,7 @@ async function handleApiRequest(request: Request): Promise<Response> {
     throw new Error(`Network response not ok: ${networkResponse.status}`)
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: Network failed for API request, trying cache')
+      logger.debug('Service Worker: Network failed for API request, trying cache')
     }
 
     // Fall back to cache
@@ -204,7 +206,7 @@ async function handleApiRequest(request: Request): Promise<Response> {
 // Background sync for offline actions
 self.addEventListener('sync', (event: React.MouseEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Background sync triggered:', event.tag)
+    logger.debug('Service Worker: Background sync triggered:', event.tag)
   }
 
   if (event.tag === 'background-sync-progress') {
@@ -232,11 +234,11 @@ async function syncProgressData() {
     // Clear synced data
     await clearStoredSyncData('progress-sync')
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: Progress data synced successfully')
+      logger.debug('Service Worker: Progress data synced successfully')
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Service Worker: Failed to sync progress data:', error)
+      logger.error('Service Worker: Failed to sync progress data:', error)
     }
   }
 }
@@ -256,11 +258,11 @@ async function syncExamResults() {
 
     await clearStoredSyncData('exam-results-sync')
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: Exam results synced successfully')
+      logger.debug('Service Worker: Exam results synced successfully')
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Service Worker: Failed to sync exam results:', error)
+      logger.error('Service Worker: Failed to sync exam results:', error)
     }
   }
 }
@@ -280,11 +282,11 @@ async function syncFlashcardProgress() {
 
     await clearStoredSyncData('flashcard-progress-sync')
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: Flashcard progress synced successfully')
+      logger.debug('Service Worker: Flashcard progress synced successfully')
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Service Worker: Failed to sync flashcard progress:', error)
+      logger.error('Service Worker: Failed to sync flashcard progress:', error)
     }
   }
 }
@@ -336,7 +338,7 @@ async function clearStoredSyncData(storeName: string): Promise<void> {
 // Push notification handling
 self.addEventListener('push', (event: React.MouseEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Push message received')
+    logger.debug('Service Worker: Push message received')
   }
 
   const options = {
@@ -364,7 +366,7 @@ self.addEventListener('push', (event: React.MouseEvent) => {
       options.data = data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Service Worker: Error parsing push data:', error)
+        logger.error('Service Worker: Error parsing push data:', error)
       }
     }
   }
@@ -375,7 +377,7 @@ self.addEventListener('push', (event: React.MouseEvent) => {
 // Notification click handling
 self.addEventListener('notificationclick', (event: React.MouseEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Notification clicked')
+    logger.debug('Service Worker: Notification clicked')
   }
 
   event.notification.close()
@@ -406,7 +408,7 @@ self.addEventListener('notificationclick', (event: React.MouseEvent) => {
 // Handle messages from main thread
 self.addEventListener('message', (event: React.MouseEvent) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Service Worker: Message received:', event.data)
+    logger.debug('Service Worker: Message received:', event.data)
   }
 
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -424,11 +426,11 @@ async function cacheUrls(urls: string[]) {
     const cache = await caches.open(DYNAMIC_CACHE_NAME)
     await cache.addAll(urls)
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: URLs cached successfully')
+      logger.debug('Service Worker: URLs cached successfully')
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Service Worker: Failed to cache URLs:', error)
+      logger.error('Service Worker: Failed to cache URLs:', error)
     }
   }
 }
@@ -449,11 +451,11 @@ async function syncContent() {
     await syncProgressData()
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('Service Worker: Periodic sync completed')
+      logger.debug('Service Worker: Periodic sync completed')
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Service Worker: Periodic sync failed:', error)
+      logger.error('Service Worker: Periodic sync failed:', error)
     }
   }
 }

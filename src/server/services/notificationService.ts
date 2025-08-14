@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { sendEmail } from './emailService'
 import { sendPushNotification } from './pushNotificationService'
+import { logger } from '../../services/logger'
 
 // 通知タイプ定義
 export enum NotificationType {
@@ -217,7 +218,7 @@ export class NotificationService {
         results.push({ channel, success: true })
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error(`通知送信エラー (${channel}):`, error)
+          logger.error(`通知送信エラー (${channel}):`, error)
         }
         results.push({
           channel,
@@ -285,7 +286,7 @@ export class NotificationService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('通知設定取得エラー:', error)
+        logger.error('通知設定取得エラー:', error)
       }
       return null
     }
@@ -339,7 +340,7 @@ export class NotificationService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('通知設定更新エラー:', error)
+        logger.error('通知設定更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -465,7 +466,7 @@ export class NotificationService {
       return scheduledNotification.id
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('スケジュール通知作成エラー:', error)
+        logger.error('スケジュール通知作成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -519,7 +520,7 @@ export class NotificationService {
           processed++
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error(`スケジュール通知送信エラー (${scheduled.id}):`, error)
+            logger.error(`スケジュール通知送信エラー (${scheduled.id}):`, error)
           }
 
           // 失敗回数更新
@@ -537,7 +538,7 @@ export class NotificationService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('スケジュール通知処理エラー:', error)
+        logger.error('スケジュール通知処理エラー:', error)
       }
     }
 
@@ -607,7 +608,7 @@ export class NotificationService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('アプリ内通知取得エラー:', error)
+        logger.error('アプリ内通知取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -631,7 +632,7 @@ export class NotificationService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('通知既読マークエラー:', error)
+        logger.error('通知既読マークエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -657,7 +658,7 @@ export class NotificationService {
       return result.count
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('全通知既読マークエラー:', error)
+        logger.error('全通知既読マークエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -685,7 +686,7 @@ export class NotificationService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('通知履歴記録エラー:', error)
+        logger.error('通知履歴記録エラー:', error)
       }
       // 履歴記録エラーは処理を妨げない
     }
@@ -703,12 +704,12 @@ export class NotificationService {
       })
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`期限切れ通知削除: ${result.count}件`)
+        logger.debug(`期限切れ通知削除: ${result.count}件`)
       }
       return { deleted: result.count }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('期限切れ通知クリーンアップエラー:', error)
+        logger.error('期限切れ通知クリーンアップエラー:', error)
       }
       return { deleted: 0 }
     }

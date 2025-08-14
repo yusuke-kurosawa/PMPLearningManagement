@@ -2,6 +2,7 @@ import { ValidationService } from './validation'
 import { randomBytes, createHmac, timingSafeEqual } from 'crypto'
 import Redis from 'ioredis'
 import { getRedisClient } from './rateLimiting'
+import { logger } from '../../services/logger'
 
 export interface CSRFToken {
   token: string
@@ -60,7 +61,7 @@ export class CSRFProtection {
       this.redis = await getRedisClient()
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('CSRF: Redis not available, using in-memory storage:', error)
+        logger.warn('CSRF: Redis not available, using in-memory storage:', error)
       }
     }
   }
@@ -103,7 +104,7 @@ export class CSRFProtection {
       return tokenValue
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('CSRF token generation error:', error)
+        logger.error('CSRF token generation error:', error)
       }
       throw new Error('Failed to generate CSRF token')
     }
@@ -224,7 +225,7 @@ export class CSRFProtection {
       return result
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('CSRF token validation error:', error)
+        logger.error('CSRF token validation error:', error)
       }
       result.error = 'Validation system error'
       result.riskScore = 60
@@ -516,7 +517,7 @@ export class CSRFProtection {
 
         if (!validation.valid) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('CSRF validation failed:', {
+            logger.warn('CSRF validation failed:', {
           }
             ip: req.ip,
             userAgent: req.get('User-Agent'),
@@ -537,7 +538,7 @@ export class CSRFProtection {
         // Log high-risk validations
         if (validation.riskScore && validation.riskScore > 40) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('High-risk CSRF validation:', {
+            logger.warn('High-risk CSRF validation:', {
           }
             ip: req.ip,
             userId: req.user?.id,
@@ -549,7 +550,7 @@ export class CSRFProtection {
         next()
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('CSRF middleware error:', error)
+          logger.error('CSRF middleware error:', error)
         }
         return res.status(500).json({
           error: 'CSRF system error',
@@ -758,7 +759,7 @@ export class CSRFProtection {
             await this.redis.setex(graceKey, 300, newToken) // 5 minutes grace
 
             if (process.env.NODE_ENV === 'development') {
-              console.info(
+              logger.info(
             }
               `Token rotated for user ${userId}: ${oldToken.substring(0, 8)}... -> ${newToken.substring(0, 8)}...`
             )
@@ -767,7 +768,7 @@ export class CSRFProtection {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Token rotation error:', error)
+        logger.error('Token rotation error:', error)
       }
     }
   }

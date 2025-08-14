@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import MobileBottomNavigation from './MobileBottomNavigation'
+import { logger } from '../../services/logger'
 
 const EnhancedMobileLayout = ({ children }) => {
   const [pullToRefreshState, setPullToRefreshState] = useState('idle') // idle, pulling, triggered
@@ -56,7 +57,7 @@ const EnhancedMobileLayout = ({ children }) => {
         window.location.reload()
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Refresh failed:', error)
+          logger.error('Refresh failed:', error)
         }
       } finally {
         setIsRefreshing(false)

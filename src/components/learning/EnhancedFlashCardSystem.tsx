@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react'
 import {
+import { logger } from '../../services/logger'
   BookOpen,
   Brain,
   Plus,
@@ -335,7 +336,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to end session:', error)
+        logger.error('Failed to end session:', error)
       }
     }
   }
@@ -354,7 +355,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to rate card:', error)
+        logger.error('Failed to rate card:', error)
       }
     }
   }

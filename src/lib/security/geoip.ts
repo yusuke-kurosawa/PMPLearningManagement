@@ -6,6 +6,7 @@
 import Redis from 'ioredis'
 import { z } from 'zod'
 import { getRedisClient } from './rateLimiting'
+import { logger } from '../../services/logger'
 
 // GeoIP レスポンススキーマ
 const GeoLocationSchema = z.object({
@@ -154,7 +155,7 @@ export class GeoIPService {
       return fallbackData
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('GeoIP lookup error:', error)
+        logger.error('GeoIP lookup error:', error)
       }
       return null
     }
@@ -205,7 +206,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('IP-API fetch error:', error)
+        logger.error('IP-API fetch error:', error)
       }
       return null
     }
@@ -251,7 +252,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('IPGeolocation fetch error:', error)
+        logger.error('IPGeolocation fetch error:', error)
       }
       return null
     }
@@ -300,7 +301,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('MaxMind fetch error:', error)
+        logger.error('MaxMind fetch error:', error)
       }
       return null
     }
@@ -324,7 +325,7 @@ export class GeoIPService {
       return null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache retrieval error:', error)
+        logger.error('Cache retrieval error:', error)
       }
       return null
     }
@@ -342,7 +343,7 @@ export class GeoIPService {
       await this.redis.setex(cacheKey, this.cacheTTL, JSON.stringify(location))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache storage error:', error)
+        logger.error('Cache storage error:', error)
       }
     }
   }
@@ -485,7 +486,7 @@ export class GeoIPService {
       return { allowed: true, location }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Geo restriction check error:', error)
+        logger.error('Geo restriction check error:', error)
       }
       return {
         allowed: false,
@@ -606,7 +607,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Anomaly detection error:', error)
+        logger.error('Anomaly detection error:', error)
       }
       return {
         isAnomalous: true,
@@ -647,7 +648,7 @@ export class GeoIPService {
       return history
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Location history retrieval error:', error)
+        logger.error('Location history retrieval error:', error)
       }
       return []
     }
@@ -670,7 +671,7 @@ export class GeoIPService {
       await this.redis.expire(key, 30 * 24 * 60 * 60) // 30日間保持
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Location history save error:', error)
+        logger.error('Location history save error:', error)
       }
     }
   }
@@ -777,7 +778,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Geo stats error:', error)
+        logger.error('Geo stats error:', error)
       }
       return {
         totalRequests: 0,
@@ -809,7 +810,7 @@ export class GeoIPService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache clear error:', error)
+        logger.error('Cache clear error:', error)
       }
     }
   }

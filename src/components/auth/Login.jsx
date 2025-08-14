@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, Github, Chrome } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { logger } from '../../services/logger'
 // import toast from 'react-hot-toast' // TODO: Implement toast notifications
 
 const Login = () => {
@@ -97,7 +98,7 @@ const Login = () => {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Login error:', error)
+        logger.error('Login error:', error)
       }
     } finally {
       setLoading(false)
@@ -111,7 +112,7 @@ const Login = () => {
       await signInWithOAuth(provider)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`${provider} login error:`, error)
+        logger.error(`${provider} login error:`, error)
       }
     } finally {
       setLoading(false)

@@ -251,7 +251,7 @@ const ITTONetworkDiagram = () => {
   }
 
   // Calculate path for connections with curves
-//   const calculatePath = (from, to) => { // TODO: Will be used in future
+  const calculatePath = (from, to) => {
     const fromNode = allNodes.find((n) => n.id === from)
     const toNode = allNodes.find((n) => n.id === to)
 

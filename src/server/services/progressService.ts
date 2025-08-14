@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 // import { SubscriptionPlan } from '@prisma/client' // TODO: Will be used in future
 
 // 進捗分析期間の定義
@@ -252,7 +253,7 @@ export class ProgressService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザーメトリクス計算エラー:', error)
+        logger.error('ユーザーメトリクス計算エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -405,7 +406,7 @@ export class ProgressService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('コホート比較分析エラー:', error)
+        logger.error('コホート比較分析エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -546,7 +547,7 @@ export class ProgressService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('予測分析エラー:', error)
+        logger.error('予測分析エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -753,7 +754,7 @@ export class ProgressService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('進捗サマリー取得エラー:', error)
+        logger.error('進捗サマリー取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
+import { logger } from '../../services/logger'
   User,
   Mail,
   Shield,
@@ -118,7 +119,7 @@ const UserProfile = () => {
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Profile update error:', error)
+        logger.error('Profile update error:', error)
       }
     }
   }
@@ -139,7 +140,7 @@ const UserProfile = () => {
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Password update error:', error)
+        logger.error('Password update error:', error)
       }
     }
   }

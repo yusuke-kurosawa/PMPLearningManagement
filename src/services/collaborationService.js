@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 // コラボレーション機能のサービス
 class CollaborationService {
   constructor() {
@@ -20,7 +22,7 @@ class CollaborationService {
       if (savedGroups) this.studyGroups = JSON.parse(savedGroups)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('コラボレーションデータの読み込みエラー:', error)
+        logger.error('コラボレーションデータの読み込みエラー:', error)
       }
     }
   }
@@ -33,7 +35,7 @@ class CollaborationService {
       localStorage.setItem('studyGroups', JSON.stringify(this.studyGroups))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('コラボレーションデータの保存エラー:', error)
+        logger.error('コラボレーションデータの保存エラー:', error)
       }
     }
   }

@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 /**
  * Context Management Service
  * Handles context storage, compression, and optimization for memory efficiency
@@ -35,7 +37,7 @@ class ContextManager {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Context storage failed:', error)
+        logger.error('Context storage failed:', error)
       }
       return false
     }
@@ -64,7 +66,7 @@ class ContextManager {
       return JSON.parse(data)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Context retrieval failed:', error)
+        logger.error('Context retrieval failed:', error)
       }
       return null
     }
@@ -167,7 +169,7 @@ class ContextManager {
     expiredKeys.forEach((key) => this.cache.delete(key))
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`Context cleanup: Removed ${expiredKeys.length} expired entries`)
+      logger.warn(`Context cleanup: Removed ${expiredKeys.length} expired entries`)
     }
     return expiredKeys.length
   }
@@ -251,12 +253,12 @@ class ContextManager {
         keysToArchive.forEach((key) => this.cache.delete(key))
 
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`Archived ${keysToArchive.length} context entries`)
+          logger.warn(`Archived ${keysToArchive.length} context entries`)
         }
         return keysToArchive.length
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Context archiving failed:', error)
+          logger.error('Context archiving failed:', error)
         }
         return 0
       }
@@ -285,7 +287,7 @@ class ContextManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Context restoration failed:', error)
+        logger.error('Context restoration failed:', error)
       }
     }
 
@@ -323,7 +325,7 @@ class ContextManager {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Context import failed:', error)
+        logger.error('Context import failed:', error)
       }
       return false
     }

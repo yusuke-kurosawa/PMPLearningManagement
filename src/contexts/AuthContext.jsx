@@ -4,6 +4,7 @@ import { supabase, authHelpers, sessionManager } from '../lib/supabase'
 import { auditLogger } from '../services/auditService'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { logger } from '../services/logger'
 
 // Create Auth Context
 const AuthContext = createContext({})
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         // Silently handle initialization errors in production
         if (process.env.NODE_ENV === 'development') {
-          console.error('Auth initialization error:', error)
+          logger.error('Auth initialization error:', error)
         }
         setAuthError(error.message)
       } finally {
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   const handleAuthStateChange = async (event, session) => {
     // Log auth state changes in development only
     if (process.env.NODE_ENV === 'development') {
-      console.log('Auth state changed:', event)
+      logger.debug('Auth state changed:', event)
     }
 
     switch (event) {
@@ -151,7 +152,7 @@ export const AuthProvider = ({ children }) => {
       setPermissions(rolePermissions[userRole] || [])
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Load permissions error:', error)
+        logger.error('Load permissions error:', error)
       }
     }
   }
@@ -251,7 +252,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Signed out successfully')
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Sign out error:', error)
+        logger.error('Sign out error:', error)
       }
       toast.error('Sign out failed')
     } finally {

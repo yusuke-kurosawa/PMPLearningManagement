@@ -5,6 +5,7 @@ import { supabase } from '../../lib/auth/supabase'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { Card } from '../ui/card'
 import { Button } from '../ui/button'
+import { logger } from '../../services/logger'
 
 const AuthCallback = () => {
   const navigate = useNavigate()
@@ -117,7 +118,7 @@ const AuthCallback = () => {
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Auth callback error:', error)
+          logger.error('Auth callback error:', error)
         }
         setStatus('error')
         setError(error.message)

@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { SubscriptionPlan } from '@prisma/client'
 import { StripeService, SUBSCRIPTION_PLANS } from './stripeService'
+import { logger } from '../../services/logger'
 // import { createPermissionChecker } from '@/server/auth/rbac' // TODO: Will be used in future
 
 // サブスクリプション情報型定義
@@ -126,7 +127,7 @@ export class SubscriptionService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション情報取得エラー:', error)
+        logger.error('サブスクリプション情報取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -193,7 +194,7 @@ export class SubscriptionService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('プラン変更エラー:', error)
+        logger.error('プラン変更エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -234,7 +235,7 @@ export class SubscriptionService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('フリープランダウングレードエラー:', error)
+        logger.error('フリープランダウングレードエラー:', error)
       }
       throw error
     }
@@ -259,7 +260,7 @@ export class SubscriptionService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('フリープランアップグレードエラー:', error)
+        logger.error('フリープランアップグレードエラー:', error)
       }
       throw error
     }
@@ -334,7 +335,7 @@ export class SubscriptionService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('使用量計算エラー:', error)
+        logger.error('使用量計算エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -402,7 +403,7 @@ export class SubscriptionService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('使用量制限チェックエラー:', error)
+        logger.error('使用量制限チェックエラー:', error)
       }
       return { allowed: false, reason: 'システムエラーが発生しました' }
     }
@@ -428,7 +429,7 @@ export class SubscriptionService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('フリープラン制限適用エラー:', error)
+        logger.error('フリープラン制限適用エラー:', error)
       }
       // エラーログは記録するが、処理は継続
     }
@@ -455,7 +456,7 @@ export class SubscriptionService {
       await StripeService.syncSubscriptionToDatabase(stripeSubscription, userId)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション同期エラー:', error)
+        logger.error('サブスクリプション同期エラー:', error)
       }
       // 同期エラーは記録するが、例外を投げない
     }
@@ -501,7 +502,7 @@ export class SubscriptionService {
       }))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション履歴取得エラー:', error)
+        logger.error('サブスクリプション履歴取得エラー:', error)
       }
       return []
     }
@@ -570,7 +571,7 @@ export class SubscriptionService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション再開エラー:', error)
+        logger.error('サブスクリプション再開エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -595,7 +596,7 @@ export class SubscriptionService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('アクティビティログ記録エラー:', error)
+        logger.error('アクティビティログ記録エラー:', error)
       }
       // ログ記録エラーは処理を妨げない
     }
@@ -631,7 +632,7 @@ export class SubscriptionService {
           processed++
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error(`期限切れサブスクリプション処理エラー (${subscription.userId}):`, error)
+            logger.error(`期限切れサブスクリプション処理エラー (${subscription.userId}):`, error)
           }
           errors++
         }
@@ -640,7 +641,7 @@ export class SubscriptionService {
       return { processed, errors }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('期限切れサブスクリプション一括処理エラー:', error)
+        logger.error('期限切れサブスクリプション一括処理エラー:', error)
       }
       return { processed: 0, errors: 1 }
     }

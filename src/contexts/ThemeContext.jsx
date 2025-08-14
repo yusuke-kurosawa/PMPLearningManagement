@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { logger } from '../services/logger'
 
 const ThemeContext = createContext()
 
@@ -28,7 +29,7 @@ export const ThemeProvider = ({ children }) => {
       return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('テーマ設定の読み込みエラー:', error)
+        logger.error('テーマ設定の読み込みエラー:', error)
       }
       return defaultSettings
     }
@@ -42,7 +43,7 @@ export const ThemeProvider = ({ children }) => {
       localStorage.setItem('themeSettings', JSON.stringify(settings))
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('テーマ設定の保存エラー:', error)
+        logger.error('テーマ設定の保存エラー:', error)
       }
     }
   }, [settings])

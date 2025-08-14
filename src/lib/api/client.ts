@@ -9,6 +9,7 @@ import { httpBatchLink, loggerLink } from '@trpc/client'
 import { QueryClient, QueryCache } from '@tanstack/react-query'
 import superjson from 'superjson'
 import type { AppRouter } from '../trpc/server'
+import { logger } from '../../services/logger'
 
 // Create tRPC React hooks
 export const api = createTRPCReact<AppRouter>()
@@ -45,7 +46,7 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Query error for key ${query.queryKey}:`, error)
+        logger.error(`Query error for key ${query.queryKey}:`, error)
       }
     },
   }),
@@ -156,12 +157,12 @@ export const offlineUtils = {
         try {
           // Process queued mutations
           if (process.env.NODE_ENV === 'development') {
-            console.log('Processing offline mutation:', item)
+            logger.debug('Processing offline mutation:', item)
           }
           // Implementation would depend on specific mutation types
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('Failed to process offline mutation:', error)
+            logger.error('Failed to process offline mutation:', error)
           }
         }
       }
@@ -182,7 +183,7 @@ export const performanceUtils = {
         end: () => {
           const duration = performance.now() - start
           if (process.env.NODE_ENV === 'development') {
-            console.log(`API call ${name} took ${duration.toFixed(2)}ms`)
+            logger.debug(`API call ${name} took ${duration.toFixed(2)}ms`)
           }
 
           // Report to analytics if configured

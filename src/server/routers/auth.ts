@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/trpc'
 import { prisma } from '@/lib/db'
 import { hashPassword, verifyPassword } from '@/server/auth/providers'
+import { logger } from '../../services/logger'
 // import { createPermissionChecker, Permission } from '@/server/auth/rbac' // TODO: Will be used in future
 import { UserRole, SubscriptionPlan } from '@prisma/client'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
@@ -193,7 +194,7 @@ export const authRouter = createTRPCRouter({
         })
       } catch (emailError) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('確認メール送信エラー:', emailError)
+          logger.error('確認メール送信エラー:', emailError)
         }
         // メール送信失敗でもユーザー作成は継続
       }
@@ -225,7 +226,7 @@ export const authRouter = createTRPCRouter({
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('ユーザー登録エラー:', error)
+        logger.error('ユーザー登録エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -283,7 +284,7 @@ export const authRouter = createTRPCRouter({
         }
 
         if (process.env.NODE_ENV === 'development') {
-          console.error('メール確認エラー:', error)
+          logger.error('メール確認エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -339,7 +340,7 @@ export const authRouter = createTRPCRouter({
           })
         } catch (emailError) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('パスワードリセットメール送信エラー:', emailError)
+            logger.error('パスワードリセットメール送信エラー:', emailError)
           }
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
@@ -367,7 +368,7 @@ export const authRouter = createTRPCRouter({
         }
 
         if (process.env.NODE_ENV === 'development') {
-          console.error('パスワードリセット要求エラー:', error)
+          logger.error('パスワードリセット要求エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -426,7 +427,7 @@ export const authRouter = createTRPCRouter({
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('パスワードリセットエラー:', error)
+        logger.error('パスワードリセットエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -540,7 +541,7 @@ export const authRouter = createTRPCRouter({
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('プロフィール更新エラー:', error)
+        logger.error('プロフィール更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -606,7 +607,7 @@ export const authRouter = createTRPCRouter({
         }
 
         if (process.env.NODE_ENV === 'development') {
-          console.error('パスワード変更エラー:', error)
+          logger.error('パスワード変更エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -672,7 +673,7 @@ export const authRouter = createTRPCRouter({
           })
         } catch (emailError) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('アカウント削除確認メール送信エラー:', emailError)
+            logger.error('アカウント削除確認メール送信エラー:', emailError)
           }
           // メール送信失敗でもアカウント削除は継続
         }
@@ -686,7 +687,7 @@ export const authRouter = createTRPCRouter({
         }
 
         if (process.env.NODE_ENV === 'development') {
-          console.error('アカウント削除エラー:', error)
+          logger.error('アカウント削除エラー:', error)
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

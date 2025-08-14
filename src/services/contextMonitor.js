@@ -4,6 +4,7 @@
  */
 
 import contextManager from './contextManager.js'
+import { logger } from './logger'
 
 class ContextMonitor {
   constructor() {
@@ -112,7 +113,7 @@ class ContextMonitor {
       return stats.totalSizeKB * 1024
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Memory estimation failed:', error)
+        logger.warn('Memory estimation failed:', error)
       }
       return 0
     }
@@ -177,7 +178,7 @@ class ContextMonitor {
    */
   async handleCriticalMemory() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🚨 Critical memory usage detected, switching to aggressive rotation')
+      logger.warn('🚨 Critical memory usage detected, switching to aggressive rotation')
     }
 
     this.currentPolicy = 'aggressive'
@@ -190,7 +191,7 @@ class ContextMonitor {
    */
   async handleWarningMemory() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('⚠️ High memory usage detected, performing cleanup')
+      logger.warn('⚠️ High memory usage detected, performing cleanup')
     }
 
     await contextManager.cleanup()
@@ -202,7 +203,7 @@ class ContextMonitor {
    */
   handleSlowRetrieval() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🐌 Slow retrieval detected, optimizing cache')
+      logger.warn('🐌 Slow retrieval detected, optimizing cache')
     }
 
     // Switch to more aggressive caching
@@ -214,7 +215,7 @@ class ContextMonitor {
    */
   handleHighErrorRate() {
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ High error rate detected in context operations')
+      logger.error('❌ High error rate detected in context operations')
     }
 
     // Reset context manager and clear corrupted data
@@ -243,14 +244,14 @@ class ContextMonitor {
    */
   async performRotation(policy) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🔄 Performing context rotation with policy: ${this.currentPolicy}`)
+      logger.warn(`🔄 Performing context rotation with policy: ${this.currentPolicy}`)
     }
 
     const archived = await contextManager.archiveOldData(policy.maxAge)
     const cleaned = await contextManager.cleanup()
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`✅ Rotation complete: archived ${archived}, cleaned ${cleaned}`)
+      logger.warn(`✅ Rotation complete: archived ${archived}, cleaned ${cleaned}`)
     }
 
     // Record the cleanup
@@ -262,7 +263,7 @@ class ContextMonitor {
    */
   async performEmergencyCleanup() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🆘 Performing emergency context cleanup')
+      logger.warn('🆘 Performing emergency context cleanup')
     }
 
     // Archive everything older than 1 hour
@@ -289,14 +290,14 @@ class ContextMonitor {
    */
   async performCleanup() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🧹 Performing scheduled context cleanup')
+      logger.warn('🧹 Performing scheduled context cleanup')
     }
 
     const cleaned = await contextManager.cleanup()
     const archived = await contextManager.archiveOldData()
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`✅ Cleanup complete: archived ${archived}, cleaned ${cleaned}`)
+      logger.warn(`✅ Cleanup complete: archived ${archived}, cleaned ${cleaned}`)
     }
   }
 
@@ -305,7 +306,7 @@ class ContextMonitor {
    */
   performDiagnostics() {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🔍 Running context diagnostics...')
+      logger.warn('🔍 Running context diagnostics...')
     }
 
     const stats = contextManager.getStats()
@@ -327,7 +328,7 @@ class ContextMonitor {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn('📊 Context Diagnostics:', diagnostics)
+      logger.warn('📊 Context Diagnostics:', diagnostics)
     }
     return diagnostics
   }
@@ -388,7 +389,7 @@ class ContextMonitor {
     if (this.rotationPolicies[policy]) {
       this.currentPolicy = policy
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`🔧 Context rotation policy changed to: ${policy}`)
+        logger.warn(`🔧 Context rotation policy changed to: ${policy}`)
       }
     }
   }

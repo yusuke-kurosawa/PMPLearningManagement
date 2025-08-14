@@ -1,5 +1,6 @@
 // progressService.js - 学習進捗の永続化とデータ管理
 import { useState, useEffect } from 'react'
+import { logger } from './logger'
 
 const STORAGE_KEY = 'pmp_learning_progress'
 
@@ -131,7 +132,7 @@ class ProgressService {
       return this.getDefaultProgress()
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error loading progress:', error)
+        logger.error('Error loading progress:', error)
       }
       return this.getDefaultProgress()
     }
@@ -144,7 +145,7 @@ class ProgressService {
       return true
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error saving progress:', error)
+        logger.error('Error saving progress:', error)
       }
       return false
     }
@@ -429,7 +430,7 @@ export const useProgress = () => {
         setStatistics(stats)
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error loading progress data:', error)
+          logger.error('Error loading progress data:', error)
         }
         // エラーの場合もデフォルトデータで初期化
         const defaultData = progressService.getDefaultProgress()

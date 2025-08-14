@@ -1,4 +1,5 @@
 import { openDB, IDBPDatabase } from 'idb'
+import { logger } from '../../services/logger'
 
 export interface SyncQueueItem {
   id: string
@@ -95,7 +96,7 @@ export class SyncQueue {
       return item.id
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to add item to sync queue:', error)
+        logger.error('Failed to add item to sync queue:', error)
       }
       throw new Error(
         `Queue add failed: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -127,7 +128,7 @@ export class SyncQueue {
         .slice(0, limit)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get pending items:', error)
+        logger.error('Failed to get pending items:', error)
       }
       return []
     }
@@ -164,7 +165,7 @@ export class SyncQueue {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to update item status:', error)
+        logger.error('Failed to update item status:', error)
       }
     }
   }
@@ -181,7 +182,7 @@ export class SyncQueue {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to remove item from queue:', error)
+        logger.error('Failed to remove item from queue:', error)
       }
     }
   }
@@ -221,7 +222,7 @@ export class SyncQueue {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Queue processing error:', error)
+        logger.error('Queue processing error:', error)
       }
     } finally {
       this.isProcessing = false
@@ -416,7 +417,7 @@ export class SyncQueue {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get queue stats:', error)
+        logger.error('Failed to get queue stats:', error)
       }
       return {
         pending: 0,
@@ -450,7 +451,7 @@ export class SyncQueue {
       return removedCount
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to clear completed items:', error)
+        logger.error('Failed to clear completed items:', error)
       }
       return 0
     }
@@ -468,7 +469,7 @@ export class SyncQueue {
       await tx.complete
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to clear queue:', error)
+        logger.error('Failed to clear queue:', error)
       }
     }
   }
@@ -507,7 +508,7 @@ export class SyncQueue {
       setTimeout(() => this.processQueue(), 100)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to retry failed items:', error)
+        logger.error('Failed to retry failed items:', error)
       }
     }
   }

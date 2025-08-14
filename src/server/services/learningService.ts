@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { LearningProgress, ExamResult, StudySession } from '@prisma/client'
+import { logger } from '../../services/logger'
 
 // 学習進捗データ型定義
 export interface LearningProgressWithStats extends LearningProgress {
@@ -250,7 +251,7 @@ export class LearningService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習進捗取得エラー:', error)
+        logger.error('学習進捗取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -330,7 +331,7 @@ export class LearningService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習セッション記録エラー:', error)
+        logger.error('学習セッション記録エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -398,7 +399,7 @@ export class LearningService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習履歴取得エラー:', error)
+        logger.error('学習履歴取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -422,7 +423,7 @@ export class LearningService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習目標設定エラー:', error)
+        logger.error('学習目標設定エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -447,7 +448,7 @@ export class LearningService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習目標取得エラー:', error)
+        logger.error('学習目標取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -502,7 +503,7 @@ export class LearningService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習推奨取得エラー:', error)
+        logger.error('学習推奨取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -539,7 +540,7 @@ export class LearningService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習進捗リセットエラー:', error)
+        logger.error('学習進捗リセットエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -600,7 +601,7 @@ export class LearningService {
       return [csvHeaders, ...csvRows].map((row) => row.join(',')).join('\n')
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('学習データエクスポートエラー:', error)
+        logger.error('学習データエクスポートエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

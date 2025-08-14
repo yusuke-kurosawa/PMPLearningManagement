@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { SubscriptionPlan } from '@prisma/client'
+import { logger } from '../../services/logger'
 
 // Stripe初期化
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -142,7 +143,7 @@ export class StripeService {
       return customer
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Stripe顧客作成エラー:', error)
+        logger.error('Stripe顧客作成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -235,7 +236,7 @@ export class StripeService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション作成エラー:', error)
+        logger.error('サブスクリプション作成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -297,7 +298,7 @@ export class StripeService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプション更新エラー:', error)
+        logger.error('サブスクリプション更新エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -340,7 +341,7 @@ export class StripeService {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.error('サブスクリプションキャンセルエラー:', error)
+        logger.error('サブスクリプションキャンセルエラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -384,7 +385,7 @@ export class StripeService {
       return paymentMethod
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('支払い方法追加エラー:', error)
+        logger.error('支払い方法追加エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -413,7 +414,7 @@ export class StripeService {
       return invoices.data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('請求書履歴取得エラー:', error)
+        logger.error('請求書履歴取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -441,7 +442,7 @@ export class StripeService {
       return paymentMethods.data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('支払い方法取得エラー:', error)
+        logger.error('支払い方法取得エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -457,7 +458,7 @@ export class StripeService {
       return stripe.webhooks.constructEvent(payload, signature, endpointSecret)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('WebHook署名検証エラー:', error)
+        logger.error('WebHook署名検証エラー:', error)
       }
       throw new TRPCError({
         code: 'BAD_REQUEST',
@@ -503,7 +504,7 @@ export class StripeService {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('データベース同期エラー:', error)
+        logger.error('データベース同期エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -592,7 +593,7 @@ export class StripeService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('使用量レポート生成エラー:', error)
+        logger.error('使用量レポート生成エラー:', error)
       }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

@@ -7,6 +7,7 @@ import crypto from 'crypto'
 import Redis from 'ioredis'
 import { getRedisClient } from './rateLimiting'
 import type { KeyVersion, KeyRotationConfig, EncryptionMetadata } from './encryption'
+import { logger } from '../../services/logger'
 
 /**
  * キー管理システム
@@ -41,11 +42,11 @@ export class KeyManagementSystem {
     try {
       this.redis = await getRedisClient()
       if (process.env.NODE_ENV === 'development') {
-        console.info('Key Management System: Redis connected')
+        logger.info('Key Management System: Redis connected')
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Key Management System: Redis not available, using in-memory storage:', error)
+        logger.warn('Key Management System: Redis not available, using in-memory storage:', error)
       }
     }
   }
@@ -63,13 +64,13 @@ export class KeyManagementSystem {
         await this.performKeyRotation()
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Scheduled key rotation failed:', error)
+          logger.error('Scheduled key rotation failed:', error)
         }
       }
     }, this.config.rotationInterval)
 
     if (process.env.NODE_ENV === 'development') {
-      console.info(`Key rotation scheduler started (interval: ${this.config.rotationInterval}ms)`)
+      logger.info(`Key rotation scheduler started (interval: ${this.config.rotationInterval}ms)`)
     }
   }
 
@@ -105,7 +106,7 @@ export class KeyManagementSystem {
     this.keyCache.set(keyId, keyVersion)
 
     if (process.env.NODE_ENV === 'development') {
-      console.info(`New encryption key generated: ${keyId.substring(0, 8)}... (${purpose})`)
+      logger.info(`New encryption key generated: ${keyId.substring(0, 8)}... (${purpose})`)
     }
     return keyVersion
   }
@@ -128,7 +129,7 @@ export class KeyManagementSystem {
       if (!activeKey) {
         // アクティブキーが存在しない場合は新規生成
         if (process.env.NODE_ENV === 'development') {
-          console.warn('No active encryption key found, generating new key')
+          logger.warn('No active encryption key found, generating new key')
         }
         activeKey = await this.generateEncryptionKey()
       }
@@ -140,7 +141,7 @@ export class KeyManagementSystem {
       // 使用回数が閾値を超えた場合はローテーション
       if (usage >= this.config.masterKeyRotationThreshold) {
         if (process.env.NODE_ENV === 'development') {
-          console.info(`Key usage threshold exceeded for ${activeKey.id}, triggering rotation`)
+          logger.info(`Key usage threshold exceeded for ${activeKey.id}, triggering rotation`)
         }
         await this.performKeyRotation()
         // 新しいアクティブキーを取得
@@ -150,7 +151,7 @@ export class KeyManagementSystem {
       return activeKey
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get active encryption key:', error)
+        logger.error('Failed to get active encryption key:', error)
       }
       throw new Error('Encryption key retrieval failed')
     }
@@ -177,12 +178,12 @@ export class KeyManagementSystem {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Key not found: ${keyId}`)
+        logger.warn(`Key not found: ${keyId}`)
       }
       return null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error(`Failed to retrieve key ${keyId}:`, error)
+        logger.error(`Failed to retrieve key ${keyId}:`, error)
       }
       return null
     }
@@ -194,7 +195,7 @@ export class KeyManagementSystem {
   async performKeyRotation(): Promise<void> {
     try {
       if (process.env.NODE_ENV === 'development') {
-        console.info('Starting key rotation process...')
+        logger.info('Starting key rotation process...')
       }
 
       // 現在のアクティブキーを取得
@@ -212,14 +213,14 @@ export class KeyManagementSystem {
       await this.cleanupExpiredKeys()
 
       if (process.env.NODE_ENV === 'development') {
-        console.info(`Key rotation completed. New key: ${newKey.id.substring(0, 8)}...`)
+        logger.info(`Key rotation completed. New key: ${newKey.id.substring(0, 8)}...`)
       }
 
       // ローテーション統計を更新
       await this.updateRotationStatistics()
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Key rotation failed:', error)
+        logger.error('Key rotation failed:', error)
       }
       throw error
     }
@@ -232,7 +233,7 @@ export class KeyManagementSystem {
     const key = await this.getKeyById(keyId)
     if (!key) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Cannot deprecate non-existent key: ${keyId}`)
+        logger.warn(`Cannot deprecate non-existent key: ${keyId}`)
       }
       return
     }
@@ -244,7 +245,7 @@ export class KeyManagementSystem {
     this.keyCache.set(keyId, key)
 
     if (process.env.NODE_ENV === 'development') {
-      console.info(
+      logger.info(
     }
       `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
     )
@@ -257,7 +258,7 @@ export class KeyManagementSystem {
     const key = await this.getKeyById(keyId)
     if (!key) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Cannot revoke non-existent key: ${keyId}`)
+        logger.warn(`Cannot revoke non-existent key: ${keyId}`)
       }
       return
     }
@@ -269,7 +270,7 @@ export class KeyManagementSystem {
     this.keyCache.set(keyId, key)
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`Key revoked: ${keyId.substring(0, 8)}... ${reason ? `(reason: ${reason})` : ''}`)
+      logger.warn(`Key revoked: ${keyId.substring(0, 8)}... ${reason ? `(reason: ${reason})` : ''}`)
     }
 
     // セキュリティログ記録
@@ -320,7 +321,7 @@ export class KeyManagementSystem {
           processed++
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error(`Re-encryption failed for data item ${dataItem.id}:`, error)
+            logger.error(`Re-encryption failed for data item ${dataItem.id}:`, error)
           }
           failed++
         }
@@ -329,7 +330,7 @@ export class KeyManagementSystem {
       const completed = dataToReEncrypt.length < batchSize // 最後のバッチの場合
 
       if (process.env.NODE_ENV === 'development') {
-        console.info(
+        logger.info(
       }
         `Re-encryption batch completed: ${processed} processed, ${failed} failed, completed: ${completed}`
       )
@@ -337,7 +338,7 @@ export class KeyManagementSystem {
       return { processed, failed, completed }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Gradual re-encryption failed:', error)
+        logger.error('Gradual re-encryption failed:', error)
       }
       throw error
     }
@@ -370,7 +371,7 @@ export class KeyManagementSystem {
       return stats
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get key usage statistics:', error)
+        logger.error('Failed to get key usage statistics:', error)
       }
       throw error
     }
@@ -381,7 +382,7 @@ export class KeyManagementSystem {
    */
   async setupProductionKeyStrategy(): Promise<void> {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('Production key strategy setup called in non-production environment')
+      logger.warn('Production key strategy setup called in non-production environment')
       return
     }
 
@@ -399,11 +400,11 @@ export class KeyManagementSystem {
       await this.setupKeyBackupStrategy()
 
       if (process.env.NODE_ENV === 'development') {
-        console.info('Production key management strategy initialized')
+        logger.info('Production key management strategy initialized')
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to setup production key strategy:', error)
+        logger.error('Failed to setup production key strategy:', error)
       }
       throw error
     }
@@ -460,7 +461,7 @@ export class KeyManagementSystem {
       return null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to find active key from storage:', error)
+        logger.error('Failed to find active key from storage:', error)
       }
       return null
     }
@@ -479,13 +480,13 @@ export class KeyManagementSystem {
           // キーを完全に削除
           await this.deleteKey(key.id)
           if (process.env.NODE_ENV === 'development') {
-            console.info(`Expired key cleaned up: ${key.id.substring(0, 8)}...`)
+            logger.info(`Expired key cleaned up: ${key.id.substring(0, 8)}...`)
           }
         }
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Key cleanup failed:', error)
+        logger.error('Key cleanup failed:', error)
       }
     }
   }
@@ -595,7 +596,7 @@ export class KeyManagementSystem {
   ): Promise<void> {
     // 実際の実装では、データベース更新を実行
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Updated data ${dataId} with new key ${newKeyId}`)
+      logger.debug(`Updated data ${dataId} with new key ${newKeyId}`)
     }
   }
 
@@ -610,7 +611,7 @@ export class KeyManagementSystem {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to update rotation statistics:', error)
+        logger.error('Failed to update rotation statistics:', error)
       }
     }
   }
@@ -629,7 +630,7 @@ export class KeyManagementSystem {
       return []
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get rotation history:', error)
+        logger.error('Failed to get rotation history:', error)
       }
       return []
     }
@@ -652,11 +653,11 @@ export class KeyManagementSystem {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Security event logged: ${event}`, details)
+        logger.warn(`Security event logged: ${event}`, details)
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to log security event:', error)
+        logger.error('Failed to log security event:', error)
       }
     }
   }
@@ -667,7 +668,7 @@ export class KeyManagementSystem {
   private async prepareHSMIntegration(): Promise<void> {
     // HSM (Hardware Security Module) 統合の準備
     if (process.env.NODE_ENV === 'development') {
-      console.info('HSM integration preparation (placeholder)')
+      logger.info('HSM integration preparation (placeholder)')
     }
   }
 
@@ -677,7 +678,7 @@ export class KeyManagementSystem {
   private async setupDistributedKeyManagement(): Promise<void> {
     // 分散環境でのキー管理設定
     if (process.env.NODE_ENV === 'development') {
-      console.info('Distributed key management setup (placeholder)')
+      logger.info('Distributed key management setup (placeholder)')
     }
   }
 
@@ -687,7 +688,7 @@ export class KeyManagementSystem {
   private async enableKeyAuditLogging(): Promise<void> {
     // キー使用の監査ログ機能を有効化
     if (process.env.NODE_ENV === 'development') {
-      console.info('Key audit logging enabled (placeholder)')
+      logger.info('Key audit logging enabled (placeholder)')
     }
   }
 
@@ -697,7 +698,7 @@ export class KeyManagementSystem {
   private async setupKeyBackupStrategy(): Promise<void> {
     // 災害復旧用のキーバックアップ戦略を設定
     if (process.env.NODE_ENV === 'development') {
-      console.info('Key backup strategy setup (placeholder)')
+      logger.info('Key backup strategy setup (placeholder)')
     }
   }
 
@@ -711,7 +712,7 @@ export class KeyManagementSystem {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.info('Key Management System destroyed')
+      logger.info('Key Management System destroyed')
     }
   }
 }
@@ -761,7 +762,7 @@ export class EnhancedEncryptionService {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Enhanced encryption failed:', error)
+        logger.error('Enhanced encryption failed:', error)
       }
       throw new Error('Encryption failed')
     }
@@ -799,7 +800,7 @@ export class EnhancedEncryptionService {
       return decrypted
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Enhanced decryption failed:', error)
+        logger.error('Enhanced decryption failed:', error)
       }
       throw new Error('Decryption failed')
     }

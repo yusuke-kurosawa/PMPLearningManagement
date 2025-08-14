@@ -5,6 +5,7 @@
 
 import Redis from 'ioredis'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // Rate Limiting 設定スキーマ
 const RateLimitConfigSchema = z.object({
@@ -58,19 +59,19 @@ class RedisClient {
 
         RedisClient.instance.on('connect', () => {
           if (process.env.NODE_ENV === 'development') {
-            console.log('Redis connected successfully')
+            logger.debug('Redis connected successfully')
           }
         })
 
         RedisClient.instance.on('error', (error) => {
           if (process.env.NODE_ENV === 'development') {
-            console.error('Redis connection error:', error)
+            logger.error('Redis connection error:', error)
           }
         })
 
         RedisClient.instance.on('close', () => {
           if (process.env.NODE_ENV === 'development') {
-            console.log('Redis connection closed')
+            logger.debug('Redis connection closed')
           }
         })
 
@@ -78,7 +79,7 @@ class RedisClient {
         await RedisClient.instance.ping()
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Redis initialization failed:', error)
+          logger.error('Redis initialization failed:', error)
         }
         RedisClient.instance = null
         throw error
@@ -182,7 +183,7 @@ export class SlidingWindowRateLimiter {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Rate limiting error:', error)
+        logger.error('Rate limiting error:', error)
       }
       // Redis エラー時はデフォルトで許可
       return {
@@ -221,7 +222,7 @@ export class SlidingWindowRateLimiter {
       await redis.del(key)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Rate limit reset error:', error)
+        logger.error('Rate limit reset error:', error)
       }
     }
   }
@@ -249,7 +250,7 @@ export class SlidingWindowRateLimiter {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Get limit status error:', error)
+        logger.error('Get limit status error:', error)
       }
       return {
         current: 0,
@@ -345,7 +346,7 @@ export class TokenBucketRateLimiter {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Token bucket error:', error)
+        logger.error('Token bucket error:', error)
       }
       return {
         success: true,
@@ -469,7 +470,7 @@ export class DDoSProtection {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('DDoS protection error:', error)
+        logger.error('DDoS protection error:', error)
       }
       return {
         allowed: true, // エラー時はデフォルトで許可
@@ -542,7 +543,7 @@ export class DDoSProtection {
       return Math.min(100, score)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Suspicious score calculation error:', error)
+        logger.error('Suspicious score calculation error:', error)
       }
       return 0
     }
@@ -606,7 +607,7 @@ export class DDoSProtection {
       return { isAnomalous: false }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Geographic anomaly check error:', error)
+        logger.error('Geographic anomaly check error:', error)
       }
       return { isAnomalous: false }
     }
@@ -628,7 +629,7 @@ export class DDoSProtection {
       return count
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Request frequency check error:', error)
+        logger.error('Request frequency check error:', error)
       }
       return 0
     }
@@ -690,7 +691,7 @@ export class DDoSProtection {
       await redis.expire(freqKey, 10) // 10秒間保持
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('IP reputation update error:', error)
+        logger.error('IP reputation update error:', error)
       }
     }
   }
@@ -710,11 +711,11 @@ export class DDoSProtection {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`IP ${clientIp} unblocked manually`)
+        logger.debug(`IP ${clientIp} unblocked manually`)
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('IP unblock error:', error)
+        logger.error('IP unblock error:', error)
       }
     }
   }

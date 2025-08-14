@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react'
 import { useContextMonitoring } from '../contexts/ContextManagerContext'
 import {
+import { logger } from '../services/logger'
   Activity,
   Database,
   Gauge,
@@ -72,7 +73,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
   const handleRunDiagnostics = () => {
     const diagnostics = getDiagnostics()
     if (process.env.NODE_ENV === 'development') {
-      console.warn('🔍 Context Diagnostics:', diagnostics)
+      logger.warn('🔍 Context Diagnostics:', diagnostics)
     }
     alert('Diagnostics completed. Check console for details.')
   }

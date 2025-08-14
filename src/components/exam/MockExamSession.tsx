@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+import { logger } from '../../services/logger'
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -99,7 +100,7 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
           } catch (error) {
             setAutoSaveStatus('error')
             if (process.env.NODE_ENV === 'development') {
-              console.error('Auto-save failed:', error)
+              logger.error('Auto-save failed:', error)
             }
           }
         }

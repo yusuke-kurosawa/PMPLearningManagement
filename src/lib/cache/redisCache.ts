@@ -5,6 +5,7 @@
 
 import Redis from 'ioredis'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // キャッシュ設定スキーマ
 const CacheConfigSchema = z.object({
@@ -91,13 +92,13 @@ export class RedisCacheManager {
 
       this.redis.on('connect', () => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('Redis cache connection established')
+          logger.debug('Redis cache connection established')
         }
       })
 
       this.redis.on('error', (error) => {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Redis cache error:', error)
+          logger.error('Redis cache error:', error)
         }
       })
 
@@ -197,7 +198,7 @@ export class RedisCacheManager {
       this.updateResponseTime(Date.now() - startTime)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache set error:', error)
+        logger.error('Cache set error:', error)
       }
       throw error
     }
@@ -255,7 +256,7 @@ export class RedisCacheManager {
       return entry.data
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache get error:', error)
+        logger.error('Cache get error:', error)
       }
       this.stats.misses++
       return null
@@ -286,7 +287,7 @@ export class RedisCacheManager {
       return false
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache delete error:', error)
+        logger.error('Cache delete error:', error)
       }
       return false
     }
@@ -320,7 +321,7 @@ export class RedisCacheManager {
             this.stats.hits++
           } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-              console.warn(`Failed to parse cached data for ${identifiers[i]}:`, error)
+              logger.warn(`Failed to parse cached data for ${identifiers[i]}:`, error)
             }
             this.stats.misses++
           }
@@ -330,7 +331,7 @@ export class RedisCacheManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache mget error:', error)
+        logger.error('Cache mget error:', error)
       }
     }
 
@@ -381,7 +382,7 @@ export class RedisCacheManager {
       this.stats.sets += dataMap.size
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache mset error:', error)
+        logger.error('Cache mset error:', error)
       }
       throw error
     }
@@ -407,7 +408,7 @@ export class RedisCacheManager {
       return keys.length
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache invalidate by tag error:', error)
+        logger.error('Cache invalidate by tag error:', error)
       }
       return 0
     }
@@ -429,7 +430,7 @@ export class RedisCacheManager {
       return keys.length
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache invalidate by pattern error:', error)
+        logger.error('Cache invalidate by pattern error:', error)
       }
       return 0
     }
@@ -472,7 +473,7 @@ export class RedisCacheManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to get cache stats:', error)
+        logger.error('Failed to get cache stats:', error)
       }
       return this.stats
     }
@@ -521,7 +522,7 @@ export class RedisCacheManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache health check failed:', error)
+        logger.error('Cache health check failed:', error)
       }
       return {
         status: 'unhealthy',
@@ -565,14 +566,14 @@ export class RedisCacheManager {
 
       if (deleted > 0) {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`Cleaned up ${deleted} expired cache keys`)
+          logger.debug(`Cleaned up ${deleted} expired cache keys`)
         }
       }
 
       return deleted
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Cache cleanup error:', error)
+        logger.error('Cache cleanup error:', error)
       }
       return 0
     }
@@ -602,7 +603,7 @@ export class RedisCacheManager {
       await this.redis.quit()
       this.redis = null
       if (process.env.NODE_ENV === 'development') {
-        console.log('Redis cache disconnected')
+        logger.debug('Redis cache disconnected')
       }
     }
   }
@@ -657,7 +658,7 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
         return data
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Cache middleware error:', error)
+          logger.error('Cache middleware error:', error)
         }
         // キャッシュエラー時は元の処理を実行
         return await handler()

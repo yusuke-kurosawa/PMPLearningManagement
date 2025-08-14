@@ -5,6 +5,7 @@
 
 import { register, collectDefaultMetrics, Counter, Histogram, Gauge, Summary } from 'prom-client'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // メトリクス設定スキーマ
 const MetricsConfigSchema = z.object({
@@ -627,7 +628,7 @@ export class SystemMetricsCollector {
     }, intervalMs)
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`System metrics collection started (interval: ${intervalMs}ms)`)
+      logger.debug(`System metrics collection started (interval: ${intervalMs}ms)`)
     }
   }
 
@@ -639,7 +640,7 @@ export class SystemMetricsCollector {
       clearInterval(this.intervalId)
       this.intervalId = null
       if (process.env.NODE_ENV === 'development') {
-        console.log('System metrics collection stopped')
+        logger.debug('System metrics collection stopped')
       }
     }
   }
@@ -676,7 +677,7 @@ export class SystemMetricsCollector {
       })
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('System metrics collection error:', error)
+        logger.error('System metrics collection error:', error)
       }
     }
   }

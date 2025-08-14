@@ -7,6 +7,7 @@ import ForgotPasswordForm from './ForgotPasswordForm'
 import { Button } from '../ui/button'
 import { ArrowLeft, Github } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { logger } from '../../services/logger'
 
 const AuthPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -36,7 +37,7 @@ const AuthPage = () => {
       await signInWithOAuth(provider)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('OAuth sign in error:', error)
+        logger.error('OAuth sign in error:', error)
       }
     }
   }
