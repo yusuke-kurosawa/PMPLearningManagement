@@ -7,6 +7,7 @@ export interface StorageItem {
   timestamp: number
   version?: string
   userId?: string
+  expiresAt?: number
 }
 
 export interface StorageOptions {
@@ -94,7 +95,7 @@ export class IndexedDBStorage {
 
       // Add TTL if specified
       if (options.ttl) {
-        ;(item as any).expiresAt = Date.now() + options.ttl
+        item.expiresAt = Date.now() + options.ttl
       }
 
       const tx = db.transaction(this.STORE_NAME, 'readwrite')
@@ -124,7 +125,7 @@ export class IndexedDBStorage {
       }
 
       // Check TTL
-      if ((item as any).expiresAt && Date.now() > (item as any).expiresAt) {
+      if (item.expiresAt && Date.now() > item.expiresAt) {
         await this.removeItem(key)
         return null
       }
@@ -254,7 +255,7 @@ export class IndexedDBStorage {
 
       while (cursor) {
         const item = cursor.value
-        if ((item as any).expiresAt && now > (item as any).expiresAt) {
+        if (item.expiresAt && now > item.expiresAt) {
           await cursor.delete()
           cleanedCount++
         }

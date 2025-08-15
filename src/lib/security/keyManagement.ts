@@ -580,7 +580,10 @@ export class KeyManagementSystem {
   /**
    * 再暗号化対象データの取得（実装は実際のデータベース構造に依存）
    */
-  private async getDataForReEncryption(_oldKeyId: string, _limit: number): Promise<any[]> {
+  private async getDataForReEncryption(
+    _oldKeyId: string,
+    _limit: number
+  ): Promise<Array<{ id: string; encryptedData: string }>> {
     // 実際の実装では、データベースクエリを実行
     // ここではダミーデータを返す
     return []

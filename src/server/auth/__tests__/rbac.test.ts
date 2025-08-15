@@ -35,7 +35,7 @@ describe('RBAC システム', () => {
 
       instructorUser = {
         id: 'instructor123',
-        role: 'INSTRUCTOR' as any,
+        role: 'instructor' as UserRole,
         subscriptionPlan: SubscriptionPlan.PREMIUM,
         subscriptionActive: true,
         profileComplete: true,

@@ -334,7 +334,10 @@ describe('Enhanced CSRF Protection', () => {
     })
 
     it('should clean up expired tokens', async () => {
-      const cleanupSpy = vi.spyOn(csrf as any, 'cleanupExpiredTokens')
+      const cleanupSpy = vi.spyOn(
+        csrf as unknown as { cleanupExpiredTokens: () => void },
+        'cleanupExpiredTokens'
+      )
 
       await csrf.generateToken()
 
@@ -342,7 +345,10 @@ describe('Enhanced CSRF Protection', () => {
     })
 
     it('should handle token rotation', async () => {
-      const rotateSpy = vi.spyOn(csrf as any, 'rotateActiveTokens')
+      const rotateSpy = vi.spyOn(
+        csrf as unknown as { rotateActiveTokens: () => Promise<void> },
+        'rotateActiveTokens'
+      )
 
       // Manually trigger rotation for testing
       await csrf['rotateActiveTokens']()

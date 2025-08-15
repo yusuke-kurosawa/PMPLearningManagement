@@ -85,7 +85,7 @@ export class HealthChecker {
       const connectionInfo = (await prisma.$queryRaw`SELECT 
         COUNT(*) as total_connections
       FROM pg_stat_activity 
-      WHERE datname = current_database()`) as any[]
+      WHERE datname = current_database()`) as Array<{ total_connections: number }>
 
       const responseTime = Date.now() - startTime
 
@@ -636,7 +636,7 @@ export class HealthChecker {
         uptime: process.uptime(),
         version: process.env.APP_VERSION || '1.0.0',
         environment: process.env.NODE_ENV || 'development',
-        checks: {} as any,
+        checks: {} as SystemHealth['checks'],
         summary: {
           total: 0,
           healthy: 0,
