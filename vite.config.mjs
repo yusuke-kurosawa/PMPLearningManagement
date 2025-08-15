@@ -112,5 +112,24 @@ export default defineConfig({
       'lucide-react',
       'framer-motion'
     ]
+  },
+  
+  // Vitest configuration
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: false,
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        'scripts/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        'dist/'
+      ]
+    }
   }
 })

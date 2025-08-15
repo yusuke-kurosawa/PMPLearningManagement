@@ -81,6 +81,61 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock scrollTo
 window.scrollTo = vi.fn()
 
+// Mock localStorage
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    getItem: vi.fn(() => null),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(() => null),
+  },
+  writable: true,
+})
+
+// Mock sessionStorage
+Object.defineProperty(window, 'sessionStorage', {
+  value: {
+    getItem: vi.fn(() => null),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(() => null),
+  },
+  writable: true,
+})
+
+// Mock window.ontouchstart for touch event detection
+Object.defineProperty(window, 'ontouchstart', {
+  value: null,
+  writable: true,
+})
+
+// Mock navigator properties
+Object.defineProperty(navigator, 'maxTouchPoints', {
+  value: 0,
+  writable: true,
+})
+
+Object.defineProperty(navigator, 'userAgent', {
+  value:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+  writable: true,
+})
+
+// Mock window dimensions
+Object.defineProperty(window, 'innerWidth', {
+  value: 1024,
+  writable: true,
+})
+
+Object.defineProperty(window, 'innerHeight', {
+  value: 768,
+  writable: true,
+})
+
 // Mock D3 selection methods for visualization tests
 vi.mock('d3-selection', () => ({
   select: vi.fn(() => ({

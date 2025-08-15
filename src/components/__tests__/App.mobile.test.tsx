@@ -34,10 +34,10 @@ mockIntersectionObserver.mockReturnValue({
 window.IntersectionObserver = mockIntersectionObserver
 
 describe('App Mobile Detection and Routing', () => {
-  let originalUserAgent
-  let originalInnerWidth
-  let originalInnerHeight
-  let originalMaxTouchPoints
+  let originalUserAgent: string
+  let originalInnerWidth: number
+  let originalInnerHeight: number
+  let originalMaxTouchPoints: number
 
   beforeEach(() => {
     // Store original values

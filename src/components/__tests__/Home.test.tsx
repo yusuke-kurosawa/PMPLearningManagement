@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@test/utils/test-utils'
-import { checkA11y } from '@test/utils/accessibility'
+import { render, screen } from '../../test/utils/test-utils'
+import { checkA11y } from '../../test/utils/accessibility'
 import Home from '../pages/Home'
 
 describe('Home', () => {
@@ -43,13 +43,13 @@ describe('Home', () => {
     render(<Home />)
 
     const matrixLink = screen.getByRole('link', { name: /PMBOKマトリックスビュー/i })
-    expect(matrixLink).toHaveAttribute('href', '#/matrix')
+    expect(matrixLink).toHaveAttribute('href', '/matrix')
 
     const networkLink = screen.getByRole('link', { name: /ネットワークダイアグラム/i })
-    expect(networkLink).toHaveAttribute('href', '#/network')
+    expect(networkLink).toHaveAttribute('href', '/network')
 
     const glossaryLink = screen.getByRole('link', { name: /PMP用語集/i })
-    expect(glossaryLink).toHaveAttribute('href', '#/glossary')
+    expect(glossaryLink).toHaveAttribute('href', '/glossary')
   })
 
   it('displays feature icons', () => {
@@ -88,7 +88,7 @@ describe('Home', () => {
       render(<Home />)
 
       const links = screen.getAllByRole('link')
-      links.forEach((link) => {
+      links.forEach((link: HTMLElement) => {
         expect(link).toHaveAccessibleName()
       })
     })

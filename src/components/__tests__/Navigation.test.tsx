@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@test/utils/test-utils'
-import { checkA11y } from '@test/utils/accessibility'
+import { render, screen } from '../../test/utils/test-utils'
+import { checkA11y } from '../../test/utils/accessibility'
 import Navigation from '../layout/Navigation'
 
 // Mock GlobalSearch component to avoid complex dependencies in unit tests

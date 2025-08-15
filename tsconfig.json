@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
@@ -29,7 +30,8 @@
       "@/utils/*": ["./src/utils/*"],
       "@/server/*": ["./src/server/*"],
       "@/data/*": ["./src/data/*"],
-      "@/services/*": ["./src/services/*"]
+      "@/services/*": ["./src/services/*"],
+      "@test/*": ["./src/test/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,

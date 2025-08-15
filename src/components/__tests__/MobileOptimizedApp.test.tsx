@@ -13,7 +13,7 @@ mockIntersectionObserver.mockReturnValue({
   unobserve: () => null,
   disconnect: () => null,
 })
-window.IntersectionObserver = mockIntersectionObserver
+global.IntersectionObserver = mockIntersectionObserver
 
 // Mock service worker
 const mockServiceWorker = {
@@ -63,13 +63,13 @@ Object.defineProperty(window, 'devicePixelRatio', {
   writable: true,
 })
 
-const renderWithRouter = (component) => {
+const renderWithRouter = (component: React.ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>)
 }
 
 describe('MobileOptimizedApp', () => {
-  let originalInnerWidth
-  let originalInnerHeight
+  let originalInnerWidth: number
+  let originalInnerHeight: number
 
   beforeEach(() => {
     // Mock mobile viewport
@@ -200,10 +200,12 @@ describe('MobileOptimizedApp', () => {
 
       const touchStartEvent = new TouchEvent('touchstart', {
         touches: [
-          {
+          new Touch({
+            identifier: 0,
+            target: container.firstChild as Element,
             clientX: 100,
             clientY: 200,
-          },
+          }),
         ],
       })
 
@@ -223,19 +225,23 @@ describe('MobileOptimizedApp', () => {
       // Simulate swipe right from edge
       const touchStart = new TouchEvent('touchstart', {
         touches: [
-          {
+          new Touch({
+            identifier: 0,
+            target: container.firstChild as Element,
             clientX: 20,
             clientY: 200,
-          },
+          }),
         ],
       })
 
       const touchEnd = new TouchEvent('touchend', {
         changedTouches: [
-          {
+          new Touch({
+            identifier: 0,
+            target: container.firstChild as Element,
             clientX: 150,
             clientY: 200,
-          },
+          }),
         ],
       })
 
@@ -261,10 +267,12 @@ describe('MobileOptimizedApp', () => {
 
       const touchStart = new TouchEvent('touchstart', {
         touches: [
-          {
+          new Touch({
+            identifier: 0,
+            target: container.firstChild as Element,
             clientX: 100,
             clientY: 200,
-          },
+          }),
         ],
       })
 

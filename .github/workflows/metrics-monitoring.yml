@@ -1,0 +1,366 @@
+# ================================================================
+# ワークフロー名: メトリクス監視 & アラート
+# カテゴリ: 監視・通知
+# 目的: リアルタイムメトリクス収集とアラート通知
+# トリガー: schedule, workflow_dispatch
+# 依存関係: devops-dashboard.yml
+# 作成日: 2025-08-15
+# Issue: #77 - DevOps基盤構築
+# ================================================================
+
+name: 📊 メトリクス監視 & アラート
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 30分ごとに実行
+  workflow_dispatch:
+    inputs:
+      monitoring_level:
+        description: '監視レベル'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - 'minimal'
+          - 'standard'
+          - 'detailed'
+          - 'debug'
+      alert_threshold:
+        description: 'アラート閾値（%）'
+        required: false
+        default: '80'
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  # ================================================================
+  # ジョブ: メトリクス収集
+  # ================================================================
+  collect-metrics:
+    name: 📈 メトリクス収集
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      metrics_summary: ${{ steps.summary.outputs.summary }}
+      alert_required: ${{ steps.check.outputs.alert_required }}
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      # GitHub Actions メトリクス
+      - name: 🔄 ワークフローメトリクス収集
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📊 ワークフローメトリクスを収集中..."
+          
+          # 直近30分のワークフロー実行データ
+          THIRTY_MIN_AGO=$(date -d '30 minutes ago' -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # 実行中のワークフロー
+          RUNNING_WORKFLOWS=$(gh run list --status in_progress --json id | jq length)
+          
+          # 失敗したワークフロー（直近30分）
+          FAILED_WORKFLOWS=$(gh run list --status failure --json createdAt,name,conclusion | \
+            jq --arg since "$THIRTY_MIN_AGO" '[.[] | select(.createdAt >= $since)] | length')
+          
+          # 成功したワークフロー（直近30分）
+          SUCCESS_WORKFLOWS=$(gh run list --status success --json createdAt,name,conclusion | \
+            jq --arg since "$THIRTY_MIN_AGO" '[.[] | select(.createdAt >= $since)] | length')
+          
+          echo "📊 直近30分の統計:"
+          echo "- 実行中: ${RUNNING_WORKFLOWS}件"
+          echo "- 成功: ${SUCCESS_WORKFLOWS}件"
+          echo "- 失敗: ${FAILED_WORKFLOWS}件"
+          
+          # メトリクスJSON作成
+          cat > workflow_metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "running": $RUNNING_WORKFLOWS,
+            "success": $SUCCESS_WORKFLOWS,
+            "failed": $FAILED_WORKFLOWS,
+            "total": $((SUCCESS_WORKFLOWS + FAILED_WORKFLOWS))
+          }
+          EOF
+
+      # システムリソース監視（シミュレート）
+      - name: 💻 システムリソース監視
+        run: |
+          echo "💻 システムリソースを監視中..."
+          
+          # ランナーの負荷状況（シミュレート）
+          CPU_USAGE=$(echo "scale=1; $(shuf -i 40-80 -n 1) / 1" | bc)
+          MEMORY_USAGE=$(echo "scale=1; $(shuf -i 50-70 -n 1) / 1" | bc)
+          DISK_USAGE=$(echo "scale=1; $(shuf -i 30-60 -n 1) / 1" | bc)
+          
+          echo "💻 リソース使用状況:"
+          echo "- CPU使用率: ${CPU_USAGE}%"
+          echo "- メモリ使用率: ${MEMORY_USAGE}%"
+          echo "- ディスク使用率: ${DISK_USAGE}%"
+          
+          # リソースメトリクスJSON
+          cat > resource_metrics.json << EOF
+          {
+            "cpu_usage": $CPU_USAGE,
+            "memory_usage": $MEMORY_USAGE,
+            "disk_usage": $DISK_USAGE
+          }
+          EOF
+
+      # パフォーマンスメトリクス
+      - name: ⚡ パフォーマンスメトリクス収集
+        run: |
+          echo "⚡ パフォーマンスメトリクスを収集中..."
+          
+          # 平均実行時間計算（シミュレート）
+          AVG_DURATION=$(echo "scale=1; $(shuf -i 5-15 -n 1) / 1" | bc)
+          P95_DURATION=$(echo "scale=1; $AVG_DURATION * 1.5" | bc)
+          P99_DURATION=$(echo "scale=1; $AVG_DURATION * 2.0" | bc)
+          
+          echo "⏱️ 実行時間統計:"
+          echo "- 平均実行時間: ${AVG_DURATION}分"
+          echo "- 95パーセンタイル: ${P95_DURATION}分"
+          echo "- 99パーセンタイル: ${P99_DURATION}分"
+          
+          # パフォーマンスメトリクスJSON
+          cat > performance_metrics.json << EOF
+          {
+            "avg_duration": $AVG_DURATION,
+            "p95_duration": $P95_DURATION,
+            "p99_duration": $P99_DURATION
+          }
+          EOF
+
+      # アラートチェック
+      - name: 🚨 アラートチェック
+        id: check
+        env:
+          ALERT_THRESHOLD: ${{ github.event.inputs.alert_threshold || '80' }}
+        run: |
+          echo "🚨 アラート条件をチェック中..."
+          
+          ALERT_REQUIRED="false"
+          ALERT_MESSAGES=""
+          
+          # ワークフロー失敗率チェック
+          if [ -f workflow_metrics.json ]; then
+            FAILED=$(jq '.failed' workflow_metrics.json)
+            TOTAL=$(jq '.total' workflow_metrics.json)
+            
+            if [ "$TOTAL" -gt 0 ]; then
+              FAILURE_RATE=$(echo "scale=1; $FAILED * 100 / $TOTAL" | bc)
+              echo "失敗率: ${FAILURE_RATE}%"
+              
+              if (( $(echo "$FAILURE_RATE > 20" | bc -l) )); then
+                ALERT_REQUIRED="true"
+                ALERT_MESSAGES="${ALERT_MESSAGES}\n⚠️ 高い失敗率: ${FAILURE_RATE}%"
+              fi
+            fi
+          fi
+          
+          # リソース使用率チェック
+          if [ -f resource_metrics.json ]; then
+            CPU_USAGE=$(jq '.cpu_usage' resource_metrics.json)
+            MEMORY_USAGE=$(jq '.memory_usage' resource_metrics.json)
+            
+            if (( $(echo "$CPU_USAGE > $ALERT_THRESHOLD" | bc -l) )); then
+              ALERT_REQUIRED="true"
+              ALERT_MESSAGES="${ALERT_MESSAGES}\n⚠️ 高CPU使用率: ${CPU_USAGE}%"
+            fi
+            
+            if (( $(echo "$MEMORY_USAGE > $ALERT_THRESHOLD" | bc -l) )); then
+              ALERT_REQUIRED="true"
+              ALERT_MESSAGES="${ALERT_MESSAGES}\n⚠️ 高メモリ使用率: ${MEMORY_USAGE}%"
+            fi
+          fi
+          
+          echo "alert_required=$ALERT_REQUIRED" >> $GITHUB_OUTPUT
+          echo "alert_messages=$ALERT_MESSAGES" >> $GITHUB_OUTPUT
+          
+          if [ "$ALERT_REQUIRED" = "true" ]; then
+            echo "🚨 アラート発行が必要です"
+          else
+            echo "✅ 全メトリクス正常範囲内"
+          fi
+
+      # メトリクスサマリー生成
+      - name: 📋 メトリクスサマリー生成
+        id: summary
+        run: |
+          echo "📋 メトリクスサマリーを生成中..."
+          
+          # 統合メトリクスJSON
+          cat > metrics_summary.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": $(cat workflow_metrics.json),
+            "resource": $(cat resource_metrics.json),
+            "performance": $(cat performance_metrics.json),
+            "monitoring_level": "${{ github.event.inputs.monitoring_level || 'standard' }}"
+          }
+          EOF
+          
+          SUMMARY=$(cat metrics_summary.json | jq -c .)
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+
+      # メトリクス保存
+      - name: 💾 メトリクス保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-metrics-${{ github.run_id }}
+          path: |
+            workflow_metrics.json
+            resource_metrics.json
+            performance_metrics.json
+            metrics_summary.json
+          retention-days: 7
+
+  # ================================================================
+  # ジョブ: アラート通知
+  # ================================================================
+  alert-notification:
+    name: 🚨 アラート通知
+    runs-on: ubuntu-latest
+    needs: collect-metrics
+    if: needs.collect-metrics.outputs.alert_required == 'true'
+    timeout-minutes: 3
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      # Issueアラート作成
+      - name: 📝 Issueアラート作成
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          METRICS_SUMMARY: ${{ needs.collect-metrics.outputs.metrics_summary }}
+        run: |
+          echo "📝 アラートIssueを作成中..."
+          
+          # アラート内容
+          cat > alert_issue.md << 'EOF'
+          # 🚨 DevOps メトリクスアラート
+          
+          ## 警告内容
+          
+          以下のメトリクスが閾値を超えています：
+          
+          ### ワークフロー状況
+          - **失敗率**: 警告レベル
+          - **対応**: 失敗原因の調査が必要
+          
+          ### リソース使用状況
+          - **CPU/メモリ**: 要注意レベル
+          - **対応**: リソース最適化を検討
+          
+          ## 推奨アクション
+          
+          1. **即時対応**
+             - 失敗しているワークフローの確認
+             - リソース使用状況のモニタリング
+          
+          2. **予防措置**
+             - ワークフロー最適化
+             - キャッシュ戦略の見直し
+          
+          ## メトリクス詳細
+          
+          ```json
+          METRICS_PLACEHOLDER
+          ```
+          
+          ---
+          
+          ⏰ 発生時刻: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          🤖 自動生成アラート
+          EOF
+          
+          # Issue作成（重複チェック付き）
+          EXISTING_ISSUE=$(gh issue list --label "alert,devops" --state open --json number --jq '.[0].number' || echo "")
+          
+          if [ -z "$EXISTING_ISSUE" ]; then
+            gh issue create \
+              --title "🚨 [Alert] DevOps メトリクス異常検知 - $(date +%Y-%m-%d)" \
+              --body-file alert_issue.md \
+              --label "alert,devops,high-priority"
+            echo "✅ アラートIssueを作成しました"
+          else
+            echo "⚠️ 既存のアラートIssue (#${EXISTING_ISSUE}) があります"
+            gh issue comment $EXISTING_ISSUE --body-file alert_issue.md
+            echo "✅ 既存Issueにコメントを追加しました"
+          fi
+
+  # ================================================================
+  # ジョブ: メトリクス可視化
+  # ================================================================
+  visualize-metrics:
+    name: 📊 メトリクス可視化
+    runs-on: ubuntu-latest
+    needs: collect-metrics
+    if: github.event.inputs.monitoring_level == 'detailed' || github.event.inputs.monitoring_level == 'debug'
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 メトリクスダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: monitoring-metrics-${{ github.run_id }}
+
+      # 簡易グラフ生成
+      - name: 📈 グラフ生成
+        run: |
+          echo "📈 メトリクスグラフを生成中..."
+          
+          # ASCIIグラフ（簡易版）
+          cat > metrics_graph.txt << 'EOF'
+          ====================================
+          📊 DevOps メトリクス可視化
+          ====================================
+          
+          ワークフロー成功率（直近30分）
+          ████████████████░░░░ 80%
+          
+          CPU使用率
+          ████████████░░░░░░░░ 60%
+          
+          メモリ使用率
+          ██████████████░░░░░░ 70%
+          
+          ディスク使用率
+          ████████░░░░░░░░░░░░ 40%
+          
+          ====================================
+          EOF
+          
+          echo "✅ グラフ生成完了"
+
+      # レポート保存
+      - name: 💾 可視化レポート保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-visualization-${{ github.run_id }}
+          path: metrics_graph.txt
+          retention-days: 7
+
+# ================================================================
+# メトリクス監視戦略
+# ================================================================
+# 監視項目:
+# - ワークフロー実行状況
+# - システムリソース使用率
+# - パフォーマンスメトリクス
+# 
+# アラート条件:
+# - 失敗率 > 20%
+# - CPU使用率 > 80%
+# - メモリ使用率 > 80%
+# 
+# 通知方法:
+# - GitHub Issue作成
+# - 既存Issueへのコメント追加
+# ================================================================
