@@ -1,20 +1,20 @@
 {
-  "timestamp": "2025-08-15T01:20:23Z",
+  "timestamp": "2025-08-15T01:46:42Z",
   "repository": {
-    "total_commits": 62,
+    "total_commits": 63,
     "total_branches": 6
   },
   "last_30_days": {
-    "total_commits": 4,
-    "compliant_commits": 3,
-    "compliance_rate": 75,
+    "total_commits": 5,
+    "compliant_commits": 4,
+    "compliance_rate": 80,
     "unique_authors": 1
   },
   "daily_stats": [
     {
       "date": "2025-08-15",
-      "total": 2,
-      "compliant": 1
+      "total": 3,
+      "compliant": 2
     },
     {
       "date": "2025-08-14",
