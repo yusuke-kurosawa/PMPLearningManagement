@@ -10,7 +10,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean
-  return function (...args: Parameters<T>) {
+  return function (this: unknown, ...args: Parameters<T>) {
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
@@ -27,7 +27,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   delay: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout
-  return function (...args: Parameters<T>) {
+  return function (this: unknown, ...args: Parameters<T>) {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => func.apply(this, args), delay)
   }
@@ -51,6 +51,11 @@ export function measurePerformance<T>(func: () => T, label: string = 'Performanc
   const start = performance.now()
   const result = func()
   const end = performance.now()
-  console.log(`${label}: ${end - start} milliseconds`)
+
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.log(`${label}: ${end - start} milliseconds`)
+  }
+
   return result
 }

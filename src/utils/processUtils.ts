@@ -27,9 +27,9 @@ export function parseProcessId(processId: string): {
   if (!match) return null
 
   return {
-    knowledgeAreaCode: match[1],
-    processGroupCode: match[2],
-    index: parseInt(match[3], 10),
+    knowledgeAreaCode: match[1]!,
+    processGroupCode: match[2]!,
+    index: parseInt(match[3]!, 10),
   }
 }
 
