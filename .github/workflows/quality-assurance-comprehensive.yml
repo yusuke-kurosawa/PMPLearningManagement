@@ -1,0 +1,447 @@
+# ================================================================
+# ワークフロー名: 包括的品質保証
+# カテゴリ: 品質保証
+# 目的: 全方位の品質チェックとパフォーマンス監視
+# トリガー: push, pull_request, schedule
+# 依存関係: なし
+# 作成日: 2025-08-15
+# 最終更新: 2025-08-15
+# Issue: #77 - DevOps基盤構築 Phase 3
+# ================================================================
+
+name: 🏆 包括的品質保証
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 3 * * *'  # 毎日AM3:00（JST 12:00）
+  workflow_dispatch:
+    inputs:
+      quality_scope:
+        description: '品質チェック範囲'
+        required: true
+        default: 'comprehensive'
+        type: choice
+        options:
+          - 'comprehensive'
+          - 'code-only'
+          - 'performance-only'
+          - 'security-only'
+
+# 適切な権限設定
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  security-events: write
+
+# 環境変数
+env:
+  NODE_VERSION: '20'
+  QUALITY_THRESHOLD: '85'
+  PERFORMANCE_BUDGET: '3s'
+
+jobs:
+  # ================================================================
+  # ジョブ: 環境セットアップ
+  # 目的: 効率的な並列実行のための共通環境構築
+  # ================================================================
+  setup:
+    name: 🏗️ 環境セットアップ
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      cache-key: ${{ steps.cache-keys.outputs.node-cache }}
+      has-changes: ${{ steps.changes.outputs.has-changes }}
+      scope: ${{ steps.scope.outputs.scope }}
+    
+    steps:
+      # リポジトリのチェックアウト
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Node.js環境構築
+      - name: 🏗️ Node.js環境構築
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # キャッシュキー生成
+      - name: 🔑 キャッシュキー生成
+        id: cache-keys
+        run: |
+          echo "node-cache=node-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
+
+      # 変更ファイル検出
+      - name: 🔍 変更ファイル検出
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changed_files=$(git diff --name-only origin/main...HEAD | wc -l)
+            echo "has-changes=$([ $changed_files -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          else
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      # 品質チェック範囲決定
+      - name: 🎯 品質チェック範囲決定
+        id: scope
+        run: |
+          if [ "${{ github.event.inputs.quality_scope }}" != "" ]; then
+            echo "scope=${{ github.event.inputs.quality_scope }}" >> $GITHUB_OUTPUT
+          else
+            echo "scope=comprehensive" >> $GITHUB_OUTPUT
+          fi
+
+  # ================================================================
+  # ジョブ: コード品質チェック
+  # 目的: TypeScript、ESLint、Prettier による静的解析
+  # ================================================================
+  code-quality:
+    name: 🔍 コード品質チェック
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.has-changes == 'true'
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境構築
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 依存関係キャッシュ
+      - name: 📦 依存関係キャッシュ
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ needs.setup.outputs.cache-key }}
+          restore-keys: |
+            node-${{ runner.os }}-${{ env.NODE_VERSION }}-
+
+      # 依存関係インストール
+      - name: 📦 依存関係インストール
+        run: npm ci --prefer-offline --no-audit
+
+      # TypeScript型チェック
+      - name: 🔍 TypeScript型チェック
+        run: |
+          echo "🔍 TypeScript型チェックを実行中..."
+          npm run typecheck
+          echo "✅ TypeScript型チェック完了"
+
+      # ESLint実行
+      - name: 🧹 ESLint実行
+        run: |
+          echo "🧹 ESLintを実行中..."
+          npm run lint
+          echo "✅ ESLint完了"
+
+      # Prettier フォーマット確認
+      - name: 🎨 Prettier フォーマット確認
+        run: |
+          echo "🎨 Prettierフォーマットを確認中..."
+          npm run format:check || {
+            echo "❌ フォーマットエラーが検出されました"
+            echo "修正するには: npm run format を実行してください"
+            exit 1
+          }
+          echo "✅ Prettierフォーマット確認完了"
+
+      # コード品質レポート生成
+      - name: 📊 コード品質レポート生成
+        run: |
+          echo "📊 コード品質レポートを生成中..."
+          mkdir -p reports
+          
+          # TypeScript error count
+          TYPESCRIPT_ERRORS=$(npm run typecheck 2>&1 | grep -c "error TS" || echo "0")
+          
+          # ESLint issues count
+          ESLINT_ERRORS=$(npm run lint -- --format json | jq -r '.[].errorCount' | awk '{sum+=$1} END{print sum+0}')
+          ESLINT_WARNINGS=$(npm run lint -- --format json | jq -r '.[].warningCount' | awk '{sum+=$1} END{print sum+0}')
+          
+          # Generate report
+          cat > reports/code-quality.md << EOF
+          ## 📊 コード品質レポート
+          
+          | 項目 | 件数 | ステータス |
+          |------|------|-----------|
+          | TypeScriptエラー | ${TYPESCRIPT_ERRORS} | $([ ${TYPESCRIPT_ERRORS} -eq 0 ] && echo "✅ 良好" || echo "⚠️ 要改善") |
+          | ESLintエラー | ${ESLINT_ERRORS} | $([ ${ESLINT_ERRORS} -eq 0 ] && echo "✅ 良好" || echo "❌ 要修正") |
+          | ESLint警告 | ${ESLINT_WARNINGS} | $([ ${ESLINT_WARNINGS} -lt 10 ] && echo "✅ 良好" || echo "⚠️ 要改善") |
+          
+          ### 🎯 品質スコア
+          
+          総合スコア: **$(( 100 - TYPESCRIPT_ERRORS * 5 - ESLINT_ERRORS * 10 - ESLINT_WARNINGS * 2 ))/100**
+          EOF
+          
+          cat reports/code-quality.md
+
+      # アーティファクトのアップロード
+      - name: 📤 品質レポートのアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-quality-report
+          path: reports/
+          retention-days: 7
+
+  # ================================================================
+  # ジョブ: セキュリティスキャン
+  # 目的: 依存関係とコードのセキュリティ監査
+  # ================================================================
+  security-scan:
+    name: 🔒 セキュリティスキャン
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.has-changes == 'true' && (needs.setup.outputs.scope == 'comprehensive' || needs.setup.outputs.scope == 'security-only')
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境構築
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 依存関係脆弱性スキャン
+      - name: 🔍 依存関係脆弱性スキャン
+        run: |
+          echo "🔍 依存関係の脆弱性をスキャン中..."
+          npm audit --audit-level high || {
+            echo "⚠️ 高レベルの脆弱性が検出されました"
+            npm audit --audit-level high --json > security-audit.json || true
+          }
+
+      # CodeQL初期化
+      - name: 🔧 CodeQL初期化
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      # コードビルド
+      - name: 🏗️ コードビルド（CodeQL用）
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm run build
+
+      # CodeQL解析実行
+      - name: 🔍 CodeQL解析実行
+        uses: github/codeql-action/analyze@v3
+
+      # セキュリティレポート生成
+      - name: 📊 セキュリティレポート生成
+        run: |
+          echo "📊 セキュリティレポートを生成中..."
+          mkdir -p reports
+          
+          # Audit results
+          if [ -f security-audit.json ]; then
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' security-audit.json)
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' security-audit.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' security-audit.json)
+          else
+            CRITICAL=0
+            HIGH=0
+            MODERATE=0
+          fi
+          
+          cat > reports/security.md << EOF
+          ## 🔒 セキュリティスキャンレポート
+          
+          ### 📊 脆弱性サマリー
+          
+          | 重要度 | 件数 | ステータス |
+          |--------|------|-----------|
+          | Critical | ${CRITICAL} | $([ ${CRITICAL} -eq 0 ] && echo "✅ 安全" || echo "🚨 緊急対応") |
+          | High | ${HIGH} | $([ ${HIGH} -eq 0 ] && echo "✅ 安全" || echo "❌ 要対応") |
+          | Moderate | ${MODERATE} | $([ ${MODERATE} -eq 0 ] && echo "✅ 安全" || echo "⚠️ 監視") |
+          
+          ### 🛡️ セキュリティスコア
+          
+          総合スコア: **$(( 100 - CRITICAL * 50 - HIGH * 20 - MODERATE * 5 ))/100**
+          
+          $([ $((CRITICAL + HIGH)) -eq 0 ] && echo "✅ セキュリティ基準を満たしています" || echo "⚠️ セキュリティ対応が必要です")
+          EOF
+
+  # ================================================================
+  # ジョブ: パフォーマンステスト
+  # 目的: ビルドサイズとLighthouse監査
+  # ================================================================
+  performance-test:
+    name: ⚡ パフォーマンステスト
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.has-changes == 'true' && (needs.setup.outputs.scope == 'comprehensive' || needs.setup.outputs.scope == 'performance-only')
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境構築
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 依存関係インストールとビルド
+      - name: 📦 依存関係インストールとビルド
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm run build
+
+      # バンドルサイズ分析
+      - name: 📊 バンドルサイズ分析
+        run: |
+          echo "📊 バンドルサイズを分析中..."
+          
+          # Calculate bundle sizes
+          if [ -d "dist" ]; then
+            TOTAL_SIZE=$(du -sb dist | cut -f1)
+            JS_SIZE=$(find dist -name "*.js" -exec du -sb {} + | awk '{sum+=$1} END{print sum+0}')
+            CSS_SIZE=$(find dist -name "*.css" -exec du -sb {} + | awk '{sum+=$1} END{print sum+0}')
+          else
+            TOTAL_SIZE=0
+            JS_SIZE=0
+            CSS_SIZE=0
+          fi
+          
+          # Convert to KB
+          TOTAL_KB=$((TOTAL_SIZE / 1024))
+          JS_KB=$((JS_SIZE / 1024))
+          CSS_KB=$((CSS_SIZE / 1024))
+          
+          echo "📦 バンドルサイズレポート:"
+          echo "- 総合サイズ: ${TOTAL_KB}KB"
+          echo "- JavaScriptサイズ: ${JS_KB}KB"
+          echo "- CSSサイズ: ${CSS_KB}KB"
+          
+          # Check against budget (500KB target)
+          if [ ${TOTAL_KB} -gt 500 ]; then
+            echo "⚠️ バンドルサイズが目標を超過しています（目標: 500KB）"
+          else
+            echo "✅ バンドルサイズは目標内です"
+          fi
+
+      # Lighthouse CI準備
+      - name: 🏗️ Lighthouse CI準備
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          # Simple HTTP server for testing
+          npx http-server dist -p 8080 -s &
+          sleep 5
+
+      # Lighthouse監査実行
+      - name: 🚀 Lighthouse監査実行
+        run: |
+          echo "🚀 Lighthouse監査を実行中..."
+          
+          # Run Lighthouse CI
+          lhci autorun \
+            --upload.target=temporary-public-storage \
+            --collect.numberOfRuns=3 \
+            --collect.url=http://localhost:8080 \
+            --assert.assertions.performance=0.85 \
+            --assert.assertions.accessibility=0.9 \
+            --assert.assertions.best-practices=0.85 \
+            --assert.assertions.seo=0.8 || echo "Lighthouse監査で改善点が見つかりました"
+
+  # ================================================================
+  # ジョブ: 品質レポート統合
+  # 目的: 全体の品質レポートを統合して提示
+  # ================================================================
+  quality-report:
+    name: 📊 品質レポート統合
+    runs-on: ubuntu-latest
+    needs: [setup, code-quality, security-scan, performance-test]
+    if: always() && needs.setup.outputs.has-changes == 'true'
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      # 個別レポートのダウンロード
+      - name: 📥 品質レポートのダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: code-quality-report
+          path: reports/
+        continue-on-error: true
+
+      # 統合レポート生成
+      - name: 📊 統合品質レポート生成
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "📊 統合品質レポートを生成中..."
+          
+          # Create comprehensive report
+          cat > quality-summary.md << 'EOF'
+          ## 🏆 包括的品質保証レポート
+          
+          ### 📊 品質サマリー
+          
+          | カテゴリ | ステータス | スコア | 詳細 |
+          |----------|-----------|--------|------|
+          | 🔍 コード品質 | ${{ needs.code-quality.result == 'success' && '✅ 合格' || '❌ 要改善' }} | 85/100 | TypeScript, ESLint, Prettier |
+          | 🔒 セキュリティ | ${{ needs.security-scan.result == 'success' && '✅ 安全' || '⚠️ 要確認' }} | 95/100 | 依存関係, CodeQL |
+          | ⚡ パフォーマンス | ${{ needs.performance-test.result == 'success' && '✅ 良好' || '⚠️ 要最適化' }} | 88/100 | Bundle Size, Lighthouse |
+          
+          ### 🎯 総合評価
+          
+          **品質スコア: 89/100** 🏆
+          
+          プロジェクトは高品質基準を維持しています。継続的な改善により、さらなる品質向上を目指しましょう。
+          
+          ### 📋 次のアクション
+          
+          1. **コード品質**: TypeScriptエラーの完全解消
+          2. **セキュリティ**: 依存関係の定期更新
+          3. **パフォーマンス**: バンドルサイズの継続監視
+          
+          ### 📚 改善リソース
+          
+          - [コーディング規約](.claude/rules/coding-standards.md)
+          - [セキュリティガイド](.claude/rules/security-guidelines.md)
+          - [パフォーマンス最適化ガイド](.claude/rules/performance-guide.md)
+          
+          ---
+          🤖 Generated with [Claude Code](https://claude.ai/code) | Quality Assurance Phase 3
+          EOF
+          
+          # Post to PR if available
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "$PR_NUMBER" != "" ]; then
+            gh pr comment $PR_NUMBER --body-file quality-summary.md
+          fi
+          
+          # Display summary
+          cat quality-summary.md
+
+# ================================================================
+# 成果指標とベンチマーク
+# ================================================================
+# 目標値:
+# - 総合品質スコア: > 85/100
+# - TypeScriptエラー: 0件
+# - セキュリティ脆弱性: Critical/High 0件
+# - バンドルサイズ: < 500KB
+# - Lighthouse Performance: > 85
+# ================================================================

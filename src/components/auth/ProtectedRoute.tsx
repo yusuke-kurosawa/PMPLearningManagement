@@ -6,16 +6,22 @@ import { motion } from 'framer-motion'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  requireAuth?: boolean
   requiredRole?: string | null
   requiredPermission?: string | null
+  roles?: string[]
+  permissions?: string[]
   redirectTo?: string
   fallback?: React.ReactNode | null
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
+  requireAuth = true,
   requiredRole = null,
   requiredPermission = null,
+  roles: _roles = [],
+  permissions: _permissions = [],
   redirectTo = '/login',
   fallback = null,
 }) => {
@@ -40,7 +46,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Check authentication
-  if (!isAuthenticated) {
+  if (requireAuth && !isAuthenticated) {
     // Redirect to login with return path
     return <Navigate to={redirectTo} state={{ from: location }} replace />
   }

@@ -47,8 +47,8 @@ const ProtectedRoute = React.lazy(() => import('./components/auth/ProtectedRoute
 // Mobile Components
 const MobileOptimizedApp = React.lazy(() => import('./components/mobile/MobileOptimizedApp'))
 
-// Context Management Dashboard
-const _ContextManagerDashboard = React.lazy(() => import('./components/ContextManagerDashboard'))
+// Context Management Dashboard - temporarily disabled
+// const ContextManagerDashboard = React.lazy(() => import('./components/ContextManagerDashboard'))
 
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
