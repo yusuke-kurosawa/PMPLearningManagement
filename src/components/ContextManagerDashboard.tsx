@@ -16,14 +16,54 @@ import {
   XCircle,
 } from 'lucide-react'
 
-const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
+// Type definitions
+interface ContextStats {
+  totalEntries: number
+  totalSizeKB: number
+  cacheHitRate: number
+  averageAccessCount: number
+  compressionRatio: number
+}
+
+interface MonitoringData {
+  status: 'healthy' | 'warning' | 'critical' | string
+  policy: 'aggressive' | 'normal' | 'conservative' | string
+  metrics: {
+    cacheHitRate?: number
+    avgRetrievalTime?: number
+    [key: string]: unknown
+  }
+  lastCleanup: number
+  nextCleanup?: number
+}
+
+interface PerformanceMetrics {
+  memory: {
+    usedMB: number
+    totalMB: number
+    limitMB: number
+  }
+  cache: {
+    lazyLoadCacheSize: number
+  }
+}
+
+interface ContextManagerDashboardProps {
+  isOpen?: boolean
+  onClose: () => void
+}
+
+const ContextManagerDashboard: React.FC<ContextManagerDashboardProps> = ({
+  isOpen = false,
+  onClose,
+}) => {
   const { getStats, getMonitoringData, getPerformanceMetrics, getDiagnostics, setRotationPolicy } =
     useContextMonitoring()
 
-  const [stats, setStats] = useState(null)
-  const [monitoring, setMonitoring] = useState(null)
-  const [performance, setPerformance] = useState(null)
-  const [refreshInterval, setRefreshInterval] = useState(5000) // 5 seconds
+  const [stats, setStats] = useState<ContextStats | null>(null)
+  const [monitoring, setMonitoring] = useState<MonitoringData | null>(null)
+  const [performance, setPerformance] = useState<PerformanceMetrics | null>(null)
+  const [refreshInterval, setRefreshInterval] = useState<number>(5000) // 5 seconds
 
   // Auto-refresh data
   useEffect(() => {
@@ -41,7 +81,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     return () => clearInterval(interval)
   }, [isOpen, refreshInterval, getStats, getMonitoringData, getPerformanceMetrics])
 
-  const getHealthStatusIcon = (status) => {
+  const getHealthStatusIcon = (status: string | undefined): JSX.Element => {
     switch (status) {
       case 'healthy':
         return <CheckCircle className="h-5 w-5 text-green-500" />
@@ -54,26 +94,27 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const _formatBytes = (bytes) => {
-    if (!bytes) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+  // Format bytes function (currently unused but kept for future use)
+  // const formatBytes = (bytes: number): string => {
+  //   if (!bytes) return '0 B'
+  //   const k = 1024
+  //   const sizes = ['B', 'KB', 'MB', 'GB']
+  //   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  //   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  // }
 
-  const formatPercentage = (value) => {
+  const formatPercentage = (value: number): string => {
     return (value * 100).toFixed(1) + '%'
   }
 
-  const handlePolicyChange = (policy) => {
+  const handlePolicyChange = (policy: string): void => {
     setRotationPolicy(policy)
   }
 
-  const handleRunDiagnostics = () => {
+  const handleRunDiagnostics = (): void => {
     const diagnostics = getDiagnostics()
     if (process.env.NODE_ENV === 'development') {
-      logger.warn('🔍 Context Diagnostics:', diagnostics)
+      logger.warn('🔍 Context Diagnostics:', { diagnostics })
     }
     alert('Diagnostics completed. Check console for details.')
   }
@@ -227,7 +268,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
               <div>
                 <label className="mb-2 block text-sm font-medium">Rotation Policy</label>
                 <div className="flex space-x-2">
-                  {['aggressive', 'normal', 'conservative'].map((policy) => (
+                  {(['aggressive', 'normal', 'conservative'] as const).map((policy) => (
                     <button
                       key={policy}
                       onClick={() => handlePolicyChange(policy)}
@@ -248,7 +289,9 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
                 <label className="mb-2 block text-sm font-medium">Refresh Interval</label>
                 <select
                   value={refreshInterval}
-                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setRefreshInterval(Number(e.target.value))
+                  }
                   className="rounded border border-gray-300 px-3 py-1 text-sm"
                 >
                   <option value={1000}>1 second</option>

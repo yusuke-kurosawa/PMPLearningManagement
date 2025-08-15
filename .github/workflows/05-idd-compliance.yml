@@ -59,7 +59,7 @@ jobs:
         id: check-body
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
-          if echo "$PR_BODY" | grep -qE '(closes|fixes|resolves|references) #[0-9]+'; then
+          if echo "$PR_BODY" | grep -qiE '(closes|fixes|resolves|references) #[0-9]+'; then
             echo "✅ PR body contains issue reference"
             echo "has_issue_ref=true" >> $GITHUB_OUTPUT
           else

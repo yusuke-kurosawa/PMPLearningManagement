@@ -12,7 +12,7 @@ export function PWAManager() {
         .registerServiceWorker()
         .then((registration) => {
           if (process.env.NODE_ENV === 'development') {
-            logger.warn('SW registered: ', registration)
+            logger.warn('SW registered: ', { registration })
           }
         })
         .catch((registrationError) => {
