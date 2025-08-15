@@ -118,7 +118,7 @@ const createUserWithDefaults = async (userData: {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as unknown as NextAuthOptions['adapter'],
 
   providers: [
     // Google OAuth Provider

@@ -336,9 +336,10 @@ describe('KeyManagementSystem', () => {
 
     it('should handle rotation errors gracefully', async () => {
       // キーの取得でエラーを発生させる
-      vi.spyOn(keyManager as any, 'getActiveKeys').mockRejectedValueOnce(
-        new Error('Key fetch failed')
-      )
+      vi.spyOn(
+        keyManager as unknown as { getActiveKeys: () => Promise<unknown[]> },
+        'getActiveKeys'
+      ).mockRejectedValueOnce(new Error('Key fetch failed'))
 
       await expect(keyManager.performKeyRotation()).rejects.toThrow('Key fetch failed')
     })
@@ -347,7 +348,12 @@ describe('KeyManagementSystem', () => {
   describe('セキュリティ機能', () => {
     it('should log security events for key revocation', async () => {
       const key = await keyManager.generateEncryptionKey()
-      const logSpy = vi.spyOn(keyManager as any, 'logSecurityEvent')
+      const logSpy = vi.spyOn(
+        keyManager as unknown as {
+          logSecurityEvent: (event: string, details: unknown) => Promise<void>
+        },
+        'logSecurityEvent'
+      )
 
       await keyManager.revokeKey(key.id, 'test revocation')
 

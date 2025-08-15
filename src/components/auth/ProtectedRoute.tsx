@@ -6,16 +6,22 @@ import { motion } from 'framer-motion'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  requireAuth?: boolean
   requiredRole?: string | null
   requiredPermission?: string | null
+  roles?: string[]
+  permissions?: string[]
   redirectTo?: string
   fallback?: React.ReactNode | null
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
+  requireAuth = true,
   requiredRole = null,
   requiredPermission = null,
+  roles = [],
+  permissions = [],
   redirectTo = '/login',
   fallback = null,
 }) => {
@@ -40,12 +46,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Check authentication
-  if (!isAuthenticated) {
+  if (requireAuth && !isAuthenticated) {
     // Redirect to login with return path
     return <Navigate to={redirectTo} state={{ from: location }} replace />
   }
 
-  // Check role requirement
+  // Check role requirement (single role)
   if (requiredRole && !hasRole(requiredRole)) {
     if (fallback) {
       return fallback
@@ -79,7 +85,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     )
   }
 
-  // Check permission requirement
+  // Check permission requirement (single permission)
   if (requiredPermission && !hasPermission(requiredPermission)) {
     if (fallback) {
       return fallback
@@ -100,6 +106,84 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <h2 className="mb-2 text-2xl font-bold text-gray-900">Insufficient Permissions</h2>
             <p className="mb-6 text-gray-600">
               You need additional permissions to access this feature.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => window.history.back()}
+                className="w-full rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => (window.location.href = '/profile/permissions')}
+                className="w-full rounded-lg bg-gray-200 px-6 py-2 text-gray-700 transition duration-150 hover:bg-gray-300"
+              >
+                Request Access
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Check multiple roles requirement
+  if (roles.length > 0 && !roles.some((role) => hasRole(role))) {
+    if (fallback) {
+      return fallback
+    }
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md px-4"
+        >
+          <div className="rounded-lg bg-white p-8 text-center shadow-lg">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <Lock className="h-8 w-8 text-red-600" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold text-gray-900">Access Denied</h2>
+            <p className="mb-6 text-gray-600">
+              You don&apos;t have the required role to access this page. Required roles:{' '}
+              {roles.join(', ')}
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700"
+            >
+              Go Back
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Check multiple permissions requirement
+  if (permissions.length > 0 && !permissions.every((permission) => hasPermission(permission))) {
+    if (fallback) {
+      return fallback
+    }
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md px-4"
+        >
+          <div className="rounded-lg bg-white p-8 text-center shadow-lg">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
+              <AlertCircle className="h-8 w-8 text-yellow-600" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold text-gray-900">Insufficient Permissions</h2>
+            <p className="mb-6 text-gray-600">
+              You need additional permissions to access this feature. Required:{' '}
+              {permissions.join(', ')}
             </p>
             <div className="space-y-3">
               <button

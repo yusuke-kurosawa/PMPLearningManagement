@@ -442,7 +442,12 @@ export class LearningService {
   }
 
   // 学習目標取得
-  static async getLearningGoals(userId: string, activeOnly: boolean = false): Promise<any[]> {
+  static async getLearningGoals(
+    userId: string,
+    activeOnly: boolean = false
+  ): Promise<
+    Array<{ id: string; title: string; description: string; deadline?: Date; achieved: boolean }>
+  > {
     try {
       const where: unknown = { userId }
 

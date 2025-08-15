@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react'
 import { authService, UserRoles } from '../services/authService'
 import { supabase, authHelpers, sessionManager } from '../lib/supabase'
 import { auditLogger } from '../services/auditService'
@@ -6,18 +13,60 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { logger } from '../services/logger'
 
+interface User {
+  id: string
+  email: string
+  name?: string
+  avatar?: string
+  created_at: string
+  updated_at: string
+}
+
+interface Session {
+  access_token: string
+  refresh_token: string
+  user: User
+  expires_at: number
+}
+
+interface AuthContextType {
+  user: User | null
+  session: Session | null
+  role: string
+  permissions: string[]
+  loading: boolean
+  authError: string | null
+  isAuthenticated: boolean
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signUp: (
+    email: string,
+    password: string,
+    userData?: Record<string, unknown>
+  ) => Promise<{ success: boolean; error?: string }>
+  signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>
+  updateProfile: (userData: Partial<User>) => Promise<{ success: boolean; error?: string }>
+  hasRole: (requiredRole: string) => boolean
+  hasPermission: (permission: string) => boolean
+  refreshSession: () => Promise<void>
+}
+
 // Create Auth Context
-const AuthContext = createContext({})
+const AuthContext = createContext<AuthContextType | null>(null)
+
+interface AuthProviderProps {
+  children: ReactNode
+}
 
 // Auth Provider Component
-export const AuthProvider = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [session, setSession] = useState(null)
-  const [role, setRole] = useState(UserRoles.GUEST)
-  const [permissions, setPermissions] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [authError, setAuthError] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [role, setRole] = useState<string>(UserRoles.GUEST)
+  const [permissions, setPermissions] = useState<string[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [authError, setAuthError] = useState<string | null>(null)
 
   // Initialize auth state
   useEffect(() => {
@@ -349,7 +398,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   // Context value
-  const value = {
+  const value: AuthContextType = {
     // State
     user,
     session,
@@ -362,26 +411,33 @@ export const AuthProvider = ({ children }) => {
     // Methods
     signUp,
     signIn,
-    signInWithOAuth,
     signOut,
     resetPassword,
-    updatePassword,
     updateProfile,
     hasPermission,
     hasRole,
-
-    // Helpers
-    clearError: () => setAuthError(null),
+    refreshSession: async () => {
+      try {
+        const { data, error } = await supabase.auth.refreshSession()
+        if (error) throw error
+        if (data.session) {
+          setSession(data.session)
+        }
+      } catch (error) {
+        logger.error('Failed to refresh session:', error)
+        setAuthError('Session refresh failed')
+      }
+    },
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 // Custom hook to use auth context
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
 

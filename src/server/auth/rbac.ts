@@ -266,8 +266,7 @@ export class PermissionChecker {
   // インストラクター権限チェック
   isInstructor(): boolean {
     return (
-      [UserRole.ADMIN].includes(this.userContext.role) ||
-      this.userContext.role === ('INSTRUCTOR' as any)
+      [UserRole.ADMIN].includes(this.userContext.role) || this.userContext.role === 'instructor'
     )
   }
 

@@ -349,7 +349,9 @@ describe('データ暗号化システム', () => {
         phone: null,
       }
 
-      const encrypted = pii.encryptPII(partialData as any)
+      const encrypted = pii.encryptPII(
+        partialData as { email?: string; name?: string; phone?: string }
+      )
       const decrypted = pii.decryptPII(encrypted)
 
       expect(decrypted.email).toBe('test@example.com')

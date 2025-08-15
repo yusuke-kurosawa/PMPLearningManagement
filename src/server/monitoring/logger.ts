@@ -213,7 +213,7 @@ export class Logger {
             name: error.name,
             message: error.message,
             stack: error.stack,
-            code: (error as any).code,
+            code: (error as Error & { code?: string }).code,
           }
         : error
           ? { message: String(error) }
