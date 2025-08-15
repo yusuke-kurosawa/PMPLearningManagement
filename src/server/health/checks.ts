@@ -510,7 +510,7 @@ export class HealthChecker {
     const startTime = Date.now()
 
     try {
-      const _fs = await import('_fs/promises')
+      // const _fs = await import('_fs/promises') // TODO: Will be used in future
       //       const path = require('path') // TODO: Will be used in future
 
       // 簡易的なディスク容量チェック

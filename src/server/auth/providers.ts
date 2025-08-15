@@ -229,7 +229,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account, _profile, _email, _credentials }) {
+    async signIn({ user, account }) {
       try {
         // OAuth プロバイダーの場合、既存ユーザーをチェック
         if (account?.provider !== 'credentials') {
@@ -256,7 +256,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
 
-    async jwt({ token, user, _account }) {
+    async jwt({ token, user }) {
       // 初回ログイン時
       if (user) {
         token.role = user.role
@@ -307,7 +307,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   events: {
-    async signIn({ user, account, _profile, isNewUser }) {
+    async signIn({ user, account, isNewUser }) {
       // ログイン記録
       await prisma.userActivity.create({
         data: {
