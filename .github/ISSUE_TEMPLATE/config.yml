@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ドキュメント
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/blob/main/README.md
+    about: プロジェクトドキュメントとガイド
+  - name: 💬 ディスカッション
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/discussions
+    about: 質問、アイデア、コミュニティでの議論
+  - name: 🔒 セキュリティ問題の報告
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/security/advisories/new
+    about: セキュリティの脆弱性を責任をもって開示する
