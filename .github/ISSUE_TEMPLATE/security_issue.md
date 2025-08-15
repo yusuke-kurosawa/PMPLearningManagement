@@ -1,6 +1,6 @@
 ---
 name: 🔒 Security Issue
-about: Report a security vulnerability or security-related concern  
+about: Report a security vulnerability or security-related concern
 title: '[Security] '
 labels: ['type:security', 'priority:critical', 'status:triage']
 assignees: ''

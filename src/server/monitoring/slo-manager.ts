@@ -6,7 +6,7 @@
 import { EventEmitter } from 'events'
 import client from 'prom-client'
 import { Logger } from './logger'
-import { Metrics } from './metrics'
+import {} from './metrics'
 
 // SLO Target Definition
 interface SLOTarget {
@@ -45,7 +45,7 @@ interface SLOViolation {
   currentValue: number
   threshold: number
   severity: SLOSeverity
-  details: any
+  details: unknown
   resolved: boolean
   resolvedAt?: Date
 }
@@ -76,7 +76,7 @@ export class SLOManager extends EventEmitter {
   constructor() {
     super()
     this.prometheusRegistry = new client.Registry()
-    this.initializeMetrics()
+    this.initialize()
     this.setupDefaultSLOs()
     this.startMonitoring()
 
@@ -518,7 +518,7 @@ export class SLOManager extends EventEmitter {
   /**
    * Send alert to specific channel
    */
-  private async sendAlertToChannel(channel: string, message: any): Promise<void> {
+  private async sendAlertToChannel(channel: string, message: unknown): Promise<void> {
     switch (channel) {
       case 'slack':
         await this.sendSlackAlert(message)
@@ -540,7 +540,7 @@ export class SLOManager extends EventEmitter {
   /**
    * Send Slack alert (simplified)
    */
-  private async sendSlackAlert(message: any): Promise<void> {
+  private async sendSlackAlert(message: unknown): Promise<void> {
     // Implementation would integrate with Slack API
     Logger.info('Slack alert sent:', message.title)
   }
@@ -548,7 +548,7 @@ export class SLOManager extends EventEmitter {
   /**
    * Send email alert (simplified)
    */
-  private async sendEmailAlert(message: any): Promise<void> {
+  private async sendEmailAlert(message: unknown): Promise<void> {
     // Implementation would integrate with email service
     Logger.info('Email alert sent:', message.title)
   }
@@ -556,7 +556,7 @@ export class SLOManager extends EventEmitter {
   /**
    * Send PagerDuty alert (simplified)
    */
-  private async sendPagerDutyAlert(message: any): Promise<void> {
+  private async sendPagerDutyAlert(message: unknown): Promise<void> {
     // Implementation would integrate with PagerDuty API
     Logger.info('PagerDuty alert sent:', message.title)
   }
@@ -564,7 +564,7 @@ export class SLOManager extends EventEmitter {
   /**
    * Send Microsoft Teams alert (simplified)
    */
-  private async sendTeamsAlert(message: any): Promise<void> {
+  private async sendTeamsAlert(message: unknown): Promise<void> {
     // Implementation would integrate with Teams webhook
     Logger.info('Teams alert sent:', message.title)
   }

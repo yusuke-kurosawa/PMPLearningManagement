@@ -7,10 +7,35 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { logger } from '../../services/logger'
 import {
   getInstallPromptManager,
-  PWAInstallPromptManager,
+  _PWAInstallPromptManager,
   InstallPromptState,
 } from '../../lib/pwa/installPrompt'
 import { useToast } from '../../hooks/use-toast'
+
+// Navigator network connection type definition
+interface NetworkConnection {
+  effectiveType: '2g' | '3g' | '4g' | 'slow-2g'
+  downlink: number
+  saveData: boolean
+  addEventListener(type: string, listener: EventListener): void
+  removeEventListener(type: string, listener: EventListener): void
+}
+
+// Extended Navigator interface with experimental APIs
+interface ExtendedNavigator extends Navigator {
+  connection?: NetworkConnection
+  getBattery?: () => Promise<BatteryManager>
+}
+
+// Battery Manager interface
+interface BatteryManager {
+  charging: boolean
+  chargingTime: number
+  dischargingTime: number
+  level: number
+  addEventListener(type: string, listener: EventListener): void
+  removeEventListener(type: string, listener: EventListener): void
+}
 
 interface PWAContextType {
   // Install state
@@ -194,7 +219,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
     // Connection change (mobile)
     if ('connection' in navigator) {
-      ;(navigator as any).connection.addEventListener('change', updateNetworkInfo)
+      const extendedNavigator = navigator as ExtendedNavigator
+      extendedNavigator.connection?.addEventListener('change', updateNetworkInfo)
     }
 
     // Visibility change for wake lock management
@@ -206,7 +232,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     window.removeEventListener('offline', handleOffline)
 
     if ('connection' in navigator) {
-      ;(navigator as any).connection.removeEventListener('change', updateNetworkInfo)
+      const extendedNavigator = navigator as ExtendedNavigator
+      extendedNavigator.connection?.removeEventListener('change', updateNetworkInfo)
     }
 
     document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -261,10 +288,13 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   const setupPeriodicSync = async (registration: ServiceWorkerRegistration) => {
     try {
       // Request permission for periodic background sync
-      const status = await navigator.permissions.query({ name: 'periodic-background-sync' as any })
+      const status = await navigator.permissions.query({
+        name: 'periodic-background-sync' as PermissionName,
+      })
 
       if (status.state === 'granted' && 'periodicSync' in registration) {
-        await (registration as any).periodicSync.register('content-sync', {
+        const extendedRegistration = registration as ExtendedServiceWorkerRegistration
+        await extendedRegistration.periodicSync?.register('content-sync', {
           minInterval: defaultConfig.syncInterval,
         })
       }
@@ -306,7 +336,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
   const updateNetworkInfo = () => {
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
+      const extendedNavigator = navigator as ExtendedNavigator
+      const connection = extendedNavigator.connection
       setConnectionType(connection.effectiveType || 'unknown')
       setSaveData(connection.saveData || false)
     }
@@ -479,7 +510,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     if (!capabilities.hasWakeLock || wakeLock) return
 
     try {
-      const lock = await (navigator as any).wakeLock.request('screen')
+      const extendedNavigator = navigator as ExtendedNavigator
+      const lock = await extendedNavigator.wakeLock?.request('screen')
       setWakeLock(lock)
 
       lock.addEventListener('release', () => {

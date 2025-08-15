@@ -1,5 +1,16 @@
 import { logger } from '../services/logger'
 
+// 型定義の追加
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean
+}
+
+interface WindowWithVisualViewport extends Window {
+  visualViewport?: {
+    height: number
+  }
+}
+
 // PWA utilities and service worker management
 
 export interface PWAInstallPrompt {
@@ -52,7 +63,7 @@ class PWAManager {
     // Check if app is installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
+      (window.navigator as NavigatorWithStandalone).standalone === true
     ) {
       this.isInstalled = true
     }
@@ -196,7 +207,7 @@ class PWAManager {
     }
   }
 
-  async getCachedUserData(key: string): Promise<any | null> {
+  async getCachedUserData(key: string): Promise<unknown | null> {
     if ('caches' in window) {
       try {
         const cache = await caches.open('user-data')

@@ -4,7 +4,7 @@ import { getServerSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
-import { logger } from '../services/logger'
+import {} from '../services/logger'
 
 /**
  * Context creation for tRPC
@@ -56,7 +56,7 @@ const timingMiddleware = t.middleware(async ({ next }) => {
   const result = await next()
 
   //   const duration = Date.now() - start // TODO: Will be used in future
-  // logger.debug(`[tRPC] ${path} took ${duration}ms`)
+  // .debug(`[tRPC] ${path} took ${duration}ms`)
 
   return result
 })

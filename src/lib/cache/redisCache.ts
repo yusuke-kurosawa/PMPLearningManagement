@@ -20,7 +20,7 @@ const CacheConfigSchema = z.object({
 export type CacheConfig = z.infer<typeof CacheConfigSchema>
 
 // キャッシュエントリの型
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   data: T
   timestamp: number
   ttl: number
@@ -114,7 +114,7 @@ export class RedisCacheManager {
   private generateKey(
     strategy: CacheKeyStrategy,
     identifier: string,
-    additionalParams?: Record<string, any>
+    additionalParams?: Record<string, unknown>
   ): string {
     let key = `${strategy}:${identifier}`
 
@@ -156,7 +156,7 @@ export class RedisCacheManager {
       ttl?: number
       tags?: string[]
       version?: string
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<void> {
     const startTime = Date.now()
@@ -211,7 +211,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifier: string,
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
       acceptedVersions?: string[]
     }
   ): Promise<T | null> {
@@ -270,7 +270,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifier: string,
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<boolean> {
     try {
@@ -300,7 +300,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifiers: string[],
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<Map<string, T>> {
     const results = new Map<string, T>()
@@ -348,7 +348,7 @@ export class RedisCacheManager {
       ttl?: number
       tags?: string[]
       version?: string
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<void> {
     try {
@@ -621,7 +621,7 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
       tags?: string[]
       version?: string
       skipCache?: (req: unknown) => boolean
-      generateKey?: (req: unknown) => Record<string, any>
+      generateKey?: (req: unknown) => Record<string, unknown>
     }
   ) {
     return async function (req: unknown, handler: () => Promise<T>): Promise<T> {

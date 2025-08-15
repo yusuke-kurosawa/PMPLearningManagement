@@ -1,0 +1,558 @@
+# ================================================================
+# Composite Action: IDD検証
+# カテゴリ: IDD管理
+# 目的: Issue-Driven Development準拠チェックと自動化
+# 再利用性: IDD関連ワークフローで共通利用
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# ================================================================
+
+name: '📋 IDD検証'
+description: 'Issue-Driven Development準拠チェックと品質管理'
+
+inputs:
+  github-token:
+    description: 'GitHub API アクセストークン'
+    required: true
+  
+  check-commit-messages:
+    description: 'コミットメッセージのIssue参照チェック'
+    required: false
+    default: 'true'
+  
+  check-pr-title:
+    description: 'PRタイトルのIssue参照チェック'
+    required: false
+    default: 'true'
+  
+  check-branch-naming:
+    description: 'ブランチ命名規則チェック'
+    required: false
+    default: 'true'
+  
+  auto-label:
+    description: '自動ラベリングの実行'
+    required: false
+    default: 'true'
+  
+  issue-number:
+    description: '関連Issue番号（手動指定）'
+    required: false
+  
+  strict-mode:
+    description: '厳格モード（すべてのチェックを必須）'
+    required: false
+    default: 'false'
+
+outputs:
+  compliance-score:
+    description: 'IDD準拠スコア（0-100）'
+    value: ${{ steps.calculate-score.outputs.score }}
+  
+  issue-referenced:
+    description: 'Issue参照の有無'
+    value: ${{ steps.issue-check.outputs.referenced }}
+  
+  violations:
+    description: '検出された違反数'
+    value: ${{ steps.calculate-score.outputs.violations }}
+  
+  recommendations:
+    description: '改善提案'
+    value: ${{ steps.generate-recommendations.outputs.recommendations }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ================================================================
+    # Step 1: IDD検証環境準備
+    # ================================================================
+    - name: 📋 IDD validation setup
+      shell: bash
+      run: |
+        echo "📋 IDD検証環境準備中..."
+        
+        # 結果格納ディレクトリ作成
+        mkdir -p idd-results
+        
+        echo "🔧 検証設定:"
+        echo "  コミットメッセージチェック: ${{ inputs.check-commit-messages }}"
+        echo "  PRタイトルチェック: ${{ inputs.check-pr-title }}"
+        echo "  ブランチ命名チェック: ${{ inputs.check-branch-naming }}"
+        echo "  自動ラベリング: ${{ inputs.auto-label }}"
+        echo "  厳格モード: ${{ inputs.strict-mode }}"
+        
+        # 基本情報の収集
+        echo "📊 基本情報:"
+        echo "  ブランチ: ${GITHUB_REF#refs/heads/}"
+        echo "  イベント: ${GITHUB_EVENT_NAME}"
+        echo "  リポジトリ: ${GITHUB_REPOSITORY}"
+        
+        echo "✅ 環境準備完了"
+    
+    # ================================================================
+    # Step 2: コミットメッセージの検証
+    # ================================================================
+    - name: 💬 Commit message validation
+      id: commit-check
+      if: inputs.check-commit-messages == 'true'
+      shell: bash
+      run: |
+        echo "💬 コミットメッセージのIssue参照チェック..."
+        
+        VIOLATIONS=0
+        COMPLIANT_COMMITS=0
+        TOTAL_COMMITS=0
+        
+        # 最新のコミット群を取得（PRの場合は base..head、pushの場合は最新10個）
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          COMMITS=$(git rev-list --reverse "${GITHUB_BASE_REF}..${GITHUB_SHA}")
+        else
+          COMMITS=$(git rev-list --max-count=10 ${GITHUB_SHA})
+        fi
+        
+        echo "🔍 検証対象コミット一覧:" > idd-results/commit-analysis.txt
+        
+        for commit in $COMMITS; do
+          TOTAL_COMMITS=$((TOTAL_COMMITS + 1))
+          
+          # コミットメッセージを取得
+          MESSAGE=$(git log --format=%B -n 1 $commit)
+          SHORT_SHA=$(git rev-parse --short $commit)
+          
+          echo "Commit: $SHORT_SHA" >> idd-results/commit-analysis.txt
+          echo "Message: $MESSAGE" >> idd-results/commit-analysis.txt
+          
+          # Issue参照パターンをチェック (#数字 または fixes #数字 など)
+          if echo "$MESSAGE" | grep -qE "(#[0-9]+|[Ff]ixes?\s+#[0-9]+|[Cc]loses?\s+#[0-9]+|[Rr]esolves?\s+#[0-9]+)"; then
+            echo "✅ Issue参照あり: $SHORT_SHA"
+            echo "Status: COMPLIANT" >> idd-results/commit-analysis.txt
+            COMPLIANT_COMMITS=$((COMPLIANT_COMMITS + 1))
+          else
+            echo "⚠️ Issue参照なし: $SHORT_SHA - $MESSAGE"
+            echo "Status: VIOLATION" >> idd-results/commit-analysis.txt
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          echo "---" >> idd-results/commit-analysis.txt
+        done
+        
+        echo "commit-violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+        echo "compliant-commits=$COMPLIANT_COMMITS" >> $GITHUB_OUTPUT
+        echo "total-commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+        
+        # 結果サマリー
+        echo "📊 コミットメッセージ分析結果:"
+        echo "  総コミット数: $TOTAL_COMMITS"
+        echo "  準拠コミット数: $COMPLIANT_COMMITS"  
+        echo "  違反コミット数: $VIOLATIONS"
+        
+        if [ $TOTAL_COMMITS -gt 0 ]; then
+          COMPLIANCE_RATE=$((COMPLIANT_COMMITS * 100 / TOTAL_COMMITS))
+          echo "  準拠率: ${COMPLIANCE_RATE}%"
+          echo "commit-compliance-rate=$COMPLIANCE_RATE" >> $GITHUB_OUTPUT
+        else
+          echo "commit-compliance-rate=100" >> $GITHUB_OUTPUT
+        fi
+    
+    # ================================================================
+    # Step 3: PRタイトルの検証
+    # ================================================================
+    - name: 📝 PR title validation
+      id: pr-check
+      if: inputs.check-pr-title == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        echo "📝 PRタイトルのIssue参照チェック..."
+        
+        # PRタイトルを取得
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        
+        echo "🔍 PRタイトル: $PR_TITLE" > idd-results/pr-analysis.txt
+        
+        # Issue参照パターンをチェック
+        if echo "$PR_TITLE" | grep -qE "(#[0-9]+|[Ff]ixes?\s+#[0-9]+|[Cc]loses?\s+#[0-9]+|[Rr]esolves?\s+#[0-9]+)"; then
+          echo "✅ PRタイトルにIssue参照あり"
+          echo "Status: COMPLIANT" >> idd-results/pr-analysis.txt
+          echo "pr-compliant=true" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ PRタイトルにIssue参照なし"
+          echo "Status: VIOLATION" >> idd-results/pr-analysis.txt
+          echo "pr-compliant=false" >> $GITHUB_OUTPUT
+        fi
+        
+        # PRの説明文もチェック
+        PR_BODY="${{ github.event.pull_request.body }}"
+        if echo "$PR_BODY" | grep -qE "(#[0-9]+|[Ff]ixes?\s+#[0-9]+|[Cc]loses?\s+#[0-9]+|[Rr]esolves?\s+#[0-9]+)"; then
+          echo "✅ PR説明文にIssue参照あり"
+          echo "Body Issue Reference: YES" >> idd-results/pr-analysis.txt
+        else
+          echo "⚠️ PR説明文にIssue参照なし"
+          echo "Body Issue Reference: NO" >> idd-results/pr-analysis.txt
+        fi
+    
+    # ================================================================
+    # Step 4: ブランチ命名規則の検証
+    # ================================================================
+    - name: 🌿 Branch naming validation
+      id: branch-check
+      if: inputs.check-branch-naming == 'true'
+      shell: bash
+      run: |
+        echo "🌿 ブランチ命名規則チェック..."
+        
+        BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+        
+        echo "🔍 ブランチ名: $BRANCH_NAME" > idd-results/branch-analysis.txt
+        
+        # ブランチ命名規則のパターン
+        # feature/issue-123, fix/issue-456, hotfix/issue-789, etc.
+        VALID_PATTERNS=(
+          "^feature/issue-[0-9]+.*"
+          "^fix/issue-[0-9]+.*"
+          "^hotfix/issue-[0-9]+.*"
+          "^bug/issue-[0-9]+.*"
+          "^enhancement/issue-[0-9]+.*"
+          "^docs/issue-[0-9]+.*"
+          "^refactor/issue-[0-9]+.*"
+          "^test/issue-[0-9]+.*"
+          "^chore/issue-[0-9]+.*"
+          "^main$"
+          "^develop$"
+          "^master$"
+        )
+        
+        BRANCH_COMPLIANT=false
+        
+        for pattern in "${VALID_PATTERNS[@]}"; do
+          if echo "$BRANCH_NAME" | grep -qE "$pattern"; then
+            echo "✅ ブランチ命名規則に準拠: $pattern"
+            echo "Matched Pattern: $pattern" >> idd-results/branch-analysis.txt
+            echo "Status: COMPLIANT" >> idd-results/branch-analysis.txt
+            BRANCH_COMPLIANT=true
+            break
+          fi
+        done
+        
+        if [ "$BRANCH_COMPLIANT" = "false" ]; then
+          echo "⚠️ ブランチ命名規則に準拠していません"
+          echo "Status: VIOLATION" >> idd-results/branch-analysis.txt
+          echo "Recommendation: feature/issue-NUMBER-description の形式を使用してください" >> idd-results/branch-analysis.txt
+        fi
+        
+        echo "branch-compliant=$BRANCH_COMPLIANT" >> $GITHUB_OUTPUT
+    
+    # ================================================================
+    # Step 5: Issue関連性チェック
+    # ================================================================
+    - name: 🔗 Issue relationship check
+      id: issue-check
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        echo "🔗 Issue関連性チェック..."
+        
+        ISSUE_REFERENCED=false
+        REFERENCED_ISSUES=()
+        
+        # 指定されたIssue番号がある場合
+        if [ -n "${{ inputs.issue-number }}" ]; then
+          ISSUE_REFERENCED=true
+          REFERENCED_ISSUES+=("${{ inputs.issue-number }}")
+          echo "📌 手動指定Issue: #${{ inputs.issue-number }}"
+        fi
+        
+        # コミットメッセージからIssue番号を抽出
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          COMMITS=$(git rev-list --reverse "${GITHUB_BASE_REF}..${GITHUB_SHA}")
+        else
+          COMMITS=$(git rev-list --max-count=10 ${GITHUB_SHA})
+        fi
+        
+        for commit in $COMMITS; do
+          MESSAGE=$(git log --format=%B -n 1 $commit)
+          
+          # Issue番号を抽出（#123 の形式）
+          ISSUES=$(echo "$MESSAGE" | grep -oE "#[0-9]+" | sed 's/#//' || true)
+          
+          for issue in $ISSUES; do
+            if [ -n "$issue" ]; then
+              ISSUE_REFERENCED=true
+              REFERENCED_ISSUES+=("$issue")
+              echo "📌 参照Issue発見: #$issue (commit: $(git rev-parse --short $commit))"
+            fi
+          done
+        done
+        
+        # PR情報からもIssue番号を抽出
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          PR_ISSUES=$(echo "$PR_TITLE $PR_BODY" | grep -oE "#[0-9]+" | sed 's/#//' || true)
+          
+          for issue in $PR_ISSUES; do
+            if [ -n "$issue" ]; then
+              ISSUE_REFERENCED=true
+              REFERENCED_ISSUES+=("$issue")
+              echo "📌 PR参照Issue発見: #$issue"
+            fi
+          done
+        fi
+        
+        # 重複を除去
+        UNIQUE_ISSUES=($(printf "%s\n" "${REFERENCED_ISSUES[@]}" | sort -u))
+        
+        echo "referenced=$ISSUE_REFERENCED" >> $GITHUB_OUTPUT
+        echo "issue-count=${#UNIQUE_ISSUES[@]}" >> $GITHUB_OUTPUT
+        
+        # 結果をファイルに保存
+        echo "Issue Relationship Analysis" > idd-results/issue-analysis.txt
+        echo "Issue Referenced: $ISSUE_REFERENCED" >> idd-results/issue-analysis.txt
+        echo "Referenced Issues: ${UNIQUE_ISSUES[*]}" >> idd-results/issue-analysis.txt
+        echo "Issue Count: ${#UNIQUE_ISSUES[@]}" >> idd-results/issue-analysis.txt
+        
+        if [ "$ISSUE_REFERENCED" = "true" ]; then
+          echo "✅ Issue参照あり: ${UNIQUE_ISSUES[*]}"
+        else
+          echo "⚠️ Issue参照なし"
+        fi
+    
+    # ================================================================
+    # Step 6: IDD準拠スコア計算
+    # ================================================================
+    - name: 📊 Calculate IDD compliance score
+      id: calculate-score
+      shell: bash
+      run: |
+        echo "📊 IDD準拠スコア計算中..."
+        
+        TOTAL_SCORE=0
+        MAX_SCORE=100
+        VIOLATIONS=0
+        
+        # コミットメッセージ準拠 (30点)
+        if [ "${{ inputs.check-commit-messages }}" = "true" ]; then
+          COMMIT_RATE=${{ steps.commit-check.outputs.commit-compliance-rate || 100 }}
+          COMMIT_SCORE=$((COMMIT_RATE * 30 / 100))
+          TOTAL_SCORE=$((TOTAL_SCORE + COMMIT_SCORE))
+          
+          if [ "$COMMIT_RATE" -lt 100 ]; then
+            COMMIT_VIOLATIONS=${{ steps.commit-check.outputs.commit-violations || 0 }}
+            VIOLATIONS=$((VIOLATIONS + COMMIT_VIOLATIONS))
+          fi
+          
+          echo "  コミットメッセージスコア: $COMMIT_SCORE/30 (準拠率: ${COMMIT_RATE}%)"
+        else
+          TOTAL_SCORE=$((TOTAL_SCORE + 30))  # スキップした場合は満点
+        fi
+        
+        # PRタイトル準拠 (20点)
+        if [ "${{ inputs.check-pr-title }}" = "true" ] && [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          if [ "${{ steps.pr-check.outputs.pr-compliant }}" = "true" ]; then
+            TOTAL_SCORE=$((TOTAL_SCORE + 20))
+            echo "  PRタイトルスコア: 20/20"
+          else
+            VIOLATIONS=$((VIOLATIONS + 1))
+            echo "  PRタイトルスコア: 0/20"
+          fi
+        else
+          TOTAL_SCORE=$((TOTAL_SCORE + 20))  # スキップした場合は満点
+        fi
+        
+        # ブランチ命名準拠 (20点)
+        if [ "${{ inputs.check-branch-naming }}" = "true" ]; then
+          if [ "${{ steps.branch-check.outputs.branch-compliant }}" = "true" ]; then
+            TOTAL_SCORE=$((TOTAL_SCORE + 20))
+            echo "  ブランチ命名スコア: 20/20"
+          else
+            VIOLATIONS=$((VIOLATIONS + 1))
+            echo "  ブランチ命名スコア: 0/20"
+          fi
+        else
+          TOTAL_SCORE=$((TOTAL_SCORE + 20))  # スキップした場合は満点
+        fi
+        
+        # Issue参照 (30点)
+        if [ "${{ steps.issue-check.outputs.referenced }}" = "true" ]; then
+          TOTAL_SCORE=$((TOTAL_SCORE + 30))
+          echo "  Issue参照スコア: 30/30"
+        else
+          VIOLATIONS=$((VIOLATIONS + 1))
+          echo "  Issue参照スコア: 0/30"
+        fi
+        
+        echo "score=$TOTAL_SCORE" >> $GITHUB_OUTPUT
+        echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+        
+        # スコア評価
+        echo "📊 IDD準拠スコア: $TOTAL_SCORE/100"
+        
+        if [ $TOTAL_SCORE -ge 90 ]; then
+          echo "🏆 優秀: IDD準拠率が高いです"
+          GRADE="A"
+        elif [ $TOTAL_SCORE -ge 70 ]; then
+          echo "✅ 良好: おおむねIDD準拠しています"
+          GRADE="B"
+        elif [ $TOTAL_SCORE -ge 50 ]; then
+          echo "⚠️ 改善必要: IDD準拠に問題があります"
+          GRADE="C"
+        else
+          echo "❌ 不合格: IDD準拠していません"
+          GRADE="F"
+        fi
+        
+        echo "grade=$GRADE" >> $GITHUB_OUTPUT
+        
+        # スコアレポート作成
+        {
+          echo "IDD Compliance Score Report"
+          echo "=========================="
+          echo "Overall Score: $TOTAL_SCORE/100"
+          echo "Grade: $GRADE"
+          echo "Violations: $VIOLATIONS"
+          echo ""
+          echo "Score Breakdown:"
+          if [ "${{ inputs.check-commit-messages }}" = "true" ]; then
+            echo "- Commit Messages: ${COMMIT_SCORE:-0}/30"
+          else
+            echo "- Commit Messages: 30/30 (skipped)"
+          fi
+          if [ "${{ inputs.check-pr-title }}" = "true" ] && [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            if [ "${{ steps.pr-check.outputs.pr-compliant }}" = "true" ]; then
+              echo "- PR Title: 20/20"
+            else
+              echo "- PR Title: 0/20"
+            fi
+          else
+            echo "- PR Title: 20/20 (skipped)"
+          fi
+          if [ "${{ inputs.check-branch-naming }}" = "true" ]; then
+            if [ "${{ steps.branch-check.outputs.branch-compliant }}" = "true" ]; then
+              echo "- Branch Naming: 20/20"
+            else
+              echo "- Branch Naming: 0/20"
+            fi
+          else
+            echo "- Branch Naming: 20/20 (skipped)"
+          fi
+          if [ "${{ steps.issue-check.outputs.referenced }}" = "true" ]; then
+            echo "- Issue Reference: 30/30"
+          else
+            echo "- Issue Reference: 0/30"
+          fi
+          echo ""
+          echo "Generated: $(date)"
+        } > idd-results/compliance-score.txt
+    
+    # ================================================================
+    # Step 7: 改善提案生成
+    # ================================================================
+    - name: 💡 Generate recommendations
+      id: generate-recommendations
+      shell: bash
+      run: |
+        echo "💡 改善提案生成中..."
+        
+        RECOMMENDATIONS=()
+        
+        # コミットメッセージ関連の提案
+        if [ "${{ steps.commit-check.outputs.commit-violations || 0 }}" -gt 0 ]; then
+          RECOMMENDATIONS+=("コミットメッセージにIssue番号を含めてください（例: feat: 新機能追加 #123）")
+        fi
+        
+        # PRタイトル関連の提案
+        if [ "${{ steps.pr-check.outputs.pr-compliant }}" = "false" ]; then
+          RECOMMENDATIONS+=("PRタイトルにIssue番号を含めてください（例: feat: 新機能実装 #123）")
+        fi
+        
+        # ブランチ命名関連の提案
+        if [ "${{ steps.branch-check.outputs.branch-compliant }}" = "false" ]; then
+          RECOMMENDATIONS+=("ブランチ名をfeature/issue-NUMBER-description形式にしてください")
+        fi
+        
+        # Issue参照関連の提案
+        if [ "${{ steps.issue-check.outputs.referenced }}" = "false" ]; then
+          RECOMMENDATIONS+=("作業前にIssueを作成し、コミットやPRで参照してください")
+        fi
+        
+        # 全般的な提案
+        if [ "${{ steps.calculate-score.outputs.violations }}" -gt 3 ]; then
+          RECOMMENDATIONS+=("IDD準拠を向上させるため、開発前にIssueベースの計画を立ててください")
+        fi
+        
+        # 提案をJSON形式で出力
+        RECOMMENDATIONS_JSON=$(printf '%s\n' "${RECOMMENDATIONS[@]}" | jq -R . | jq -s .)
+        echo "recommendations<<EOF" >> $GITHUB_OUTPUT
+        echo "$RECOMMENDATIONS_JSON" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # 提案をファイルに保存
+        echo "IDD Improvement Recommendations" > idd-results/recommendations.txt
+        if [ ${#RECOMMENDATIONS[@]} -gt 0 ]; then
+          printf '%s\n' "${RECOMMENDATIONS[@]}" >> idd-results/recommendations.txt
+        else
+          echo "すべてのチェックに合格しています。現在の品質を維持してください。" >> idd-results/recommendations.txt
+        fi
+        
+        echo "📋 生成された提案数: ${#RECOMMENDATIONS[@]}"
+    
+    # ================================================================
+    # Step 8: IDD検証レポート生成
+    # ================================================================
+    - name: 📄 Generate IDD validation report
+      shell: bash
+      run: |
+        echo "📄 IDD検証レポート生成中..."
+        
+        {
+          echo "# IDD検証レポート"
+          echo ""
+          echo "## 📊 検証結果サマリー"
+          echo ""
+          echo "- **全体スコア**: ${{ steps.calculate-score.outputs.score }}/100"
+          echo "- **グレード**: ${{ steps.calculate-score.outputs.grade }}"
+          echo "- **違反数**: ${{ steps.calculate-score.outputs.violations }}"
+          echo "- **Issue参照**: ${{ steps.issue-check.outputs.referenced }}"
+          echo ""
+          echo "## 🔍 詳細検証結果"
+          echo ""
+          echo "### コミットメッセージ分析"
+          if [ "${{ inputs.check-commit-messages }}" = "true" ]; then
+            echo "- 総コミット数: ${{ steps.commit-check.outputs.total-commits || 0 }}"
+            echo "- 準拠コミット数: ${{ steps.commit-check.outputs.compliant-commits || 0 }}"
+            echo "- 準拠率: ${{ steps.commit-check.outputs.commit-compliance-rate || 100 }}%"
+          fi
+          echo ""
+          echo "### PR分析"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] && [ "${{ inputs.check-pr-title }}" = "true" ]; then
+            echo "- PRタイトル準拠: ${{ steps.pr-check.outputs.pr-compliant }}"
+          fi
+          echo ""
+          echo "### ブランチ分析"
+          if [ "${{ inputs.check-branch-naming }}" = "true" ]; then
+            echo "- ブランチ命名準拠: ${{ steps.branch-check.outputs.branch-compliant }}"
+          fi
+          echo ""
+          echo "### Issue関連性"
+          echo "- Issue参照あり: ${{ steps.issue-check.outputs.referenced }}"
+          echo "- 参照Issue数: ${{ steps.issue-check.outputs.issue-count }}"
+          echo ""
+          echo "## 💡 改善提案"
+          echo ""
+          if [ -f "idd-results/recommendations.txt" ]; then
+            cat idd-results/recommendations.txt | sed 's/^/- /'
+          fi
+          echo ""
+          echo "---"
+          echo "Generated: $(date)"
+          echo "Repository: ${GITHUB_REPOSITORY}"
+          echo "Event: ${GITHUB_EVENT_NAME}"
+        } > idd-results/validation-report.md
+        
+        echo "📄 IDD検証レポートを生成しました: idd-results/validation-report.md"
+        echo "📊 検証完了 - スコア: ${{ steps.calculate-score.outputs.score }}/100"

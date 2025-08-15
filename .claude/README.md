@@ -1,175 +1,297 @@
-# .claude ディレクトリ
+# 🤖 .claude ディレクトリ - Claude Code コンテキスト管理システム
 
-このディレクトリは、Claude Code (claude.ai/code) がプロジェクトコンテキストを効率的に管理するための専用ディレクトリです。
+> **重要**: このディレクトリは Claude Code (claude.ai/code) がプロジェクトを深く理解し、効率的に支援するための専用コンテキスト管理システムです。
 
-## 目的
+## 📋 概要
 
-- プロジェクトの最新状態をClaudeが即座に把握できるようにする
-- 重要な決定事項や技術的詳細を集約する
-- 開発チームが参照しやすいドキュメント構造を提供する
-- コンテキストの一貫性と最新性を保証する
+`.claude`ディレクトリは、PMPLearningManagementプロジェクトのコンテキスト情報を体系的に管理し、Claude AIとの協働を最適化するための統合管理システムです。プロジェクトの現状、アーキテクチャ、開発ガイドライン、自動化ツールなどを集約しています。
 
-## ディレクトリ構造
+## 🏗️ ディレクトリ構造と役割
 
 ```
 .claude/
-├── context/                    # プロジェクトコンテキスト
-│   ├── project-map.md         # プロジェクト全体の構造マップ
-│   ├── architecture-summary.md # アーキテクチャの要約
-│   ├── current-status.md      # 現在の開発ステータス
-│   ├── key-decisions.md       # 主要な技術的決定事項
-│   ├── project-summary.md     # プロジェクトサマリー（自動生成）
-│   ├── todo-list.md          # TODOリスト（自動抽出）
-│   └── recent-changes.md      # 最近の変更履歴（自動生成）
+├── 📂 agents/                    # AIエージェント定義
+│   ├── architecture/            # アーキテクチャレビュー・設計エージェント
+│   ├── coordination/           # タスク調整・管理エージェント
+│   ├── development/            # 開発支援エージェント
+│   ├── infrastructure/         # インフラ・DevOpsエージェント
+│   ├── management/             # プロジェクト管理エージェント
+│   └── quality/                # 品質保証・テストエージェント
 │
-├── quick-ref/                  # クイックリファレンス
-│   ├── commands.md            # よく使うコマンド一覧
-│   └── file-locations.md      # 重要ファイルの配置
+├── 📂 automation/                # 自動化設定・スクリプト
+│   ├── hooks/                  # Git Hooks設定
+│   ├── workflows/              # GitHub Actions統合
+│   └── scripts/                # 自動化実行スクリプト
 │
-├── prompts/                    # プロンプトテンプレート
-│   ├── code-review.md         # コードレビュー用テンプレート
-│   ├── architecture-review.md # アーキテクチャレビュー用
-│   └── testing-guidelines.md  # テストガイドライン
+├── 📂 context/                   # プロジェクトコンテキスト（最重要）
+│   ├── current-status.md       # 🔴 現在のプロジェクトステータス
+│   ├── implementation-status.md # 🔴 実装状況詳細
+│   ├── architecture-summary.md # 🔴 アーキテクチャサマリー
+│   ├── key-decisions.md        # 🔴 主要な技術的決定事項
+│   ├── project-map.md          # プロジェクト全体構造マップ
+│   ├── project-summary.md      # プロジェクトサマリー（自動生成）
+│   ├── todo-list.md            # TODOリスト（自動抽出）
+│   └── recent-changes.md       # 最近の変更履歴（自動生成）
 │
-├── scripts/                    # 自動化スクリプト
-│   └── sync-context.sh        # コンテキスト同期スクリプト
+├── 📂 devops/                    # DevOps設定・ガイドライン
+│   ├── ci-cd/                  # CI/CDパイプライン設定
+│   ├── monitoring/             # 監視・アラート設定
+│   └── deployment/             # デプロイメント設定
 │
-└── templates/                  # 各種テンプレート（将来用）
+├── 📂 policies/                  # 開発ポリシー・ガイドライン
+│   ├── coding-standards.md     # コーディング規約
+│   ├── review-process.md       # レビュープロセス
+│   └── security-policy.md      # セキュリティポリシー
+│
+├── 📂 prompts/                   # Claudeプロンプトテンプレート
+│   ├── code-review.md          # コードレビュー用
+│   ├── architecture-review.md  # アーキテクチャレビュー用
+│   ├── testing-guidelines.md   # テストガイドライン
+│   └── debugging.md            # デバッグ支援用
+│
+├── 📂 quick-ref/                 # クイックリファレンス
+│   ├── commands.md             # よく使うコマンド一覧
+│   ├── file-locations.md       # 重要ファイルの配置
+│   └── shortcuts.md            # ショートカット・Tips
+│
+├── 📂 rules/                     # 開発ルール定義
+│   ├── eslint-rules.md         # ESLintルール
+│   ├── github-actions-rules.md # GitHub Actionsルール
+│   └── workflow-comment-rules.md # ワークフローコメントルール
+│
+├── 📂 scripts/                   # 管理スクリプト
+│   ├── sync-context.sh         # コンテキスト同期
+│   ├── update-docs.sh          # ドキュメント更新
+│   └── analyze-project.sh      # プロジェクト分析
+│
+└── 📂 templates/                 # 各種テンプレート
+    ├── component/               # コンポーネントテンプレート
+    ├── service/                # サービステンプレート
+    └── test/                   # テストテンプレート
 ```
 
-## 使い方
+## 🎯 主要機能と使用方法
 
-### 1. コンテキストの確認
+### 1. 🔍 コンテキスト管理
 
-Claudeに質問する前に、以下のファイルを参照してプロジェクトの状態を把握：
+#### 初回利用時
+```bash
+# 1. 現在のステータス確認
+cat .claude/context/current-status.md
 
-- **初めての場合**: `context/project-map.md`から開始
-- **アーキテクチャについて**: `context/architecture-summary.md`を参照
-- **現在の状況**: `context/current-status.md`で最新状態を確認
-- **技術的決定**: `context/key-decisions.md`で過去の決定を確認
+# 2. 実装状況の把握
+cat .claude/context/implementation-status.md
 
-### 2. クイックリファレンス
+# 3. アーキテクチャ理解
+cat .claude/context/architecture-summary.md
+```
 
-よく使う情報への素早いアクセス：
+#### 定期メンテナンス
+```bash
+# コンテキスト同期（重要な変更後に実行）
+npm run context:update
 
-- **コマンド**: `quick-ref/commands.md`
-- **ファイル配置**: `quick-ref/file-locations.md`
+# ステータス確認
+npm run context:status
 
-### 3. プロンプトテンプレート
+# レポート生成
+npm run context:report
+```
 
-Claudeへの質問時に使用：
+### 2. 🤖 AIエージェント活用
+
+各エージェントは特定の専門領域を持ち、Claude Codeと連携して作業を支援します。
 
 ```bash
-# コードレビューを依頼する場合
-cat .claude/prompts/code-review.md
+# アーキテクチャレビュー
+@agent-architecture-reviewer レビューを実施してください
 
-# アーキテクチャレビューを依頼する場合
-cat .claude/prompts/architecture-review.md
+# コード品質チェック
+@agent-quality-checker 品質チェックを実行してください
 
-# テスト作成を依頼する場合
-cat .claude/prompts/testing-guidelines.md
+# DevOps最適化
+@agent-devops-optimizer GitHub Actionsを最適化してください
 ```
 
-### 4. コンテキストの同期
+### 3. ⚡ 自動化機能
 
-プロジェクトの最新状態を反映：
+#### Git Hooks統合
+```bash
+# Git Hooks有効化
+npm run hooks:install
+
+# 機能:
+# - pre-commit: ESLint、Prettier、テスト実行
+# - commit-msg: IDD準拠チェック
+# - pre-push: 包括的品質チェック
+```
+
+#### GitHub Actions連携
+```yaml
+# .github/workflows/*.yml で自動実行
+- コンテキスト同期
+- ドキュメント更新
+- 品質メトリクス収集
+```
+
+### 4. 📚 プロンプトテンプレート
 
 ```bash
-# コンテキストを同期
-./.claude/scripts/sync-context.sh
+# コードレビュー依頼
+cat .claude/prompts/code-review.md | pbcopy
 
-# package.jsonに追加してnpmコマンドとして実行
-npm run sync-context
+# アーキテクチャ相談
+cat .claude/prompts/architecture-review.md | pbcopy
+
+# テスト作成支援
+cat .claude/prompts/testing-guidelines.md | pbcopy
 ```
 
-## 自動更新
-
-以下のファイルは`sync-context.sh`スクリプトによって自動更新されます：
-
-- `context/project-summary.md` - ファイル統計、依存関係、カバレッジ
-- `context/todo-list.md` - ソースコードからTODOコメントを抽出
-- `context/recent-changes.md` - Git履歴から最近の変更を記録
-- `context/current-status.md` - Git情報セクションの更新
-
-## ベストプラクティス
-
-### DO ✅
-
-1. **定期的な同期**: 大きな変更後は`sync-context.sh`を実行
-2. **決定の記録**: 重要な技術的決定は`key-decisions.md`に記録
-3. **ステータス更新**: マイルストーン達成時は`current-status.md`を更新
-4. **テンプレート活用**: プロンプトテンプレートを使って一貫した質問
-
-### DON'T ❌
-
-1. **機密情報の記載**: パスワード、APIキー等は記載しない
-2. **過度な詳細**: 要約レベルを保ち、詳細は元ドキュメントを参照
-3. **重複情報**: 他のドキュメントと重複する情報は参照リンクで対応
-4. **古い情報の放置**: 定期的にレビューして古い情報を更新
-
-## 統合
-
-### package.jsonへの追加
+## 🔧 NPMスクリプト
 
 ```json
 {
   "scripts": {
-    "sync-context": "./.claude/scripts/sync-context.sh",
-    "context:update": "npm run sync-context",
-    "context:view": "cat .claude/context/current-status.md"
+    // コンテキスト管理
+    "context:update": "./.claude/scripts/sync-context.sh",
+    "context:status": "cat .claude/context/current-status.md",
+    "context:report": "node .claude/scripts/generate-report.js",
+    
+    // エージェント実行
+    "agent:review": "node .claude/agents/run-agent.js review",
+    "agent:test": "node .claude/agents/run-agent.js test",
+    "agent:optimize": "node .claude/agents/run-agent.js optimize",
+    
+    // 自動化
+    "hooks:install": "node .claude/automation/install-hooks.js",
+    "workflow:check": "node .claude/automation/check-workflows.js"
   }
 }
 ```
 
-### Git Hooksでの自動実行
+## 📊 メトリクスとレポート
 
-`.git/hooks/pre-commit`に以下を追加：
+### 自動収集メトリクス
+- **コード品質**: ESLintエラー/警告数、型カバレッジ率
+- **テストカバレッジ**: 単体テスト、E2Eテスト
+- **パフォーマンス**: ビルド時間、バンドルサイズ
+- **DevOps成熟度**: CI/CD実行時間、デプロイ頻度
 
+### レポート生成
 ```bash
-#!/bin/bash
-# コミット前にコンテキストを同期
-./.claude/scripts/sync-context.sh
+# 週次レポート
+npm run report:weekly
+
+# 品質レポート
+npm run report:quality
+
+# パフォーマンスレポート
+npm run report:performance
 ```
 
-### CI/CDパイプラインでの活用
+## 🚀 ベストプラクティス
 
-GitHub Actionsで自動更新：
+### ✅ 推奨事項
 
-```yaml
-- name: Sync Claude Context
-  run: |
-    chmod +x .claude/scripts/sync-context.sh
-    ./.claude/scripts/sync-context.sh
+1. **定期的な同期**
+   - 大きな変更後は必ず`context:update`を実行
+   - 週次でコンテキスト全体をレビュー
 
-- name: Commit Context Updates
-  run: |
-    git add .claude/context/
-    git commit -m "chore: update Claude context [skip ci]" || true
+2. **エージェント活用**
+   - 専門的なタスクは適切なエージェントに委任
+   - エージェント間の連携を活用
+
+3. **ドキュメント更新**
+   - 重要な決定は`key-decisions.md`に記録
+   - 実装完了時は`implementation-status.md`を更新
+
+4. **自動化の活用**
+   - Git Hooksで品質を自動保証
+   - GitHub Actionsで継続的な改善
+
+### ❌ 避けるべきこと
+
+1. **機密情報の記載**
+   - APIキー、パスワードは絶対に記載しない
+   - 環境変数で管理
+
+2. **過度な詳細**
+   - サマリーレベルを保つ
+   - 詳細は元ファイルを参照
+
+3. **手動更新の放置**
+   - 自動化可能な部分は必ずスクリプト化
+   - 定期的なメンテナンスを怠らない
+
+## 🔄 継続的改善
+
+### Issue駆動開発（IDD）
+```bash
+# Issue作成からPRまでの自動化
+npm run idd:create-issue
+npm run idd:create-branch
+npm run idd:create-pr
 ```
 
-## トラブルシューティング
+### メトリクス駆動改善
+```bash
+# 改善ポイントの自動検出
+npm run analyze:improvement-points
 
-### Q: sync-context.shが実行できない
+# 技術的負債の可視化
+npm run analyze:tech-debt
+```
 
-A: 実行権限を付与: `chmod +x .claude/scripts/sync-context.sh`
+## 🛠️ トラブルシューティング
 
-### Q: コンテキストファイルが古い
+### よくある問題
 
-A: 手動で`sync-context.sh`を実行するか、Git Hooksを設定
+#### Q: コンテキストが古い
+```bash
+# 強制同期
+npm run context:update -- --force
 
-### Q: Claudeが最新情報を認識しない
+# キャッシュクリア
+npm run context:clear-cache
+```
 
-A: CLAUDE.mdの先頭にある参照リンクを確認し、最新のコンテキストファイルを指定
+#### Q: エージェントが動作しない
+```bash
+# エージェント診断
+npm run agent:diagnose
 
-## 貢献
+# 依存関係チェック
+npm run agent:check-deps
+```
 
-このコンテキスト管理システムの改善提案は歓迎します：
+#### Q: 自動化が失敗する
+```bash
+# Hooks再インストール
+npm run hooks:reinstall
 
-1. 新しいテンプレートの追加
-2. 同期スクリプトの機能拡張
-3. ドキュメントの改善
-4. 自動化の強化
+# ワークフロー検証
+npm run workflow:validate
+```
 
-## ライセンス
+## 📝 貢献ガイドライン
 
-このディレクトリの内容はプロジェクト本体と同じライセンスに従います。
+### 新機能追加時
+1. 適切なディレクトリに配置
+2. READMEを更新
+3. テストを追加
+4. ドキュメントを作成
+
+### 改善提案
+- Issueで提案
+- PRでの実装
+- レビュープロセス遵守
+
+## 📄 ライセンス
+
+このディレクトリの内容はプロジェクト本体（MIT）と同じライセンスに従います。
+
+---
+
+**最終更新**: 2025-08-15  
+**メンテナー**: PMPLearningManagement開発チーム  
+**Claude Code統合バージョン**: 2.0.0

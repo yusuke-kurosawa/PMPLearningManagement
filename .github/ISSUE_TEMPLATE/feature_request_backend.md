@@ -7,21 +7,26 @@ assignees: ''
 ---
 
 ## 📋 API/Service Description
+
 <!-- Provide a clear description of the backend feature -->
 
 ## 🎯 Business Requirements
+
 **Feature Purpose**: <!-- What business problem does this solve? -->
 **Expected Load**: <!-- How many requests/users will this handle? -->
 **Performance Requirements**: <!-- Response time, throughput requirements -->
 
 ## 🔌 API Specifications
+
 ### Endpoints
+
 - [ ] `POST /api/[endpoint]` - Create operation
-- [ ] `GET /api/[endpoint]` - Read operation  
+- [ ] `GET /api/[endpoint]` - Read operation
 - [ ] `PUT /api/[endpoint]` - Update operation
 - [ ] `DELETE /api/[endpoint]` - Delete operation
 
 ### Request/Response Schema
+
 ```json
 // Request Schema
 {
@@ -38,16 +43,20 @@ assignees: ''
 ```
 
 ## 🗄️ Database Requirements
+
 ### Schema Changes
+
 - [ ] New tables needed: `table_name`
 - [ ] Modified tables: `existing_table`
 - [ ] Indexes required: `field_name`
 - [ ] Migration scripts: `YYYY_MM_DD_migration_name`
 
 ### Data Relationships
+
 <!-- Describe data relationships and constraints -->
 
 ## 🔒 Security Requirements
+
 - [ ] Authentication required
 - [ ] Authorization levels: `[admin|user|guest]`
 - [ ] Input validation rules
@@ -56,6 +65,7 @@ assignees: ''
 - [ ] CORS configuration
 
 ## 📊 Performance Requirements
+
 - **Response Time**: < Xms for Y% of requests
 - **Throughput**: X requests/second
 - **Concurrent Users**: X users
@@ -63,6 +73,7 @@ assignees: ''
 - **Memory Usage**: < XMB per instance
 
 ## 🧪 Testing Requirements
+
 - [ ] Unit tests for all business logic
 - [ ] Integration tests for API endpoints
 - [ ] Database transaction tests
@@ -71,18 +82,22 @@ assignees: ''
 - [ ] Error handling tests
 
 ## 🔧 Technical Specifications
+
 ### Services to Create/Modify
+
 - [ ] Service: `src/services/[ServiceName].js`
 - [ ] Controller: `src/controllers/[ControllerName].js`
 - [ ] Model: `src/models/[ModelName].js`
 - [ ] Middleware: `src/middleware/[MiddlewareName].js`
 
 ### Dependencies
+
 - [ ] New packages needed:
 - [ ] Database changes required
 - [ ] External API integrations
 
 ## ✅ Acceptance Criteria
+
 - [ ] All API endpoints return expected responses
 - [ ] Database operations are atomic and consistent
 - [ ] Security requirements are implemented
@@ -92,6 +107,7 @@ assignees: ''
 - [ ] Documentation is complete
 
 ## 🚀 Deployment Considerations
+
 - [ ] Environment variables needed
 - [ ] Database migrations required
 - [ ] Infrastructure scaling requirements
@@ -99,13 +115,17 @@ assignees: ''
 - [ ] Backup and recovery procedures
 
 ## 🔗 Related Issues
+
 <!-- Link any related issues, dependencies, or blockers -->
+
 - Blocks: #
 - Depends on: #
 - Related to: #
 
 ## 📈 Success Metrics
+
 <!-- How will we measure the success of this backend feature? -->
 
 ## 🐛 Edge Cases & Error Handling
+
 <!-- Describe potential edge cases and how they should be handled -->

@@ -237,13 +237,13 @@
     "🧪 種類:テスト": "type:test",
     "🔒 種類:セキュリティ": ["type:enhancement", "area:security"],
     "⚡ 種類:パフォーマンス": ["type:enhancement", "area:performance"],
-    
+
     "🚨 優先度:緊急": "priority:critical",
     "🔥 優先度:高": "priority:high",
     "📋 優先度:中": "priority:medium",
     "📌 優先度:低": "priority:low",
     "💭 優先度:検討": ["priority:low", "status:triage"],
-    
+
     "🆕 状況:未着手": "status:ready",
     "🔍 状況:調査中": "status:triage",
     "🚀 状況:作業中": "status:in-progress",
@@ -251,7 +251,7 @@
     "👀 状況:レビュー待ち": "status:review",
     "✅ 状況:完了": null,
     "❌ 状況:対応不要": "wontfix",
-    
+
     "🎨 領域:UI/UX": "area:ui",
     "⚛️ 領域:フロントエンド": "area:frontend",
     "🔧 領域:バックエンド": "area:backend",
@@ -261,7 +261,7 @@
     "🛠️ 領域:DevOps": "area:devops",
     "🔐 領域:認証・認可": "area:security",
     "🤖 領域:AI/ML": "area:backend",
-    
+
     "🆘 ヘルプ募集": "help-wanted",
     "🌟 初心者歓迎": "good-first-issue",
     "⚠️ 破壊的変更": "breaking-change",

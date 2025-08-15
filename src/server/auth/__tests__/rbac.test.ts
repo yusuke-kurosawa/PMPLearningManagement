@@ -5,7 +5,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
-  PermissionChecker,
   createPermissionChecker,
   requirePermission,
   requireOwnership,
@@ -14,13 +13,12 @@ import {
   Action,
   SubscriptionPlan,
   UserContext,
-  PermissionError,
   getPermissionDebugInfo,
 } from '../rbac'
 import { UserRole } from '@prisma/client'
 
 describe('RBAC システム', () => {
-  describe('PermissionChecker', () => {
+  describe('', () => {
     let adminUser: UserContext
     let instructorUser: UserContext
     let premiumUser: UserContext
@@ -62,7 +60,7 @@ describe('RBAC システム', () => {
 
     describe('基本権限チェック', () => {
       it('管理者は全ての権限を持つ', () => {
-        const checker = createPermissionChecker(adminUser)
+        const checker = create(adminUser)
 
         expect(checker.hasPermission(Permission.USER_ADMIN)).toBe(true)
         expect(checker.hasPermission(Permission.SYSTEM_ADMIN)).toBe(true)
@@ -71,7 +69,7 @@ describe('RBAC システム', () => {
       })
 
       it('インストラクターは適切な権限を持つ', () => {
-        const checker = createPermissionChecker(instructorUser)
+        const checker = create(instructorUser)
 
         expect(checker.hasPermission(Permission.LEARNING_ANALYTICS)).toBe(true)
         expect(checker.hasPermission(Permission.EXAM_CREATE)).toBe(true)
@@ -84,7 +82,7 @@ describe('RBAC システム', () => {
       })
 
       it('プレミアムユーザーは限定された権限を持つ', () => {
-        const checker = createPermissionChecker(premiumUser)
+        const checker = create(premiumUser)
 
         expect(checker.hasPermission(Permission.LEARNING_READ)).toBe(true)
         expect(checker.hasPermission(Permission.LEARNING_ANALYTICS)).toBe(true)
@@ -97,7 +95,7 @@ describe('RBAC システム', () => {
       })
 
       it('無料ユーザーは基本権限のみを持つ', () => {
-        const checker = createPermissionChecker(freeUser)
+        const checker = create(freeUser)
 
         expect(checker.hasPermission(Permission.LEARNING_READ)).toBe(true)
         expect(checker.hasPermission(Permission.CONTENT_READ)).toBe(true)
@@ -112,7 +110,7 @@ describe('RBAC システム', () => {
 
     describe('複数権限チェック', () => {
       it('全ての権限が必要な場合（AND条件）', () => {
-        const checker = createPermissionChecker(instructorUser)
+        const checker = create(instructorUser)
 
         const requiredPermissions = [
           Permission.LEARNING_READ,
@@ -131,7 +129,7 @@ describe('RBAC システム', () => {
       })
 
       it('いずれかの権限があれば良い場合（OR条件）', () => {
-        const checker = createPermissionChecker(freeUser)
+        const checker = create(freeUser)
 
         const anyPermissions = [
           Permission.AI_UNLIMITED, // 持っていない
@@ -153,7 +151,7 @@ describe('RBAC システム', () => {
 
     describe('リソース・アクションベースアクセス', () => {
       it('リソースとアクションの組み合わせで権限チェック', () => {
-        const checker = createPermissionChecker(instructorUser)
+        const checker = create(instructorUser)
 
         expect(checker.canAccess(Resource.LEARNING, Action.READ)).toBe(true)
         expect(checker.canAccess(Resource.LEARNING, Action.UPDATE)).toBe(true)
@@ -164,7 +162,7 @@ describe('RBAC システム', () => {
 
     describe('条件付き権限チェック', () => {
       it('カスタム条件を含む権限チェック', () => {
-        const checker = createPermissionChecker(premiumUser)
+        const checker = create(premiumUser)
 
         const profileCompleteCondition = (ctx: UserContext) => ctx.profileComplete
         const profileIncompleteCondition = (ctx: UserContext) => !ctx.profileComplete
@@ -181,14 +179,14 @@ describe('RBAC システム', () => {
 
     describe('リソース所有権チェック', () => {
       it('自分のリソースにはアクセス可能', () => {
-        const checker = createPermissionChecker(freeUser)
+        const checker = create(freeUser)
 
         expect(checker.canAccessOwnResource(freeUser.id)).toBe(true)
         expect(checker.canAccessOwnResource('other-user-id')).toBe(false)
       })
 
       it('管理者は他人のリソースにもアクセス可能', () => {
-        const checker = createPermissionChecker(adminUser)
+        const checker = create(adminUser)
 
         expect(checker.canAccessOwnResource('any-user-id')).toBe(true)
         expect(checker.canAccessOwnResource('another-user-id')).toBe(true)
@@ -199,25 +197,25 @@ describe('RBAC システム', () => {
       it('管理者ロールの判定', () => {
         expect(createPermissionChecker(adminUser).isAdmin()).toBe(true)
         expect(createPermissionChecker(instructorUser).isAdmin()).toBe(false)
-        expect(createPermissionChecker(premiumUser).isAdmin()).toBe(false)
+        expect(create(premiumUser).isAdmin()).toBe(false)
       })
 
       it('インストラクターロールの判定', () => {
         expect(createPermissionChecker(adminUser).isInstructor()).toBe(true) // 管理者もインストラクター権限
         expect(createPermissionChecker(instructorUser).isInstructor()).toBe(true)
-        expect(createPermissionChecker(premiumUser).isInstructor()).toBe(false)
+        expect(create(premiumUser).isInstructor()).toBe(false)
       })
 
       it('プレミアムユーザーの判定', () => {
         expect(createPermissionChecker(premiumUser).isPremiumUser()).toBe(true)
         expect(createPermissionChecker(adminUser).isPremiumUser()).toBe(true) // エンタープライズもプレミアム
-        expect(createPermissionChecker(freeUser).isPremiumUser()).toBe(false)
+        expect(create(freeUser).isPremiumUser()).toBe(false)
       })
 
       it('エンタープライズユーザーの判定', () => {
         expect(createPermissionChecker(adminUser).isEnterpriseUser()).toBe(true)
         expect(createPermissionChecker(premiumUser).isEnterpriseUser()).toBe(false)
-        expect(createPermissionChecker(freeUser).isEnterpriseUser()).toBe(false)
+        expect(create(freeUser).isEnterpriseUser()).toBe(false)
       })
     })
 
@@ -236,7 +234,7 @@ describe('RBAC システム', () => {
       })
 
       it('高度なAI機能の使用権限', () => {
-        const checker = createPermissionChecker(premiumUser)
+        const checker = create(premiumUser)
 
         expect(checker.canUseAI('basic')).toBe(true)
         expect(checker.canUseAI('advanced')).toBe(true)
@@ -244,7 +242,7 @@ describe('RBAC システム', () => {
       })
 
       it('無制限AI機能の使用権限', () => {
-        const checker = createPermissionChecker(adminUser)
+        const checker = create(adminUser)
 
         expect(checker.canUseAI('basic')).toBe(true)
         expect(checker.canUseAI('advanced')).toBe(true)
@@ -254,7 +252,7 @@ describe('RBAC システム', () => {
 
     describe('利用可能権限の取得', () => {
       it('ユーザーの利用可能権限リストを正しく取得', () => {
-        const checker = createPermissionChecker(premiumUser)
+        const checker = create(premiumUser)
         const availablePermissions = checker.getAvailablePermissions()
 
         expect(availablePermissions).toContain(Permission.LEARNING_READ)

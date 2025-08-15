@@ -16,6 +16,7 @@ PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の�
 PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の学習用包括的PWA対応Webアプリケーションです。49のプロセス、12のプリンシプル、8つのパフォーマンスドメイン、およびITTO（インプット、ツールと技法、アウトプット）フレームワークを多様な視覚化手法で理解し、効率的に学習するための統合プラットフォームを提供します。
 
 **現在のシステム成熟度**:
+
 - **実装状態**: 静的サイト + 先進的フロントエンド機能（バックエンド統合準備中）
 - **IDD成熟度**: 99% - 完全自動化達成（Git hooks + GitHub Actions）
 - **コンテキスト管理**: 自動化された管理システム実装済み（60%メモリ削減達成）
@@ -50,7 +51,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 - **AIコーチングシステム**: コンポーネント実装済み（`AICoachingDashboard.jsx`）
 - **プロジェクトシミュレーター**: コンポーネント実装済み（`ProjectSimulator.jsx`）
 - **メンターシップハブ**: コンポーネント実装済み（`MentorshipHub.jsx`）
-- **コラボレーション機能**: 
+- **コラボレーション機能**:
   - StudyGroups.jsx（学習グループ管理）
   - SharedNotes.jsx（共有ノート）
   - DiscussionThread.jsx（ディスカッションスレッド）
@@ -117,7 +118,7 @@ npm run deploy
 - **ビルドツール**: Vite v5
 - **視覚化**: D3.js v7, D3-sankey
 - **スタイリング**: Tailwind CSS v3 + tailwindcss-animate
-- **UIコンポーネント**: Radix UI（@radix-ui/react-*）完全採用
+- **UIコンポーネント**: Radix UI（@radix-ui/react-\*）完全採用
 - **アイコン**: Lucide React
 - **アニメーション**: Framer Motion v12
 - **フォーム管理**: React Hook Form v7 + Zod
@@ -128,7 +129,7 @@ npm run deploy
 - **サーバー状態**: @tanstack/react-query v5（準備済み）
 - **データ永続化**: LocalStorage（現在）、IndexedDB移行準備中
 - **認証**: Supabase Auth（@supabase/supabase-js v2）
-- **カスタムフック**: 
+- **カスタムフック**:
   - useProgress（学習進捗管理）
   - useDebounce（検索最適化）
   - useAuth（認証管理）
@@ -138,7 +139,7 @@ npm run deploy
 
 - **単体テスト**: Vitest v1.6 + @testing-library/react
 - **E2Eテスト**: Playwright v1.40
-- **高度なテスト**: 
+- **高度なテスト**:
   - Stryker（ミューテーションテスト）
   - fast-check（プロパティベーステスト）
 - **モック**: MSW v2, Sinon, Nock
@@ -150,7 +151,7 @@ npm run deploy
 - **コード分割**: React.lazy/Suspense による遅延ロード実装済み
 - **メモ化**: React.memo, useMemo, useCallback活用
 - **最適化**: スロットリング、デバウンシング実装
-- **コンテキスト管理**: 
+- **コンテキスト管理**:
   - LRUキャッシュ（50アイテム制限）
   - 自動圧縮（1KB以上のファイル）
   - TTLベース有効期限（24時間）
@@ -170,17 +171,20 @@ npm run deploy
 本プロジェクトは99%のIDD準拠率を達成し、完全自動化されたワークフローを実装しています。
 
 #### Git Hooks（ローカル開発）
+
 - **pre-commit**: Issue参照チェック
 - **commit-msg**: メッセージフォーマット検証
 - **pre-push**: 最終準拠チェック
 
 #### GitHub Actions（CI/CD）
+
 - **issue-driven-development.yml**: メインIDD検証
 - **idd-compliance.yml**: PR準拠チェック
 - **idd-metrics-collector.yml**: メトリクス収集
 - **deploy.yml**: GitHub Pagesデプロイ
 
 #### IDD NPMスクリプト
+
 ```bash
 npm run idd:setup          # IDD環境セットアップ
 npm run idd:hooks:install  # Git hooks インストール
@@ -379,6 +383,7 @@ chore: 雑務 #901
 ---
 
 **注**: PMBOK、PMP、PMIはProject Management Institute, Inc.の登録商標です。
+
 ## 📊 IDD Compliance Dashboard
 
 [![IDD Compliance](https://img.shields.io/badge/IDD%20Compliance-66%25-yellow)](https://yusuke-kurosawa.github.io/PMPLearningManagement/idd-dashboard/)

@@ -4,12 +4,12 @@
  * Fix malformed import statements caused by logger migration
  */
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
+const fs = require('fs')
+const path = require('path')
+const glob = require('glob')
 
 // Pattern to match the malformed import
-const malformedPattern = /import\s*{\s*\nimport\s*{\s*logger\s*}\s*from\s*['"].*\/logger['"]\s*\n/gm;
+const malformedPattern = /import\s*{\s*\nimport\s*{\s*logger\s*}\s*from\s*['"].*\/logger['"]\s*\n/gm
 
 // Files with parsing errors related to imports
 const filesWithErrors = [
@@ -31,54 +31,54 @@ const filesWithErrors = [
   'src/server/monitoring/monitoring.ts',
   'src/server/routers/payment.ts',
   'src/server/services/encryptedUserService.ts',
-];
+]
 
-let fixedCount = 0;
-let errorCount = 0;
+let fixedCount = 0
+let errorCount = 0
 
-filesWithErrors.forEach(filePath => {
-  const fullPath = path.join(process.cwd(), filePath);
-  
+filesWithErrors.forEach((filePath) => {
+  const fullPath = path.join(process.cwd(), filePath)
+
   if (!fs.existsSync(fullPath)) {
-    console.log(`⚠️  File not found: ${filePath}`);
-    return;
+    console.log(`⚠️  File not found: ${filePath}`)
+    return
   }
-  
+
   try {
-    let content = fs.readFileSync(fullPath, 'utf8');
-    const originalContent = content;
-    
+    let content = fs.readFileSync(fullPath, 'utf8')
+    const originalContent = content
+
     // Fix the malformed import pattern
     content = content.replace(malformedPattern, (match) => {
       // Extract the logger import path
-      const loggerMatch = match.match(/from\s*['"](.*)\/logger['"]/);
-      const loggerPath = loggerMatch ? loggerMatch[1] + '/logger' : '../services/logger';
-      
-      return `import { logger } from '${loggerPath}'\nimport {\n`;
-    });
-    
+      const loggerMatch = match.match(/from\s*['"](.*)\/logger['"]/)
+      const loggerPath = loggerMatch ? loggerMatch[1] + '/logger' : '../services/logger'
+
+      return `import { logger } from '${loggerPath}'\nimport {\n`
+    })
+
     // Alternative pattern for different formatting
-    const altPattern = /import\s*{\s*import\s*{\s*logger\s*}\s*from\s*['"].*\/logger['"]/gm;
+    const altPattern = /import\s*{\s*import\s*{\s*logger\s*}\s*from\s*['"].*\/logger['"]/gm
     content = content.replace(altPattern, (match) => {
-      const loggerMatch = match.match(/from\s*['"](.*)\/logger['"]/);
-      const loggerPath = loggerMatch ? loggerMatch[1] + '/logger' : '../services/logger';
-      return `import { logger } from '${loggerPath}'\nimport {`;
-    });
-    
+      const loggerMatch = match.match(/from\s*['"](.*)\/logger['"]/)
+      const loggerPath = loggerMatch ? loggerMatch[1] + '/logger' : '../services/logger'
+      return `import { logger } from '${loggerPath}'\nimport {`
+    })
+
     if (content !== originalContent) {
-      fs.writeFileSync(fullPath, content, 'utf8');
-      console.log(`✅ Fixed: ${filePath}`);
-      fixedCount++;
+      fs.writeFileSync(fullPath, content, 'utf8')
+      console.log(`✅ Fixed: ${filePath}`)
+      fixedCount++
     } else {
-      console.log(`ℹ️  No changes needed: ${filePath}`);
+      console.log(`ℹ️  No changes needed: ${filePath}`)
     }
   } catch (error) {
-    console.error(`❌ Error processing ${filePath}:`, error.message);
-    errorCount++;
+    console.error(`❌ Error processing ${filePath}:`, error.message)
+    errorCount++
   }
-});
+})
 
-console.log(`\n📊 Summary:`);
-console.log(`   Fixed: ${fixedCount} files`);
-console.log(`   Errors: ${errorCount} files`);
-console.log(`   Total: ${filesWithErrors.length} files`);
+console.log(`\n📊 Summary:`)
+console.log(`   Fixed: ${fixedCount} files`)
+console.log(`   Errors: ${errorCount} files`)
+console.log(`   Total: ${filesWithErrors.length} files`)

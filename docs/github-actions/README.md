@@ -7,7 +7,7 @@
 ## 🎯 標準化について
 
 - **標準仕様書**: [`WORKFLOW_STANDARDS.md`](WORKFLOW_STANDARDS.md) - 包括的な標準仕様とガイドライン
-- **テンプレート**: [`00-template-workflow.yml`](00-template-workflow.yml) - 新規ワークフロー作成用テンプレート  
+- **テンプレート**: [`00-template-workflow.yml`](00-template-workflow.yml) - 新規ワークフロー作成用テンプレート
 - **実装サマリー**: [`IMPLEMENTATION_SUMMARY.md`](IMPLEMENTATION_SUMMARY.md) - 標準化の成果と結果
 
 ## 📦 デプロイメント関連

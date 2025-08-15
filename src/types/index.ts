@@ -448,5 +448,113 @@ export type DeepPartial<T> = {
 
 export type ValueOf<T> = T[keyof T]
 
+// ============================================================================
+// Component Props Types
+// ============================================================================
+
+export interface BaseComponentProps {
+  className?: string
+  children?: React.ReactNode
+  id?: string
+  'data-testid'?: string
+}
+
+export interface ButtonProps extends BaseComponentProps {
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost'
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
+  loading?: boolean
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
+  type?: 'button' | 'submit' | 'reset'
+}
+
+export interface ModalProps extends BaseComponentProps {
+  open: boolean
+  onClose: () => void
+  title?: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  closable?: boolean
+}
+
+export interface TabsProps extends BaseComponentProps {
+  value: string
+  onValueChange: (value: string) => void
+  orientation?: 'horizontal' | 'vertical'
+}
+
+// ============================================================================
+// Context Types
+// ============================================================================
+
+export interface ThemeContextType {
+  theme: 'light' | 'dark' | 'system'
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
+  isDark: boolean
+}
+
+export interface AuthContextType {
+  user: User | null
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  register: (email: string, password: string, name: string) => Promise<void>
+  updateProfile: (updates: Partial<User>) => Promise<void>
+  isLoading: boolean
+  error: string | null
+}
+
+export interface ProgressContextType {
+  progress: UserProgress | null
+  updateProgress: (processId: string, updates: Partial<ProcessProgress>) => void
+  getProcessProgress: (processId: string) => ProcessProgress | undefined
+  calculateOverallProgress: () => number
+  isLoading: boolean
+}
+
+// ============================================================================
+// Hook Return Types
+// ============================================================================
+
+export interface UseAsyncReturn<T> {
+  data: T | null
+  loading: boolean
+  error: Error | null
+  execute: () => Promise<void>
+  reset: () => void
+}
+
+export interface UseLocalStorageReturn<T> {
+  value: T
+  setValue: (value: T | ((prevValue: T) => T)) => void
+  removeValue: () => void
+}
+
+export interface UseDebounceReturn<T> {
+  debouncedValue: T
+  isDebouncing: boolean
+}
+
+// ============================================================================
+// Service Types
+// ============================================================================
+
+export interface ApiClientConfig {
+  baseURL: string
+  timeout: number
+  retries: number
+  headers?: Record<string, string>
+}
+
+export interface CacheConfig {
+  ttl: number
+  maxSize: number
+  strategy: 'lru' | 'fifo' | 'lifo'
+}
+
+export interface LoggerConfig {
+  level: 'debug' | 'info' | 'warn' | 'error'
+  output: 'console' | 'file' | 'remote'
+  format: 'json' | 'text'
+}
+
 // Export everything as a namespace for convenience
 export * as Types from './index'

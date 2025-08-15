@@ -8,7 +8,7 @@ import {
   EnhancedPrismaClient,
   DatabaseManager,
   DatabaseMonitor,
-  type DatabaseStats,
+  type _DatabaseStats,
 } from '../connectionPool'
 import {
   QueryOptimizer,
@@ -235,7 +235,7 @@ describe('データベース最適化システム', () => {
       mockPrismaClient.user.count.mockResolvedValue(100)
 
       // プライベートメソッドをテストするため、リフレクションを使用
-      await (monitor as any).collectMetrics()
+      await (monitor as DatabaseMonitor & { collectMetrics(): Promise<void> }).collectMetrics()
 
       const metrics = monitor.getMetrics()
       expect(typeof metrics.response_time).toBe('number')
@@ -250,7 +250,7 @@ describe('データベース最適化システム', () => {
       )
       mockPrismaClient.user.count.mockResolvedValue(100)
 
-      await (monitor as any).collectMetrics()
+      await (monitor as DatabaseMonitor & { collectMetrics(): Promise<void> }).collectMetrics()
 
       const alerts = monitor.getAlerts()
       expect(alerts.some((alert) => alert.type === 'performance')).toBe(true)

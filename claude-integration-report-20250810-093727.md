@@ -6,12 +6,15 @@ Repository: yusuke-kurosawa/PMPLearningManagement
 ## Workflow Execution Status
 
 ### Claude Assistant
+
 No data
 
 ### Issue Handler
+
 No data
 
 ### PR Review
+
 No data
 
 ## Statistics
@@ -22,8 +25,6 @@ No data
 - Success rate: 0%
 
 ## Recommendations
-
-
 
 - Review failed workflow logs to improve success rate
 

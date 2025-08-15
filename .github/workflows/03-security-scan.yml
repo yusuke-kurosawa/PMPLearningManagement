@@ -1,13 +1,15 @@
 # ================================================================
-# セキュリティ | セキュリティスキャン - 包括的セキュリティ監査
-# ================================================================
-# Issue: #86
-# Purpose: アプリケーションの包括的セキュリティ監査と脆弱性検出
-#         依存関係、コード、インフラストラクチャのセキュリティ検証
-# Author: Claude Code Actions
+# ワークフロー: Security Scanning
+# カテゴリ: セキュリティ
+# 目的: 脆弱性スキャンとセキュリティチェック
+# トリガー: schedule, push
+# 依存関係: security scanners, audit tools
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
 # ================================================================
 
-name: 🔒 Security Scan
+name: '🔒 Security Scan'
 
 on:
   push:
@@ -203,8 +205,3 @@ jobs:
           echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Custom Security Checks: ${{ needs.custom-security-checks.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- OWASP Dependency Check: ${{ needs.owasp-dependency-check.result }}" >> $GITHUB_STEP_SUMMARY
-
-# ================================================================
-# End of Security Scan
-# Generated with Claude Code Actions
-# ================================================================

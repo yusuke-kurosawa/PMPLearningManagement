@@ -7,6 +7,7 @@
 ## 📋 前提条件
 
 ### 必須要件
+
 - GitHubリポジトリへのアクセス権限
 - Anthropic API Key（Claude API）
 - GitHub CLI（オプション、テスト用）
@@ -46,22 +47,27 @@ gh issue create --title "Test" --body "@claude Hello!"
 ### 1. Claude Assistantの使用（@claudeメンション）
 
 #### Issueでの質問
+
 ```markdown
 @claude このバグの原因を分析してください
 
 詳細:
+
 - エラーメッセージ: ...
 - 再現手順: ...
 ```
 
 #### コメントでの相談
-```markdown
+
+````markdown
 @claude このコードの改善点を教えてください
 
 ```javascript
 // コードをここに貼り付け
 ```
-```
+````
+
+````
 
 ### 2. 自動Issue分析
 
@@ -83,9 +89,10 @@ Pull Requestを作成すると、自動的に:
 ```bash
 # 監視スクリプトを実行
 ./scripts/monitor-claude-integration.sh
-```
+````
 
 ### GitHub Actionsでの確認
+
 1. リポジトリの **Actions** タブを開く
 2. ワークフロー実行履歴を確認
 3. 各ワークフローのログを確認
@@ -95,6 +102,7 @@ Pull Requestを作成すると、自動的に:
 ### 効果的な@claudeメンションの書き方
 
 #### 良い例 ✅
+
 ```markdown
 @claude このエラーを解決する方法を教えてください:
 
@@ -109,6 +117,7 @@ APIからデータを取得した後に発生
 ```
 
 #### 悪い例 ❌
+
 ```markdown
 @claude バグがあります。助けて！
 ```
@@ -116,22 +125,28 @@ APIからデータを取得した後に発生
 ### Issue作成のコツ
 
 #### 構造化された情報提供
+
 ```markdown
 ## 問題の概要
+
 [簡潔な説明]
 
 ## 期待される動作
+
 [どうあるべきか]
 
 ## 実際の動作
+
 [現在どうなっているか]
 
 ## 再現手順
+
 1. [ステップ1]
 2. [ステップ2]
 
 ## 環境
-- OS: 
+
+- OS:
 - ブラウザ:
 - バージョン:
 ```
@@ -151,24 +166,27 @@ APIからデータを取得した後に発生
 
 ### よくあるエラーと解決方法
 
-| エラー | 原因 | 解決方法 |
-|--------|------|----------|
-| `Error: Bad credentials` | GitHub権限不足 | Workflow permissionsを確認 |
-| `Error: API key invalid` | APIキー設定ミス | Secretsを再設定 |
-| `Error: Rate limit exceeded` | API制限超過 | 時間を置いて再試行 |
-| `Workflow not triggered` | トリガー条件不一致 | Issueに@claudeが含まれているか確認 |
+| エラー                       | 原因               | 解決方法                           |
+| ---------------------------- | ------------------ | ---------------------------------- |
+| `Error: Bad credentials`     | GitHub権限不足     | Workflow permissionsを確認         |
+| `Error: API key invalid`     | APIキー設定ミス    | Secretsを再設定                    |
+| `Error: Rate limit exceeded` | API制限超過        | 時間を置いて再試行                 |
+| `Workflow not triggered`     | トリガー条件不一致 | Issueに@claudeが含まれているか確認 |
 
 ## 📈 使用制限と注意事項
 
 ### API使用量
+
 - Claude API: 月間制限あり（プランによる）
 - 1リクエストあたり最大1024トークン
 
 ### レスポンス時間
+
 - 通常: 10-30秒
 - 高負荷時: 最大60秒
 
 ### セキュリティ
+
 - センシティブ情報を含めない
 - 個人情報を共有しない
 - コードの機密部分は除外する
@@ -176,6 +194,7 @@ APIからデータを取得した後に発生
 ## 🔄 アップデートとメンテナンス
 
 ### ワークフローの更新
+
 ```bash
 # 最新版を取得
 git pull origin main
@@ -185,9 +204,11 @@ ls -la .github/workflows/
 ```
 
 ### モデルのアップグレード
+
 現在使用中: `claude-3-sonnet-20240229`
 
 より高性能なモデルへの変更:
+
 1. ワークフローファイルを編集
 2. `model` パラメータを変更
 3. コミット&プッシュ
@@ -209,5 +230,5 @@ ls -la .github/workflows/
 
 ---
 
-*最終更新: 2025年1月9日*  
-*バージョン: 1.0.0*
+_最終更新: 2025年1月9日_  
+_バージョン: 1.0.0_

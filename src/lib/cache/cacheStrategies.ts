@@ -6,6 +6,7 @@
 import { RedisCacheManager, CacheKeyStrategy } from './redisCache'
 import { z } from 'zod'
 import { logger } from '../../services/logger'
+import type { Redis } from 'ioredis'
 
 // キャッシング戦略の定義
 export enum CacheStrategy {
@@ -57,7 +58,7 @@ export class AdvancedCacheManager {
   private cacheManager: RedisCacheManager
   private dependencyGraph: Map<string, Set<string>> = new Map()
   private refreshQueue: Set<string> = new Set()
-  private refreshCallbacks: Map<string, () => Promise<any>> = new Map()
+  private refreshCallbacks: Map<string, () => Promise<unknown>> = new Map()
 
   constructor(cacheManager: RedisCacheManager) {
     this.cacheManager = cacheManager
@@ -214,7 +215,9 @@ export class AdvancedCacheManager {
     try {
       // キャッシュエントリの詳細情報を取得
       const cacheKey = `${keyStrategy}:${identifier}`
-      const redis = await (this.cacheManager as any).getRedis()
+      const redis = await (
+        this.cacheManager as RedisCacheManager & { getRedis(): Promise<Redis> }
+      ).getRedis()
       const ttl = await redis.ttl(cacheKey)
       const cachedData = await this.cacheManager.get<T>(keyStrategy, identifier)
 
@@ -354,7 +357,9 @@ export class AdvancedCacheManager {
   ): Promise<T | null> {
     try {
       // Redisから期限切れでも取得を試行
-      const redis = await (this.cacheManager as any).getRedis()
+      const redis = await (
+        this.cacheManager as RedisCacheManager & { getRedis(): Promise<Redis> }
+      ).getRedis()
       const cacheKey = `${keyStrategy}:${identifier}`
       const result = await redis.get(cacheKey)
 
@@ -404,7 +409,7 @@ export class AdvancedCacheManager {
     warmupConfigs: Array<{
       keyStrategy: CacheKeyStrategy
       identifier: string
-      dataFetcher: () => Promise<any>
+      dataFetcher: () => Promise<unknown>
       config?: Partial<CacheStrategyConfig>
     }>
   ): Promise<number> {
@@ -524,7 +529,7 @@ export class PMPCacheStrategies {
   /**
    * ユーザーダッシュボードデータ用キャッシング
    */
-  async cacheUserDashboard(userId: string, dataFetcher: () => Promise<any>) {
+  async cacheUserDashboard(userId: string, dataFetcher: () => Promise<unknown>) {
     return this.advancedCache.smartCache(
       CacheKeyStrategy.USER_DATA,
       `dashboard:${userId}`,
@@ -542,7 +547,7 @@ export class PMPCacheStrategies {
   /**
    * PMBOK プロセス情報用キャッシング
    */
-  async cachePMBOKProcesses(dataFetcher: () => Promise<any>) {
+  async cachePMBOKProcesses(dataFetcher: () => Promise<unknown>) {
     return this.advancedCache.cacheAside(
       CacheKeyStrategy.PMBOK_DATA,
       'all_processes',
@@ -558,7 +563,11 @@ export class PMPCacheStrategies {
   /**
    * 試験問題用キャッシング（階層化）
    */
-  async cacheExamQuestions(examType: string, difficulty: string, dataFetcher: () => Promise<any>) {
+  async cacheExamQuestions(
+    examType: string,
+    difficulty: string,
+    dataFetcher: () => Promise<unknown>
+  ) {
     return this.advancedCache.multiLayerCache(
       CacheKeyStrategy.EXAM_DATA,
       `questions:${examType}:${difficulty}`,

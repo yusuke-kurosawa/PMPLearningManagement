@@ -1,5 +1,11 @@
 import { logger } from '../../services/logger'
 
+// 型定義の追加
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean
+  getInstalledRelatedApps?: () => Promise<unknown[]>
+}
+
 /**
  * PWA Install Prompt Manager
  * Developer 6: PWA & Mobile Developer Implementation
@@ -70,12 +76,12 @@ class PWAInstallPromptManager {
   private checkInstallationStatus(): void {
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone ||
+      (window.navigator as NavigatorWithStandalone).standalone ||
       document.referrer.includes('android-app://')
 
     const isInstalled =
       isStandalone ||
-      (window.navigator as any)
+      (window.navigator as NavigatorWithStandalone)
         .getInstalledRelatedApps?.()
         .then((apps: unknown[]) => apps.length > 0)
 

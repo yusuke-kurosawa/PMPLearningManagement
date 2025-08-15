@@ -5,14 +5,8 @@
     "translated_title": "[バグ] 認証リダイレクトループ 本番環境での",
     "original_body": "When users try to login, they get stuck in a redirect loop.",
     "translated_body": "ユーザーがログインしようとすると、リダイレクトループに陥ります。",
-    "original_labels": [
-      "bug",
-      "priority:high"
-    ],
-    "translated_labels": [
-      "🐛 バグ",
-      "🟠 優先度:高"
-    ],
+    "original_labels": ["bug", "priority:high"],
+    "translated_labels": ["🐛 バグ", "🟠 優先度:高"],
     "state": "open",
     "url": "https://github.com/test/repo/issues/1"
   },
@@ -22,14 +16,8 @@
     "translated_title": "[機能] ダークモード対応の追加",
     "original_body": "Users have requested dark mode for better eye comfort.",
     "translated_body": "ユーザーから、目の疲れを軽減するためのダークモードが要望されています。",
-    "original_labels": [
-      "enhancement",
-      "area:ui"
-    ],
-    "translated_labels": [
-      "✨ 機能強化",
-      "🎨 UI/UX"
-    ],
+    "original_labels": ["enhancement", "area:ui"],
+    "translated_labels": ["✨ 機能強化", "🎨 UI/UX"],
     "state": "open",
     "url": "https://github.com/test/repo/issues/2"
   },
@@ -39,14 +27,8 @@
     "translated_title": "[セキュリティ] 二要素認証の実装 (2FA)",
     "original_body": "Add 2FA support for enhanced security.",
     "translated_body": "セキュリティ強化のため、2要素認証（2FA）のサポートを追加します。",
-    "original_labels": [
-      "type:security",
-      "priority:critical"
-    ],
-    "translated_labels": [
-      "🔒 セキュリティ",
-      "🔴 緊急"
-    ],
+    "original_labels": ["type:security", "priority:critical"],
+    "translated_labels": ["🔒 セキュリティ", "🔴 緊急"],
     "state": "open",
     "url": "https://github.com/test/repo/issues/3"
   },
@@ -56,14 +38,8 @@
     "translated_title": "[パフォーマンス] 初期読み込み時間の最適化",
     "original_body": "The application takes too long to load on first visit.",
     "translated_body": "アプリケーションの初回訪問時の読み込みに時間がかかりすぎます。",
-    "original_labels": [
-      "type:performance",
-      "priority:medium"
-    ],
-    "translated_labels": [
-      "⚡ パフォーマンス",
-      "🟡 優先度:中"
-    ],
+    "original_labels": ["type:performance", "priority:medium"],
+    "translated_labels": ["⚡ パフォーマンス", "🟡 優先度:中"],
     "state": "open",
     "url": "https://github.com/test/repo/issues/4"
   },
@@ -73,14 +49,8 @@
     "translated_title": "[AI] インテリジェント学習アシスタントの実装",
     "original_body": "Create an AI-powered study assistant to help users.",
     "translated_body": "ユーザーを支援するAI駆動の学習アシスタントを作成します。",
-    "original_labels": [
-      "area:ai",
-      "type:feature"
-    ],
-    "translated_labels": [
-      "🤖 AI/ML",
-      "✨ 新機能"
-    ],
+    "original_labels": ["area:ai", "type:feature"],
+    "translated_labels": ["🤖 AI/ML", "✨ 新機能"],
     "state": "open",
     "url": "https://github.com/test/repo/issues/5"
   }

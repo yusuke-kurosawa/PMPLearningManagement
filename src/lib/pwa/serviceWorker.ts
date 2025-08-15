@@ -21,7 +21,7 @@ const STATIC_ASSETS = [
 ]
 
 // API endpoints to cache
-const CACHE_API_ROUTES = [
+const _CACHE_API_ROUTES = [
   // TODO: Will be used in future
   '/api/pmbok/processes',
   '/api/flashcards/decks',
@@ -293,7 +293,7 @@ async function syncFlashcardProgress() {
 }
 
 // Helper functions for IndexedDB operations
-async function getStoredSyncData(storeName: string): Promise<any[]> {
+async function getStoredSyncData(storeName: string): Promise<unknown[]> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('PMP-Learning-Sync', 1)
 
@@ -337,7 +337,7 @@ async function clearStoredSyncData(storeName: string): Promise<void> {
 }
 
 // Push notification handling
-self.addEventListener('push', (event: React.MouseEvent) => {
+self.addEventListener('push', (event: ExtendableMessageEvent) => {
   if (process.env.NODE_ENV === 'development') {
     logger.debug('Service Worker: Push message received')
   }
@@ -376,7 +376,7 @@ self.addEventListener('push', (event: React.MouseEvent) => {
 })
 
 // Notification click handling
-self.addEventListener('notificationclick', (event: React.MouseEvent) => {
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
   if (process.env.NODE_ENV === 'development') {
     logger.debug('Service Worker: Notification clicked')
   }
@@ -407,7 +407,7 @@ self.addEventListener('notificationclick', (event: React.MouseEvent) => {
 })
 
 // Handle messages from main thread
-self.addEventListener('message', (event: React.MouseEvent) => {
+self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (process.env.NODE_ENV === 'development') {
     logger.debug('Service Worker: Message received:', event.data)
   }
@@ -437,7 +437,7 @@ async function cacheUrls(urls: string[]) {
 }
 
 // Periodic background sync (if supported)
-self.addEventListener('periodicsync', (event: React.MouseEvent) => {
+self.addEventListener('periodicsync', (event: ExtendableEvent) => {
   if (event.tag === 'content-sync') {
     event.waitUntil(syncContent())
   }

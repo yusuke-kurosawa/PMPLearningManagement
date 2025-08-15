@@ -285,7 +285,7 @@ export class EmailService {
   // テンプレートレンダリング
   private static async renderTemplate(
     templateName: string,
-    data: Record<string, any>
+    data: Record<string, unknown>
   ): Promise<EmailTemplate> {
     try {
       let template: EmailTemplate

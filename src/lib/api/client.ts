@@ -11,6 +11,16 @@ import superjson from 'superjson'
 import type { AppRouter } from '../trpc/server'
 import { logger } from '../../services/logger'
 
+// tRPC Error types
+interface TRPCError {
+  message: string
+  data?: {
+    code: string
+    httpStatus: number
+    [key: string]: unknown
+  }
+}
+
 // Create tRPC React hooks
 export const api = createTRPCReact<AppRouter>()
 
@@ -109,7 +119,7 @@ export const handleApiError = (error: unknown): ApiError => {
   }
 
   if (typeof error === 'object' && error !== null && 'data' in error) {
-    const trpcError = error as any
+    const trpcError = error as TRPCError
     return {
       message: trpcError.message || 'An error occurred',
       code: trpcError.data?.code || 'UNKNOWN_ERROR',

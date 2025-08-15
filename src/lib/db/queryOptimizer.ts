@@ -17,7 +17,7 @@ const PaginationSchema = z.object({
 export type PaginationOptions = z.infer<typeof PaginationSchema>
 
 // ページネーション結果
-export interface PaginatedResult<T> {
+export interface PaginatedResult<_T> {
   data: T[]
   pagination: {
     page: number
@@ -56,7 +56,7 @@ export class QueryOptimizer {
   /**
    * ページネーション付きクエリの構築
    */
-  static buildPaginatedQuery<T>(
+  static buildPaginatedQuery<_T>(
     options: PaginationOptions,
     baseQuery: unknown = {}
   ): {
@@ -108,10 +108,10 @@ export class QueryOptimizer {
     field: string,
     start?: Date,
     end?: Date
-  ): Record<string, any> | undefined {
+  ): Record<string, unknown> | undefined {
     if (!start && !end) return undefined
 
-    const filter: Record<string, any> = {}
+    const filter: Record<string, unknown> = {}
 
     if (start && end) {
       filter[field] = {
@@ -134,8 +134,8 @@ export class QueryOptimizer {
   /**
    * 複合フィルター条件の構築
    */
-  static buildComplexFilter(conditions: FilterConditions): Record<string, any> {
-    const where: Record<string, any> = {}
+  static buildComplexFilter(conditions: FilterConditions): Record<string, unknown> {
+    const where: Record<string, unknown> = {}
 
     // 日付範囲フィルター
     if (conditions.dateRange) {
@@ -366,7 +366,7 @@ export class QueryOptimizer {
   /**
    * バッチ処理用最適化クエリ
    */
-  static buildBatchQuery<T>(
+  static buildBatchQuery<_T>(
     batchSize: number = 1000,
     lastId?: string
   ): {
@@ -423,7 +423,7 @@ export class QueryCache {
   /**
    * キャッシュからデータを取得
    */
-  get<T>(query: object): T | null {
+  get<_T>(query: object): T | null {
     const key = this.generateKey(query)
     const cached = this.cache.get(key)
 
@@ -441,7 +441,7 @@ export class QueryCache {
   /**
    * データをキャッシュに保存
    */
-  set<T>(query: object, data: T, ttl?: number): void {
+  set<_T>(query: object, data: T, ttl?: number): void {
     const key = this.generateKey(query)
     this.cache.set(key, {
       data,
@@ -518,7 +518,7 @@ export class IndexOptimizer {
    */
   static suggestIndexes(
     tableName: string,
-    whereConditions: Record<string, any>,
+    whereConditions: Record<string, unknown>,
     orderBy?: Record<string, 'asc' | 'desc'>
   ): string[] {
     const suggestions: string[] = []

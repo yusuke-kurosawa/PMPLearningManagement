@@ -10,6 +10,7 @@
 PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の学習用包括的PWA対応Webアプリケーションです。49のプロセス、12のプリンシプル、8つのパフォーマンスドメイン、およびITTO（インプット、ツールと技法、アウトプット）フレームワークを多様な視覚化手法で理解し、効率的に学習するための統合プラットフォームを提供します。
 
 **現在のシステム成熟度**:
+
 - **実装状態**: 静的サイト + 先進的フロントエンド機能（バックエンド統合準備中）
 - **IDD成熟度**: 99% - 完全自動化達成（Git hooks + GitHub Actions）
 - **コンテキスト管理**: 自動化された管理システム実装済み（60%メモリ削減達成）
@@ -54,7 +55,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 - **AIコーチングシステム**: コンポーネント実装済み（`AICoachingDashboard.jsx`）
 - **プロジェクトシミュレーター**: コンポーネント実装済み（`ProjectSimulator.jsx`）
 - **メンターシップハブ**: コンポーネント実装済み（`MentorshipHub.jsx`）
-- **コラボレーション機能**: 
+- **コラボレーション機能**:
   - StudyGroups.jsx（学習グループ管理）
   - SharedNotes.jsx（共有ノート）
   - DiscussionThread.jsx（ディスカッションスレッド）
@@ -78,7 +79,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 - **ビルドツール**: Vite v5
 - **視覚化**: D3.js v7, D3-sankey
 - **スタイリング**: Tailwind CSS v3 + tailwindcss-animate
-- **UIコンポーネント**: Radix UI（@radix-ui/react-*）完全採用
+- **UIコンポーネント**: Radix UI（@radix-ui/react-\*）完全採用
 - **アイコン**: Lucide React
 - **アニメーション**: Framer Motion v12
 - **フォーム管理**: React Hook Form v7 + Zod
@@ -89,7 +90,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 - **サーバー状態**: @tanstack/react-query v5（準備済み）
 - **データ永続化**: LocalStorage（現在）、IndexedDB移行準備中
 - **認証**: Supabase Auth（@supabase/supabase-js v2）
-- **カスタムフック**: 
+- **カスタムフック**:
   - useProgress（学習進捗管理）
   - useDebounce（検索最適化）
   - useAuth（認証管理）
@@ -99,7 +100,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 
 - **単体テスト**: Vitest v1.6 + @testing-library/react
 - **E2Eテスト**: Playwright v1.40
-- **高度なテスト**: 
+- **高度なテスト**:
   - Stryker（ミューテーションテスト）
   - fast-check（プロパティベーステスト）
 - **モック**: MSW v2, Sinon, Nock
@@ -111,7 +112,7 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 - **コード分割**: React.lazy/Suspense による遅延ロード実装済み
 - **メモ化**: React.memo, useMemo, useCallback活用
 - **最適化**: スロットリング、デバウンシング実装
-- **コンテキスト管理**: 
+- **コンテキスト管理**:
   - LRUキャッシュ（50アイテム制限）
   - 自動圧縮（1KB以上のファイル）
   - TTLベース有効期限（24時間）
@@ -131,16 +132,19 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 本プロジェクトは99%のIDD準拠率を達成し、完全自動化されたワークフローを実装しています。
 
 #### Git Hooks（ローカル開発）
+
 - **pre-commit**: Issue参照チェック
 - **commit-msg**: メッセージフォーマット検証
 - **pre-push**: 最終準拠チェック
 
 #### GitHub Actions（CI/CD）
+
 - **issue-driven-development.yml**: メインIDD検証
 - **idd-compliance.yml**: PR準拠チェック
 - **idd-metrics-collector.yml**: メトリクス収集
 
 #### IDD NPMスクリプト
+
 ```bash
 npm run idd:setup          # IDD環境セットアップ
 npm run idd:hooks:install  # Git hooks インストール
@@ -337,7 +341,7 @@ PMPLearningManagement/
 
 - **コード分割**: 全主要コンポーネントで React.lazy 実装
 - **メモ化**: useMemo, useCallback の適切な使用
-- **コンテキスト管理**: 
+- **コンテキスト管理**:
   - LRUキャッシュによるメモリ管理
   - 自動圧縮と解凍
   - TTLベースの有効期限管理
@@ -486,17 +490,20 @@ chore: 雑務 #901
 ## 関連ドキュメント
 
 ### プロジェクト管理
+
 - [IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md)
 - [IIDエージェントガイドライン](docs/IDD_AGENT_GUIDELINES.md)
 - [IDD自動化実装レポート](docs/IDD_AUTOMATION_IMPLEMENTATION_REPORT.md)
 
 ### コンテキスト管理
+
 - [現在のステータス](.claude/context/current-status.md)
 - [実装状況](.claude/context/implementation-status.md)
 - [アーキテクチャサマリー](.claude/context/architecture-summary.md)
 - [主要な決定事項](.claude/context/key-decisions.md)
 
 ### 開発リファレンス
+
 - [コマンドリファレンス](.claude/quick-ref/commands.md)
 - [ファイルロケーション](.claude/quick-ref/file-locations.md)
 - [コードレビューテンプレート](.claude/prompts/code-review.md)
@@ -523,19 +530,22 @@ MIT
 ---
 
 最終更新: 2025-08-10
+
 ## 📈 メトリクス（自動更新: 2025-08-10）
 
 ### 開発統計
+
 - 📁 コンポーネント数: 92個
-- 🔧 サービス数: 13個  
+- 🔧 サービス数: 13個
 - 🎣 カスタムフック数: 3個
 - 🧪 テストファイル数: 329個
 - 📊 総コード行数: 74,047行
 
 ### 日次活動（過去24時間）
+
 - 📝 コミット数: 20回
 - 📁 変更ファイル数: 649個
 
 ### 機能実装状況
-- 🎯 全体進捗: 100% (10/10)
 
+- 🎯 全体進捗: 100% (10/10)

@@ -6,6 +6,37 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { logger } from '../../services/logger'
+
+// Extended Navigator interface for Safari standalone detection
+interface ExtendedNavigator extends Navigator {
+  standalone?: boolean
+  getBattery?: () => Promise<BatteryManager>
+  connection?: {
+    effectiveType: '2g' | '3g' | '4g' | 'slow-2g'
+    downlink: number
+    saveData: boolean
+  }
+}
+
+// Battery Manager interface
+interface BatteryManager {
+  charging: boolean
+  chargingTime: number
+  dischargingTime: number
+  level: number
+  addEventListener(type: string, listener: EventListener): void
+  removeEventListener(type: string, listener: EventListener): void
+}
+
+// Before Install Prompt Event interface
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[]
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed'
+    platform: string
+  }>
+  prompt(): Promise<void>
+}
 import {
   Menu,
   X,
@@ -13,34 +44,34 @@ import {
   BookOpen,
   Users,
   BarChart3,
-  Settings,
+  _Settings,
   Download,
   Wifi,
   WifiOff,
   Bell,
-  BellOff,
+  _BellOff,
   Share,
-  Plus,
-  Search,
-  Filter,
-  ArrowLeft,
-  MoreVertical,
+  _Plus,
+  _Search,
+  _Filter,
+  _ArrowLeft,
+  _MoreVertical,
   Smartphone,
-  Monitor,
-  Tablet,
-  RefreshCw,
+  _Monitor,
+  _Tablet,
+  _RefreshCw,
   Battery,
-  Signal,
-  Volume2,
-  VolumeX,
-  Sun,
-  Moon,
-  Zap,
-  Globe,
+  _Signal,
+  _Volume2,
+  _VolumeX,
+  _Sun,
+  _Moon,
+  _Zap,
+  _Globe,
   Grid,
   Network,
   Layers,
-  TrendingUp,
+  _TrendingUp,
   Brain,
   GraduationCap,
 } from 'lucide-react'
@@ -149,7 +180,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [offlineMode, setOfflineMode] = useState(false)
-  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null)
+  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(
+    null
+  )
 
   // Refs
   const appRef = useRef<HTMLDivElement>(null)
@@ -172,7 +205,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     // Check if app is installed
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone ||
+      (window.navigator as ExtendedNavigator).standalone ||
       document.referrer.includes('android-app://')
 
     setPwaCapabilities((prev) => ({
@@ -389,16 +422,19 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     const updateBatteryInfo = async () => {
       if ('getBattery' in navigator) {
         try {
-          const battery = await (navigator as any).getBattery()
-          setDeviceInfo((prev) => ({
-            ...prev,
-            battery: {
-              level: Math.round(battery.level * 100),
-              charging: battery.charging,
-              chargingTime: battery.chargingTime,
-              dischargingTime: battery.dischargingTime,
-            },
-          }))
+          const extendedNavigator = navigator as ExtendedNavigator
+          const battery = await extendedNavigator.getBattery?.()
+          if (battery) {
+            setDeviceInfo((prev) => ({
+              ...prev,
+              battery: {
+                level: Math.round(battery.level * 100),
+                charging: battery.charging,
+                chargingTime: battery.chargingTime,
+                dischargingTime: battery.dischargingTime,
+              },
+            }))
+          }
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
             logger.debug('Battery API not supported')
@@ -410,15 +446,18 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     // Update network info
     const updateNetworkInfo = () => {
       if ('connection' in navigator) {
-        const connection = (navigator as any).connection
-        setDeviceInfo((prev) => ({
-          ...prev,
-          network: {
-            effectiveType: connection.effectiveType,
-            downlink: connection.downlink,
-            saveData: connection.saveData,
-          },
-        }))
+        const extendedNavigator = navigator as ExtendedNavigator
+        const connection = extendedNavigator.connection
+        if (connection) {
+          setDeviceInfo((prev) => ({
+            ...prev,
+            network: {
+              effectiveType: connection.effectiveType,
+              downlink: connection.downlink,
+              saveData: connection.saveData,
+            },
+          }))
+        }
       }
     }
 
@@ -584,7 +623,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                   </Button>
                 </div>
 
-                {/* Quick Settings */}
+                {/* Quick _Settings */}
                 <div className="space-y-3 border-t pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700">Dark Mode</span>

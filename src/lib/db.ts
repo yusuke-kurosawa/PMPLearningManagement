@@ -29,14 +29,14 @@ prisma.$use(async (params, next) => {
 // Helper functions for common database operations
 export const _db = {
   // Transaction helper
-  async transaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+  async transaction<_T>(fn: (tx: PrismaClient) => Promise<_T>): Promise<_T> {
     return await prisma.$transaction(async (tx) => {
       return await fn(tx as PrismaClient)
     })
   },
 
   // Pagination helper
-  async paginate<T>(
+  async paginate<_T>(
     model: unknown,
     {
       page = 1,
@@ -79,7 +79,7 @@ export const _db = {
   },
 
   // Batch operations helper
-  async batchCreate<T>(model: unknown, data: T[], chunkSize = 100) {
+  async batchCreate<_T>(model: unknown, data: T[], chunkSize = 100) {
     const results = []
 
     for (let i = 0; i < data.length; i += chunkSize) {

@@ -8,6 +8,17 @@ import { geoIPService, GeoRestrictionConfig } from '../security/geoip'
 import { ddosProtection } from '../security/rateLimiting'
 import { logger } from '../../services/logger'
 
+// 型定義の追加
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string
+    role: string
+  }
+  session?: {
+    userId: string
+  }
+}
+
 // リクエスト拡張
 declare module 'express' {
   interface Request {
@@ -134,7 +145,8 @@ export function anomalyDetectionMiddleware() {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // 認証済みユーザーのみチェック
-      const userId = (req as any).user?.id || (req as any).session?.userId
+      const userId =
+        (req as AuthenticatedRequest).user?.id || (req as AuthenticatedRequest).session?.userId
       if (!userId) {
         return next()
       }
@@ -194,18 +206,18 @@ export function geoEnhancedDDoSMiddleware() {
     try {
       const clientIP = getClientIP(req)
       const userAgent = req.get('User-Agent')
-      const userId = (req as any).user?.id
+      const userId = (req as AuthenticatedRequest).user?.id
 
       // 地理情報を考慮したDDoS保護
       const geoLocation = req.geoLocation
       if (geoLocation) {
         // 高脅威地域からのアクセスは厳しく制限
-        let baseLimit = 100 // 基本制限（1分間）
+        let _baseLimit = 100 // 基本制限（1分間）
 
-        if (geoLocation.threat > 70) baseLimit = 20
-        else if (geoLocation.threat > 50) baseLimit = 50
-        else if (geoLocation.proxy || geoLocation.vpn) baseLimit = 30
-        else if (geoLocation.hosting) baseLimit = 40
+        if (geoLocation.threat > 70) _baseLimit = 20
+        else if (geoLocation.threat > 50) _baseLimit = 50
+        else if (geoLocation.proxy || geoLocation.vpn) _baseLimit = 30
+        else if (geoLocation.hosting) _baseLimit = 40
 
         // カスタム制限設定でDDoS保護をチェック
         const protection = await ddosProtection.checkProtection(clientIP, userAgent, userId)
@@ -329,7 +341,7 @@ export function geoStatusMiddleware() {
   return async (req: Request, res: Response, _next: NextFunction) => {
     try {
       // 管理者権限チェック（実装は認証システムによる）
-      const isAdmin = (req as any).user?.role === 'admin'
+      const isAdmin = (req as AuthenticatedRequest).user?.role === 'admin'
       if (!isAdmin) {
         return res.status(403).json({ error: 'Admin access required' })
       }

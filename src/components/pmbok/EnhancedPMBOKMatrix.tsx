@@ -7,25 +7,25 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { logger } from '../../services/logger'
 import {
   Search,
-  Filter,
+  _Filter,
   BookOpen,
   ChevronDown,
   ChevronUp,
   Star,
-  StarOff,
+  _StarOff,
   Eye,
   ExternalLink,
   Download,
   Settings,
-  RotateCcw,
+  _RotateCcw,
   Bookmark,
   BookmarkCheck,
   Lightbulb,
   ArrowRight,
   Clock,
-  Users,
-  TrendingUp,
-  Info,
+  _Users,
+  _TrendingUp,
+  _Info,
   CheckCircle,
   AlertCircle,
   RefreshCw,
@@ -553,7 +553,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   {/* Version Toggle */}
                   <Select
                     value={selectedVersion.toString()}
-                    onValueChange={(value) => setSelectedVersion(value as any)}
+                    onValueChange={(value) => setSelectedVersion(value as 6 | 7 | 'both')}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -565,7 +565,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     </SelectContent>
                   </Select>
 
-                  {/* Knowledge Area Filter */}
+                  {/* Knowledge Area _Filter */}
                   <Select value={selectedKnowledgeArea} onValueChange={setSelectedKnowledgeArea}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Knowledge Area" />
@@ -580,7 +580,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     </SelectContent>
                   </Select>
 
-                  {/* Process Group Filter */}
+                  {/* Process Group _Filter */}
                   <Select value={selectedProcessGroup} onValueChange={setSelectedProcessGroup}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Process Group" />
@@ -596,7 +596,10 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   </Select>
 
                   {/* View Mode */}
-                  <Select value={viewMode} onValueChange={setViewMode as any}>
+                  <Select
+                    value={viewMode}
+                    onValueChange={(value) => setViewMode(value as 'matrix' | 'list' | 'cards')}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>

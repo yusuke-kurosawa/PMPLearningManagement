@@ -23,7 +23,7 @@ name: 🚀 統合CI/CDパイプライン
 ### ワークフロー実行時間制限
 
 - Pre-flight: 5分以内
-- Quality Gates: 10分以内  
+- Quality Gates: 10分以内
 - Testing: 15分以内
 - Build & Deploy: 10分以内
 - 総実行時間: 40分以内
@@ -116,6 +116,7 @@ npm audit --audit-level=high
 - 失敗時の分かりやすいエラーメッセージ
 
 ---
+
 作成者: Claude Code Agent Orchestration System
 作成日: 2025-08-13
 最終更新: 2025-08-13

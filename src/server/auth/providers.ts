@@ -365,9 +365,10 @@ export const authOptions: NextAuthOptions = {
         logger.warn(`NextAuth Warning [${code}]`)
       }
     },
-    debug(code, metadata) {
+    debug(_code, _metadata) {
       if (process.env.NODE_ENV === 'development') {
-        console.debug(`NextAuth Debug [${code}]:`, metadata)
+        // デバッグ情報は開発環境でのみログ出力
+        logger.debug(`NextAuth Debug [${_code}]:`, _metadata)
       }
     },
   },

@@ -10,6 +10,12 @@ import { z } from 'zod'
 import { LearningProgress, ExamResult, StudySession } from '@prisma/client'
 import { logger } from '../../services/logger'
 
+// Knowledge Area Scores type
+type KnowledgeAreaScores = Record<string, number>
+
+// Process Group Scores type
+type ProcessGroupScores = Record<string, number>
+
 // 学習進捗データ型定義
 export interface LearningProgressWithStats extends LearningProgress {
   stats: {
@@ -114,7 +120,9 @@ export class LearningStatsCalculator {
     PMBOK_PROCESSES.knowledgeAreas.forEach((area) => {
       const areaSessions = sessions.filter((s) => s.knowledgeArea === area)
       const areaExams = examResults.filter(
-        (e) => e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
+        (e) =>
+          e.knowledgeAreaScores &&
+          (e.knowledgeAreaScores as KnowledgeAreaScores)[area] !== undefined
       )
 
       stats[area] = {
@@ -123,7 +131,7 @@ export class LearningStatsCalculator {
         averageScore:
           areaExams.length > 0
             ? areaExams.reduce(
-                (sum, exam) => sum + ((exam.knowledgeAreaScores as any)[area] || 0),
+                (sum, exam) => sum + ((exam.knowledgeAreaScores as KnowledgeAreaScores)[area] || 0),
                 0
               ) / areaExams.length
             : 0,
@@ -142,7 +150,8 @@ export class LearningStatsCalculator {
     PMBOK_PROCESSES.processGroups.forEach((group) => {
       const groupSessions = sessions.filter((s) => s.processGroup === group)
       const groupExams = examResults.filter(
-        (e) => e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
+        (e) =>
+          e.processGroupScores && (e.processGroupScores as ProcessGroupScores)[group] !== undefined
       )
 
       stats[group] = {
@@ -151,7 +160,7 @@ export class LearningStatsCalculator {
         averageScore:
           groupExams.length > 0
             ? groupExams.reduce(
-                (sum, exam) => sum + ((exam.processGroupScores as any)[group] || 0),
+                (sum, exam) => sum + ((exam.processGroupScores as ProcessGroupScores)[group] || 0),
                 0
               ) / groupExams.length
             : 0,
@@ -409,7 +418,7 @@ export class LearningService {
   }
 
   // 学習目標設定
-  static async setLearningGoal(userId: string, goalData: LearningGoalData): Promise<any> {
+  static async setLearningGoal(userId: string, goalData: LearningGoalData): Promise<unknown> {
     try {
       return await prisma.learningGoal.create({
         data: {

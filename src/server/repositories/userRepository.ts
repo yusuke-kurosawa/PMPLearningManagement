@@ -144,7 +144,7 @@ export class UserRepository {
     page: number = 1,
     pageSize: number = 20,
     options?: UserQueryOptions
-  ): Promise<PaginatedUsers<any>> {
+  ): Promise<PaginatedUsers<unknown>> {
     try {
       // WHERE条件構築
       const where: Prisma.UserWhereInput = {

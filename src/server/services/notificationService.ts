@@ -79,7 +79,7 @@ export interface NotificationData {
   type: NotificationType
   title: string
   message: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
   channels: NotificationChannel[]
   priority: NotificationPriority
   scheduledFor?: Date
@@ -503,7 +503,7 @@ export class NotificationService {
             type: scheduled.type as NotificationType,
             title: scheduled.title,
             message: scheduled.message,
-            data: scheduled.data as Record<string, any>,
+            data: scheduled.data as Record<string, unknown>,
             channels: scheduled.channels as NotificationChannel[],
             priority: scheduled.priority as NotificationPriority,
           })
@@ -559,7 +559,7 @@ export class NotificationService {
       type: NotificationType
       title: string
       message: string
-      data: Record<string, any>
+      data: Record<string, unknown>
       read: boolean
       createdAt: Date
     }>
@@ -601,7 +601,7 @@ export class NotificationService {
         notifications: notifications.map((n) => ({
           ...n,
           type: n.type as NotificationType,
-          data: n.data as Record<string, any>,
+          data: n.data as Record<string, unknown>,
         })),
         unreadCount,
         totalCount,

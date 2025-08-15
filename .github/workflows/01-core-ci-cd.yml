@@ -1,13 +1,15 @@
 # ================================================================
-# コア | CI/CD パイプライン - メインデプロイメント
-# ================================================================
-# Issue: #86
-# Purpose: PMPLearningManagementアプリケーションのコア CI/CD パイプライン
-#         ビルド、テスト、デプロイの全自動化
-# Author: Claude Code Actions
+# ワークフロー: Core CI/CD Pipeline
+# カテゴリ: CI/CD
+# 目的: メインの継続的インテグレーション・デプロイメント
+# トリガー: push, pull_request
+# 依存関係: Node.js, npm, ESLint, TypeScript
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
 # ================================================================
 
-name: 📦 Core CI/CD Pipeline
+name: '📦 Core CI/CD Pipeline'
 
 on:
   push:
@@ -203,8 +205,3 @@ jobs:
         if: success()
         run: |
           echo "✅ Deployment successful to https://pmp-learning.dev"
-
-# ================================================================
-# End of Core CI/CD Pipeline
-# Generated with Claude Code Actions
-# ================================================================

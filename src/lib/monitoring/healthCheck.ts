@@ -36,7 +36,7 @@ export interface CheckResult {
   name: string
   status: HealthStatus
   responseTime: number
-  details: Record<string, any>
+  details: Record<string, unknown>
   error?: string
   timestamp: Date
 }

@@ -1,11 +1,21 @@
 import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
+import type { Adapter } from 'next-auth/adapters'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
 import type { _User } from '@prisma/client'
 import { logger } from '../services/logger'
+
+// Extended User type for authentication
+interface AuthUser {
+  id: string
+  email: string
+  name?: string | null
+  role?: string
+  image?: string | null
+}
 
 declare module 'next-auth' {
   interface Session {
@@ -27,7 +37,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -98,7 +108,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role || 'USER'
+        token.role = (user as AuthUser).role || 'USER'
       }
 
       // Refresh access token for OAuth providers

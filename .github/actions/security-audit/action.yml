@@ -1,0 +1,310 @@
+# ================================================================
+# Composite Action: セキュリティ監査
+# カテゴリ: セキュリティ
+# 目的: npm audit、脆弱性スキャン、セキュリティパターンチェック
+# 再利用性: セキュリティワークフローで共通利用
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# ================================================================
+
+name: '🔒 セキュリティ監査'
+description: 'npm audit、脆弱性スキャン、セキュリティパターンの統合チェック'
+
+inputs:
+  audit-level:
+    description: 'npm auditの監査レベル (low/moderate/high/critical)'
+    required: false
+    default: 'moderate'
+  
+  run-dependency-audit:
+    description: '依存関係監査の実行フラグ'
+    required: false
+    default: 'true'
+  
+  run-code-scan:
+    description: 'コードスキャンの実行フラグ'
+    required: false
+    default: 'true'
+  
+  run-secret-scan:
+    description: 'シークレットスキャンの実行フラグ'
+    required: false
+    default: 'true'
+  
+  fail-on-vulnerabilities:
+    description: '脆弱性検出時に失敗させるかどうか'
+    required: false
+    default: 'true'
+
+outputs:
+  dependency-audit-result:
+    description: '依存関係監査結果'
+    value: ${{ steps.dependency-audit.outputs.result }}
+  
+  code-scan-result:
+    description: 'コードスキャン結果'
+    value: ${{ steps.code-scan.outputs.result }}
+  
+  secret-scan-result:
+    description: 'シークレットスキャン結果'
+    value: ${{ steps.secret-scan.outputs.result }}
+  
+  vulnerabilities-found:
+    description: '発見された脆弱性数'
+    value: ${{ steps.dependency-audit.outputs.vulnerabilities-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ================================================================
+    # Step 1: セキュリティ監査環境準備
+    # ================================================================
+    - name: 🔒 Security audit preparation
+      shell: bash
+      run: |
+        echo "🔒 セキュリティ監査環境準備中..."
+        
+        # 結果格納ディレクトリ作成
+        mkdir -p security-results
+        
+        echo "📊 監査設定:"
+        echo "  依存関係監査: ${{ inputs.run-dependency-audit }}"
+        echo "  コードスキャン: ${{ inputs.run-code-scan }}"
+        echo "  シークレットスキャン: ${{ inputs.run-secret-scan }}"
+        echo "  監査レベル: ${{ inputs.audit-level }}"
+        
+        echo "✅ 環境準備完了"
+    
+    # ================================================================
+    # Step 2: npm依存関係監査
+    # ================================================================
+    - name: 📦 Dependency security audit
+      id: dependency-audit
+      if: inputs.run-dependency-audit == 'true'
+      shell: bash
+      run: |
+        echo "📦 依存関係セキュリティ監査実行中..."
+        
+        # npm audit の実行
+        if npm audit --audit-level=${{ inputs.audit-level }} --json > security-results/npm-audit.json 2>&1; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "vulnerabilities-count=0" >> $GITHUB_OUTPUT
+          echo "✅ 依存関係監査: 脆弱性なし"
+        else
+          # 脆弱性の詳細分析
+          if [ -f "security-results/npm-audit.json" ]; then
+            # jqが利用可能な場合、詳細分析
+            if command -v jq &> /dev/null; then
+              CRITICAL=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "critical")) | length' security-results/npm-audit.json 2>/dev/null || echo "0")
+              HIGH=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "high")) | length' security-results/npm-audit.json 2>/dev/null || echo "0")
+              MODERATE=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "moderate")) | length' security-results/npm-audit.json 2>/dev/null || echo "0")
+              LOW=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "low")) | length' security-results/npm-audit.json 2>/dev/null || echo "0")
+              
+              TOTAL=$((CRITICAL + HIGH + MODERATE + LOW))
+              
+              echo "📊 脆弱性サマリー:"
+              echo "  Critical: $CRITICAL"
+              echo "  High: $HIGH"
+              echo "  Moderate: $MODERATE"
+              echo "  Low: $LOW"
+              echo "  Total: $TOTAL"
+              
+              echo "vulnerabilities-count=$TOTAL" >> $GITHUB_OUTPUT
+            else
+              echo "vulnerabilities-count=unknown" >> $GITHUB_OUTPUT
+            fi
+            
+            # 人間が読める形式でも出力
+            npm audit --audit-level=${{ inputs.audit-level }} > security-results/npm-audit-human.txt 2>&1 || true
+          fi
+          
+          echo "result=vulnerabilities-found" >> $GITHUB_OUTPUT
+          echo "⚠️ 依存関係監査: 脆弱性が発見されました"
+          
+          if [ "${{ inputs.fail-on-vulnerabilities }}" = "true" ]; then
+            echo "❌ 脆弱性が検出されたため失敗します"
+            exit 1
+          fi
+        fi
+    
+    # ================================================================
+    # Step 3: コードセキュリティスキャン
+    # ================================================================
+    - name: 🛡️ Code security scan
+      id: code-scan
+      if: inputs.run-code-scan == 'true'
+      shell: bash
+      run: |
+        echo "🛡️ コードセキュリティスキャン実行中..."
+        
+        ISSUES_FOUND=0
+        
+        # 危険なJavaScriptパターンのスキャン
+        echo "🔍 危険なパターンをスキャン中..."
+        
+        # eval() の使用チェック
+        if find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs grep -n "eval(" 2>/dev/null > security-results/eval-usage.txt; then
+          echo "⚠️ eval() の使用が検出されました:"
+          cat security-results/eval-usage.txt
+          ISSUES_FOUND=$((ISSUES_FOUND + $(wc -l < security-results/eval-usage.txt)))
+        else
+          echo "✅ eval() の使用なし"
+          echo "No eval() usage found" > security-results/eval-usage.txt
+        fi
+        
+        # innerHTML の危険な使用チェック
+        if find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs grep -n "innerHTML\s*=" 2>/dev/null > security-results/innerhtml-usage.txt; then
+          echo "⚠️ innerHTML の直接使用が検出されました:"
+          cat security-results/innerhtml-usage.txt
+          ISSUES_FOUND=$((ISSUES_FOUND + $(wc -l < security-results/innerhtml-usage.txt)))
+        else
+          echo "✅ innerHTML の危険な使用なし"
+          echo "No dangerous innerHTML usage found" > security-results/innerhtml-usage.txt
+        fi
+        
+        # document.write の使用チェック
+        if find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs grep -n "document\.write" 2>/dev/null > security-results/document-write-usage.txt; then
+          echo "⚠️ document.write の使用が検出されました:"
+          cat security-results/document-write-usage.txt
+          ISSUES_FOUND=$((ISSUES_FOUND + $(wc -l < security-results/document-write-usage.txt)))
+        else
+          echo "✅ document.write の使用なし"
+          echo "No document.write usage found" > security-results/document-write-usage.txt
+        fi
+        
+        # XSS脆弱なパターンのチェック
+        if find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs grep -n -i "dangerouslySetInnerHTML" 2>/dev/null > security-results/dangerous-html-usage.txt; then
+          echo "⚠️ dangerouslySetInnerHTML の使用が検出されました:"
+          cat security-results/dangerous-html-usage.txt
+          ISSUES_FOUND=$((ISSUES_FOUND + $(wc -l < security-results/dangerous-html-usage.txt)))
+        else
+          echo "✅ dangerouslySetInnerHTML の使用なし"
+          echo "No dangerouslySetInnerHTML usage found" > security-results/dangerous-html-usage.txt
+        fi
+        
+        # 結果の判定
+        if [ $ISSUES_FOUND -eq 0 ]; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "✅ コードセキュリティスキャン: 問題なし"
+        else
+          echo "result=issues-found" >> $GITHUB_OUTPUT
+          echo "⚠️ コードセキュリティスキャン: $ISSUES_FOUND 件の問題が見つかりました"
+        fi
+        
+        # サマリーファイル作成
+        echo "Code Security Scan Results" > security-results/code-scan-summary.txt
+        echo "Issues Found: $ISSUES_FOUND" >> security-results/code-scan-summary.txt
+        echo "Scan Date: $(date)" >> security-results/code-scan-summary.txt
+    
+    # ================================================================
+    # Step 4: シークレット・機密情報スキャン
+    # ================================================================
+    - name: 🔐 Secret scan
+      id: secret-scan
+      if: inputs.run-secret-scan == 'true'
+      shell: bash
+      run: |
+        echo "🔐 シークレット・機密情報スキャン実行中..."
+        
+        SECRETS_FOUND=0
+        
+        # APIキー、パスワード、トークンのパターンスキャン
+        echo "🔍 機密情報パターンをスキャン中..."
+        
+        # API Key パターン
+        if find src -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.json" \) 2>/dev/null | \
+           xargs grep -n -i -E "(api[_-]?key|apikey)" 2>/dev/null | \
+           grep -E "(['\"])[A-Za-z0-9]{20,}(['\"])" > security-results/api-key-patterns.txt; then
+          echo "⚠️ 疑わしいAPIキーパターンが検出されました:"
+          cat security-results/api-key-patterns.txt
+          SECRETS_FOUND=$((SECRETS_FOUND + $(wc -l < security-results/api-key-patterns.txt)))
+        else
+          echo "✅ APIキーパターンなし"
+          echo "No API key patterns found" > security-results/api-key-patterns.txt
+        fi
+        
+        # パスワードパターン
+        if find src -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.json" \) 2>/dev/null | \
+           xargs grep -n -i -E "(password|passwd|pwd)" 2>/dev/null | \
+           grep -E "(['\"])[A-Za-z0-9@#$%^&*!]{8,}(['\"])" > security-results/password-patterns.txt; then
+          echo "⚠️ 疑わしいパスワードパターンが検出されました:"
+          cat security-results/password-patterns.txt
+          SECRETS_FOUND=$((SECRETS_FOUND + $(wc -l < security-results/password-patterns.txt)))
+        else
+          echo "✅ パスワードパターンなし"
+          echo "No password patterns found" > security-results/password-patterns.txt
+        fi
+        
+        # トークンパターン
+        if find src -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" -o -name "*.json" \) 2>/dev/null | \
+           xargs grep -n -i -E "(token|secret|key)" 2>/dev/null | \
+           grep -E "(['\"])[A-Za-z0-9_-]{32,}(['\"])" > security-results/token-patterns.txt; then
+          echo "⚠️ 疑わしいトークンパターンが検出されました:"
+          cat security-results/token-patterns.txt
+          SECRETS_FOUND=$((SECRETS_FOUND + $(wc -l < security-results/token-patterns.txt)))
+        else
+          echo "✅ トークンパターンなし"
+          echo "No token patterns found" > security-results/token-patterns.txt
+        fi
+        
+        # 結果の判定
+        if [ $SECRETS_FOUND -eq 0 ]; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "✅ シークレットスキャン: 問題なし"
+        else
+          echo "result=secrets-found" >> $GITHUB_OUTPUT
+          echo "⚠️ シークレットスキャン: $SECRETS_FOUND 件の疑わしいパターンが見つかりました"
+        fi
+        
+        # サマリーファイル作成
+        echo "Secret Scan Results" > security-results/secret-scan-summary.txt
+        echo "Suspicious Patterns Found: $SECRETS_FOUND" >> security-results/secret-scan-summary.txt
+        echo "Scan Date: $(date)" >> security-results/secret-scan-summary.txt
+    
+    # ================================================================
+    # Step 5: セキュリティ監査サマリー
+    # ================================================================
+    - name: 📊 Security audit summary
+      shell: bash
+      run: |
+        echo "📊 セキュリティ監査結果サマリー:"
+        
+        DEPENDENCY_RESULT="${{ steps.dependency-audit.outputs.result }}"
+        CODE_SCAN_RESULT="${{ steps.code-scan.outputs.result }}"
+        SECRET_SCAN_RESULT="${{ steps.secret-scan.outputs.result }}"
+        
+        # 結果の表示
+        if [ "${{ inputs.run-dependency-audit }}" = "true" ]; then
+          if [ "$DEPENDENCY_RESULT" = "success" ]; then
+            echo "  ✅ 依存関係監査: 脆弱性なし"
+          else
+            echo "  ⚠️ 依存関係監査: 脆弱性検出"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-code-scan }}" = "true" ]; then
+          if [ "$CODE_SCAN_RESULT" = "success" ]; then
+            echo "  ✅ コードスキャン: 問題なし"
+          else
+            echo "  ⚠️ コードスキャン: セキュリティ問題検出"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-secret-scan }}" = "true" ]; then
+          if [ "$SECRET_SCAN_RESULT" = "success" ]; then
+            echo "  ✅ シークレットスキャン: 問題なし"
+          else
+            echo "  ⚠️ シークレットスキャン: 疑わしいパターン検出"
+          fi
+        fi
+        
+        # 統合サマリーファイル作成
+        echo "Security Audit Summary" > security-results/audit-summary.txt
+        echo "Dependency Audit: $DEPENDENCY_RESULT" >> security-results/audit-summary.txt
+        echo "Code Scan: $CODE_SCAN_RESULT" >> security-results/audit-summary.txt
+        echo "Secret Scan: $SECRET_SCAN_RESULT" >> security-results/audit-summary.txt
+        echo "Vulnerabilities Count: ${{ steps.dependency-audit.outputs.vulnerabilities-count }}" >> security-results/audit-summary.txt
+        echo "Audit Date: $(date)" >> security-results/audit-summary.txt
+        
+        echo "📄 セキュリティ監査結果は security-results/ ディレクトリに保存されました"

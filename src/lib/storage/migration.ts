@@ -108,7 +108,7 @@ export class MigrationService {
    */
   async createBackup(): Promise<boolean> {
     try {
-      const backup: Record<string, any> = {}
+      const backup: Record<string, unknown> = {}
 
       // Backup all PMP-related localStorage items
       for (let i = 0; i < localStorage.length; i++) {

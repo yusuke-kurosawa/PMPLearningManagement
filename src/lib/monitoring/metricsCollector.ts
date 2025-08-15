@@ -490,7 +490,7 @@ export class MetricsCollector {
   /**
    * 特定のメトリクスの値を取得（デバッグ用）
    */
-  async getMetricValue(metricName: string): Promise<any> {
+  async getMetricValue(metricName: string): Promise<unknown> {
     const metric = register.getSingleMetric(metricName)
     if (metric) {
       return await metric.get()

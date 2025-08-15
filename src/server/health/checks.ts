@@ -16,7 +16,7 @@ export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string
   responseTime: number
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   error?: string
 }
 
@@ -327,7 +327,7 @@ export class HealthChecker {
   // 外部API統合ヘルスチェック
   static async checkExternalApis(): Promise<HealthCheckResult> {
     const startTime = Date.now()
-    const results: Record<string, any> = {}
+    const results: Record<string, unknown> = {}
 
     try {
       // 複数の外部APIを並行してチェック

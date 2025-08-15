@@ -529,7 +529,13 @@ const EnhancedFlashCardSystem: React.FC = () => {
           </div>
         </div>
 
-        <Tabs value={activeView} onValueChange={setActiveView as any} className="space-y-6">
+        <Tabs
+          value={activeView}
+          onValueChange={(value) =>
+            setActiveView(value as 'decks' | 'study' | 'create' | 'statistics')
+          }
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="decks">Decks</TabsTrigger>
             <TabsTrigger value="study" disabled={!isStudying}>

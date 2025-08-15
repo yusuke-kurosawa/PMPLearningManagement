@@ -22,13 +22,13 @@
 
 ```javascript
 // ❌ 重複プロパティ
-<div 
+<div
   onTouchEnd={handler1}
   onTouchEnd={handler2}  // エラー
 >
 
 // ✅ 統合処理
-<div 
+<div
   onTouchEnd={(e) => {
     handler1(e);
     handler2(e);
@@ -60,15 +60,15 @@ You&apos;re all caught up!
 // ❌ 変数宣言がcase内にある
 switch (type) {
   case 'test':
-    const result = calculate();  // エラー
-    break;
+    const result = calculate() // エラー
+    break
 }
 
 // ✅ ブロックで囲む
 switch (type) {
   case 'test': {
-    const result = calculate();
-    break;
+    const result = calculate()
+    break
   }
 }
 ```
@@ -214,6 +214,7 @@ logger.debug('Debug info')
 - ゼロ警告運用開始
 
 ---
+
 作成者: Claude Code Agent Orchestration System
 作成日: 2025-08-13
 最終更新: 2025-08-13

@@ -6,13 +6,13 @@
       "category": "デプロイメント"
     },
     "test.yml": {
-      "new_name": "02-test-comprehensive.yml", 
+      "new_name": "02-test-comprehensive.yml",
       "japanese_name": "🧪 統合テストスイート実行",
       "category": "テスト"
     },
     "security-scan.yml": {
       "new_name": "03-security-vulnerability-scan.yml",
-      "japanese_name": "🔒 セキュリティ脆弱性監査", 
+      "japanese_name": "🔒 セキュリティ脆弱性監査",
       "category": "セキュリティ"
     },
     "pr-validation.yml": {
@@ -26,7 +26,7 @@
       "category": "監視"
     },
     "ai-assisted-review.yml": {
-      "new_name": "05-automation-ai-review.yml", 
+      "new_name": "05-automation-ai-review.yml",
       "japanese_name": "🤖 AI支援コードレビュー",
       "category": "自動化"
     },
@@ -37,7 +37,7 @@
     },
     "advanced-testing.yml": {
       "new_name": "02-test-advanced-suite.yml",
-      "japanese_name": "🔬 高度テスト実行スイート", 
+      "japanese_name": "🔬 高度テスト実行スイート",
       "category": "テスト"
     },
     "zero-trust-security.yml": {
@@ -56,7 +56,7 @@
       "category": "通知"
     },
     "developer-experience.yml": {
-      "new_name": "08-developer-experience.yml", 
+      "new_name": "08-developer-experience.yml",
       "japanese_name": "🔧 開発者体験向上",
       "category": "開発支援"
     },
