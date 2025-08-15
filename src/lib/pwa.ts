@@ -5,12 +5,6 @@ interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean
 }
 
-interface WindowWithVisualViewport extends Window {
-  visualViewport?: {
-    height: number
-  }
-}
-
 // PWA utilities and service worker management
 
 export interface PWAInstallPrompt {
@@ -264,7 +258,7 @@ export const isAndroid = (): boolean => {
 export const isStandalone = (): boolean => {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as NavigatorWithStandalone).standalone === true
   )
 }
 

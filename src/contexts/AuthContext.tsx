@@ -276,7 +276,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   )
 
   // Sign in with OAuth
-  const signInWithOAuth = useCallback(async (provider) => {
+  const _signInWithOAuth = useCallback(async (provider) => {
     setLoading(true)
     setAuthError(null)
 
@@ -328,7 +328,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   // Update password
-  const updatePassword = useCallback(async (newPassword) => {
+  const _updatePassword = useCallback(async (newPassword) => {
     setLoading(true)
     setAuthError(null)
 

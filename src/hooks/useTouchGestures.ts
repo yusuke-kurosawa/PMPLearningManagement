@@ -5,7 +5,7 @@ interface SwipeHandlers {
   onSwipeRight?: () => void
   onSwipeUp?: () => void
   onSwipeDown?: () => void
-  onPinchZoom?: (scale: number) => void
+  onPinchZoom?: (_scale: number) => void
   onDoubleTap?: () => void
 }
 

@@ -6,6 +6,7 @@
 
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
+import Stripe from 'stripe'
 import { createTRPCRouter, protectedProcedure } from '@/server/trpc'
 import { StripeService, paymentMethodSchema } from '@/server/services/stripeService'
 import { logger } from '../../services/logger'
@@ -17,6 +18,13 @@ import {
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { SubscriptionPlan } from '@prisma/client'
 import { prisma } from '@/lib/db'
+
+// Stripe Customer型ガード
+function isStripeCustomer(
+  customer: Stripe.Customer | Stripe.DeletedCustomer
+): customer is Stripe.Customer {
+  return !customer.deleted && 'metadata' in customer
+}
 
 // 入力検証スキーマ
 const createSubscriptionSchema = z.object({
@@ -59,7 +67,7 @@ export const paymentRouter = createTRPCRouter({
   }),
 
   // 利用可能なプラン一覧取得
-  getPlans: protectedProcedure.query(async ({ _ctx }) => {
+  getPlans: protectedProcedure.query(async () => {
     return SubscriptionService.getAvailablePlans()
   }),
 
@@ -486,7 +494,15 @@ export const paymentRouter = createTRPCRouter({
         // 顧客確認
         if (typeof invoice.customer === 'string') {
           const customer = await StripeService.stripe.customers.retrieve(invoice.customer)
-          if ((customer as any).metadata?.userId !== ctx.session.user.id) {
+
+          if (!isStripeCustomer(customer)) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: '削除された顧客の請求書にはアクセスできません',
+            })
+          }
+
+          if (customer.metadata?.userId !== ctx.session.user.id) {
             throw new TRPCError({
               code: 'FORBIDDEN',
               message: 'この請求書にアクセスする権限がありません',

@@ -250,7 +250,7 @@ export class UserService {
   }
 
   // ユーザー詳細情報取得
-  static async getUserById(userId: string, _requesterId?: string): Promise<UserDetails | null> {
+  static async getUserById(userId: string): Promise<UserDetails | null> {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
