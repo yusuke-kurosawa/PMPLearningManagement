@@ -1,0 +1,347 @@
+groups:
+  - name: critical_alerts
+    interval: 30s
+    rules:
+      # ============================================
+      # Service Availability
+      # ============================================
+      - alert: ServiceDown
+        expr: up{job="pmp-learning"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          service: pmp-learning
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: |
+            Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute.
+            Current value: {{ $value }}
+          runbook_url: https://wiki.pmplearning.com/runbooks/service-down
+          dashboard_url: https://grafana.pmplearning.com/d/service-health
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate for {{ $labels.service }}"
+          description: |
+            Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}.
+            This exceeds the critical threshold of 5%.
+          runbook_url: https://wiki.pmplearning.com/runbooks/high-error-rate
+
+      - alert: ServiceUnavailable
+        expr: |
+          (
+            sum(rate(http_requests_total{status="503"}[5m])) by (service)
+          ) > 10
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service unavailable errors detected"
+          description: |
+            Service {{ $labels.service }} is returning 503 errors.
+            Rate: {{ $value }} errors per second
+
+      # ============================================
+      # Database Health
+      # ============================================
+      - alert: DatabaseConnectionFailure
+        expr: |
+          mysql_up == 0 or pg_up == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: database
+          component: database
+        annotations:
+          summary: "Database connection failure"
+          description: |
+            Cannot connect to database {{ $labels.database_name }}.
+            Instance: {{ $labels.instance }}
+          runbook_url: https://wiki.pmplearning.com/runbooks/database-connection
+
+      - alert: DatabaseReplicationLag
+        expr: |
+          mysql_slave_lag_seconds > 30 or
+          pg_replication_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "High database replication lag"
+          description: |
+            Replication lag is {{ $value }} seconds for {{ $labels.instance }}.
+            This may cause data inconsistency issues.
+
+      - alert: DatabaseLockWaits
+        expr: |
+          rate(mysql_global_status_innodb_row_lock_waits[5m]) > 10 or
+          rate(pg_locks_count{mode="ExclusiveLock"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "High database lock contention"
+          description: |
+            Database {{ $labels.instance }} experiencing high lock waits.
+            Current rate: {{ $value }} locks/sec
+
+      # ============================================
+      # Infrastructure
+      # ============================================
+      - alert: NodeDown
+        expr: |
+          up{job="node-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Node {{ $labels.instance }} is down"
+          description: |
+            Node exporter on {{ $labels.instance }} has been down for more than 2 minutes.
+            This node may be completely unavailable.
+
+      - alert: HighCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 90
+        for: 10m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.instance }}"
+          description: |
+            CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}.
+            This may cause performance degradation.
+
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+            / node_memory_MemTotal_bytes
+          ) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Critical memory usage on {{ $labels.instance }}"
+          description: |
+            Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}.
+            Available memory: {{ $labels.available_memory }}
+
+      - alert: DiskSpaceCritical
+        expr: |
+          (
+            (node_filesystem_size_bytes - node_filesystem_avail_bytes)
+            / node_filesystem_size_bytes
+          ) > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: |
+            Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}.
+            Mount point: {{ $labels.mountpoint }}
+            Available space: {{ $labels.available_bytes | humanize1024 }}
+
+      # ============================================
+      # Kubernetes
+      # ============================================
+      - alert: KubernetesPodCrashLooping
+        expr: |
+          rate(kube_pod_container_status_restarts_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: |
+            Pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value }} times in the last hour.
+            Container: {{ $labels.container }}
+
+      - alert: KubernetesNodeNotReady
+        expr: |
+          kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Kubernetes node {{ $labels.node }} is not ready"
+          description: |
+            Node {{ $labels.node }} has been in NotReady state for more than 5 minutes.
+            This will affect pod scheduling and availability.
+
+      - alert: KubernetesPersistentVolumeError
+        expr: |
+          kube_persistentvolume_status_phase{phase=~"Failed|Pending"} > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Persistent volume error"
+          description: |
+            Persistent volume {{ $labels.persistentvolume }} is in {{ $labels.phase }} state.
+            This may cause data access issues.
+
+      # ============================================
+      # Application-Specific
+      # ============================================
+      - alert: APILatencyHigh
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(http_request_duration_seconds_bucket{job="pmp-api"}[5m])) by (le, method, endpoint)
+          ) > 2
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+          slo: latency
+        annotations:
+          summary: "API latency is critically high"
+          description: |
+            99th percentile latency for {{ $labels.method }} {{ $labels.endpoint }} is {{ $value }}s.
+            SLO violation: latency should be < 2s
+
+      - alert: PaymentProcessingFailure
+        expr: |
+          sum(rate(payment_processing_errors_total[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: payments
+          pagerduty: true
+        annotations:
+          summary: "Payment processing failures detected"
+          description: |
+            Payment processing error rate is {{ $value }} errors/sec.
+            This is affecting customer transactions.
+          runbook_url: https://wiki.pmplearning.com/runbooks/payment-failures
+
+      - alert: AuthenticationServiceDown
+        expr: |
+          up{job="auth-service"} == 0 or
+          sum(rate(auth_failures_total[5m])) > 100
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+          service: authentication
+        annotations:
+          summary: "Authentication service is down or failing"
+          description: |
+            Authentication service is either down or experiencing high failure rate.
+            Current failure rate: {{ $value }}/sec
+
+      # ============================================
+      # Data Pipeline
+      # ============================================
+      - alert: DataPipelineStalled
+        expr: |
+          time() - data_pipeline_last_success_timestamp > 3600
+        for: 5m
+        labels:
+          severity: critical
+          team: data
+        annotations:
+          summary: "Data pipeline has stalled"
+          description: |
+            Data pipeline {{ $labels.pipeline }} hasn't completed successfully in {{ $value | humanizeDuration }}.
+            Last success: {{ $labels.last_success }}
+
+      - alert: KafkaConsumerLag
+        expr: |
+          kafka_consumer_lag_sum > 100000
+        for: 10m
+        labels:
+          severity: critical
+          team: data
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: |
+            Consumer group {{ $labels.consumergroup }} has a lag of {{ $value }} messages.
+            Topic: {{ $labels.topic }}
+
+      # ============================================
+      # Security
+      # ============================================
+      - alert: SecurityBreachAttempt
+        expr: |
+          sum(rate(security_breach_attempts_total[5m])) > 10 or
+          sum(rate(failed_login_attempts_total[5m])) > 100
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+          pagerduty: true
+        annotations:
+          summary: "Potential security breach detected"
+          description: |
+            Detected {{ $value }} breach attempts per second.
+            Immediate investigation required.
+          runbook_url: https://wiki.pmplearning.com/runbooks/security-breach
+
+      - alert: SSLCertificateExpiringSoon
+        expr: |
+          probe_ssl_earliest_cert_expiry - time() < 7 * 24 * 3600
+        for: 1h
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: |
+            SSL certificate for {{ $labels.instance }} will expire in {{ $value | humanizeDuration }}.
+            Immediate renewal required.
+
+      # ============================================
+      # Business Metrics
+      # ============================================
+      - alert: RevenueProcessingDown
+        expr: |
+          sum(rate(revenue_processed_total[5m])) == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: business
+          pagerduty: true
+        annotations:
+          summary: "Revenue processing has stopped"
+          description: |
+            No revenue has been processed in the last 5 minutes.
+            This directly impacts business operations.
+
+      - alert: CriticalBusinessKPIViolation
+        expr: |
+          business_kpi_score{kpi="customer_satisfaction"} < 0.7 or
+          business_kpi_score{kpi="conversion_rate"} < 0.01
+        for: 15m
+        labels:
+          severity: critical
+          team: business
+        annotations:
+          summary: "Critical business KPI violation"
+          description: |
+            Business KPI {{ $labels.kpi }} is at {{ $value }}.
+            This is below critical threshold and requires immediate attention.

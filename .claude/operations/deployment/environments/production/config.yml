@@ -1,0 +1,520 @@
+# Production Environment Configuration
+# PMP Learning Management Platform
+
+environment:
+  name: production
+  tier: tier-1
+  region: us-east-1
+  availability_zones:
+    - us-east-1a
+    - us-east-1b
+    - us-east-1c
+
+# ============================================
+# Application Configuration
+# ============================================
+application:
+  name: pmp-learning-management
+  version: "${APP_VERSION}"
+  
+  replicas:
+    min: 3
+    max: 20
+    target_cpu_utilization: 70
+    target_memory_utilization: 80
+  
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+  
+  health_checks:
+    liveness:
+      path: /health/live
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      failure_threshold: 3
+    
+    readiness:
+      path: /health/ready
+      initial_delay_seconds: 10
+      period_seconds: 5
+      timeout_seconds: 3
+      failure_threshold: 3
+    
+    startup:
+      path: /health/startup
+      initial_delay_seconds: 0
+      period_seconds: 10
+      timeout_seconds: 3
+      failure_threshold: 30
+
+# ============================================
+# Database Configuration
+# ============================================
+database:
+  primary:
+    engine: postgresql
+    version: "15.3"
+    instance_class: db.r6g.xlarge
+    storage:
+      type: gp3
+      size: 500
+      iops: 16000
+      throughput: 1000
+    
+    high_availability:
+      enabled: true
+      multi_az: true
+      standby_replicas: 1
+    
+    backup:
+      enabled: true
+      retention_days: 30
+      window: "03:00-04:00"
+      final_snapshot: true
+    
+    monitoring:
+      enhanced: true
+      interval: 60
+      performance_insights: true
+      retention_days: 7
+  
+  read_replicas:
+    - region: us-east-1
+      instance_class: db.r6g.large
+      availability_zone: us-east-1b
+    
+    - region: us-west-2
+      instance_class: db.r6g.large
+      availability_zone: us-west-2a
+
+  connection_pool:
+    min_connections: 10
+    max_connections: 100
+    idle_timeout: 300
+    connection_timeout: 10
+
+# ============================================
+# Cache Configuration
+# ============================================
+cache:
+  redis:
+    engine: redis
+    version: "7.0"
+    node_type: cache.r6g.xlarge
+    
+    cluster:
+      enabled: true
+      num_cache_nodes: 3
+      automatic_failover: true
+    
+    persistence:
+      enabled: true
+      snapshot_retention: 5
+      snapshot_window: "04:00-05:00"
+    
+    security:
+      auth_token: "${REDIS_AUTH_TOKEN}"
+      transit_encryption: true
+      at_rest_encryption: true
+
+# ============================================
+# CDN Configuration
+# ============================================
+cdn:
+  provider: cloudfront
+  
+  distribution:
+    enabled: true
+    price_class: PriceClass_All
+    
+    origins:
+      - domain: api.pmplearning.com
+        protocol: https
+        custom_headers:
+          - name: X-CDN-Secret
+            value: "${CDN_SECRET}"
+    
+    behaviors:
+      default:
+        viewer_protocol_policy: redirect-to-https
+        allowed_methods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+        cached_methods: ["GET", "HEAD", "OPTIONS"]
+        compress: true
+        
+        cache_policy:
+          default_ttl: 86400
+          max_ttl: 31536000
+          min_ttl: 0
+      
+      api:
+        path_pattern: "/api/*"
+        viewer_protocol_policy: https-only
+        allowed_methods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+        cached_methods: ["GET", "HEAD"]
+        
+        cache_policy:
+          default_ttl: 0
+          max_ttl: 0
+          min_ttl: 0
+    
+    geo_restriction:
+      restriction_type: none
+    
+    waf:
+      enabled: true
+      web_acl_id: "${WAF_WEB_ACL_ID}"
+
+# ============================================
+# Load Balancer Configuration
+# ============================================
+load_balancer:
+  type: application
+  scheme: internet-facing
+  
+  listeners:
+    - port: 443
+      protocol: HTTPS
+      certificate_arn: "${ACM_CERTIFICATE_ARN}"
+      
+      default_action:
+        type: forward
+        target_group: main
+    
+    - port: 80
+      protocol: HTTP
+      
+      default_action:
+        type: redirect
+        redirect:
+          protocol: HTTPS
+          port: 443
+          status_code: 301
+  
+  target_groups:
+    main:
+      port: 3000
+      protocol: HTTP
+      health_check:
+        enabled: true
+        path: /health
+        interval: 30
+        timeout: 5
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+      
+      stickiness:
+        enabled: true
+        duration: 86400
+        cookie_name: AWSALB
+  
+  security:
+    security_groups:
+      - "${ALB_SECURITY_GROUP_ID}"
+    
+    ssl_policy: ELBSecurityPolicy-TLS-1-2-2017-01
+
+# ============================================
+# Auto Scaling Configuration
+# ============================================
+auto_scaling:
+  enabled: true
+  
+  metrics:
+    - type: cpu
+      target: 70
+      scale_up_cooldown: 60
+      scale_down_cooldown: 300
+    
+    - type: memory
+      target: 80
+      scale_up_cooldown: 60
+      scale_down_cooldown: 300
+    
+    - type: requests_per_second
+      target: 1000
+      scale_up_cooldown: 30
+      scale_down_cooldown: 300
+  
+  policies:
+    scale_up:
+      adjustment_type: PercentChangeInCapacity
+      scaling_adjustment: 50
+      cooldown: 60
+    
+    scale_down:
+      adjustment_type: PercentChangeInCapacity
+      scaling_adjustment: -25
+      cooldown: 300
+  
+  scheduled_actions:
+    - name: morning_scale_up
+      schedule: "0 6 * * MON-FRI"
+      min_size: 5
+      max_size: 25
+      desired_capacity: 8
+    
+    - name: evening_scale_down
+      schedule: "0 20 * * *"
+      min_size: 3
+      max_size: 15
+      desired_capacity: 3
+
+# ============================================
+# Monitoring & Alerting
+# ============================================
+monitoring:
+  prometheus:
+    enabled: true
+    namespace: monitoring
+    retention: 30d
+    storage: 100Gi
+  
+  grafana:
+    enabled: true
+    admin_user: admin
+    dashboards:
+      - application-metrics
+      - infrastructure-metrics
+      - business-kpis
+      - security-dashboard
+  
+  alertmanager:
+    enabled: true
+    
+    receivers:
+      - name: pagerduty-critical
+        pagerduty_configs:
+          - service_key: "${PAGERDUTY_SERVICE_KEY}"
+            severity: critical
+      
+      - name: slack-warnings
+        slack_configs:
+          - api_url: "${SLACK_WEBHOOK_URL}"
+            channel: "#ops-alerts"
+      
+      - name: email-notifications
+        email_configs:
+          - to: "ops-team@pmplearning.com"
+            from: "alerts@pmplearning.com"
+  
+  logging:
+    provider: cloudwatch
+    
+    log_groups:
+      - name: /aws/application/pmp-learning
+        retention_days: 90
+      
+      - name: /aws/infrastructure/pmp-learning
+        retention_days: 30
+    
+    log_streams:
+      - application
+      - access
+      - error
+      - audit
+
+# ============================================
+# Security Configuration
+# ============================================
+security:
+  waf:
+    enabled: true
+    
+    rules:
+      - name: RateLimitRule
+        priority: 1
+        action: BLOCK
+        rate_limit: 2000
+        
+      - name: SQLInjectionRule
+        priority: 2
+        action: BLOCK
+        
+      - name: XSSProtectionRule
+        priority: 3
+        action: BLOCK
+  
+  secrets_manager:
+    enabled: true
+    rotation:
+      enabled: true
+      lambda_arn: "${ROTATION_LAMBDA_ARN}"
+      rotation_days: 30
+  
+  network:
+    vpc_id: "${VPC_ID}"
+    
+    subnets:
+      public:
+        - "${PUBLIC_SUBNET_1}"
+        - "${PUBLIC_SUBNET_2}"
+        - "${PUBLIC_SUBNET_3}"
+      
+      private:
+        - "${PRIVATE_SUBNET_1}"
+        - "${PRIVATE_SUBNET_2}"
+        - "${PRIVATE_SUBNET_3}"
+    
+    security_groups:
+      application: "${APP_SECURITY_GROUP}"
+      database: "${DB_SECURITY_GROUP}"
+      cache: "${CACHE_SECURITY_GROUP}"
+  
+  compliance:
+    enabled: true
+    standards:
+      - PCI-DSS
+      - HIPAA
+      - SOC2
+    
+    audit_logging:
+      enabled: true
+      destination: s3://pmp-audit-logs/production/
+
+# ============================================
+# Backup & Disaster Recovery
+# ============================================
+backup:
+  strategy: comprehensive
+  
+  database:
+    enabled: true
+    schedule: "0 2 * * *"
+    retention:
+      daily: 7
+      weekly: 4
+      monthly: 12
+      yearly: 5
+    
+    replication:
+      enabled: true
+      target_region: us-west-2
+  
+  application_state:
+    enabled: true
+    schedule: "0 * * * *"
+    destination: s3://pmp-backups/production/state/
+  
+  disaster_recovery:
+    rpo: 1  # Recovery Point Objective in hours
+    rto: 4  # Recovery Time Objective in hours
+    
+    dr_region: us-west-2
+    dr_environment: production-dr
+    
+    failover:
+      automatic: false
+      health_check_interval: 60
+      failure_threshold: 3
+
+# ============================================
+# Feature Flags
+# ============================================
+feature_flags:
+  provider: launchdarkly
+  
+  sdk_key: "${LAUNCHDARKLY_SDK_KEY}"
+  
+  defaults:
+    new_dashboard: true
+    ai_coaching: true
+    advanced_analytics: true
+    mobile_app: true
+    
+  rollout_strategy:
+    type: percentage
+    rules:
+      - percentage: 100
+        segments: ["premium_users"]
+      
+      - percentage: 50
+        segments: ["standard_users"]
+      
+      - percentage: 10
+        segments: ["free_users"]
+
+# ============================================
+# Deployment Strategy
+# ============================================
+deployment:
+  strategy: blue_green
+  
+  blue_green:
+    enabled: true
+    
+    validation:
+      enabled: true
+      duration: 300  # seconds
+      
+      checks:
+        - type: health
+          endpoint: /health
+          expected_status: 200
+        
+        - type: smoke_test
+          script: smoke-test.sh
+        
+        - type: performance
+          threshold:
+            p95_latency: 1000  # ms
+            error_rate: 0.01   # 1%
+    
+    rollback:
+      automatic: true
+      on_validation_failure: true
+      
+  canary:
+    enabled: false
+    stages:
+      - traffic: 5
+        duration: 300
+      
+      - traffic: 25
+        duration: 600
+      
+      - traffic: 50
+        duration: 900
+      
+      - traffic: 100
+
+# ============================================
+# Cost Optimization
+# ============================================
+cost_optimization:
+  enabled: true
+  
+  spot_instances:
+    enabled: true
+    percentage: 30
+    
+    on_demand_base: 3
+    spot_allocation_strategy: lowest-price
+  
+  reserved_instances:
+    enabled: true
+    coverage_target: 70
+    
+    instance_types:
+      - t3.large
+      - t3.xlarge
+      - m5.large
+      - m5.xlarge
+  
+  auto_shutdown:
+    enabled: false  # Not for production
+  
+  resource_tagging:
+    mandatory: true
+    
+    required_tags:
+      - Environment
+      - Project
+      - Owner
+      - CostCenter
+      - Purpose
