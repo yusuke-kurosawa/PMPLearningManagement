@@ -15,7 +15,7 @@ import {
 import { ProgressService } from '@/server/services/progressService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { prisma } from '@/lib/db'
-import type { KnowledgeArea, ProcessGroup } from '@/types'
+// import type { KnowledgeArea, ProcessGroup } from '@/types'
 
 // Score types for exam results
 type KnowledgeAreaScores = Record<string, number>

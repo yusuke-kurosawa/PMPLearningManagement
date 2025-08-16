@@ -63,7 +63,7 @@ class PerformanceMonitor {
 
       observer.observe({ entryTypes: ['paint'] })
       this.observers.set('paint', observer)
-    } catch (e) {
+    } catch (_e) {
       console.debug('Paint observer not supported')
     }
   }
@@ -82,7 +82,7 @@ class PerformanceMonitor {
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
       this.observers.set('lcp', observer)
-    } catch (e) {
+    } catch (_e) {
       console.debug('LCP observer not supported')
     }
   }
@@ -104,7 +104,7 @@ class PerformanceMonitor {
 
       observer.observe({ entryTypes: ['first-input'] })
       this.observers.set('fid', observer)
-    } catch (e) {
+    } catch (_e) {
       console.debug('FID observer not supported')
     }
   }
@@ -135,7 +135,7 @@ class PerformanceMonitor {
         this.metrics.CLS = Math.round(clsValue * 1000) / 1000
         this.reportMetric('CLS', this.metrics.CLS)
       })
-    } catch (e) {
+    } catch (_e) {
       console.debug('CLS observer not supported')
     }
   }
@@ -150,7 +150,7 @@ class PerformanceMonitor {
         this.metrics.TTFB = Math.round(navigationEntry.responseStart - navigationEntry.fetchStart)
         this.reportMetric('TTFB', this.metrics.TTFB)
       }
-    } catch (e) {
+    } catch (_e) {
       console.debug('TTFB measurement not supported')
     }
   }
@@ -177,7 +177,7 @@ class PerformanceMonitor {
 
       observer.observe({ entryTypes: ['event'] })
       this.observers.set('inp', observer)
-    } catch (e) {
+    } catch (_e) {
       console.debug('INP observer not supported')
     }
   }

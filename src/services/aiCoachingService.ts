@@ -84,7 +84,7 @@ class AICoachingService {
 
       // Personalized recommendations
       immediateActions: this.generateImmediateActions(weaknesses, profile),
-      weeklySchedule: this.generateWeeklySchedule(profile, weaknesses, learningGoals),
+      weeklySchedule: this.generateWeeklySchedule(profile, weaknesses, _learningGoals),
       studyPlan: this.generateStudyPlan(userProgress, weaknesses, strengths),
 
       // Adaptive elements
@@ -92,8 +92,8 @@ class AICoachingService {
       preferredLearningMethods: this.getPreferredMethods(profile),
 
       // Career integration
-      careerAlignment: this.getCareerAlignment(profile, learningGoals),
-      postCertificationPath: this.generatePostCertificationPath(profile, learningGoals),
+      careerAlignment: this.getCareerAlignment(_profile, __learningGoals),
+      postCertificationPath: this.generatePostCertificationPath(_profile, __learningGoals),
     }
 
     this.updateLearningPattern(userId, learningPath)
@@ -237,7 +237,7 @@ class AICoachingService {
   /**
    * Generate weekly study schedule based on user preferences and weaknesses
    */
-  generateWeeklySchedule(profile, weaknesses, learningGoals) {
+  generateWeeklySchedule(profile, weaknesses, _learningGoals) {
     const availableHours = profile.availableStudyTime || 10 // hours per week
     // const intensity = learningGoals.intensity || 'moderate'
 
@@ -399,7 +399,7 @@ class AICoachingService {
   /**
    * Generate post-certification career development path
    */
-  generatePostCertificationPath(profile, learningGoals) {
+  generatePostCertificationPath(_profile, __learningGoals) {
     // const careerLevel = learningGoals.currentRole || 'aspiring_pm'
     // const targetRole = learningGoals.targetRole || 'senior_pm'
 

@@ -118,9 +118,15 @@ const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, pro
   if (!isOpen || !process) {return null}
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
       onClick={handleBackdropClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose()
+        }
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
