@@ -1,0 +1,153 @@
+{
+  "version": "1.0.0",
+  "environment": "development",
+  "project": {
+    "name": "PMPLearningManagement",
+    "description": "PMBOK Learning Management System with Advanced DevOps Integration",
+    "repository": "https://github.com/yusuke-kurosawa/PMPLearningManagement",
+    "version": "0.1.0",
+    "maintainers": [
+      {
+        "name": "Yusuke Kurosawa",
+        "email": "yusuke@example.com",
+        "role": "Lead Developer"
+      }
+    ]
+  },
+  "agents": {
+    "enabled": [
+      "deployment-engineer",
+      "cloud-architect",
+      "sre-engineer",
+      "security-engineer",
+      "platform-engineer",
+      "devops-engineer",
+      "test-automation-engineer",
+      "monitoring-specialist"
+    ],
+    "defaultAgent": "devops-engineer",
+    "timeout": 30000
+  },
+  "automation": {
+    "enabled": true,
+    "workflows": [
+      {
+        "name": "continuous-integration",
+        "trigger": "push",
+        "actions": ["lint", "test", "build", "security-scan"],
+        "enabled": true
+      },
+      {
+        "name": "continuous-deployment",
+        "trigger": "merge",
+        "actions": ["build", "test", "deploy", "verify"],
+        "enabled": true
+      },
+      {
+        "name": "nightly-maintenance",
+        "trigger": "schedule",
+        "actions": ["cleanup", "backup", "health-check", "report"],
+        "enabled": true
+      }
+    ],
+    "schedule": {
+      "cleanup": "0 2 * * *",
+      "backup": "0 3 * * *",
+      "healthCheck": "*/30 * * * *"
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": {
+      "collection": true,
+      "retention": 30,
+      "exporters": ["prometheus", "datadog", "cloudwatch"]
+    },
+    "alerts": {
+      "enabled": true,
+      "channels": ["email", "slack", "pagerduty"],
+      "thresholds": {
+        "errorRate": 0.01,
+        "responseTime": 1000,
+        "availability": 0.999,
+        "diskUsage": 0.8,
+        "memoryUsage": 0.9
+      }
+    },
+    "healthCheck": {
+      "interval": 60000,
+      "timeout": 5000,
+      "retries": 3
+    }
+  },
+  "security": {
+    "scanning": {
+      "enabled": true,
+      "frequency": "daily",
+      "scanners": ["trivy", "snyk", "owasp-zap", "semgrep"]
+    },
+    "access": {
+      "authentication": "jwt",
+      "authorization": "rbac",
+      "audit": true
+    },
+    "compliance": {
+      "standards": ["OWASP", "CIS", "PCI-DSS", "GDPR"],
+      "reporting": true
+    }
+  },
+  "deployment": {
+    "strategy": "blue-green",
+    "environments": {
+      "development": {
+        "url": "http://localhost:5173",
+        "branch": "develop",
+        "autoDeploy": true
+      },
+      "staging": {
+        "url": "https://staging.pmplearning.com",
+        "branch": "staging",
+        "autoDeploy": true
+      },
+      "production": {
+        "url": "https://yusuke-kurosawa.github.io/PMPLearningManagement",
+        "branch": "main",
+        "autoDeploy": false
+      }
+    },
+    "rollback": {
+      "enabled": true,
+      "automatic": true,
+      "conditions": ["health-check-failed", "error-rate-exceeded", "performance-degraded"]
+    }
+  },
+  "performance": {
+    "caching": {
+      "enabled": true,
+      "strategy": "lru",
+      "ttl": 3600
+    },
+    "optimization": {
+      "parallel": true,
+      "workers": 4,
+      "resourceLimits": {
+        "maxMemory": "512MB",
+        "maxCpu": "2",
+        "maxDisk": "1GB"
+      }
+    }
+  },
+  "maintenance": {
+    "backup": {
+      "enabled": true,
+      "frequency": "daily",
+      "retention": 30,
+      "location": "./meta/backup"
+    },
+    "cleanup": {
+      "enabled": true,
+      "frequency": "weekly",
+      "patterns": ["*.log", "*.tmp", ".cache", "node_modules"]
+    }
+  }
+}

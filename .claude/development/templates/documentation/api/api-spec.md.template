@@ -1,0 +1,504 @@
+# {{ApiName}} API Documentation
+
+**Version:** {{Version}}  
+**Base URL:** `{{BaseUrl}}`  
+**Last Updated:** {{Date}}  
+**Author:** {{Author}}
+
+## Overview
+
+{{Description}}
+
+## Authentication
+
+{{#if RequiresAuth}}
+This API requires authentication. Include the following header in all requests:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+### Obtaining Access Token
+
+```http
+POST /auth/token
+Content-Type: application/json
+
+{
+  "username": "user@example.com",
+  "password": "password"
+}
+```
+{{else}}
+This API does not require authentication.
+{{/if}}
+
+## Endpoints
+
+### {{ResourceName}} Resource
+
+#### List All {{ResourceName}}s
+
+```http
+GET /{{endpoint}}
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| page | integer | No | Page number (default: 1) |
+| limit | integer | No | Items per page (default: 20) |
+| sort | string | No | Sort field and direction |
+| filter | object | No | Filter criteria |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "string",
+      "description": "string",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "totalPages": 5
+  },
+  "success": true
+}
+```
+
+#### Get Single {{ResourceName}}
+
+```http
+GET /{{endpoint}}/:id
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | Resource ID |
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "description": "string",
+    "metadata": {},
+    "createdAt": "datetime",
+    "updatedAt": "datetime"
+  },
+  "success": true
+}
+```
+
+#### Create {{ResourceName}}
+
+```http
+POST /{{endpoint}}
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "name": "string",
+  "description": "string",
+  "metadata": {}
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "description": "string",
+    "metadata": {},
+    "createdAt": "datetime",
+    "updatedAt": "datetime"
+  },
+  "success": true,
+  "message": "{{ResourceName}} created successfully"
+}
+```
+
+#### Update {{ResourceName}}
+
+```http
+PUT /{{endpoint}}/:id
+Content-Type: application/json
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | Resource ID |
+
+**Request Body:**
+
+```json
+{
+  "name": "string",
+  "description": "string",
+  "metadata": {}
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "description": "string",
+    "metadata": {},
+    "createdAt": "datetime",
+    "updatedAt": "datetime"
+  },
+  "success": true,
+  "message": "{{ResourceName}} updated successfully"
+}
+```
+
+#### Partial Update {{ResourceName}}
+
+```http
+PATCH /{{endpoint}}/:id
+Content-Type: application/json
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | Resource ID |
+
+**Request Body:**
+
+```json
+{
+  "description": "string"
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "description": "string",
+    "metadata": {},
+    "createdAt": "datetime",
+    "updatedAt": "datetime"
+  },
+  "success": true,
+  "message": "{{ResourceName}} updated successfully"
+}
+```
+
+#### Delete {{ResourceName}}
+
+```http
+DELETE /{{endpoint}}/:id
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | Resource ID |
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "{{ResourceName}} deleted successfully"
+}
+```
+
+## Batch Operations
+
+### Batch Create
+
+```http
+POST /{{endpoint}}/batch
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "items": [
+    {
+      "name": "string",
+      "description": "string"
+    }
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "created": 5,
+    "failed": 0,
+    "items": []
+  },
+  "success": true
+}
+```
+
+### Batch Delete
+
+```http
+DELETE /{{endpoint}}/batch
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "ids": ["uuid1", "uuid2", "uuid3"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "deleted": 3,
+    "failed": 0
+  },
+  "success": true
+}
+```
+
+## Error Responses
+
+### Error Format
+
+All errors follow this format:
+
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "errors": ["Detailed error 1", "Detailed error 2"],
+  "code": "ERROR_CODE",
+  "statusCode": 400
+}
+```
+
+### Common Error Codes
+
+| Status Code | Error Code | Description |
+|-------------|------------|-------------|
+| 400 | VALIDATION_ERROR | Invalid request parameters |
+| 401 | UNAUTHORIZED | Authentication required |
+| 403 | FORBIDDEN | Access denied |
+| 404 | NOT_FOUND | Resource not found |
+| 409 | CONFLICT | Resource conflict |
+| 429 | RATE_LIMIT | Too many requests |
+| 500 | INTERNAL_ERROR | Server error |
+| 503 | SERVICE_UNAVAILABLE | Service temporarily unavailable |
+
+## Rate Limiting
+
+{{#if RateLimiting}}
+API requests are rate limited:
+
+- **Requests per minute:** {{RateLimit}}
+- **Burst limit:** {{BurstLimit}}
+
+Rate limit information is included in response headers:
+
+```http
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+X-RateLimit-Reset: 1640995200
+```
+{{else}}
+This API does not implement rate limiting.
+{{/if}}
+
+## Webhooks
+
+{{#if Webhooks}}
+### Webhook Events
+
+The API can send webhooks for the following events:
+
+- `{{ResourceName.toLowerCase()}}.created`
+- `{{ResourceName.toLowerCase()}}.updated`
+- `{{ResourceName.toLowerCase()}}.deleted`
+
+### Webhook Payload
+
+```json
+{
+  "event": "{{ResourceName.toLowerCase()}}.created",
+  "timestamp": "2025-08-15T10:00:00Z",
+  "data": {
+    "id": "uuid",
+    "name": "string"
+  }
+}
+```
+
+### Webhook Security
+
+Webhooks are signed with HMAC-SHA256. Verify the signature:
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhook(payload, signature, secret) {
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = hmac.update(payload).digest('hex');
+  return digest === signature;
+}
+```
+{{else}}
+This API does not support webhooks.
+{{/if}}
+
+## Code Examples
+
+### JavaScript/TypeScript
+
+```typescript
+import { {{ApiName}}Client } from '@/services/{{kebab-name}}';
+
+const client = new {{ApiName}}Client({
+  baseUrl: '{{BaseUrl}}',
+  apiKey: 'your-api-key'
+});
+
+// List resources
+const { data } = await client.getAll({
+  page: 1,
+  limit: 20
+});
+
+// Create resource
+const newItem = await client.create({
+  name: 'New Item',
+  description: 'Description'
+});
+
+// Update resource
+await client.update('uuid', {
+  name: 'Updated Name'
+});
+
+// Delete resource
+await client.delete('uuid');
+```
+
+### cURL
+
+```bash
+# List resources
+curl -X GET "{{BaseUrl}}/{{endpoint}}" \
+  -H "Authorization: Bearer <token>"
+
+# Create resource
+curl -X POST "{{BaseUrl}}/{{endpoint}}" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "name": "New Item",
+    "description": "Description"
+  }'
+
+# Update resource
+curl -X PUT "{{BaseUrl}}/{{endpoint}}/uuid" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "name": "Updated Name"
+  }'
+
+# Delete resource
+curl -X DELETE "{{BaseUrl}}/{{endpoint}}/uuid" \
+  -H "Authorization: Bearer <token>"
+```
+
+### Python
+
+```python
+import requests
+
+class {{ApiName}}Client:
+    def __init__(self, base_url, api_key):
+        self.base_url = base_url
+        self.headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+    
+    def get_all(self, page=1, limit=20):
+        response = requests.get(
+            f'{self.base_url}/{{endpoint}}',
+            params={'page': page, 'limit': limit},
+            headers=self.headers
+        )
+        return response.json()
+    
+    def create(self, data):
+        response = requests.post(
+            f'{self.base_url}/{{endpoint}}',
+            json=data,
+            headers=self.headers
+        )
+        return response.json()
+
+# Usage
+client = {{ApiName}}Client('{{BaseUrl}}', 'your-api-key')
+resources = client.get_all()
+```
+
+## Changelog
+
+### {{Version}} - {{Date}}
+
+- Initial API documentation
+- Added endpoints for {{ResourceName}} resource
+- Implemented batch operations
+
+## Support
+
+For API support, please contact:
+
+- **Email:** {{SupportEmail}}
+- **Documentation:** {{DocumentationUrl}}
+- **Status Page:** {{StatusPageUrl}}
+
+---
+
+Generated with [Template System](https://github.com/yusuke-kurosawa/PMPLearningManagement)

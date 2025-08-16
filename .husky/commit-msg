@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run custom IDD commit-msg hook  
+if [ -f ".github/hooks/commit-msg" ]; then
+  bash .github/hooks/commit-msg "$1"
+fi

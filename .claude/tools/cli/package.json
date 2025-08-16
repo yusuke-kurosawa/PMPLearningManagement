@@ -1,0 +1,36 @@
+{
+  "name": "@claude/cli",
+  "version": "1.0.0",
+  "description": "Enterprise-grade CLI for Claude directory management",
+  "main": "claude-cli.js",
+  "bin": {
+    "claude": "./claude-cli.js"
+  },
+  "scripts": {
+    "install-global": "npm link",
+    "uninstall-global": "npm unlink",
+    "test": "node test/cli.test.js"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "devops",
+    "automation",
+    "management"
+  ],
+  "author": "Claude DevOps Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^9.4.1",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1",
+    "yargs": "^17.6.2"
+  },
+  "devDependencies": {
+    "jest": "^29.3.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

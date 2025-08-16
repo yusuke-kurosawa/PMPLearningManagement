@@ -1,0 +1,128 @@
+{
+  "version": "1.0.0",
+  "environment": "staging",
+  "project": {
+    "name": "PMPLearningManagement",
+    "description": "Staging Environment - PMBOK Learning Management System",
+    "repository": "https://github.com/yusuke-kurosawa/PMPLearningManagement",
+    "version": "1.0.0-staging"
+  },
+  "agents": {
+    "enabled": [
+      "deployment-engineer",
+      "test-automation-engineer",
+      "monitoring-specialist",
+      "devops-engineer"
+    ],
+    "defaultAgent": "test-automation-engineer",
+    "timeout": 45000
+  },
+  "automation": {
+    "enabled": true,
+    "workflows": [
+      {
+        "name": "staging-deployment",
+        "trigger": "push",
+        "actions": ["lint", "test", "build", "deploy", "smoke-test"],
+        "enabled": true
+      },
+      {
+        "name": "staging-testing",
+        "trigger": "schedule",
+        "actions": ["integration-test", "performance-test", "security-scan"],
+        "enabled": true
+      }
+    ],
+    "schedule": {
+      "cleanup": "0 4 * * *",
+      "backup": "0 3 * * *",
+      "healthCheck": "*/15 * * * *",
+      "testing": "0 */4 * * *"
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": {
+      "collection": true,
+      "retention": 30,
+      "exporters": ["prometheus", "datadog"]
+    },
+    "alerts": {
+      "enabled": true,
+      "channels": ["slack", "email"],
+      "thresholds": {
+        "errorRate": 0.01,
+        "responseTime": 1000,
+        "availability": 0.99,
+        "diskUsage": 0.85,
+        "memoryUsage": 0.85
+      }
+    },
+    "healthCheck": {
+      "interval": 60000,
+      "timeout": 5000,
+      "retries": 3
+    }
+  },
+  "security": {
+    "scanning": {
+      "enabled": true,
+      "frequency": "hourly",
+      "scanners": ["trivy", "snyk", "semgrep"]
+    },
+    "access": {
+      "authentication": "jwt",
+      "authorization": "rbac",
+      "audit": true
+    },
+    "compliance": {
+      "standards": ["OWASP", "CIS"],
+      "reporting": true
+    }
+  },
+  "deployment": {
+    "strategy": "canary",
+    "environments": {
+      "staging": {
+        "url": "https://staging.pmplearning.com",
+        "branch": "staging",
+        "autoDeploy": true,
+        "canaryPercentage": 10
+      }
+    },
+    "rollback": {
+      "enabled": true,
+      "automatic": true,
+      "conditions": ["health-check-failed", "error-rate-exceeded"]
+    }
+  },
+  "performance": {
+    "caching": {
+      "enabled": true,
+      "strategy": "lru",
+      "ttl": 3600
+    },
+    "optimization": {
+      "parallel": true,
+      "workers": 4,
+      "resourceLimits": {
+        "maxMemory": "2GB",
+        "maxCpu": "2",
+        "maxDisk": "50GB"
+      }
+    }
+  },
+  "maintenance": {
+    "backup": {
+      "enabled": true,
+      "frequency": "daily",
+      "retention": 14,
+      "location": "./backups/staging"
+    },
+    "cleanup": {
+      "enabled": true,
+      "frequency": "daily",
+      "patterns": ["*.log", "*.tmp", ".cache", "test-results"]
+    }
+  }
+}

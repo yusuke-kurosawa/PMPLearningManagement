@@ -1,0 +1,52 @@
+{
+  "name": "@pmp-learning/template-generator",
+  "version": "1.0.0",
+  "description": "Production-ready template generation system with DevOps best practices",
+  "main": "generator/index.js",
+  "bin": {
+    "generate": "cli/generate.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint . --ext .js",
+    "validate": "node cli/generate.js --validate",
+    "list": "node cli/generate.js --list",
+    "generate": "node cli/generate.js",
+    "generate:component": "node cli/generate.js component/basic",
+    "generate:service": "node cli/generate.js service/api",
+    "generate:test": "node cli/generate.js test/unit",
+    "generate:page": "node cli/generate.js component/page",
+    "generate:hook": "node cli/generate.js component/hook"
+  },
+  "keywords": [
+    "template",
+    "generator",
+    "scaffolding",
+    "react",
+    "typescript",
+    "devops",
+    "automation"
+  ],
+  "author": "PMP Learning Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^9.4.1",
+    "fs-extra": "^11.1.0",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0",
+    "jest": "^29.4.3",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yusuke-kurosawa/PMPLearningManagement.git"
+  }
+}

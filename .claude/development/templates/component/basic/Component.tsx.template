@@ -1,0 +1,108 @@
+import React, { FC, HTMLAttributes } from 'react'
+import { cn } from '@/lib/utils'
+
+export interface {{ComponentName}}Props extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * Additional CSS class names
+   */
+  className?: string
+  /**
+   * Component variant
+   */
+  variant?: 'default' | 'primary' | 'secondary'
+  /**
+   * Component size
+   */
+  size?: 'sm' | 'md' | 'lg'
+  /**
+   * Loading state
+   */
+  isLoading?: boolean
+  /**
+   * Disabled state
+   */
+  disabled?: boolean
+}
+
+/**
+ * {{ComponentName}} - {{Description}}
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * <{{ComponentName}} variant="primary" size="md">
+ *   Content here
+ * </{{ComponentName}}>
+ * ```
+ * 
+ * @param {{{ComponentName}}Props} props - Component properties
+ * @returns {JSX.Element} Rendered component
+ * 
+ * @since {{Date}}
+ * @author {{Author}}
+ */
+export const {{ComponentName}}: FC<{{ComponentName}}Props> = ({
+  className,
+  variant = 'default',
+  size = 'md',
+  isLoading = false,
+  disabled = false,
+  children,
+  ...props
+}) => {
+  // Component logic
+  const baseClasses = '{{kebab-name}}'
+  const variantClasses = {
+    default: '{{kebab-name}}--default',
+    primary: '{{kebab-name}}--primary bg-primary text-primary-foreground',
+    secondary: '{{kebab-name}}--secondary bg-secondary text-secondary-foreground'
+  }
+  const sizeClasses = {
+    sm: '{{kebab-name}}--sm px-2 py-1 text-sm',
+    md: '{{kebab-name}}--md px-4 py-2',
+    lg: '{{kebab-name}}--lg px-6 py-3 text-lg'
+  }
+
+  // Event handlers
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled || isLoading) {
+      event.preventDefault()
+      return
+    }
+    props.onClick?.(event)
+  }
+
+  return (
+    <div
+      className={cn(
+        baseClasses,
+        variantClasses[variant],
+        sizeClasses[size],
+        {
+          'opacity-50 cursor-not-allowed': disabled,
+          'animate-pulse': isLoading
+        },
+        className
+      )}
+      onClick={handleClick}
+      aria-disabled={disabled}
+      aria-busy={isLoading}
+      role="{{ariaRole}}"
+      data-testid="{{kebab-name}}"
+      {...props}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center">
+          <span className="sr-only">Loading...</span>
+          <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  )
+}
+
+{{ComponentName}}.displayName = '{{ComponentName}}'
+
+export default {{ComponentName}}

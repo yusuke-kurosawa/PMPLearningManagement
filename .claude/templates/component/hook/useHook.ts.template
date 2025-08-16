@@ -1,0 +1,229 @@
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+
+/**
+ * {{HookName}} - {{Description}}
+ * 
+ * @example
+ * ```tsx
+ * const MyComponent = () => {
+ *   const { {{returnValues}} } = {{HookName}}({{exampleParams}})
+ *   
+ *   return (
+ *     <div>{/* Use hook values */}</div>
+ *   )
+ * }
+ * ```
+ * 
+ * @param {{{ParamType}}} {{paramName}} - {{ParamDescription}}
+ * @returns {{{ReturnType}}} Hook return values
+ * 
+ * @since {{Date}}
+ * @author {{Author}}
+ */
+
+// Types
+export interface {{HookName}}Options {
+  /**
+   * Initial value
+   */
+  initialValue?: {{ValueType}}
+  /**
+   * Callback on value change
+   */
+  onChange?: (value: {{ValueType}}) => void
+  /**
+   * Debounce delay in milliseconds
+   */
+  debounceMs?: number
+  /**
+   * Enable persistence to localStorage
+   */
+  persist?: boolean
+  /**
+   * Storage key for persistence
+   */
+  storageKey?: string
+}
+
+export interface {{HookName}}Return {
+  /**
+   * Current value
+   */
+  value: {{ValueType}}
+  /**
+   * Set value function
+   */
+  setValue: (value: {{ValueType}} | ((prev: {{ValueType}}) => {{ValueType}})) => void
+  /**
+   * Loading state
+   */
+  isLoading: boolean
+  /**
+   * Error state
+   */
+  error: Error | null
+  /**
+   * Reset to initial value
+   */
+  reset: () => void
+  /**
+   * Refresh/refetch data
+   */
+  refresh: () => Promise<void>
+}
+
+// Constants
+const DEFAULT_DEBOUNCE_MS = 300
+const STORAGE_PREFIX = '{{kebab-name}}'
+
+// Main hook
+export function {{HookName}}(
+  options: {{HookName}}Options = {}
+): {{HookName}}Return {
+  const {
+    initialValue = {{DefaultValue}},
+    onChange,
+    debounceMs = DEFAULT_DEBOUNCE_MS,
+    persist = false,
+    storageKey = `${STORAGE_PREFIX}-value`
+  } = options
+
+  // State
+  const [value, setValueInternal] = useState<{{ValueType}}>(() => {
+    if (persist && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(storageKey)
+        if (stored) {
+          return JSON.parse(stored)
+        }
+      } catch (error) {
+        console.error(`Failed to load ${storageKey} from localStorage:`, error)
+      }
+    }
+    return initialValue
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  // Refs
+  const timeoutRef = useRef<NodeJS.Timeout>()
+  const mountedRef = useRef(true)
+  const onChangeRef = useRef(onChange)
+
+  // Update onChange ref
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Persist to localStorage
+  useEffect(() => {
+    if (persist && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(value))
+      } catch (error) {
+        console.error(`Failed to save ${storageKey} to localStorage:`, error)
+      }
+    }
+  }, [value, persist, storageKey])
+
+  // Debounced onChange callback
+  useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      if (mountedRef.current && onChangeRef.current) {
+        onChangeRef.current(value)
+      }
+    }, debounceMs)
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [value, debounceMs])
+
+  // Set value with validation
+  const setValue = useCallback((
+    newValue: {{ValueType}} | ((prev: {{ValueType}}) => {{ValueType}})
+  ) => {
+    try {
+      setError(null)
+      setValueInternal(newValue)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to set value'))
+    }
+  }, [])
+
+  // Reset to initial value
+  const reset = useCallback(() => {
+    setValue(initialValue)
+    setError(null)
+    setIsLoading(false)
+  }, [initialValue, setValue])
+
+  // Refresh/refetch data
+  const refresh = useCallback(async () => {
+    if (!mountedRef.current) return
+
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      // TODO: Replace with actual data fetching logic
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Example: Fetch new value
+      const newValue = await fetchNewValue()
+      
+      if (mountedRef.current) {
+        setValue(newValue)
+      }
+    } catch (err) {
+      if (mountedRef.current) {
+        setError(err instanceof Error ? err : new Error('Failed to refresh'))
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false)
+      }
+    }
+  }, [setValue])
+
+  // Memoized return value
+  const returnValue = useMemo<{{HookName}}Return>(() => ({
+    value,
+    setValue,
+    isLoading,
+    error,
+    reset,
+    refresh
+  }), [value, setValue, isLoading, error, reset, refresh])
+
+  return returnValue
+}
+
+// Helper functions
+async function fetchNewValue(): Promise<{{ValueType}}> {
+  // TODO: Implement actual data fetching
+  return {{DefaultValue}}
+}
+
+// Re-export types
+export type { {{HookName}}Options, {{HookName}}Return }
+
+export default {{HookName}}

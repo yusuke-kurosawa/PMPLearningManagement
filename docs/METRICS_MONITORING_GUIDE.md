@@ -7,6 +7,7 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ## 🎯 監視目標
 
 ### 主要KPI
+
 - **ワークフロー成功率**: 95%以上
 - **平均実行時間**: 15分以内
 - **リソース使用率**: 80%以下
@@ -15,6 +16,7 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ## 📈 実装済みメトリクス
 
 ### 1. GitHub Actions メトリクス
+
 ```json
 {
   "total_runs": 150,
@@ -26,6 +28,7 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ```
 
 ### 2. リポジトリメトリクス
+
 ```json
 {
   "commits_last_30_days": 120,
@@ -37,6 +40,7 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ```
 
 ### 3. パフォーマンスメトリクス
+
 ```json
 {
   "build_time_seconds": "45.2",
@@ -46,6 +50,7 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ```
 
 ### 4. 品質メトリクス
+
 ```json
 {
   "eslint_errors": 0,
@@ -62,32 +67,36 @@ PMPLearningManagementプロジェクトの包括的なメトリクス監視シ�
 ## 🔄 ワークフロー
 
 ### メトリクス収集ワークフロー
+
 ```yaml
 # .github/workflows/metrics-monitoring.yml
 schedule:
-  - cron: '*/30 * * * *'  # 30分ごと
+  - cron: '*/30 * * * *' # 30分ごと
 ```
 
 ### DevOpsダッシュボード
+
 ```yaml
 # .github/workflows/devops-dashboard.yml
 schedule:
-  - cron: '0 8 * * *'     # 毎日8:00
-  - cron: '0 9 * * 1'     # 週次レポート（月曜9:00）
+  - cron: '0 8 * * *' # 毎日8:00
+  - cron: '0 9 * * 1' # 週次レポート（月曜9:00）
 ```
 
 ## 🚨 アラート設定
 
 ### アラート閾値
-| メトリクス | 警告レベル | 危険レベル |
-|-----------|-----------|-----------|
-| ワークフロー失敗率 | 10% | 20% |
-| CPU使用率 | 70% | 80% |
-| メモリ使用率 | 70% | 80% |
-| ビルド時間 | 10分 | 15分 |
-| ESLintエラー | 5個 | 10個 |
+
+| メトリクス         | 警告レベル | 危険レベル |
+| ------------------ | ---------- | ---------- |
+| ワークフロー失敗率 | 10%        | 20%        |
+| CPU使用率          | 70%        | 80%        |
+| メモリ使用率       | 70%        | 80%        |
+| ビルド時間         | 10分       | 15分       |
+| ESLintエラー       | 5個        | 10個       |
 
 ### アラート通知方法
+
 1. **GitHub Issue**: 自動作成
 2. **Slack通知**: (将来実装)
 3. **メール通知**: (将来実装)
@@ -95,6 +104,7 @@ schedule:
 ## 📊 ダッシュボード
 
 ### アクセス方法
+
 1. **GitHub Actions タブ**
    - ワークフロー実行履歴
    - リアルタイムステータス
@@ -110,6 +120,7 @@ schedule:
 ## 🛠️ ローカル実行
 
 ### メトリクス収集スクリプト
+
 ```bash
 # メトリクス収集
 node scripts/collect-metrics.js
@@ -119,6 +130,7 @@ cat devops-metrics.json
 ```
 
 ### カスタムメトリクス追加
+
 ```javascript
 // scripts/collect-metrics.js に追加
 async collectCustomMetrics() {
@@ -132,16 +144,19 @@ async collectCustomMetrics() {
 ## 📈 分析機能
 
 ### トレンド分析
+
 - 日別成功率推移
 - 実行時間トレンド
 - リソース使用率推移
 
 ### 異常検知
+
 - 実行時間の異常値
 - 失敗パターン検出
 - リソース使用スパイク
 
 ### 予測分析
+
 - 成功率予測
 - リソース使用予測
 - 改善効果予測
@@ -149,6 +164,7 @@ async collectCustomMetrics() {
 ## 🔮 将来の拡張
 
 ### Phase 5 計画
+
 1. **機械学習による予測**
    - 失敗予測モデル
    - 最適化提案AI
@@ -168,6 +184,7 @@ async collectCustomMetrics() {
 ### よくある問題
 
 #### メトリクス収集失敗
+
 ```bash
 # GitHub CLIの認証確認
 gh auth status
@@ -177,6 +194,7 @@ gh api user
 ```
 
 #### アラート未送信
+
 ```bash
 # ワークフロー実行ログ確認
 gh run view <run-id>
@@ -188,6 +206,7 @@ gh issue create --title "Test" --body "Test"
 ## 🎯 ベストプラクティス
 
 ### メトリクス管理
+
 1. **定期的な閾値見直し**
    - 月次で閾値を評価
    - 実績に基づく調整

@@ -1,0 +1,436 @@
+import { test, expect, Page } from '@playwright/test'
+import { {{FlowName}}Page } from './pages/{{kebab-name}}.page'
+
+/**
+ * E2E Test Suite: {{FlowName}} Flow
+ * 
+ * @description {{Description}}
+ * @since {{Date}}
+ * @author {{Author}}
+ */
+
+// ============================================================================
+// Test Configuration
+// ============================================================================
+
+test.describe.configure({ mode: 'parallel' })
+
+test.use({
+  // Browser configuration
+  viewport: { width: 1280, height: 720 },
+  
+  // Test timeout
+  actionTimeout: 10000,
+  
+  // Screenshot on failure
+  screenshot: 'only-on-failure',
+  
+  // Video recording
+  video: 'retain-on-failure',
+  
+  // Trace for debugging
+  trace: 'on-first-retry'
+})
+
+// ============================================================================
+// Test Fixtures
+// ============================================================================
+
+const testData = {
+  validUser: {
+    email: 'test@example.com',
+    password: 'Test123!@#',
+    name: 'Test User'
+  },
+  invalidUser: {
+    email: 'invalid@example.com',
+    password: 'wrong'
+  },
+  testItem: {
+    name: 'Test Item',
+    description: 'Test Description',
+    category: 'Category A'
+  }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+async function setupTestEnvironment(page: Page) {
+  // Clear cookies and localStorage
+  await page.context().clearCookies()
+  await page.evaluate(() => localStorage.clear())
+  
+  // Set up any required test data
+  await page.goto('/setup', { waitUntil: 'networkidle' })
+  
+  // Mock API responses if needed
+  await page.route('**/api/{{endpoint}}', route => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, data: [] })
+    })
+  })
+}
+
+async function login(page: Page, credentials = testData.validUser) {
+  await page.goto('/auth/login')
+  await page.fill('[data-testid="email-input"]', credentials.email)
+  await page.fill('[data-testid="password-input"]', credentials.password)
+  await page.click('[data-testid="login-button"]')
+  await page.waitForURL('**/dashboard')
+}
+
+// ============================================================================
+// Test Suite: {{FlowName}}
+// ============================================================================
+
+test.describe('{{FlowName}} Flow', () => {
+  let page: Page
+  let flowPage: {{FlowName}}Page
+  
+  test.beforeEach(async ({ page: testPage }) => {
+    page = testPage
+    flowPage = new {{FlowName}}Page(page)
+    await setupTestEnvironment(page)
+  })
+  
+  // --------------------------------------------------------------------------
+  // Happy Path Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Happy Path', () => {
+    test('should complete {{FlowName}} flow successfully', async () => {
+      // Step 1: Navigate to starting page
+      await page.goto('/{{route}}')
+      await expect(page).toHaveTitle(/{{PageTitle}}/)
+      
+      // Step 2: Verify initial state
+      await expect(flowPage.mainHeading).toBeVisible()
+      await expect(flowPage.mainHeading).toHaveText('{{HeadingText}}')
+      
+      // Step 3: Perform main action
+      await flowPage.fillForm(testData.testItem)
+      await flowPage.submitForm()
+      
+      // Step 4: Verify success state
+      await expect(flowPage.successMessage).toBeVisible()
+      await expect(flowPage.successMessage).toContainText('Success')
+      
+      // Step 5: Verify data persistence
+      await page.reload()
+      await expect(flowPage.itemList).toContainText(testData.testItem.name)
+    })
+    
+    test('should handle multiple items', async () => {
+      await page.goto('/{{route}}')
+      
+      // Add multiple items
+      for (let i = 0; i < 3; i++) {
+        await flowPage.addItem({
+          ...testData.testItem,
+          name: `Item ${i + 1}`
+        })
+      }
+      
+      // Verify all items are displayed
+      const items = await flowPage.getItemCount()
+      expect(items).toBe(3)
+    })
+    
+    test('should maintain state across navigation', async () => {
+      await page.goto('/{{route}}')
+      await flowPage.fillForm(testData.testItem)
+      
+      // Navigate away and back
+      await page.goto('/other-page')
+      await page.goBack()
+      
+      // Verify form data is preserved
+      const formData = await flowPage.getFormData()
+      expect(formData.name).toBe(testData.testItem.name)
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Error Handling Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Error Handling', () => {
+    test('should display validation errors for invalid input', async () => {
+      await page.goto('/{{route}}')
+      
+      // Submit empty form
+      await flowPage.submitForm()
+      
+      // Verify validation messages
+      await expect(flowPage.errorMessage).toBeVisible()
+      await expect(flowPage.getFieldError('name')).toContainText('required')
+    })
+    
+    test('should handle network errors gracefully', async () => {
+      await page.goto('/{{route}}')
+      
+      // Mock network failure
+      await page.route('**/api/{{endpoint}}', route => {
+        route.abort('failed')
+      })
+      
+      await flowPage.fillForm(testData.testItem)
+      await flowPage.submitForm()
+      
+      // Verify error handling
+      await expect(flowPage.errorMessage).toBeVisible()
+      await expect(flowPage.errorMessage).toContainText('network')
+      
+      // Verify retry mechanism
+      await expect(flowPage.retryButton).toBeVisible()
+      
+      // Fix network and retry
+      await page.unroute('**/api/{{endpoint}}')
+      await flowPage.clickRetry()
+      await expect(flowPage.successMessage).toBeVisible()
+    })
+    
+    test('should handle server errors', async () => {
+      await page.goto('/{{route}}')
+      
+      // Mock server error
+      await page.route('**/api/{{endpoint}}', route => {
+        route.fulfill({
+          status: 500,
+          body: JSON.stringify({ error: 'Internal Server Error' })
+        })
+      })
+      
+      await flowPage.performAction()
+      await expect(flowPage.errorMessage).toContainText('server error')
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Accessibility Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Accessibility', () => {
+    test('should be keyboard navigable', async () => {
+      await page.goto('/{{route}}')
+      
+      // Tab through interactive elements
+      await page.keyboard.press('Tab')
+      await expect(flowPage.firstInput).toBeFocused()
+      
+      await page.keyboard.press('Tab')
+      await expect(flowPage.secondInput).toBeFocused()
+      
+      // Submit with Enter key
+      await page.keyboard.press('Enter')
+      await expect(flowPage.form).not.toBeVisible()
+    })
+    
+    test('should have proper ARIA labels', async () => {
+      await page.goto('/{{route}}')
+      
+      // Check ARIA attributes
+      await expect(flowPage.mainSection).toHaveAttribute('role', 'main')
+      await expect(flowPage.submitButton).toHaveAttribute('aria-label', /submit/i)
+      await expect(flowPage.form).toHaveAttribute('aria-labelledby', /.+/)
+    })
+    
+    test('should support screen readers', async () => {
+      await page.goto('/{{route}}')
+      
+      // Check for screen reader content
+      const srOnly = await page.$$('.sr-only')
+      expect(srOnly.length).toBeGreaterThan(0)
+      
+      // Verify live regions for dynamic content
+      await flowPage.performAction()
+      await expect(page.locator('[aria-live="polite"]')).toContainText(/success|error/)
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Performance Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Performance', () => {
+    test('should load within acceptable time', async () => {
+      const startTime = Date.now()
+      await page.goto('/{{route}}')
+      await page.waitForLoadState('networkidle')
+      const loadTime = Date.now() - startTime
+      
+      expect(loadTime).toBeLessThan(3000)
+    })
+    
+    test('should handle large datasets efficiently', async () => {
+      await page.goto('/{{route}}')
+      
+      // Mock large dataset
+      const largeData = Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        name: `Item ${i}`
+      }))
+      
+      await page.route('**/api/{{endpoint}}', route => {
+        route.fulfill({
+          status: 200,
+          body: JSON.stringify({ data: largeData })
+        })
+      })
+      
+      await flowPage.loadData()
+      
+      // Verify virtualization or pagination
+      const visibleItems = await flowPage.getVisibleItemCount()
+      expect(visibleItems).toBeLessThan(100) // Should use virtualization
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Mobile Responsiveness Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Mobile', () => {
+    test.use({
+      viewport: { width: 375, height: 667 }, // iPhone SE
+      isMobile: true
+    })
+    
+    test('should be responsive on mobile devices', async () => {
+      await page.goto('/{{route}}')
+      
+      // Check mobile menu
+      await expect(flowPage.mobileMenuButton).toBeVisible()
+      await flowPage.openMobileMenu()
+      await expect(flowPage.mobileMenu).toBeVisible()
+      
+      // Check touch interactions
+      await flowPage.swipeToDelete()
+      await expect(flowPage.deleteConfirmation).toBeVisible()
+    })
+    
+    test('should handle touch gestures', async () => {
+      await page.goto('/{{route}}')
+      
+      // Test swipe gestures
+      const element = flowPage.swipeableElement
+      await element.dragTo(flowPage.deleteZone)
+      
+      await expect(flowPage.deleteConfirmation).toBeVisible()
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Cross-browser Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Cross-browser', () => {
+    ['chromium', 'firefox', 'webkit'].forEach(browserName => {
+      test(`should work in ${browserName}`, async ({ browserName: currentBrowser }) => {
+        if (currentBrowser !== browserName) {
+          test.skip()
+        }
+        
+        await page.goto('/{{route}}')
+        await flowPage.performBasicFlow()
+        await expect(flowPage.successMessage).toBeVisible()
+      })
+    })
+  })
+  
+  // --------------------------------------------------------------------------
+  // Security Tests
+  // --------------------------------------------------------------------------
+  
+  test.describe('Security', () => {
+    test('should prevent XSS attacks', async () => {
+      await page.goto('/{{route}}')
+      
+      const xssPayload = '<script>alert("XSS")</script>'
+      await flowPage.fillForm({ name: xssPayload })
+      await flowPage.submitForm()
+      
+      // Verify script is not executed
+      const alertDialog = page.waitForEvent('dialog', { timeout: 1000 })
+      await expect(alertDialog).rejects.toThrow()
+      
+      // Verify escaped content
+      const content = await flowPage.getDisplayedContent()
+      expect(content).not.toContain('<script>')
+      expect(content).toContain('&lt;script&gt;')
+    })
+    
+    test('should require authentication for protected actions', async () => {
+      await page.goto('/{{route}}/protected')
+      
+      // Should redirect to login
+      await expect(page).toHaveURL(/\/auth\/login/)
+      
+      // Login and retry
+      await login(page)
+      await page.goto('/{{route}}/protected')
+      await expect(flowPage.protectedContent).toBeVisible()
+    })
+  })
+})
+
+// ============================================================================
+// Visual Regression Tests
+// ============================================================================
+
+test.describe('Visual Regression', () => {
+  test('should match visual snapshot', async ({ page }) => {
+    await page.goto('/{{route}}')
+    await page.waitForLoadState('networkidle')
+    
+    // Take screenshot
+    await expect(page).toHaveScreenshot('{{kebab-name}}-page.png', {
+      fullPage: true,
+      animations: 'disabled'
+    })
+    
+    // Component-level screenshots
+    await expect(flowPage.header).toHaveScreenshot('{{kebab-name}}-header.png')
+    await expect(flowPage.mainContent).toHaveScreenshot('{{kebab-name}}-content.png')
+  })
+  
+  test('should match dark mode snapshot', async ({ page }) => {
+    await page.goto('/{{route}}')
+    
+    // Toggle dark mode
+    await page.click('[data-testid="theme-toggle"]')
+    await page.waitForTimeout(500) // Wait for transition
+    
+    await expect(page).toHaveScreenshot('{{kebab-name}}-dark.png', {
+      fullPage: true
+    })
+  })
+})
+
+// ============================================================================
+// API Integration Tests
+// ============================================================================
+
+test.describe('API Integration', () => {
+  test('should integrate with real API', async ({ page }) => {
+    // Skip in CI environment
+    if (process.env.CI) {
+      test.skip()
+    }
+    
+    // Use real API endpoint
+    const apiUrl = process.env.API_URL || 'http://localhost:3000'
+    await page.goto('/{{route}}')
+    
+    // Perform real API call
+    const response = await page.request.get(`${apiUrl}/api/{{endpoint}}`)
+    expect(response.ok()).toBeTruthy()
+    
+    const data = await response.json()
+    expect(data).toHaveProperty('success', true)
+  })
+})

@@ -28,6 +28,7 @@ automation/
 ## Git Hooks Configuration
 
 ### Pre-commit Hook
+
 ```bash
 #!/bin/bash
 # automation/hooks/pre-commit
@@ -69,6 +70,7 @@ echo "Pre-commit checks passed!"
 ```
 
 ### Commit-msg Hook
+
 ```bash
 #!/bin/bash
 # automation/hooks/commit-msg
@@ -100,6 +102,7 @@ echo "Commit message validation passed!"
 ```
 
 ### Pre-push Hook
+
 ```bash
 #!/bin/bash
 # automation/hooks/pre-push
@@ -146,6 +149,7 @@ echo "Pre-push validation complete!"
 ### Daily Tasks
 
 #### 1. Dependency Update Check
+
 ```bash
 #!/bin/bash
 # automation/scripts/daily/check-dependencies.sh
@@ -158,7 +162,7 @@ outdated=$(npm outdated --json)
 if [ ! -z "$outdated" ]; then
     echo "Outdated dependencies found:"
     npm outdated
-    
+
     # Create issue if critical updates exist
     if echo "$outdated" | grep -q "CRITICAL"; then
         gh issue create \
@@ -175,7 +179,7 @@ critical_vulns=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical'
 if [ "$critical_vulns" -gt 0 ]; then
     echo "Critical vulnerabilities found!"
     npm audit
-    
+
     # Create security issue
     gh issue create \
         --title "Critical security vulnerabilities detected" \
@@ -185,6 +189,7 @@ fi
 ```
 
 #### 2. Code Quality Report
+
 ```bash
 #!/bin/bash
 # automation/scripts/daily/quality-report.sh
@@ -214,6 +219,7 @@ echo "Quality report generated and sent"
 ### Weekly Tasks
 
 #### 1. Performance Baseline
+
 ```bash
 #!/bin/bash
 # automation/scripts/weekly/performance-baseline.sh
@@ -241,6 +247,7 @@ echo "Performance baseline complete"
 ```
 
 #### 2. Documentation Update
+
 ```bash
 #!/bin/bash
 # automation/scripts/weekly/update-docs.sh
@@ -268,6 +275,7 @@ echo "Documentation updated"
 ### Ad-hoc Scripts
 
 #### 1. Project Setup
+
 ```bash
 #!/bin/bash
 # automation/scripts/adhoc/setup-project.sh
@@ -302,6 +310,7 @@ echo "Project setup complete!"
 ```
 
 #### 2. Clean Environment
+
 ```bash
 #!/bin/bash
 # automation/scripts/adhoc/clean-env.sh
@@ -334,6 +343,7 @@ echo "Environment cleaned"
 ## Cron Job Configuration
 
 ### Crontab Configuration
+
 ```bash
 # automation/cron/crontab
 
@@ -359,6 +369,7 @@ echo "Environment cleaned"
 ## Workflow Templates
 
 ### Feature Development Workflow
+
 ```yaml
 # automation/workflows/templates/feature-development.yml
 
@@ -368,32 +379,33 @@ description: Automated workflow for feature development
 steps:
   - name: Create feature branch
     run: git checkout -b feature/$ISSUE_NUMBER-$FEATURE_NAME
-    
+
   - name: Setup development environment
     run: npm run dev:setup
-    
+
   - name: Run tests in watch mode
     run: npm run test:watch
-    
+
   - name: Enable hot reload
     run: npm run dev
-    
+
   - name: Pre-commit validation
     hooks:
       - pre-commit
       - commit-msg
-      
+
   - name: Create pull request
     run: gh pr create --draft --title "$FEATURE_NAME" --body "Fixes #$ISSUE_NUMBER"
-    
+
   - name: Run CI pipeline
     trigger: github-actions/feature-pipeline
-    
+
   - name: Request review
     run: gh pr ready && gh pr review --request @team/reviewers
 ```
 
 ### Bug Fix Workflow
+
 ```yaml
 # automation/workflows/templates/bug-fix.yml
 
@@ -403,22 +415,22 @@ description: Automated workflow for bug fixes
 steps:
   - name: Create fix branch
     run: git checkout -b fix/$ISSUE_NUMBER-$BUG_DESCRIPTION
-    
+
   - name: Reproduce bug
     run: npm run test:reproduce -- --issue $ISSUE_NUMBER
-    
+
   - name: Write failing test
     template: test-template.js
-    
+
   - name: Implement fix
     validate: npm test -- --grep "$BUG_DESCRIPTION"
-    
+
   - name: Verify fix
     run: npm run test:all
-    
+
   - name: Update changelog
     run: npm run changelog:add -- --type fix --issue $ISSUE_NUMBER
-    
+
   - name: Create pull request
     run: gh pr create --title "fix: $BUG_DESCRIPTION #$ISSUE_NUMBER"
 ```
@@ -426,6 +438,7 @@ steps:
 ## Installation & Setup
 
 ### Installing Git Hooks
+
 ```bash
 #!/bin/bash
 # automation/hooks/install.sh
@@ -466,6 +479,7 @@ echo "Git hooks installation complete!"
 ## Best Practices
 
 ### 1. Script Design
+
 - **Idempotent**: Scripts should be safe to run multiple times
 - **Error handling**: Always check return codes
 - **Logging**: Provide clear output and logging
@@ -473,6 +487,7 @@ echo "Git hooks installation complete!"
 - **Testing**: Test scripts in isolated environments
 
 ### 2. Automation Strategy
+
 ```yaml
 Automation Levels:
   Level 1: Manual with documentation
@@ -480,12 +495,13 @@ Automation Levels:
   Level 3: Fully automated with triggers
   Level 4: Self-healing automation
   Level 5: AI-driven automation
-  
+
 Current Level: 3
 Target Level: 4
 ```
 
 ### 3. Performance Considerations
+
 - **Parallel execution**: Run independent tasks concurrently
 - **Caching**: Cache results when appropriate
 - **Incremental processing**: Process only changed files
@@ -495,13 +511,14 @@ Target Level: 4
 ## Monitoring & Metrics
 
 ### Automation Metrics
+
 ```yaml
 Efficiency Metrics:
   - Automation Coverage: 85%
   - Manual Task Reduction: 70%
   - Error Rate: < 2%
   - Average Execution Time: < 5 minutes
-  
+
 Quality Metrics:
   - Pre-commit Catch Rate: 95%
   - Build Success Rate: 98%
@@ -510,26 +527,27 @@ Quality Metrics:
 ```
 
 ### Dashboard Integration
+
 ```javascript
 // automation/scripts/metrics/collect.js
 
 const metrics = {
-    automationRuns: 0,
-    successRate: 0,
-    timesSaved: 0,
-    errorsPrevent: 0,
-    
-    collect: async function() {
-        // Collect from various sources
-        this.automationRuns = await getRunCount();
-        this.successRate = await getSuccessRate();
-        this.timesSaved = await calculateTimeSaved();
-        this.errorsPrevent = await getPreventedErrors();
-        
-        // Send to monitoring
-        await sendToMonitoring(this);
-    }
-};
+  automationRuns: 0,
+  successRate: 0,
+  timesSaved: 0,
+  errorsPrevent: 0,
+
+  collect: async function () {
+    // Collect from various sources
+    this.automationRuns = await getRunCount()
+    this.successRate = await getSuccessRate()
+    this.timesSaved = await calculateTimeSaved()
+    this.errorsPrevent = await getPreventedErrors()
+
+    // Send to monitoring
+    await sendToMonitoring(this)
+  },
+}
 ```
 
 ## Troubleshooting
@@ -537,6 +555,7 @@ const metrics = {
 ### Common Issues
 
 #### 1. Hook Not Executing
+
 ```bash
 # Check hook permissions
 ls -la .git/hooks/
@@ -549,6 +568,7 @@ chmod +x .git/hooks/pre-commit
 ```
 
 #### 2. Script Failures
+
 ```bash
 # Run with debug mode
 bash -x automation/scripts/daily/check-dependencies.sh
@@ -561,6 +581,7 @@ which node npm git
 ```
 
 #### 3. Cron Job Not Running
+
 ```bash
 # Check cron service
 systemctl status cron
@@ -575,11 +596,12 @@ crontab -l
 ## Integration with CI/CD
 
 ### GitHub Actions Integration
+
 ```yaml
 name: Automation Trigger
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 */6 * * *' # Every 6 hours
   workflow_dispatch:
 
 jobs:
@@ -596,18 +618,21 @@ jobs:
 ## Future Enhancements
 
 ### Short Term (1-3 months)
+
 - [ ] AI-powered code review automation
 - [ ] Intelligent test selection based on changes
 - [ ] Auto-fix for common issues
 - [ ] Performance regression detection
 
 ### Medium Term (3-6 months)
+
 - [ ] Self-healing scripts
 - [ ] Predictive maintenance
 - [ ] Automated documentation generation
 - [ ] Custom DSL for automation workflows
 
 ### Long Term (6-12 months)
+
 - [ ] ML-based automation optimization
 - [ ] Natural language automation commands
 - [ ] Autonomous incident response

@@ -45,7 +45,7 @@ jobs:
       - uses: ./.github/actions/composite/setup-node
       - run: npm ci
       - run: npm run build
-      
+
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
       - uses: ./.github/actions/composite/run-tests
         with:
           suite: ${{ matrix.test-suite }}
-          
+
   deploy:
     needs: [build, test]
     if: github.ref == 'refs/heads/main'
@@ -89,6 +89,7 @@ jobs:
 ## Pipeline Stages
 
 ### 1. Source Stage
+
 ```bash
 # Triggered by:
 - Git push/merge
@@ -99,6 +100,7 @@ jobs:
 ```
 
 ### 2. Build Stage
+
 ```bash
 # Actions:
 - Dependency installation
@@ -109,6 +111,7 @@ jobs:
 ```
 
 ### 3. Test Stage
+
 ```bash
 # Test Types:
 - Unit tests (Vitest)
@@ -120,6 +123,7 @@ jobs:
 ```
 
 ### 4. Deploy Stage
+
 ```bash
 # Deployment Strategies:
 - Blue-Green deployment
@@ -129,6 +133,7 @@ jobs:
 ```
 
 ### 5. Verify Stage
+
 ```bash
 # Verification:
 - Smoke tests
@@ -141,6 +146,7 @@ jobs:
 ## Composite Actions
 
 ### Setup Node Environment
+
 ```yaml
 # .github/actions/composite/setup-node/action.yml
 name: 'Setup Node Environment'
@@ -159,6 +165,7 @@ runs:
 ```
 
 ### Run Tests
+
 ```yaml
 # .github/actions/composite/run-tests/action.yml
 name: 'Run Test Suite'
@@ -181,6 +188,7 @@ runs:
 ## Environment Configuration
 
 ### Development
+
 ```yaml
 environment: development
 variables:
@@ -190,6 +198,7 @@ variables:
 ```
 
 ### Staging
+
 ```yaml
 environment: staging
 variables:
@@ -202,6 +211,7 @@ secrets:
 ```
 
 ### Production
+
 ```yaml
 environment: production
 variables:
@@ -217,6 +227,7 @@ secrets:
 ## Scripts Usage
 
 ### Build Script
+
 ```bash
 #!/bin/bash
 # ci-cd/scripts/build.sh
@@ -249,6 +260,7 @@ echo "Build complete for $ENVIRONMENT"
 ```
 
 ### Test Script
+
 ```bash
 #!/bin/bash
 # ci-cd/scripts/test.sh
@@ -285,6 +297,7 @@ echo "Tests complete"
 ```
 
 ### Deploy Script
+
 ```bash
 #!/bin/bash
 # ci-cd/scripts/deploy.sh
@@ -331,6 +344,7 @@ echo "Deployment complete"
 ## Best Practices
 
 ### 1. Pipeline Design
+
 - **Keep pipelines fast**: Target < 10 minutes for PR pipelines
 - **Parallelize when possible**: Run independent jobs concurrently
 - **Cache dependencies**: Use GitHub Actions cache for node_modules
@@ -338,6 +352,7 @@ echo "Deployment complete"
 - **Use matrix builds**: Test across multiple Node.js versions
 
 ### 2. Security
+
 - **Never commit secrets**: Use GitHub Secrets
 - **Scan dependencies**: Regular vulnerability scanning
 - **Sign commits**: Enable commit signature verification
@@ -345,14 +360,16 @@ echo "Deployment complete"
 - **Least privilege**: Minimal permissions for CI/CD
 
 ### 3. Testing Strategy
+
 ```yaml
 # Test Pyramid
-Unit Tests:        70% (fast, isolated)
+Unit Tests: 70% (fast, isolated)
 Integration Tests: 20% (API, database)
-E2E Tests:        10% (critical paths only)
+E2E Tests: 10% (critical paths only)
 ```
 
 ### 4. Deployment Safety
+
 - **Feature flags**: Gradual rollout
 - **Canary deployments**: Test with subset of users
 - **Automated rollback**: Quick recovery from failures
@@ -362,6 +379,7 @@ E2E Tests:        10% (critical paths only)
 ## Monitoring & Metrics
 
 ### Key Metrics
+
 ```yaml
 DORA Metrics:
   - Deployment Frequency: Daily
@@ -377,6 +395,7 @@ Pipeline Metrics:
 ```
 
 ### Dashboards
+
 - **Pipeline Status**: Real-time pipeline execution
 - **Deployment History**: Track all deployments
 - **Test Results**: Test trends and flaky tests
@@ -388,6 +407,7 @@ Pipeline Metrics:
 ### Common Issues
 
 #### 1. Build Failures
+
 ```bash
 # Clear cache and retry
 npm cache clean --force
@@ -396,12 +416,14 @@ npm install
 ```
 
 #### 2. Test Failures
+
 ```bash
 # Run tests locally with same environment
 NODE_ENV=test npm run test:unit -- --verbose
 ```
 
 #### 3. Deployment Issues
+
 ```bash
 # Check deployment logs
 gh run view --log
@@ -416,11 +438,13 @@ npm run rollback:production
 ## Integration Points
 
 ### 1. Issue Tracking
+
 - Automatic issue linking in commits
 - Deployment notifications in issues
 - Auto-close issues on deployment
 
 ### 2. Slack Integration
+
 ```yaml
 - name: Notify Slack
   uses: slack-notify-action@v1
@@ -430,6 +454,7 @@ npm run rollback:production
 ```
 
 ### 3. Monitoring Systems
+
 - Send deployment events to DataDog
 - Update StatusPage on deployments
 - Trigger synthetic monitoring after deploy
@@ -437,12 +462,14 @@ npm run rollback:production
 ## Maintenance
 
 ### Weekly Tasks
+
 - Review failed pipelines
 - Update dependencies
 - Clean up old artifacts
 - Review security alerts
 
 ### Monthly Tasks
+
 - Analyze pipeline metrics
 - Update documentation
 - Review and optimize workflows

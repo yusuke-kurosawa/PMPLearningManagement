@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run custom IDD pre-push hook
+if [ -f ".github/hooks/pre-push" ]; then
+  bash .github/hooks/pre-push "$@"
+fi

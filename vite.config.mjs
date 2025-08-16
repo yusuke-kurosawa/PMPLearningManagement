@@ -98,7 +98,23 @@ export default defineConfig({
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
     __IS_PRODUCTION__: JSON.stringify(process.env.NODE_ENV === 'production'),
     __ENABLE_PWA__: JSON.stringify(true),
-    __ENABLE_OFFLINE__: JSON.stringify(true)
+    __ENABLE_OFFLINE__: JSON.stringify(true),
+    // Production environment variables (replacing .env.production)
+    'process.env.VITE_API_BASE_URL': JSON.stringify(
+      process.env.NODE_ENV === 'production' 
+        ? 'https://api.pmp-learning.com' 
+        : 'http://localhost:3001'
+    ),
+    'process.env.VITE_ALLOWED_ORIGINS': JSON.stringify(
+      'https://yusuke-kurosawa.github.io,https://pmp-learning.com'
+    ),
+    'process.env.VITE_ENABLE_ANALYTICS': JSON.stringify(
+      process.env.NODE_ENV === 'production'
+    ),
+    'process.env.VITE_ENABLE_ERROR_TRACKING': JSON.stringify(
+      process.env.NODE_ENV === 'production'
+    ),
+    'process.env.VITE_A11Y_STRICT_MODE': JSON.stringify(true)
   },
   
   // Optimization

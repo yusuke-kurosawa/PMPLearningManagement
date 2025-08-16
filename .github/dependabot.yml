@@ -4,9 +4,10 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
-      time: "02:00"
-      timezone: "UTC"
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Tokyo"
     open-pull-requests-limit: 10
     reviewers:
       - "yusuke-kurosawa"
@@ -18,6 +19,7 @@ updates:
     labels:
       - "dependencies"
       - "automated"
+      - "security"
     
     # Security updates - immediate
     allow:
@@ -109,8 +111,8 @@ updates:
     schedule:
       interval: "weekly"
       day: "friday"
-      time: "02:00"
-      timezone: "UTC"
+      time: "03:30"
+      timezone: "Asia/Tokyo"
     open-pull-requests-limit: 5
     reviewers:
       - "yusuke-kurosawa"
@@ -135,21 +137,21 @@ updates:
     allow:
       - dependency-type: "all"
       
-  # Docker dependencies (if using containers in the future)
-  - package-ecosystem: "docker"
-    directory: "/deployment"
+  # Terraform dependencies (for future IaC)
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure"
     schedule:
       interval: "weekly"
       day: "saturday"
-      time: "02:00"
-      timezone: "UTC"
+      time: "03:00"
+      timezone: "Asia/Tokyo"
     open-pull-requests-limit: 3
     reviewers:
       - "yusuke-kurosawa"
     commit-message:
-      prefix: "docker"
+      prefix: "infra"
       include: "scope"
     labels:
-      - "docker"
+      - "terraform"
       - "infrastructure"
       - "automated"

@@ -1,0 +1,387 @@
+import { z } from 'zod'
+
+/**
+ * {{ServiceName}}Service - {{Description}}
+ * 
+ * @module services/{{kebab-name}}
+ * @since {{Date}}
+ * @author {{Author}}
+ */
+
+// ============================================================================
+// Types & Schemas
+// ============================================================================
+
+/**
+ * Request schema validation
+ */
+export const {{ServiceName}}RequestSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(255),
+  description: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+  createdAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional()
+})
+
+/**
+ * Response schema validation
+ */
+export const {{ServiceName}}ResponseSchema = z.object({
+  data: z.unknown(),
+  success: z.boolean(),
+  message: z.string().optional(),
+  errors: z.array(z.string()).optional(),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number()
+  }).optional()
+})
+
+// Type exports
+export type {{ServiceName}}Request = z.infer<typeof {{ServiceName}}RequestSchema>
+export type {{ServiceName}}Response = z.infer<typeof {{ServiceName}}ResponseSchema>
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+/**
+ * Service configuration
+ */
+export interface {{ServiceName}}Config {
+  baseUrl: string
+  apiKey?: string
+  timeout?: number
+  retryAttempts?: number
+  retryDelay?: number
+  headers?: Record<string, string>
+}
+
+const DEFAULT_CONFIG: Partial<{{ServiceName}}Config> = {
+  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  timeout: 30000,
+  retryAttempts: 3,
+  retryDelay: 1000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+}
+
+// ============================================================================
+// Error Handling
+// ============================================================================
+
+/**
+ * Custom error class for service errors
+ */
+export class {{ServiceName}}Error extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number,
+    public details?: unknown
+  ) {
+    super(message)
+    this.name = '{{ServiceName}}Error'
+  }
+}
+
+// ============================================================================
+// Service Class
+// ============================================================================
+
+/**
+ * {{ServiceName}} API Service
+ */
+export class {{ServiceName}}Service {
+  private config: {{ServiceName}}Config
+  private abortController: AbortController | null = null
+
+  constructor(config: Partial<{{ServiceName}}Config> = {}) {
+    this.config = { ...DEFAULT_CONFIG, ...config } as {{ServiceName}}Config
+  }
+
+  // --------------------------------------------------------------------------
+  // Private Methods
+  // --------------------------------------------------------------------------
+
+  /**
+   * Make HTTP request with retry logic
+   */
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    retryCount = 0
+  ): Promise<T> {
+    const url = `${this.config.baseUrl}${endpoint}`
+    
+    // Create abort controller for timeout
+    this.abortController = new AbortController()
+    const timeoutId = setTimeout(() => {
+      this.abortController?.abort()
+    }, this.config.timeout)
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...this.config.headers,
+          ...(this.config.apiKey && {
+            'Authorization': `Bearer ${this.config.apiKey}`
+          }),
+          ...options.headers
+        },
+        signal: this.abortController.signal
+      })
+
+      clearTimeout(timeoutId)
+
+      // Handle non-2xx responses
+      if (!response.ok) {
+        const error = await this.handleErrorResponse(response)
+        
+        // Retry logic for certain status codes
+        if (
+          retryCount < this.config.retryAttempts! &&
+          [408, 429, 500, 502, 503, 504].includes(response.status)
+        ) {
+          await this.delay(this.config.retryDelay! * Math.pow(2, retryCount))
+          return this.request<T>(endpoint, options, retryCount + 1)
+        }
+        
+        throw error
+      }
+
+      const data = await response.json()
+      return data as T
+    } catch (error) {
+      clearTimeout(timeoutId)
+      
+      if (error instanceof {{ServiceName}}Error) {
+        throw error
+      }
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new {{ServiceName}}Error('Request timeout', 'TIMEOUT', 408)
+        }
+        throw new {{ServiceName}}Error(error.message, 'NETWORK_ERROR')
+      }
+      
+      throw new {{ServiceName}}Error('Unknown error occurred', 'UNKNOWN_ERROR')
+    } finally {
+      this.abortController = null
+    }
+  }
+
+  /**
+   * Handle error responses
+   */
+  private async handleErrorResponse(response: Response): Promise<{{ServiceName}}Error> {
+    try {
+      const errorData = await response.json()
+      return new {{ServiceName}}Error(
+        errorData.message || `HTTP ${response.status}`,
+        errorData.code || 'API_ERROR',
+        response.status,
+        errorData
+      )
+    } catch {
+      return new {{ServiceName}}Error(
+        `HTTP ${response.status}: ${response.statusText}`,
+        'API_ERROR',
+        response.status
+      )
+    }
+  }
+
+  /**
+   * Delay helper for retry logic
+   */
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  // --------------------------------------------------------------------------
+  // Public Methods - CRUD Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Get all items with optional pagination and filters
+   */
+  async getAll(params?: {
+    page?: number
+    limit?: number
+    sort?: string
+    filter?: Record<string, unknown>
+  }): Promise<{{ServiceName}}Response> {
+    const queryParams = new URLSearchParams()
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, String(value))
+        }
+      })
+    }
+
+    const endpoint = `/{{endpoint}}${queryParams.toString() ? `?${queryParams}` : ''}`
+    const response = await this.request<{{ServiceName}}Response>(endpoint)
+    
+    // Validate response
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Get single item by ID
+   */
+  async getById(id: string): Promise<{{ServiceName}}Response> {
+    if (!id) {
+      throw new {{ServiceName}}Error('ID is required', 'VALIDATION_ERROR', 400)
+    }
+
+    const response = await this.request<{{ServiceName}}Response>(`/{{endpoint}}/${id}`)
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Create new item
+   */
+  async create(data: {{ServiceName}}Request): Promise<{{ServiceName}}Response> {
+    // Validate request data
+    const validated = {{ServiceName}}RequestSchema.parse(data)
+
+    const response = await this.request<{{ServiceName}}Response>('/{{endpoint}}', {
+      method: 'POST',
+      body: JSON.stringify(validated)
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Update existing item
+   */
+  async update(id: string, data: Partial<{{ServiceName}}Request>): Promise<{{ServiceName}}Response> {
+    if (!id) {
+      throw new {{ServiceName}}Error('ID is required', 'VALIDATION_ERROR', 400)
+    }
+
+    // Validate partial data
+    const validated = {{ServiceName}}RequestSchema.partial().parse(data)
+
+    const response = await this.request<{{ServiceName}}Response>(`/{{endpoint}}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(validated)
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Partially update existing item
+   */
+  async patch(id: string, data: Partial<{{ServiceName}}Request>): Promise<{{ServiceName}}Response> {
+    if (!id) {
+      throw new {{ServiceName}}Error('ID is required', 'VALIDATION_ERROR', 400)
+    }
+
+    const validated = {{ServiceName}}RequestSchema.partial().parse(data)
+
+    const response = await this.request<{{ServiceName}}Response>(`/{{endpoint}}/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(validated)
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Delete item
+   */
+  async delete(id: string): Promise<{{ServiceName}}Response> {
+    if (!id) {
+      throw new {{ServiceName}}Error('ID is required', 'VALIDATION_ERROR', 400)
+    }
+
+    const response = await this.request<{{ServiceName}}Response>(`/{{endpoint}}/${id}`, {
+      method: 'DELETE'
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  // --------------------------------------------------------------------------
+  // Public Methods - Batch Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Batch create multiple items
+   */
+  async batchCreate(items: {{ServiceName}}Request[]): Promise<{{ServiceName}}Response> {
+    const validated = items.map(item => {{ServiceName}}RequestSchema.parse(item))
+
+    const response = await this.request<{{ServiceName}}Response>('/{{endpoint}}/batch', {
+      method: 'POST',
+      body: JSON.stringify({ items: validated })
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  /**
+   * Batch delete multiple items
+   */
+  async batchDelete(ids: string[]): Promise<{{ServiceName}}Response> {
+    if (!ids.length) {
+      throw new {{ServiceName}}Error('IDs array is required', 'VALIDATION_ERROR', 400)
+    }
+
+    const response = await this.request<{{ServiceName}}Response>('/{{endpoint}}/batch', {
+      method: 'DELETE',
+      body: JSON.stringify({ ids })
+    })
+
+    return {{ServiceName}}ResponseSchema.parse(response)
+  }
+
+  // --------------------------------------------------------------------------
+  // Public Methods - Utility
+  // --------------------------------------------------------------------------
+
+  /**
+   * Cancel ongoing request
+   */
+  cancel(): void {
+    this.abortController?.abort()
+  }
+
+  /**
+   * Update configuration
+   */
+  updateConfig(config: Partial<{{ServiceName}}Config>): void {
+    this.config = { ...this.config, ...config }
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfig(): {{ServiceName}}Config {
+    return { ...this.config }
+  }
+}
+
+// ============================================================================
+// Singleton Instance
+// ============================================================================
+
+/**
+ * Default service instance
+ */
+export const {{camelCaseName}}Service = new {{ServiceName}}Service()
+
+// Default export
+export default {{ServiceName}}Service

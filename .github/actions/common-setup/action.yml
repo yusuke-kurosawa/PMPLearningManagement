@@ -1,0 +1,148 @@
+name: '🔧 共通セットアップ'
+description: 'PMPLearningManagement用の統一された開発環境セットアップ'
+author: 'yusuke-kurosawa'
+
+inputs:
+  node-version:
+    description: 'Node.jsのバージョン'
+    required: false
+    default: '20'
+  
+  cache-dependency-path:
+    description: '依存関係キャッシュのパス'
+    required: false
+    default: '**/package-lock.json'
+  
+  install-dependencies:
+    description: '依存関係をインストールするかどうか'
+    required: false
+    default: 'true'
+  
+  enable-corepack:
+    description: 'Corepackを有効にするかどうか'
+    required: false
+    default: 'true'
+  
+  skip-post-install:
+    description: 'ポストインストールスクリプトをスキップするかどうか'
+    required: false
+    default: 'false'
+
+outputs:
+  node-version:
+    description: '使用されたNode.jsのバージョン'
+    value: ${{ steps.setup-node.outputs.node-version }}
+  
+  cache-hit:
+    description: 'キャッシュがヒットしたかどうか'
+    value: ${{ steps.cache-dependencies.outputs.cache-hit }}
+  
+  npm-version:
+    description: '使用されたnpmのバージョン'
+    value: ${{ steps.versions.outputs.npm-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📊 セットアップ情報の表示
+      shell: bash
+      run: |
+        echo "🔧 PMPLearningManagement 共通セットアップ開始"
+        echo "Node.js バージョン: ${{ inputs.node-version }}"
+        echo "依存関係インストール: ${{ inputs.install-dependencies }}"
+        echo "Corepack有効: ${{ inputs.enable-corepack }}"
+    
+    - name: ⚡ Node.js セットアップ
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+    
+    - name: 🔧 Corepack 有効化
+      if: inputs.enable-corepack == 'true'
+      shell: bash
+      run: |
+        echo "Enabling Corepack..."
+        corepack enable
+        echo "✅ Corepack enabled"
+    
+    - name: 📦 依存関係キャッシュ
+      id: cache-dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          node_modules
+          .next/cache
+          .vite/cache
+          dist
+        key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles(inputs.cache-dependency-path) }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ inputs.node-version }}-
+          ${{ runner.os }}-node-
+    
+    - name: 📥 依存関係インストール
+      if: inputs.install-dependencies == 'true' && steps.cache-dependencies.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Installing dependencies..."
+        if [ "${{ inputs.skip-post-install }}" = "true" ]; then
+          echo "Skipping post-install scripts..."
+          npm ci --prefer-offline --no-audit --ignore-scripts
+        else
+          npm ci --prefer-offline --no-audit
+        fi
+        echo "✅ Dependencies installed"
+    
+    - name: 🔍 バージョン情報の収集
+      id: versions
+      shell: bash
+      run: |
+        echo "node-version=$(node --version)" >> $GITHUB_OUTPUT
+        echo "npm-version=$(npm --version)" >> $GITHUB_OUTPUT
+        echo "📊 Environment Info:"
+        echo "Node.js: $(node --version)"
+        echo "npm: $(npm --version)"
+        echo "Platform: ${{ runner.os }}"
+        echo "Architecture: ${{ runner.arch }}"
+    
+    - name: 🧹 キャッシュクリーンアップ
+      shell: bash
+      run: |
+        echo "Cleaning up npm cache..."
+        npm cache verify
+        echo "✅ Cache cleanup completed"
+    
+    - name: 🎯 プロジェクト固有の設定
+      shell: bash
+      run: |
+        echo "Setting up PMPLearningManagement specific configurations..."
+        
+        # プロジェクト変数の設定
+        echo "PROJECT_NAME=PMPLearningManagement" >> $GITHUB_ENV
+        echo "NODE_ENV=test" >> $GITHUB_ENV
+        echo "CI=true" >> $GITHUB_ENV
+        
+        # PWA関連の環境変数
+        echo "VITE_PWA_ENABLED=true" >> $GITHUB_ENV
+        echo "VITE_APP_NAME=PMP学習管理システム" >> $GITHUB_ENV
+        
+        # ビルド最適化
+        echo "VITE_BUILD_SOURCEMAP=false" >> $GITHUB_ENV
+        echo "VITE_BUILD_MINIFY=true" >> $GITHUB_ENV
+        
+        echo "✅ Project-specific configuration completed"
+    
+    - name: 📊 セットアップ完了レポート
+      shell: bash
+      run: |
+        echo "🎉 共通セットアップ完了!"
+        echo "=================================="
+        echo "Node.js: $(node --version)"
+        echo "npm: $(npm --version)"
+        echo "Cache Hit: ${{ steps.cache-dependencies.outputs.cache-hit }}"
+        echo "Dependencies Installed: ${{ inputs.install-dependencies }}"
+        echo "Setup Time: $(date)"
+        echo "=================================="

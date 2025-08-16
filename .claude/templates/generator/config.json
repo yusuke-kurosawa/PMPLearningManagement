@@ -1,0 +1,241 @@
+{
+  "version": "1.0.0",
+  "description": "Template Generator Configuration",
+  "variables": {
+    "projectName": "PMPLearningManagement",
+    "organization": "PMP Learning Team",
+    "defaultLicense": "MIT",
+    "defaultAuthor": "Development Team",
+    "copyrightYear": "2025",
+    "repositoryUrl": "https://github.com/yusuke-kurosawa/PMPLearningManagement",
+    "defaultLanguage": "en",
+    "defaultTimezone": "UTC"
+  },
+  "templates": {
+    "component": {
+      "basic": {
+        "name": "Basic Component",
+        "description": "Standard React functional component",
+        "outputDir": "src/components",
+        "fileExtension": ".tsx",
+        "requiredVariables": ["ComponentName"],
+        "optionalVariables": ["Description", "Author", "Date"]
+      },
+      "page": {
+        "name": "Page Component",
+        "description": "Page component with routing and layout",
+        "outputDir": "src/components/pages",
+        "fileExtension": ".tsx",
+        "requiredVariables": ["PageName"],
+        "optionalVariables": ["Route", "Description", "RequiresAuth"]
+      },
+      "layout": {
+        "name": "Layout Component",
+        "description": "Layout wrapper with navigation",
+        "outputDir": "src/components/layout",
+        "fileExtension": ".tsx",
+        "requiredVariables": ["LayoutName"],
+        "optionalVariables": ["ShowSidebar", "ShowFooter", "ShowMobileNav"]
+      },
+      "hook": {
+        "name": "Custom Hook",
+        "description": "Custom React hook with TypeScript",
+        "outputDir": "src/hooks",
+        "fileExtension": ".ts",
+        "requiredVariables": ["HookName"],
+        "optionalVariables": ["ValueType", "DefaultValue", "Description"]
+      }
+    },
+    "service": {
+      "api": {
+        "name": "API Service",
+        "description": "REST API service with error handling",
+        "outputDir": "src/services",
+        "fileExtension": ".ts",
+        "requiredVariables": ["ServiceName"],
+        "optionalVariables": ["endpoint", "Description"]
+      },
+      "auth": {
+        "name": "Auth Service",
+        "description": "Authentication service with JWT",
+        "outputDir": "src/services/auth",
+        "fileExtension": ".ts",
+        "requiredVariables": ["ServiceName"],
+        "optionalVariables": ["Provider", "Description"]
+      },
+      "data": {
+        "name": "Data Service",
+        "description": "Data management and caching service",
+        "outputDir": "src/services/data",
+        "fileExtension": ".ts",
+        "requiredVariables": ["ServiceName"],
+        "optionalVariables": ["StorageType", "Description"]
+      },
+      "utility": {
+        "name": "Utility Service",
+        "description": "General utility service",
+        "outputDir": "src/services/utils",
+        "fileExtension": ".ts",
+        "requiredVariables": ["ServiceName"],
+        "optionalVariables": ["Description"]
+      }
+    },
+    "test": {
+      "unit": {
+        "name": "Unit Test",
+        "description": "Component unit test with Vitest",
+        "outputDir": "src/components/__tests__",
+        "fileExtension": ".test.tsx",
+        "requiredVariables": ["ComponentName"],
+        "optionalVariables": ["TestDescription"]
+      },
+      "integration": {
+        "name": "Integration Test",
+        "description": "Service integration test",
+        "outputDir": "src/services/__tests__",
+        "fileExtension": ".test.ts",
+        "requiredVariables": ["ServiceName"],
+        "optionalVariables": ["TestDescription"]
+      },
+      "e2e": {
+        "name": "E2E Test",
+        "description": "End-to-end Playwright test",
+        "outputDir": "tests/e2e",
+        "fileExtension": ".spec.ts",
+        "requiredVariables": ["FlowName"],
+        "optionalVariables": ["TestDescription"]
+      }
+    },
+    "documentation": {
+      "api": {
+        "name": "API Documentation",
+        "description": "API specification document",
+        "outputDir": "docs/api",
+        "fileExtension": ".md",
+        "requiredVariables": ["ApiName"],
+        "optionalVariables": ["Version", "Description"]
+      },
+      "component": {
+        "name": "Component Documentation",
+        "description": "Component usage documentation",
+        "outputDir": "docs/components",
+        "fileExtension": ".md",
+        "requiredVariables": ["ComponentName"],
+        "optionalVariables": ["Description", "Examples"]
+      },
+      "guide": {
+        "name": "User Guide",
+        "description": "User guide documentation",
+        "outputDir": "docs/guides",
+        "fileExtension": ".md",
+        "requiredVariables": ["GuideName"],
+        "optionalVariables": ["Audience", "Description"]
+      }
+    },
+    "config": {
+      "eslint": {
+        "name": "ESLint Configuration",
+        "description": "ESLint configuration file",
+        "outputDir": ".",
+        "fileExtension": ".json",
+        "requiredVariables": [],
+        "optionalVariables": ["Extends", "Rules"]
+      },
+      "typescript": {
+        "name": "TypeScript Configuration",
+        "description": "TypeScript tsconfig file",
+        "outputDir": ".",
+        "fileExtension": ".json",
+        "requiredVariables": [],
+        "optionalVariables": ["Target", "Module"]
+      },
+      "vite": {
+        "name": "Vite Configuration",
+        "description": "Vite build configuration",
+        "outputDir": ".",
+        "fileExtension": ".js",
+        "requiredVariables": [],
+        "optionalVariables": ["Base", "Plugins"]
+      }
+    }
+  },
+  "validation": {
+    "componentName": {
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "message": "Component name must start with uppercase and contain only alphanumeric characters"
+    },
+    "serviceName": {
+      "pattern": "^[A-Z][a-zA-Z0-9]*Service$",
+      "message": "Service name must start with uppercase and end with 'Service'"
+    },
+    "hookName": {
+      "pattern": "^use[A-Z][a-zA-Z0-9]*$",
+      "message": "Hook name must start with 'use' followed by PascalCase"
+    },
+    "fileName": {
+      "pattern": "^[a-zA-Z0-9-_.]+$",
+      "message": "File name can only contain alphanumeric characters, hyphens, underscores, and dots"
+    }
+  },
+  "hooks": {
+    "preGenerate": [
+      {
+        "name": "validate",
+        "enabled": true,
+        "script": "./validators.js"
+      }
+    ],
+    "postGenerate": [
+      {
+        "name": "format",
+        "enabled": true,
+        "commands": ["prettier --write", "eslint --fix"]
+      },
+      {
+        "name": "git-add",
+        "enabled": true,
+        "command": "git add"
+      }
+    ]
+  },
+  "settings": {
+    "interactive": {
+      "enabled": true,
+      "defaultMode": "wizard",
+      "confirmBeforeGenerate": true,
+      "showPreview": true
+    },
+    "output": {
+      "overwriteProtection": true,
+      "createBackup": false,
+      "timestampBackups": true
+    },
+    "logging": {
+      "level": "info",
+      "file": ".claude/templates/generator.log",
+      "console": true
+    },
+    "performance": {
+      "parallelGeneration": false,
+      "cacheTemplates": true,
+      "maxCacheSize": 50
+    }
+  },
+  "integrations": {
+    "vscode": {
+      "enabled": true,
+      "snippetsPath": ".vscode/snippets",
+      "tasksPath": ".vscode/tasks.json"
+    },
+    "github": {
+      "enabled": true,
+      "autoCreatePR": false,
+      "branchPrefix": "template/"
+    },
+    "ci": {
+      "enabled": true,
+      "validateOnCommit": true,
+      "runTestsAfterGenerate": false
+    }
+  }
+}

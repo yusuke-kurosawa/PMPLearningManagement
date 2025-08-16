@@ -8,8 +8,8 @@
 # Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
 # ================================================================
 
-name: '🔍 コード品質チェック'
-description: 'ESLint、TypeScript、Prettierの統合品質チェック'
+name: '🛡️ 品質チェック'
+description: 'PMPLearningManagement用の包括的な品質検証'
 
 inputs:
   run-eslint:

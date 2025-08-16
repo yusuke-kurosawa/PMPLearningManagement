@@ -33,42 +33,48 @@ monitoring/
 ## Three Pillars of Observability
 
 ### 1. Metrics
+
 Numerical data points over time that indicate system performance.
 
 ```javascript
 // metrics/application/web-vitals.js
 export const webVitalsMetrics = {
-  LCP: {  // Largest Contentful Paint
+  LCP: {
+    // Largest Contentful Paint
     name: 'web_vitals_lcp',
     type: 'histogram',
     buckets: [1000, 2500, 4000, 6000],
-    target: 2500,  // milliseconds
-    critical: 4000
+    target: 2500, // milliseconds
+    critical: 4000,
   },
-  FID: {  // First Input Delay
+  FID: {
+    // First Input Delay
     name: 'web_vitals_fid',
     type: 'histogram',
     buckets: [50, 100, 200, 300],
-    target: 100,   // milliseconds
-    critical: 300
+    target: 100, // milliseconds
+    critical: 300,
   },
-  CLS: {  // Cumulative Layout Shift
+  CLS: {
+    // Cumulative Layout Shift
     name: 'web_vitals_cls',
     type: 'gauge',
     target: 0.1,
-    critical: 0.25
+    critical: 0.25,
   },
-  TTFB: { // Time to First Byte
+  TTFB: {
+    // Time to First Byte
     name: 'web_vitals_ttfb',
     type: 'histogram',
     buckets: [200, 400, 600, 800, 1000],
-    target: 600,   // milliseconds
-    critical: 1000
-  }
+    target: 600, // milliseconds
+    critical: 1000,
+  },
 }
 ```
 
 ### 2. Logs
+
 Timestamped records of discrete events.
 
 ```json
@@ -90,6 +96,7 @@ Timestamped records of discrete events.
 ```
 
 ### 3. Traces
+
 Records of the path of a request through the system.
 
 ```javascript
@@ -99,24 +106,25 @@ export const tracingConfig = {
   collector: {
     endpoint: 'http://jaeger-collector:14268/api/traces',
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   },
   sampler: {
     type: 'probabilistic',
-    param: 0.1  // Sample 10% of traces
+    param: 0.1, // Sample 10% of traces
   },
   propagation: ['b3', 'w3c'],
   tags: {
     environment: process.env.NODE_ENV,
-    version: process.env.APP_VERSION
-  }
+    version: process.env.APP_VERSION,
+  },
 }
 ```
 
 ## Alert Configurations
 
 ### Critical Alerts
+
 ```yaml
 # alerts/critical/system.yml
 alerts:
@@ -127,8 +135,8 @@ alerts:
     for: 5m
     severity: critical
     annotations:
-      summary: "High error rate detected"
-      description: "Error rate is {{ $value | percent }} for {{ $labels.service }}"
+      summary: 'High error rate detected'
+      description: 'Error rate is {{ $value | percent }} for {{ $labels.service }}'
     actions:
       - pagerduty
       - slack
@@ -139,8 +147,8 @@ alerts:
     for: 1m
     severity: critical
     annotations:
-      summary: "Service {{ $labels.job }} is down"
-      description: "{{ $labels.instance }} has been down for more than 1 minute"
+      summary: 'Service {{ $labels.job }} is down'
+      description: '{{ $labels.instance }} has been down for more than 1 minute'
     actions:
       - pagerduty
       - phone
@@ -150,14 +158,15 @@ alerts:
     for: 30s
     severity: critical
     annotations:
-      summary: "Database connection failure"
-      description: "Cannot connect to {{ $labels.database }}"
+      summary: 'Database connection failure'
+      description: 'Cannot connect to {{ $labels.database }}'
     actions:
       - pagerduty
       - slack
 ```
 
 ### Warning Alerts
+
 ```yaml
 # alerts/warning/performance.yml
 alerts:
@@ -167,8 +176,8 @@ alerts:
     for: 10m
     severity: warning
     annotations:
-      summary: "High response time detected"
-      description: "95th percentile response time is {{ $value }}s"
+      summary: 'High response time detected'
+      description: '95th percentile response time is {{ $value }}s'
     actions:
       - slack
       - email
@@ -180,8 +189,8 @@ alerts:
     for: 15m
     severity: warning
     annotations:
-      summary: "High memory usage"
-      description: "Memory usage is {{ $value | percent }}"
+      summary: 'High memory usage'
+      description: 'Memory usage is {{ $value | percent }}'
     actions:
       - slack
 
@@ -192,13 +201,14 @@ alerts:
     for: 30m
     severity: warning
     annotations:
-      summary: "Disk space warning"
-      description: "Disk usage is {{ $value | percent }} on {{ $labels.mountpoint }}"
+      summary: 'Disk space warning'
+      description: 'Disk usage is {{ $value | percent }} on {{ $labels.mountpoint }}'
 ```
 
 ## Dashboard Configurations
 
 ### Application Dashboard
+
 ```json
 // dashboards/grafana/application.json
 {
@@ -254,6 +264,7 @@ alerts:
 ```
 
 ### Infrastructure Dashboard
+
 ```json
 // dashboards/grafana/infrastructure.json
 {
@@ -316,209 +327,213 @@ alerts:
 ## Monitoring Scripts
 
 ### Enhanced Health Check
+
 ```javascript
 #!/usr/bin/env node
 // monitoring/scripts/check.js
 
-const axios = require('axios');
-const { performance } = require('perf_hooks');
+const axios = require('axios')
+const { performance } = require('perf_hooks')
 
 class HealthChecker {
   constructor(config) {
-    this.config = config;
-    this.results = [];
+    this.config = config
+    this.results = []
   }
 
   async checkEndpoint(endpoint) {
-    const start = performance.now();
+    const start = performance.now()
     try {
       const response = await axios.get(endpoint.url, {
         timeout: endpoint.timeout || 5000,
-        headers: endpoint.headers || {}
-      });
-      
-      const duration = performance.now() - start;
-      
+        headers: endpoint.headers || {},
+      })
+
+      const duration = performance.now() - start
+
       return {
         name: endpoint.name,
         status: 'healthy',
         statusCode: response.status,
         responseTime: duration,
-        timestamp: new Date().toISOString()
-      };
+        timestamp: new Date().toISOString(),
+      }
     } catch (error) {
       return {
         name: endpoint.name,
         status: 'unhealthy',
         error: error.message,
         responseTime: performance.now() - start,
-        timestamp: new Date().toISOString()
-      };
+        timestamp: new Date().toISOString(),
+      }
     }
   }
 
   async checkDatabase() {
     // Database connectivity check
-    const { Pool } = require('pg');
-    const pool = new Pool(this.config.database);
-    
+    const { Pool } = require('pg')
+    const pool = new Pool(this.config.database)
+
     try {
-      const start = performance.now();
-      const result = await pool.query('SELECT NOW()');
-      const duration = performance.now() - start;
-      
-      await pool.end();
-      
+      const start = performance.now()
+      const result = await pool.query('SELECT NOW()')
+      const duration = performance.now() - start
+
+      await pool.end()
+
       return {
         name: 'database',
         status: 'healthy',
         responseTime: duration,
-        timestamp: result.rows[0].now
-      };
+        timestamp: result.rows[0].now,
+      }
     } catch (error) {
       return {
         name: 'database',
         status: 'unhealthy',
-        error: error.message
-      };
+        error: error.message,
+      }
     }
   }
 
   async checkRedis() {
-    const redis = require('redis');
-    const client = redis.createClient(this.config.redis);
-    
+    const redis = require('redis')
+    const client = redis.createClient(this.config.redis)
+
     try {
-      await client.connect();
-      const start = performance.now();
-      await client.ping();
-      const duration = performance.now() - start;
-      
-      await client.quit();
-      
+      await client.connect()
+      const start = performance.now()
+      await client.ping()
+      const duration = performance.now() - start
+
+      await client.quit()
+
       return {
         name: 'redis',
         status: 'healthy',
-        responseTime: duration
-      };
+        responseTime: duration,
+      }
     } catch (error) {
       return {
         name: 'redis',
         status: 'unhealthy',
-        error: error.message
-      };
+        error: error.message,
+      }
     }
   }
 
   async checkDiskSpace() {
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execAsync = promisify(exec);
-    
+    const { exec } = require('child_process')
+    const { promisify } = require('util')
+    const execAsync = promisify(exec)
+
     try {
-      const { stdout } = await execAsync('df -h /');
-      const lines = stdout.trim().split('\n');
-      const data = lines[1].split(/\s+/);
-      const usagePercent = parseInt(data[4]);
-      
+      const { stdout } = await execAsync('df -h /')
+      const lines = stdout.trim().split('\n')
+      const data = lines[1].split(/\s+/)
+      const usagePercent = parseInt(data[4])
+
       return {
         name: 'disk',
         status: usagePercent < 80 ? 'healthy' : 'warning',
         usage: `${usagePercent}%`,
-        available: data[3]
-      };
+        available: data[3],
+      }
     } catch (error) {
       return {
         name: 'disk',
         status: 'unknown',
-        error: error.message
-      };
+        error: error.message,
+      }
     }
   }
 
   async runAllChecks() {
-    console.log('🏥 Running Health Checks...\n');
-    
+    console.log('🏥 Running Health Checks...\n')
+
     // Application endpoints
     for (const endpoint of this.config.endpoints) {
-      const result = await this.checkEndpoint(endpoint);
-      this.results.push(result);
-      this.printResult(result);
+      const result = await this.checkEndpoint(endpoint)
+      this.results.push(result)
+      this.printResult(result)
     }
-    
+
     // Database
-    const dbResult = await this.checkDatabase();
-    this.results.push(dbResult);
-    this.printResult(dbResult);
-    
+    const dbResult = await this.checkDatabase()
+    this.results.push(dbResult)
+    this.printResult(dbResult)
+
     // Redis
-    const redisResult = await this.checkRedis();
-    this.results.push(redisResult);
-    this.printResult(redisResult);
-    
+    const redisResult = await this.checkRedis()
+    this.results.push(redisResult)
+    this.printResult(redisResult)
+
     // Disk space
-    const diskResult = await this.checkDiskSpace();
-    this.results.push(diskResult);
-    this.printResult(diskResult);
-    
+    const diskResult = await this.checkDiskSpace()
+    this.results.push(diskResult)
+    this.printResult(diskResult)
+
     // Overall status
-    this.printOverallStatus();
-    
+    this.printOverallStatus()
+
     // Send to monitoring system
-    await this.sendToMonitoring();
+    await this.sendToMonitoring()
   }
 
   printResult(result) {
-    const icon = result.status === 'healthy' ? '✅' : 
-                  result.status === 'warning' ? '⚠️' : '❌';
-    
-    console.log(`${icon} ${result.name}: ${result.status}`);
+    const icon = result.status === 'healthy' ? '✅' : result.status === 'warning' ? '⚠️' : '❌'
+
+    console.log(`${icon} ${result.name}: ${result.status}`)
     if (result.responseTime) {
-      console.log(`   Response time: ${result.responseTime.toFixed(2)}ms`);
+      console.log(`   Response time: ${result.responseTime.toFixed(2)}ms`)
     }
     if (result.error) {
-      console.log(`   Error: ${result.error}`);
+      console.log(`   Error: ${result.error}`)
     }
-    console.log('');
+    console.log('')
   }
 
   printOverallStatus() {
-    const unhealthy = this.results.filter(r => r.status === 'unhealthy');
-    const warnings = this.results.filter(r => r.status === 'warning');
-    
-    console.log('📊 Overall Status:');
+    const unhealthy = this.results.filter((r) => r.status === 'unhealthy')
+    const warnings = this.results.filter((r) => r.status === 'warning')
+
+    console.log('📊 Overall Status:')
     if (unhealthy.length === 0 && warnings.length === 0) {
-      console.log('   ✅ All systems operational');
+      console.log('   ✅ All systems operational')
     } else {
       if (unhealthy.length > 0) {
-        console.log(`   ❌ ${unhealthy.length} unhealthy services`);
+        console.log(`   ❌ ${unhealthy.length} unhealthy services`)
       }
       if (warnings.length > 0) {
-        console.log(`   ⚠️ ${warnings.length} warnings`);
+        console.log(`   ⚠️ ${warnings.length} warnings`)
       }
     }
-    
+
     // Calculate availability
-    const healthy = this.results.filter(r => r.status === 'healthy');
-    const availability = (healthy.length / this.results.length) * 100;
-    console.log(`   📈 Availability: ${availability.toFixed(2)}%`);
+    const healthy = this.results.filter((r) => r.status === 'healthy')
+    const availability = (healthy.length / this.results.length) * 100
+    console.log(`   📈 Availability: ${availability.toFixed(2)}%`)
   }
 
   async sendToMonitoring() {
     try {
-      await axios.post(this.config.monitoring.endpoint, {
-        timestamp: new Date().toISOString(),
-        service: 'pmp-learning-management',
-        checks: this.results
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': this.config.monitoring.apiKey
+      await axios.post(
+        this.config.monitoring.endpoint,
+        {
+          timestamp: new Date().toISOString(),
+          service: 'pmp-learning-management',
+          checks: this.results,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': this.config.monitoring.apiKey,
+          },
         }
-      });
-      console.log('\n✅ Results sent to monitoring system');
+      )
+      console.log('\n✅ Results sent to monitoring system')
     } catch (error) {
-      console.error('\n❌ Failed to send to monitoring:', error.message);
+      console.error('\n❌ Failed to send to monitoring:', error.message)
     }
   }
 }
@@ -528,148 +543,145 @@ const config = {
   endpoints: [
     { name: 'API Health', url: 'http://localhost:3000/health' },
     { name: 'Frontend', url: 'http://localhost:5173' },
-    { name: 'GraphQL', url: 'http://localhost:3000/graphql', 
-      headers: { 'Content-Type': 'application/json' } }
+    {
+      name: 'GraphQL',
+      url: 'http://localhost:3000/graphql',
+      headers: { 'Content-Type': 'application/json' },
+    },
   ],
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     database: process.env.DB_NAME || 'pmp_learning',
     user: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD
+    password: process.env.DB_PASSWORD,
   },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379
+    port: process.env.REDIS_PORT || 6379,
   },
   monitoring: {
     endpoint: process.env.MONITORING_ENDPOINT || 'http://metrics.internal/health',
-    apiKey: process.env.MONITORING_API_KEY
-  }
-};
+    apiKey: process.env.MONITORING_API_KEY,
+  },
+}
 
 // Run health checks
-const checker = new HealthChecker(config);
-checker.runAllChecks().catch(console.error);
+const checker = new HealthChecker(config)
+checker.runAllChecks().catch(console.error)
 ```
 
 ### Metric Collection
+
 ```javascript
 #!/usr/bin/env node
 // monitoring/scripts/collect.js
 
-const client = require('prom-client');
-const express = require('express');
+const client = require('prom-client')
+const express = require('express')
 
 // Create a Registry
-const register = new client.Registry();
+const register = new client.Registry()
 
 // Add default metrics
-client.collectDefaultMetrics({ register });
+client.collectDefaultMetrics({ register })
 
 // Custom metrics
 const httpRequestDuration = new client.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status'],
-  buckets: [0.1, 0.5, 1, 2, 5]
-});
+  buckets: [0.1, 0.5, 1, 2, 5],
+})
 
 const activeUsers = new client.Gauge({
   name: 'active_users_total',
-  help: 'Number of active users'
-});
+  help: 'Number of active users',
+})
 
 const businessMetrics = {
   coursesCompleted: new client.Counter({
     name: 'courses_completed_total',
     help: 'Total number of courses completed',
-    labelNames: ['course_id', 'user_type']
+    labelNames: ['course_id', 'user_type'],
   }),
-  
+
   examsPassed: new client.Counter({
     name: 'exams_passed_total',
     help: 'Total number of exams passed',
-    labelNames: ['exam_type']
+    labelNames: ['exam_type'],
   }),
-  
+
   studyTime: new client.Histogram({
     name: 'study_time_minutes',
     help: 'Study time in minutes',
     labelNames: ['course_id'],
-    buckets: [15, 30, 60, 120, 240]
-  })
-};
+    buckets: [15, 30, 60, 120, 240],
+  }),
+}
 
 // Register all metrics
-register.registerMetric(httpRequestDuration);
-register.registerMetric(activeUsers);
-Object.values(businessMetrics).forEach(metric => {
-  register.registerMetric(metric);
-});
+register.registerMetric(httpRequestDuration)
+register.registerMetric(activeUsers)
+Object.values(businessMetrics).forEach((metric) => {
+  register.registerMetric(metric)
+})
 
 // Express server for metrics endpoint
-const app = express();
+const app = express()
 
 app.get('/metrics', async (req, res) => {
   try {
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
   } catch (err) {
-    res.status(500).end(err);
+    res.status(500).end(err)
   }
-});
+})
 
 // Simulate metric updates
 setInterval(() => {
   // Update active users
-  activeUsers.set(Math.floor(Math.random() * 1000));
-  
+  activeUsers.set(Math.floor(Math.random() * 1000))
+
   // Simulate HTTP requests
-  const methods = ['GET', 'POST', 'PUT', 'DELETE'];
-  const routes = ['/api/courses', '/api/users', '/api/exams'];
-  const statuses = ['200', '201', '400', '500'];
-  
-  methods.forEach(method => {
-    routes.forEach(route => {
-      statuses.forEach(status => {
+  const methods = ['GET', 'POST', 'PUT', 'DELETE']
+  const routes = ['/api/courses', '/api/users', '/api/exams']
+  const statuses = ['200', '201', '400', '500']
+
+  methods.forEach((method) => {
+    routes.forEach((route) => {
+      statuses.forEach((status) => {
         if (Math.random() > 0.7) {
-          httpRequestDuration
-            .labels(method, route, status)
-            .observe(Math.random() * 2);
+          httpRequestDuration.labels(method, route, status).observe(Math.random() * 2)
         }
-      });
-    });
-  });
-  
+      })
+    })
+  })
+
   // Simulate business metrics
   if (Math.random() > 0.8) {
-    businessMetrics.coursesCompleted
-      .labels('pmbok-fundamentals', 'premium')
-      .inc();
+    businessMetrics.coursesCompleted.labels('pmbok-fundamentals', 'premium').inc()
   }
-  
-  if (Math.random() > 0.9) {
-    businessMetrics.examsPassed
-      .labels('practice')
-      .inc();
-  }
-  
-  businessMetrics.studyTime
-    .labels('pmbok-fundamentals')
-    .observe(Math.random() * 240);
-}, 5000);
 
-const PORT = process.env.METRICS_PORT || 9090;
+  if (Math.random() > 0.9) {
+    businessMetrics.examsPassed.labels('practice').inc()
+  }
+
+  businessMetrics.studyTime.labels('pmbok-fundamentals').observe(Math.random() * 240)
+}, 5000)
+
+const PORT = process.env.METRICS_PORT || 9090
 app.listen(PORT, () => {
-  console.log(`Metrics server listening on port ${PORT}`);
-  console.log(`Metrics available at http://localhost:${PORT}/metrics`);
-});
+  console.log(`Metrics server listening on port ${PORT}`)
+  console.log(`Metrics available at http://localhost:${PORT}/metrics`)
+})
 ```
 
 ## Log Management
 
 ### Log Aggregation Configuration
+
 ```yaml
 # logs/filebeat.yml
 filebeat.inputs:
@@ -680,14 +692,14 @@ filebeat.inputs:
     multiline.pattern: '^\d{4}-\d{2}-\d{2}'
     multiline.negate: true
     multiline.match: after
-    
+
   - type: container
     enabled: true
     paths:
       - '/var/lib/docker/containers/*/*.log'
     processors:
       - add_docker_metadata:
-          host: "unix:///var/run/docker.sock"
+          host: 'unix:///var/run/docker.sock'
 
 processors:
   - add_host_metadata:
@@ -697,9 +709,9 @@ processors:
   - add_kubernetes_metadata: ~
 
 output.elasticsearch:
-  hosts: ["elasticsearch:9200"]
-  index: "pmp-learning-%{+yyyy.MM.dd}"
-  
+  hosts: ['elasticsearch:9200']
+  index: 'pmp-learning-%{+yyyy.MM.dd}'
+
 logging.level: info
 logging.to_files: true
 logging.files:
@@ -712,67 +724,68 @@ logging.files:
 ## Synthetic Monitoring
 
 ### User Journey Monitoring
+
 ```javascript
 // monitoring/synthetic/user-journey.js
 
-const { chromium } = require('playwright');
+const { chromium } = require('playwright')
 
 async function monitorUserJourney() {
-  const browser = await chromium.launch();
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  
+  const browser = await chromium.launch()
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
   const metrics = {
     loginTime: 0,
     courseLoadTime: 0,
     examStartTime: 0,
-    errors: []
-  };
-  
+    errors: [],
+  }
+
   try {
     // 1. Login flow
-    const loginStart = Date.now();
-    await page.goto('https://pmp-learning.com/login');
-    await page.fill('#email', 'test@example.com');
-    await page.fill('#password', 'password');
-    await page.click('#login-button');
-    await page.waitForSelector('.dashboard');
-    metrics.loginTime = Date.now() - loginStart;
-    
+    const loginStart = Date.now()
+    await page.goto('https://pmp-learning.com/login')
+    await page.fill('#email', 'test@example.com')
+    await page.fill('#password', 'password')
+    await page.click('#login-button')
+    await page.waitForSelector('.dashboard')
+    metrics.loginTime = Date.now() - loginStart
+
     // 2. Course navigation
-    const courseStart = Date.now();
-    await page.click('.course-link');
-    await page.waitForSelector('.course-content');
-    metrics.courseLoadTime = Date.now() - courseStart;
-    
+    const courseStart = Date.now()
+    await page.click('.course-link')
+    await page.waitForSelector('.course-content')
+    metrics.courseLoadTime = Date.now() - courseStart
+
     // 3. Start exam
-    const examStart = Date.now();
-    await page.click('.start-exam');
-    await page.waitForSelector('.exam-question');
-    metrics.examStartTime = Date.now() - examStart;
-    
+    const examStart = Date.now()
+    await page.click('.start-exam')
+    await page.waitForSelector('.exam-question')
+    metrics.examStartTime = Date.now() - examStart
   } catch (error) {
     metrics.errors.push({
       message: error.message,
-      timestamp: new Date().toISOString()
-    });
+      timestamp: new Date().toISOString(),
+    })
   } finally {
-    await browser.close();
+    await browser.close()
   }
-  
+
   // Send metrics to monitoring
-  await sendMetrics(metrics);
-  
-  return metrics;
+  await sendMetrics(metrics)
+
+  return metrics
 }
 
 // Run every 5 minutes
-setInterval(monitorUserJourney, 5 * 60 * 1000);
+setInterval(monitorUserJourney, 5 * 60 * 1000)
 ```
 
 ## Best Practices
 
 ### 1. Monitoring Strategy
+
 - **Golden Signals**: Latency, Traffic, Errors, Saturation
 - **SLI/SLO/SLA**: Define and track service level objectives
 - **Alert Fatigue**: Minimize false positives
@@ -780,6 +793,7 @@ setInterval(monitorUserJourney, 5 * 60 * 1000);
 - **Progressive Monitoring**: Start simple, evolve based on needs
 
 ### 2. Dashboard Design
+
 ```yaml
 Dashboard Principles:
   - Single pane of glass for critical metrics
@@ -790,6 +804,7 @@ Dashboard Principles:
 ```
 
 ### 3. Log Management
+
 - **Structured Logging**: Use JSON format
 - **Log Levels**: DEBUG, INFO, WARN, ERROR, FATAL
 - **Correlation IDs**: Track requests across services
@@ -799,37 +814,44 @@ Dashboard Principles:
 ## Incident Response
 
 ### Runbook Template
+
 ```markdown
 # Runbook: [Alert Name]
 
 ## Alert Details
+
 - **Severity**: Critical/Warning/Info
 - **Service**: Service name
 - **Threshold**: Specific threshold that triggers alert
 
 ## Impact
+
 - User-facing impact description
 - Business impact assessment
 
 ## Diagnosis Steps
+
 1. Check dashboard: [Dashboard Link]
 2. Query logs: `query example`
 3. Verify dependencies
 4. Check recent deployments
 
 ## Mitigation Steps
+
 1. Immediate action to restore service
 2. Rollback procedure if needed
 3. Scale resources if required
 4. Failover to backup system
 
 ## Escalation
+
 - L1: On-call engineer
 - L2: Team lead
 - L3: Service owner
 - L4: CTO
 
 ## Post-Incident
+
 - Create incident report
 - Update runbook if needed
 - Schedule post-mortem
@@ -838,6 +860,7 @@ Dashboard Principles:
 ## Performance Benchmarks
 
 ### Target Metrics
+
 ```yaml
 Availability:
   - Target: 99.9% (43.2 minutes downtime/month)
@@ -861,6 +884,7 @@ Resource Utilization:
 ## Cost Optimization
 
 ### Monitoring Cost Management
+
 ```javascript
 // monitoring/scripts/cost-optimizer.js
 
@@ -870,36 +894,39 @@ const costOptimizer = {
     // Recommend metric aggregation
     // Suggest sampling rates
   },
-  
+
   optimizeLogRetention() {
     // Archive old logs to cold storage
     // Compress logs
     // Delete debug logs after 7 days
   },
-  
+
   rightSizeMonitoring() {
     // Analyze actual usage vs provisioned
     // Recommend instance types
     // Suggest auto-scaling policies
-  }
-};
+  },
+}
 ```
 
 ## Future Enhancements
 
 ### Short Term (1-3 months)
+
 - [ ] AIOps integration for anomaly detection
 - [ ] Distributed tracing implementation
 - [ ] Custom metrics SDK
 - [ ] Mobile app monitoring
 
 ### Medium Term (3-6 months)
+
 - [ ] Machine learning for predictive alerts
 - [ ] Chaos engineering integration
 - [ ] Real user monitoring (RUM)
 - [ ] SLO-based alerting
 
 ### Long Term (6-12 months)
+
 - [ ] Full observability platform
 - [ ] Self-healing systems
 - [ ] Cost anomaly detection

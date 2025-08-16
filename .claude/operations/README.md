@@ -49,11 +49,13 @@ operations/
 ### 1. CI/CDパイプライン管理
 
 #### GitHub Actions ワークフロー
+
 - **コアワークフロー**: メインCI/CDパイプライン
 - **セキュリティスキャン**: 脆弱性検査と監査
 - **デプロイメント**: 本番・ステージング環境へのデプロイ
 
 #### 自動化スクリプト
+
 ```bash
 # ビルド実行
 ./operations/ci-cd/scripts/build.sh
@@ -68,11 +70,13 @@ operations/
 ### 2. 開発自動化
 
 #### Git Hooks
+
 - **pre-commit**: ESLint、Prettier、TypeScript型チェック、軽量テスト
 - **commit-msg**: IDD準拠チェック、Issue番号検証
 - **pre-push**: 包括的テスト、ビルド確認、セキュリティスキャン
 
 #### 自動化タスク
+
 ```bash
 # 日次タスク（クリーンアップ、バックアップ）
 npm run ops:automation:daily
@@ -87,20 +91,22 @@ npm run ops:automation:run -- scripts/custom.sh
 ### 3. 監視とアラート
 
 #### メトリクス収集
+
 - アプリケーションメトリクス
 - インフラストラクチャメトリクス
 - ビジネスメトリクス
 - パフォーマンス指標
 
 #### アラート設定
+
 ```yaml
 # alerts/critical.yml
-- name: "High Error Rate"
+- name: 'High Error Rate'
   condition: error_rate > 5%
   duration: 5m
   severity: critical
-  
-- name: "Low Availability"
+
+- name: 'Low Availability'
   condition: availability < 99.9%
   duration: 1m
   severity: critical
@@ -109,11 +115,13 @@ npm run ops:automation:run -- scripts/custom.sh
 ### 4. デプロイメント戦略
 
 #### 環境
+
 - **development**: 開発環境
 - **staging**: ステージング環境
 - **production**: 本番環境
 
 #### デプロイ方式
+
 - Blue-Green デプロイメント
 - カナリアリリース
 - ローリングアップデート
@@ -122,6 +130,7 @@ npm run ops:automation:run -- scripts/custom.sh
 ### 5. インフラストラクチャ管理
 
 #### Infrastructure as Code
+
 - Terraform による環境構築
 - Docker コンテナ化
 - Kubernetes オーケストレーション
@@ -130,6 +139,7 @@ npm run ops:automation:run -- scripts/custom.sh
 ## 📊 運用コマンド
 
 ### 日常運用
+
 ```bash
 # システムヘルスチェック
 npm run ops:health:check
@@ -145,6 +155,7 @@ npm run ops:dashboard
 ```
 
 ### デプロイメント
+
 ```bash
 # ステージングデプロイ
 npm run ops:deploy:staging
@@ -160,6 +171,7 @@ npm run ops:deploy:status
 ```
 
 ### 自動化管理
+
 ```bash
 # Git Hooks インストール
 npm run ops:hooks:install
@@ -175,6 +187,7 @@ npm run ops:automation:stats
 ```
 
 ### トラブルシューティング
+
 ```bash
 # システム診断
 npm run ops:diagnose:system
@@ -192,6 +205,7 @@ DEBUG=* npm run ops:debug
 ## 📈 メトリクスと成熟度
 
 ### DevOps成熟度
+
 - **現在のレベル**: 3-4
   - ✅ 自動化されたCI/CD
   - ✅ インフラストラクチャのコード化
@@ -200,10 +214,12 @@ DEBUG=* npm run ops:debug
   - 🔴 完全な自己修復（未実装）
 
 ### 自動化率
+
 - **現在**: 85%
 - **目標**: 95%
 
 ### パフォーマンス指標
+
 - **デプロイ頻度**: 日次
 - **リードタイム**: < 2時間
 - **MTTR**: < 30分
@@ -212,18 +228,21 @@ DEBUG=* npm run ops:debug
 ## 🔒 セキュリティ
 
 ### シークレット管理
+
 - GitHub Secrets 使用
 - 環境変数での管理
 - 暗号化された設定ファイル
 - HashiCorp Vault 統合（計画中）
 
 ### アクセス制御
+
 - RBAC実装
 - 最小権限の原則
 - 監査ログ
 - 定期的な権限レビュー
 
 ### セキュリティスキャン
+
 - 依存関係の脆弱性チェック
 - コンテナイメージスキャン
 - SAST/DAST実装
@@ -232,6 +251,7 @@ DEBUG=* npm run ops:debug
 ## 🚀 ベストプラクティス
 
 ### ✅ 推奨事項
+
 1. **自動化優先**: 手動作業を最小限に
 2. **コードとしての管理**: すべての設定をコード化
 3. **監視の充実**: プロアクティブな問題検出
@@ -239,6 +259,7 @@ DEBUG=* npm run ops:debug
 5. **継続的改善**: メトリクスに基づく最適化
 
 ### ❌ 避けるべきこと
+
 1. **手動デプロイメント**: 必ず自動化パイプラインを使用
 2. **ハードコードされた設定**: 環境変数を使用
 3. **監視の欠如**: すべての重要機能を監視
@@ -248,6 +269,7 @@ DEBUG=* npm run ops:debug
 ## 📚 リファレンス
 
 ### 内部ドキュメント
+
 - [CI/CDガイドライン](./ci-cd/README.md)
 - [自動化ガイド](./automation/README.md)
 - [監視設定](./monitoring/README.md)
@@ -255,6 +277,7 @@ DEBUG=* npm run ops:debug
 - [インフラガイド](./infrastructure/README.md)
 
 ### 外部リソース
+
 - [GitHub Actions ドキュメント](https://docs.github.com/actions)
 - [Terraform ドキュメント](https://www.terraform.io/docs)
 - [Kubernetes ドキュメント](https://kubernetes.io/docs)
@@ -263,16 +286,19 @@ DEBUG=* npm run ops:debug
 ## 🔄 改善計画
 
 ### 短期（1-3ヶ月）
+
 - [ ] 監視ダッシュボードの強化
 - [ ] アラート最適化
 - [ ] ドキュメント自動生成
 
 ### 中期（3-6ヶ月）
+
 - [ ] 自動スケーリング実装
 - [ ] カオスエンジニアリング導入
 - [ ] ML基盤の運用最適化
 
 ### 長期（6-12ヶ月）
+
 - [ ] 完全自動化達成（95%以上）
 - [ ] 自己修復システム実装
 - [ ] AIOps導入

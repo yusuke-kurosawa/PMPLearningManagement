@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Quick Reference - Interactive Web Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🚀 DevOps Quick Reference</h1>
+            <p>Interactive command finder and documentation explorer</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Search commands, APIs, troubleshooting..."
+                autofocus
+            >
+            <div class="search-filters">
+                <label class="filter-chip">
+                    <input type="checkbox" value="commands" checked> Commands
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" value="apis" checked> APIs
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" value="troubleshooting" checked> Troubleshooting
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" value="security" checked> Security
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" value="database" checked> Database
+                </label>
+            </div>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="categories-grid" id="categoriesGrid">
+            <div class="category-card" data-category="commands">
+                <div class="category-icon">💻</div>
+                <h3>Commands</h3>
+                <p>CLI commands for development, testing, and deployment</p>
+                <span class="item-count">500+ commands</span>
+            </div>
+            
+            <div class="category-card" data-category="apis">
+                <div class="category-icon">🔌</div>
+                <h3>APIs</h3>
+                <p>API endpoints, authentication, and service references</p>
+                <span class="item-count">50+ endpoints</span>
+            </div>
+            
+            <div class="category-card" data-category="architecture">
+                <div class="category-icon">🏗️</div>
+                <h3>Architecture</h3>
+                <p>System design, patterns, and infrastructure</p>
+                <span class="item-count">30+ patterns</span>
+            </div>
+            
+            <div class="category-card" data-category="troubleshooting">
+                <div class="category-icon">🔧</div>
+                <h3>Troubleshooting</h3>
+                <p>Common issues, solutions, and debugging tips</p>
+                <span class="item-count">100+ solutions</span>
+            </div>
+            
+            <div class="category-card" data-category="workflows">
+                <div class="category-icon">🔄</div>
+                <h3>Workflows</h3>
+                <p>GitHub Actions, CI/CD pipelines, and automation</p>
+                <span class="item-count">20+ workflows</span>
+            </div>
+            
+            <div class="category-card" data-category="environment">
+                <div class="category-icon">🔐</div>
+                <h3>Environment</h3>
+                <p>Environment variables, configuration, and secrets</p>
+                <span class="item-count">50+ variables</span>
+            </div>
+            
+            <div class="category-card" data-category="security">
+                <div class="category-icon">🛡️</div>
+                <h3>Security</h3>
+                <p>Security best practices, scanning, and compliance</p>
+                <span class="item-count">40+ practices</span>
+            </div>
+            
+            <div class="category-card" data-category="monitoring">
+                <div class="category-icon">📊</div>
+                <h3>Monitoring</h3>
+                <p>Logging, metrics, alerts, and observability</p>
+                <span class="item-count">30+ metrics</span>
+            </div>
+            
+            <div class="category-card" data-category="database">
+                <div class="category-icon">🗄️</div>
+                <h3>Database</h3>
+                <p>Queries, migrations, optimization, and backup</p>
+                <span class="item-count">60+ queries</span>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results" id="searchResults" style="display: none;">
+            <h2>Search Results</h2>
+            <div class="results-container" id="resultsContainer"></div>
+        </div>
+
+        <!-- Command Details Modal -->
+        <div class="modal" id="commandModal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="action-btn" onclick="showFavorites()">
+                ⭐ Favorites
+            </button>
+            <button class="action-btn" onclick="showRecent()">
+                🕒 Recent
+            </button>
+            <button class="action-btn" onclick="generateCheatsheet()">
+                📄 Generate Cheatsheet
+            </button>
+            <button class="action-btn" onclick="exportCommands()">
+                📥 Export
+            </button>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="keyboard-shortcuts">
+            <h4>Keyboard Shortcuts</h4>
+            <div class="shortcut"><kbd>/</kbd> Focus search</div>
+            <div class="shortcut"><kbd>Esc</kbd> Clear search</div>
+            <div class="shortcut"><kbd>↑↓</kbd> Navigate results</div>
+            <div class="shortcut"><kbd>Enter</kbd> Open selected</div>
+            <div class="shortcut"><kbd>Cmd+K</kbd> Command palette</div>
+        </div>
+    </div>
+
+    <!-- Command Palette -->
+    <div class="command-palette" id="commandPalette" style="display: none;">
+        <input 
+            type="text" 
+            id="paletteInput" 
+            placeholder="Type a command..."
+            class="palette-input"
+        >
+        <div class="palette-results" id="paletteResults"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast" id="toast"></div>
+
+    <script src="search.js"></script>
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            setupEventListeners();
+            loadReferences();
+            restoreState();
+        }
+
+        function setupEventListeners() {
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', debounce(handleSearch, 300));
+
+            // Category cards
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const category = card.dataset.category;
+                    loadCategory(category);
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+
+            // Filter checkboxes
+            document.querySelectorAll('.filter-chip input').forEach(checkbox => {
+                checkbox.addEventListener('change', handleSearch);
+            });
+        }
+
+        function handleKeyboardShortcuts(e) {
+            // Focus search: /
+            if (e.key === '/' && !isInputFocused()) {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+
+            // Clear search: Escape
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+
+            // Command palette: Cmd+K or Ctrl+K
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleCommandPalette();
+            }
+        }
+
+        function isInputFocused() {
+            const activeElement = document.activeElement;
+            return activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Placeholder functions - to be implemented in search.js
+        function handleSearch() {
+            console.log('Searching...');
+        }
+
+        function loadCategory(category) {
+            console.log('Loading category:', category);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('categoriesGrid').style.display = 'grid';
+        }
+
+        function toggleCommandPalette() {
+            const palette = document.getElementById('commandPalette');
+            if (palette.style.display === 'none') {
+                palette.style.display = 'block';
+                document.getElementById('paletteInput').focus();
+            } else {
+                palette.style.display = 'none';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('commandModal').style.display = 'none';
+        }
+
+        function showFavorites() {
+            showToast('Loading favorites...', 'info');
+        }
+
+        function showRecent() {
+            showToast('Loading recent commands...', 'info');
+        }
+
+        function generateCheatsheet() {
+            showToast('Generating cheatsheet...', 'success');
+        }
+
+        function exportCommands() {
+            showToast('Exporting commands...', 'success');
+        }
+
+        function loadReferences() {
+            // Load reference data
+            console.log('Loading references...');
+        }
+
+        function restoreState() {
+            // Restore user preferences
+            const savedState = localStorage.getItem('quickref-state');
+            if (savedState) {
+                console.log('Restoring state...');
+            }
+        }
+    </script>
+</body>
+</html>

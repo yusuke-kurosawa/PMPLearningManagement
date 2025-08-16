@@ -1,0 +1,526 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest'
+import { setupServer } from 'msw/node'
+import { rest } from 'msw'
+import { {{ServiceName}}Service } from '@/services/{{kebab-name}}'
+import type { {{ServiceName}}Request, {{ServiceName}}Response } from '@/services/{{kebab-name}}'
+
+/**
+ * Integration Tests for {{ServiceName}}Service
+ * 
+ * @description {{Description}}
+ * @since {{Date}}
+ * @author {{Author}}
+ */
+
+// ============================================================================
+// Mock Server Setup
+// ============================================================================
+
+const mockServer = setupServer(
+  // Default handlers
+  rest.get('*/{{endpoint}}', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: mockData,
+        success: true,
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 100,
+          totalPages: 5
+        }
+      })
+    )
+  }),
+  
+  rest.get('*/{{endpoint}}/:id', (req, res, ctx) => {
+    const { id } = req.params
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: { id, ...mockItem },
+        success: true
+      })
+    )
+  }),
+  
+  rest.post('*/{{endpoint}}', async (req, res, ctx) => {
+    const body = await req.json()
+    return res(
+      ctx.status(201),
+      ctx.json({
+        data: { id: 'new-id', ...body },
+        success: true,
+        message: '{{ResourceName}} created successfully'
+      })
+    )
+  }),
+  
+  rest.put('*/{{endpoint}}/:id', async (req, res, ctx) => {
+    const { id } = req.params
+    const body = await req.json()
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: { id, ...body },
+        success: true,
+        message: '{{ResourceName}} updated successfully'
+      })
+    )
+  }),
+  
+  rest.delete('*/{{endpoint}}/:id', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        success: true,
+        message: '{{ResourceName}} deleted successfully'
+      })
+    )
+  })
+)
+
+// ============================================================================
+// Test Data
+// ============================================================================
+
+const mockItem = {
+  name: 'Test Item',
+  description: 'Test Description',
+  metadata: { key: 'value' },
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+}
+
+const mockData = Array.from({ length: 10 }, (_, i) => ({
+  id: `id-${i}`,
+  ...mockItem,
+  name: `Test Item ${i}`
+}))
+
+// ============================================================================
+// Test Suite
+// ============================================================================
+
+describe('{{ServiceName}}Service Integration Tests', () => {
+  let service: {{ServiceName}}Service
+  
+  // Setup and teardown
+  beforeAll(() => {
+    mockServer.listen({ onUnhandledRequest: 'error' })
+  })
+  
+  afterAll(() => {
+    mockServer.close()
+  })
+  
+  beforeEach(() => {
+    // Create fresh service instance
+    service = new {{ServiceName}}Service({
+      baseUrl: 'http://localhost:3000/api'
+    })
+    mockServer.resetHandlers()
+  })
+  
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+  
+  // ============================================================================
+  // CRUD Operations
+  // ============================================================================
+  
+  describe('CRUD Operations', () => {
+    describe('GET /{{endpoint}}', () => {
+      it('should fetch all items successfully', async () => {
+        const response = await service.getAll()
+        
+        expect(response).toMatchObject({
+          success: true,
+          data: expect.any(Array),
+          pagination: expect.objectContaining({
+            page: 1,
+            limit: 20
+          })
+        })
+        expect(response.data).toHaveLength(10)
+      })
+      
+      it('should handle pagination parameters', async () => {
+        const response = await service.getAll({
+          page: 2,
+          limit: 5,
+          sort: 'name',
+          filter: { status: 'active' }
+        })
+        
+        expect(response.success).toBe(true)
+      })
+      
+      it('should handle empty results', async () => {
+        mockServer.use(
+          rest.get('*/{{endpoint}}', (req, res, ctx) => {
+            return res(
+              ctx.status(200),
+              ctx.json({ data: [], success: true })
+            )
+          })
+        )
+        
+        const response = await service.getAll()
+        expect(response.data).toEqual([])
+      })
+    })
+    
+    describe('GET /{{endpoint}}/:id', () => {
+      it('should fetch single item by ID', async () => {
+        const response = await service.getById('test-id')
+        
+        expect(response).toMatchObject({
+          success: true,
+          data: expect.objectContaining({
+            id: 'test-id',
+            name: expect.any(String)
+          })
+        })
+      })
+      
+      it('should handle not found error', async () => {
+        mockServer.use(
+          rest.get('*/{{endpoint}}/:id', (req, res, ctx) => {
+            return res(
+              ctx.status(404),
+              ctx.json({
+                success: false,
+                message: 'Resource not found',
+                code: 'NOT_FOUND'
+              })
+            )
+          })
+        )
+        
+        await expect(service.getById('nonexistent')).rejects.toThrow('Resource not found')
+      })
+      
+      it('should validate ID parameter', async () => {
+        await expect(service.getById('')).rejects.toThrow('ID is required')
+      })
+    })
+    
+    describe('POST /{{endpoint}}', () => {
+      it('should create new item', async () => {
+        const newItem: {{ServiceName}}Request = {
+          name: 'New Item',
+          description: 'New Description'
+        }
+        
+        const response = await service.create(newItem)
+        
+        expect(response).toMatchObject({
+          success: true,
+          data: expect.objectContaining({
+            id: expect.any(String),
+            name: 'New Item'
+          }),
+          message: expect.stringContaining('created')
+        })
+      })
+      
+      it('should validate request data', async () => {
+        const invalidItem = { name: '' } // Missing required fields
+        
+        await expect(service.create(invalidItem as any)).rejects.toThrow()
+      })
+      
+      it('should handle conflict errors', async () => {
+        mockServer.use(
+          rest.post('*/{{endpoint}}', (req, res, ctx) => {
+            return res(
+              ctx.status(409),
+              ctx.json({
+                success: false,
+                message: 'Resource already exists',
+                code: 'CONFLICT'
+              })
+            )
+          })
+        )
+        
+        await expect(service.create(mockItem)).rejects.toThrow('Resource already exists')
+      })
+    })
+    
+    describe('PUT /{{endpoint}}/:id', () => {
+      it('should update existing item', async () => {
+        const updates = {
+          name: 'Updated Name',
+          description: 'Updated Description'
+        }
+        
+        const response = await service.update('test-id', updates)
+        
+        expect(response).toMatchObject({
+          success: true,
+          data: expect.objectContaining({
+            id: 'test-id',
+            name: 'Updated Name'
+          })
+        })
+      })
+      
+      it('should handle partial updates with PATCH', async () => {
+        const partialUpdate = { description: 'Only description' }
+        
+        const response = await service.patch('test-id', partialUpdate)
+        
+        expect(response.success).toBe(true)
+      })
+    })
+    
+    describe('DELETE /{{endpoint}}/:id', () => {
+      it('should delete item', async () => {
+        const response = await service.delete('test-id')
+        
+        expect(response).toMatchObject({
+          success: true,
+          message: expect.stringContaining('deleted')
+        })
+      })
+      
+      it('should handle delete of non-existent item', async () => {
+        mockServer.use(
+          rest.delete('*/{{endpoint}}/:id', (req, res, ctx) => {
+            return res(ctx.status(404))
+          })
+        )
+        
+        await expect(service.delete('nonexistent')).rejects.toThrow()
+      })
+    })
+  })
+  
+  // ============================================================================
+  // Batch Operations
+  // ============================================================================
+  
+  describe('Batch Operations', () => {
+    it('should batch create multiple items', async () => {
+      const items = [
+        { name: 'Item 1', description: 'Desc 1' },
+        { name: 'Item 2', description: 'Desc 2' }
+      ]
+      
+      mockServer.use(
+        rest.post('*/{{endpoint}}/batch', async (req, res, ctx) => {
+          return res(
+            ctx.status(201),
+            ctx.json({
+              data: { created: 2, failed: 0, items: [] },
+              success: true
+            })
+          )
+        })
+      )
+      
+      const response = await service.batchCreate(items)
+      expect(response.data.created).toBe(2)
+    })
+    
+    it('should batch delete multiple items', async () => {
+      mockServer.use(
+        rest.delete('*/{{endpoint}}/batch', async (req, res, ctx) => {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              data: { deleted: 3, failed: 0 },
+              success: true
+            })
+          )
+        })
+      )
+      
+      const response = await service.batchDelete(['id1', 'id2', 'id3'])
+      expect(response.data.deleted).toBe(3)
+    })
+  })
+  
+  // ============================================================================
+  // Error Handling
+  // ============================================================================
+  
+  describe('Error Handling', () => {
+    it('should retry on network errors', async () => {
+      let attempts = 0
+      mockServer.use(
+        rest.get('*/{{endpoint}}', (req, res, ctx) => {
+          attempts++
+          if (attempts < 3) {
+            return res(ctx.status(500))
+          }
+          return res(ctx.status(200), ctx.json({ data: [], success: true }))
+        })
+      )
+      
+      const response = await service.getAll()
+      expect(response.success).toBe(true)
+      expect(attempts).toBe(3)
+    })
+    
+    it('should handle timeout errors', async () => {
+      mockServer.use(
+        rest.get('*/{{endpoint}}', async (req, res, ctx) => {
+          await new Promise(resolve => setTimeout(resolve, 5000))
+          return res(ctx.status(200))
+        })
+      )
+      
+      service.updateConfig({ timeout: 100 })
+      
+      await expect(service.getAll()).rejects.toThrow('timeout')
+    })
+    
+    it('should handle rate limiting', async () => {
+      mockServer.use(
+        rest.get('*/{{endpoint}}', (req, res, ctx) => {
+          return res(
+            ctx.status(429),
+            ctx.json({
+              success: false,
+              message: 'Too many requests',
+              code: 'RATE_LIMIT'
+            }),
+            ctx.set('X-RateLimit-Remaining', '0'),
+            ctx.set('X-RateLimit-Reset', String(Date.now() + 60000))
+          )
+        })
+      )
+      
+      await expect(service.getAll()).rejects.toThrow('Too many requests')
+    })
+    
+    it('should handle malformed responses', async () => {
+      mockServer.use(
+        rest.get('*/{{endpoint}}', (req, res, ctx) => {
+          return res(
+            ctx.status(200),
+            ctx.text('Invalid JSON')
+          )
+        })
+      )
+      
+      await expect(service.getAll()).rejects.toThrow()
+    })
+  })
+  
+  // ============================================================================
+  // Authentication & Authorization
+  // ============================================================================
+  
+  describe('Authentication', () => {
+    it('should include API key in requests', async () => {
+      let capturedHeaders: any = {}
+      
+      mockServer.use(
+        rest.get('*/{{endpoint}}', (req, res, ctx) => {
+          capturedHeaders = Object.fromEntries(req.headers.entries())
+          return res(ctx.status(200), ctx.json({ data: [], success: true }))
+        })
+      )
+      
+      service.updateConfig({ apiKey: 'test-api-key' })
+      await service.getAll()
+      
+      expect(capturedHeaders.authorization).toBe('Bearer test-api-key')
+    })
+    
+    it('should handle unauthorized errors', async () => {
+      mockServer.use(
+        rest.get('*/{{endpoint}}', (req, res, ctx) => {
+          return res(
+            ctx.status(401),
+            ctx.json({
+              success: false,
+              message: 'Unauthorized',
+              code: 'UNAUTHORIZED'
+            })
+          )
+        })
+      )
+      
+      await expect(service.getAll()).rejects.toThrow('Unauthorized')
+    })
+  })
+  
+  // ============================================================================
+  // Request Cancellation
+  // ============================================================================
+  
+  describe('Request Cancellation', () => {
+    it('should cancel ongoing requests', async () => {
+      mockServer.use(
+        rest.get('*/{{endpoint}}', async (req, res, ctx) => {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          return res(ctx.status(200), ctx.json({ data: [], success: true }))
+        })
+      )
+      
+      const promise = service.getAll()
+      service.cancel()
+      
+      await expect(promise).rejects.toThrow()
+    })
+  })
+  
+  // ============================================================================
+  // Configuration
+  // ============================================================================
+  
+  describe('Configuration', () => {
+    it('should update configuration', () => {
+      service.updateConfig({
+        baseUrl: 'https://new-api.com',
+        timeout: 5000,
+        retryAttempts: 5
+      })
+      
+      const config = service.getConfig()
+      expect(config.baseUrl).toBe('https://new-api.com')
+      expect(config.timeout).toBe(5000)
+      expect(config.retryAttempts).toBe(5)
+    })
+  })
+})
+
+// ============================================================================
+// Performance Tests
+// ============================================================================
+
+describe('{{ServiceName}}Service Performance', () => {
+  beforeAll(() => mockServer.listen())
+  afterAll(() => mockServer.close())
+  
+  it('should handle concurrent requests', async () => {
+    const service = new {{ServiceName}}Service()
+    
+    const promises = Array.from({ length: 10 }, (_, i) => 
+      service.getById(`id-${i}`)
+    )
+    
+    const results = await Promise.all(promises)
+    expect(results).toHaveLength(10)
+    results.forEach(result => {
+      expect(result.success).toBe(true)
+    })
+  })
+  
+  it('should complete requests within timeout', async () => {
+    const service = new {{ServiceName}}Service({ timeout: 2000 })
+    
+    const start = Date.now()
+    await service.getAll()
+    const duration = Date.now() - start
+    
+    expect(duration).toBeLessThan(2000)
+  })
+})

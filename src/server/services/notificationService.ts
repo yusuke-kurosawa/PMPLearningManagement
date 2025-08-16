@@ -277,7 +277,7 @@ export class NotificationService {
       }
 
       // 実際の設定とマージ（深いマージが必要）
-      const settings = userSettings.notifications as any
+      const settings = userSettings.notifications as Record<string, unknown>
       return {
         email: { ...defaultSettings.email, ...settings?.email },
         push: { ...defaultSettings.push, ...settings?.push },

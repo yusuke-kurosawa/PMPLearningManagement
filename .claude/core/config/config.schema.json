@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Configuration Schema",
+  "description": "Central configuration schema for .claude directory",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Configuration version (semver)"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["development", "staging", "production", "test"],
+      "default": "development"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version": {
+          "type": "string"
+        },
+        "maintainers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "role": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["name", "repository"]
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "defaultAgent": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 0,
+          "default": 30000
+        }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "trigger": { "type": "string" },
+              "actions": { "type": "array" },
+              "enabled": { "type": "boolean" }
+            }
+          }
+        },
+        "schedule": {
+          "type": "object",
+          "properties": {
+            "cleanup": { "type": "string" },
+            "backup": { "type": "string" },
+            "healthCheck": { "type": "string" }
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "collection": { "type": "boolean" },
+            "retention": { "type": "number" },
+            "exporters": { "type": "array" }
+          }
+        },
+        "alerts": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "channels": { "type": "array" },
+            "thresholds": { "type": "object" }
+          }
+        },
+        "healthCheck": {
+          "type": "object",
+          "properties": {
+            "interval": { "type": "number" },
+            "timeout": { "type": "number" },
+            "retries": { "type": "number" }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "scanning": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "frequency": { "type": "string" },
+            "scanners": { "type": "array" }
+          }
+        },
+        "access": {
+          "type": "object",
+          "properties": {
+            "authentication": { "type": "string" },
+            "authorization": { "type": "string" },
+            "audit": { "type": "boolean" }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "standards": { "type": "array" },
+            "reporting": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["blue-green", "canary", "rolling", "recreate"]
+        },
+        "environments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string" },
+              "branch": { "type": "string" },
+              "autoDeplot": { "type": "boolean" }
+            }
+          }
+        },
+        "rollback": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "automatic": { "type": "boolean" },
+            "conditions": { "type": "array" }
+          }
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "caching": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "strategy": { "type": "string" },
+            "ttl": { "type": "number" }
+          }
+        },
+        "optimization": {
+          "type": "object",
+          "properties": {
+            "parallel": { "type": "boolean" },
+            "workers": { "type": "number" },
+            "resourceLimits": { "type": "object" }
+          }
+        }
+      }
+    },
+    "maintenance": {
+      "type": "object",
+      "properties": {
+        "backup": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "frequency": { "type": "string" },
+            "retention": { "type": "number" },
+            "location": { "type": "string" }
+          }
+        },
+        "cleanup": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "frequency": { "type": "string" },
+            "patterns": { "type": "array" }
+          }
+        }
+      }
+    }
+  },
+  "required": ["version", "environment", "project"]
+}

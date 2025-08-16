@@ -141,7 +141,7 @@ module "eks" {
       name = "${var.project_name}-${var.environment}-main"
 
       instance_types = var.instance_types
-      
+
       min_size     = var.min_size
       max_size     = var.max_size
       desired_size = var.desired_size
@@ -283,7 +283,7 @@ resource "aws_db_instance" "read_replica" {
   replicate_source_db = module.rds.db_instance_id
 
   instance_class = var.read_replica_instance_class
-  
+
   # Different AZ for HA
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
 
@@ -381,7 +381,7 @@ services:
       dockerfile: docker/images/app/Dockerfile
       target: builder
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:password@db:5432/pmplearning
@@ -401,7 +401,7 @@ services:
   db:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -410,7 +410,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../../scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -420,12 +420,12 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -435,7 +435,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "8080:8080"
+      - '8080:8080'
     environment:
       ADMINER_DEFAULT_SERVER: db
     networks:
@@ -484,119 +484,124 @@ spec:
         component: frontend
         version: v1
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9090"
-        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        prometheus.io/path: '/metrics'
     spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - pmp-learning
-              topologyKey: kubernetes.io/hostname
-      
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - pmp-learning
+                topologyKey: kubernetes.io/hostname
+
       initContainers:
-      - name: wait-for-db
-        image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z database-service 5432; do echo waiting for db; sleep 2; done;']
-      
+        - name: wait-for-db
+          image: busybox:1.35
+          command:
+            [
+              'sh',
+              '-c',
+              'until nc -z database-service 5432; do echo waiting for db; sleep 2; done;',
+            ]
+
       containers:
-      - name: app
-        image: pmplearning/app:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-          name: http
-          protocol: TCP
-        - containerPort: 9090
-          name: metrics
-          protocol: TCP
-        
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: PORT
-          value: "3000"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: database-url
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: redis-url
-        
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
-        
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3000
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          successThreshold: 1
-          failureThreshold: 3
-        
-        startupProbe:
-          httpGet:
-            path: /startup
-            port: 3000
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 3
-          successThreshold: 1
-          failureThreshold: 30
-        
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-          readOnly: true
-        - name: cache
-          mountPath: /app/.cache
-        
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1001
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-      
+        - name: app
+          image: pmplearning/app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: PORT
+              value: '3000'
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: redis-url
+
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 30
+
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: cache
+              mountPath: /app/.cache
+
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
       volumes:
-      - name: config
-        configMap:
-          name: app-config
-      - name: cache
-        emptyDir: {}
-      
+        - name: config
+          configMap:
+            name: app-config
+        - name: cache
+          emptyDir: {}
+
       serviceAccountName: pmp-learning-sa
       securityContext:
         fsGroup: 1001
@@ -612,20 +617,20 @@ replicaCount: 3
 image:
   repository: pmplearning/app
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: ''
 
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 
 podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9090"
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9090'
 
 podSecurityContext:
   fsGroup: 1001
@@ -633,7 +638,7 @@ podSecurityContext:
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1001
@@ -647,9 +652,9 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   hosts:
     - host: pmplearning.com
       paths:
@@ -677,7 +682,7 @@ autoscaling:
 
 persistence:
   enabled: true
-  storageClass: "gp3"
+  storageClass: 'gp3'
   accessMode: ReadWriteOnce
   size: 10Gi
 
@@ -717,26 +722,25 @@ monitoring:
 
 ```yaml
 # ansible/playbooks/setup-k8s.yml
-
 ---
 - name: Setup Kubernetes Cluster
   hosts: k8s_masters
   become: yes
   vars:
-    kubernetes_version: "1.27.0"
-    pod_network_cidr: "10.244.0.0/16"
-  
+    kubernetes_version: '1.27.0'
+    pod_network_cidr: '10.244.0.0/16'
+
   tasks:
     - name: Install Docker
       package:
         name: docker.io
         state: present
-    
+
     - name: Add Kubernetes APT repository
       apt_repository:
-        repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+        repo: 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
         state: present
-    
+
     - name: Install Kubernetes packages
       package:
         name:
@@ -744,7 +748,7 @@ monitoring:
           - kubeadm={{ kubernetes_version }}
           - kubectl={{ kubernetes_version }}
         state: present
-    
+
     - name: Initialize Kubernetes cluster
       command: |
         kubeadm init \
@@ -752,41 +756,41 @@ monitoring:
           --kubernetes-version={{ kubernetes_version }}
       args:
         creates: /etc/kubernetes/admin.conf
-    
+
     - name: Create .kube directory
       file:
         path: /home/{{ ansible_user }}/.kube
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-    
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+
     - name: Copy admin.conf
       copy:
         src: /etc/kubernetes/admin.conf
         dest: /home/{{ ansible_user }}/.kube/config
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
         mode: '0644'
         remote_src: yes
-    
+
     - name: Install Flannel CNI
       command: |
         kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
       environment:
         KUBECONFIG: /home/{{ ansible_user }}/.kube/config
-    
+
     - name: Generate join command
       command: kubeadm token create --print-join-command
       register: join_command
-    
+
     - name: Set join command fact
       set_fact:
-        kubeadm_join_command: "{{ join_command.stdout }}"
+        kubeadm_join_command: '{{ join_command.stdout }}'
 
 - name: Join Worker Nodes
   hosts: k8s_workers
   become: yes
-  
+
   tasks:
     - name: Join cluster
       command: "{{ hostvars[groups['k8s_masters'][0]]['kubeadm_join_command'] }}"
@@ -812,7 +816,7 @@ Parameters:
       - development
       - staging
       - production
-  
+
   VpcCIDR:
     Type: String
     Default: 10.0.0.0/16
@@ -827,7 +831,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-vpc
-  
+
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -840,7 +844,7 @@ Resources:
           Value: !Sub ${EnvironmentName}-public-subnet-1
         - Key: kubernetes.io/role/elb
           Value: 1
-  
+
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -852,26 +856,26 @@ Resources:
           Value: !Sub ${EnvironmentName}-private-subnet-1
         - Key: kubernetes.io/role/internal-elb
           Value: 1
-  
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-igw
-  
+
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
-  
+
   NatGateway1EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
-  
+
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -884,13 +888,13 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub ${EnvironmentName}-vpc-id
-  
+
   PublicSubnets:
     Description: Public subnet IDs
     Value: !Join [',', [!Ref PublicSubnet1]]
     Export:
       Name: !Sub ${EnvironmentName}-public-subnets
-  
+
   PrivateSubnets:
     Description: Private subnet IDs
     Value: !Join [',', [!Ref PrivateSubnet1]]
@@ -927,7 +931,12 @@ scrape_configs:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     relabel_configs:
-      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      - source_labels:
+          [
+            __meta_kubernetes_namespace,
+            __meta_kubernetes_service_name,
+            __meta_kubernetes_endpoint_port_name,
+          ]
         action: keep
         regex: default;kubernetes;https
 
@@ -979,41 +988,41 @@ spec:
   minReplicas: 3
   maxReplicas: 20
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
-  - type: Pods
-    pods:
-      metric:
-        name: http_requests_per_second
-      target:
-        type: AverageValue
-        averageValue: "1000"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: '1000'
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 50
-        periodSeconds: 60
+        - type: Percent
+          value: 50
+          periodSeconds: 60
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 60
-      - type: Pods
-        value: 4
-        periodSeconds: 60
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+        - type: Pods
+          value: 4
+          periodSeconds: 60
       selectPolicy: Max
 ```
 
@@ -1030,25 +1039,26 @@ metadata:
   name: daily-backup
   namespace: velero
 spec:
-  schedule: "0 2 * * *"
+  schedule: '0 2 * * *'
   template:
     ttl: 720h0m0s
     includedNamespaces:
-    - default
-    - pmp-learning
+      - default
+      - pmp-learning
     includedResources:
-    - '*'
+      - '*'
     excludedResources:
-    - events
-    - events.events.k8s.io
+      - events
+      - events.events.k8s.io
     storageLocation: default
     volumeSnapshotLocations:
-    - default
+      - default
 ```
 
 ## Best Practices
 
 ### 1. Infrastructure Standards
+
 - **Immutable Infrastructure**: Never modify running infrastructure
 - **Version Everything**: Tag all resources with version numbers
 - **Least Privilege**: Apply minimal permissions required
@@ -1056,11 +1066,12 @@ spec:
 - **Monitoring**: Instrument everything
 
 ### 2. Resource Naming
+
 ```yaml
 Naming Convention:
   Format: {project}-{environment}-{resource}-{identifier}
   Example: pmp-prod-rds-primary
-  
+
   Environments:
     - dev: Development
     - stg: Staging
@@ -1069,6 +1080,7 @@ Naming Convention:
 ```
 
 ### 3. Tagging Strategy
+
 ```yaml
 Required Tags:
   - Environment: dev|stg|prod
@@ -1085,6 +1097,7 @@ Required Tags:
 ### Common Issues
 
 #### 1. Terraform State Lock
+
 ```bash
 # Force unlock state
 terraform force-unlock <lock-id>
@@ -1096,6 +1109,7 @@ aws dynamodb get-item \
 ```
 
 #### 2. Kubernetes Node Issues
+
 ```bash
 # Check node status
 kubectl get nodes
@@ -1109,6 +1123,7 @@ kubectl uncordon <node-name>
 ```
 
 #### 3. Docker Build Failures
+
 ```bash
 # Clean Docker system
 docker system prune -a

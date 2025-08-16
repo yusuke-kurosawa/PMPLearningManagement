@@ -1,0 +1,187 @@
+name: 🚨 ワークフロー監視・アラート
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    
+    steps:
+      - name: 📊 失敗情報の収集
+        id: failure-info
+        run: |
+          echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+          echo "run_id=${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
+          echo "run_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+      
+      - name: 📧 重要なワークフロー失敗時Issue作成
+        if: |
+          contains(fromJSON('["Production Deployment", "Security Scan", "Core CI/CD Pipeline", "Deploy", "CI"]'), 
+                   github.event.workflow_run.name)
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "🚨 Critical Workflow Failure: ${{ github.event.workflow_run.name }}"
+          content: |
+            ## 🚨 ワークフロー失敗レポート
+            
+            **ワークフロー名**: ${{ github.event.workflow_run.name }}
+            **状態**: ❌ 失敗
+            **実行時刻**: ${{ steps.failure-info.outputs.timestamp }}
+            **ブランチ**: ${{ steps.failure-info.outputs.branch }}
+            **コミット**: ${{ steps.failure-info.outputs.commit_sha }}
+            **実行URL**: ${{ steps.failure-info.outputs.run_url }}
+            
+            ### 対応が必要な理由
+            このワークフローは本番環境またはセキュリティに関わる重要なプロセスです。
+            早急な確認と修正が必要です。
+            
+            ### 次のステップ
+            1. 📋 失敗ログを確認
+            2. 🔧 問題を特定・修正
+            3. ✅ 修正後に再実行
+            4. 📝 必要に応じてポストモーテム作成
+            
+            ### 関連リンク
+            - [実行詳細](${{ steps.failure-info.outputs.run_url }})
+            - [コミット詳細](https://github.com/${{ github.repository }}/commit/${{ steps.failure-info.outputs.commit_sha }})
+          labels: |
+            bug
+            critical
+            ci/cd
+            automated
+            workflow-failure
+      
+      - name: 📊 メトリクス記録
+        run: |
+          echo "Recording failure metrics..."
+          mkdir -p .github/metrics
+          echo "{
+            \"workflow\": \"${{ github.event.workflow_run.name }}\",
+            \"status\": \"failure\",
+            \"timestamp\": \"${{ steps.failure-info.outputs.timestamp }}\",
+            \"run_id\": \"${{ github.event.workflow_run.id }}\",
+            \"branch\": \"${{ steps.failure-info.outputs.branch }}\",
+            \"commit_sha\": \"${{ steps.failure-info.outputs.commit_sha }}\"
+          }" >> .github/metrics/workflow-failures.jsonl
+      
+      - name: 🔔 継続的な失敗の検知
+        id: failure-pattern
+        run: |
+          # 過去5回の実行で3回以上失敗している場合を検知
+          FAILURE_COUNT=$(gh api repos/${{ github.repository }}/actions/workflows \
+            --jq ".workflows[] | select(.name == \"${{ github.event.workflow_run.name }}\") | .id" \
+            | xargs -I {} gh api repos/${{ github.repository }}/actions/workflows/{}/runs \
+            --jq '.workflow_runs[0:5] | map(select(.conclusion == "failure")) | length')
+          
+          if [ "$FAILURE_COUNT" -ge 3 ]; then
+            echo "pattern_detected=true" >> $GITHUB_OUTPUT
+            echo "failure_count=$FAILURE_COUNT" >> $GITHUB_OUTPUT
+          else
+            echo "pattern_detected=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🚨 継続的失敗パターンのアラート
+        if: steps.failure-pattern.outputs.pattern_detected == 'true'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "🔥 URGENT: Continuous Workflow Failures Detected - ${{ github.event.workflow_run.name }}"
+          content: |
+            ## 🔥 緊急: 継続的なワークフロー失敗を検知
+            
+            **ワークフロー名**: ${{ github.event.workflow_run.name }}
+            **失敗回数**: ${{ steps.failure-pattern.outputs.failure_count }}/5 (最新5回中)
+            **検知時刻**: ${{ steps.failure-info.outputs.timestamp }}
+            
+            ### ⚠️ 重要
+            このワークフローは継続的に失敗しており、システムの安定性に影響を与える可能性があります。
+            
+            ### 即座に必要な対応
+            1. 🔴 **即座に調査開始**
+            2. 🔧 **根本原因の特定**
+            3. 📋 **一時的な回避策の検討**
+            4. 💬 **チーム/ステークホルダーへの報告**
+            5. 📝 **インシデントレポート作成**
+            
+            ### 関連情報
+            - [ワークフロー履歴](https://github.com/${{ github.repository }}/actions/workflows)
+            - [最新の失敗実行](${{ steps.failure-info.outputs.run_url }})
+            
+            /cc @yusuke-kurosawa
+          labels: |
+            critical
+            urgent
+            incident
+            ci/cd
+            automated
+            continuous-failure
+
+  success-metrics:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: 📈 成功メトリクス記録
+        run: |
+          echo "Recording success metrics..."
+          mkdir -p .github/metrics
+          echo "{
+            \"workflow\": \"${{ github.event.workflow_run.name }}\",
+            \"status\": \"success\",
+            \"timestamp\": \"$(date -u +"%Y-%m-%d %H:%M:%S UTC")\",
+            \"run_id\": \"${{ github.event.workflow_run.id }}\",
+            \"duration_ms\": \"${{ github.event.workflow_run.run_duration_ms }}\",
+            \"branch\": \"${{ github.event.workflow_run.head_branch }}\"
+          }" >> .github/metrics/workflow-success.jsonl
+      
+      - name: 🎉 重要なワークフロー成功通知
+        if: |
+          contains(fromJSON('["Production Deployment", "Release"]'), 
+                   github.event.workflow_run.name) && 
+          github.event.workflow_run.head_branch == 'main'
+        run: |
+          echo "🎉 重要なワークフローが正常に完了しました"
+          echo "ワークフロー: ${{ github.event.workflow_run.name }}"
+          echo "実行時間: ${{ github.event.workflow_run.run_duration_ms }}ms"
+
+  weekly-health-report:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.name == 'Weekly Health Check' }}
+    
+    steps:
+      - name: 📊 週次ヘルスレポート生成
+        run: |
+          echo "## 📊 週次ワークフローヘルスレポート" > weekly-report.md
+          echo "**期間**: $(date -d '7 days ago' +%Y-%m-%d) - $(date +%Y-%m-%d)" >> weekly-report.md
+          echo "" >> weekly-report.md
+          
+          # ワークフロー統計の収集
+          echo "### 📈 実行統計" >> weekly-report.md
+          TOTAL_RUNS=$(gh api repos/${{ github.repository }}/actions/runs --jq '.total_count')
+          echo "- 総実行回数: $TOTAL_RUNS" >> weekly-report.md
+          
+          # 成功率の計算
+          SUCCESS_RATE=$(gh api repos/${{ github.repository }}/actions/runs \
+            --jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+          echo "- 成功率: $(($SUCCESS_RATE * 100 / $TOTAL_RUNS))%" >> weekly-report.md
+          
+          echo "" >> weekly-report.md
+          echo "### 🎯 推奨アクション" >> weekly-report.md
+          echo "- 失敗率が10%を超える場合は要調査" >> weekly-report.md
+          echo "- 実行時間が前週比20%増加の場合は最適化検討" >> weekly-report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

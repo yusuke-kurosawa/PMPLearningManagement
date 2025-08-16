@@ -7,21 +7,25 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 🎯 主要ワークフロー
 
 ### 1. 📦 Core CI/CD Pipeline
+
 - **ファイル**: `01-core-ci-cd.yml`
 - **目的**: ビルド、テスト、品質チェック
 - **トリガー**: push、PR作成時
 
 ### 2. 🔒 Security Scan
+
 - **ファイル**: `03-security-scan.yml`
 - **目的**: セキュリティ監査、脆弱性スキャン
 - **トリガー**: 定期実行、PR作成時
 
 ### 3. 🚀 Production Deployment
+
 - **ファイル**: `deploy.yml`
 - **目的**: GitHub Pagesへのデプロイ
 - **トリガー**: mainブランチへのpush
 
 ### 4. 📋 IDD Compliance Check
+
 - **ファイル**: `idd-compliance.yml`
 - **目的**: Issue駆動開発の準拠チェック
 - **トリガー**: PR作成・更新時
@@ -29,6 +33,7 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 🏷️ 命名規則
 
 ### ワークフローファイル
+
 ```
 <番号>-<カテゴリ>-<機能>.yml
 
@@ -43,6 +48,7 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 💡 ベストプラクティス
 
 ### ✅ 推奨事項
+
 1. **日本語コメント**: わかりやすい説明を記載
 2. **絵文字使用**: 視認性向上のため活用
 3. **並列実行**: 可能な限り並列化
@@ -50,6 +56,7 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 5. **適切な権限**: 最小権限の原則
 
 ### ❌ 避けるべき事項
+
 1. **ハードコーディング**: シークレットや設定値
 2. **過度な権限付与**: 不必要な権限は設定しない
 3. **長時間実行**: 効率的な実装を心がける
@@ -58,12 +65,14 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 🔧 メンテナンス
 
 ### 定期的な確認事項
+
 - [ ] ワークフローの実行状況
 - [ ] エラーログの確認
 - [ ] 実行時間の監視
 - [ ] 成功率の追跡
 
 ### 問題発生時の対応
+
 1. **GitHub Actions画面で詳細ログを確認**
 2. **エラーメッセージを分析**
 3. **必要に応じてワークフローを修正**
@@ -72,12 +81,14 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 📊 監視項目
 
 ### パフォーマンス指標
+
 - 実行時間
 - 成功率
 - リソース使用量
 - キャッシュヒット率
 
 ### 品質指標
+
 - ビルド成功率
 - テストカバレッジ
 - ESLintエラー数
@@ -86,6 +97,7 @@ PMPLearningManagementプロジェクトのGitHub Actions運用に関する基本
 ## 🚀 最適化のヒント
 
 ### 実行時間短縮
+
 ```yaml
 # キャッシュの活用
 - uses: actions/cache@v4
@@ -100,6 +112,7 @@ strategy:
 ```
 
 ### エラー処理
+
 ```yaml
 # 条件付き実行
 - name: テスト実行

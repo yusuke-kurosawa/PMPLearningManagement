@@ -16,6 +16,7 @@ import { ProgressService } from '@/server/services/progressService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { prisma } from '@/lib/db'
 import type { KnowledgeArea, ProcessGroup } from '@/types'
+// 未使用変数を削除予定 - Issue #77 対応
 
 // Score types for exam results
 type KnowledgeAreaScores = Record<string, number>
