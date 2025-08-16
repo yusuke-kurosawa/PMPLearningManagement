@@ -1,62 +1,11 @@
 {
-  "timestamp": "2025-08-16T03:12:46.424Z",
-  "buildPath": "/home/kurosawa/PMPLearningManagement/dist",
-  "baseUrl": "/PMPLearningManagement/",
-  "pwaAssets": {
-    "manifest": true,
-    "serviceWorker": true,
-    "offlinePage": true,
-    "headers": true
-  },
-  "routing": {
-    "spa404": true,
-    "nojekyll": true
-  },
-  "bundleSize": {
-    "total": "1.5M\tdist/",
-    "details": [
-      "-rw-r--r-- 1 kurosawa kurosawa  20739 Aug 16 12:12 dist/assets/AICoachingDashboard-rLMPo8ZZ.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   4232 Aug 16 12:12 dist/assets/AuthCallback-C57tmE90.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  21530 Aug 16 12:12 dist/assets/AuthPage-5vkTagoh.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  37377 Aug 16 12:12 dist/assets/CollaborationHub-BfxJqc9V.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  30864 Aug 16 12:12 dist/assets/DataManagement-CrE3N-RX.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   7653 Aug 16 12:12 dist/assets/EnhancedNetworkGraph-DjB-_-MD.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   8166 Aug 16 12:12 dist/assets/ExamResults-rNjhMofP.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  13299 Aug 16 12:12 dist/assets/FlashCardLearning-DJRlYYxS.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   2181 Aug 16 12:12 dist/assets/GlossaryDialog-s5X3lnxE.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  16642 Aug 16 12:12 dist/assets/ITTOForceGraph-B8gXoi8p.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   4833 Aug 16 12:12 dist/assets/IntegratedView-0iFn3Lss.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  10610 Aug 16 12:12 dist/assets/KnowledgeAreaHeatmap-BNqZQPig.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  10373 Aug 16 12:12 dist/assets/LearningProgressDashboard-g9lv1BC_.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  21197 Aug 16 12:12 dist/assets/MentorshipHub-CPe81GjK.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   6879 Aug 16 12:12 dist/assets/MindMapView-Ce5hr_1T.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  19298 Aug 16 12:12 dist/assets/MobileOptimizedApp-Cs6veico.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   9384 Aug 16 12:12 dist/assets/MockExam-DEab7JP5.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  42869 Aug 16 12:12 dist/assets/PMBOKMatrix-SrrEPjLB.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  35962 Aug 16 12:12 dist/assets/PMBOKVersionSelector-DmfVKUa1.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   6016 Aug 16 12:12 dist/assets/PMPGlossary-WTay6H2-.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  11108 Aug 16 12:12 dist/assets/ProcessFlowDiagram-CQGdL314.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   7277 Aug 16 12:12 dist/assets/ProcessHeatmap-BjTyNXOm.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  15109 Aug 16 12:12 dist/assets/ProjectSimulator-BIUtR-XL.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   3949 Aug 16 12:12 dist/assets/ProtectedRoute-BaBwAj2c.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   8125 Aug 16 12:12 dist/assets/ResetPasswordForm-gh_zhY62.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   8354 Aug 16 12:12 dist/assets/SankeyDiagram-CSVVecY7.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  14619 Aug 16 12:12 dist/assets/UserProfile-hc2fslV4.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   7869 Aug 16 12:12 dist/assets/VisualizationHub-Dh2uRzlv.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  22940 Aug 16 12:12 dist/assets/button-DFdRVo1N.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   1694 Aug 16 12:12 dist/assets/card-wYMOTuYE.js",
-      "-rw-r--r-- 1 kurosawa kurosawa    403 Aug 16 12:12 dist/assets/charts-DZ5DcBAI.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  94692 Aug 16 12:12 dist/assets/d3-BXs3IaC2.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   7681 Aug 16 12:12 dist/assets/examQuestions-C4GtxV40.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   1731 Aug 16 12:12 dist/assets/glossaryService-DjW4qUed.js",
-      "-rw-r--r-- 1 kurosawa kurosawa 275967 Aug 16 12:12 dist/assets/index-CRUqw1Vg.js",
-      "-rw-r--r-- 1 kurosawa kurosawa  87034 Aug 16 12:12 dist/assets/index-DpAKEqX7.css",
-      "-rw-r--r-- 1 kurosawa kurosawa  80471 Aug 16 12:12 dist/assets/label-Drp5nPjc.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   9220 Aug 16 12:12 dist/assets/progressService-DEJk6_-U.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   8524 Aug 16 12:12 dist/assets/radix-CEDEVvdg.js",
-      "-rw-r--r-- 1 kurosawa kurosawa 176478 Aug 16 12:12 dist/assets/ui-D8nbQQpR.js",
-      "-rw-r--r-- 1 kurosawa kurosawa 160277 Aug 16 12:12 dist/assets/vendor-CsqhZn4E.js",
-      "-rw-r--r-- 1 kurosawa kurosawa   9668 Aug 16 12:12 dist/sw.js"
-    ]
-  }
+  "timestamp": "2025-08-16T12:37:56.431Z",
+  "buildTime": "2025-08-16T12:37:56.431Z",
+  "bundleSize": "1.20 MB",
+  "optimizations": [
+    "SPA routing configured",
+    "PWA offline fallback created",
+    "Security headers added",
+    "Jekyll disabled for GitHub Pages"
+  ]
 }
