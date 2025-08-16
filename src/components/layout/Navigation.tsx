@@ -45,6 +45,9 @@ const Navigation = () => {
     signOut,
     loading,
   } = useAuth()
+  
+  const profileButtonRef = React.useRef(null)
+  const profileMenuRef = React.useRef(null)
 
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = (pathname) => {
@@ -108,6 +111,37 @@ const Navigation = () => {
   ]
 
   const breadcrumbs = generateBreadcrumbs(location.pathname)
+  
+  // Handle keyboard navigation for dropdowns
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (isProfileOpen) {
+          setIsProfileOpen(false)
+          profileButtonRef.current?.focus()
+        }
+        if (isMobileMenuOpen) {
+          setIsMobileMenuOpen(false)
+        }
+      }
+    }
+    
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileOpen(false)
+      }
+    }
+    
+    if (isProfileOpen || isMobileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown)
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isProfileOpen, isMobileMenuOpen])
 
   return (
     <>
@@ -165,8 +199,15 @@ const Navigation = () => {
                   /* Authenticated User Menu */
                   <div className="relative">
                     <button
+                      ref={profileButtonRef}
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="ml-2 flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowDown' && !isProfileOpen) {
+                          e.preventDefault()
+                          setIsProfileOpen(true)
+                        }
+                      }}
+                      className="ml-2 flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       aria-label="ユーザーメニュー"
                       aria-expanded={isProfileOpen}
                       aria-haspopup="true"
@@ -191,7 +232,13 @@ const Navigation = () => {
                     </button>
 
                     {isProfileOpen && (
-                      <div className="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                      <div 
+                        ref={profileMenuRef}
+                        className="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                        role="menu"
+                        aria-orientation="vertical"
+                        tabIndex={-1}
+                      >
                         <div className="border-b p-4 dark:border-gray-700">
                           <div className="flex items-center gap-3">
                             {userAvatar ? (
@@ -227,7 +274,8 @@ const Navigation = () => {
                           <Link
                             to="/profile"
                             onClick={() => setIsProfileOpen(false)}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+                            role="menuitem"
                           >
                             <User className="h-4 w-4" />
                             プロフィール設定
@@ -238,7 +286,8 @@ const Navigation = () => {
                               toggleDarkMode()
                               setIsProfileOpen(false)
                             }}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+                            role="menuitem"
                           >
                             {settings.darkMode ? (
                               <Sun className="h-4 w-4" />
@@ -259,7 +308,8 @@ const Navigation = () => {
                                 await signOut()
                               }}
                               disabled={loading}
-                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 focus:outline-none focus:bg-red-50 dark:focus:bg-red-900/20"
+                              role="menuitem"
                             >
                               <LogOut className="h-4 w-4" />
                               {loading ? 'サインアウト中...' : 'サインアウト'}
@@ -274,14 +324,14 @@ const Navigation = () => {
                   <div className="flex items-center gap-2">
                     <Link
                       to="/auth?mode=login"
-                      className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                       <LogIn className="h-4 w-4" />
                       サインイン
                     </Link>
                     <Link
                       to="/auth?mode=register"
-                      className="flex items-center gap-2 rounded-md bg-blue-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                      className="flex items-center gap-2 rounded-md bg-blue-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                       <UserPlus className="h-4 w-4" />
                       新規登録
@@ -289,7 +339,7 @@ const Navigation = () => {
 
                     <button
                       onClick={toggleDarkMode}
-                      className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       aria-label={
                         settings.darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'
                       }
@@ -328,14 +378,14 @@ const Navigation = () => {
 
               <button
                 onClick={toggleDarkMode}
-                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label={settings.darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
               >
                 {settings.darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label={isMobileMenuOpen ? 'メニューを閉じる' : 'メニューを開く'}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-menu"
