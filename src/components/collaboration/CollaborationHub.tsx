@@ -57,7 +57,6 @@ const CollaborationHub = () => {
                   ? 'border-gray-600 bg-gray-700 text-white'
                   : 'border-gray-300 bg-white'
               }`}
-              autoFocus
             />
             <button
               onClick={handleSetUsername}
