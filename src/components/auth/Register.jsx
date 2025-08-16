@@ -196,7 +196,7 @@ const Register = () => {
             >
               <User className="h-8 w-8 text-white" />
             </motion.div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Create Account</h2>
+            <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Create Account</h1>
             <p className="mt-2 text-sm text-gray-600">Start your PMP certification journey today</p>
           </div>
 

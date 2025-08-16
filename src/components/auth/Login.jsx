@@ -144,7 +144,7 @@ const Login = () => {
             >
               <Lock className="h-8 w-8 text-white" />
             </motion.div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome Back</h2>
+            <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome Back</h1>
             <p className="mt-2 text-sm text-gray-600">
               Sign in to continue your PMP learning journey
             </p>

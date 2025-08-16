@@ -107,7 +107,7 @@ const PMBOK7Principles = () => {
     <div className={`p-6 ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
       {/* ヘッダー */}
       <div className="mb-8">
-        <h2 className="mb-3 text-3xl font-bold">PMBOK第7版 - 12のプロジェクトマネジメント原則</h2>
+        <h1 className="mb-3 text-3xl font-bold">PMBOK第7版 - 12のプロジェクトマネジメント原則</h1>
         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           プロジェクトマネジメントの指針となる基本原則
         </p>
