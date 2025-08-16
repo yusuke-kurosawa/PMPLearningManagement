@@ -24,15 +24,32 @@ jobs:
           echo "- 基本構文チェック: 完了"
           echo "✅ 最小限チェック成功"
 
-  # 軽量品質チェック（Repository Rulesets対応）
+  # 軽量品質チェック（緊急修正版）
   lightweight-quality:
     name: 🔄 軽量品質チェック
-    uses: ./.github/workflows/00-reusable-workflows.yml
+    runs-on: ubuntu-latest
     needs: minimal-check
-    with:
-      workflow-type: 'build'
-      node-version: '20'
-      skip-tests: true
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📥 チェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 🏗️ Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📦 依存関係インストール
+        run: |
+          npm ci --prefer-offline --no-audit
+          echo "✅ インストール完了"
+          
+      - name: 🏗️ 基本ビルドテスト
+        run: |
+          npm run build
+          echo "✅ ビルド成功"
 
   # 成功ステータス統合
   minimal-success:
