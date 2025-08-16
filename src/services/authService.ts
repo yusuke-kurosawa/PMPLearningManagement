@@ -632,7 +632,7 @@ class AuthService {
    * @returns 暗号化済み文字列
    * @private
    */
-  private async encryptSensitiveData(data: any): Promise<string> {
+  private async encryptSensitiveData(data: unknown): Promise<string> {
     try {
       // Web Crypto APIを使用した安全な暗号化
       const encoder = new TextEncoder()
@@ -678,7 +678,7 @@ class AuthService {
    * @returns 復号化済みデータ
    * @private
    */
-  private async decryptSensitiveData(encryptedData: string): Promise<any> {
+  private async decryptSensitiveData(encryptedData: string): Promise<unknown> {
     try {
       const keyData = sessionStorage.getItem('_ek')
       const ivData = sessionStorage.getItem('_iv')

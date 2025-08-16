@@ -122,7 +122,7 @@ const EnhancedProgressDashboard: React.FC = () => {
         title: 'Progress Exported',
         description: 'Your learning progress has been exported successfully.',
       })
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Export Failed',
         description: 'Failed to export progress data.',
@@ -140,7 +140,7 @@ const EnhancedProgressDashboard: React.FC = () => {
         title: 'Goal Created',
         description: 'Your new learning goal has been created.',
       })
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Failed to Create Goal',
         description: 'Could not create your learning goal.',

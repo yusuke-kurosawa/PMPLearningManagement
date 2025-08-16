@@ -279,6 +279,14 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const element = appRef.current
 
+    const handleTouchMove = (_e: TouchEvent) => {
+      // Clear long press timeout on move
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current)
+        touchTimeoutRef.current = null
+      }
+    }
+
     element.addEventListener('touchstart', handleTouchStart, { passive: false })
     element.addEventListener('touchmove', handleTouchMove, { passive: false })
     element.addEventListener('touchend', handleTouchEnd, { passive: false })
@@ -436,7 +444,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               },
             }))
           }
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.debug('Battery API not supported')
           }

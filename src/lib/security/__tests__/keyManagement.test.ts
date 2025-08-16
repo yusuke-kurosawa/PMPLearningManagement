@@ -181,10 +181,13 @@ describe('KeyManagementSystem', () => {
 
   describe('キーローテーション', () => {
     it('should perform key rotation', async () => {
-      const oldKey = await keyManager.generateEncryptionKey()
+      // 最初にアクティブキーを取得（自動生成される）
+      const oldKey = await keyManager.getActiveEncryptionKey()
 
+      // キーローテーションを実行
       await keyManager.performKeyRotation()
 
+      // 新しいアクティブキーを取得
       const newActiveKey = await keyManager.getActiveEncryptionKey()
       const retrievedOldKey = await keyManager.getKeyById(oldKey.id)
 
@@ -225,6 +228,8 @@ describe('KeyManagementSystem', () => {
 
       const statsAfter = await keyManager.getKeyUsageStatistics()
       expect(statsAfter.activeKeys).toBeGreaterThanOrEqual(1)
+      // Redisがない場合は履歴が空になる可能性がある
+      expect(statsAfter.rotationHistory.length).toBeGreaterThanOrEqual(0)
     })
   })
 

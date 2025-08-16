@@ -137,6 +137,31 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+// Mock ServiceWorkerRegistration globally
+if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {
+  (window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
+    scope = '/'
+    updateViaCache = 'none' as const
+    active = null
+    installing = null
+    waiting = null
+    onupdatefound = null
+    
+    async getNotifications() { return [] }
+    async showNotification() { return }
+    async update() { return }
+    async unregister() { return false }
+    
+    pushManager = {
+      getSubscription: vi.fn(),
+      subscribe: vi.fn(),
+      permissionState: vi.fn(),
+    }
+    
+    prototype = ServiceWorkerRegistration.prototype
+  }
+}
+
 // Mock scrollTo
 window.scrollTo = vi.fn()
 

@@ -305,7 +305,7 @@ export class SLOManager extends EventEmitter {
 
       // Check for violations
       await this.evaluateSLOCompliance(slo, currentValue)
-    } catch (error) {
+    } catch (_error) {
       Logger.error(`SLO evaluation error for ${slo.id}:`, error)
     }
   }
@@ -509,7 +509,7 @@ export class SLOManager extends EventEmitter {
           channel,
           severity: violation.severity,
         })
-      } catch (error) {
+      } catch (_error) {
         Logger.error(`Failed to send alert to ${channel}:`, error)
       }
     }

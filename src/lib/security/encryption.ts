@@ -470,7 +470,7 @@ export class PIIEncryption {
     for (const [key, value] of Object.entries(encryptedData)) {
       try {
         decrypted[key] = this.encryption.decrypt(value)
-      } catch (error) {
+      } catch (_error) {
         if (process.env.NODE_ENV === 'development') {
           logger.error(`PII復号化エラー (${key}):`, error)
         }
