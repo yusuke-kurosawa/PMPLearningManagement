@@ -227,7 +227,6 @@ const ResetPasswordForm: React.FC = () => {
                   handleInputChange()
                 }}
                 disabled={loading || isSubmitting}
-                autoFocus
               />
               <button
                 type="button"
