@@ -35,7 +35,7 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
   // コメントの投稿
   const handlePostComment = () => {
-    if (!newComment.trim()) return
+    if (!newComment.trim()) {return}
 
     collaborationService.addComment({
       targetId,
@@ -50,7 +50,7 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
   // 返信の投稿
   const handlePostReply = (commentId) => {
-    if (!newReply.trim()) return
+    if (!newReply.trim()) {return}
 
     collaborationService.addReply(commentId, {
       content: newReply,

@@ -397,7 +397,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleCreateThread = async () => {
-    if (!activeGroup) return
+    if (!activeGroup) {return}
 
     try {
       const thread = await api.collaboration.createDiscussion.mutate({
@@ -429,7 +429,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleCreateNote = async () => {
-    if (!activeGroup) return
+    if (!activeGroup) {return}
 
     try {
       const note = await api.collaboration.createSharedNote.mutate({
@@ -462,7 +462,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleReplyToThread = async () => {
-    if (!activeThread || !replyContent.trim()) return
+    if (!activeThread || !replyContent.trim()) {return}
 
     try {
       const reply = await api.collaboration.replyToDiscussion.mutate({

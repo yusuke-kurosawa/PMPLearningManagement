@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
 // Conditional logger import for ES modules
-let logger = { warn: console.warn }
+const logger = { warn: console.warn }
 
 // Mock Supabase for tests
 vi.mock('../lib/supabase', () => ({
@@ -28,6 +28,27 @@ vi.mock('../lib/supabase', () => ({
     }))
   }
 }))
+
+// Mock Nock to prevent conflicts with MSW
+vi.mock('nock', () => {
+  const mockNock = () => ({
+    get: vi.fn().mockReturnThis(),
+    post: vi.fn().mockReturnThis(),
+    put: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    reply: vi.fn().mockReturnThis(),
+    persist: vi.fn().mockReturnThis(),
+    scope: vi.fn().mockReturnThis(),
+    query: vi.fn().mockReturnThis(),
+    delay: vi.fn().mockReturnThis(),
+    times: vi.fn().mockReturnThis(),
+    replyWithError: vi.fn().mockReturnThis(),
+  })
+  mockNock.cleanAll = vi.fn()
+  mockNock.restore = vi.fn()
+  mockNock.isActive = vi.fn().mockReturnValue(false)
+  return { default: mockNock }
+})
 
 // Mock environment variables for tests
 if (typeof process !== 'undefined' && process.env) {

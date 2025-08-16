@@ -41,7 +41,7 @@ const LearningProgressDashboard = () => {
   }
 
   const formatDate = (dateString) => {
-    if (!dateString) return '未開始'
+    if (!dateString) {return '未開始'}
     const date = new Date(dateString)
     return date.toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -53,18 +53,18 @@ const LearningProgressDashboard = () => {
   }
 
   const getProgressColor = (percentage) => {
-    if (percentage >= 80) return 'text-green-600 bg-green-100'
-    if (percentage >= 60) return 'text-blue-600 bg-blue-100'
-    if (percentage >= 40) return 'text-yellow-600 bg-yellow-100'
-    if (percentage >= 20) return 'text-orange-600 bg-orange-100'
+    if (percentage >= 80) {return 'text-green-600 bg-green-100'}
+    if (percentage >= 60) {return 'text-blue-600 bg-blue-100'}
+    if (percentage >= 40) {return 'text-yellow-600 bg-yellow-100'}
+    if (percentage >= 20) {return 'text-orange-600 bg-orange-100'}
     return 'text-gray-600 bg-gray-100'
   }
 
   const getProgressBarColor = (percentage) => {
-    if (percentage >= 80) return 'bg-green-600'
-    if (percentage >= 60) return 'bg-blue-600'
-    if (percentage >= 40) return 'bg-yellow-600'
-    if (percentage >= 20) return 'bg-orange-600'
+    if (percentage >= 80) {return 'bg-green-600'}
+    if (percentage >= 60) {return 'bg-blue-600'}
+    if (percentage >= 40) {return 'bg-yellow-600'}
+    if (percentage >= 20) {return 'bg-orange-600'}
     return 'bg-gray-400'
   }
 

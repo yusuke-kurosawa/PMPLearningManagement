@@ -188,7 +188,7 @@ const EnhancedProgressDashboard: React.FC = () => {
           acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 }
         }
         acc[process.knowledgeArea].total += 1
-        if (process.masteryLevel === 'mastered') acc[process.knowledgeArea].mastered += 1
+        if (process.masteryLevel === 'mastered') {acc[process.knowledgeArea].mastered += 1}
         acc[process.knowledgeArea].studyTime += process.studyTime
         return acc
       },

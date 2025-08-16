@@ -83,7 +83,7 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
     onDoubleTap: handleFlip,
   })
 
-  if (!currentCard) return null
+  if (!currentCard) {return null}
 
   return (
     <div className="mx-auto flex h-full max-w-lg flex-col px-4 py-6">

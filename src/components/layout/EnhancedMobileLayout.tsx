@@ -22,7 +22,7 @@ const EnhancedMobileLayout = ({ children }) => {
   }
 
   const handleTouchMove = (e) => {
-    if (window.scrollY > 0 || startY === 0) return
+    if (window.scrollY > 0 || startY === 0) {return}
 
     const currentY = e.touches[0].clientY
     const diff = currentY - startY
@@ -83,7 +83,7 @@ const EnhancedMobileLayout = ({ children }) => {
   }
 
   const handleSwipeEnd = (e) => {
-    if (!swipeStart) return
+    if (!swipeStart) {return}
 
     const swipeEnd = {
       x: e.changedTouches[0].clientX,
@@ -143,7 +143,7 @@ const EnhancedMobileLayout = ({ children }) => {
 
   // Render pull-to-refresh indicator
   const renderPullToRefreshIndicator = () => {
-    if (pullDistance === 0) return null
+    if (pullDistance === 0) {return null}
 
     const progress = Math.min(pullDistance / PULL_THRESHOLD, 1)
     const rotation = progress * 360

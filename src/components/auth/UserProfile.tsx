@@ -168,16 +168,16 @@ const UserProfile = () => {
   }
 
   const getPasswordStrengthColor = () => {
-    if (passwordStrength < 30) return 'bg-red-500'
-    if (passwordStrength < 60) return 'bg-yellow-500'
-    if (passwordStrength < 80) return 'bg-blue-500'
+    if (passwordStrength < 30) {return 'bg-red-500'}
+    if (passwordStrength < 60) {return 'bg-yellow-500'}
+    if (passwordStrength < 80) {return 'bg-blue-500'}
     return 'bg-green-500'
   }
 
   const getPasswordStrengthText = () => {
-    if (passwordStrength < 30) return 'Weak'
-    if (passwordStrength < 60) return 'Fair'
-    if (passwordStrength < 80) return 'Good'
+    if (passwordStrength < 30) {return 'Weak'}
+    if (passwordStrength < 60) {return 'Fair'}
+    if (passwordStrength < 80) {return 'Good'}
     return 'Strong'
   }
 

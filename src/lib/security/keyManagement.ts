@@ -443,7 +443,7 @@ export class KeyManagementSystem {
    * ストレージからアクティブキーを検索
    */
   private async findActiveKeyFromStorage(purpose: string): Promise<KeyVersion | null> {
-    if (!this.redis) return null
+    if (!this.redis) {return null}
 
     try {
       const keyIds = await this.redis.zrevrange('keys:by_created', 0, 10)

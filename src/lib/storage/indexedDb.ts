@@ -403,7 +403,7 @@ export class FallbackStorage {
   async getItem<T>(key: string): Promise<T | null> {
     try {
       const item = localStorage.getItem(key)
-      if (!item) return null
+      if (!item) {return null}
 
       const parsed = JSON.parse(item)
       return parsed.value
@@ -423,7 +423,7 @@ export class FallbackStorage {
     const keys: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (key) keys.push(key)
+      if (key) {keys.push(key)}
     }
     return keys
   }

@@ -53,7 +53,7 @@ export function MobileNavigation() {
   const { theme, setTheme } = useTheme()
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === href
+    if (href === '/') {return pathname === href}
     return pathname.startsWith(href)
   }
 

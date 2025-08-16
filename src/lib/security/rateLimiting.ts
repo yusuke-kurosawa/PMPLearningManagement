@@ -525,8 +525,8 @@ export class DDoSProtection {
       const failedAttempts = parseInt(ipReputationData[0] || '0')
       const successRate = parseFloat(ipReputationData[1] || '1.0')
 
-      if (failedAttempts > 10) score += 25
-      if (successRate < 0.5) score += 30
+      if (failedAttempts > 10) {score += 25}
+      if (successRate < 0.5) {score += 30}
 
       // 新しいIPアドレス（初回接続）
       if (!ipReputationData[2]) {

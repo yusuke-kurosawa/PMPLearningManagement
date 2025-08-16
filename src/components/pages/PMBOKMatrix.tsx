@@ -1063,7 +1063,7 @@ const PMBOKMatrix = memo(() => {
   }, [])
 
   const filteredProcesses = useMemo(() => {
-    if (!searchQuery) return processes
+    if (!searchQuery) {return processes}
 
     const filtered = {}
     const query = searchQuery.toLowerCase()
@@ -1086,13 +1086,13 @@ const PMBOKMatrix = memo(() => {
 
   const getProcessCount = (areaId) => {
     const areaProcesses = filteredProcesses[areaId]
-    if (!areaProcesses) return 0
+    if (!areaProcesses) {return 0}
     return Object.values(areaProcesses).reduce((sum, group) => sum + group.length, 0)
   }
 
   const getAreaProgress = (areaId) => {
     const areaProcesses = processes[areaId]
-    if (!areaProcesses || !progress?.processes) return { completed: 0, total: 0, percentage: 0 }
+    if (!areaProcesses || !progress?.processes) {return { completed: 0, total: 0, percentage: 0 }}
 
     let completed = 0
     let total = 0
@@ -1167,7 +1167,7 @@ const PMBOKMatrix = memo(() => {
                 const hasFilteredProcesses = processCount > 0
                 const areaProgress = getAreaProgress(area.id)
 
-                if (!hasFilteredProcesses && searchQuery) return null
+                if (!hasFilteredProcesses && searchQuery) {return null}
 
                 return (
                   <React.Fragment key={area.id}>
@@ -1259,7 +1259,7 @@ const PMBOKMatrix = memo(() => {
                           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                             {processGroups.map((group) => {
                               const groupProcesses = filteredProcesses[area.id][group]
-                              if (!groupProcesses || groupProcesses.length === 0) return null
+                              if (!groupProcesses || groupProcesses.length === 0) {return null}
 
                               return (
                                 <div key={group} className="space-y-1.5 sm:space-y-2">
@@ -1329,7 +1329,7 @@ const PMBOKMatrix = memo(() => {
                             (() => {
                               // 選択されたプロセスが現在の知識エリアに属しているかチェック
                               const currentAreaProcesses = processes[area.id]
-                              if (!currentAreaProcesses) return false
+                              if (!currentAreaProcesses) {return false}
 
                               const isInCurrentArea = Object.values(currentAreaProcesses).some(
                                 (groupProcesses) =>

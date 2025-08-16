@@ -35,16 +35,16 @@ const ExamResults = () => {
   // }
 
   const getScoreColor = (percentage) => {
-    if (percentage >= 80) return 'text-green-600'
-    if (percentage >= 61) return 'text-blue-600'
-    if (percentage >= 40) return 'text-yellow-600'
+    if (percentage >= 80) {return 'text-green-600'}
+    if (percentage >= 61) {return 'text-blue-600'}
+    if (percentage >= 40) {return 'text-yellow-600'}
     return 'text-red-600'
   }
 
   const getScoreBgColor = (percentage) => {
-    if (percentage >= 80) return 'bg-green-100'
-    if (percentage >= 61) return 'bg-blue-100'
-    if (percentage >= 40) return 'bg-yellow-100'
+    if (percentage >= 80) {return 'bg-green-100'}
+    if (percentage >= 61) {return 'bg-blue-100'}
+    if (percentage >= 40) {return 'bg-yellow-100'}
     return 'bg-red-100'
   }
 
@@ -142,7 +142,7 @@ const ExamResults = () => {
           <div className="space-y-4">
             {Object.entries(examDomains).map(([key, domain]) => {
               const domainScore = results.domainScores[key]
-              if (!domainScore || domainScore.total === 0) return null
+              if (!domainScore || domainScore.total === 0) {return null}
 
               return (
                 <div key={key}>

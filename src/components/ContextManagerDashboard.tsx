@@ -27,7 +27,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
 
   // Auto-refresh data
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {return}
 
     const updateData = () => {
       setStats(getStats())
@@ -54,13 +54,6 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const _formatBytes = (bytes) => {
-    if (!bytes) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
 
   const formatPercentage = (value) => {
     return (value * 100).toFixed(1) + '%'
@@ -78,7 +71,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     alert('Diagnostics completed. Check console for details.')
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">

@@ -313,7 +313,7 @@ export class GeoIPService {
   private async getCachedLocation(ip: string): Promise<GeoLocation | null> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return null
+      if (!this.redis) {return null}
 
       const cacheKey = `${this.cachePrefix}:${ip}`
       const cached = await this.redis.get(cacheKey)
@@ -337,7 +337,7 @@ export class GeoIPService {
   private async cacheLocation(ip: string, location: GeoLocation): Promise<void> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       const cacheKey = `${this.cachePrefix}:${ip}`
       await this.redis.setex(cacheKey, this.cacheTTL, JSON.stringify(location))
@@ -354,13 +354,13 @@ export class GeoIPService {
   private calculateThreatScore(securityData: unknown): number {
     let score = 0
 
-    if (securityData?.is_proxy || securityData?.proxy) score += 30
-    if (securityData?.is_vpn || securityData?.vpn) score += 20
-    if (securityData?.is_tor || securityData?.tor) score += 50
-    if (securityData?.is_hosting || securityData?.hosting) score += 15
-    if (securityData?.is_anonymous_proxy) score += 40
-    if (securityData?.threat_level === 'high') score += 60
-    if (securityData?.threat_level === 'medium') score += 30
+    if (securityData?.is_proxy || securityData?.proxy) {score += 30}
+    if (securityData?.is_vpn || securityData?.vpn) {score += 20}
+    if (securityData?.is_tor || securityData?.tor) {score += 50}
+    if (securityData?.is_hosting || securityData?.hosting) {score += 15}
+    if (securityData?.is_anonymous_proxy) {score += 40}
+    if (securityData?.threat_level === 'high') {score += 60}
+    if (securityData?.threat_level === 'medium') {score += 30}
 
     return Math.min(100, score)
   }
@@ -379,10 +379,10 @@ export class GeoIPService {
    * プライベートIP判定
    */
   private isPrivateIP(ip: string): boolean {
-    if (ip === '127.0.0.1' || ip === '::1') return true
-    if (ip.startsWith('192.168.')) return true
-    if (ip.startsWith('10.')) return true
-    if (ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) return true
+    if (ip === '127.0.0.1' || ip === '::1') {return true}
+    if (ip.startsWith('192.168.')) {return true}
+    if (ip.startsWith('10.')) {return true}
+    if (ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {return true}
     return false
   }
 
@@ -627,7 +627,7 @@ export class GeoIPService {
     timeWindow: number
   ): Promise<Array<GeoLocation & { timestamp: number }>> {
     try {
-      if (!this.redis) return []
+      if (!this.redis) {return []}
 
       const key = `user_location_history:${userId}`
       const cutoff = Date.now() - timeWindow
@@ -662,7 +662,7 @@ export class GeoIPService {
     location: GeoLocation & { timestamp: number }
   ): Promise<void> {
     try {
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       const key = `user_location_history:${userId}`
       const locationData = JSON.stringify(location)
@@ -796,7 +796,7 @@ export class GeoIPService {
   async clearCache(ip?: string): Promise<void> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       if (ip) {
         const cacheKey = `${this.cachePrefix}:${ip}`

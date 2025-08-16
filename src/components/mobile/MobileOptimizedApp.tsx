@@ -83,6 +83,7 @@ import { useToast } from '../../hooks/use-toast'
 // import { Tabs } from '../ui/tabs' // TODO: Will be used in future
 import { Switch } from '../ui/switch'
 // import { Progress } from '../ui/progress' // TODO: Will be used in future
+import SkipLinks from '../shared/SkipLinks'
 
 interface PWACapabilities {
   isInstalled: boolean
@@ -274,7 +275,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const registerTouchGestures = () => {
-    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) return
+    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) {return}
 
     const element = appRef.current
 
@@ -323,7 +324,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   //   }
 
   const handleTouchEnd = (e: TouchEvent) => {
-    if (!touchStart) return
+    if (!touchStart) {return}
 
     // Clear long press timeout
     if (touchTimeoutRef.current) {
@@ -481,7 +482,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   const handleInstallApp = async () => {
-    if (!installPromptEvent) return
+    if (!installPromptEvent) {return}
 
     try {
       const result = await installPromptEvent.prompt()
@@ -551,8 +552,11 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <div ref={appRef} className={`min-h-screen bg-gray-50 ${isDarkMode ? 'dark' : ''}`}>
+      {/* Skip Links for Accessibility */}
+      <SkipLinks />
+
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
+      <header id="navigation" className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -700,7 +704,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       </header>
 
       {/* Main Content */}
-      <main className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
+      <main id="main-content" className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
 
       {/* Mobile Bottom Navigation */}
       {deviceInfo.isMobile && (

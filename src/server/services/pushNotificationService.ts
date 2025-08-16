@@ -510,11 +510,11 @@ export class PushNotificationService {
   }> {
     try {
       const where: unknown = {}
-      if (userId) where.userId = userId
+      if (userId) {where.userId = userId}
       if (startDate || endDate) {
         where.createdAt = {}
-        if (startDate) where.createdAt.gte = startDate
-        if (endDate) where.createdAt.lte = endDate
+        if (startDate) {where.createdAt.gte = startDate}
+        if (endDate) {where.createdAt.lte = endDate}
       }
 
       const [historyStats, deviceStats] = await Promise.all([

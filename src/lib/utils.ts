@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
  * Format date to Japanese locale string
  */
 export function formatDate(date: Date | string | null | undefined): string {
-  if (!date) return ''
+  if (!date) {return ''}
 
   const d = typeof date === 'string' ? new Date(date) : date
 
@@ -24,7 +24,7 @@ export function formatDate(date: Date | string | null | undefined): string {
  * Format date and time to Japanese locale string
  */
 export function formatDateTime(date: Date | string | null | undefined): string {
-  if (!date) return ''
+  if (!date) {return ''}
 
   const d = typeof date === 'string' ? new Date(date) : date
 
@@ -115,7 +115,7 @@ export function generateId(prefix = ''): string {
  * Truncate text with ellipsis
  */
 export function truncate(text: string, length: number): string {
-  if (text.length <= length) return text
+  if (text.length <= length) {return text}
   return text.substring(0, length) + '...'
 }
 
@@ -134,10 +134,10 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
  * Check if value is empty
  */
 export function isEmpty(value: unknown): boolean {
-  if (value == null) return true
-  if (typeof value === 'string') return value.trim().length === 0
-  if (Array.isArray(value)) return value.length === 0
-  if (typeof value === 'object') return Object.keys(value).length === 0
+  if (value == null) {return true}
+  if (typeof value === 'string') {return value.trim().length === 0}
+  if (Array.isArray(value)) {return value.length === 0}
+  if (typeof value === 'object') {return Object.keys(value).length === 0}
   return false
 }
 
@@ -148,7 +148,7 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
   return array.reduce(
     (result, item) => {
       const group = String(item[key])
-      if (!result[group]) result[group] = []
+      if (!result[group]) {result[group] = []}
       result[group].push(item)
       return result
     },
@@ -162,8 +162,8 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
 export function sortBy<T>(array: T[], keys: (keyof T)[]): T[] {
   return [...array].sort((a, b) => {
     for (const key of keys) {
-      if (a[key] < b[key]) return -1
-      if (a[key] > b[key]) return 1
+      if (a[key] < b[key]) {return -1}
+      if (a[key] > b[key]) {return 1}
     }
     return 0
   })

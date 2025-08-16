@@ -249,7 +249,7 @@ class AuditLogger {
    * @returns Promise<void>
    */
   async log(event: AuditEvent): Promise<void> {
-    if (!this.isEnabled) return
+    if (!this.isEnabled) {return}
 
     try {
       const auditEntry = this.createAuditEntry(event)
@@ -317,7 +317,7 @@ class AuditLogger {
    * @private
    */
   private async flush(): Promise<void> {
-    if (this.queue.length === 0) return
+    if (this.queue.length === 0) {return}
 
     const batch = [...this.queue]
     this.queue = []
@@ -379,9 +379,9 @@ class AuditLogger {
 
     const errorActions = [AuditEventTypes.INVALID_TOKEN]
 
-    if (criticalActions.includes(action)) return AuditSeverity.CRITICAL
-    if (warningActions.includes(action)) return AuditSeverity.WARNING
-    if (errorActions.includes(action)) return AuditSeverity.ERROR
+    if (criticalActions.includes(action)) {return AuditSeverity.CRITICAL}
+    if (warningActions.includes(action)) {return AuditSeverity.WARNING}
+    if (errorActions.includes(action)) {return AuditSeverity.ERROR}
 
     return AuditSeverity.INFO
   }
@@ -455,18 +455,18 @@ class AuditLogger {
 
     // Detect browser
     let browser = 'Unknown'
-    if (userAgent.includes('Firefox')) browser = 'Firefox'
-    else if (userAgent.includes('Chrome')) browser = 'Chrome'
-    else if (userAgent.includes('Safari')) browser = 'Safari'
-    else if (userAgent.includes('Edge')) browser = 'Edge'
+    if (userAgent.includes('Firefox')) {browser = 'Firefox'}
+    else if (userAgent.includes('Chrome')) {browser = 'Chrome'}
+    else if (userAgent.includes('Safari')) {browser = 'Safari'}
+    else if (userAgent.includes('Edge')) {browser = 'Edge'}
 
     // Detect OS
     let os = 'Unknown'
-    if (platform.includes('Win')) os = 'Windows'
-    else if (platform.includes('Mac')) os = 'macOS'
-    else if (platform.includes('Linux')) os = 'Linux'
-    else if (userAgent.includes('Android')) os = 'Android'
-    else if (userAgent.includes('iOS')) os = 'iOS'
+    if (platform.includes('Win')) {os = 'Windows'}
+    else if (platform.includes('Mac')) {os = 'macOS'}
+    else if (platform.includes('Linux')) {os = 'Linux'}
+    else if (userAgent.includes('Android')) {os = 'Android'}
+    else if (userAgent.includes('iOS')) {os = 'iOS'}
 
     // Detect device type
     let deviceType = 'Desktop'
@@ -526,7 +526,7 @@ class AuditLogger {
 
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {throw error}
 
       return data
     } catch (error) {
