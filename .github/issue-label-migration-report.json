@@ -1,0 +1,506 @@
+{
+  "summary": {
+    "timestamp": "2025-08-16T06:23:33.701Z",
+    "statistics": {
+      "total": 88,
+      "labeled": 51,
+      "unlabeled": 37,
+      "updated": 37,
+      "errors": 0
+    },
+    "migrationRate": 42
+  },
+  "migrations": [
+    {
+      "issue": 38,
+      "title": "[Tech Debt] TypeScript Migration - Comprehensive Type Safety Implementation",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:バグ修正",
+        "優先度:中",
+        "状態:調査中",
+        "領域:フロントエンド",
+        "規模:XL（複数週間）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 37,
+      "title": "[Feature] Continuous Learning Dashboard - Post-Certification Value Tracking",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:調査中",
+        "領域:バックエンド",
+        "規模:XL（複数週間）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 36,
+      "title": "[Feature] PMBOK 7th Edition Support - Principles-Based Framework",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:調査中",
+        "領域:パフォーマンス",
+        "規模:XL（複数週間）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 35,
+      "title": "[Feature] Career Services Integration - Job Matching & Salary Tools",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:調査中",
+        "領域:バックエンド",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 34,
+      "title": "[UX] Advanced User Settings and Personalization Options",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:改善",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:学習機能",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 33,
+      "title": "[UX] Intelligent Notification System with Preferences",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 32,
+      "title": "[UX] Dark Mode Theme Implementation with System Preference",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:パフォーマンス",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 31,
+      "title": "[UX] Comprehensive Accessibility Improvements (WCAG 2.1 AA)",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:学習機能",
+        "規模:XL（複数週間）",
+        "PM:品質管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 30,
+      "title": "[UX] Enhanced Onboarding Experience with Interactive Tutorial",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:フロントエンド",
+        "規模:M（1-2日）",
+        "PM:品質管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 29,
+      "title": "[Feature] Customizable Learning Dashboard with Widgets",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 28,
+      "title": "[Feature] Multi-language Support and Internationalization",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:フロントエンド",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 27,
+      "title": "[Feature] Native Mobile App Development (iOS/Android)",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 26,
+      "title": "[Feature] Complete Offline Mode with Background Sync",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 25,
+      "title": "[Feature] Customizable Learning Dashboard with Widgets",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 24,
+      "title": "[Performance] Database Query Optimization and Indexing",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:XL（複数週間）",
+        "PM:品質管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 23,
+      "title": "[Performance] Bundle Size Reduction and Optimization",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:リファクタリング",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:モバイル",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 22,
+      "title": "[Performance] Comprehensive Image Optimization Pipeline",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:パフォーマンス",
+        "規模:XL（複数週間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 21,
+      "title": "[Performance] Initial Load Time Optimization (<1s target)",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:モバイル",
+        "規模:XL（複数週間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 20,
+      "title": "[AI] Intelligent Study Assistant Chatbot Integration",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 19,
+      "title": "[AI] Predictive Exam Score Modeling and Success Probability",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:学習機能",
+        "規模:L（1週間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 18,
+      "title": "[AI] Intelligent Weakness Analysis and Improvement System",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:調査中",
+        "領域:バックエンド",
+        "規模:XL（複数週間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 17,
+      "title": "[AI] Personalized Content Recommendations Engine",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:XS（1-2時間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 16,
+      "title": "[AI] Adaptive Learning Path Generation with Machine Learning",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:XS（1-2時間）",
+        "PM:品質管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 15,
+      "title": "[Security] Fine-grained Access Control and RBAC Enhancement",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:改善",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:バックエンド",
+        "規模:M（1-2日）",
+        "PM:リスク管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 13,
+      "title": "[Security] Comprehensive Audit Logging System",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:セキュリティ",
+        "規模:XL（複数週間）",
+        "PM:リスク管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 12,
+      "title": "[Security] Extended Data Encryption Implementation",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:改善",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:セキュリティ",
+        "規模:M（1-2日）",
+        "PM:リスク管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 11,
+      "title": "[Security] Implement Two-Factor Authentication (2FA)",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:セキュリティ",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 10,
+      "title": "コラボレーション機能の追加",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:セキュリティ",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 9,
+      "title": "PWAオフラインサポートの実装",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "状態:準備完了",
+        "領域:モバイル",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 8,
+      "title": "ダークモードとカスタマイズ機能",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 7,
+      "title": "スマート検索機能の実装",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 6,
+      "title": "視覚化オプションの強化",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:パフォーマンス",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 5,
+      "title": "PMBOK第7版への対応",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:パフォーマンス",
+        "規模:M（1-2日）",
+        "PM:統合管理"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 4,
+      "title": "データのインポート/エクスポート機能",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:バグ修正",
+        "優先度:中",
+        "領域:バックエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 3,
+      "title": "PMP模擬試験機能の実装",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:学習機能",
+        "規模:XS（1-2時間）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 2,
+      "title": "フラッシュカードによるインタラクティブ学習モード",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:フロントエンド",
+        "規模:M（1-2日）"
+      ],
+      "status": "success"
+    },
+    {
+      "issue": 1,
+      "title": "学習進捗トラッキング機能の実装",
+      "previousLabels": [],
+      "newLabels": [
+        "種別:機能追加",
+        "優先度:中",
+        "領域:フロントエンド",
+        "規模:XS（1-2時間）"
+      ],
+      "status": "success"
+    }
+  ],
+  "recommendations": [
+    "20%以上のIssueにラベルが設定されていませんでした。継続的なラベル付けプロセスの検討をお勧めします。"
+  ]
+}

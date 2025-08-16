@@ -1,23 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "paths": {
       "@/*": ["./src/*"],
       "@/components/*": ["./src/components/*"],
@@ -29,8 +26,10 @@
       "@/utils/*": ["./src/utils/*"],
       "@/server/*": ["./src/server/*"],
       "@/data/*": ["./src/data/*"],
-      "@/services/*": ["./src/services/*"]
+      "@/services/*": ["./src/services/*"],
+      "@/contexts/*": ["./src/contexts/*"]
     },
+    "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -42,17 +41,30 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "useDefineForClassFields": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
     "src/**/*",
-    "app/**/*",
-    "prisma/**/*",
-    "config/**/*"
+    "vite.config.mjs",
+    "vitest.config.ts",
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "stryker.config.mjs",
+    "e2e/**/*",
+    "scripts/**/*"
   ],
-  "exclude": ["node_modules", "dist", ".next", "tests/helpers/index.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "test-results",
+    "playwright-report",
+    "migrations",
+    "supabase",
+    "docs/archive"
+  ]
 }

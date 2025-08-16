@@ -1,5 +1,19 @@
 {
-  "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
-  "*.{json,md,css,scss}": ["prettier --write"],
-  "*.{js,jsx,ts,tsx}": ["bash -c 'npm run typecheck'"]
+  "*.{ts,tsx,js,jsx}": [
+    "eslint --fix",
+    "prettier --write",
+    "git add"
+  ],
+  "*.{json,md,yml,yaml}": [
+    "prettier --write",
+    "git add"
+  ],
+  "*.{css,scss}": [
+    "prettier --write",
+    "git add"
+  ],
+  "package.json": [
+    "npx sort-package-json",
+    "git add"
+  ]
 }

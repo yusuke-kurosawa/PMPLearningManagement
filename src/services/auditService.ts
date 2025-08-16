@@ -392,7 +392,24 @@ class AuditLogger {
    * @private
    */
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // 暗号学的に安全なランダム値を生成
+    const timestamp = Date.now()
+    const randomArray = new Uint8Array(8)
+    
+    try {
+      // Web Crypto APIを使用した安全な乱数生成
+      window.crypto.getRandomValues(randomArray)
+      const randomString = Array.from(randomArray, byte => byte.toString(36)).join('')
+      return `${timestamp}-${randomString}`
+    } catch (error) {
+      // フォールバック: より強化されたMath.random()ベース
+      console.warn('Crypto API利用不可。フォールバック乱数生成を使用:', error)
+      const fallbackRandom = Array.from(
+        { length: 12 }, 
+        () => Math.random().toString(36)[2]
+      ).join('')
+      return `${timestamp}-${fallbackRandom}`
+    }
   }
 
   /**

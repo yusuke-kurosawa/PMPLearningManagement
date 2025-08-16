@@ -1,0 +1,55 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true,
+  "eslint.workingDirectories": ["./"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.ts": "typescript"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/test-results": true,
+    "**/playwright-report": true,
+    "**/.git": true,
+    "**/.vscode": false
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/.git": true,
+    "**/*.tsbuildinfo": true
+  },
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "typescript.inlayHints.variableTypes.enabled": false,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "git.ignoreLimitWarning": true,
+  "git.autofetch": true,
+  "extensions.ignoreRecommendations": false
+}

@@ -1,9 +1,12 @@
 # PMP学習管理システム
 
-[![CI/CD Pipeline](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/deploy.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/deploy.yml)
-[![IDD Compliance](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/idd-compliance.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/idd-compliance.yml)
+[![CI/CD Pipeline](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/04-deploy.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/04-deploy.yml)
+[![IDD Compliance](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/05-idd-compliance.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/05-idd-compliance.yml)
+[![Security Scan](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/03-security-scan.yml/badge.svg)](https://github.com/yusuke-kurosawa/PMPLearningManagement/actions/workflows/03-security-scan.yml)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-green?logo=github)](https://yusuke-kurosawa.github.io/PMPLearningManagement/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-20.11.0-green?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)](https://www.typescriptlang.org/)
 
 PMBOK（プロジェクトマネジメント知識体系）第6版・第7版の学習用包括的PWA対応Webアプリケーション
 
@@ -71,8 +74,8 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 
 ### 前提条件
 
-- Node.js 18以上
-- npm 8以上
+- Node.js 20.19.0以上（推奨）
+- npm 9以上
 
 ### インストール
 

@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+coverage/
+test-results/
+playwright-report/
+
+# Generated files
+*.tsbuildinfo
+.next/
+.cache/
+
+# Configuration files
+*.config.js
+*.config.mjs
+*.config.ts
+*.lock
+
+# Static assets
+public/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Data files
+*.json
+*.csv
+*.sql
+
+# Documentation
+docs/archive/
+*.md
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env*
+
+# Legacy files
+bg.png
+results.xml
+test-results.xml
+eslint-report.json
