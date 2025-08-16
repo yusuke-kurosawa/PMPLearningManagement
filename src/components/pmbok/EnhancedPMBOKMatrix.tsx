@@ -216,7 +216,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           process.outputs.some((output) => output.name.toLowerCase().includes(query)) ||
           process.toolsAndTechniques.some((tool) => tool.name.toLowerCase().includes(query))
 
-        if (!matchesSearch) return false
+        if (!matchesSearch) {return false}
       }
 
       // Knowledge area filter
@@ -1205,7 +1205,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                           {selectedProcess.relatedProcesses.map((relatedId) => {
                             const relatedProcess = processes.find((p) => p.id === relatedId)
-                            if (!relatedProcess) return null
+                            if (!relatedProcess) {return null}
 
                             return (
                               <div

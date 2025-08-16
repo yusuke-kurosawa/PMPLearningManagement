@@ -315,14 +315,14 @@ const MockExam = () => {
                 </button>
               )
             })}
-          </div>
+          </fieldset>
 
           {currentQuestion.type === questionTypes.MULTIPLE_CHOICE && (
             <p className="mt-4 text-sm text-gray-600">
               ※ 複数選択問題です。該当するものをすべて選択してください。
             </p>
           )}
-        </div>
+        </section>
 
         {/* ナビゲーションボタン */}
         <div className="flex items-center justify-between">

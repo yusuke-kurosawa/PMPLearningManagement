@@ -733,7 +733,7 @@ export class CSRFProtection {
    * Rotate active tokens for security
    */
   private async rotateActiveTokens(): Promise<void> {
-    if (!this.redis) return
+    if (!this.redis) {return}
 
     try {
       // Get all active user token keys

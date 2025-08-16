@@ -175,7 +175,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       endStudySession: async (effectiveness = 'medium', notes) => {
         const currentSession = get().currentSession
-        if (!currentSession) return
+        if (!currentSession) {return}
 
         const endTime = new Date()
         const duration = Math.round(
@@ -273,7 +273,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       recordQuizScore: async (processId: string, score: number) => {
         set((state) => {
-          if (!state.processProgress[processId]) return
+          if (!state.processProgress[processId]) {return}
 
           state.processProgress[processId].quizScores.push(score)
           // Keep only last 10 scores
@@ -575,7 +575,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       getOverallProgress: () => {
         const processes = Object.values(get().processProgress)
-        if (processes.length === 0) return 0
+        if (processes.length === 0) {return 0}
 
         const masteryLevels = {
           not_started: 0,
@@ -663,7 +663,7 @@ export const useProgressStore = create<ProgressStore>()(
 
           // Sync with server
           await get().syncWithServer()
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = 'Failed to import progress data'
           })

@@ -89,7 +89,7 @@ const DataManagement = () => {
   // ファイル選択処理
   const handleFileSelect = async (event) => {
     const file = event.target.files[0]
-    if (!file) return
+    if (!file) {return}
 
     setImportFile(file)
     setMessage(null)
@@ -134,7 +134,7 @@ const DataManagement = () => {
 
   // インポート実行
   const handleImport = async () => {
-    if (!importPreview) return
+    if (!importPreview) {return}
 
     setLoading(true)
     setMessage(null)

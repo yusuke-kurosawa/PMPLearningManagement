@@ -369,11 +369,11 @@ export const useExamStore = create<ExamStore>()(
 
       getQuestionsByDomain: () => {
         const session = get().currentSession
-        if (!session) return {}
+        if (!session) {return {}}
 
         return session.questions.reduce(
           (acc, question) => {
-            if (!acc[question.domain]) acc[question.domain] = []
+            if (!acc[question.domain]) {acc[question.domain] = []}
             acc[question.domain].push(question)
             return acc
           },
@@ -383,19 +383,19 @@ export const useExamStore = create<ExamStore>()(
 
       getCurrentQuestion: () => {
         const session = get().currentSession
-        if (!session) return null
+        if (!session) {return null}
         return session.questions[session.currentQuestionIndex] || null
       },
 
       canNavigateNext: () => {
         const session = get().currentSession
-        if (!session) return false
+        if (!session) {return false}
         return session.currentQuestionIndex < session.questions.length - 1
       },
 
       canNavigatePrevious: () => {
         const session = get().currentSession
-        if (!session) return false
+        if (!session) {return false}
         return session.currentQuestionIndex > 0
       },
 

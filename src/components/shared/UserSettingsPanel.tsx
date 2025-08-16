@@ -118,7 +118,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
             localStorage.setItem('searchHistory', JSON.stringify(userData.searchHistory))
           }
           alert('データのインポートが完了しました。')
-        } catch (error) {
+        } catch (_error) {
           alert('ファイルの形式が正しくありません。')
         }
       }
@@ -126,7 +126,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-[150] overflow-y-auto">

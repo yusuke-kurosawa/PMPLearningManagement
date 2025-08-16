@@ -122,7 +122,7 @@ const EnhancedProgressDashboard: React.FC = () => {
         title: 'Progress Exported',
         description: 'Your learning progress has been exported successfully.',
       })
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Export Failed',
         description: 'Failed to export progress data.',
@@ -140,7 +140,7 @@ const EnhancedProgressDashboard: React.FC = () => {
         title: 'Goal Created',
         description: 'Your new learning goal has been created.',
       })
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Failed to Create Goal',
         description: 'Could not create your learning goal.',
@@ -188,7 +188,7 @@ const EnhancedProgressDashboard: React.FC = () => {
           acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 }
         }
         acc[process.knowledgeArea].total += 1
-        if (process.masteryLevel === 'mastered') acc[process.knowledgeArea].mastered += 1
+        if (process.masteryLevel === 'mastered') {acc[process.knowledgeArea].mastered += 1}
         acc[process.knowledgeArea].studyTime += process.studyTime
         return acc
       },

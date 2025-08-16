@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
 // Conditional logger import for ES modules
-let logger = { warn: console.warn }
+// const logger = { warn: console.warn }
 
 // Mock Supabase for tests
 vi.mock('../lib/supabase', () => ({
@@ -29,6 +29,27 @@ vi.mock('../lib/supabase', () => ({
   }
 }))
 
+// Mock Nock to prevent conflicts with MSW
+vi.mock('nock', () => {
+  const mockNock = () => ({
+    get: vi.fn().mockReturnThis(),
+    post: vi.fn().mockReturnThis(),
+    put: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    reply: vi.fn().mockReturnThis(),
+    persist: vi.fn().mockReturnThis(),
+    scope: vi.fn().mockReturnThis(),
+    query: vi.fn().mockReturnThis(),
+    delay: vi.fn().mockReturnThis(),
+    times: vi.fn().mockReturnThis(),
+    replyWithError: vi.fn().mockReturnThis(),
+  })
+  mockNock.cleanAll = vi.fn()
+  mockNock.restore = vi.fn()
+  mockNock.isActive = vi.fn().mockReturnValue(false)
+  return { default: mockNock }
+})
+
 // Mock environment variables for tests
 if (typeof process !== 'undefined' && process.env) {
   process.env.VITE_SUPABASE_URL = 'https://test.supabase.co'
@@ -43,7 +64,7 @@ async function setupMSWServer() {
     const { server: mswServer } = await import('./mocks/server.js')
     server = mswServer
     return server
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       console.warn('MSW server not available, skipping mock server setup')
     }
@@ -115,6 +136,31 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 })
+
+// Mock ServiceWorkerRegistration globally
+if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {
+  (window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
+    scope = '/'
+    updateViaCache = 'none' as const
+    active = null
+    installing = null
+    waiting = null
+    onupdatefound = null
+    
+    async getNotifications() { return [] }
+    async showNotification() { return }
+    async update() { return }
+    async unregister() { return false }
+    
+    pushManager = {
+      getSubscription: vi.fn(),
+      subscribe: vi.fn(),
+      permissionState: vi.fn(),
+    }
+    
+    prototype = ServiceWorkerRegistration.prototype
+  }
+}
 
 // Mock scrollTo
 window.scrollTo = vi.fn()

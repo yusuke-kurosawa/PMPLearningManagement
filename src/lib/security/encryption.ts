@@ -341,7 +341,8 @@ export class HashingService {
    */
   signSession(sessionData: object): string {
     const dataString = JSON.stringify(sessionData)
-    return this.hashSensitiveData(dataString, true)
+    // セッション署名にはタイムスタンプを使用しない（検証可能にするため）
+    return this.hashSensitiveData(dataString, false)
   }
 
   /**
@@ -469,7 +470,7 @@ export class PIIEncryption {
     for (const [key, value] of Object.entries(encryptedData)) {
       try {
         decrypted[key] = this.encryption.decrypt(value)
-      } catch (error) {
+      } catch (_error) {
         if (process.env.NODE_ENV === 'development') {
           logger.error(`PII復号化エラー (${key}):`, error)
         }

@@ -71,7 +71,7 @@ export function useTouchGestures(handlers: SwipeHandlers) {
         return
       }
 
-      if (!touchStartRef.current) return
+      if (!touchStartRef.current) {return}
 
       const touch = e.changedTouches[0]
       touchEndRef.current = {
@@ -97,7 +97,7 @@ export function useTouchGestures(handlers: SwipeHandlers) {
       const deltaY = touchEndRef.current.y - touchStartRef.current.y
       const deltaTime = touchEndRef.current.time - touchStartRef.current.time
 
-      if (deltaTime > maxSwipeTime) return
+      if (deltaTime > maxSwipeTime) {return}
 
       const absX = Math.abs(deltaX)
       const absY = Math.abs(deltaY)
@@ -167,7 +167,7 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isPulling || isRefreshing) return
+      if (!isPulling || isRefreshing) {return}
 
       currentYRef.current = e.touches[0].clientY
       const distance = currentYRef.current - startYRef.current
@@ -179,7 +179,7 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
     }
 
     const handleTouchEnd = async () => {
-      if (!isPulling || isRefreshing) return
+      if (!isPulling || isRefreshing) {return}
 
       if (pullDistance > threshold) {
         isRefreshing = true

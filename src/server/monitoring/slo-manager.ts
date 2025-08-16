@@ -305,7 +305,7 @@ export class SLOManager extends EventEmitter {
 
       // Check for violations
       await this.evaluateSLOCompliance(slo, currentValue)
-    } catch (error) {
+    } catch (_error) {
       Logger.error(`SLO evaluation error for ${slo.id}:`, error)
     }
   }
@@ -464,15 +464,15 @@ export class SLOManager extends EventEmitter {
     const { warning, critical, emergency } = slo.alertThresholds
 
     if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {
-      if (currentValue <= emergency) return SLOSeverity.CRITICAL
-      if (currentValue <= critical) return SLOSeverity.HIGH
-      if (currentValue <= warning) return SLOSeverity.MEDIUM
+      if (currentValue <= emergency) {return SLOSeverity.CRITICAL}
+      if (currentValue <= critical) {return SLOSeverity.HIGH}
+      if (currentValue <= warning) {return SLOSeverity.MEDIUM}
       return SLOSeverity.LOW
     } else {
       // For performance metrics
-      if (currentValue >= emergency) return SLOSeverity.CRITICAL
-      if (currentValue >= critical) return SLOSeverity.HIGH
-      if (currentValue >= warning) return SLOSeverity.MEDIUM
+      if (currentValue >= emergency) {return SLOSeverity.CRITICAL}
+      if (currentValue >= critical) {return SLOSeverity.HIGH}
+      if (currentValue >= warning) {return SLOSeverity.MEDIUM}
       return SLOSeverity.LOW
     }
   }
@@ -509,7 +509,7 @@ export class SLOManager extends EventEmitter {
           channel,
           severity: violation.severity,
         })
-      } catch (error) {
+      } catch (_error) {
         Logger.error(`Failed to send alert to ${channel}:`, error)
       }
     }

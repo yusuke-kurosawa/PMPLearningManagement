@@ -21,7 +21,7 @@ const AICoachingDashboard = () => {
   const [learningPath, setLearningPath] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeCoaching, setActiveCoaching] = useState(null)
-  const [_userProgress, setUserProgress] = useState({})
+  const [, setUserProgress] = useState({})
   const [selectedWeekness, setSelectedWeekness] = useState(null)
 
   // Mock user ID - in real app this would come from auth context

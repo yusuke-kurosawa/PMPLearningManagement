@@ -227,7 +227,7 @@ export class MigrationService {
   private async migrateLearningProgress(): Promise<number> {
     try {
       const progressData = localStorage.getItem('learning-progress')
-      if (!progressData) return 0
+      if (!progressData) {return 0}
 
       const parsed = LegacyProgressSchema.parse(JSON.parse(progressData))
 
@@ -263,7 +263,7 @@ export class MigrationService {
   private async migrateExamResults(): Promise<number> {
     try {
       const examResults = localStorage.getItem('exam-results')
-      if (!examResults) return 0
+      if (!examResults) {return 0}
 
       const parsed = JSON.parse(examResults)
       const validResults = []
@@ -307,7 +307,7 @@ export class MigrationService {
   private async migrateFlashCardProgress(): Promise<number> {
     try {
       const flashCardData = localStorage.getItem('flashcard-progress')
-      if (!flashCardData) return 0
+      if (!flashCardData) {return 0}
 
       const parsed = JSON.parse(flashCardData)
       const migratedCount = Object.keys(parsed).length

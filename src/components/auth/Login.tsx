@@ -39,7 +39,7 @@ const Login: React.FC = () => {
   // Clear errors on unmount
   useEffect(() => {
     return () => {
-      if (clearError) clearError()
+      if (clearError) {clearError()}
     }
   }, [clearError])
 

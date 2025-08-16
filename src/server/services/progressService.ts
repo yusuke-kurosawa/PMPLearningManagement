@@ -476,7 +476,7 @@ export class ProgressService {
       const knowledgeAreaStats: Record<string, number> = {}
       examResults.forEach((exam) => {
         if (exam.knowledgeAreaScores) {
-          Object.entries(exam.knowledgeAreaScores as any).forEach(([area, score]) => {
+          Object.entries(exam.knowledgeAreaScores as Record<string, number>).forEach(([area, score]) => {
             knowledgeAreaStats[area] = (knowledgeAreaStats[area] || 0) + (score as number)
           })
         }

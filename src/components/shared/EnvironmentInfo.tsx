@@ -80,7 +80,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
   }
 
   const formatBuildTime = (buildTime: string) => {
-    if (!buildTime) return 'Unknown'
+    if (!buildTime) {return 'Unknown'}
     try {
       return new Date(buildTime).toLocaleString()
     } catch {

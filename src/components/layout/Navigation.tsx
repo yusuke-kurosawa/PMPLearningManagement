@@ -146,6 +146,7 @@ const Navigation = () => {
   return (
     <>
       <nav
+        id="navigation"
         className="sticky top-0 z-50 bg-white shadow-lg transition-colors dark:bg-gray-800"
         role="navigation"
         aria-label="メインナビゲーション"
