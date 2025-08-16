@@ -22,7 +22,7 @@ on:
         description: 'Node.jsのバージョン'
         required: false
         type: string
-        default: '18'
+        default: '20'
       skip-tests:
         description: 'テストをスキップするか'
         required: false
