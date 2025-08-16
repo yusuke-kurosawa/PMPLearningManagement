@@ -58,15 +58,5 @@
     "react": {
       "version": "detect"
     }
-  },
-  "ignorePatterns": [
-    "dist",
-    "node_modules",
-    "coverage",
-    "test-results",
-    "playwright-report",
-    "*.config.js",
-    "*.config.mjs",
-    "*.config.ts"
-  ]
+  }
 }

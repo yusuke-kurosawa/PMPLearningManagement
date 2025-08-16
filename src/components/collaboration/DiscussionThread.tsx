@@ -237,7 +237,6 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
                         ? 'border-gray-600 bg-gray-700 text-white'
                         : 'border-gray-300 bg-white'
                     }`}
-                    autoFocus
                   />
                   <button
                     onClick={() => handlePostReply(comment.id)}
