@@ -13,6 +13,24 @@ const mockThemeContext = {
   setTheme: vi.fn(),
 }
 
+// Mock settings context (for Navigation component)
+const mockSettings = {
+  darkMode: false,
+  toggleDarkMode: vi.fn(),
+  language: 'ja',
+  setLanguage: vi.fn(),
+}
+
+// Create a mock settings context provider
+const MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
+  // Use a simple Context.Provider since we're mocking
+  return React.createElement(
+    'div',
+    { 'data-testid': 'mock-settings-provider' },
+    children
+  )
+}
+
 // Mock auth context value
 const mockAuthContext: AuthContextType = {
   user: null,

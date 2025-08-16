@@ -1,7 +1,6 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [react()],
@@ -66,18 +65,18 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@/components': resolve(__dirname, './src/components'),
-      '@/lib': resolve(__dirname, './src/lib'),
-      '@/hooks': resolve(__dirname, './src/hooks'),
-      '@/stores': resolve(__dirname, './src/stores'),
-      '@/types': resolve(__dirname, './src/types'),
-      '@/styles': resolve(__dirname, './src/styles'),
-      '@/utils': resolve(__dirname, './src/utils'),
-      '@/server': resolve(__dirname, './src/server'),
-      '@/data': resolve(__dirname, './src/data'),
-      '@/services': resolve(__dirname, './src/services'),
-      '@/contexts': resolve(__dirname, './src/contexts')
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@/components': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@/lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
+      '@/hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
+      '@/stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
+      '@/types': fileURLToPath(new URL('./src/types', import.meta.url)),
+      '@/styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
+      '@/utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
+      '@/server': fileURLToPath(new URL('./src/server', import.meta.url)),
+      '@/data': fileURLToPath(new URL('./src/data', import.meta.url)),
+      '@/services': fileURLToPath(new URL('./src/services', import.meta.url)),
+      '@/contexts': fileURLToPath(new URL('./src/contexts', import.meta.url))
     }
   }
-});
+})
