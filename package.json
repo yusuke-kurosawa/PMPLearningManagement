@@ -44,7 +44,11 @@
     "idd:report": "node scripts/issue-report-generator.js",
     "health:check": "node scripts/health-check.js",
     "project:validate": "npm run typecheck && npm run lint && npm run test:run",
-    "project:optimize": "npm run clean && npm run format && npm run build:optimized"
+    "project:optimize": "npm run clean && npm run format && npm run build:optimized",
+    "docs:check-links": "node scripts/check-doc-links.js",
+    "docs:version": "node scripts/version-manager.js",
+    "docs:serve": "python -m http.server 8080 -d docs",
+    "docs:sync": "echo 'Syncing documentation...' && npm run docs:check-links"
   },
   "overrides": {
     "tmp": "^0.2.4",
