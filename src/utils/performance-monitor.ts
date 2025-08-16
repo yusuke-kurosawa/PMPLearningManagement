@@ -20,7 +20,7 @@ class PerformanceMonitor {
    * Web Vitalsの監視開始
    */
   startMonitoring(): void {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {return}
 
     // First Contentful Paint
     this.observePaint()
@@ -115,7 +115,7 @@ class PerformanceMonitor {
   private observeCLS(): void {
     try {
       let clsValue = 0
-      let clsEntries: PerformanceEntry[] = []
+      const clsEntries: PerformanceEntry[] = []
 
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
@@ -248,10 +248,10 @@ class PerformanceMonitor {
     }
 
     const threshold = thresholds[metric]
-    if (!threshold) return 'unknown'
+    if (!threshold) {return 'unknown'}
 
-    if (value <= threshold.good) return 'good'
-    if (value <= threshold.needs_improvement) return 'needs improvement'
+    if (value <= threshold.good) {return 'good'}
+    if (value <= threshold.needs_improvement) {return 'needs improvement'}
     return 'poor'
   }
 
