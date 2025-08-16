@@ -54,8 +54,10 @@
     "maintenance:deploy:force": "bash scripts/maintenance-deploy.sh --force",
     "maintenance:deploy:quick": "bash scripts/maintenance-deploy.sh --skip-tests",
     "monitoring:performance": "node scripts/monitor-performance.js",
+    "monitoring:accessibility": "node scripts/accessibility-monitor.js",
     "monitoring:continuous": "while true; do npm run monitoring:performance; sleep 300; done",
-    "maintenance:full": "npm run maintenance:deploy && npm run monitoring:performance"
+    "monitoring:full": "npm run monitoring:performance && npm run monitoring:accessibility",
+    "maintenance:full": "npm run maintenance:deploy && npm run monitoring:full"
   },
   "overrides": {
     "tmp": "^0.2.4",
