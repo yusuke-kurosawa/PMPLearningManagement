@@ -22,7 +22,7 @@ const mockThemeContext = {
 // }
 
 // Create a mock settings context provider
-// const MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
+const MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
   // Use a simple Context.Provider since we're mocking
   return React.createElement(
     'div',
@@ -58,7 +58,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialEntries?: string[]
 }
 
-// const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <MemoryRouter initialEntries={['/']}>
       <ThemeContext.Provider value={mockThemeContext}>
