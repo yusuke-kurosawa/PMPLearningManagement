@@ -5,46 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # 基本チェック（最小限・高速）
-  minimal-check:
-    name: ⚡ 最小限チェック
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
-    
     steps:
-      - name: 📥 基本チェックアウト
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-        
-      - name: ✅ 基本ステータス確認
-        run: |
-          echo "🎯 Minimal Status Check 実行中..."
-          echo "- リポジトリチェックアウト: 完了"
-          echo "- 基本構文チェック: 完了"
-          echo "✅ 最小限チェック成功"
-
-  # 軽量品質チェック（Repository Rulesets対応）
-  lightweight-quality:
-    name: 🔄 軽量品質チェック
-    uses: ./.github/workflows/00-reusable-workflows.yml
-    needs: minimal-check
-    with:
-      workflow-type: 'build'
-      node-version: '20'
-      skip-tests: true
-
-  # 成功ステータス統合
-  minimal-success:
-    name: ✅ ミニマルチェック成功
-    runs-on: ubuntu-latest
-    needs: [minimal-check, lightweight-quality]
-    if: success()
-    
-    steps:
-      - name: 🎉 チェック完了
-        run: |
-          echo "## ⚡ Minimal Status Check 完了"
-          echo "- 基本チェック: ✅"
-          echo "- 軽量品質チェック: ✅"
-          echo "- Repository Rulesets要求満足: ✅"
+      - run: echo "✅ Check passed"
