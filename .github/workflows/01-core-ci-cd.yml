@@ -21,120 +21,32 @@ on:
     - cron: '0 6 * * 1'  # 毎週月曜日の午前6時
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   CACHE_VERSION: v1
 
 jobs:
   # ================================================================
-  # Stage 1: コード品質チェック
+  # Stage 1: 再利用可能ワークフローによる統合チェック
   # ================================================================
-  quality-checks:
-    name: 🔍 Code Quality Checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🧹 ESLint check
-        run: npm run lint
-
-      - name: 🔍 TypeScript check
-        run: npm run type-check
-        continue-on-error: true
-
-      - name: 💎 Prettier check
-        run: npm run format:check
-
-      - name: 📊 Upload quality metrics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: quality-reports
-          path: |
-            reports/
-            coverage/
+  integrated-checks:
+    name: 🔄 統合品質・ビルドチェック
+    uses: ./.github/workflows/00-reusable-workflows.yml
+    with:
+      workflow-type: 'full'
+      node-version: '20'
+      skip-tests: false
 
   # ================================================================
-  # Stage 2: セキュリティ監査
+  # Stage 2: Claude Code統合セキュリティスキャン
   # ================================================================
-  security-audit:
-    name: 🔒 Security Audit
-    runs-on: ubuntu-latest
-    needs: quality-checks
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🔒 Run npm audit
-        run: npm audit --audit-level moderate
-
-      - name: 🛡️ Security scan
-        run: |
-          if [ -f "scripts/security-audit.js" ]; then
-            npm run security:audit
-          fi
-
-  # ================================================================
-  # Stage 3: ビルドテスト
-  # ================================================================
-  build-test:
-    name: 🏗️ Build Test
-    runs-on: ubuntu-latest
-    needs: [quality-checks, security-audit]
-    outputs:
-      build-success: ${{ steps.build.outcome == 'success' }}
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: ⚡ Run tests
-        run: npm test
-
-      - name: 🏗️ Build application
-        id: build
-        run: npm run build
-
-      - name: 📋 Bundle analysis
-        run: |
-          if [ -f "scripts/analyze-bundle.js" ]; then
-            npm run analyze:bundle
-          fi
-
-      - name: 📊 Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
-          retention-days: 7
+  claude-security-scan:
+    name: 🤖 Claude統合セキュリティスキャン
+    uses: ./.github/workflows/00-reusable-workflows.yml
+    needs: integrated-checks
+    with:
+      workflow-type: 'security'
+      node-version: '20'
+      skip-tests: true
 
   # ================================================================
   # Stage 4: GitHub Pages デプロイ
@@ -143,7 +55,7 @@ jobs:
     name: 🚀 Deploy to GitHub Pages
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build-test
+    needs: [integrated-checks, claude-security-scan]
     environment: production
     concurrency:
       group: production-deploy

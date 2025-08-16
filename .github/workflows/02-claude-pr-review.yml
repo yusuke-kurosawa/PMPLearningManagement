@@ -48,24 +48,24 @@ jobs:
         run: |
           # Get changed files for filtering
           git diff --name-only "origin/$BASE_REF...HEAD" > changed_files.txt
-        
-        # Filter relevant files (exclude docs, configs)
-        grep -E '\.(js|jsx|ts|tsx|json|css)$' changed_files.txt > relevant_files.txt || true
-        
-        # Get focused diff only for relevant files
-        if [ -s relevant_files.txt ]; then
-          git diff "origin/$BASE_REF...HEAD" -- $(cat relevant_files.txt | tr '\n' ' ') > pr_diff.txt
-          # Limit diff size more intelligently
-          head -c 8000 pr_diff.txt > limited_diff.txt  # 文字数制限
-        else
-          echo "No relevant code files changed" > limited_diff.txt
-        fi
-        
-        # Save diff for analysis
-        DIFF_CONTENT=$(cat limited_diff.txt)
-        echo "diff<<EOF" >> $GITHUB_OUTPUT
-        echo "$DIFF_CONTENT" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Filter relevant files (exclude docs, configs)
+          grep -E '\.(js|jsx|ts|tsx|json|css)$' changed_files.txt > relevant_files.txt || true
+          
+          # Get focused diff only for relevant files
+          if [ -s relevant_files.txt ]; then
+            git diff "origin/$BASE_REF...HEAD" -- $(cat relevant_files.txt | tr '\n' ' ') > pr_diff.txt
+            # Limit diff size more intelligently
+            head -c 8000 pr_diff.txt > limited_diff.txt
+          else
+            echo "No relevant code files changed" > limited_diff.txt
+          fi
+          
+          # Save diff for analysis
+          DIFF_CONTENT=$(cat limited_diff.txt)
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIFF_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         
         # PRメタデータも保存
         echo "files_changed=$(wc -l < changed_files.txt)" >> $GITHUB_OUTPUT
@@ -86,7 +86,7 @@ jobs:
             echo "review=スキップ: 関連するコードファイルの変更がありません。" >> $GITHUB_OUTPUT
             exit 0
           fi
-        
+          
           # Enhanced prompt for better analysis
           PROMPT="PMPLearningManagement React/D3.js PR Review\n\nTitle: $PR_TITLE\nDescription: $PR_BODY\nChanged Files: $FILES_CHANGED\nReview Target: $RELEVANT_FILES\n\nCode Changes:\n$DIFF\n\nReview Points:\n1. Summary of changes\n2. Code quality (React/JS practices)\n3. Performance impact\n4. Security considerations\n5. Testing requirements\n6. Improvement suggestions\n\nPlease respond in Japanese concisely."
           
@@ -147,16 +147,16 @@ jobs:
             
             const timestamp = new Date().toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'});
             
-            const comment = `
+            const comment = \`
             ## 🤖 Claude AI Enhanced Code Review
             
             **分析情報:**
-            - 📁 変更ファイル数: ${filesChanged}
-            - 🎯 レビュー対象: ${relevantFiles} ファイル
-            - 📅 実行時刻: ${timestamp}
+            - 📁 変更ファイル数: \${filesChanged}
+            - 🎯 レビュー対象: \${relevantFiles} ファイル
+            - 📅 実行時刻: \${timestamp}
             
             **レビュー結果:**
-            ${review}
+            \${review}
             
             ---
             
@@ -176,7 +176,7 @@ jobs:
             - リトライ: 3回まで
             - 分析対象: JS/JSX/TS/TSX/JSON/CSSファイル
             </details>
-            `;
+            \`;
             
             try {
               await github.rest.issues.createComment({
@@ -206,10 +206,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const comment = `
+            const comment = \`
             ## ⚠️ 大きなPRの検出
             
-            このPRは**${{ github.event.pull_request.changed_files }}個のファイル**を変更しており、レビューが困難になる可能性があります。
+            このPRは**\${{ github.event.pull_request.changed_files }}個のファイル**を変更しており、レビューが困難になる可能性があります。
             
             **推奨事項:**
             - 可能であれば、機能別に小さなPRに分割
@@ -219,7 +219,7 @@ jobs:
             **自動レビュー:** 大きなPRのため、Claude AIレビューはスキップされました。
             
             *📝 小さなPR（20ファイル以下）にすることで、より詳細な自動レビューを受けることができます。*
-            `;
+            \`;
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
