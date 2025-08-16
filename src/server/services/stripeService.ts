@@ -12,7 +12,7 @@ import { SubscriptionPlan } from '@prisma/client'
 import { logger } from '../../services/logger'
 
 // Stripe初期化
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: '2023-10-16',
   typescript: true,
 })
@@ -29,7 +29,7 @@ export const SUBSCRIPTION_PLANS = {
   },
   [SubscriptionPlan.BASIC]: {
     name: 'ベーシックプラン',
-    priceId: process.env.STRIPE_BASIC_PRICE_ID!,
+    priceId: process.env.STRIPE_BASIC_PRICE_ID || "",
     amount: 2980,
     currency: 'jpy',
     interval: 'month' as const,
@@ -43,7 +43,7 @@ export const SUBSCRIPTION_PLANS = {
   },
   [SubscriptionPlan.PREMIUM]: {
     name: 'プレミアムプラン',
-    priceId: process.env.STRIPE_PREMIUM_PRICE_ID!,
+    priceId: process.env.STRIPE_PREMIUM_PRICE_ID || "",
     amount: 4980,
     currency: 'jpy',
     interval: 'month' as const,
@@ -57,7 +57,7 @@ export const SUBSCRIPTION_PLANS = {
   },
   [SubscriptionPlan.ENTERPRISE]: {
     name: 'エンタープライズプラン',
-    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID!,
+    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID || "",
     amount: 9980,
     currency: 'jpy',
     interval: 'month' as const,
@@ -454,7 +454,7 @@ export class StripeService {
   // WebHook署名検証
   static verifyWebhookSignature(payload: string, signature: string): Stripe.Event {
     try {
-      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
       return stripe.webhooks.constructEvent(payload, signature, endpointSecret)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {

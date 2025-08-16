@@ -290,7 +290,7 @@ export class AdvancedCacheManager {
     if (!this.dependencyGraph.has(parentKey)) {
       this.dependencyGraph.set(parentKey, new Set())
     }
-    this.dependencyGraph.get(parentKey)!.add(childKey)
+    this.dependencyGraph.get(parentKey)?.add(childKey)
   }
 
   /**

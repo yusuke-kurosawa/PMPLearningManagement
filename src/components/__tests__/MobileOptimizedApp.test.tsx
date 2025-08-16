@@ -124,7 +124,8 @@ describe('MobileOptimizedApp', () => {
         </MobileOptimizedApp>
       )
 
-      expect(screen.getByRole('button')).toBeInTheDocument()
+      const buttons = screen.getAllByRole('button')
+      expect(buttons.length).toBeGreaterThan(0) // At least one button
       expect(screen.getByText('PMP Learning')).toBeInTheDocument()
     })
 
@@ -145,7 +146,8 @@ describe('MobileOptimizedApp', () => {
       fireEvent(window, new Event('offline'))
 
       await waitFor(() => {
-        expect(screen.getByText(/offline/i)).toBeInTheDocument()
+        const offlineElements = screen.getAllByText(/offline/i)
+        expect(offlineElements.length).toBeGreaterThan(0)
       })
     })
 

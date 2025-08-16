@@ -1086,7 +1086,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
         }
 
         if (filters.tags && filters.tags.length > 0) {
-          cards = cards.filter((card) => filters.tags!.some((tag) => card.tags.includes(tag)))
+          cards = cards.filter((card) => filters?.tags.some((tag) => card.tags.includes(tag)))
         }
 
         if (filters.dueOnly) {

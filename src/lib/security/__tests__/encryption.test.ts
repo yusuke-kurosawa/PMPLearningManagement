@@ -278,7 +278,7 @@ describe('データ暗号化システム', () => {
         encryptionResult.encrypted,
         encryptionResult.iv,
         encryptionResult.tag,
-        encryptionResult.salt!
+        encryptionResult?.salt
       )
 
       expect(verifiedPayload).toBeNull()

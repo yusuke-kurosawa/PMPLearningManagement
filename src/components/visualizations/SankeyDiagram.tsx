@@ -10,8 +10,6 @@ import {
 } from 'd3-sankey'
 import {
   Download,
-  _Settings,
-  _Palette,
   AlignLeft,
   AlignRight,
   AlignCenter,

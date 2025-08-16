@@ -399,7 +399,7 @@ describe('KeyManagementSystem', () => {
       const key = await keyManager.generateEncryptionKey()
 
       expect(key.derivedFrom).toBeTruthy()
-      expect(key.derivedFrom!.length).toBe(64) // 32 bytes as hex = 64 chars
+      expect(key?.derivedFrom.length).toBe(64) // 32 bytes as hex = 64 chars
     })
   })
 

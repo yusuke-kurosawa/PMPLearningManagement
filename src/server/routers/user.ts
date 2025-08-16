@@ -337,7 +337,7 @@ export const userRouter = createTRPCRouter({
 
       return {
         users: result.users
-          .filter((user) => !input.excludeIds.includes(user.id!))
+          .filter((user) => !input.excludeIds.includes(user?.id))
           .map((user) => ({
             id: user.id,
             name: user.name,
