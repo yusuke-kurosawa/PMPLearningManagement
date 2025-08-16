@@ -104,7 +104,7 @@ jobs:
 
       - name: 🔍 TypeScriptチェック
         run: |
-          if npm run type-check 2>/dev/null; then
+          if npm run typecheck 2>/dev/null; then
             echo "✅ TypeScript型チェック通過"
           else
             echo "⚠️ TypeScript型チェックをスキップ（設定なし）"
@@ -137,7 +137,7 @@ jobs:
       - name: 🧪 ユニットテスト実行
         id: test
         run: |
-          if npm run test 2>/dev/null; then
+          if npm run test:run 2>/dev/null; then
             echo "results=passed" >> $GITHUB_OUTPUT
             echo "✅ テスト成功"
           else
