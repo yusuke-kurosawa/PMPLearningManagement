@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  check:
+  minimal-status-check:
     runs-on: ubuntu-latest
     steps:
       - run: echo "✅ Check passed"
