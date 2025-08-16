@@ -6,7 +6,7 @@
 ## 📋 目次
 
 - [🎯 概要](#-概要)
-- [🏗️ アーキテクチャ設計](#️-アーキテクチャ設計)  
+- [🏗️ アーキテクチャ設計](#️-アーキテクチャ設計)
 - [📂 ディレクトリ構造](#-ディレクトリ構造)
 - [🔄 ワークフロー一覧](#-ワークフロー一覧)
 - [🧩 Composite Actions](#-composite-actions)
@@ -51,39 +51,39 @@ graph TB
         SCHEDULE[Scheduled]
         MANUAL[Manual Dispatch]
     end
-    
+
     subgraph "Orchestration Layer"
         CI[CI Workflows]
-        CD[CD Workflows] 
+        CD[CD Workflows]
         SECURITY[Security Workflows]
         QUALITY[Quality Workflows]
         CLAUDE[ClaudeCode Workflows]
     end
-    
+
     subgraph "Execution Layer"
         COMPOSITE[Composite Actions]
         EXTERNAL[External Actions]
         SCRIPTS[Custom Scripts]
     end
-    
+
     subgraph "Infrastructure Layer"
         RUNNERS[GitHub Runners]
         CACHE[Cache Systems]
         SECRETS[Secrets Management]
         ARTIFACTS[Artifact Storage]
     end
-    
+
     PR --> CI
     PUSH --> CD
     SCHEDULE --> SECURITY
     MANUAL --> QUALITY
-    
+
     CI --> COMPOSITE
     CD --> COMPOSITE
     SECURITY --> SCRIPTS
     QUALITY --> EXTERNAL
     CLAUDE --> COMPOSITE
-    
+
     COMPOSITE --> RUNNERS
     EXTERNAL --> CACHE
     SCRIPTS --> SECRETS
@@ -101,19 +101,19 @@ sequenceDiagram
     participant CLAUDE as ClaudeCode
     participant CD as CD Pipeline
     participant PROD as Production
-    
+
     Dev->>PR: コード変更をプッシュ
     PR->>CI: CI基本チェック開始
     CI->>QA: 品質保証ワークフロー実行
     CI->>SEC: セキュリティスキャン実行
     CI->>CLAUDE: ClaudeCodeレビュー実行
-    
+
     QA-->>PR: 品質レポート
     SEC-->>PR: セキュリティレポート
     CLAUDE-->>PR: AIレビューコメント
-    
+
     Note over PR: レビュー・承認プロセス
-    
+
     PR->>CD: mainブランチマージ
     CD->>PROD: 本番デプロイ実行
     PROD-->>CD: デプロイ完了通知
@@ -152,11 +152,12 @@ sequenceDiagram
 
 ### 🔍 CI (Continuous Integration)
 
-| ワークフロー | ファイル名 | 目的 | トリガー |
-|------------|------------|------|-----------|
+| ワークフロー      | ファイル名            | 目的                           | トリガー     |
+| ----------------- | --------------------- | ------------------------------ | ------------ |
 | 🔄 CI基本チェック | `ci-basic-checks.yml` | リント、TypeScript、単体テスト | PR、プッシュ |
 
 **特徴:**
+
 - 🚀 高速実行（平均5分以内）
 - 📊 変更ファイル分析による最適化
 - 🔄 並行実行による効率化
@@ -164,11 +165,12 @@ sequenceDiagram
 
 ### 🚀 CD (Continuous Deployment)
 
-| ワークフロー | ファイル名 | 目的 | トリガー |
-|------------|------------|------|-----------|
+| ワークフロー    | ファイル名                     | 目的                     | トリガー           |
+| --------------- | ------------------------------ | ------------------------ | ------------------ |
 | 🚀 本番デプロイ | `cd-production-deployment.yml` | GitHub Pagesへのデプロイ | mainプッシュ、手動 |
 
 **特徴:**
+
 - 🔍 デプロイ前検証（品質ゲート）
 - 🏗️ 最適化ビルド実行
 - ✅ デプロイ後検証（ヘルスチェック）
@@ -177,11 +179,12 @@ sequenceDiagram
 
 ### 🔒 Security (セキュリティ)
 
-| ワークフロー | ファイル名 | 目的 | トリガー |
-|------------|------------|------|-----------|
+| ワークフロー                | ファイル名                        | 目的                   | トリガー         |
+| --------------------------- | --------------------------------- | ---------------------- | ---------------- |
 | 🔒 包括セキュリティスキャン | `security-comprehensive-scan.yml` | セキュリティ脆弱性検出 | PR、スケジュール |
 
 **特徴:**
+
 - 📦 依存関係脆弱性監査
 - 🔍 コードセキュリティ分析
 - ⚙️ 設定セキュリティ監査
@@ -190,11 +193,12 @@ sequenceDiagram
 
 ### 🧪 Quality (品質保証)
 
-| ワークフロー | ファイル名 | 目的 | トリガー |
-|------------|------------|------|-----------|
+| ワークフロー    | ファイル名              | 目的               | トリガー               |
+| --------------- | ----------------------- | ------------------ | ---------------------- |
 | 🧪 品質保証統合 | `quality-assurance.yml` | 包括的品質チェック | PR、スケジュール、手動 |
 
 **特徴:**
+
 - 🧪 多階層テスト（単体・統合・E2E）
 - 📊 品質メトリクス計算
 - 🚪 品質ゲート判定
@@ -203,11 +207,12 @@ sequenceDiagram
 
 ### 🤖 ClaudeCode (AI統合)
 
-| ワークフロー | ファイル名 | 目的 | トリガー |
-|------------|------------|------|-----------|
+| ワークフロー      | ファイル名                    | 目的                 | トリガー            |
+| ----------------- | ----------------------------- | -------------------- | ------------------- |
 | 🤖 ClaudeCode統合 | `claude-code-integration.yml` | AI支援開発・レビュー | PR、Issue、コメント |
 
 **特徴:**
+
 - 👁️ AI自動コードレビュー
 - 📋 Issue分析・提案生成
 - 📚 ドキュメント同期チェック
@@ -231,6 +236,7 @@ sequenceDiagram
 ```
 
 **特徴:**
+
 - ⚡ 高速キャッシュ機能
 - 🔒 セキュリティ監査統合
 - 📊 環境情報出力
@@ -248,6 +254,7 @@ sequenceDiagram
 ```
 
 **特徴:**
+
 - 🔍 ESLint・TypeScript・Prettier統合
 - 🔒 セキュリティ監査
 - 🧪 オプショナルテスト実行
@@ -266,6 +273,7 @@ sequenceDiagram
 ```
 
 **特徴:**
+
 - 🏗️ プロダクション最適化
 - 📈 バンドル分析
 - ⚡ パフォーマンスバジェット
@@ -280,7 +288,7 @@ sequenceDiagram
 
 例:
 - ci-basic-checks.yml
-- cd-production-deployment.yml  
+- cd-production-deployment.yml
 - security-comprehensive-scan.yml
 - quality-assurance.yml
 - claudecode-integration.yml
@@ -344,7 +352,7 @@ sequenceDiagram
 ```yaml
 env:
   CLAUDE_API_VERSION: 'v1'
-  CLAUDE_MAX_TOKENS: '4000'  
+  CLAUDE_MAX_TOKENS: '4000'
   CLAUDE_TEMPERATURE: '0.2'
   CLAUDE_LANGUAGE: 'japanese'
 ```
@@ -356,17 +364,17 @@ env:
 ```yaml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true  # 新実行時に古い実行をキャンセル
+  cancel-in-progress: true # 新実行時に古い実行をキャンセル
 ```
 
 ### ⏱️ タイムアウト設定
 
-| ワークフロー種別 | タイムアウト | 理由 |
-|----------------|-------------|------|
-| CI基本チェック | 15分 | 高速フィードバック |
-| 品質保証 | 30分 | 包括的テスト |
-| セキュリティ | 45分 | 詳細スキャン |
-| デプロイメント | 25分 | 安全なデプロイ |
+| ワークフロー種別 | タイムアウト | 理由               |
+| ---------------- | ------------ | ------------------ |
+| CI基本チェック   | 15分         | 高速フィードバック |
+| 品質保証         | 30分         | 包括的テスト       |
+| セキュリティ     | 45分         | 詳細スキャン       |
+| デプロイメント   | 25分         | 安全なデプロイ     |
 
 ### 💾 キャッシュ戦略
 
@@ -386,13 +394,13 @@ concurrency:
 
 ### 📏 品質メトリクス
 
-| メトリクス | 閾値 | 測定方法 |
-|------------|------|----------|
-| テストカバレッジ | ≥80% | Vitest |
-| 品質スコア | ≥85/100 | 総合評価 |
-| Lintエラー | 0件 | ESLint |
-| TypeScriptエラー | 0件 | tsc |
-| セキュリティ脆弱性(Critical) | 0件 | npm audit |
+| メトリクス                   | 閾値    | 測定方法  |
+| ---------------------------- | ------- | --------- |
+| テストカバレッジ             | ≥80%    | Vitest    |
+| 品質スコア                   | ≥85/100 | 総合評価  |
+| Lintエラー                   | 0件     | ESLint    |
+| TypeScriptエラー             | 0件     | tsc       |
+| セキュリティ脆弱性(Critical) | 0件     | npm audit |
 
 ### 🚪 品質ゲート
 
@@ -454,6 +462,7 @@ GitHub Step Summaryを使用したリアルタイムダッシュボード：
 
 ```markdown
 ## 📊 DevOpsダッシュボード
+
 - 📈 今日の成功率: 95%
 - ⚡ 平均実行時間: 8分
 - 🔒 検出された脆弱性: 0件
@@ -469,6 +478,7 @@ GitHub Step Summaryを使用したリアルタイムダッシュボード：
 **問題**: `npm run typecheck`が失敗
 
 **解決法**:
+
 ```bash
 # 1. TypeScript設定確認
 cat tsconfig.json
@@ -485,9 +495,10 @@ npm run typecheck -- --listFiles
 **問題**: 依存関係キャッシュが正しく動作しない
 
 **解決法**:
+
 ```yaml
 # キャッシュバージョンを更新
-cache-version: 'v3'  # v2 から v3 に変更
+cache-version: 'v3' # v2 から v3 に変更
 ```
 
 #### ❌ デプロイ失敗
@@ -495,6 +506,7 @@ cache-version: 'v3'  # v2 から v3 に変更
 **問題**: GitHub Pagesデプロイが失敗
 
 **解決法**:
+
 ```bash
 # 1. ビルド出力確認
 ls -la dist/
@@ -514,7 +526,7 @@ ls dist/index.html dist/404.html
 # 1. 即座実行コマンド
 npm audit fix --force
 
-# 2. 確認コマンド  
+# 2. 確認コマンド
 npm audit --audit-level=critical
 
 # 3. セキュリティパッチ適用
@@ -535,12 +547,12 @@ git push --force-with-lease origin main
 
 ### 📞 サポート
 
-| 問題種別 | 連絡先 | 対応時間 |
-|----------|--------|----------|
-| 🚨 Critical脆弱性 | セキュリティチーム | 即座 |
-| 🔴 本番障害 | DevOpsチーム | 1時間以内 |
-| 🟡 品質問題 | 開発チーム | 4時間以内 |
-| 🔵 一般質問 | GitHub Issue | 24時間以内 |
+| 問題種別          | 連絡先             | 対応時間   |
+| ----------------- | ------------------ | ---------- |
+| 🚨 Critical脆弱性 | セキュリティチーム | 即座       |
+| 🔴 本番障害       | DevOpsチーム       | 1時間以内  |
+| 🟡 品質問題       | 開発チーム         | 4時間以内  |
+| 🔵 一般質問       | GitHub Issue       | 24時間以内 |
 
 ---
 
@@ -556,4 +568,4 @@ git push --force-with-lease origin main
 
 **🎉 この世界クラスのDevOps基盤により、PMPLearningManagementプロジェクトは継続的に高品質で安全なソフトウェアを提供できます！**
 
-*📝 最終更新: 2025-08-12 by Claude Code DevOps Team*
+_📝 最終更新: 2025-08-12 by Claude Code DevOps Team_

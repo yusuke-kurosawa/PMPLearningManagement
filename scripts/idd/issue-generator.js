@@ -2,125 +2,124 @@
 
 /**
  * IDD Issue Generator / IDD Issue自動生成エンジン
- * 
+ *
  * Issue: #68 #4
  * Purpose: コード分析に基づくIssue自動生成
  * Author: Claude Code Actions + yusuke-kurosawa
  * Version: 1.0.0
  */
 
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import fs from 'fs'
+import path from 'path'
+import { execSync } from 'child_process'
+import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 class IssueGenerator {
   constructor() {
-    this.issues = [];
+    this.issues = []
     this.analysisResults = {
       bugs: [],
       security: [],
       performance: [],
       enhancement: [],
-      maintenance: []
-    };
+      maintenance: [],
+    }
   }
 
   /**
    * コード全体を分析
    */
   async analyzeCode() {
-    console.log('🔍 コード分析開始...\n');
-    
-    await this.analyzeBugs();
-    await this.analyzeSecurity();
-    await this.analyzePerformance();
-    await this.analyzeEnhancements();
-    await this.analyzeMaintenance();
-    
-    console.log(`\n📊 分析完了: ${this.issues.length}件のIssue候補を生成`);
+    console.log('🔍 コード分析開始...\n')
+
+    await this.analyzeBugs()
+    await this.analyzeSecurity()
+    await this.analyzePerformance()
+    await this.analyzeEnhancements()
+    await this.analyzeMaintenance()
+
+    console.log(`\n📊 分析完了: ${this.issues.length}件のIssue候補を生成`)
   }
 
   /**
    * バグ・エラー検出
    */
   async analyzeBugs() {
-    console.log('🐛 バグ検出分析...');
-    
+    console.log('🐛 バグ検出分析...')
+
     try {
       // ESLint分析
-      const eslintOutput = execSync('npx eslint . --format json', { 
+      const eslintOutput = execSync('npx eslint . --format json', {
         encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore']
-      });
-      
-      const results = JSON.parse(eslintOutput);
-      let totalErrors = 0;
-      let totalWarnings = 0;
-      const errorFiles = [];
-      
-      results.forEach(file => {
+        stdio: ['pipe', 'pipe', 'ignore'],
+      })
+
+      const results = JSON.parse(eslintOutput)
+      let totalErrors = 0
+      let totalWarnings = 0
+      const errorFiles = []
+
+      results.forEach((file) => {
         if (file.errorCount > 0) {
-          totalErrors += file.errorCount;
+          totalErrors += file.errorCount
           errorFiles.push({
             path: file.filePath,
             errors: file.errorCount,
-            messages: file.messages.filter(m => m.severity === 2)
-          });
+            messages: file.messages.filter((m) => m.severity === 2),
+          })
         }
-        totalWarnings += file.warningCount;
-      });
-      
+        totalWarnings += file.warningCount
+      })
+
       if (totalErrors > 10) {
         this.generateBugIssue({
           severity: 'high',
           errorCount: totalErrors,
           warningCount: totalWarnings,
-          files: errorFiles.slice(0, 5)
-        });
+          files: errorFiles.slice(0, 5),
+        })
       }
-      
-      console.log(`   検出: エラー ${totalErrors}件、警告 ${totalWarnings}件`);
-      
+
+      console.log(`   検出: エラー ${totalErrors}件、警告 ${totalWarnings}件`)
     } catch (error) {
       // ESLintエラーも分析対象
-      console.log('   ESLint実行エラー（これも分析対象）');
+      console.log('   ESLint実行エラー（これも分析対象）')
     }
-    
+
     // console.error検出
-    await this.detectConsoleErrors();
-    
+    await this.detectConsoleErrors()
+
     // TODO/FIXME検出
-    await this.detectTodoComments();
+    await this.detectTodoComments()
   }
 
   /**
    * console.error/console.log検出
    */
   async detectConsoleErrors() {
-    const files = this.getJavaScriptFiles();
-    let consoleCount = 0;
-    const consoleUsage = [];
-    
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf-8');
-      const lines = content.split('\n');
-      
+    const files = this.getJavaScriptFiles()
+    let consoleCount = 0
+    const consoleUsage = []
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8')
+      const lines = content.split('\n')
+
       lines.forEach((line, index) => {
         if (line.includes('console.') && !line.includes('//')) {
-          consoleCount++;
+          consoleCount++
           consoleUsage.push({
             file: file.replace(process.cwd(), ''),
             line: index + 1,
-            code: line.trim()
-          });
+            code: line.trim(),
+          })
         }
-      });
-    });
-    
+      })
+    })
+
     if (consoleCount > 20) {
       this.issues.push({
         title: '🧹 過剰なconsole文の削除',
@@ -130,12 +129,12 @@ class IssueGenerator {
           actions: [
             'console文を削除またはデバッグ用ロガーに置換',
             '本番ビルドでconsole文を自動削除する設定',
-            'ESLintルールで console使用を制限'
-          ]
+            'ESLintルールで console使用を制限',
+          ],
         }),
         labels: ['bug', 'code-quality', 'auto-generated'],
-        priority: 'medium'
-      });
+        priority: 'medium',
+      })
     }
   }
 
@@ -143,32 +142,32 @@ class IssueGenerator {
    * TODO/FIXME コメント検出
    */
   async detectTodoComments() {
-    const files = this.getAllSourceFiles();
-    const todos = [];
-    const fixmes = [];
-    
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf-8');
-      const lines = content.split('\n');
-      
+    const files = this.getAllSourceFiles()
+    const todos = []
+    const fixmes = []
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8')
+      const lines = content.split('\n')
+
       lines.forEach((line, index) => {
         if (line.includes('TODO')) {
           todos.push({
             file: file.replace(process.cwd(), ''),
             line: index + 1,
-            comment: line.trim()
-          });
+            comment: line.trim(),
+          })
         }
         if (line.includes('FIXME')) {
           fixmes.push({
             file: file.replace(process.cwd(), ''),
             line: index + 1,
-            comment: line.trim()
-          });
+            comment: line.trim(),
+          })
         }
-      });
-    });
-    
+      })
+    })
+
     if (fixmes.length > 0) {
       this.issues.push({
         title: '🔧 FIXMEコメントの解決',
@@ -178,12 +177,12 @@ class IssueGenerator {
           actions: [
             'FIXMEコメントで指摘された問題を修正',
             '修正完了後、コメントを削除',
-            '定期的なFIXME棚卸しプロセスの確立'
-          ]
+            '定期的なFIXME棚卸しプロセスの確立',
+          ],
         }),
         labels: ['bug', 'technical-debt', 'auto-generated'],
-        priority: 'high'
-      });
+        priority: 'high',
+      })
     }
   }
 
@@ -191,36 +190,37 @@ class IssueGenerator {
    * セキュリティ分析
    */
   async analyzeSecurity() {
-    console.log('🔒 セキュリティ分析...');
-    
+    console.log('🔒 セキュリティ分析...')
+
     try {
       // npm audit
       const auditOutput = execSync('npm audit --json', {
         encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore']
-      });
-      
-      const audit = JSON.parse(auditOutput);
-      const vulnerabilities = audit.metadata?.vulnerabilities || {};
-      
+        stdio: ['pipe', 'pipe', 'ignore'],
+      })
+
+      const audit = JSON.parse(auditOutput)
+      const vulnerabilities = audit.metadata?.vulnerabilities || {}
+
       if (vulnerabilities.critical > 0 || vulnerabilities.high > 0) {
         this.generateSecurityIssue({
           critical: vulnerabilities.critical || 0,
           high: vulnerabilities.high || 0,
           moderate: vulnerabilities.moderate || 0,
           low: vulnerabilities.low || 0,
-          info: vulnerabilities.info || 0
-        });
+          info: vulnerabilities.info || 0,
+        })
       }
-      
-      console.log(`   脆弱性: Critical ${vulnerabilities.critical || 0}, High ${vulnerabilities.high || 0}`);
-      
+
+      console.log(
+        `   脆弱性: Critical ${vulnerabilities.critical || 0}, High ${vulnerabilities.high || 0}`
+      )
     } catch (error) {
-      console.log('   npm audit実行エラー');
+      console.log('   npm audit実行エラー')
     }
-    
+
     // セキュリティパターン検出
-    await this.detectSecurityPatterns();
+    await this.detectSecurityPatterns()
   }
 
   /**
@@ -232,27 +232,27 @@ class IssueGenerator {
       { pattern: /password\s*=\s*["'][^"']+["']/gi, type: 'ハードコードされたパスワード' },
       { pattern: /eval\s*\(/g, type: 'eval使用' },
       { pattern: /innerHTML\s*=/g, type: 'innerHTML使用（XSSリスク）' },
-      { pattern: /http:\/\//g, type: 'HTTPプロトコル使用' }
-    ];
-    
-    const files = this.getJavaScriptFiles();
-    const findings = [];
-    
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf-8');
-      
+      { pattern: /http:\/\//g, type: 'HTTPプロトコル使用' },
+    ]
+
+    const files = this.getJavaScriptFiles()
+    const findings = []
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8')
+
       patterns.forEach(({ pattern, type }) => {
-        const matches = content.match(pattern);
+        const matches = content.match(pattern)
         if (matches) {
           findings.push({
             file: file.replace(process.cwd(), ''),
             type,
-            count: matches.length
-          });
+            count: matches.length,
+          })
         }
-      });
-    });
-    
+      })
+    })
+
     if (findings.length > 0) {
       this.issues.push({
         title: '⚠️ セキュリティパターン検証',
@@ -262,12 +262,12 @@ class IssueGenerator {
           actions: [
             '検出されたパターンを確認し、安全な実装に変更',
             '環境変数を使用してセンシティブ情報を管理',
-            'セキュリティベストプラクティスの適用'
-          ]
+            'セキュリティベストプラクティスの適用',
+          ],
         }),
         labels: ['security', 'review-needed', 'auto-generated'],
-        priority: 'high'
-      });
+        priority: 'high',
+      })
     }
   }
 
@@ -275,16 +275,16 @@ class IssueGenerator {
    * パフォーマンス分析
    */
   async analyzePerformance() {
-    console.log('⚡ パフォーマンス分析...');
-    
+    console.log('⚡ パフォーマンス分析...')
+
     // バンドルサイズチェック
-    await this.checkBundleSize();
-    
+    await this.checkBundleSize()
+
     // 大きなファイル検出
-    await this.detectLargeFiles();
-    
+    await this.detectLargeFiles()
+
     // 複雑な関数検出
-    await this.detectComplexFunctions();
+    await this.detectComplexFunctions()
   }
 
   /**
@@ -293,35 +293,35 @@ class IssueGenerator {
   async checkBundleSize() {
     if (fs.existsSync('dist')) {
       const getDirectorySize = (dir) => {
-        let size = 0;
-        const files = fs.readdirSync(dir);
-        
-        files.forEach(file => {
-          const filePath = path.join(dir, file);
-          const stat = fs.statSync(filePath);
-          
+        let size = 0
+        const files = fs.readdirSync(dir)
+
+        files.forEach((file) => {
+          const filePath = path.join(dir, file)
+          const stat = fs.statSync(filePath)
+
           if (stat.isDirectory()) {
-            size += getDirectorySize(filePath);
+            size += getDirectorySize(filePath)
           } else {
-            size += stat.size;
+            size += stat.size
           }
-        });
-        
-        return size;
-      };
-      
-      const sizeInBytes = getDirectorySize('dist');
-      const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
-      
+        })
+
+        return size
+      }
+
+      const sizeInBytes = getDirectorySize('dist')
+      const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2)
+
       if (sizeInMB > 5) {
         this.generatePerformanceIssue({
           type: 'bundle-size',
           size: sizeInMB,
-          threshold: 5
-        });
+          threshold: 5,
+        })
       }
-      
-      console.log(`   バンドルサイズ: ${sizeInMB}MB`);
+
+      console.log(`   バンドルサイズ: ${sizeInMB}MB`)
     }
   }
 
@@ -329,23 +329,23 @@ class IssueGenerator {
    * 大きなファイル検出
    */
   async detectLargeFiles() {
-    const files = this.getAllSourceFiles();
-    const largeFiles = [];
-    
-    files.forEach(file => {
-      const stat = fs.statSync(file);
-      const sizeInKB = (stat.size / 1024).toFixed(2);
-      
+    const files = this.getAllSourceFiles()
+    const largeFiles = []
+
+    files.forEach((file) => {
+      const stat = fs.statSync(file)
+      const sizeInKB = (stat.size / 1024).toFixed(2)
+
       if (sizeInKB > 100) {
-        const lineCount = fs.readFileSync(file, 'utf-8').split('\n').length;
+        const lineCount = fs.readFileSync(file, 'utf-8').split('\n').length
         largeFiles.push({
           file: file.replace(process.cwd(), ''),
           size: `${sizeInKB}KB`,
-          lines: lineCount
-        });
+          lines: lineCount,
+        })
       }
-    });
-    
+    })
+
     if (largeFiles.length > 5) {
       this.issues.push({
         title: '📦 大きなファイルの分割推奨',
@@ -355,12 +355,12 @@ class IssueGenerator {
           actions: [
             'コンポーネントを小さく分割',
             '関連機能をモジュールに分離',
-            'コード分割とLazy Loadingの実装'
-          ]
+            'コード分割とLazy Loadingの実装',
+          ],
         }),
         labels: ['performance', 'refactoring', 'auto-generated'],
-        priority: 'medium'
-      });
+        priority: 'medium',
+      })
     }
   }
 
@@ -368,47 +368,47 @@ class IssueGenerator {
    * 複雑な関数検出
    */
   async detectComplexFunctions() {
-    const files = this.getJavaScriptFiles();
-    const complexFunctions = [];
-    
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf-8');
-      const lines = content.split('\n');
-      
-      let functionStart = -1;
-      let braceCount = 0;
-      
+    const files = this.getJavaScriptFiles()
+    const complexFunctions = []
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8')
+      const lines = content.split('\n')
+
+      let functionStart = -1
+      let braceCount = 0
+
       lines.forEach((line, index) => {
         // 関数定義の検出
         if (line.match(/function\s+\w+|const\s+\w+\s*=\s*\(|^\s*\w+\s*\(/)) {
           if (functionStart === -1) {
-            functionStart = index;
-            braceCount = 0;
+            functionStart = index
+            braceCount = 0
           }
         }
-        
+
         // ブレース カウント
-        braceCount += (line.match(/{/g) || []).length;
-        braceCount -= (line.match(/}/g) || []).length;
-        
+        braceCount += (line.match(/{/g) || []).length
+        braceCount -= (line.match(/}/g) || []).length
+
         // 関数終了
         if (functionStart !== -1 && braceCount === 0 && line.includes('}')) {
-          const functionLength = index - functionStart + 1;
-          
+          const functionLength = index - functionStart + 1
+
           if (functionLength > 50) {
             complexFunctions.push({
               file: file.replace(process.cwd(), ''),
               startLine: functionStart + 1,
               endLine: index + 1,
-              lines: functionLength
-            });
+              lines: functionLength,
+            })
           }
-          
-          functionStart = -1;
+
+          functionStart = -1
         }
-      });
-    });
-    
+      })
+    })
+
     if (complexFunctions.length > 10) {
       this.issues.push({
         title: '🔄 複雑な関数のリファクタリング',
@@ -419,12 +419,12 @@ class IssueGenerator {
             '長い関数を小さな関数に分割',
             '単一責任の原則を適用',
             'ヘルパー関数の抽出',
-            'ユニットテストの追加'
-          ]
+            'ユニットテストの追加',
+          ],
         }),
         labels: ['enhancement', 'refactoring', 'code-quality', 'auto-generated'],
-        priority: 'low'
-      });
+        priority: 'low',
+      })
     }
   }
 
@@ -432,29 +432,29 @@ class IssueGenerator {
    * 改善提案分析
    */
   async analyzeEnhancements() {
-    console.log('✨ 改善提案分析...');
-    
+    console.log('✨ 改善提案分析...')
+
     // TypeScript未使用チェック
-    await this.checkTypeScriptAdoption();
-    
+    await this.checkTypeScriptAdoption()
+
     // テストカバレッジチェック
-    await this.checkTestCoverage();
-    
+    await this.checkTestCoverage()
+
     // ドキュメントチェック
-    await this.checkDocumentation();
+    await this.checkDocumentation()
   }
 
   /**
    * TypeScript採用チェック
    */
   async checkTypeScriptAdoption() {
-    const jsFiles = this.getJavaScriptFiles();
-    const tsFiles = this.getTypeScriptFiles();
-    
-    const jsCount = jsFiles.length;
-    const tsCount = tsFiles.length;
-    const tsRatio = tsCount / (jsCount + tsCount) * 100;
-    
+    const jsFiles = this.getJavaScriptFiles()
+    const tsFiles = this.getTypeScriptFiles()
+
+    const jsCount = jsFiles.length
+    const tsCount = tsFiles.length
+    const tsRatio = (tsCount / (jsCount + tsCount)) * 100
+
     if (tsRatio < 50 && jsCount > 20) {
       this.issues.push({
         title: '📘 TypeScript採用の推奨',
@@ -463,18 +463,18 @@ class IssueGenerator {
           details: {
             jsFiles: jsCount,
             tsFiles: tsCount,
-            recommendation: 'TypeScriptへの段階的移行を推奨'
+            recommendation: 'TypeScriptへの段階的移行を推奨',
           },
           actions: [
             'tsconfig.jsonの設定',
             '新規ファイルはTypeScriptで作成',
             '既存ファイルの段階的移行',
-            '型定義ファイルの追加'
-          ]
+            '型定義ファイルの追加',
+          ],
         }),
         labels: ['enhancement', 'typescript', 'auto-generated'],
-        priority: 'low'
-      });
+        priority: 'low',
+      })
     }
   }
 
@@ -482,11 +482,11 @@ class IssueGenerator {
    * テストカバレッジチェック
    */
   async checkTestCoverage() {
-    const testFiles = this.getTestFiles();
-    const sourceFiles = this.getJavaScriptFiles().filter(f => !f.includes('test'));
-    
-    const testRatio = testFiles.length / sourceFiles.length;
-    
+    const testFiles = this.getTestFiles()
+    const sourceFiles = this.getJavaScriptFiles().filter((f) => !f.includes('test'))
+
+    const testRatio = testFiles.length / sourceFiles.length
+
     if (testRatio < 0.5) {
       this.issues.push({
         title: '🧪 テストカバレッジの向上',
@@ -495,18 +495,18 @@ class IssueGenerator {
           details: {
             sourceFiles: sourceFiles.length,
             testFiles: testFiles.length,
-            missingTests: sourceFiles.length - testFiles.length
+            missingTests: sourceFiles.length - testFiles.length,
           },
           actions: [
             'ユニットテストの追加',
             '統合テストの実装',
             'テストカバレッジ目標の設定（80%以上）',
-            'CI/CDパイプラインでカバレッジチェック'
-          ]
+            'CI/CDパイプラインでカバレッジチェック',
+          ],
         }),
         labels: ['enhancement', 'testing', 'auto-generated'],
-        priority: 'medium'
-      });
+        priority: 'medium',
+      })
     }
   }
 
@@ -514,16 +514,16 @@ class IssueGenerator {
    * ドキュメントチェック
    */
   async checkDocumentation() {
-    const hasReadme = fs.existsSync('README.md');
-    const hasContributing = fs.existsSync('CONTRIBUTING.md');
-    const hasChangelog = fs.existsSync('CHANGELOG.md');
-    const hasLicense = fs.existsSync('LICENSE');
-    
-    const missingDocs = [];
-    if (!hasContributing) missingDocs.push('CONTRIBUTING.md');
-    if (!hasChangelog) missingDocs.push('CHANGELOG.md');
-    if (!hasLicense) missingDocs.push('LICENSE');
-    
+    const hasReadme = fs.existsSync('README.md')
+    const hasContributing = fs.existsSync('CONTRIBUTING.md')
+    const hasChangelog = fs.existsSync('CHANGELOG.md')
+    const hasLicense = fs.existsSync('LICENSE')
+
+    const missingDocs = []
+    if (!hasContributing) missingDocs.push('CONTRIBUTING.md')
+    if (!hasChangelog) missingDocs.push('CHANGELOG.md')
+    if (!hasLicense) missingDocs.push('LICENSE')
+
     if (missingDocs.length > 0) {
       this.issues.push({
         title: '📚 プロジェクトドキュメントの整備',
@@ -535,14 +535,14 @@ class IssueGenerator {
               'README.md': hasReadme,
               'CONTRIBUTING.md': hasContributing,
               'CHANGELOG.md': hasChangelog,
-              'LICENSE': hasLicense
-            }
+              LICENSE: hasLicense,
+            },
           },
-          actions: missingDocs.map(doc => `${doc}を作成`)
+          actions: missingDocs.map((doc) => `${doc}を作成`),
         }),
         labels: ['documentation', 'good-first-issue', 'auto-generated'],
-        priority: 'low'
-      });
+        priority: 'low',
+      })
     }
   }
 
@@ -550,13 +550,13 @@ class IssueGenerator {
    * メンテナンス分析
    */
   async analyzeMaintenance() {
-    console.log('🔧 メンテナンス分析...');
-    
+    console.log('🔧 メンテナンス分析...')
+
     // 依存関係の更新チェック
-    await this.checkDependencyUpdates();
-    
+    await this.checkDependencyUpdates()
+
     // 未使用コードチェック
-    await this.checkUnusedCode();
+    await this.checkUnusedCode()
   }
 
   /**
@@ -566,34 +566,34 @@ class IssueGenerator {
     try {
       const outdatedOutput = execSync('npm outdated --json', {
         encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore']
-      });
-      
+        stdio: ['pipe', 'pipe', 'ignore'],
+      })
+
       if (outdatedOutput) {
-        const outdated = JSON.parse(outdatedOutput);
-        const packages = Object.keys(outdated);
-        
+        const outdated = JSON.parse(outdatedOutput)
+        const packages = Object.keys(outdated)
+
         if (packages.length > 10) {
           this.issues.push({
             title: '📦 依存関係の更新',
             body: this.formatIssueBody({
               summary: `${packages.length}個のパッケージに更新があります`,
-              details: packages.slice(0, 10).map(pkg => ({
+              details: packages.slice(0, 10).map((pkg) => ({
                 package: pkg,
                 current: outdated[pkg].current,
                 wanted: outdated[pkg].wanted,
-                latest: outdated[pkg].latest
+                latest: outdated[pkg].latest,
               })),
               actions: [
                 'npm updateで互換性のある更新を適用',
                 'メジャーバージョンアップの影響を確認',
                 'テストの実行と動作確認',
-                '定期的な依存関係更新プロセスの確立'
-              ]
+                '定期的な依存関係更新プロセスの確立',
+              ],
             }),
             labels: ['maintenance', 'dependencies', 'auto-generated'],
-            priority: 'low'
-          });
+            priority: 'low',
+          })
         }
       }
     } catch (error) {
@@ -606,29 +606,29 @@ class IssueGenerator {
    */
   async checkUnusedCode() {
     // 簡易的な未使用export検出
-    const files = this.getJavaScriptFiles();
-    const exports = [];
-    const imports = [];
-    
-    files.forEach(file => {
-      const content = fs.readFileSync(file, 'utf-8');
-      
+    const files = this.getJavaScriptFiles()
+    const exports = []
+    const imports = []
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8')
+
       // export検出
-      const exportMatches = content.match(/export\s+(const|function|class|default)\s+(\w+)/g) || [];
-      exportMatches.forEach(match => {
-        const name = match.split(/\s+/).pop();
-        exports.push({ name, file });
-      });
-      
+      const exportMatches = content.match(/export\s+(const|function|class|default)\s+(\w+)/g) || []
+      exportMatches.forEach((match) => {
+        const name = match.split(/\s+/).pop()
+        exports.push({ name, file })
+      })
+
       // import検出
-      const importMatches = content.match(/import\s+.*\s+from/g) || [];
-      importMatches.forEach(match => {
-        imports.push(match);
-      });
-    });
-    
+      const importMatches = content.match(/import\s+.*\s+from/g) || []
+      importMatches.forEach((match) => {
+        imports.push(match)
+      })
+    })
+
     // この分析は簡易版のため、より詳細な分析が必要
-    console.log(`   エクスポート: ${exports.length}個, インポート: ${imports.length}個`);
+    console.log(`   エクスポート: ${exports.length}個, インポート: ${imports.length}個`)
   }
 
   /**
@@ -644,12 +644,12 @@ class IssueGenerator {
           'ESLintエラーをすべて修正',
           '警告を可能な限り削減',
           'ESLint設定の見直し',
-          'pre-commit hookでESLintを実行'
-        ]
+          'pre-commit hookでESLintを実行',
+        ],
       }),
       labels: ['bug', 'code-quality', 'auto-generated'],
-      priority: data.severity
-    });
+      priority: data.severity,
+    })
   }
 
   generateSecurityIssue(data) {
@@ -662,12 +662,12 @@ class IssueGenerator {
           'npm audit fixで自動修正を試行',
           'Critical/High脆弱性を優先的に対応',
           '依存関係の更新または代替ライブラリの検討',
-          'セキュリティスキャンをCI/CDに統合'
-        ]
+          'セキュリティスキャンをCI/CDに統合',
+        ],
       }),
       labels: ['security', 'dependencies', 'critical', 'auto-generated'],
-      priority: 'critical'
-    });
+      priority: 'critical',
+    })
   }
 
   generatePerformanceIssue(data) {
@@ -681,102 +681,111 @@ class IssueGenerator {
           '動的インポートの活用',
           '未使用コードの削除',
           '画像・アセットの最適化',
-          'Tree Shakingの設定確認'
-        ]
+          'Tree Shakingの設定確認',
+        ],
       }),
       labels: ['performance', 'optimization', 'auto-generated'],
-      priority: 'medium'
-    });
+      priority: 'medium',
+    })
   }
 
   /**
    * Issue本文フォーマット
    */
   formatIssueBody({ summary, details, actions }) {
-    let body = `## 📋 概要\n\n${summary}\n\n`;
-    
+    let body = `## 📋 概要\n\n${summary}\n\n`
+
     if (details) {
-      body += `## 📊 詳細\n\n`;
+      body += `## 📊 詳細\n\n`
       if (Array.isArray(details)) {
-        details.forEach(item => {
+        details.forEach((item) => {
           if (typeof item === 'object') {
-            body += `- ${JSON.stringify(item, null, 2)}\n`;
+            body += `- ${JSON.stringify(item, null, 2)}\n`
           } else {
-            body += `- ${item}\n`;
+            body += `- ${item}\n`
           }
-        });
+        })
       } else if (typeof details === 'object') {
-        body += '```json\n' + JSON.stringify(details, null, 2) + '\n```\n';
+        body += '```json\n' + JSON.stringify(details, null, 2) + '\n```\n'
       } else {
-        body += details + '\n';
+        body += details + '\n'
       }
-      body += '\n';
+      body += '\n'
     }
-    
+
     if (actions && actions.length > 0) {
-      body += `## ✅ 対応内容\n\n`;
-      actions.forEach(action => {
-        body += `- [ ] ${action}\n`;
-      });
-      body += '\n';
+      body += `## ✅ 対応内容\n\n`
+      actions.forEach((action) => {
+        body += `- [ ] ${action}\n`
+      })
+      body += '\n'
     }
-    
-    body += `## 🤖 自動生成情報\n\n`;
-    body += `- 生成日時: ${new Date().toISOString()}\n`;
-    body += `- 生成元: IDD Issue Generator v1.0.0\n`;
-    body += `- 分析基準: コード品質・セキュリティ・パフォーマンス\n\n`;
-    body += `---\n`;
-    body += `*このIssueはコード分析により自動生成されました。必要に応じて内容を調整してください。*`;
-    
-    return body;
+
+    body += `## 🤖 自動生成情報\n\n`
+    body += `- 生成日時: ${new Date().toISOString()}\n`
+    body += `- 生成元: IDD Issue Generator v1.0.0\n`
+    body += `- 分析基準: コード品質・セキュリティ・パフォーマンス\n\n`
+    body += `---\n`
+    body += `*このIssueはコード分析により自動生成されました。必要に応じて内容を調整してください。*`
+
+    return body
   }
 
   /**
    * ヘルパー関数
    */
   getJavaScriptFiles() {
-    return this.findFiles('src', ['.js', '.jsx']);
+    return this.findFiles('src', ['.js', '.jsx'])
   }
 
   getTypeScriptFiles() {
-    return this.findFiles('src', ['.ts', '.tsx']);
+    return this.findFiles('src', ['.ts', '.tsx'])
   }
 
   getTestFiles() {
-    return this.findFiles('src', ['.test.js', '.test.jsx', '.test.ts', '.test.tsx', '.spec.js', '.spec.jsx', '.spec.ts', '.spec.tsx']);
+    return this.findFiles('src', [
+      '.test.js',
+      '.test.jsx',
+      '.test.ts',
+      '.test.tsx',
+      '.spec.js',
+      '.spec.jsx',
+      '.spec.ts',
+      '.spec.tsx',
+    ])
   }
 
   getAllSourceFiles() {
-    return [...this.getJavaScriptFiles(), ...this.getTypeScriptFiles()];
+    return [...this.getJavaScriptFiles(), ...this.getTypeScriptFiles()]
   }
 
   findFiles(dir, extensions) {
-    const files = [];
-    
+    const files = []
+
     if (!fs.existsSync(dir)) {
-      return files;
+      return files
     }
-    
+
     const walk = (currentDir) => {
-      const entries = fs.readdirSync(currentDir);
-      
-      entries.forEach(entry => {
-        const fullPath = path.join(currentDir, entry);
-        const stat = fs.statSync(fullPath);
-        
+      const entries = fs.readdirSync(currentDir)
+
+      entries.forEach((entry) => {
+        const fullPath = path.join(currentDir, entry)
+        const stat = fs.statSync(fullPath)
+
         if (stat.isDirectory() && !entry.startsWith('.') && entry !== 'node_modules') {
-          walk(fullPath);
+          walk(fullPath)
         } else if (stat.isFile()) {
-          const ext = path.extname(entry);
-          if (extensions.some(e => entry.endsWith(e))) {
-            files.push(fullPath);
+          const ext = path.extname(entry)
+          if (extensions.some((e) => entry.endsWith(e))) {
+            files.push(fullPath)
           }
         }
-      });
-    };
-    
-    walk(dir);
-    return files;
+      })
+    }
+
+    walk(dir)
+    return files
   }
 
   /**
@@ -788,82 +797,82 @@ class IssueGenerator {
       summary: {
         totalIssues: this.issues.length,
         byPriority: {
-          critical: this.issues.filter(i => i.priority === 'critical').length,
-          high: this.issues.filter(i => i.priority === 'high').length,
-          medium: this.issues.filter(i => i.priority === 'medium').length,
-          low: this.issues.filter(i => i.priority === 'low').length
+          critical: this.issues.filter((i) => i.priority === 'critical').length,
+          high: this.issues.filter((i) => i.priority === 'high').length,
+          medium: this.issues.filter((i) => i.priority === 'medium').length,
+          low: this.issues.filter((i) => i.priority === 'low').length,
         },
         byCategory: {
-          bug: this.issues.filter(i => i.labels.includes('bug')).length,
-          security: this.issues.filter(i => i.labels.includes('security')).length,
-          performance: this.issues.filter(i => i.labels.includes('performance')).length,
-          enhancement: this.issues.filter(i => i.labels.includes('enhancement')).length,
-          maintenance: this.issues.filter(i => i.labels.includes('maintenance')).length
-        }
+          bug: this.issues.filter((i) => i.labels.includes('bug')).length,
+          security: this.issues.filter((i) => i.labels.includes('security')).length,
+          performance: this.issues.filter((i) => i.labels.includes('performance')).length,
+          enhancement: this.issues.filter((i) => i.labels.includes('enhancement')).length,
+          maintenance: this.issues.filter((i) => i.labels.includes('maintenance')).length,
+        },
       },
-      issues: this.issues
-    };
-    
+      issues: this.issues,
+    }
+
     // JSON出力
-    fs.writeFileSync('issue-generation-report.json', JSON.stringify(report, null, 2));
-    
+    fs.writeFileSync('issue-generation-report.json', JSON.stringify(report, null, 2))
+
     // Markdown出力
-    let markdown = `# 📊 Issue自動生成レポート\n\n`;
-    markdown += `**生成日時**: ${report.timestamp}\n\n`;
-    markdown += `## 📈 サマリー\n\n`;
-    markdown += `- **総Issue数**: ${report.summary.totalIssues}\n`;
-    markdown += `- **Critical**: ${report.summary.byPriority.critical}\n`;
-    markdown += `- **High**: ${report.summary.byPriority.high}\n`;
-    markdown += `- **Medium**: ${report.summary.byPriority.medium}\n`;
-    markdown += `- **Low**: ${report.summary.byPriority.low}\n\n`;
-    markdown += `## 📝 生成されたIssue\n\n`;
-    
+    let markdown = `# 📊 Issue自動生成レポート\n\n`
+    markdown += `**生成日時**: ${report.timestamp}\n\n`
+    markdown += `## 📈 サマリー\n\n`
+    markdown += `- **総Issue数**: ${report.summary.totalIssues}\n`
+    markdown += `- **Critical**: ${report.summary.byPriority.critical}\n`
+    markdown += `- **High**: ${report.summary.byPriority.high}\n`
+    markdown += `- **Medium**: ${report.summary.byPriority.medium}\n`
+    markdown += `- **Low**: ${report.summary.byPriority.low}\n\n`
+    markdown += `## 📝 生成されたIssue\n\n`
+
     this.issues.forEach((issue, index) => {
-      markdown += `### ${index + 1}. ${issue.title}\n`;
-      markdown += `- **優先度**: ${issue.priority}\n`;
-      markdown += `- **ラベル**: ${issue.labels.join(', ')}\n\n`;
-    });
-    
-    fs.writeFileSync('issue-generation-report.md', markdown);
-    
-    return report;
+      markdown += `### ${index + 1}. ${issue.title}\n`
+      markdown += `- **優先度**: ${issue.priority}\n`
+      markdown += `- **ラベル**: ${issue.labels.join(', ')}\n\n`
+    })
+
+    fs.writeFileSync('issue-generation-report.md', markdown)
+
+    return report
   }
 
   /**
    * 実行
    */
   async run() {
-    console.log('🚀 Issue自動生成エンジン起動\n');
-    console.log('='.repeat(60));
-    
-    await this.analyzeCode();
-    
-    const report = this.generateReport();
-    
-    console.log('\n' + '='.repeat(60));
-    console.log('📊 生成結果サマリー');
-    console.log('='.repeat(60));
-    console.log(`✅ ${this.issues.length}件のIssue候補を生成`);
-    console.log(`   - Critical: ${report.summary.byPriority.critical}`);
-    console.log(`   - High: ${report.summary.byPriority.high}`);
-    console.log(`   - Medium: ${report.summary.byPriority.medium}`);
-    console.log(`   - Low: ${report.summary.byPriority.low}`);
-    console.log('='.repeat(60));
-    
-    console.log('\n📄 レポート出力:');
-    console.log('   - issue-generation-report.json');
-    console.log('   - issue-generation-report.md');
-    
+    console.log('🚀 Issue自動生成エンジン起動\n')
+    console.log('='.repeat(60))
+
+    await this.analyzeCode()
+
+    const report = this.generateReport()
+
+    console.log('\n' + '='.repeat(60))
+    console.log('📊 生成結果サマリー')
+    console.log('='.repeat(60))
+    console.log(`✅ ${this.issues.length}件のIssue候補を生成`)
+    console.log(`   - Critical: ${report.summary.byPriority.critical}`)
+    console.log(`   - High: ${report.summary.byPriority.high}`)
+    console.log(`   - Medium: ${report.summary.byPriority.medium}`)
+    console.log(`   - Low: ${report.summary.byPriority.low}`)
+    console.log('='.repeat(60))
+
+    console.log('\n📄 レポート出力:')
+    console.log('   - issue-generation-report.json')
+    console.log('   - issue-generation-report.md')
+
     // GitHub Actions用の出力
     if (process.env.GITHUB_ACTIONS) {
-      console.log(`::set-output name=issues::${JSON.stringify(this.issues)}`);
-      console.log(`::set-output name=total::${this.issues.length}`);
+      console.log(`::set-output name=issues::${JSON.stringify(this.issues)}`)
+      console.log(`::set-output name=total::${this.issues.length}`)
     }
   }
 }
 
 // メイン実行
-const generator = new IssueGenerator();
-generator.run().catch(console.error);
+const generator = new IssueGenerator()
+generator.run().catch(console.error)
 
-export default IssueGenerator;
+export default IssueGenerator

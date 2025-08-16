@@ -4,10 +4,10 @@
 
 ## エージェント選択ガイド
 
-| エージェント | 適用場面 | 主な技術 |
-|------------|----------|----------|  
-| **devops-engineer** | CI/CD・デプロイ自動化 | GitHub Actions, Docker, K8s |
-| **database-admin** | データベース設計・運用 | PostgreSQL, Redis, 最適化 |
+| エージェント        | 適用場面               | 主な技術                    |
+| ------------------- | ---------------------- | --------------------------- |
+| **devops-engineer** | CI/CD・デプロイ自動化  | GitHub Actions, Docker, K8s |
+| **database-admin**  | データベース設計・運用 | PostgreSQL, Redis, 最適化   |
 
 ## 推奨使用パターン
 

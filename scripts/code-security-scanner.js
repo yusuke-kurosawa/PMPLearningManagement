@@ -3,19 +3,19 @@
  * コードセキュリティスキャナー
  * 静的コード分析によるセキュリティホール検出システム
  * SAST（Static Application Security Testing）の実装
- * 
+ *
  * @author PMPLearningManagement Security Team
  * @version 1.0.0
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import crypto from 'crypto';
+import { promises as fs } from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import crypto from 'crypto'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROJECT_ROOT = path.resolve(__dirname, '..');
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const PROJECT_ROOT = path.resolve(__dirname, '..')
 
 class CodeSecurityScanner {
   constructor() {
@@ -24,13 +24,13 @@ class CodeSecurityScanner {
       summary: {
         filesScanned: 0,
         issuesFound: 0,
-        riskScore: 0
+        riskScore: 0,
       },
       issues: [],
       codeQuality: {},
       securityPatterns: {},
-      recommendations: []
-    };
+      recommendations: [],
+    }
 
     // セキュリティパターン定義
     this.securityPatterns = {
@@ -38,19 +38,20 @@ class CodeSecurityScanner {
       injection: {
         sql: [
           {
-            pattern: /['"][^'"]*\s*\+\s*[^'"]*['"].*?(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/gi,
+            pattern:
+              /['"][^'"]*\s*\+\s*[^'"]*['"].*?(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/gi,
             severity: 'critical',
             cwe: 'CWE-89',
             description: 'SQL インジェクションの可能性があります',
-            examples: ['"SELECT * FROM users WHERE id = " + userInput']
+            examples: ['"SELECT * FROM users WHERE id = " + userInput'],
           },
           {
             pattern: /\$\{[^}]*\}.*?(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/gi,
             severity: 'high',
             cwe: 'CWE-89',
             description: 'テンプレートリテラルによるSQL注入の可能性',
-            examples: ['`SELECT * FROM users WHERE name = ${userName}`']
-          }
+            examples: ['`SELECT * FROM users WHERE name = ${userName}`'],
+          },
         ],
         xss: [
           {
@@ -58,22 +59,22 @@ class CodeSecurityScanner {
             severity: 'high',
             cwe: 'CWE-79',
             description: 'XSS（クロスサイトスクリプティング）の可能性があります',
-            examples: ['element.innerHTML = userInput + "text"']
+            examples: ['element.innerHTML = userInput + "text"'],
           },
           {
             pattern: /document\.write\s*\([^)]*\+|document\.write\s*\([^)]*\$\{/gi,
             severity: 'high',
             cwe: 'CWE-79',
             description: 'document.write による XSS の可能性',
-            examples: ['document.write("Hello " + userName)']
+            examples: ['document.write("Hello " + userName)'],
           },
           {
             pattern: /dangerouslySetInnerHTML\s*:\s*\{\s*__html\s*:\s*[^}]*\}/gi,
             severity: 'moderate',
             cwe: 'CWE-79',
             description: 'dangerouslySetInnerHTML の使用を確認してください',
-            examples: ['<div dangerouslySetInnerHTML={{__html: userContent}} />']
-          }
+            examples: ['<div dangerouslySetInnerHTML={{__html: userContent}} />'],
+          },
         ],
         command: [
           {
@@ -81,16 +82,16 @@ class CodeSecurityScanner {
             severity: 'critical',
             cwe: 'CWE-78',
             description: 'コマンドインジェクションの可能性があります',
-            examples: ['exec("rm -rf " + userPath)']
+            examples: ['exec("rm -rf " + userPath)'],
           },
           {
             pattern: /spawn\s*\([^)]*\+|spawn\s*\([^)]*\$\{/gi,
             severity: 'high',
             cwe: 'CWE-78',
             description: 'プロセス生成時のコマンドインジェクション',
-            examples: ['spawn("git", ["clone", userRepo])']
-          }
-        ]
+            examples: ['spawn("git", ["clone", userRepo])'],
+          },
+        ],
       },
 
       // 中リスク：暗号化・認証問題
@@ -100,22 +101,22 @@ class CodeSecurityScanner {
           severity: 'moderate',
           cwe: 'CWE-327',
           description: '弱いハッシュアルゴリズムの使用',
-          examples: ['crypto.createHash("md5")']
+          examples: ['crypto.createHash("md5")'],
         },
         {
           pattern: /Math\.random\s*\(\s*\).*(?:password|token|key|secret)/gi,
           severity: 'high',
           cwe: 'CWE-338',
           description: '暗号学的に安全でない乱数生成',
-          examples: ['const token = Math.random().toString(36)']
+          examples: ['const token = Math.random().toString(36)'],
         },
         {
           pattern: /btoa\s*\(|atob\s*\(/gi,
           severity: 'low',
           cwe: 'CWE-327',
           description: 'Base64は暗号化ではありません',
-          examples: ['const encoded = btoa(password)']
-        }
+          examples: ['const encoded = btoa(password)'],
+        },
       ],
 
       // 情報漏洩リスク
@@ -125,22 +126,22 @@ class CodeSecurityScanner {
           severity: 'moderate',
           cwe: 'CWE-532',
           description: '機密情報のログ出力の可能性',
-          examples: ['console.log("User password:", password)']
+          examples: ['console.log("User password:", password)'],
         },
         {
           pattern: /alert\s*\([^)]*(?:password|token|key|secret)/gi,
           severity: 'high',
           cwe: 'CWE-532',
           description: 'アラートでの機密情報表示',
-          examples: ['alert("Your token: " + token)']
+          examples: ['alert("Your token: " + token)'],
         },
         {
           pattern: /localStorage\.setItem\s*\([^)]*(?:password|token|key)/gi,
           severity: 'moderate',
           cwe: 'CWE-922',
           description: 'ブラウザストレージでの機密情報保存',
-          examples: ['localStorage.setItem("token", userToken)']
-        }
+          examples: ['localStorage.setItem("token", userToken)'],
+        },
       ],
 
       // アクセス制御・認証
@@ -150,40 +151,42 @@ class CodeSecurityScanner {
           severity: 'critical',
           cwe: 'CWE-95',
           description: 'eval() の使用は極めて危険です',
-          examples: ['eval(userInput)']
+          examples: ['eval(userInput)'],
         },
         {
           pattern: /new\s+Function\s*\([^)]*\)/gi,
           severity: 'high',
           cwe: 'CWE-95',
           description: 'Function コンストラクタによる動的コード実行',
-          examples: ['new Function("return " + userCode)()']
+          examples: ['new Function("return " + userCode)()'],
         },
         {
           pattern: /setTimeout\s*\(\s*['"][^'"]*['"]\s*,|setInterval\s*\(\s*['"][^'"]*['"]\s*,/gi,
           severity: 'moderate',
           cwe: 'CWE-95',
           description: 'タイマー関数での文字列実行',
-          examples: ['setTimeout("doSomething()", 1000)']
-        }
+          examples: ['setTimeout("doSomething()", 1000)'],
+        },
       ],
 
       // 入力検証
       validation: [
         {
-          pattern: /req\.(?:params|query|body)\.[^.\s]*\s*(?:(?!.*(?:validate|sanitize|escape|trim))[^;\n])*?(?:SELECT|INSERT|UPDATE|DELETE|exec|eval)/gi,
+          pattern:
+            /req\.(?:params|query|body)\.[^.\s]*\s*(?:(?!.*(?:validate|sanitize|escape|trim))[^;\n])*?(?:SELECT|INSERT|UPDATE|DELETE|exec|eval)/gi,
           severity: 'high',
           cwe: 'CWE-20',
           description: '入力値の検証が不十分です',
-          examples: ['const id = req.params.id; db.query("SELECT * FROM users WHERE id = " + id)']
+          examples: ['const id = req.params.id; db.query("SELECT * FROM users WHERE id = " + id)'],
         },
         {
-          pattern: /parseInt\s*\([^,)]*\)\s*(?:(?!.*isNaN)[^;\n])*?(?:SELECT|INSERT|UPDATE|DELETE)/gi,
+          pattern:
+            /parseInt\s*\([^,)]*\)\s*(?:(?!.*isNaN)[^;\n])*?(?:SELECT|INSERT|UPDATE|DELETE)/gi,
           severity: 'moderate',
           cwe: 'CWE-20',
           description: 'parseInt後のNaNチェックが不十分',
-          examples: ['const id = parseInt(req.params.id); db.query(...)']
-        }
+          examples: ['const id = parseInt(req.params.id); db.query(...)'],
+        },
       ],
 
       // React固有のセキュリティ問題
@@ -193,15 +196,15 @@ class CodeSecurityScanner {
           severity: 'moderate',
           cwe: 'CWE-79',
           description: 'React.createElementでのdangerouslySetInnerHTML使用',
-          examples: ['React.createElement("div", {dangerouslySetInnerHTML: {__html: html}})']
+          examples: ['React.createElement("div", {dangerouslySetInnerHTML: {__html: html}})'],
         },
         {
           pattern: /href\s*=\s*['"]javascript:/gi,
           severity: 'high',
           cwe: 'CWE-79',
           description: 'javascript: スキームの使用は危険です',
-          examples: ['<a href="javascript:alert(1)">Link</a>']
-        }
+          examples: ['<a href="javascript:alert(1)">Link</a>'],
+        },
       ],
 
       // Node.js固有
@@ -211,69 +214,68 @@ class CodeSecurityScanner {
           severity: 'info',
           cwe: 'CWE-526',
           description: '環境変数での機密情報管理を確認',
-          examples: ['const dbPassword = process.env.DB_PASSWORD']
+          examples: ['const dbPassword = process.env.DB_PASSWORD'],
         },
         {
           pattern: /require\s*\(\s*[^)]*\+|require\s*\(\s*\$\{/gi,
           severity: 'high',
           cwe: 'CWE-95',
           description: '動的なモジュール読み込みは危険です',
-          examples: ['require("./" + userModuleName)']
-        }
-      ]
-    };
+          examples: ['require("./" + userModuleName)'],
+        },
+      ],
+    }
 
     // 安全なパターン（誤検出を減らすため）
     this.safePatterns = [
       /\/\*[\s\S]*?\*\/|\/\/.*$/gm, // コメント
       /console\.log\s*\(\s*['"](?:debug|info|test)['"]/gi, // デバッグログ
-      /localStorage\.setItem\s*\(\s*['"]theme['"]|localStorage\.setItem\s*\(\s*['"]lang['"]/gi // テーマ・言語設定
-    ];
+      /localStorage\.setItem\s*\(\s*['"]theme['"]|localStorage\.setItem\s*\(\s*['"]lang['"]/gi, // テーマ・言語設定
+    ]
   }
 
   /**
    * メインスキャン実行
    */
   async runScan() {
-    console.log('🔍 コードセキュリティスキャンを開始します...');
-    console.log(`📅 実行時刻: ${this.results.timestamp}`);
+    console.log('🔍 コードセキュリティスキャンを開始します...')
+    console.log(`📅 実行時刻: ${this.results.timestamp}`)
 
     try {
       // ソースファイルの取得
-      const sourceFiles = await this.getSourceFiles();
-      this.results.summary.filesScanned = sourceFiles.length;
+      const sourceFiles = await this.getSourceFiles()
+      this.results.summary.filesScanned = sourceFiles.length
 
-      console.log(`📂 ${sourceFiles.length} ファイルをスキャンします`);
+      console.log(`📂 ${sourceFiles.length} ファイルをスキャンします`)
 
       // 各ファイルをスキャン
       for (const filePath of sourceFiles) {
-        await this.scanFile(filePath);
+        await this.scanFile(filePath)
       }
 
       // コード品質メトリクスの計算
-      this.calculateCodeQualityMetrics();
+      this.calculateCodeQualityMetrics()
 
       // セキュリティパターン統計
-      this.generateSecurityPatternStats();
+      this.generateSecurityPatternStats()
 
       // リスクスコアの計算
-      this.calculateRiskScore();
+      this.calculateRiskScore()
 
       // 推奨事項の生成
-      this.generateRecommendations();
+      this.generateRecommendations()
 
       // レポート生成
-      await this.generateReport();
+      await this.generateReport()
 
-      console.log('✅ コードセキュリティスキャンが完了しました');
-      console.log(`📊 検出された問題: ${this.results.summary.issuesFound} 件`);
-      console.log(`🎯 リスクスコア: ${this.results.summary.riskScore}/100`);
+      console.log('✅ コードセキュリティスキャンが完了しました')
+      console.log(`📊 検出された問題: ${this.results.summary.issuesFound} 件`)
+      console.log(`🎯 リスクスコア: ${this.results.summary.riskScore}/100`)
 
-      return this.results;
-
+      return this.results
     } catch (error) {
-      console.error('❌ コードセキュリティスキャンでエラーが発生しました:', error.message);
-      throw error;
+      console.error('❌ コードセキュリティスキャンでエラーが発生しました:', error.message)
+      throw error
     }
   }
 
@@ -282,30 +284,34 @@ class CodeSecurityScanner {
    */
   async scanFile(filePath) {
     try {
-      const content = await fs.readFile(filePath, 'utf8');
-      const relativePath = path.relative(PROJECT_ROOT, filePath);
-      
+      const content = await fs.readFile(filePath, 'utf8')
+      const relativePath = path.relative(PROJECT_ROOT, filePath)
+
       // 各セキュリティパターンカテゴリをチェック
       for (const [categoryName, patterns] of Object.entries(this.securityPatterns)) {
         if (Array.isArray(patterns)) {
           // 単純配列の場合
           for (const pattern of patterns) {
-            const issues = this.findPatternInCode(content, pattern, relativePath, categoryName);
-            this.results.issues.push(...issues);
+            const issues = this.findPatternInCode(content, pattern, relativePath, categoryName)
+            this.results.issues.push(...issues)
           }
         } else {
           // ネストされたオブジェクトの場合
           for (const [subCategory, subPatterns] of Object.entries(patterns)) {
             for (const pattern of subPatterns) {
-              const issues = this.findPatternInCode(content, pattern, relativePath, `${categoryName}.${subCategory}`);
-              this.results.issues.push(...issues);
+              const issues = this.findPatternInCode(
+                content,
+                pattern,
+                relativePath,
+                `${categoryName}.${subCategory}`
+              )
+              this.results.issues.push(...issues)
             }
           }
         }
       }
-
     } catch (error) {
-      console.warn(`⚠️ ファイルスキャンエラー: ${filePath}`, error.message);
+      console.warn(`⚠️ ファイルスキャンエラー: ${filePath}`, error.message)
     }
   }
 
@@ -313,20 +319,20 @@ class CodeSecurityScanner {
    * コード内でのパターンマッチング
    */
   findPatternInCode(content, patternDef, filePath, category) {
-    const issues = [];
-    
+    const issues = []
+
     // セーフパターンに一致する部分を除外
-    let cleanContent = content;
+    let cleanContent = content
     for (const safePattern of this.safePatterns) {
-      cleanContent = cleanContent.replace(safePattern, ' '.repeat(50)); // 置き換えて位置をキープ
+      cleanContent = cleanContent.replace(safePattern, ' '.repeat(50)) // 置き換えて位置をキープ
     }
 
-    const matches = cleanContent.match(patternDef.pattern);
+    const matches = cleanContent.match(patternDef.pattern)
     if (matches) {
-      matches.forEach(match => {
-        const lineNumber = this.getLineNumber(content, match);
-        const context = this.getCodeContext(content, lineNumber);
-        
+      matches.forEach((match) => {
+        const lineNumber = this.getLineNumber(content, match)
+        const context = this.getCodeContext(content, lineNumber)
+
         issues.push({
           category: category,
           severity: patternDef.severity,
@@ -337,39 +343,37 @@ class CodeSecurityScanner {
           description: patternDef.description,
           context: context,
           examples: patternDef.examples,
-          remediation: this.getRemediation(patternDef.cwe)
-        });
-      });
+          remediation: this.getRemediation(patternDef.cwe),
+        })
+      })
     }
 
-    return issues;
+    return issues
   }
 
   /**
    * マッチした内容の行番号を取得
    */
   getLineNumber(content, match) {
-    const index = content.indexOf(match);
-    if (index === -1) return 0;
-    
-    return content.substring(0, index).split('\n').length;
+    const index = content.indexOf(match)
+    if (index === -1) return 0
+
+    return content.substring(0, index).split('\n').length
   }
 
   /**
    * コードのコンテキスト取得
    */
   getCodeContext(content, lineNumber, contextLines = 2) {
-    const lines = content.split('\n');
-    const startLine = Math.max(0, lineNumber - contextLines - 1);
-    const endLine = Math.min(lines.length, lineNumber + contextLines);
-    
-    return lines
-      .slice(startLine, endLine)
-      .map((line, index) => ({
-        number: startLine + index + 1,
-        content: line.trim(),
-        isMatch: startLine + index + 1 === lineNumber
-      }));
+    const lines = content.split('\n')
+    const startLine = Math.max(0, lineNumber - contextLines - 1)
+    const endLine = Math.min(lines.length, lineNumber + contextLines)
+
+    return lines.slice(startLine, endLine).map((line, index) => ({
+      number: startLine + index + 1,
+      content: line.trim(),
+      isMatch: startLine + index + 1 === lineNumber,
+    }))
   }
 
   /**
@@ -386,40 +390,40 @@ class CodeSecurityScanner {
       'CWE-922': '機密情報はサーバーサイドで管理し、適切な暗号化を実施する',
       'CWE-95': '動的コード実行を避け、静的な実装に変更する',
       'CWE-20': '入力検証とサニタイズを徹底する',
-      'CWE-526': '環境変数の適切な管理とアクセス制御を実装する'
-    };
-    
-    return remediations[cwe] || 'セキュリティベストプラクティスに従って修正する';
+      'CWE-526': '環境変数の適切な管理とアクセス制御を実装する',
+    }
+
+    return remediations[cwe] || 'セキュリティベストプラクティスに従って修正する'
   }
 
   /**
    * コード品質メトリクスの計算
    */
   calculateCodeQualityMetrics() {
-    const issues = this.results.issues;
-    
+    const issues = this.results.issues
+
     // 重要度別集計
     const severityCounts = {
-      critical: issues.filter(i => i.severity === 'critical').length,
-      high: issues.filter(i => i.severity === 'high').length,
-      moderate: issues.filter(i => i.severity === 'moderate').length,
-      low: issues.filter(i => i.severity === 'low').length,
-      info: issues.filter(i => i.severity === 'info').length
-    };
+      critical: issues.filter((i) => i.severity === 'critical').length,
+      high: issues.filter((i) => i.severity === 'high').length,
+      moderate: issues.filter((i) => i.severity === 'moderate').length,
+      low: issues.filter((i) => i.severity === 'low').length,
+      info: issues.filter((i) => i.severity === 'info').length,
+    }
 
     // CWE別集計
-    const cweMap = {};
-    issues.forEach(issue => {
+    const cweMap = {}
+    issues.forEach((issue) => {
       if (issue.cwe) {
-        cweMap[issue.cwe] = (cweMap[issue.cwe] || 0) + 1;
+        cweMap[issue.cwe] = (cweMap[issue.cwe] || 0) + 1
       }
-    });
+    })
 
     // ファイル別集計
-    const fileMap = {};
-    issues.forEach(issue => {
-      fileMap[issue.file] = (fileMap[issue.file] || 0) + 1;
-    });
+    const fileMap = {}
+    issues.forEach((issue) => {
+      fileMap[issue.file] = (fileMap[issue.file] || 0) + 1
+    })
 
     this.results.codeQuality = {
       severityBreakdown: severityCounts,
@@ -431,67 +435,69 @@ class CodeSecurityScanner {
         .sort(([, a], [, b]) => b - a)
         .slice(0, 10)
         .map(([file, count]) => ({ file, count })),
-      issuesPerFile: this.results.summary.filesScanned > 0 ? 
-        (issues.length / this.results.summary.filesScanned).toFixed(2) : 0
-    };
+      issuesPerFile:
+        this.results.summary.filesScanned > 0
+          ? (issues.length / this.results.summary.filesScanned).toFixed(2)
+          : 0,
+    }
 
-    this.results.summary.issuesFound = issues.length;
+    this.results.summary.issuesFound = issues.length
   }
 
   /**
    * セキュリティパターン統計の生成
    */
   generateSecurityPatternStats() {
-    const categories = {};
-    
-    this.results.issues.forEach(issue => {
-      const mainCategory = issue.category.split('.')[0];
+    const categories = {}
+
+    this.results.issues.forEach((issue) => {
+      const mainCategory = issue.category.split('.')[0]
       if (!categories[mainCategory]) {
-        categories[mainCategory] = 0;
+        categories[mainCategory] = 0
       }
-      categories[mainCategory]++;
-    });
+      categories[mainCategory]++
+    })
 
     this.results.securityPatterns = {
       categoryCounts: categories,
       topCategories: Object.entries(categories)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
-        .map(([category, count]) => ({ category, count }))
-    };
+        .map(([category, count]) => ({ category, count })),
+    }
   }
 
   /**
    * リスクスコアの計算
    */
   calculateRiskScore() {
-    const weights = { critical: 10, high: 7, moderate: 4, low: 1, info: 0.1 };
-    const severityCounts = this.results.codeQuality.severityBreakdown;
-    
-    let weightedScore = 0;
-    let maxPossibleScore = 0;
+    const weights = { critical: 10, high: 7, moderate: 4, low: 1, info: 0.1 }
+    const severityCounts = this.results.codeQuality.severityBreakdown
+
+    let weightedScore = 0
+    let maxPossibleScore = 0
 
     Object.entries(severityCounts).forEach(([severity, count]) => {
-      const weight = weights[severity] || 1;
-      weightedScore += count * weight;
-      maxPossibleScore += count * 10; // 最大重みで計算
-    });
+      const weight = weights[severity] || 1
+      weightedScore += count * weight
+      maxPossibleScore += count * 10 // 最大重みで計算
+    })
 
     // ファイル数による正規化
-    const filesScanned = this.results.summary.filesScanned;
+    const filesScanned = this.results.summary.filesScanned
     if (filesScanned > 0) {
-      weightedScore = weightedScore / filesScanned * 100;
+      weightedScore = (weightedScore / filesScanned) * 100
     }
 
-    this.results.summary.riskScore = Math.min(100, Math.round(weightedScore));
+    this.results.summary.riskScore = Math.min(100, Math.round(weightedScore))
   }
 
   /**
    * 推奨事項の生成
    */
   generateRecommendations() {
-    const recommendations = [];
-    const severityCounts = this.results.codeQuality.severityBreakdown;
+    const recommendations = []
+    const severityCounts = this.results.codeQuality.severityBreakdown
 
     // 重要度別推奨事項
     if (severityCounts.critical > 0) {
@@ -500,8 +506,8 @@ class CodeSecurityScanner {
         title: '緊急: クリティカル脆弱性の即座修正',
         description: `${severityCounts.critical}件のクリティカル脆弱性を即座に修正してください`,
         action: 'immediate',
-        impact: 'システムの安全性に重大な影響'
-      });
+        impact: 'システムの安全性に重大な影響',
+      })
     }
 
     if (severityCounts.high > 0) {
@@ -510,33 +516,33 @@ class CodeSecurityScanner {
         title: '高優先度: セキュリティ脆弱性の修正',
         description: `${severityCounts.high}件の高優先度脆弱性を修正してください`,
         action: 'urgent',
-        impact: 'セキュリティリスクが高い'
-      });
+        impact: 'セキュリティリスクが高い',
+      })
     }
 
     // CWE別推奨事項
-    const topCWEs = this.results.codeQuality.topCWEs;
+    const topCWEs = this.results.codeQuality.topCWEs
     if (topCWEs.length > 0) {
-      const topCWE = topCWEs[0];
+      const topCWE = topCWEs[0]
       recommendations.push({
         priority: 'moderate',
         title: `主要脆弱性パターンの対策: ${topCWE.cwe}`,
         description: `${topCWE.cwe}が${topCWE.count}件検出されています`,
         action: 'systematic',
-        impact: '共通脆弱性の体系的解決'
-      });
+        impact: '共通脆弱性の体系的解決',
+      })
     }
 
     // 脆弱なファイルの改善
-    const mostVulnerable = this.results.codeQuality.mostVulnerableFiles[0];
+    const mostVulnerable = this.results.codeQuality.mostVulnerableFiles[0]
     if (mostVulnerable && mostVulnerable.count > 3) {
       recommendations.push({
         priority: 'moderate',
         title: '脆弱なファイルの重点改善',
         description: `${mostVulnerable.file}に${mostVulnerable.count}件の問題があります`,
         action: 'refactor',
-        impact: '問題の集中的解決'
-      });
+        impact: '問題の集中的解決',
+      })
     }
 
     // 予防的推奨事項
@@ -545,96 +551,96 @@ class CodeSecurityScanner {
       title: 'セキュアコーディング標準の策定',
       description: '組織全体でのセキュアコーディングガイドラインを策定し、自動チェックを導入',
       action: 'preventive',
-      impact: '将来の脆弱性予防'
-    });
+      impact: '将来の脆弱性予防',
+    })
 
-    this.results.recommendations = recommendations;
+    this.results.recommendations = recommendations
   }
 
   /**
    * ソースファイル一覧の取得
    */
   async getSourceFiles() {
-    const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue'];
-    const excludePaths = ['node_modules', 'dist', 'build', '.git', 'coverage', 'public'];
-    
-    return await this.getFilesRecursively(PROJECT_ROOT, extensions, excludePaths);
+    const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue']
+    const excludePaths = ['node_modules', 'dist', 'build', '.git', 'coverage', 'public']
+
+    return await this.getFilesRecursively(PROJECT_ROOT, extensions, excludePaths)
   }
 
   /**
    * 再帰的にファイル一覧を取得
    */
   async getFilesRecursively(dirPath, extensions, excludePaths) {
-    const files = [];
-    
+    const files = []
+
     try {
-      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      const entries = await fs.readdir(dirPath, { withFileTypes: true })
 
       for (const entry of entries) {
-        const fullPath = path.join(dirPath, entry.name);
-        const relativePath = path.relative(PROJECT_ROOT, fullPath);
+        const fullPath = path.join(dirPath, entry.name)
+        const relativePath = path.relative(PROJECT_ROOT, fullPath)
 
-        if (excludePaths.some(excluded => relativePath.startsWith(excluded))) {
-          continue;
+        if (excludePaths.some((excluded) => relativePath.startsWith(excluded))) {
+          continue
         }
 
         if (entry.isDirectory()) {
-          const subFiles = await this.getFilesRecursively(fullPath, extensions, excludePaths);
-          files.push(...subFiles);
+          const subFiles = await this.getFilesRecursively(fullPath, extensions, excludePaths)
+          files.push(...subFiles)
         } else if (entry.isFile()) {
-          const ext = path.extname(entry.name);
+          const ext = path.extname(entry.name)
           if (extensions.includes(ext)) {
-            files.push(fullPath);
+            files.push(fullPath)
           }
         }
       }
     } catch (error) {
-      console.warn(`ディレクトリ読み込みエラー: ${dirPath}`, error.message);
+      console.warn(`ディレクトリ読み込みエラー: ${dirPath}`, error.message)
     }
 
-    return files;
+    return files
   }
 
   /**
    * レポート生成
    */
   async generateReport() {
-    console.log('📄 コードセキュリティレポート生成中...');
+    console.log('📄 コードセキュリティレポート生成中...')
 
-    const reportDir = path.join(PROJECT_ROOT, 'reports', 'code-security');
-    await fs.mkdir(reportDir, { recursive: true });
+    const reportDir = path.join(PROJECT_ROOT, 'reports', 'code-security')
+    await fs.mkdir(reportDir, { recursive: true })
 
     // JSON詳細レポート
-    const jsonReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.json`);
-    await fs.writeFile(jsonReportPath, JSON.stringify(this.results, null, 2));
+    const jsonReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.json`)
+    await fs.writeFile(jsonReportPath, JSON.stringify(this.results, null, 2))
 
     // HTML レポート
-    const htmlReport = await this.generateHTMLReport();
-    const htmlReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.html`);
-    await fs.writeFile(htmlReportPath, htmlReport);
+    const htmlReport = await this.generateHTMLReport()
+    const htmlReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.html`)
+    await fs.writeFile(htmlReportPath, htmlReport)
 
     // SARIF レポート (GitHub Code Scanning 対応)
-    const sarifReport = this.generateSARIFReport();
-    const sarifReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.sarif`);
-    await fs.writeFile(sarifReportPath, JSON.stringify(sarifReport, null, 2));
+    const sarifReport = this.generateSARIFReport()
+    const sarifReportPath = path.join(reportDir, `code-security-scan-${Date.now()}.sarif`)
+    await fs.writeFile(sarifReportPath, JSON.stringify(sarifReport, null, 2))
 
     // サマリーレポート
-    const summaryPath = path.join(reportDir, 'code-security-summary.md');
-    const summary = this.generateSummaryReport();
-    await fs.writeFile(summaryPath, summary);
+    const summaryPath = path.join(reportDir, 'code-security-summary.md')
+    const summary = this.generateSummaryReport()
+    await fs.writeFile(summaryPath, summary)
 
-    console.log(`✅ レポート生成完了:`);
-    console.log(`   JSON: ${jsonReportPath}`);
-    console.log(`   HTML: ${htmlReportPath}`);
-    console.log(`   SARIF: ${sarifReportPath}`);
-    console.log(`   Summary: ${summaryPath}`);
+    console.log(`✅ レポート生成完了:`)
+    console.log(`   JSON: ${jsonReportPath}`)
+    console.log(`   HTML: ${htmlReportPath}`)
+    console.log(`   SARIF: ${sarifReportPath}`)
+    console.log(`   Summary: ${summaryPath}`)
   }
 
   /**
    * HTMLレポート生成
    */
   async generateHTMLReport() {
-    const severityCounts = this.results.codeQuality.severityBreakdown;
+    const severityCounts = this.results.codeQuality.severityBreakdown
 
     return `
 <!DOCTYPE html>
@@ -730,7 +736,9 @@ class CodeSecurityScanner {
 
             <div class="issues-section">
                 <h2>🚨 検出された問題</h2>
-                ${this.results.issues.map((issue, index) => `
+                ${this.results.issues
+                  .map(
+                    (issue, index) => `
                     <div class="issue-item ${issue.severity}" data-severity="${issue.severity}">
                         <h4>${issue.description}</h4>
                         <div class="issue-meta">
@@ -743,11 +751,15 @@ class CodeSecurityScanner {
                         
                         <div class="code-context">
                             <h5>コードコンテキスト:</h5>
-                            ${issue.context.map(line => `
+                            ${issue.context
+                              .map(
+                                (line) => `
                                 <div class="code-line ${line.isMatch ? 'match' : ''}">
                                     ${line.number}: ${line.content || ' '}
                                 </div>
-                            `).join('')}
+                            `
+                              )
+                              .join('')}
                         </div>
 
                         <div class="remediation">
@@ -755,19 +767,27 @@ class CodeSecurityScanner {
                             <p>${issue.remediation}</p>
                         </div>
                         
-                        ${issue.examples ? `
+                        ${
+                          issue.examples
+                            ? `
                             <details>
                                 <summary>参考例</summary>
-                                ${issue.examples.map(example => `<pre>${example}</pre>`).join('')}
+                                ${issue.examples.map((example) => `<pre>${example}</pre>`).join('')}
                             </details>
-                        ` : ''}
+                        `
+                            : ''
+                        }
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
 
             <div class="recommendations">
                 <h2>💡 推奨事項</h2>
-                ${this.results.recommendations.map(rec => `
+                ${this.results.recommendations
+                  .map(
+                    (rec) => `
                     <div class="recommendation priority-${rec.priority}">
                         <h4>${rec.title}</h4>
                         <p><strong>優先度:</strong> ${rec.priority}</p>
@@ -775,7 +795,9 @@ class CodeSecurityScanner {
                         <p><strong>アクション:</strong> ${rec.action}</p>
                         <p><strong>影響:</strong> ${rec.impact}</p>
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
         </div>
         
@@ -804,7 +826,7 @@ class CodeSecurityScanner {
     </script>
 </body>
 </html>
-    `;
+    `
   }
 
   /**
@@ -812,40 +834,45 @@ class CodeSecurityScanner {
    */
   generateSARIFReport() {
     return {
-      "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
-      "version": "2.1.0",
-      "runs": [{
-        "tool": {
-          "driver": {
-            "name": "PMPLearningManagement Security Scanner",
-            "version": "1.0.0",
-            "informationUri": "https://github.com/yusuke-kurosawa/PMPLearningManagement"
-          }
-        },
-        "results": this.results.issues.map(issue => ({
-          "ruleId": issue.cwe || issue.category,
-          "message": {
-            "text": issue.description
+      $schema:
+        'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+      version: '2.1.0',
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: 'PMPLearningManagement Security Scanner',
+              version: '1.0.0',
+              informationUri: 'https://github.com/yusuke-kurosawa/PMPLearningManagement',
+            },
           },
-          "locations": [{
-            "physicalLocation": {
-              "artifactLocation": {
-                "uri": issue.file
+          results: this.results.issues.map((issue) => ({
+            ruleId: issue.cwe || issue.category,
+            message: {
+              text: issue.description,
+            },
+            locations: [
+              {
+                physicalLocation: {
+                  artifactLocation: {
+                    uri: issue.file,
+                  },
+                  region: {
+                    startLine: issue.line,
+                  },
+                },
               },
-              "region": {
-                "startLine": issue.line
-              }
-            }
-          }],
-          "level": this.mapSeverityToSARIF(issue.severity),
-          "properties": {
-            "category": issue.category,
-            "cwe": issue.cwe,
-            "remediation": issue.remediation
-          }
-        }))
-      }]
-    };
+            ],
+            level: this.mapSeverityToSARIF(issue.severity),
+            properties: {
+              category: issue.category,
+              cwe: issue.cwe,
+              remediation: issue.remediation,
+            },
+          })),
+        },
+      ],
+    }
   }
 
   /**
@@ -853,22 +880,22 @@ class CodeSecurityScanner {
    */
   mapSeverityToSARIF(severity) {
     const mapping = {
-      critical: "error",
-      high: "error",
-      moderate: "warning",
-      low: "note",
-      info: "note"
-    };
-    return mapping[severity] || "note";
+      critical: 'error',
+      high: 'error',
+      moderate: 'warning',
+      low: 'note',
+      info: 'note',
+    }
+    return mapping[severity] || 'note'
   }
 
   /**
    * サマリーレポート生成
    */
   generateSummaryReport() {
-    const severityCounts = this.results.codeQuality.severityBreakdown;
-    const topCWEs = this.results.codeQuality.topCWEs;
-    
+    const severityCounts = this.results.codeQuality.severityBreakdown
+    const topCWEs = this.results.codeQuality.topCWEs
+
     return `# コードセキュリティスキャン サマリー
 
 ## 📊 概要
@@ -885,30 +912,36 @@ class CodeSecurityScanner {
 - **情報**: ${severityCounts.info} 件
 
 ## 🎯 主要な脆弱性パターン
-${topCWEs.map(cwe => `- **${cwe.cwe}**: ${cwe.count} 件`).join('\n')}
+${topCWEs.map((cwe) => `- **${cwe.cwe}**: ${cwe.count} 件`).join('\n')}
 
 ## 🚨 即座に対応が必要な問題
 ${this.results.issues
-  .filter(issue => issue.severity === 'critical' || issue.severity === 'high')
+  .filter((issue) => issue.severity === 'critical' || issue.severity === 'high')
   .slice(0, 5)
-  .map(issue => `
+  .map(
+    (issue) => `
 ### ${issue.description}
 - **ファイル**: ${issue.file}:${issue.line}
 - **重要度**: ${issue.severity}
 - **CWE**: ${issue.cwe}
 - **修復方法**: ${issue.remediation}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## 💡 優先推奨事項
 ${this.results.recommendations
-  .filter(rec => rec.priority === 'critical' || rec.priority === 'high')
-  .map(rec => `
+  .filter((rec) => rec.priority === 'critical' || rec.priority === 'high')
+  .map(
+    (rec) => `
 ### ${rec.title}
 ${rec.description}
 
 **アクション**: ${rec.action}  
 **影響**: ${rec.impact}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## 📈 セキュリティ改善効果予測
 このコードセキュリティ最適化により以下の効果が期待されます：
@@ -926,35 +959,36 @@ ${rec.description}
 
 ---
 *PMPLearningManagement コードセキュリティスキャナー v1.0.0*
-`;
+`
   }
 }
 
 // スクリプト実行部分
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const scanner = new CodeSecurityScanner();
-  
-  scanner.runScan()
-    .then(results => {
-      console.log('\n🎉 コードセキュリティスキャン完了!');
-      console.log(`📊 検出された問題: ${results.summary.issuesFound} 件`);
-      console.log(`🎯 リスクスコア: ${results.summary.riskScore}/100`);
-      
-      const criticalCount = results.codeQuality.severityBreakdown.critical;
-      const highCount = results.codeQuality.severityBreakdown.high;
-      
+  const scanner = new CodeSecurityScanner()
+
+  scanner
+    .runScan()
+    .then((results) => {
+      console.log('\n🎉 コードセキュリティスキャン完了!')
+      console.log(`📊 検出された問題: ${results.summary.issuesFound} 件`)
+      console.log(`🎯 リスクスコア: ${results.summary.riskScore}/100`)
+
+      const criticalCount = results.codeQuality.severityBreakdown.critical
+      const highCount = results.codeQuality.severityBreakdown.high
+
       // クリティカル・高重要度の問題がある場合は終了コード1
       if (criticalCount > 0 || highCount > 0) {
-        console.log(`🚨 緊急対応が必要な問題: ${criticalCount + highCount} 件`);
-        process.exit(1);
+        console.log(`🚨 緊急対応が必要な問題: ${criticalCount + highCount} 件`)
+        process.exit(1)
       }
-      
-      process.exit(0);
+
+      process.exit(0)
     })
-    .catch(error => {
-      console.error('❌ コードセキュリティスキャンに失敗しました:', error.message);
-      process.exit(1);
-    });
+    .catch((error) => {
+      console.error('❌ コードセキュリティスキャンに失敗しました:', error.message)
+      process.exit(1)
+    })
 }
 
-export default CodeSecurityScanner;
+export default CodeSecurityScanner

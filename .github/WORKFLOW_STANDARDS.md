@@ -35,6 +35,7 @@
 ```
 
 **例**:
+
 - `01-quality-comprehensive-check.yml`
 - `02-performance-optimization.yml`
 - `03-security-comprehensive-scan.yml`
@@ -46,6 +47,7 @@ name: '{絵文字} {日本語名} / {英語名}'
 ```
 
 **例**:
+
 ```yaml
 name: '🎯 包括的品質チェック / Comprehensive Quality Check'
 ```
@@ -96,23 +98,23 @@ jobs:
 
 ```yaml
 permissions:
-  contents: read        # 必要最小限の権限のみ
-  issues: write        # 明示的に指定
+  contents: read # 必要最小限の権限のみ
+  issues: write # 明示的に指定
 ```
 
 ### 2. シークレット管理
 
 ```yaml
 env:
-  API_KEY: ${{ secrets.API_KEY }}  # secrets経由のみ
+  API_KEY: ${{ secrets.API_KEY }} # secrets経由のみ
   # ハードコードは絶対禁止
 ```
 
 ### 3. 外部アクション
 
 ```yaml
-- uses: actions/checkout@v4        # バージョン固定
-- uses: actions/setup-node@abc123  # またはcommit SHA
+- uses: actions/checkout@v4 # バージョン固定
+- uses: actions/setup-node@abc123 # またはcommit SHA
 # - uses: actions/checkout@main    # NG: ブランチ指定禁止
 ```
 
@@ -123,7 +125,7 @@ env:
 ```yaml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true  # 古い実行をキャンセル
+  cancel-in-progress: true # 古い実行をキャンセル
 ```
 
 ### 2. キャッシュ戦略
@@ -145,10 +147,10 @@ concurrency:
 ```yaml
 jobs:
   test:
-    timeout-minutes: 30  # 明示的なタイムアウト
+    timeout-minutes: 30 # 明示的なタイムアウト
     steps:
       - name: 'ステップ'
-        timeout-minutes: 10  # ステップ単位も可能
+        timeout-minutes: 10 # ステップ単位も可能
 ```
 
 ## 🔄 再利用可能コンポーネント
@@ -195,7 +197,7 @@ jobs:
   run: |
     cat >> $GITHUB_STEP_SUMMARY <<EOF
     ## 📊 結果サマリー
-    
+
     | メトリクス | 値 |
     |-----------|-----|
     | テスト | ✅ 成功 |
@@ -211,7 +213,7 @@ jobs:
   with:
     name: report-${{ github.run_id }}
     path: reports/
-    retention-days: 30  # 保持期間を明示
+    retention-days: 30 # 保持期間を明示
 ```
 
 ## 🚨 エラーハンドリング
@@ -221,7 +223,7 @@ jobs:
 ```yaml
 - name: 'エラーハンドリング例'
   id: step1
-  continue-on-error: true  # エラーでも続行
+  continue-on-error: true # エラーでも続行
   run: |
     command || echo "failed=true" >> $GITHUB_OUTPUT
 
@@ -308,7 +310,7 @@ jobs:
     name: '📋 メインジョブ / Main Job'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     steps:
       # ============================================================
       # Step 1: セットアップ
@@ -316,12 +318,12 @@ jobs:
       # ============================================================
       - name: '📥 チェックアウト / Checkout'
         uses: actions/checkout@v4
-      
+
       - name: '🔧 環境セットアップ / Setup Environment'
         uses: ./.github/actions/setup-environment
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
       # ============================================================
       # Step 2: メイン処理
       # Main process
@@ -330,7 +332,7 @@ jobs:
         id: main
         run: |
           echo "処理を実行"
-      
+
       # ============================================================
       # Step 3: レポート
       # Report
@@ -384,4 +386,4 @@ gh run list --workflow=workflow-name.yml --json conclusion,createdAt,updatedAt \
 
 ---
 
-*このドキュメントは定期的に更新されます。最新版は常にmainブランチを参照してください。*
+_このドキュメントは定期的に更新されます。最新版は常にmainブランチを参照してください。_

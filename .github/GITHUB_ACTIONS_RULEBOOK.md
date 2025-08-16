@@ -90,29 +90,29 @@ strategy:
 
 #### 優先度プレフィックス
 
-| プレフィックス | 用途 | 実行優先度 |
-|--------------|------|-----------|
-| `00-` | テンプレート・サンプル | 実行されない |
-| `01-` | クリティカルなCI/CD | 最高 |
-| `02-` | テスト・品質保証 | 高 |
-| `03-` | セキュリティ | 高 |
-| `04-` | 監視・分析 | 中 |
-| `05-` | 自動化・最適化 | 中 |
-| `06-` | ドキュメント・レポート | 低 |
-| `07-` | 実験的・開発中 | 最低 |
+| プレフィックス | 用途                   | 実行優先度   |
+| -------------- | ---------------------- | ------------ |
+| `00-`          | テンプレート・サンプル | 実行されない |
+| `01-`          | クリティカルなCI/CD    | 最高         |
+| `02-`          | テスト・品質保証       | 高           |
+| `03-`          | セキュリティ           | 高           |
+| `04-`          | 監視・分析             | 中           |
+| `05-`          | 自動化・最適化         | 中           |
+| `06-`          | ドキュメント・レポート | 低           |
+| `07-`          | 実験的・開発中         | 最低         |
 
 #### カテゴリ識別子
 
-| カテゴリ | 識別子 | 用途 |
-|---------|--------|------|
-| デプロイメント | `deploy` | 本番・ステージング環境へのデプロイ |
-| テスト | `test` | 単体・統合・E2Eテスト |
-| セキュリティ | `security` | 脆弱性スキャン・監査 |
-| パフォーマンス | `perf` | パフォーマンス測定・最適化 |
-| 品質 | `quality` | コード品質・リンティング |
-| 監視 | `monitor` | システム監視・ヘルスチェック |
-| 通知 | `notify` | 通知・アラート |
-| 自動化 | `auto` | 自動化タスク |
+| カテゴリ       | 識別子     | 用途                               |
+| -------------- | ---------- | ---------------------------------- |
+| デプロイメント | `deploy`   | 本番・ステージング環境へのデプロイ |
+| テスト         | `test`     | 単体・統合・E2Eテスト              |
+| セキュリティ   | `security` | 脆弱性スキャン・監査               |
+| パフォーマンス | `perf`     | パフォーマンス測定・最適化         |
+| 品質           | `quality`  | コード品質・リンティング           |
+| 監視           | `monitor`  | システム監視・ヘルスチェック       |
+| 通知           | `notify`   | 通知・アラート                     |
+| 自動化         | `auto`     | 自動化タスク                       |
 
 ### ワークフロー名（name）の命名規則
 
@@ -122,16 +122,16 @@ name: {絵文字} {日本語説明} | {英語補足}
 
 #### カテゴリ別絵文字マッピング
 
-| カテゴリ | 絵文字 | 使用例 |
-|---------|--------|--------|
-| デプロイ | 🚀 📦 | `🚀 本番デプロイ \| Production Deployment` |
-| テスト | 🧪 🔬 | `🧪 単体テスト実行 \| Unit Tests` |
-| セキュリティ | 🔒 🛡️ | `🔒 セキュリティ監査 \| Security Audit` |
-| パフォーマンス | ⚡ 📊 | `⚡ パフォーマンス監視 \| Performance Monitor` |
-| 品質 | ✨ 🎨 | `✨ コード品質チェック \| Code Quality` |
-| 監視 | 👁️ 📡 | `👁️ システム監視 \| System Monitoring` |
-| 通知 | 🔔 📢 | `🔔 ビルド通知 \| Build Notifications` |
-| 自動化 | 🤖 ⚙️ | `🤖 自動マージ \| Auto Merge` |
+| カテゴリ       | 絵文字 | 使用例                                         |
+| -------------- | ------ | ---------------------------------------------- |
+| デプロイ       | 🚀 📦  | `🚀 本番デプロイ \| Production Deployment`     |
+| テスト         | 🧪 🔬  | `🧪 単体テスト実行 \| Unit Tests`              |
+| セキュリティ   | 🔒 🛡️  | `🔒 セキュリティ監査 \| Security Audit`        |
+| パフォーマンス | ⚡ 📊  | `⚡ パフォーマンス監視 \| Performance Monitor` |
+| 品質           | ✨ 🎨  | `✨ コード品質チェック \| Code Quality`        |
+| 監視           | 👁️ 📡  | `👁️ システム監視 \| System Monitoring`         |
+| 通知           | 🔔 📢  | `🔔 ビルド通知 \| Build Notifications`         |
+| 自動化         | 🤖 ⚙️  | `🤖 自動マージ \| Auto Merge`                  |
 
 ---
 
@@ -169,22 +169,22 @@ name: {絵文字} {日本語説明} | {英語補足}
 on:
   # プッシュトリガー（保護ブランチのみ）
   push:
-    branches: 
+    branches:
       - main
       - develop
     paths-ignore:
       - '**.md'
       - 'docs/**'
-      
+
   # PRトリガー（ドラフトを除く）
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
-    
+
   # 定期実行（コスト最適化のため最小限に）
   schedule:
-    - cron: '0 2 * * 1'  # 毎週月曜日 AM 2:00 UTC
-    
+    - cron: '0 2 * * 1' # 毎週月曜日 AM 2:00 UTC
+
   # 手動実行（必須）
   workflow_dispatch:
     inputs:
@@ -199,7 +199,7 @@ on:
 ```yaml
 # 最小権限の原則
 permissions:
-  contents: read       # デフォルト: 読み取りのみ
+  contents: read # デフォルト: 読み取りのみ
   # 必要に応じて追加
   # actions: write     # ワークフロー制御が必要な場合のみ
   # checks: write      # チェック結果を書き込む場合のみ
@@ -212,19 +212,19 @@ permissions:
 jobs:
   job-name:
     name: 🔹 {日本語名} | {English Name}
-    runs-on: ubuntu-latest  # 特別な理由がない限りubuntu-latest使用
-    timeout-minutes: 30      # 必須: タイムアウト設定
-    
+    runs-on: ubuntu-latest # 特別な理由がない限りubuntu-latest使用
+    timeout-minutes: 30 # 必須: タイムアウト設定
+
     # 環境設定（必要な場合）
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
-    
+
     # 並行実行制御
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-    
+
     # 条件付き実行
     if: |
       github.event_name == 'push' && 
@@ -239,8 +239,8 @@ steps:
   - name: 📥 コードのチェックアウト
     uses: actions/checkout@v4
     with:
-      fetch-depth: 0  # 履歴が必要な場合のみ
-      
+      fetch-depth: 0 # 履歴が必要な場合のみ
+
   # 2. キャッシュの復元
   - name: 📦 キャッシュの復元
     uses: actions/cache@v4
@@ -251,26 +251,26 @@ steps:
       key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       restore-keys: |
         ${{ runner.os }}-node-
-        
+
   # 3. 環境セットアップ
   - name: 🔧 Node.js環境のセットアップ
     uses: actions/setup-node@v4
     with:
-      node-version-file: '.nvmrc'  # または明示的なバージョン
+      node-version-file: '.nvmrc' # または明示的なバージョン
       cache: 'npm'
-      
+
   # 4. 依存関係のインストール
   - name: 📦 依存関係のインストール
     run: |
       npm ci --prefer-offline --no-audit
-      
+
   # 5. ビルド/テスト/デプロイ
   - name: 🏗️ ビルド実行
     run: |
       npm run build
     env:
       NODE_ENV: production
-      
+
   # 6. 成果物のアップロード
   - name: 📤 成果物のアップロード
     if: success()
@@ -278,7 +278,7 @@ steps:
     with:
       name: build-artifacts
       path: dist/
-      retention-days: 7  # コスト最適化
+      retention-days: 7 # コスト最適化
 ```
 
 ---
@@ -289,11 +289,11 @@ steps:
 
 #### 1. シークレットの分類と保管
 
-| 分類 | 保管場所 | 例 |
-|-----|---------|-----|
-| 環境固有 | Environment Secrets | API_KEY_PROD, DB_PASSWORD_STAGING |
-| リポジトリ共通 | Repository Secrets | GITHUB_TOKEN, NPM_TOKEN |
-| 組織共通 | Organization Secrets | SLACK_WEBHOOK, SONAR_TOKEN |
+| 分類           | 保管場所             | 例                                |
+| -------------- | -------------------- | --------------------------------- |
+| 環境固有       | Environment Secrets  | API_KEY_PROD, DB_PASSWORD_STAGING |
+| リポジトリ共通 | Repository Secrets   | GITHUB_TOKEN, NPM_TOKEN           |
+| 組織共通       | Organization Secrets | SLACK_WEBHOOK, SONAR_TOKEN        |
 
 #### 2. シークレット使用のベストプラクティス
 
@@ -352,7 +352,7 @@ run: |
     # 環境変数経由で安全に使用
     echo "PRタイトル: ${PR_TITLE}"
     echo "コミットメッセージ: ${COMMIT_MSG}"
-    
+
     # サニタイズ処理
     SAFE_TITLE=$(echo "${PR_TITLE}" | sed 's/[^a-zA-Z0-9 -]//g')
     echo "処理済みタイトル: ${SAFE_TITLE}"
@@ -373,7 +373,7 @@ strategy:
       - { os: ubuntu-latest, node: 18, name: 'Linux-18' }
       - { os: ubuntu-latest, node: 20, name: 'Linux-20' }
       - { os: macos-latest, node: 18, name: 'macOS-18' }
-  max-parallel: 3  # 同時実行数の制限
+  max-parallel: 3 # 同時実行数の制限
 ```
 
 #### 2. ジョブの依存関係最適化
@@ -384,14 +384,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       cache-key: ${{ steps.cache.outputs.key }}
-  
+
   test:
     needs: setup
     strategy:
       matrix:
         suite: [unit, integration, e2e]
     runs-on: ubuntu-latest
-    
+
   deploy:
     needs: test
     if: success() && github.ref == 'refs/heads/main'
@@ -432,7 +432,7 @@ jobs:
     # 不要なファイルを削除
     find . -name "*.log" -delete
     find . -name ".DS_Store" -delete
-    
+
     # node_modulesの最適化
     npm prune --production
 ```
@@ -441,20 +441,20 @@ jobs:
 
 #### 1. ランナーの選択基準
 
-| タスク | 推奨ランナー | 理由 |
-|-------|------------|------|
-| ビルド・テスト | ubuntu-latest | コスト効率が最高 |
-| iOS/macOSビルド | macos-latest | 必須要件 |
-| Windows固有テスト | windows-latest | 互換性テスト |
-| 重い処理 | ubuntu-latest-4-cores | パフォーマンス |
+| タスク            | 推奨ランナー          | 理由             |
+| ----------------- | --------------------- | ---------------- |
+| ビルド・テスト    | ubuntu-latest         | コスト効率が最高 |
+| iOS/macOSビルド   | macos-latest          | 必須要件         |
+| Windows固有テスト | windows-latest        | 互換性テスト     |
+| 重い処理          | ubuntu-latest-4-cores | パフォーマンス   |
 
 #### 2. タイムアウトの適切な設定
 
 ```yaml
-timeout-minutes: 30  # ジョブレベル
+timeout-minutes: 30 # ジョブレベル
 steps:
   - name: 長時間処理
-    timeout-minutes: 10  # ステップレベル
+    timeout-minutes: 10 # ステップレベル
     run: |
       timeout 300 npm run heavy-task || true  # コマンドレベル
 ```
@@ -477,7 +477,7 @@ steps:
       echo "build-failed=true" >> $GITHUB_OUTPUT
       exit 1
     }
-    
+
 - name: リトライロジック
   if: steps.build.outputs.build-failed == 'true'
   uses: nick-fields/retry@v3
@@ -512,7 +512,7 @@ steps:
   with:
     path: node_modules
     key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-    
+
 - name: フォールバック処理
   if: steps.cache.outcome == 'failure' || steps.cache.outputs.cache-hit != 'true'
   run: |
@@ -533,7 +533,7 @@ steps:
     # 実行時間の記録
     DURATION=$((SECONDS))
     echo "::notice::実行時間: ${DURATION}秒"
-    
+
     # メトリクスをアーティファクトとして保存
     cat > metrics.json <<EOF
     {
@@ -543,7 +543,7 @@ steps:
       "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     }
     EOF
-    
+
 - name: メトリクスアップロード
   uses: actions/upload-artifact@v4
   with:
@@ -589,7 +589,7 @@ steps:
 # ワークフローレベルでの制限
 env:
   MAX_RUNTIME_MINUTES: 60
-  
+
 jobs:
   monitor:
     timeout-minutes: ${{ fromJSON(env.MAX_RUNTIME_MINUTES) }}
@@ -610,8 +610,8 @@ jobs:
   with:
     name: test-results
     path: coverage/
-    retention-days: 3  # 最小限の保持期間
-    
+    retention-days: 3 # 最小限の保持期間
+
 # 定期的なクリーンアップ
 - name: 古いアーティファクトの削除
   uses: actions/github-script@v7
@@ -621,9 +621,9 @@ jobs:
         owner: context.repo.owner,
         repo: context.repo.repo,
       });
-      
+
       const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7日前
-      
+
       for (const artifact of artifacts.data.artifacts) {
         if (Date.parse(artifact.created_at) < cutoff) {
           await github.rest.actions.deleteArtifact({
@@ -645,7 +645,7 @@ on:
       - '**.md'
       - 'docs/**'
       - '.github/ISSUE_TEMPLATE/**'
-    
+
 # コミットメッセージによるスキップ
 jobs:
   build:
@@ -689,19 +689,19 @@ inputs:
     default: '18'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'npm'
-        
+
     - name: Install dependencies
       shell: bash
       run: |
         npm ci --prefer-offline --no-audit
-        
+
     - name: Verify setup
       shell: bash
       run: |
@@ -735,11 +735,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
-      
+
       - name: Run tests
         run: |
           npm run test:${{ inputs.test-suite }}
-          
+
       - name: Coverage check
         run: |
           COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
@@ -789,11 +789,13 @@ jobs:
 ## 📚 参考資料
 
 ### 公式ドキュメント
+
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [GitHub Actions Best Practices](https://docs.github.com/en/actions/guides/best-practices)
 - [GitHub Actions Security Hardening](https://docs.github.com/en/actions/security-guides)
 
 ### 内部ドキュメント
+
 - [WORKFLOW_STANDARDS.md](.github/workflows/WORKFLOW_STANDARDS.md)
 - [プロジェクト固有のCI/CD実装ガイド](docs/CI_CD_IMPLEMENTATION.md)
 - [IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md)
@@ -802,10 +804,10 @@ jobs:
 
 ## 🔄 更新履歴
 
-| バージョン | 日付 | 変更内容 | 作成者 |
-|----------|------|---------|-------|
-| 2.0.0 | 2025-08-12 | 包括的ルールブック初版作成 | Claude Code |
-| 1.0.0 | 2025-01-XX | 初期標準文書 | - |
+| バージョン | 日付       | 変更内容                   | 作成者      |
+| ---------- | ---------- | -------------------------- | ----------- |
+| 2.0.0      | 2025-08-12 | 包括的ルールブック初版作成 | Claude Code |
+| 1.0.0      | 2025-01-XX | 初期標準文書               | -           |
 
 ---
 
@@ -819,4 +821,4 @@ jobs:
 
 ---
 
-*このドキュメントは継続的に改善されます。フィードバックを歓迎します。*
+_このドキュメントは継続的に改善されます。フィードバックを歓迎します。_

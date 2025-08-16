@@ -3,12 +3,14 @@
 ## 基本設定
 
 ### GitHub Secrets設定
+
 - [ ] ANTHROPIC_API_KEY がSecretsに設定されている
   - 設定場所: Settings → Secrets and variables → Actions
   - 設定名: `ANTHROPIC_API_KEY`
   - **注意**: 実際のAPIキー値は表示されません（セキュリティのため）
 
 ### GitHub Actions設定
+
 - [ ] GitHub Actions が有効になっている
   - 確認場所: Settings → Actions → General
   - Actions permissions: "Allow all actions and reusable workflows" を選択
@@ -18,11 +20,13 @@
 ## ワークフローファイル
 
 ### 存在確認
+
 - [ ] `.github/workflows/claude-assistant.yml` が存在する
 - [ ] `.github/workflows/claude-issue-handler.yml` が存在する
 - [ ] `.github/workflows/claude-pr-review.yml` が存在する
 
 ### 構文検証
+
 - [ ] YAMLファイルの構文エラーがない
 - [ ] 必要な権限（permissions）が設定されている
 - [ ] トリガー条件（on）が正しく設定されている
@@ -30,18 +34,21 @@
 ## 動作確認
 
 ### Claude Assistant（@claudeメンション応答）
+
 - [ ] テストIssueが作成できる
 - [ ] @claude メンションが認識される
 - [ ] Claudeからの応答がコメントとして投稿される
 - [ ] Actionsログにエラーがない
 
 ### Issue Handler（自動ラベリング）
+
 - [ ] 新規Issueが作成されたときにワークフローが起動する
 - [ ] 自動的にラベルが付与される
 - [ ] 優先度が設定される
 - [ ] 分析結果がコメントとして投稿される
 
 ### PR Review（自動コードレビュー）
+
 - [ ] Pull Requestが作成されたときにワークフローが起動する
 - [ ] コード差分が取得される
 - [ ] レビューコメントが投稿される
@@ -50,16 +57,19 @@
 ## 高度な機能
 
 ### エラーハンドリング
+
 - [ ] APIキーが無効な場合の適切なエラーメッセージ
 - [ ] API制限に達した場合の処理
 - [ ] ネットワークエラーの処理
 
 ### パフォーマンス
+
 - [ ] ワークフロー実行時間が適切（通常30秒以内）
 - [ ] 不要な処理がない
 - [ ] 効率的なAPI呼び出し
 
 ### セキュリティ
+
 - [ ] APIキーが露出していない
 - [ ] 適切な権限設定
 - [ ] インジェクション攻撃への対策
@@ -67,12 +77,14 @@
 ## トラブルシューティング
 
 ### よくある問題
+
 - [ ] APIキーが正しく設定されているか確認
 - [ ] GitHub Actionsが有効になっているか確認
 - [ ] ワークフロー権限が適切か確認
 - [ ] API使用量制限に達していないか確認
 
 ### ログ確認方法
+
 1. GitHub リポジトリの Actions タブを開く
 2. 実行されたワークフローを選択
 3. 各ステップのログを確認
@@ -116,4 +128,4 @@
 
 ---
 
-*最終更新: 2025年1月9日*
+_最終更新: 2025年1月9日_

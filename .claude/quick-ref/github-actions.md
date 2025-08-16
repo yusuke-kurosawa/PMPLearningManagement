@@ -3,11 +3,12 @@
 ## 🎯 よく使うアクション一覧
 
 ### 基本アクション
+
 ```yaml
 # リポジトリのチェックアウト
 - uses: actions/checkout@v4
   with:
-    fetch-depth: 0  # 全履歴を取得（必要な場合）
+    fetch-depth: 0 # 全履歴を取得（必要な場合）
 
 # Node.js環境のセットアップ
 - uses: actions/setup-node@v4
@@ -44,6 +45,7 @@
 ```
 
 ### デプロイメント関連
+
 ```yaml
 # GitHub Pagesへのデプロイ
 - uses: peaceiris/actions-gh-pages@v3
@@ -68,6 +70,7 @@
 ```
 
 ### テスト・品質管理
+
 ```yaml
 # コードカバレッジ
 - uses: codecov/codecov-action@v4
@@ -90,6 +93,7 @@
 ```
 
 ### セキュリティ
+
 ```yaml
 # CodeQL 分析
 - uses: github/codeql-action/init@v3
@@ -112,28 +116,29 @@
 ## 📋 シンタックスリファレンス
 
 ### トリガー設定
+
 ```yaml
 on:
   # プッシュトリガー
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
+    branches: [main, develop]
+    tags: ['v*']
     paths:
       - 'src/**'
       - 'package.json'
     paths-ignore:
       - '**.md'
       - 'docs/**'
-  
+
   # プルリクエストトリガー
   pull_request:
-    branches: [ main ]
-    types: [ opened, synchronize, reopened ]
-  
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
   # スケジュール実行
   schedule:
-    - cron: '0 2 * * *'  # 毎日午前2時（UTC）
-  
+    - cron: '0 2 * * *' # 毎日午前2時（UTC）
+
   # 手動実行
   workflow_dispatch:
     inputs:
@@ -146,15 +151,16 @@ on:
           - development
           - staging
           - production
-  
+
   # 他のワークフロー完了時
   workflow_run:
-    workflows: ["CI"]
+    workflows: ['CI']
     types: [completed]
     branches: [main]
 ```
 
 ### 条件式
+
 ```yaml
 # 基本的な条件
 if: github.event_name == 'push'
@@ -178,17 +184,18 @@ if: needs.build.result == 'success'
 ```
 
 ### 環境変数とコンテキスト
+
 ```yaml
 env:
   # グローバル環境変数
   NODE_VERSION: '18'
-  
+
 jobs:
   build:
     env:
       # ジョブレベル環境変数
       BUILD_ENV: production
-    
+
     steps:
       - name: ステップ
         env:
@@ -201,19 +208,20 @@ jobs:
           echo "SHA: ${{ github.sha }}"
           echo "Actor: ${{ github.actor }}"
           echo "Event: ${{ github.event_name }}"
-          
+
           # ランナーコンテキスト
           echo "OS: ${{ runner.os }}"
           echo "Arch: ${{ runner.arch }}"
-          
+
           # ジョブコンテキスト
           echo "Status: ${{ job.status }}"
-          
+
           # ステップコンテキスト
           echo "Step output: ${{ steps.previous-step.outputs.result }}"
 ```
 
 ### マトリクス戦略
+
 ```yaml
 strategy:
   matrix:
@@ -226,11 +234,12 @@ strategy:
     exclude:
       - os: windows-latest
         node: 16
-  fail-fast: false  # 一つ失敗しても他を継続
-  max-parallel: 2   # 並列実行数の制限
+  fail-fast: false # 一つ失敗しても他を継続
+  max-parallel: 2 # 並列実行数の制限
 ```
 
 ### 出力とアーティファクト
+
 ```yaml
 jobs:
   generate:
@@ -239,7 +248,7 @@ jobs:
     steps:
       - id: version
         run: echo "value=1.0.0" >> $GITHUB_OUTPUT
-  
+
   use:
     needs: generate
     steps:
@@ -247,6 +256,7 @@ jobs:
 ```
 
 ### シークレットとセキュアな値
+
 ```yaml
 # Organization/Repository secrets
 env:
@@ -272,6 +282,7 @@ env:
 ### よくあるエラーと解決方法
 
 #### 1. Permission denied
+
 ```yaml
 # 解決: 適切な権限を付与
 permissions:
@@ -280,6 +291,7 @@ permissions:
 ```
 
 #### 2. Resource not accessible by integration
+
 ```yaml
 # 解決: GITHUB_TOKENの権限確認
 - uses: actions/checkout@v4
@@ -288,18 +300,21 @@ permissions:
 ```
 
 #### 3. Cannot find module
+
 ```yaml
 # 解決: 依存関係のインストール
-- run: npm ci  # npm installではなくciを使用
+- run: npm ci # npm installではなくciを使用
 ```
 
 #### 4. Timeout
+
 ```yaml
 # 解決: タイムアウト時間を延長
 timeout-minutes: 60
 ```
 
 #### 5. Out of memory
+
 ```yaml
 # 解決: Node.jsのメモリ制限を増やす
 - run: node --max-old-space-size=4096 build.js
@@ -308,6 +323,7 @@ timeout-minutes: 60
 ### デバッグテクニック
 
 #### デバッグログの有効化
+
 ```yaml
 env:
   ACTIONS_RUNNER_DEBUG: true
@@ -315,6 +331,7 @@ env:
 ```
 
 #### ワークフローの一時停止
+
 ```yaml
 - name: デバッグ用一時停止
   uses: mxschmitt/action-tmate@v3
@@ -322,15 +339,16 @@ env:
 ```
 
 #### 変数の確認
+
 ```yaml
 - name: 環境変数の確認
   run: |
     echo "All env vars:"
     env | sort
-    
+
     echo "GitHub context:"
     echo '${{ toJSON(github) }}'
-    
+
     echo "Runner context:"
     echo '${{ toJSON(runner) }}'
 ```
@@ -338,6 +356,7 @@ env:
 ## 📊 パフォーマンス最適化
 
 ### キャッシュ戦略
+
 ```yaml
 # 依存関係のキャッシュ
 - uses: actions/cache@v4
@@ -362,17 +381,18 @@ env:
 ```
 
 ### ジョブの並列化
+
 ```yaml
 jobs:
   # 独立したジョブは自動的に並列実行
   lint:
     runs-on: ubuntu-latest
     # ...
-  
+
   test:
     runs-on: ubuntu-latest
     # ...
-  
+
   # 依存関係がある場合
   deploy:
     needs: [lint, test]
@@ -381,6 +401,7 @@ jobs:
 ```
 
 ### 条件付き実行
+
 ```yaml
 # 変更がない場合はスキップ
 - name: Check for changes
@@ -401,6 +422,7 @@ jobs:
 ## 🎨 ベストプラクティス
 
 ### 1. 再利用可能なワークフロー
+
 ```yaml
 # .github/workflows/reusable-build.yml
 on:
@@ -420,12 +442,13 @@ jobs:
 ```
 
 ### 2. 複合アクション
+
 ```yaml
 # .github/actions/setup-project/action.yml
 name: 'Setup Project'
 description: 'Setup Node.js and install dependencies'
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: actions/setup-node@v4
       with:
@@ -436,6 +459,7 @@ runs:
 ```
 
 ### 3. 環境保護ルール
+
 ```yaml
 jobs:
   deploy:
@@ -448,6 +472,7 @@ jobs:
 ## 📝 プロジェクト固有の設定
 
 ### PMPLearningManagement標準設定
+
 ```yaml
 # 標準的なNode.jsセットアップ
 - name: Setup Node.js
@@ -475,4 +500,4 @@ jobs:
 
 ---
 
-*このクイックリファレンスは、GitHub Actionsワークフロー開発時の即座の参照用です。詳細な情報は公式ドキュメントを参照してください。*
+_このクイックリファレンスは、GitHub Actionsワークフロー開発時の即座の参照用です。詳細な情報は公式ドキュメントを参照してください。_

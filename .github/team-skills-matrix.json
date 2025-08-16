@@ -35,7 +35,7 @@
           "expertise_areas": ["api-development", "testing", "data-processing"]
         },
         {
-          "github_handle": "backend-dev-2", 
+          "github_handle": "backend-dev-2",
           "name": "Backend Developer",
           "skills": {
             "primary": ["node.js", "typescript", "mongodb", "express"],
@@ -87,7 +87,7 @@
       ]
     },
     "frontend": {
-      "name": "Frontend Development Team", 
+      "name": "Frontend Development Team",
       "members": [
         {
           "github_handle": "yusuke-kurosawa",
@@ -136,7 +136,7 @@
     },
     "feature": {
       "required_skills": 2,
-      "story_points": "3-8", 
+      "story_points": "3-8",
       "expertise_level": "intermediate",
       "notes": "Match primary skills"
     },
@@ -155,7 +155,7 @@
     "performance": {
       "required_skills": 2,
       "story_points": "3-8",
-      "expertise_level": "intermediate", 
+      "expertise_level": "intermediate",
       "notes": "Performance expertise preferred"
     }
   }

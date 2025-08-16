@@ -166,14 +166,8 @@
         "question_difficulty_analysis": {},
         "performance_trends": {}
       },
-      "weak_areas": [
-        "time_management",
-        "knowledge_integration"
-      ],
-      "strength_areas": [
-        "process_mastery",
-        "itto_comprehension"
-      ]
+      "weak_areas": ["time_management", "knowledge_integration"],
+      "strength_areas": ["process_mastery", "itto_comprehension"]
     },
     "retention": {
       "overall_retention": 0.5315570365909601,

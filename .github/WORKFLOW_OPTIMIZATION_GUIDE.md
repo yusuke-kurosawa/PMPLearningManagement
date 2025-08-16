@@ -32,11 +32,11 @@
 
 以下のワークフローは統合を推奨：
 
-| 現在のワークフロー | 統合後 | 理由 |
-|------------------|--------|------|
-| claude-pr-review.yml<br>claude-pr-review-enhanced.yml | 01-quality-pr-review.yml | 重複機能の統合 |
-| test.yml<br>test-parallel.yml<br>advanced-testing.yml | 02-test-comprehensive.yml | テスト機能の一元化 |
-| security-scan.yml<br>infrastructure-security.yml | 03-security-audit.yml | セキュリティ機能の統合 |
+| 現在のワークフロー                                    | 統合後                    | 理由                   |
+| ----------------------------------------------------- | ------------------------- | ---------------------- |
+| claude-pr-review.yml<br>claude-pr-review-enhanced.yml | 01-quality-pr-review.yml  | 重複機能の統合         |
+| test.yml<br>test-parallel.yml<br>advanced-testing.yml | 02-test-comprehensive.yml | テスト機能の一元化     |
+| security-scan.yml<br>infrastructure-security.yml      | 03-security-audit.yml     | セキュリティ機能の統合 |
 
 #### 分割対象
 
@@ -59,7 +59,7 @@
 name: 'Build and Cache'
 description: '標準的なビルドとキャッシュ処理'
 
-# .github/actions/test-and-report/action.yml  
+# .github/actions/test-and-report/action.yml
 name: 'Test and Report'
 description: 'テスト実行とレポート生成'
 
@@ -95,12 +95,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: npm test:unit
-  
+
   test-integration:
     runs-on: ubuntu-latest
     steps:
       - run: npm test:integration
-  
+
   test-e2e:
     runs-on: ubuntu-latest
     steps:
@@ -128,11 +128,11 @@ jobs:
 
 #### 実行頻度の見直し
 
-| ワークフロー | 現在 | 推奨 | 削減率 |
-|------------|------|------|--------|
-| daily-status-update | 毎日 | 週3回 | 57% |
-| performance-monitoring | 6時間ごと | 12時間ごと | 50% |
-| dependency-check | 毎日 | 週次 | 86% |
+| ワークフロー           | 現在      | 推奨       | 削減率 |
+| ---------------------- | --------- | ---------- | ------ |
+| daily-status-update    | 毎日      | 週3回      | 57%    |
+| performance-monitoring | 6時間ごと | 12時間ごと | 50%    |
+| dependency-check       | 毎日      | 週次       | 86%    |
 
 #### アーティファクト保持期間の最適化
 
@@ -140,7 +140,7 @@ jobs:
 # Before
 retention-days: 90  # 過度に長い
 
-# After  
+# After
 retention-days: 7   # 本番デプロイ用
 retention-days: 3   # テスト用
 retention-days: 1   # 一時的な用途
@@ -157,7 +157,7 @@ retention-days: 1   # 一時的な用途
 # 旧: deploy.yml
 # 新: 01-deploy-production.yml
 
-# 旧: test.yml  
+# 旧: test.yml
 # 新: 02-test-comprehensive.yml
 
 # 旧: security-scan.yml
@@ -168,19 +168,19 @@ retention-days: 1   # 一時的な用途
 
 ### パフォーマンス改善
 
-| メトリクス | 現在 | 目標 | 改善率 |
-|-----------|------|------|--------|
-| 平均実行時間 | 15分 | 8分 | 47% |
-| 並列実行率 | 30% | 70% | 133% |
-| キャッシュヒット率 | 60% | 85% | 42% |
+| メトリクス         | 現在 | 目標 | 改善率 |
+| ------------------ | ---- | ---- | ------ |
+| 平均実行時間       | 15分 | 8分  | 47%    |
+| 並列実行率         | 30%  | 70%  | 133%   |
+| キャッシュヒット率 | 60%  | 85%  | 42%    |
 
 ### コスト削減
 
-| 項目 | 現在 | 目標 | 削減額 |
-|------|------|------|--------|
-| 月間実行時間 | 3000分 | 1800分 | 40% |
-| ストレージ使用量 | 50GB | 20GB | 60% |
-| 月間コスト | $150 | $75 | 50% |
+| 項目             | 現在   | 目標   | 削減額 |
+| ---------------- | ------ | ------ | ------ |
+| 月間実行時間     | 3000分 | 1800分 | 40%    |
+| ストレージ使用量 | 50GB   | 20GB   | 60%    |
+| 月間コスト       | $150   | $75    | 50%    |
 
 ### 保守性向上
 
@@ -257,6 +257,7 @@ npm run workflow:auto-fix
 ### 即座に実施すべきこと
 
 1. **無効化ワークフローの削除**
+
    ```bash
    rm .github/workflows/*.disabled
    ```
@@ -289,10 +290,10 @@ npm run workflow:auto-fix
 
 ## 🔄 更新履歴
 
-| バージョン | 日付 | 変更内容 | 作成者 |
-|----------|------|---------|-------|
-| 1.0.0 | 2025-08-12 | 初版作成 | Claude Code |
+| バージョン | 日付       | 変更内容 | 作成者      |
+| ---------- | ---------- | -------- | ----------- |
+| 1.0.0      | 2025-08-12 | 初版作成 | Claude Code |
 
 ---
 
-*このガイドは継続的に更新されます。最適化の進捗に応じて内容を調整してください。*
+_このガイドは継続的に更新されます。最適化の進捗に応じて内容を調整してください。_

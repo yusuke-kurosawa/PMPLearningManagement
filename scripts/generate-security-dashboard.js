@@ -3,21 +3,21 @@
  * セキュリティダッシュボード生成システム
  * 全セキュリティスキャン結果を統合した包括的ダッシュボード
  * ROI追跡、トレンド分析、アクションアイテム管理
- * 
+ *
  * @author PMPLearningManagement Security Team
  * @version 1.0.0
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import SecurityAuditor from './security-audit.js';
-import DependencyOptimizer from './optimize-dependencies.js';
-import CodeSecurityScanner from './code-security-scanner.js';
+import { promises as fs } from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import SecurityAuditor from './security-audit.js'
+import DependencyOptimizer from './optimize-dependencies.js'
+import CodeSecurityScanner from './code-security-scanner.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROJECT_ROOT = path.resolve(__dirname, '..');
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const PROJECT_ROOT = path.resolve(__dirname, '..')
 
 class SecurityDashboardGenerator {
   constructor() {
@@ -28,63 +28,62 @@ class SecurityDashboardGenerator {
         totalVulnerabilities: 0,
         criticalIssues: 0,
         roiMetrics: {},
-        complianceStatus: {}
+        complianceStatus: {},
       },
       securityAudit: null,
       dependencyAnalysis: null,
       codeSecurityScan: null,
       trendAnalysis: {},
       actionItems: [],
-      recommendations: []
-    };
-    
+      recommendations: [],
+    }
+
     this.roiBaseline = {
       securityIncidentPrevention: 50, // 時間/年
-      manualAuditReduction: 40,       // 時間/年
-      dependencyManagement: 30,       // 時間/年
-      compliancePreparation: 20,      // 時間/年
-      buildTimeOptimization: 10       // 時間/年
-    };
+      manualAuditReduction: 40, // 時間/年
+      dependencyManagement: 30, // 時間/年
+      compliancePreparation: 20, // 時間/年
+      buildTimeOptimization: 10, // 時間/年
+    }
   }
 
   /**
    * メインダッシュボード生成
    */
   async generateDashboard() {
-    console.log('📊 セキュリティダッシュボード生成を開始します...');
-    console.log(`📅 実行時刻: ${this.dashboardData.timestamp}`);
+    console.log('📊 セキュリティダッシュボード生成を開始します...')
+    console.log(`📅 実行時刻: ${this.dashboardData.timestamp}`)
 
     try {
       // 各セキュリティスキャンを実行
-      await this.runAllScans();
+      await this.runAllScans()
 
       // 統合分析の実行
-      await this.performIntegratedAnalysis();
+      await this.performIntegratedAnalysis()
 
       // トレンド分析の実行
-      await this.analyzeTrends();
+      await this.analyzeTrends()
 
       // アクションアイテムの生成
-      this.generateActionItems();
+      this.generateActionItems()
 
       // 統合推奨事項の生成
-      this.generateIntegratedRecommendations();
+      this.generateIntegratedRecommendations()
 
       // ROIメトリクスの計算
-      this.calculateROIMetrics();
+      this.calculateROIMetrics()
 
       // ダッシュボードファイルの生成
-      await this.generateDashboardFiles();
+      await this.generateDashboardFiles()
 
-      console.log('✅ セキュリティダッシュボード生成が完了しました');
-      console.log(`📊 総合リスクスコア: ${this.dashboardData.summary.overallRiskScore}/100`);
-      console.log(`🎯 推定ROI: ${this.dashboardData.summary.roiMetrics.totalROI}%`);
+      console.log('✅ セキュリティダッシュボード生成が完了しました')
+      console.log(`📊 総合リスクスコア: ${this.dashboardData.summary.overallRiskScore}/100`)
+      console.log(`🎯 推定ROI: ${this.dashboardData.summary.roiMetrics.totalROI}%`)
 
-      return this.dashboardData;
-
+      return this.dashboardData
     } catch (error) {
-      console.error('❌ ダッシュボード生成でエラーが発生しました:', error.message);
-      throw error;
+      console.error('❌ ダッシュボード生成でエラーが発生しました:', error.message)
+      throw error
     }
   }
 
@@ -92,128 +91,127 @@ class SecurityDashboardGenerator {
    * 全セキュリティスキャンの実行
    */
   async runAllScans() {
-    console.log('🔄 セキュリティスキャンを実行中...');
+    console.log('🔄 セキュリティスキャンを実行中...')
 
     // セキュリティ監査の実行
-    console.log('1/3: セキュリティ監査実行中...');
-    const auditor = new SecurityAuditor();
-    this.dashboardData.securityAudit = await auditor.runAudit();
+    console.log('1/3: セキュリティ監査実行中...')
+    const auditor = new SecurityAuditor()
+    this.dashboardData.securityAudit = await auditor.runAudit()
 
     // 依存関係最適化の実行
-    console.log('2/3: 依存関係分析実行中...');
-    const dependencyOptimizer = new DependencyOptimizer();
-    this.dashboardData.dependencyAnalysis = await dependencyOptimizer.runOptimization();
+    console.log('2/3: 依存関係分析実行中...')
+    const dependencyOptimizer = new DependencyOptimizer()
+    this.dashboardData.dependencyAnalysis = await dependencyOptimizer.runOptimization()
 
     // コードセキュリティスキャンの実行
-    console.log('3/3: コードセキュリティスキャン実行中...');
-    const codeScanner = new CodeSecurityScanner();
-    this.dashboardData.codeSecurityScan = await codeScanner.runScan();
+    console.log('3/3: コードセキュリティスキャン実行中...')
+    const codeScanner = new CodeSecurityScanner()
+    this.dashboardData.codeSecurityScan = await codeScanner.runScan()
 
-    console.log('✓ 全セキュリティスキャン完了');
+    console.log('✓ 全セキュリティスキャン完了')
   }
 
   /**
    * 統合分析の実行
    */
   async performIntegratedAnalysis() {
-    console.log('🔬 統合セキュリティ分析を実行中...');
+    console.log('🔬 統合セキュリティ分析を実行中...')
 
-    const audit = this.dashboardData.securityAudit;
-    const deps = this.dashboardData.dependencyAnalysis;
-    const code = this.dashboardData.codeSecurityScan;
+    const audit = this.dashboardData.securityAudit
+    const deps = this.dashboardData.dependencyAnalysis
+    const code = this.dashboardData.codeSecurityScan
 
     // 総合リスクスコアの計算（重み付き平均）
-    const auditWeight = 0.4;
-    const depsWeight = 0.3;
-    const codeWeight = 0.3;
+    const auditWeight = 0.4
+    const depsWeight = 0.3
+    const codeWeight = 0.3
 
     this.dashboardData.summary.overallRiskScore = Math.round(
-      (audit.riskScore * auditWeight) +
-      (this.mapDependencyRisk(deps) * depsWeight) +
-      (code.summary.riskScore * codeWeight)
-    );
+      audit.riskScore * auditWeight +
+        this.mapDependencyRisk(deps) * depsWeight +
+        code.summary.riskScore * codeWeight
+    )
 
     // 脆弱性の統合集計
-    this.dashboardData.summary.totalVulnerabilities = 
+    this.dashboardData.summary.totalVulnerabilities =
       (audit.vulnerabilities?.length || 0) +
       (deps.unusedDependencies?.length || 0) +
       (deps.outdatedDependencies?.length || 0) +
-      (code.summary?.issuesFound || 0);
+      (code.summary?.issuesFound || 0)
 
     // クリティカル問題の集計
-    this.dashboardData.summary.criticalIssues = 
-      (audit.vulnerabilities?.filter(v => v.severity === 'critical').length || 0) +
-      (deps.outdatedDependencies?.filter(d => d.securityRisk === 'high').length || 0) +
-      (code.codeQuality?.severityBreakdown?.critical || 0);
+    this.dashboardData.summary.criticalIssues =
+      (audit.vulnerabilities?.filter((v) => v.severity === 'critical').length || 0) +
+      (deps.outdatedDependencies?.filter((d) => d.securityRisk === 'high').length || 0) +
+      (code.codeQuality?.severityBreakdown?.critical || 0)
 
     // コンプライアンス状況の統合
-    this.dashboardData.summary.complianceStatus = this.calculateComplianceStatus(audit);
+    this.dashboardData.summary.complianceStatus = this.calculateComplianceStatus(audit)
 
-    console.log('✓ 統合分析完了');
+    console.log('✓ 統合分析完了')
   }
 
   /**
    * 依存関係リスクをスコアにマップ
    */
   mapDependencyRisk(deps) {
-    const unused = deps.unusedDependencies?.length || 0;
-    const outdated = deps.outdatedDependencies?.length || 0;
-    const highRisk = deps.outdatedDependencies?.filter(d => d.securityRisk === 'high').length || 0;
-    
+    const unused = deps.unusedDependencies?.length || 0
+    const outdated = deps.outdatedDependencies?.length || 0
+    const highRisk = deps.outdatedDependencies?.filter((d) => d.securityRisk === 'high').length || 0
+
     // リスクファクターの計算
-    const riskFactor = (unused * 0.5) + (outdated * 2) + (highRisk * 5);
-    
+    const riskFactor = unused * 0.5 + outdated * 2 + highRisk * 5
+
     // 0-100スケールにマップ
-    return Math.min(100, Math.round(riskFactor));
+    return Math.min(100, Math.round(riskFactor))
   }
 
   /**
    * コンプライアンス状況の計算
    */
   calculateComplianceStatus(audit) {
-    const owaspAnalysis = audit.owaspAnalysis || {};
-    const total = Object.keys(owaspAnalysis).length;
-    const passed = Object.values(owaspAnalysis).filter(check => check.status === 'pass').length;
-    
+    const owaspAnalysis = audit.owaspAnalysis || {}
+    const total = Object.keys(owaspAnalysis).length
+    const passed = Object.values(owaspAnalysis).filter((check) => check.status === 'pass').length
+
     return {
       owaspCompliance: total > 0 ? Math.round((passed / total) * 100) : 0,
       passedChecks: passed,
       totalChecks: total,
-      status: passed / total >= 0.8 ? 'good' : passed / total >= 0.6 ? 'moderate' : 'poor'
-    };
+      status: passed / total >= 0.8 ? 'good' : passed / total >= 0.6 ? 'moderate' : 'poor',
+    }
   }
 
   /**
    * トレンド分析の実行
    */
   async analyzeTrends() {
-    console.log('📈 セキュリティトレンド分析中...');
+    console.log('📈 セキュリティトレンド分析中...')
 
     try {
       // 過去のレポートからトレンドデータを収集
-      const historicalData = await this.loadHistoricalData();
-      
+      const historicalData = await this.loadHistoricalData()
+
       if (historicalData.length > 1) {
         this.dashboardData.trendAnalysis = {
           riskScoreTrend: this.calculateTrend(historicalData, 'riskScore'),
           vulnerabilityTrend: this.calculateTrend(historicalData, 'vulnerabilities'),
           complianceTrend: this.calculateTrend(historicalData, 'compliance'),
-          improvementRate: this.calculateImprovementRate(historicalData)
-        };
+          improvementRate: this.calculateImprovementRate(historicalData),
+        }
       } else {
         this.dashboardData.trendAnalysis = {
           riskScoreTrend: 'insufficient_data',
           vulnerabilityTrend: 'insufficient_data',
           complianceTrend: 'insufficient_data',
-          improvementRate: 0
-        };
+          improvementRate: 0,
+        }
       }
 
-      console.log('✓ トレンド分析完了');
-
+      console.log('✓ トレンド分析完了')
     } catch (error) {
-      console.warn('⚠️ トレンド分析中にエラー:', error.message);
-      this.dashboardData.trendAnalysis = { error: error.message };
+      console.warn('⚠️ トレンド分析中にエラー:', error.message)
+      this.dashboardData.trendAnalysis = { error: error.message }
     }
   }
 
@@ -221,95 +219,97 @@ class SecurityDashboardGenerator {
    * 過去データの読み込み
    */
   async loadHistoricalData() {
-    const reportsDir = path.join(PROJECT_ROOT, 'reports', 'security');
-    const historicalData = [];
+    const reportsDir = path.join(PROJECT_ROOT, 'reports', 'security')
+    const historicalData = []
 
     try {
-      const files = await fs.readdir(reportsDir);
+      const files = await fs.readdir(reportsDir)
       const jsonFiles = files
-        .filter(file => file.startsWith('security-audit-') && file.endsWith('.json'))
+        .filter((file) => file.startsWith('security-audit-') && file.endsWith('.json'))
         .sort()
-        .slice(-5); // 最新5件
+        .slice(-5) // 最新5件
 
       for (const file of jsonFiles) {
         try {
-          const filePath = path.join(reportsDir, file);
-          const data = JSON.parse(await fs.readFile(filePath, 'utf8'));
-          
+          const filePath = path.join(reportsDir, file)
+          const data = JSON.parse(await fs.readFile(filePath, 'utf8'))
+
           historicalData.push({
             timestamp: data.timestamp,
             riskScore: data.riskScore,
             vulnerabilities: data.vulnerabilities?.length || 0,
-            compliance: this.calculateComplianceScore(data.owaspAnalysis)
-          });
+            compliance: this.calculateComplianceScore(data.owaspAnalysis),
+          })
         } catch (error) {
-          console.debug(`履歴ファイル読み込みスキップ: ${file}`);
+          console.debug(`履歴ファイル読み込みスキップ: ${file}`)
         }
       }
     } catch (error) {
-      console.debug('履歴データディレクトリが存在しません');
+      console.debug('履歴データディレクトリが存在しません')
     }
 
-    return historicalData;
+    return historicalData
   }
 
   /**
    * コンプライアンススコアの計算
    */
   calculateComplianceScore(owaspAnalysis) {
-    if (!owaspAnalysis) return 0;
-    
-    const total = Object.keys(owaspAnalysis).length;
-    const passed = Object.values(owaspAnalysis).filter(check => check.status === 'pass').length;
-    
-    return total > 0 ? (passed / total) * 100 : 0;
+    if (!owaspAnalysis) return 0
+
+    const total = Object.keys(owaspAnalysis).length
+    const passed = Object.values(owaspAnalysis).filter((check) => check.status === 'pass').length
+
+    return total > 0 ? (passed / total) * 100 : 0
   }
 
   /**
    * トレンドの計算
    */
   calculateTrend(data, metric) {
-    if (data.length < 2) return 'stable';
-    
-    const latest = data[data.length - 1][metric];
-    const previous = data[data.length - 2][metric];
-    
-    if (latest > previous * 1.1) return 'worsening';
-    if (latest < previous * 0.9) return 'improving';
-    return 'stable';
+    if (data.length < 2) return 'stable'
+
+    const latest = data[data.length - 1][metric]
+    const previous = data[data.length - 2][metric]
+
+    if (latest > previous * 1.1) return 'worsening'
+    if (latest < previous * 0.9) return 'improving'
+    return 'stable'
   }
 
   /**
    * 改善率の計算
    */
   calculateImprovementRate(data) {
-    if (data.length < 2) return 0;
-    
-    const oldest = data[0];
-    const latest = data[data.length - 1];
-    
+    if (data.length < 2) return 0
+
+    const oldest = data[0]
+    const latest = data[data.length - 1]
+
     // リスクスコアの改善率（低いほど良い）
-    const riskImprovement = ((oldest.riskScore - latest.riskScore) / oldest.riskScore) * 100;
-    
+    const riskImprovement = ((oldest.riskScore - latest.riskScore) / oldest.riskScore) * 100
+
     // コンプライアンスの改善率（高いほど良い）
-    const complianceImprovement = ((latest.compliance - oldest.compliance) / Math.max(oldest.compliance, 1)) * 100;
-    
-    return Math.round((riskImprovement + complianceImprovement) / 2);
+    const complianceImprovement =
+      ((latest.compliance - oldest.compliance) / Math.max(oldest.compliance, 1)) * 100
+
+    return Math.round((riskImprovement + complianceImprovement) / 2)
   }
 
   /**
    * アクションアイテムの生成
    */
   generateActionItems() {
-    console.log('📋 アクションアイテム生成中...');
+    console.log('📋 アクションアイテム生成中...')
 
-    const actionItems = [];
-    const audit = this.dashboardData.securityAudit;
-    const deps = this.dashboardData.dependencyAnalysis;
-    const code = this.dashboardData.codeSecurityScan;
+    const actionItems = []
+    const audit = this.dashboardData.securityAudit
+    const deps = this.dashboardData.dependencyAnalysis
+    const code = this.dashboardData.codeSecurityScan
 
     // クリティカル脆弱性への対応
-    const criticalAuditIssues = audit.vulnerabilities?.filter(v => v.severity === 'critical') || [];
+    const criticalAuditIssues =
+      audit.vulnerabilities?.filter((v) => v.severity === 'critical') || []
     if (criticalAuditIssues.length > 0) {
       actionItems.push({
         id: 'critical-vulnerabilities',
@@ -319,12 +319,12 @@ class SecurityDashboardGenerator {
         description: `${criticalAuditIssues.length}件のクリティカル脆弱性を即座に修正`,
         assignee: 'security-team',
         effort: '4-8時間',
-        impact: 'システムの安全性確保'
-      });
+        impact: 'システムの安全性確保',
+      })
     }
 
     // 高リスク依存関係の更新
-    const highRiskDeps = deps.outdatedDependencies?.filter(d => d.securityRisk === 'high') || [];
+    const highRiskDeps = deps.outdatedDependencies?.filter((d) => d.securityRisk === 'high') || []
     if (highRiskDeps.length > 0) {
       actionItems.push({
         id: 'high-risk-dependencies',
@@ -334,12 +334,12 @@ class SecurityDashboardGenerator {
         description: `${highRiskDeps.length}件の高リスク依存関係を更新`,
         assignee: 'dev-team',
         effort: '2-4時間',
-        impact: 'セキュリティリスク軽減'
-      });
+        impact: 'セキュリティリスク軽減',
+      })
     }
 
     // コードセキュリティ問題の修正
-    const criticalCodeIssues = code.codeQuality?.severityBreakdown?.critical || 0;
+    const criticalCodeIssues = code.codeQuality?.severityBreakdown?.critical || 0
     if (criticalCodeIssues > 0) {
       actionItems.push({
         id: 'critical-code-issues',
@@ -349,12 +349,12 @@ class SecurityDashboardGenerator {
         description: `${criticalCodeIssues}件のクリティカルコード問題を修正`,
         assignee: 'dev-team',
         effort: '6-12時間',
-        impact: 'コードセキュリティ向上'
-      });
+        impact: 'コードセキュリティ向上',
+      })
     }
 
     // 未使用依存関係のクリーンアップ
-    const unusedDeps = deps.unusedDependencies?.length || 0;
+    const unusedDeps = deps.unusedDependencies?.length || 0
     if (unusedDeps > 5) {
       actionItems.push({
         id: 'unused-dependencies-cleanup',
@@ -364,12 +364,12 @@ class SecurityDashboardGenerator {
         description: `${unusedDeps}件の未使用依存関係を削除`,
         assignee: 'dev-team',
         effort: '1-2時間',
-        impact: `${this.formatBytes(deps.potentialSavings?.diskSpace || 0)} の容量節約`
-      });
+        impact: `${this.formatBytes(deps.potentialSavings?.diskSpace || 0)} の容量節約`,
+      })
     }
 
     // OWASP コンプライアンス改善
-    const owaspCompliance = this.dashboardData.summary.complianceStatus.owaspCompliance;
+    const owaspCompliance = this.dashboardData.summary.complianceStatus.owaspCompliance
     if (owaspCompliance < 80) {
       actionItems.push({
         id: 'owasp-compliance-improvement',
@@ -379,22 +379,22 @@ class SecurityDashboardGenerator {
         description: `OWASP準拠率を${owaspCompliance}%から90%以上に改善`,
         assignee: 'security-team',
         effort: '8-16時間',
-        impact: 'セキュリティ標準準拠'
-      });
+        impact: 'セキュリティ標準準拠',
+      })
     }
 
-    this.dashboardData.actionItems = actionItems;
-    console.log(`✓ ${actionItems.length} のアクションアイテムを生成`);
+    this.dashboardData.actionItems = actionItems
+    console.log(`✓ ${actionItems.length} のアクションアイテムを生成`)
   }
 
   /**
    * 統合推奨事項の生成
    */
   generateIntegratedRecommendations() {
-    console.log('💡 統合推奨事項生成中...');
+    console.log('💡 統合推奨事項生成中...')
 
-    const recommendations = [];
-    const overallRiskScore = this.dashboardData.summary.overallRiskScore;
+    const recommendations = []
+    const overallRiskScore = this.dashboardData.summary.overallRiskScore
 
     // リスクスコアベースの推奨事項
     if (overallRiskScore > 70) {
@@ -405,11 +405,11 @@ class SecurityDashboardGenerator {
         actions: [
           'クリティカル・高重要度の脆弱性を即座に修正',
           '外部からのアクセスを一時制限',
-          'セキュリティチームによる緊急レビュー実施'
+          'セキュリティチームによる緊急レビュー実施',
         ],
         timeline: '24-48時間',
-        impact: 'critical'
-      });
+        impact: 'critical',
+      })
     }
 
     // 予防的セキュリティ施策
@@ -421,11 +421,11 @@ class SecurityDashboardGenerator {
         'CI/CDパイプラインへの自動セキュリティスキャン統合',
         'コードレビュー時のセキュリティチェックリスト導入',
         '定期的なセキュリティ研修の実施',
-        'セキュアコーディング標準の策定'
+        'セキュアコーディング標準の策定',
       ],
       timeline: '1-3ヶ月',
-      impact: 'high'
-    });
+      impact: 'high',
+    })
 
     // 継続的改善
     recommendations.push({
@@ -436,11 +436,11 @@ class SecurityDashboardGenerator {
         '週次自動セキュリティスキャンのスケジューリング',
         'セキュリティメトリクスダッシュボードの日次更新',
         'アラート機能の実装',
-        '外部脅威情報との連携'
+        '外部脅威情報との連携',
       ],
       timeline: '継続的',
-      impact: 'moderate'
-    });
+      impact: 'moderate',
+    })
 
     // ROI最適化
     recommendations.push({
@@ -451,56 +451,59 @@ class SecurityDashboardGenerator {
         '自動化によるセキュリティ運用コスト削減',
         '重複する依存関係の統合',
         'セキュリティツールの統合管理',
-        'セキュリティ投資効果の可視化'
+        'セキュリティ投資効果の可視化',
       ],
       timeline: '2-6ヶ月',
-      impact: 'moderate'
-    });
+      impact: 'moderate',
+    })
 
-    this.dashboardData.recommendations = recommendations;
-    console.log(`✓ ${recommendations.length} の統合推奨事項を生成`);
+    this.dashboardData.recommendations = recommendations
+    console.log(`✓ ${recommendations.length} の統合推奨事項を生成`)
   }
 
   /**
    * ROIメトリクスの計算
    */
   calculateROIMetrics() {
-    console.log('💰 ROIメトリクス計算中...');
+    console.log('💰 ROIメトリクス計算中...')
 
-    const audit = this.dashboardData.securityAudit;
-    const deps = this.dashboardData.dependencyAnalysis;
-    const code = this.dashboardData.codeSecurityScan;
+    const audit = this.dashboardData.securityAudit
+    const deps = this.dashboardData.dependencyAnalysis
+    const code = this.dashboardData.codeSecurityScan
 
     // 潜在的時間節約の計算
     const timeSavings = {
       // セキュリティインシデント予防
       incidentPrevention: this.calculateIncidentPreventionSavings(audit, code),
-      
+
       // 手動監査作業削減
       manualAuditSavings: this.roiBaseline.manualAuditReduction,
-      
+
       // 依存関係管理効率化
       dependencyManagement: this.calculateDependencyManagementSavings(deps),
-      
+
       // コンプライアンス準備時間削減
       compliancePreparation: this.calculateComplianceSavings(audit),
-      
+
       // ビルド時間最適化
-      buildOptimization: deps.potentialSavings?.buildTime || 0
-    };
+      buildOptimization: deps.potentialSavings?.buildTime || 0,
+    }
 
     // 総時間節約（時間/年）
-    const totalTimeSavings = Object.values(timeSavings).reduce((sum, value) => sum + value, 0);
+    const totalTimeSavings = Object.values(timeSavings).reduce((sum, value) => sum + value, 0)
 
     // コスト換算（時間単価 ¥5,000/時間 と仮定）
-    const hourlyRate = 5000;
-    const totalCostSavings = totalTimeSavings * hourlyRate;
+    const hourlyRate = 5000
+    const totalCostSavings = totalTimeSavings * hourlyRate
 
     // 実装コスト（推定）
-    const implementationCost = 200000; // ¥200,000
+    const implementationCost = 200000 // ¥200,000
 
     // ROI計算
-    const roi = totalCostSavings > 0 ? ((totalCostSavings - implementationCost) / implementationCost) * 100 : 0;
+    const roi =
+      totalCostSavings > 0
+        ? ((totalCostSavings - implementationCost) / implementationCost) * 100
+        : 0
 
     this.dashboardData.summary.roiMetrics = {
       totalTimeSavings: Math.round(totalTimeSavings),
@@ -508,90 +511,93 @@ class SecurityDashboardGenerator {
       implementationCost: implementationCost,
       totalROI: Math.round(roi),
       timeSavingsBreakdown: timeSavings,
-      paybackPeriod: totalCostSavings > implementationCost ? 
-        Math.round((implementationCost / (totalCostSavings / 12)) * 10) / 10 : null // 月
-    };
+      paybackPeriod:
+        totalCostSavings > implementationCost
+          ? Math.round((implementationCost / (totalCostSavings / 12)) * 10) / 10
+          : null, // 月
+    }
 
-    console.log(`✓ 推定ROI: ${Math.round(roi)}% (年間${Math.round(totalTimeSavings)}時間節約)`);
+    console.log(`✓ 推定ROI: ${Math.round(roi)}% (年間${Math.round(totalTimeSavings)}時間節約)`)
   }
 
   /**
    * インシデント予防による節約効果の計算
    */
   calculateIncidentPreventionSavings(audit, code) {
-    const criticalVulns = (audit.vulnerabilities?.filter(v => v.severity === 'critical').length || 0) +
-                         (code.codeQuality?.severityBreakdown?.critical || 0);
-    
+    const criticalVulns =
+      (audit.vulnerabilities?.filter((v) => v.severity === 'critical').length || 0) +
+      (code.codeQuality?.severityBreakdown?.critical || 0)
+
     // 1つのクリティカル脆弱性につき年間10時間の予防効果と仮定
-    return Math.min(this.roiBaseline.securityIncidentPrevention, criticalVulns * 10);
+    return Math.min(this.roiBaseline.securityIncidentPrevention, criticalVulns * 10)
   }
 
   /**
    * 依存関係管理による節約効果の計算
    */
   calculateDependencyManagementSavings(deps) {
-    const unusedCount = deps.unusedDependencies?.length || 0;
-    const outdatedCount = deps.outdatedDependencies?.length || 0;
-    
+    const unusedCount = deps.unusedDependencies?.length || 0
+    const outdatedCount = deps.outdatedDependencies?.length || 0
+
     // 管理する依存関係数に基づく節約効果
-    const managementSavings = (unusedCount + outdatedCount) * 0.5; // 1パッケージにつき0.5時間/年
-    
-    return Math.min(this.roiBaseline.dependencyManagement, managementSavings);
+    const managementSavings = (unusedCount + outdatedCount) * 0.5 // 1パッケージにつき0.5時間/年
+
+    return Math.min(this.roiBaseline.dependencyManagement, managementSavings)
   }
 
   /**
    * コンプライアンス準備による節約効果の計算
    */
   calculateComplianceSavings(audit) {
-    const owaspCompliance = this.calculateComplianceScore(audit.owaspAnalysis);
-    
+    const owaspCompliance = this.calculateComplianceScore(audit.owaspAnalysis)
+
     // コンプライアンス率に基づく節約効果
-    const complianceFactor = owaspCompliance / 100;
-    
-    return Math.round(this.roiBaseline.compliancePreparation * complianceFactor);
+    const complianceFactor = owaspCompliance / 100
+
+    return Math.round(this.roiBaseline.compliancePreparation * complianceFactor)
   }
 
   /**
    * ダッシュボードファイルの生成
    */
   async generateDashboardFiles() {
-    console.log('📄 ダッシュボードファイル生成中...');
+    console.log('📄 ダッシュボードファイル生成中...')
 
-    const dashboardDir = path.join(PROJECT_ROOT, 'reports', 'security-dashboard');
-    await fs.mkdir(dashboardDir, { recursive: true });
+    const dashboardDir = path.join(PROJECT_ROOT, 'reports', 'security-dashboard')
+    await fs.mkdir(dashboardDir, { recursive: true })
 
     // メインHTMLダッシュボード
-    const htmlDashboard = await this.generateHTMLDashboard();
-    const htmlPath = path.join(dashboardDir, `security-dashboard-${Date.now()}.html`);
-    await fs.writeFile(htmlPath, htmlDashboard);
+    const htmlDashboard = await this.generateHTMLDashboard()
+    const htmlPath = path.join(dashboardDir, `security-dashboard-${Date.now()}.html`)
+    await fs.writeFile(htmlPath, htmlDashboard)
 
     // JSON データ
-    const jsonPath = path.join(dashboardDir, `dashboard-data-${Date.now()}.json`);
-    await fs.writeFile(jsonPath, JSON.stringify(this.dashboardData, null, 2));
+    const jsonPath = path.join(dashboardDir, `dashboard-data-${Date.now()}.json`)
+    await fs.writeFile(jsonPath, JSON.stringify(this.dashboardData, null, 2))
 
     // エグゼクティブサマリー
-    const summaryPath = path.join(dashboardDir, 'executive-summary.md');
-    const executiveSummary = this.generateExecutiveSummary();
-    await fs.writeFile(summaryPath, executiveSummary);
+    const summaryPath = path.join(dashboardDir, 'executive-summary.md')
+    const executiveSummary = this.generateExecutiveSummary()
+    await fs.writeFile(summaryPath, executiveSummary)
 
     // 最新ダッシュボードへのリンク
-    const latestPath = path.join(dashboardDir, 'latest-dashboard.html');
-    await fs.writeFile(latestPath, htmlDashboard);
+    const latestPath = path.join(dashboardDir, 'latest-dashboard.html')
+    await fs.writeFile(latestPath, htmlDashboard)
 
-    console.log(`✅ ダッシュボード生成完了:`);
-    console.log(`   HTML: ${htmlPath}`);
-    console.log(`   JSON: ${jsonPath}`);
-    console.log(`   Summary: ${summaryPath}`);
-    console.log(`   Latest: ${latestPath}`);
+    console.log(`✅ ダッシュボード生成完了:`)
+    console.log(`   HTML: ${htmlPath}`)
+    console.log(`   JSON: ${jsonPath}`)
+    console.log(`   Summary: ${summaryPath}`)
+    console.log(`   Latest: ${latestPath}`)
   }
 
   /**
    * HTMLダッシュボードの生成
    */
   async generateHTMLDashboard() {
-    const riskScore = this.dashboardData.summary.overallRiskScore;
-    const roiMetrics = this.dashboardData.summary.roiMetrics;
-    const complianceStatus = this.dashboardData.summary.complianceStatus;
+    const riskScore = this.dashboardData.summary.overallRiskScore
+    const roiMetrics = this.dashboardData.summary.roiMetrics
+    const complianceStatus = this.dashboardData.summary.complianceStatus
 
     return `
 <!DOCTYPE html>
@@ -656,8 +662,11 @@ class SecurityDashboardGenerator {
                 <div class="metric">
                     <div class="metric-value risk-score">${riskScore}</div>
                     <div class="metric-label">総合リスクスコア / 100</div>
-                    ${this.dashboardData.trendAnalysis.riskScoreTrend !== 'insufficient_data' ? 
-                      `<span class="trend ${this.dashboardData.trendAnalysis.riskScoreTrend}">${this.getTrendLabel(this.dashboardData.trendAnalysis.riskScoreTrend)}</span>` : ''}
+                    ${
+                      this.dashboardData.trendAnalysis.riskScoreTrend !== 'insufficient_data'
+                        ? `<span class="trend ${this.dashboardData.trendAnalysis.riskScoreTrend}">${this.getTrendLabel(this.dashboardData.trendAnalysis.riskScoreTrend)}</span>`
+                        : ''
+                    }
                 </div>
             </div>
 
@@ -696,12 +705,16 @@ class SecurityDashboardGenerator {
             <div class="card">
                 <h3>ROI内訳</h3>
                 <div style="padding: 10px;">
-                    ${Object.entries(roiMetrics.timeSavingsBreakdown).map(([key, value]) => `
+                    ${Object.entries(roiMetrics.timeSavingsBreakdown)
+                      .map(
+                        ([key, value]) => `
                         <div style="margin: 10px 0;">
                             <span style="display: inline-block; width: 200px;">${this.getROILabel(key)}:</span>
                             <span style="font-weight: bold;">${value}時間/年</span>
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
             </div>
 
@@ -726,7 +739,9 @@ class SecurityDashboardGenerator {
 
         <div class="action-items">
             <h2>🎯 アクションアイテム</h2>
-            ${this.dashboardData.actionItems.map(item => `
+            ${this.dashboardData.actionItems
+              .map(
+                (item) => `
                 <div class="action-item ${item.priority}">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h4>${item.title}</h4>
@@ -740,19 +755,23 @@ class SecurityDashboardGenerator {
                         <span><strong>効果:</strong> ${item.impact}</span>
                     </div>
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
         </div>
 
         <div class="recommendations">
             <h2>💡 統合推奨事項</h2>
-            ${this.dashboardData.recommendations.map(rec => `
+            ${this.dashboardData.recommendations
+              .map(
+                (rec) => `
                 <div class="recommendation">
                     <h4>${rec.title}</h4>
                     <p>${rec.description}</p>
                     <div style="margin: 10px 0;">
                         <strong>アクション:</strong>
                         <ul style="margin-left: 20px; margin-top: 5px;">
-                            ${rec.actions.map(action => `<li>${action}</li>`).join('')}
+                            ${rec.actions.map((action) => `<li>${action}</li>`).join('')}
                         </ul>
                     </div>
                     <div style="font-size: 0.9em; color: #666;">
@@ -760,7 +779,9 @@ class SecurityDashboardGenerator {
                         <span><strong>影響度:</strong> ${rec.impact}</span>
                     </div>
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
         </div>
 
         <div class="footer">
@@ -782,16 +803,16 @@ class SecurityDashboardGenerator {
     </script>
 </body>
 </html>
-    `;
+    `
   }
 
   /**
    * エグゼクティブサマリーの生成
    */
   generateExecutiveSummary() {
-    const riskScore = this.dashboardData.summary.overallRiskScore;
-    const roiMetrics = this.dashboardData.summary.roiMetrics;
-    const criticalIssues = this.dashboardData.summary.criticalIssues;
+    const riskScore = this.dashboardData.summary.overallRiskScore
+    const roiMetrics = this.dashboardData.summary.roiMetrics
+    const criticalIssues = this.dashboardData.summary.criticalIssues
 
     return `# セキュリティダッシュボード - エグゼクティブサマリー
 
@@ -809,8 +830,8 @@ class SecurityDashboardGenerator {
 
 ## 🎯 緊急アクション（次の48時間）
 ${this.dashboardData.actionItems
-  .filter(item => item.priority === 'critical')
-  .map(item => `- **${item.title}**: ${item.description}`)
+  .filter((item) => item.priority === 'critical')
+  .map((item) => `- **${item.title}**: ${item.description}`)
   .join('\n')}
 
 ## 📈 セキュリティトレンド
@@ -828,20 +849,20 @@ ${this.dashboardData.actionItems
 
 ### 短期（1-4週間）
 ${this.dashboardData.recommendations
-  .filter(rec => rec.category === 'immediate')
-  .map(rec => `- **${rec.title}**: ${rec.description}`)
+  .filter((rec) => rec.category === 'immediate')
+  .map((rec) => `- **${rec.title}**: ${rec.description}`)
   .join('\n')}
 
 ### 中期（1-3ヶ月）
 ${this.dashboardData.recommendations
-  .filter(rec => rec.category === 'preventive')
-  .map(rec => `- **${rec.title}**: ${rec.description}`)
+  .filter((rec) => rec.category === 'preventive')
+  .map((rec) => `- **${rec.title}**: ${rec.description}`)
   .join('\n')}
 
 ### 長期（継続的）
 ${this.dashboardData.recommendations
-  .filter(rec => rec.category === 'continuous')
-  .map(rec => `- **${rec.title}**: ${rec.description}`)
+  .filter((rec) => rec.category === 'continuous')
+  .map((rec) => `- **${rec.title}**: ${rec.description}`)
   .join('\n')}
 
 ## 📊 投資効果の内訳
@@ -850,9 +871,13 @@ ${Object.entries(roiMetrics.timeSavingsBreakdown)
   .join('\n')}
 
 ## 🚨 リスク評価
-${riskScore > 70 ? '**高リスク**: 即座の対応が必要です。セキュリティチームによる緊急対応を推奨します。' : 
-  riskScore > 40 ? '**中リスク**: 計画的な改善が必要です。定期的な監視を継続してください。' : 
-  '**低リスク**: 現在の状態は良好です。予防的施策の継続を推奨します。'}
+${
+  riskScore > 70
+    ? '**高リスク**: 即座の対応が必要です。セキュリティチームによる緊急対応を推奨します。'
+    : riskScore > 40
+      ? '**中リスク**: 計画的な改善が必要です。定期的な監視を継続してください。'
+      : '**低リスク**: 現在の状態は良好です。予防的施策の継続を推奨します。'
+}
 
 ## 📋 次回レビュー予定
 - **日程**: ${this.addDays(new Date(), 7).toLocaleDateString('ja-JP')}
@@ -861,24 +886,24 @@ ${riskScore > 70 ? '**高リスク**: 即座の対応が必要です。セキュ
 ---
 *PMPLearningManagement スマートセキュリティ最適化システム v1.0.0*
 *目標ROI 430% 達成のための統合セキュリティ管理*
-`;
+`
   }
 
   /**
    * ヘルパー関数群
    */
   addDays(date, days) {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
+    const result = new Date(date)
+    result.setDate(result.getDate() + days)
+    return result
   }
 
   formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   getTrendLabel(trend) {
@@ -886,18 +911,18 @@ ${riskScore > 70 ? '**高リスク**: 即座の対応が必要です。セキュ
       improving: '改善中',
       worsening: '悪化中',
       stable: '安定',
-      insufficient_data: 'データ不足'
-    };
-    return labels[trend] || '不明';
+      insufficient_data: 'データ不足',
+    }
+    return labels[trend] || '不明'
   }
 
   getComplianceStatusLabel(status) {
     const labels = {
       good: '良好',
       moderate: '要改善',
-      poor: '不良'
-    };
-    return labels[status] || '不明';
+      poor: '不良',
+    }
+    return labels[status] || '不明'
   }
 
   getROILabel(key) {
@@ -906,30 +931,31 @@ ${riskScore > 70 ? '**高リスク**: 即座の対応が必要です。セキュ
       manualAuditSavings: '手動監査削減',
       dependencyManagement: '依存関係管理',
       compliancePreparation: 'コンプライアンス準備',
-      buildOptimization: 'ビルド時間最適化'
-    };
-    return labels[key] || key;
+      buildOptimization: 'ビルド時間最適化',
+    }
+    return labels[key] || key
   }
 }
 
 // スクリプト実行部分
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const dashboardGenerator = new SecurityDashboardGenerator();
-  
-  dashboardGenerator.generateDashboard()
-    .then(results => {
-      console.log('\n🎉 セキュリティダッシュボード生成完了!');
-      console.log(`📊 総合リスクスコア: ${results.summary.overallRiskScore}/100`);
-      console.log(`💰 推定ROI: ${results.summary.roiMetrics.totalROI}%`);
-      console.log(`⏱️ 年間時間節約: ${results.summary.roiMetrics.totalTimeSavings}時間`);
-      console.log(`🎯 アクションアイテム: ${results.actionItems.length}件`);
-      
-      process.exit(0);
+  const dashboardGenerator = new SecurityDashboardGenerator()
+
+  dashboardGenerator
+    .generateDashboard()
+    .then((results) => {
+      console.log('\n🎉 セキュリティダッシュボード生成完了!')
+      console.log(`📊 総合リスクスコア: ${results.summary.overallRiskScore}/100`)
+      console.log(`💰 推定ROI: ${results.summary.roiMetrics.totalROI}%`)
+      console.log(`⏱️ 年間時間節約: ${results.summary.roiMetrics.totalTimeSavings}時間`)
+      console.log(`🎯 アクションアイテム: ${results.actionItems.length}件`)
+
+      process.exit(0)
     })
-    .catch(error => {
-      console.error('❌ セキュリティダッシュボード生成に失敗しました:', error.message);
-      process.exit(1);
-    });
+    .catch((error) => {
+      console.error('❌ セキュリティダッシュボード生成に失敗しました:', error.message)
+      process.exit(1)
+    })
 }
 
-export default SecurityDashboardGenerator;
+export default SecurityDashboardGenerator

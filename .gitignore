@@ -1,54 +1,41 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
-# testing
-/coverage
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
 
-# next.js
-/.next/
-/out/
+# Testing
+coverage/
+playwright-report/
+test-results/
+test-results.*
+results.xml
+*.lcov
+.nyc_output/
 
-# production
-/build
-/dist
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# local env files
-.env*.local
+# Environment files
 .env
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma
-prisma/*.db
-prisma/*.db-journal
-prisma/migrations/dev/
+.env*.local
 
 # IDE
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-.idea
+.idea/
 *.swp
 *.swo
 *.suo
@@ -57,42 +44,53 @@ prisma/migrations/dev/
 *.sln
 *.sw?
 
-# OS
+# OS files
+.DS_Store
 Thumbs.db
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+desktop.ini
 
 # Database
 *.sqlite
 *.sqlite3
+*.db
+*.db-journal
 postgres_data/
 redis_data/
 pgadmin_data/
 
-# Uploads
-uploads/
+# Temporary files
 temp/
+tmp/
+uploads/
+*.tmp
+*.temp
 
-# Bundle analyzer
-.next/analyze/
-
-# PWA
+# PWA generated files
 public/sw.js
 public/workbox-*.js
 public/worker-*.js
-public/sw.js.map
-public/workbox-*.js.map
-public/worker-*.js.map
+public/*.js.map
 
-# Input documents (if containing sensitive/copyrighted data)
-# Uncomment these lines if you have PDF files with copyright content
-# docs/input/references/*.pdf
-# docs/input/pmbok/*.pdf
+# Reports (temporary)
+reports/quality/*.json
+reports/quality/*.html
+!reports/quality/.gitkeep
+
+# Performance artifacts
+lighthouse-report.html
+bundle-stats.html
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Archive files (moved to docs/archive)
+*_REPORT.md
+*_SUMMARY.md
+*_ANNOUNCEMENT.md
+*_DASHBOARD.md
+
+# Generated documentation
+docs/consolidated/*.md
+!docs/consolidated/README.md

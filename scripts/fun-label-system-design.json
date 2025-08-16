@@ -342,12 +342,12 @@
       "type:refactor": "🔧 リファクタリングの匠",
       "type:test": "🧪 テストの科学者",
       "type:chore": "🔧 リファクタリングの匠",
-      
+
       "priority:critical": "🚨 コードレッド：緊急出動",
       "priority:high": "🔥 ホット・イシュー：今すぐアクション",
       "priority:medium": "⭐ スタンダード・クエスト：順調に進行",
       "priority:low": "🌱 スロー・ライフ：のんびり改善",
-      
+
       "area:ui": "🎨 デザインの芸術家",
       "area:frontend": "📡 コミュニケーションの橋渡し",
       "area:backend": "🎯 プロジェクト統合管理",
@@ -357,19 +357,19 @@
       "area:devops": "🚀 パフォーマンス・スピードスター",
       "area:security": "🔐 セキュリティの守護者",
       "area:performance": "🚀 パフォーマンス・スピードスター",
-      
+
       "status:triage": "🔍 調査フェーズ：謎解き中",
       "status:ready": "✅ 準備完了：スタートライン",
       "status:in-progress": "⚡ 開発中：クリエイティブタイム",
       "status:blocked": "🚫 ブロック中：道の障害物",
       "status:review": "👀 レビュー待ち：最終チェック",
-      
+
       "size:xs": "🌟 レベル1：初心者への贈り物",
       "size:s": "⚡ レベル2：駆け出し冒険者",
       "size:m": "🔥 レベル3：熟練者の挑戦",
       "size:l": "👑 レベル4：マスター級の伝説",
       "size:xl": "🏆 レベル5：エピック・クエスト",
-      
+
       "epic": "🎭 複数エリア対応：オールラウンダー",
       "good-first-issue": "🚀 新人さん大歓迎：はじめの一歩",
       "help-wanted": "🎓 メンター募集：教えて先輩",

@@ -75,21 +75,21 @@ const AICoachingDashboard = () => {
     // プロンプトをログに記録
     const promptId = await logPrompt(prompt, {
       source: 'ai-coaching',
-      context: { component: 'AICoachingDashboard' }
+      context: { component: 'AICoachingDashboard' },
     })
 
     // AI応答を取得
     const startTime = Date.now()
     try {
       const response = await getAIResponse(prompt)
-      
+
       // 応答をログに記録
       await logResponse(response, {
         model: 'gpt-4',
         completionTime: Date.now() - startTime,
         totalTokens: response.usage?.total_tokens,
       })
-      
+
       return response
     } catch (error) {
       // エラーをログに記録
@@ -122,7 +122,7 @@ const GlobalSearch = () => {
     // 検索クエリをログに記録
     await logPrompt(query, {
       source: 'global-search',
-      context: { searchType: 'global' }
+      context: { searchType: 'global' },
     })
 
     // 検索実行
@@ -150,11 +150,14 @@ const GlobalSearch = () => {
 import PromptLogDashboard from './components/logging/PromptLogDashboard'
 
 // ルート設定に追加
-<Route path="/prompt-logs" element={
-  <ProtectedRoute>
-    <PromptLogDashboard />
-  </ProtectedRoute>
-} />
+;<Route
+  path="/prompt-logs"
+  element={
+    <ProtectedRoute>
+      <PromptLogDashboard />
+    </ProtectedRoute>
+  }
+/>
 ```
 
 ### Step 5: ナビゲーションメニューへの追加
@@ -221,7 +224,7 @@ export const getPromptLogConfig = () => {
       maxLogAge: 90 * 24 * 60 * 60 * 1000, // 90日
     }
   }
-  
+
   if (isDevelopment) {
     return {
       enableEncryption: false,
@@ -229,7 +232,7 @@ export const getPromptLogConfig = () => {
       maxLogAge: 7 * 24 * 60 * 60 * 1000, // 7日
     }
   }
-  
+
   return {}
 }
 ```
@@ -268,10 +271,10 @@ describe('PromptLogService', () => {
 
   it('should sanitize PII when privacy mode is enabled', () => {
     promptLogService.updateConfig({ privacyMode: true })
-    
+
     const content = 'Contact me at john@example.com or 555-123-4567'
     const sanitized = promptLogService.sanitizeContent(content)
-    
+
     expect(sanitized).not.toContain('john@example.com')
     expect(sanitized).not.toContain('555-123-4567')
     expect(sanitized).toContain('[REDACTED]')
@@ -303,7 +306,7 @@ import PromptLogDashboard from '../logging/PromptLogDashboard'
 describe('PromptLogDashboard', () => {
   it('should display logs', async () => {
     render(<PromptLogDashboard />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('Prompt Log Dashboard')).toBeInTheDocument()
     })
@@ -312,10 +315,10 @@ describe('PromptLogDashboard', () => {
   it('should filter logs by type', async () => {
     const user = userEvent.setup()
     render(<PromptLogDashboard />)
-    
+
     const typeFilter = screen.getByLabelText('Type')
     await user.selectOptions(typeFilter, 'prompt')
-    
+
     await waitFor(() => {
       const logs = screen.getAllByRole('row')
       expect(logs.length).toBeGreaterThan(0)
@@ -325,10 +328,10 @@ describe('PromptLogDashboard', () => {
   it('should export logs', async () => {
     const user = userEvent.setup()
     render(<PromptLogDashboard />)
-    
+
     const exportButton = screen.getByText('Export Logs')
     await user.click(exportButton)
-    
+
     // モックされたダウンロード処理を確認
     expect(document.createElement).toHaveBeenCalledWith('a')
   })
@@ -344,7 +347,7 @@ describe('PromptLogDashboard', () => {
 import { lazy, Suspense } from 'react'
 
 // ダッシュボードを遅延ロード
-const PromptLogDashboard = lazy(() => 
+const PromptLogDashboard = lazy(() =>
   import('./components/logging/PromptLogDashboard')
 )
 
@@ -388,20 +391,15 @@ const PromptLogDashboard = () => {
 export const encryptData = async (data) => {
   const encoder = new TextEncoder()
   const dataBuffer = encoder.encode(JSON.stringify(data))
-  
-  const key = await crypto.subtle.generateKey(
-    { name: 'AES-GCM', length: 256 },
-    true,
-    ['encrypt', 'decrypt']
-  )
-  
+
+  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+    'encrypt',
+    'decrypt',
+  ])
+
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    dataBuffer
-  )
-  
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, dataBuffer)
+
   return {
     encrypted: Array.from(new Uint8Array(encrypted)),
     iv: Array.from(iv),
@@ -417,13 +415,13 @@ export const decryptData = async (encryptedData) => {
     true,
     ['decrypt']
   )
-  
+
   const decrypted = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: new Uint8Array(encryptedData.iv) },
     key,
     new Uint8Array(encryptedData.encrypted)
   )
-  
+
   const decoder = new TextDecoder()
   return JSON.parse(decoder.decode(decrypted))
 }
@@ -438,12 +436,12 @@ import { Navigate } from 'react-router-dom'
 
 const PromptLogDashboard = () => {
   const { user } = useAuth()
-  
+
   // 管理者のみアクセス可能
   if (!user?.isAdmin) {
     return <Navigate to="/unauthorized" replace />
   }
-  
+
   // ...
 }
 ```
@@ -457,7 +455,7 @@ const PromptLogDashboard = () => {
 export const monitorPromptLogs = () => {
   setInterval(async () => {
     const stats = await promptLogService.getStatistics()
-    
+
     // エラー率が閾値を超えた場合
     if (stats.errorRate > 10) {
       console.error('High error rate detected:', stats.errorRate)
@@ -468,7 +466,7 @@ export const monitorPromptLogs = () => {
         threshold: 10,
       })
     }
-    
+
     // コストが予算を超えた場合
     if (stats.costAnalysis.totalCost > 100) {
       console.warn('Cost threshold exceeded:', stats.costAnalysis.totalCost)
@@ -501,10 +499,13 @@ if (!window.indexedDB) {
 
 ```javascript
 // 定期的なクリーンアップを実装
-setInterval(() => {
-  promptLogService.cleanupOldLogs()
-  promptLogService.archiveOldData()
-}, 24 * 60 * 60 * 1000) // 日次実行
+setInterval(
+  () => {
+    promptLogService.cleanupOldLogs()
+    promptLogService.archiveOldData()
+  },
+  24 * 60 * 60 * 1000
+) // 日次実行
 ```
 
 #### 3. パフォーマンスの問題
@@ -529,7 +530,7 @@ const logStructure = {
   timestamp: Date.now(),
   type: 'prompt|response|interaction',
   userId: 'user-id',
-  
+
   // オプションフィールド
   metadata: {},
   context: {},

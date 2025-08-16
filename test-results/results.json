@@ -46,14 +46,8 @@
         "id": "chromium",
         "name": "chromium",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -64,14 +58,8 @@
         "id": "firefox",
         "name": "firefox",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -82,14 +70,8 @@
         "id": "webkit",
         "name": "webkit",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -100,14 +82,8 @@
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -118,14 +94,8 @@
         "id": "Mobile Safari",
         "name": "Mobile Safari",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -136,14 +106,8 @@
         "id": "Microsoft Edge",
         "name": "Microsoft Edge",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       },
       {
@@ -154,14 +118,8 @@
         "id": "Google Chrome",
         "name": "Google Chrome",
         "testDir": "/home/kurosawa/PMPLearningManagement/e2e",
-        "testIgnore": [
-          "**/node_modules/**",
-          "**/dist/**",
-          "**/.next/**"
-        ],
-        "testMatch": [
-          "**/*.spec.{js,ts}"
-        ],
+        "testIgnore": ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+        "testMatch": ["**/*.spec.{js,ts}"],
         "timeout": 30000
       }
     ],

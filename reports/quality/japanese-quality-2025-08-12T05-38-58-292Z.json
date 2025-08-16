@@ -5648,58 +5648,37 @@
       "terminology_variations": [
         {
           "base_term": "プロジェクト",
-          "variations": [
-            "プロジェクト",
-            "プロジェクト・"
-          ],
+          "variations": ["プロジェクト", "プロジェクト・"],
           "recommendation": "統一用語として「プロジェクト」の使用を推奨"
         },
         {
           "base_term": "プロジェクトマネジャ",
-          "variations": [
-            "プロジェクト・マネジャー",
-            "プロジェクトマネージャー"
-          ],
+          "variations": ["プロジェクト・マネジャー", "プロジェクトマネージャー"],
           "recommendation": "統一用語として「プロジェクト・マネジャー」の使用を推奨"
         },
         {
           "base_term": "プロセス",
-          "variations": [
-            "プロセス",
-            "・プロセス"
-          ],
+          "variations": ["プロセス", "・プロセス"],
           "recommendation": "統一用語として「プロセス」の使用を推奨"
         },
         {
           "base_term": "マネジメント",
-          "variations": [
-            "・マネジメント",
-            "マネジメント"
-          ],
+          "variations": ["・マネジメント", "マネジメント"],
           "recommendation": "統一用語として「・マネジメント」の使用を推奨"
         },
         {
           "base_term": "コントロル",
-          "variations": [
-            "・コントロール",
-            "コントロール"
-          ],
+          "variations": ["・コントロール", "コントロール"],
           "recommendation": "統一用語として「・コントロール」の使用を推奨"
         },
         {
           "base_term": "パフォマンスドメイン",
-          "variations": [
-            "パフォーマンス・ドメイン",
-            "パフォーマンスドメイン"
-          ],
+          "variations": ["パフォーマンス・ドメイン", "パフォーマンスドメイン"],
           "recommendation": "統一用語として「パフォーマンス・ドメイン」の使用を推奨"
         },
         {
           "base_term": "カテゴリ",
-          "variations": [
-            "カテゴリー",
-            "カテゴリ"
-          ],
+          "variations": ["カテゴリー", "カテゴリ"],
           "recommendation": "統一用語として「カテゴリー」の使用を推奨"
         }
       ],
@@ -5727,9 +5706,7 @@
         "transition_ratio": 0.0012330456226880395,
         "question_ratio": 0.036991368680641186
       },
-      "readability_issues": [
-        "文の構造に多様性が不足しています"
-      ]
+      "readability_issues": ["文の構造に多様性が不足しています"]
     },
     "cultural": {
       "politeness_level": {

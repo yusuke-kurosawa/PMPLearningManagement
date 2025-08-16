@@ -1,1 +1,818 @@
-{\n  \"annotations\": {\n    \"list\": [\n      {\n        \"builtIn\": 1,\n        \"datasource\": \"-- Grafana --\",\n        \"enable\": true,\n        \"hide\": true,\n        \"iconColor\": \"rgba(0, 211, 255, 1)\",\n        \"name\": \"Annotations & Alerts\",\n        \"type\": \"dashboard\"\n      }\n    ]\n  },\n  \"description\": \"Enterprise SLO/SLI Dashboard for PMP Learning Management System\",\n  \"editable\": true,\n  \"gnetId\": null,\n  \"graphTooltip\": 0,\n  \"id\": null,\n  \"links\": [],\n  \"panels\": [\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"line\",\n            \"fillOpacity\": 10,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 2,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"none\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"off\"\n            }\n          },\n          \"mappings\": [],\n          \"max\": 1,\n          \"min\": 0.99,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"red\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 0.995\n              },\n              {\n                \"color\": \"green\",\n                \"value\": 0.999\n              }\n            ]\n          },\n          \"unit\": \"percentunit\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 0\n      },\n      \"id\": 1,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"pluginVersion\": \"8.0.0\",\n      \"targets\": [\n        {\n          \"expr\": \"pmp_learning_slo_compliance_ratio{slo_id=\\\"availability_99_9\\\"}\",\n          \"interval\": \"\",\n          \"legendFormat\": \"Service Availability (99.9% SLO)\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"Service Availability SLO\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"line\",\n            \"fillOpacity\": 10,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 2,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"none\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"line\"\n            }\n          },\n          \"mappings\": [],\n          \"max\": 2,\n          \"min\": 0,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 0.5\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 1\n              }\n            ]\n          },\n          \"unit\": \"s\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 0\n      },\n      \"id\": 2,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"pmp_learning_slo_compliance_ratio{slo_id=\\\"latency_p95_500ms\\\"}\",\n          \"interval\": \"\",\n          \"legendFormat\": \"P95 Latency (500ms SLO)\",\n          \"refId\": \"A\"\n        },\n        {\n          \"expr\": \"pmp_learning_slo_compliance_ratio{slo_id=\\\"latency_p99_1s\\\"}\",\n          \"interval\": \"\",\n          \"legendFormat\": \"P99 Latency (1s SLO)\",\n          \"refId\": \"B\"\n        }\n      ],\n      \"title\": \"Response Time SLOs\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"thresholds\"\n          },\n          \"custom\": {\n            \"align\": \"auto\",\n            \"displayMode\": \"auto\"\n          },\n          \"mappings\": [],\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 80\n              }\n            ]\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Status\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"custom.displayMode\",\n                \"value\": \"color-background\"\n              },\n              {\n                \"id\": \"mappings\",\n                \"value\": [\n                  {\n                    \"options\": {\n                      \"healthy\": {\n                        \"color\": \"green\",\n                        \"index\": 0\n                      },\n                      \"degraded\": {\n                        \"color\": \"yellow\",\n                        \"index\": 1\n                      },\n                      \"violating\": {\n                        \"color\": \"red\",\n                        \"index\": 2\n                      }\n                    },\n                    \"type\": \"value\"\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 8\n      },\n      \"id\": 3,\n      \"options\": {\n        \"showHeader\": true\n      },\n      \"pluginVersion\": \"8.0.0\",\n      \"targets\": [\n        {\n          \"expr\": \"pmp_learning_slo_compliance_ratio\",\n          \"format\": \"table\",\n          \"instant\": true,\n          \"interval\": \"\",\n          \"legendFormat\": \"\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"SLO Status Overview\",\n      \"transformations\": [\n        {\n          \"id\": \"organize\",\n          \"options\": {\n            \"excludeByName\": {\n              \"Time\": true,\n              \"__name__\": true,\n              \"instance\": true,\n              \"job\": true\n            },\n            \"indexByName\": {},\n            \"renameByName\": {\n              \"slo_id\": \"SLO ID\",\n              \"slo_name\": \"SLO Name\",\n              \"category\": \"Category\",\n              \"time_window\": \"Time Window\",\n              \"Value\": \"Current Value\"\n            }\n          }\n        }\n      ],\n      \"type\": \"table\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"line\",\n            \"fillOpacity\": 10,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 2,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"none\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"line\"\n            }\n          },\n          \"mappings\": [],\n          \"max\": 1,\n          \"min\": 0.5,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"red\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 0.7\n              },\n              {\n                \"color\": \"green\",\n                \"value\": 0.8\n              }\n            ]\n          },\n          \"unit\": \"percentunit\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 16\n      },\n      \"id\": 4,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"pmp_learning_slo_compliance_ratio{category=\\\"business\\\"}\",\n          \"interval\": \"\",\n          \"legendFormat\": \"{{ slo_name }}\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"Business SLOs\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"line\",\n            \"fillOpacity\": 10,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 2,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"none\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"line\"\n            }\n          },\n          \"mappings\": [],\n          \"max\": 1,\n          \"min\": 0,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"red\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 0.2\n              },\n              {\n                \"color\": \"green\",\n                \"value\": 0.5\n              }\n            ]\n          },\n          \"unit\": \"percentunit\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 16\n      },\n      \"id\": 5,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"pmp_learning_error_budget_remaining\",\n          \"interval\": \"\",\n          \"legendFormat\": \"{{ slo_id }} Error Budget\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"Error Budget Remaining\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"bars\",\n            \"fillOpacity\": 80,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 1,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"normal\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"off\"\n            }\n          },\n          \"mappings\": [],\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 80\n              }\n            ]\n          },\n          \"unit\": \"short\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 24\n      },\n      \"id\": 6,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"increase(pmp_learning_slo_violations_total[1h])\",\n          \"interval\": \"\",\n          \"legendFormat\": \"{{ severity }} - {{ slo_id }}\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"SLO Violations (Last Hour)\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"bars\",\n            \"fillOpacity\": 80,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 1,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"normal\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"off\"\n            }\n          },\n          \"mappings\": [],\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 80\n              }\n            ]\n          },\n          \"unit\": \"short\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 24\n      },\n      \"id\": 7,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"increase(pmp_learning_alerts_sent_total[24h])\",\n          \"interval\": \"\",\n          \"legendFormat\": \"{{ channel }} - {{ severity }}\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"Alerts Sent (Last 24 Hours)\",\n      \"type\": \"timeseries\"\n    },\n    {\n      \"datasource\": \"Prometheus\",\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n          \"custom\": {\n            \"axisLabel\": \"\",\n            \"axisPlacement\": \"auto\",\n            \"barAlignment\": 0,\n            \"drawStyle\": \"line\",\n            \"fillOpacity\": 10,\n            \"gradientMode\": \"none\",\n            \"hideFrom\": {\n              \"legend\": false,\n              \"tooltip\": false,\n              \"vis\": false\n            },\n            \"lineInterpolation\": \"linear\",\n            \"lineWidth\": 2,\n            \"pointSize\": 5,\n            \"scaleDistribution\": {\n              \"type\": \"linear\"\n            },\n            \"showPoints\": \"never\",\n            \"spanNulls\": true,\n            \"stacking\": {\n              \"group\": \"A\",\n              \"mode\": \"none\"\n            },\n            \"thresholdsStyle\": {\n              \"mode\": \"off\"\n            }\n          },\n          \"mappings\": [],\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 80\n              }\n            ]\n          },\n          \"unit\": \"reqps\"\n        },\n        \"overrides\": []\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 32\n      },\n      \"id\": 8,\n      \"options\": {\n        \"legend\": {\n          \"calcs\": [],\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"single\"\n        }\n      },\n      \"targets\": [\n        {\n          \"expr\": \"sum(rate(pmp_learning_http_requests_total[5m]))\",\n          \"interval\": \"\",\n          \"legendFormat\": \"Total Requests/sec\",\n          \"refId\": \"A\"\n        },\n        {\n          \"expr\": \"sum(rate(pmp_learning_http_requests_total{status_code=~\\\"2..\\\"}[5m]))\",\n          \"interval\": \"\",\n          \"legendFormat\": \"Successful Requests/sec\",\n          \"refId\": \"B\"\n        },\n        {\n          \"expr\": \"sum(rate(pmp_learning_http_requests_total{status_code=~\\\"5..\\\"}[5m]))\",\n          \"interval\": \"\",\n          \"legendFormat\": \"Error Requests/sec\",\n          \"refId\": \"C\"\n        }\n      ],\n      \"title\": \"Request Rate Overview\",\n      \"type\": \"timeseries\"\n    }\n  ],\n  \"refresh\": \"30s\",\n  \"schemaVersion\": 27,\n  \"style\": \"dark\",\n  \"tags\": [\n    \"slo\",\n    \"sli\",\n    \"monitoring\",\n    \"pmp-learning\"\n  ],\n  \"templating\": {\n    \"list\": [\n      {\n        \"allValue\": null,\n        \"current\": {\n          \"selected\": false,\n          \"text\": \"All\",\n          \"value\": \"$__all\"\n        },\n        \"datasource\": \"Prometheus\",\n        \"definition\": \"label_values(pmp_learning_slo_compliance_ratio, slo_id)\",\n        \"description\": \"Filter by SLO ID\",\n        \"error\": null,\n        \"hide\": 0,\n        \"includeAll\": true,\n        \"label\": \"SLO ID\",\n        \"multi\": true,\n        \"name\": \"slo_id\",\n        \"options\": [],\n        \"query\": {\n          \"query\": \"label_values(pmp_learning_slo_compliance_ratio, slo_id)\",\n          \"refId\": \"StandardVariableQuery\"\n        },\n        \"refresh\": 1,\n        \"regex\": \"\",\n        \"skipUrlSync\": false,\n        \"sort\": 1,\n        \"tagValuesQuery\": \"\",\n        \"tagsQuery\": \"\",\n        \"type\": \"query\",\n        \"useTags\": false\n      },\n      {\n        \"allValue\": null,\n        \"current\": {\n          \"selected\": false,\n          \"text\": \"All\",\n          \"value\": \"$__all\"\n        },\n        \"datasource\": \"Prometheus\",\n        \"definition\": \"label_values(pmp_learning_slo_compliance_ratio, category)\",\n        \"description\": \"Filter by SLO Category\",\n        \"error\": null,\n        \"hide\": 0,\n        \"includeAll\": true,\n        \"label\": \"Category\",\n        \"multi\": true,\n        \"name\": \"category\",\n        \"options\": [],\n        \"query\": {\n          \"query\": \"label_values(pmp_learning_slo_compliance_ratio, category)\",\n          \"refId\": \"StandardVariableQuery\"\n        },\n        \"refresh\": 1,\n        \"regex\": \"\",\n        \"skipUrlSync\": false,\n        \"sort\": 1,\n        \"tagValuesQuery\": \"\",\n        \"tagsQuery\": \"\",\n        \"type\": \"query\",\n        \"useTags\": false\n      }\n    ]\n  },\n  \"time\": {\n    \"from\": \"now-6h\",\n    \"to\": \"now\"\n  },\n  \"timepicker\": {},\n  \"timezone\": \"\",\n  \"title\": \"PMP Learning - SLO/SLI Dashboard\",\n  \"uid\": \"pmp-slo-dashboard\",\n  \"version\": 1\n}"
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Enterprise SLO/SLI Dashboard for PMP Learning Management System",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0.99,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.995
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "pmp_learning_slo_compliance_ratio{slo_id=\"availability_99_9\"}",
+          "interval": "",
+          "legendFormat": "Service Availability (99.9% SLO)",
+          "refId": "A"
+        }
+      ],
+      "title": "Service Availability SLO",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "max": 2,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "pmp_learning_slo_compliance_ratio{slo_id=\"latency_p95_500ms\"}",
+          "interval": "",
+          "legendFormat": "P95 Latency (500ms SLO)",
+          "refId": "A"
+        },
+        {
+          "expr": "pmp_learning_slo_compliance_ratio{slo_id=\"latency_p99_1s\"}",
+          "interval": "",
+          "legendFormat": "P99 Latency (1s SLO)",
+          "refId": "B"
+        }
+      ],
+      "title": "Response Time SLOs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "healthy": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "degraded": {
+                        "color": "yellow",
+                        "index": 1
+                      },
+                      "violating": {
+                        "color": "red",
+                        "index": 2
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "showHeader": true
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "pmp_learning_slo_compliance_ratio",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "SLO Status Overview",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "slo_id": "SLO ID",
+              "slo_name": "SLO Name",
+              "category": "Category",
+              "time_window": "Time Window",
+              "Value": "Current Value"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0.5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.7
+              },
+              {
+                "color": "green",
+                "value": 0.8
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "pmp_learning_slo_compliance_ratio{category=\"business\"}",
+          "interval": "",
+          "legendFormat": "{{ slo_name }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Business SLOs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.2
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "pmp_learning_error_budget_remaining",
+          "interval": "",
+          "legendFormat": "{{ slo_id }} Error Budget",
+          "refId": "A"
+        }
+      ],
+      "title": "Error Budget Remaining",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(pmp_learning_slo_violations_total[1h])",
+          "interval": "",
+          "legendFormat": "{{ severity }} - {{ slo_id }}",
+          "refId": "A"
+        }
+      ],
+      "title": "SLO Violations (Last Hour)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(pmp_learning_alerts_sent_total[24h])",
+          "interval": "",
+          "legendFormat": "{{ channel }} - {{ severity }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Alerts Sent (Last 24 Hours)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(pmp_learning_http_requests_total[5m]))",
+          "interval": "",
+          "legendFormat": "Total Requests/sec",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(pmp_learning_http_requests_total{status_code=~\"2..\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Successful Requests/sec",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(pmp_learning_http_requests_total{status_code=~\"5..\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Error Requests/sec",
+          "refId": "C"
+        }
+      ],
+      "title": "Request Rate Overview",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": ["slo", "sli", "monitoring", "pmp-learning"],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(pmp_learning_slo_compliance_ratio, slo_id)",
+        "description": "Filter by SLO ID",
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "SLO ID",
+        "multi": true,
+        "name": "slo_id",
+        "options": [],
+        "query": {
+          "query": "label_values(pmp_learning_slo_compliance_ratio, slo_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(pmp_learning_slo_compliance_ratio, category)",
+        "description": "Filter by SLO Category",
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "Category",
+        "multi": true,
+        "name": "category",
+        "options": [],
+        "query": {
+          "query": "label_values(pmp_learning_slo_compliance_ratio, category)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "PMP Learning - SLO/SLI Dashboard",
+  "uid": "pmp-slo-dashboard",
+  "version": 1
+}

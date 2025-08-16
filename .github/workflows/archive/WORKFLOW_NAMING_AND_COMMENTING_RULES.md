@@ -20,7 +20,7 @@
 ### 🌟 目的
 
 - **一貫性**: 全ワークフロー間での統一された記述
-- **可読性**: 日本語コメントによる理解しやすさ  
+- **可読性**: 日本語コメントによる理解しやすさ
 - **保守性**: メンテナンス時の効率化
 - **再利用性**: テンプレート化による標準化
 - **品質**: エラー削減と品質向上
@@ -34,6 +34,7 @@
 ```
 
 **構成要素:**
+
 - `[カテゴリ]`: 大分類（必須）
 - `[サブカテゴリ]`: 中分類（オプション）
 - `[機能]`: 具体的機能名（必須）
@@ -41,25 +42,25 @@
 
 ### 📂 カテゴリ分類
 
-| カテゴリ | 英語名 | 説明 | 例 |
-|---------|--------|------|-----|
-| 🔄 継続的インテグレーション | `ci` | プルリクエスト時の品質チェック | `ci-basic-checks.yml` |
-| 🚀 継続的デプロイメント | `cd` | 本番環境へのデプロイ | `cd-production-deployment.yml` |
-| 🔒 セキュリティ | `security` | 脆弱性検出・セキュリティ監査 | `security-comprehensive-scan.yml` |
-| 🧪 品質保証 | `quality` | テスト・品質チェック | `quality-assurance.yml` |
-| 📊 監視 | `monitoring` | メトリクス収集・アラート | `monitoring-dashboard.yml` |
-| 🤖 自動化 | `automation` | 定期メンテナンス・自動化 | `automation-maintenance.yml` |
-| 🤖 ClaudeCode統合 | `claudecode` | AI支援機能 | `claudecode-integration.yml` |
+| カテゴリ                    | 英語名       | 説明                           | 例                                |
+| --------------------------- | ------------ | ------------------------------ | --------------------------------- |
+| 🔄 継続的インテグレーション | `ci`         | プルリクエスト時の品質チェック | `ci-basic-checks.yml`             |
+| 🚀 継続的デプロイメント     | `cd`         | 本番環境へのデプロイ           | `cd-production-deployment.yml`    |
+| 🔒 セキュリティ             | `security`   | 脆弱性検出・セキュリティ監査   | `security-comprehensive-scan.yml` |
+| 🧪 品質保証                 | `quality`    | テスト・品質チェック           | `quality-assurance.yml`           |
+| 📊 監視                     | `monitoring` | メトリクス収集・アラート       | `monitoring-dashboard.yml`        |
+| 🤖 自動化                   | `automation` | 定期メンテナンス・自動化       | `automation-maintenance.yml`      |
+| 🤖 ClaudeCode統合           | `claudecode` | AI支援機能                     | `claudecode-integration.yml`      |
 
 ### 🎯 サブカテゴリ（オプション）
 
-| メインカテゴリ | サブカテゴリ例 | 説明 |
-|---------------|---------------|------|
-| `ci` | `basic`, `advanced`, `nightly` | チェックレベル |
-| `cd` | `staging`, `production`, `canary` | デプロイ環境 |
-| `security` | `scan`, `audit`, `compliance` | セキュリティ種別 |
-| `quality` | `unit`, `integration`, `e2e` | テスト種別 |
-| `monitoring` | `performance`, `uptime`, `cost` | 監視対象 |
+| メインカテゴリ | サブカテゴリ例                    | 説明             |
+| -------------- | --------------------------------- | ---------------- |
+| `ci`           | `basic`, `advanced`, `nightly`    | チェックレベル   |
+| `cd`           | `staging`, `production`, `canary` | デプロイ環境     |
+| `security`     | `scan`, `audit`, `compliance`     | セキュリティ種別 |
+| `quality`      | `unit`, `integration`, `e2e`      | テスト種別       |
+| `monitoring`   | `performance`, `uptime`, `cost`   | 監視対象         |
 
 ### 📝 命名例
 
@@ -104,7 +105,7 @@ workflow1.yml                         # 数字のみ
 #### 📄 ワークフロー名
 
 ```yaml
-name: 🔄 CI基本チェック  # 絵文字 + 日本語名
+name: 🔄 CI基本チェック # 絵文字 + 日本語名
 ```
 
 #### ⚡ トリガー設定
@@ -117,7 +118,7 @@ name: 🔄 CI基本チェック  # 絵文字 + 日本語名
 on:
   # プルリクエスト時（すべてのブランチ対象）
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     types: [opened, synchronize, reopened]
 ```
 
@@ -129,9 +130,9 @@ on:
 # [なぜこれらの権限が必要かを説明]
 # ------------------------------------------------------------
 permissions:
-  contents: read              # リポジトリ内容の読み取り
-  pull-requests: write       # PRコメントの書き込み
-  checks: write              # チェック結果の書き込み
+  contents: read # リポジトリ内容の読み取り
+  pull-requests: write # PRコメントの書き込み
+  checks: write # チェック結果の書き込み
 ```
 
 #### 🔄 並行実行制御
@@ -143,7 +144,7 @@ permissions:
 # ------------------------------------------------------------
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true  # 新しい実行時に古い実行をキャンセル
+  cancel-in-progress: true # 新しい実行時に古い実行をキャンセル
 ```
 
 #### 🌍 環境変数
@@ -154,9 +155,9 @@ concurrency:
 # [環境変数の用途と設定値の根拠を説明]
 # ------------------------------------------------------------
 env:
-  NODE_VERSION: '18'                    # Node.jsバージョン
-  CACHE_VERSION: 'v2'                   # キャッシュバージョン
-  CI: true                             # CI環境フラグ
+  NODE_VERSION: '18' # Node.jsバージョン
+  CACHE_VERSION: 'v2' # キャッシュバージョン
+  CI: true # CI環境フラグ
 ```
 
 ### 🏗️ ジョブコメント
@@ -185,7 +186,7 @@ job-name:
 - name: 📂 リポジトリチェックアウト
   uses: actions/checkout@v4
   with:
-    fetch-depth: 0  # 完全な履歴を取得（品質トレンド分析用）
+    fetch-depth: 0 # 完全な履歴を取得（品質トレンド分析用）
 ```
 
 ### 📝 インライン コメント
@@ -193,7 +194,7 @@ job-name:
 ```yaml
 run: |
   echo "🔍 品質チェックを開始..."
-  
+
   # リントチェック実行
   if npm run lint; then
     echo "✅ リント: 合格"
@@ -201,7 +202,7 @@ run: |
     echo "❌ リント: 不合格"  # エラー時の対応
     exit 1
   fi
-  
+
   # TypeScript型チェック
   npm run typecheck  # 型安全性の確保
 ```
@@ -220,7 +221,7 @@ name: 🔒 セキュリティ包括スキャン
 name: 🧪 品質保証統合ワークフロー
 name: 🤖 ClaudeCode統合ワークフロー
 
-❌ 悪い例  
+❌ 悪い例
 name: Basic CI                         # 英語のみ
 name: Deploy                           # 抽象的
 name: 🔄🚀🔒 Multi Workflow            # 絵文字多用
@@ -257,7 +258,7 @@ linting:                              # 動詞でない
 ```yaml
 ✅ 良い例
 - name: 📂 リポジトリチェックアウト
-- name: 🚀 Node.js環境セットアップ  
+- name: 🚀 Node.js環境セットアップ
 - name: 📥 依存関係のインストール
 - name: 🔍 ESLintコード品質チェック
 - name: 📤 テスト結果アップロード
@@ -320,23 +321,23 @@ name: 🔄 CI基本チェック
 on:
   # プルリクエスト時（品質チェック）
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     types: [opened, synchronize, reopened]
 
 # ------------------------------------------------------------
 # 権限設定（最小権限の原則）
 # ------------------------------------------------------------
 permissions:
-  contents: read              # リポジトリ内容の読み取り
-  pull-requests: write       # PRコメント書き込み用
-  checks: write              # チェック結果書き込み用
+  contents: read # リポジトリ内容の読み取り
+  pull-requests: write # PRコメント書き込み用
+  checks: write # チェック結果書き込み用
 
 # ------------------------------------------------------------
 # 環境変数
 # ------------------------------------------------------------
 env:
-  NODE_VERSION: '18'          # Node.jsの安定版
-  CI: true                   # CI環境フラグ
+  NODE_VERSION: '18' # Node.jsの安定版
+  CI: true # CI環境フラグ
 
 # ------------------------------------------------------------
 # ジョブ定義
@@ -349,8 +350,8 @@ jobs:
   quality-checks:
     name: 🔍 品質チェック
     runs-on: ubuntu-latest
-    timeout-minutes: 10     # 高速フィードバックのため短めに設定
-    
+    timeout-minutes: 10 # 高速フィードバックのため短めに設定
+
     steps:
       # ========================================
       # Step: リポジトリの取得
@@ -359,7 +360,7 @@ jobs:
       - name: 📂 リポジトリチェックアウト
         uses: actions/checkout@v4
 
-      # ========================================  
+      # ========================================
       # Step: Node.js環境の準備
       # Description: 指定バージョンのNode.jsをセットアップ
       # ========================================
@@ -367,14 +368,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'  # npm キャッシュの活用
+          cache: 'npm' # npm キャッシュの活用
 
       # ========================================
       # Step: 依存関係のインストール
-      # Description: package.jsonに基づく依存関係インストール  
+      # Description: package.jsonに基づく依存関係インストール
       # ========================================
       - name: 📥 依存関係インストール
-        run: npm ci  # 本番環境と同じ依存関係を保証
+        run: npm ci # 本番環境と同じ依存関係を保証
 
       # ========================================
       # Step: ESLintによるコード品質チェック
@@ -410,7 +411,6 @@ jobs:
 # ============================================================
 
 name: 🚀 本番環境デプロイメント
-
 # （以下、同様のコメント構造...）
 ```
 
@@ -475,14 +475,14 @@ on:
 # [権限の必要性を説明]
 # ------------------------------------------------------------
 permissions:
-  contents: read              # [用途を説明]
+  contents: read # [用途を説明]
 
 # ------------------------------------------------------------
 # 環境変数
 # [環境変数の用途を説明]
 # ------------------------------------------------------------
 env:
-  VARIABLE_NAME: 'value'      # [変数の説明]
+  VARIABLE_NAME: 'value' # [変数の説明]
 
 # ------------------------------------------------------------
 # ジョブ定義
@@ -496,7 +496,7 @@ jobs:
     name: 🎯 [ジョブ名]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       # ========================================
       # Step: [ステップ名]
@@ -569,4 +569,4 @@ runs:
 
 **🎯 この統一された命名規則とコメント標準により、プロジェクト全体の保守性と品質が大幅に向上します！**
 
-*📝 最終更新: 2025-08-12 by Claude Code DevOps Team*
+_📝 最終更新: 2025-08-12 by Claude Code DevOps Team_

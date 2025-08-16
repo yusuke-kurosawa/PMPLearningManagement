@@ -6,7 +6,7 @@ PMPラーニングマネジメントプロジェクトの GitHub Issues ラベ�
 
 **実装日**: 2025年8月10日  
 **実装状況**: ✅ 完了  
-**ラベル数**: 42個（6カテゴリ）  
+**ラベル数**: 42個（6カテゴリ）
 
 ## 📊 実装結果
 
@@ -19,14 +19,14 @@ PMPラーニングマネジメントプロジェクトの GitHub Issues ラベ�
 
 ### 6つの主要カテゴリ
 
-| カテゴリ | ラベル数 | 必須/任意 | 説明 |
-|----------|----------|-----------|------|
-| **種類** | 8個 | **必須** | Issue の性質を分類 |
-| **優先度** | 5個 | **必須** | 対応の緊急性を示す |
-| **状況** | 7個 | 推奨 | 作業の進捗状況を追跡 |
-| **領域** | 9個 | 推奨 | 担当コンポーネントを特定 |
-| **ワークフロー** | 6個 | 任意 | CI/CD・自動化関連 |
-| **特別** | 7個 | 任意 | 特殊な分類・マーカー |
+| カテゴリ         | ラベル数 | 必須/任意 | 説明                     |
+| ---------------- | -------- | --------- | ------------------------ |
+| **種類**         | 8個      | **必須**  | Issue の性質を分類       |
+| **優先度**       | 5個      | **必須**  | 対応の緊急性を示す       |
+| **状況**         | 7個      | 推奨      | 作業の進捗状況を追跡     |
+| **領域**         | 9個      | 推奨      | 担当コンポーネントを特定 |
+| **ワークフロー** | 6個      | 任意      | CI/CD・自動化関連        |
+| **特別**         | 7個      | 任意      | 特殊な分類・マーカー     |
 
 ## 🔧 実装済み成果物
 
@@ -44,6 +44,7 @@ PMPラーニングマネジメントプロジェクトの GitHub Issues ラベ�
 **ファイル**: `/home/kurosawa/PMPLearningManagement/.github/scripts/manage-labels.js`
 
 実行可能なコマンド:
+
 ```bash
 # 基本操作
 node .github/scripts/manage-labels.js status      # 現在の状況確認
@@ -62,6 +63,7 @@ node .github/scripts/manage-labels.js delete-old  # 旧ラベル削除
 **ファイル**: `/home/kurosawa/PMPLearningManagement/.github/LABEL_MANAGEMENT_GUIDE.md`
 
 包含内容:
+
 - 詳細なラベル一覧と使用場面
 - 運用ルールとベストプラクティス
 - フィルタリング活用例
@@ -70,10 +72,12 @@ node .github/scripts/manage-labels.js delete-old  # 旧ラベル削除
 ### 4. Issueテンプレート更新
 
 **更新ファイル**:
+
 - `/home/kurosawa/PMPLearningManagement/.github/ISSUE_TEMPLATE/bug_report.md`
 - `/home/kurosawa/PMPLearningManagement/.github/ISSUE_TEMPLATE/feature_request.md`
 
 **改善内容**:
+
 - 日本語化とラベル体系への対応
 - 適切なラベル選択ガイドの追加
 - チェックリストの強化
@@ -83,6 +87,7 @@ node .github/scripts/manage-labels.js delete-old  # 旧ラベル削除
 **更新ファイル**: `/home/kurosawa/PMPLearningManagement/.github/pull_request_template.md`
 
 **改善内容**:
+
 - ラベル体系に対応した分類項目
 - 新しいカテゴリでの選択肢
 - 運用ガイドへのリンク追加
@@ -92,6 +97,7 @@ node .github/scripts/manage-labels.js delete-old  # 旧ラベル削除
 **更新箇所**: コントリビューションセクション
 
 **追加内容**:
+
 - ラベルシステムの説明
 - ラベル管理コマンドの案内
 - 運用ガイドへの適切な誘導

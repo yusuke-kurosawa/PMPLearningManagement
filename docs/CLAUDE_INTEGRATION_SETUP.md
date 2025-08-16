@@ -15,11 +15,13 @@
 ## 🔧 前提条件
 
 ### 必要な権限・アカウント
+
 - **GitHub**：リポジトリの管理者権限
 - **Anthropic**：Claude API アカウント（APIキーの取得が必要）
 - **Node.js**：18.x 以降（スクリプト実行用）
 
 ### 確認事項
+
 - [ ] GitHubリポジトリへの管理者権限がある
 - [ ] GitHub Actionsが有効になっている
 - [ ] リポジトリがPublicまたはGitHub Pro/Team/Enterpriseプランである
@@ -83,6 +85,7 @@ Settings:
 - **Billing**: 課金設定を確認
 
 推奨設定：
+
 - Monthly spend limit: $50-100（使用量に応じて調整）
 - Rate limit alerts: 有効
 
@@ -92,25 +95,25 @@ Settings:
 
 GitHubリポジトリの **Settings** → **Secrets and variables** → **Actions** で以下を追加：
 
-| Secret名 | 値 | 説明 |
-|---------|---|-----|
-| `ANTHROPIC_API_KEY` | `sk-ant-api03-...` | Anthropic APIキー |
-| `GITHUB_TOKEN` | *自動生成* | GitHub Actions用トークン（通常は自動） |
+| Secret名            | 値                 | 説明                                   |
+| ------------------- | ------------------ | -------------------------------------- |
+| `ANTHROPIC_API_KEY` | `sk-ant-api03-...` | Anthropic APIキー                      |
+| `GITHUB_TOKEN`      | _自動生成_         | GitHub Actions用トークン（通常は自動） |
 
 ### 2. オプションSecrets
 
 必要に応じて追加：
 
-| Secret名 | 値 | 説明 |
-|---------|---|-----|
-| `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/...` | Slack通知用 |
-| `DISCORD_WEBHOOK_URL` | `https://discord.com/api/webhooks/...` | Discord通知用 |
-| `LIGHTHOUSE_CI_TOKEN` | `lhci_token_...` | Lighthouse CI用 |
+| Secret名              | 値                                     | 説明            |
+| --------------------- | -------------------------------------- | --------------- |
+| `SLACK_WEBHOOK_URL`   | `https://hooks.slack.com/...`          | Slack通知用     |
+| `DISCORD_WEBHOOK_URL` | `https://discord.com/api/webhooks/...` | Discord通知用   |
+| `LIGHTHOUSE_CI_TOKEN` | `lhci_token_...`                       | Lighthouse CI用 |
 
 ### 3. Secretsの設定手順
 
 1. GitHubリポジトリで **Settings** をクリック
-2. 左サイドバーで **Secrets and variables** → **Actions** をクリック  
+2. 左サイドバーで **Secrets and variables** → **Actions** をクリック
 3. **New repository secret** をクリック
 4. Name: `ANTHROPIC_API_KEY`
 5. Secret: AnthropicからコピーしたAPIキーを貼り付け
@@ -158,6 +161,7 @@ Labels: (空欄のまま)
 ```
 
 期待結果：
+
 - 自動的に `bug` ラベルが追加される
 - 優先度ラベル（`priority:high`）が追加される
 - AIによる分類コメントが投稿される
@@ -173,6 +177,7 @@ Labels: (空欄のまま)
 ```
 
 期待結果：
+
 - Claude AIからの返答コメントが数分以内に投稿される
 - 影響範囲の分析と解決提案が含まれる
 
@@ -192,13 +197,16 @@ Labels: (空欄のまま)
 **症状**: `@claude`でメンションしても応答がない
 
 **解決方法**:
+
 1. Secretsの設定を確認：
+
    ```bash
    # Actions履歴でSecret masking を確認
    ANTHROPIC_API_KEY: ***
    ```
 
 2. ワークフローの実行ログを確認：
+
    ```yaml
    # エラー例と対処法
    Error: Invalid API key → APIキーを再生成・設定
@@ -215,13 +223,16 @@ Labels: (空欄のまま)
 **症状**: Issue作成時に自動処理が起動しない
 
 **解決方法**:
+
 1. GitHub Actions設定確認：
+
    ```yaml
    Settings → Actions → General
    Actions permissions: Allow all actions and reusable workflows
    ```
 
 2. ワークフロー権限確認：
+
    ```yaml
    Workflow permissions: Read and write permissions
    ☑ Allow GitHub Actions to create and approve pull requests
@@ -238,17 +249,19 @@ Labels: (空欄のまま)
 **症状**: `Rate limit exceeded` エラー
 
 **解決方法**:
+
 1. Anthropic Console で使用量確認
 2. ワークフロー実行頻度の調整：
+
    ```yaml
    # リクエスト間の待機時間を増加
-   delay: 2000  # 2秒 → 5秒
+   delay: 2000 # 2秒 → 5秒
    ```
 
 3. 一時的な使用制限の設定：
    ```yaml
    env:
-     MAX_CONCURRENT_REQUESTS: 3  # 同時実行数制限
+     MAX_CONCURRENT_REQUESTS: 3 # 同時実行数制限
    ```
 
 #### 4. 権限エラー
@@ -256,12 +269,13 @@ Labels: (空欄のまま)
 **症状**: `Permission denied` エラー
 
 **解決方法**:
+
 1. GitHub Personal Access Token の確認
 2. リポジトリ権限の確認：
    ```bash
    # 必要な権限
    - issues: write
-   - pull-requests: write  
+   - pull-requests: write
    - contents: read
    ```
 
@@ -306,7 +320,7 @@ Slack/Discord通知の設定：
   with:
     status: ${{ job.status }}
     webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-    text: "Claude AI processing completed: ${{ job.status }}"
+    text: 'Claude AI processing completed: ${{ job.status }}'
 ```
 
 ### 2. カスタムラベルルール
@@ -318,14 +332,14 @@ const CUSTOM_CLASSIFICATION_RULES = {
   'pmbok-v7': {
     keywords: ['pmbok', '7版', 'performance domain'],
     priority: 'high',
-    labels: ['pmbok-v7', 'enhancement']
+    labels: ['pmbok-v7', 'enhancement'],
   },
   'mobile-pwa': {
     keywords: ['mobile', 'pwa', 'offline'],
-    priority: 'high', 
-    labels: ['mobile', 'pwa', 'enhancement']
-  }
-};
+    priority: 'high',
+    labels: ['mobile', 'pwa', 'enhancement'],
+  },
+}
 ```
 
 ### 3. メトリクス収集の自動化
@@ -336,7 +350,7 @@ const CUSTOM_CLASSIFICATION_RULES = {
 # .github/workflows/metrics-collection.yml
 on:
   schedule:
-    - cron: '0 9 * * 1'  # 毎週月曜日 9:00 JST
+    - cron: '0 9 * * 1' # 毎週月曜日 9:00 JST
 
 jobs:
   collect-metrics:
@@ -362,6 +376,7 @@ if: |
 ### 1. 定期チェック項目
 
 毎週確認すること：
+
 - [ ] API使用量の確認（Anthropic Console）
 - [ ] ワークフロー実行状況（GitHub Actions）
 - [ ] エラーログの確認
@@ -414,7 +429,7 @@ Claude Code新機能の適用：
 設定完了後、以下をすべてチェック：
 
 - [ ] Anthropic APIキーを取得・設定完了
-- [ ] GitHub SecretsにAPIキーを追加完了  
+- [ ] GitHub SecretsにAPIキーを追加完了
 - [ ] GitHub Actions権限設定完了
 - [ ] ワークフローファイルがすべて配置完了
 - [ ] Issue自動分類の動作確認完了

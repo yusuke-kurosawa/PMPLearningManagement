@@ -15,14 +15,16 @@
 以下の3つのワークフローを実装しました：
 
 #### claude-assistant.yml
+
 - **目的**: @claudeメンションへの自動応答
 - **トリガー**: Issue作成/編集、Issueコメント作成
-- **機能**: 
+- **機能**:
   - @claudeメンションを検出
   - Claude APIを呼び出して応答を生成
   - 応答をIssueコメントとして投稿
 
 #### claude-issue-handler.yml
+
 - **目的**: Issueの自動分析とラベリング
 - **トリガー**: Issue作成時
 - **機能**:
@@ -32,6 +34,7 @@
   - 分析結果をコメント投稿
 
 #### claude-pr-review.yml
+
 - **目的**: Pull Requestの自動コードレビュー
 - **トリガー**: PR作成/更新時
 - **機能**:
@@ -50,6 +53,7 @@
 ### 必要な設定
 
 1. **GitHub Secrets設定**
+
    ```
    Settings → Secrets and variables → Actions
    → New repository secret
@@ -58,6 +62,7 @@
    ```
 
 2. **GitHub Actions有効化**
+
    ```
    Settings → Actions → General
    → Actions permissions: Allow all actions
@@ -105,6 +110,7 @@ gh issue create \
 **原因**: GitHub Actionsが無効、または権限不足
 
 **解決方法**:
+
 ```
 Settings → Actions → General
 - Actions permissions: "Allow all actions and reusable workflows"
@@ -116,6 +122,7 @@ Settings → Actions → General
 **原因**: APIキーが設定されていない、または無効
 
 **解決方法**:
+
 1. Secretsを確認: `Settings → Secrets and variables → Actions`
 2. `ANTHROPIC_API_KEY`が存在することを確認
 3. APIキーの有効性を確認
@@ -126,6 +133,7 @@ Settings → Actions → General
 
 **解決方法**:
 各ワークフローファイルに適切な権限を追加:
+
 ```yaml
 permissions:
   issues: write
@@ -138,6 +146,7 @@ permissions:
 **原因**: Claude API使用量制限
 
 **解決方法**:
+
 - API使用量を確認
 - レート制限を考慮した実装に変更
 - 必要に応じてAPIプランをアップグレード
@@ -167,6 +176,7 @@ permissions:
 ### 1. 運用ガイドライン
 
 #### @claude メンションの使い方
+
 ```markdown
 @claude [具体的な質問や依頼]
 
@@ -176,6 +186,7 @@ permissions:
 ```
 
 #### 効果的な質問方法
+
 - 具体的で明確な質問をする
 - コンテキストを提供する
 - 期待する出力形式を指定する
@@ -183,11 +194,13 @@ permissions:
 ### 2. 監視設定
 
 #### メトリクス追跡
+
 - API使用量の日次確認
 - エラー率のモニタリング
 - 応答時間の記録
 
 #### アラート設定
+
 ```yaml
 # .github/workflows/monitor-claude.yml
 - name: Check API usage
@@ -218,11 +231,13 @@ permissions:
 ## セキュリティ考慮事項
 
 ### APIキー保護
+
 - GitHub Secretsでの管理
 - ログへの出力禁止
 - 定期的なキーローテーション
 
 ### データプライバシー
+
 - センシティブ情報のフィルタリング
 - 個人情報の除外
 - コンプライアンス準拠
@@ -233,7 +248,7 @@ Claude AI統合は正常に実装され、以下の機能が利用可能です�
 
 ✅ @claudeメンションへの自動応答  
 ✅ Issueの自動分析とラベリング  
-✅ Pull Requestの自動レビュー  
+✅ Pull Requestの自動レビュー
 
 ### 次のステップ
 
@@ -288,5 +303,5 @@ gh run view [RUN_ID] --log
 
 ---
 
-*最終更新: 2025年1月9日*  
-*作成者: Claude Code DevOps Engineer*
+_最終更新: 2025年1月9日_  
+_作成者: Claude Code DevOps Engineer_
