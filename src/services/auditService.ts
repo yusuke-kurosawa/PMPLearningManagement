@@ -406,6 +406,7 @@ class AuditLogger {
       // Node.js環境での安全な乱数生成
       if (typeof require !== 'undefined') {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const crypto = require('crypto')
           const randomBytes = crypto.randomBytes(16)
           const randomString = randomBytes.toString('hex').substring(0, 12)

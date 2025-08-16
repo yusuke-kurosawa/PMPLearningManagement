@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
 // Conditional logger import for ES modules
-const logger = { warn: console.warn }
+// const logger = { warn: console.warn }
 
 // Mock Supabase for tests
 vi.mock('../lib/supabase', () => ({
@@ -64,7 +64,7 @@ async function setupMSWServer() {
     const { server: mswServer } = await import('./mocks/server.js')
     server = mswServer
     return server
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       console.warn('MSW server not available, skipping mock server setup')
     }

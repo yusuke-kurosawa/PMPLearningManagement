@@ -998,7 +998,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
 
           return newDeckId
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid deck data format')
         }
       },
@@ -1029,7 +1029,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
 
           await api.flashcards.importAllData.mutate(importData)
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid data format')
         }
       },
@@ -1041,7 +1041,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
         try {
           const shareUrl = await api.flashcards.shareCard.mutate({ cardId })
           return shareUrl
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Failed to share card')
         }
       },
@@ -1053,7 +1053,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
         try {
           const shareUrl = await api.flashcards.shareDeck.mutate({ deckId })
           return shareUrl
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Failed to share deck')
         }
       },

@@ -59,17 +59,6 @@ const AuthPage: React.FC = () => {
     }
   }
 
-  const _getPageTitle: React.FC = () => {
-    switch (currentMode) {
-      case 'register':
-        return 'Create Your Account'
-      case 'forgot-password':
-        return 'Reset Password'
-      case 'login':
-      default:
-        return 'Welcome Back'
-    }
-  }
 
   if (isAuthenticated) {
     return null // Will redirect above

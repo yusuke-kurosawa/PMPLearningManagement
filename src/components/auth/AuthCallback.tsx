@@ -38,7 +38,7 @@ const AuthCallback: React.FC = () => {
           case 'signup':
             // Email confirmation callback
             if (accessToken && refreshToken) {
-              const { data: _data, error: sessionError } = await supabase.auth.setSession({
+              const { error: sessionError } = await supabase.auth.setSession({
                 access_token: accessToken,
                 refresh_token: refreshToken,
               })
@@ -68,7 +68,7 @@ const AuthCallback: React.FC = () => {
             // Password reset callback
             if (accessToken && refreshToken) {
               // Set the session so the user can reset their password
-              const { data: _data2, error: sessionError } = await supabase.auth.setSession({
+              const { error: sessionError } = await supabase.auth.setSession({
                 access_token: accessToken,
                 refresh_token: refreshToken,
               })

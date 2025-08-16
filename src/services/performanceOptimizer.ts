@@ -224,7 +224,7 @@ class PerformanceOptimizer {
     const {
       memoize = true,
       preload = false,
-      virtualizeThreshold: _virtualizeThreshold = 100,
+      virtualizeThreshold = 100,
     } = options
 
     let OptimizedComponent = Component

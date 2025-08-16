@@ -274,7 +274,7 @@ class ContextManager {
     try {
       // 本番環境では適切な圧縮ライブラリを使用することを推奨
       return btoa(encodeURIComponent(data))
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.warn('Compression failed, using original data')
       }
@@ -291,7 +291,7 @@ class ContextManager {
   private decompress(compressedData: string): string {
     try {
       return decodeURIComponent(atob(compressedData))
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.warn('Decompression failed, using original data')
       }

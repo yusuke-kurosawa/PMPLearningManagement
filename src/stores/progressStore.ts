@@ -663,7 +663,7 @@ export const useProgressStore = create<ProgressStore>()(
 
           // Sync with server
           await get().syncWithServer()
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = 'Failed to import progress data'
           })
