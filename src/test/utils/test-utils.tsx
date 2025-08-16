@@ -101,9 +101,6 @@ export const mockLocation = {
   key: 'default',
 }
 
-// Export mocks for manual usage in tests that need them
-export { mockNavigate, mockLocation }
-
 // Helper function to create test data
 export const createTestUser = (overrides: Record<string, unknown> = {}) => ({
   id: '123',

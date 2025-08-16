@@ -1117,8 +1117,9 @@ const EnhancedCollaborationHub: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">Group Name</label>
+                <label htmlFor="group-name" className="mb-2 block text-sm font-medium text-gray-700">Group Name</label>
                 <Input
+                  id="group-name"
                   placeholder="Enter group name..."
                   value={newGroup.name}
                   onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
@@ -1126,8 +1127,9 @@ const EnhancedCollaborationHub: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">Description</label>
+                <label htmlFor="group-description" className="mb-2 block text-sm font-medium text-gray-700">Description</label>
                 <Textarea
+                  id="group-description"
                   placeholder="Describe the purpose and goals of your study group..."
                   value={newGroup.description}
                   onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
@@ -1137,10 +1139,11 @@ const EnhancedCollaborationHub: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label htmlFor="max-members" className="mb-2 block text-sm font-medium text-gray-700">
                     Maximum Members
                   </label>
                   <Input
+                    id="max-members"
                     type="number"
                     min="5"
                     max="100"
@@ -1152,10 +1155,11 @@ const EnhancedCollaborationHub: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label htmlFor="group-tags" className="mb-2 block text-sm font-medium text-gray-700">
                     Tags (comma-separated)
                   </label>
                   <Input
+                    id="group-tags"
                     placeholder="PMP, Study, Exam..."
                     value={newGroup.tags}
                     onChange={(e) => setNewGroup({ ...newGroup, tags: e.target.value })}
@@ -1165,10 +1169,11 @@ const EnhancedCollaborationHub: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <Switch
+                  id="group-private"
                   checked={newGroup.isPrivate}
                   onCheckedChange={(checked) => setNewGroup({ ...newGroup, isPrivate: checked })}
                 />
-                <label className="text-sm text-gray-700">Make group private (invite-only)</label>
+                <label htmlFor="group-private" className="text-sm text-gray-700">Make group private (invite-only)</label>
               </div>
             </div>
 

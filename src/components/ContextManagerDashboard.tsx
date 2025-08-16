@@ -218,7 +218,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
             <div className="space-y-4">
               {/* Rotation Policy */}
               <div>
-                <label className="mb-2 block text-sm font-medium">Rotation Policy</label>
+                <div className="mb-2 block text-sm font-medium">Rotation Policy</div>
                 <div className="flex space-x-2">
                   {['aggressive', 'normal', 'conservative'].map((policy) => (
                     <button
@@ -238,8 +238,9 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
 
               {/* Refresh Interval */}
               <div>
-                <label className="mb-2 block text-sm font-medium">Refresh Interval</label>
+                <label htmlFor="refresh-interval" className="mb-2 block text-sm font-medium">Refresh Interval</label>
                 <select
+                  id="refresh-interval"
                   value={refreshInterval}
                   onChange={(e) => setRefreshInterval(Number(e.target.value))}
                   className="rounded border border-gray-300 px-3 py-1 text-sm"
