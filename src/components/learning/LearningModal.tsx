@@ -63,7 +63,7 @@ const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, pro
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  if (!isOpen || !process) return null
+  if (!isOpen || !process) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">

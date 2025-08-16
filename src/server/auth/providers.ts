@@ -58,7 +58,7 @@ const credentialsSchema = z.object({
 })
 
 // パスワードハッシュ化ユーティリティ
-export const _hashPassword = async (password: string): Promise<string> => {
+export const __hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 12
   return await bcrypt.hash(password, saltRounds)
 }
@@ -375,7 +375,7 @@ export const authOptions: NextAuthOptions = {
 }
 
 // サーバーサイド認証ヘルパー
-// export const _getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future
+// export const __getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future
 //   // サーバーサイドでの認証状態取得
 //   // 実装は使用するフレームワークによって異なる
 // }
@@ -389,7 +389,7 @@ export const requireAuth = (session: unknown) => {
 }
 
 // 管理者権限検証ヘルパー
-export const _requireAdmin = (session: unknown) => {
+export const __requireAdmin = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.role !== UserRole.ADMIN) {
     throw new Error('管理者権限が必要です')
@@ -398,7 +398,7 @@ export const _requireAdmin = (session: unknown) => {
 }
 
 // プレミアム権限検証ヘルパー
-export const _requirePremium = (session: unknown) => {
+export const __requirePremium = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.subscriptionPlan === SubscriptionPlan.FREE || !user.subscriptionActive) {
     throw new Error('プレミアムプランが必要です')

@@ -159,7 +159,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
       setAutoRevealTimer(timer)
 
       return () => {
-        if (timer) clearTimeout(timer)
+        if (timer) {clearTimeout(timer)}
       }
     }
   }, [
@@ -342,7 +342,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
   }
 
   const handleRateCard = async (difficulty: 1 | 2 | 3 | 4 | 5) => {
-    if (!cardResponseStartTime) return
+    if (!cardResponseStartTime) {return}
 
     const responseTime = Date.now() - cardResponseStartTime.getTime()
 

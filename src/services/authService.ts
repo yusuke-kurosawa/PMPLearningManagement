@@ -94,7 +94,7 @@ export type OAuthProvider = 'google' | 'github' | 'microsoft'
  * ログイン試行記録インターフェース
  * @description 失敗したログイン試行の追跡用
  */
-interface _LoginAttempt {
+interface LoginAttempt {
   /** 試行時刻 */
   timestamp: Date
   /** IPアドレス */
@@ -170,7 +170,7 @@ class AuthService {
         },
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       // ユーザープロファイル作成
       if (data.user) {
@@ -281,7 +281,7 @@ class AuthService {
         },
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       await auditLogger.log({
         action: 'OAUTH_LOGIN_INITIATED',
@@ -345,7 +345,7 @@ class AuthService {
         redirectTo: `${import.meta.env.VITE_APP_URL}/reset-password`,
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       await auditLogger.log({
         action: 'PASSWORD_RESET_REQUESTED',
@@ -377,7 +377,7 @@ class AuthService {
         password: newPassword,
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       const user = await authHelpers.getCurrentUser()
       if (user) {
@@ -413,7 +413,7 @@ class AuthService {
         type: 'email',
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       await auditLogger.log({
         action: 'EMAIL_VERIFIED',
@@ -439,7 +439,7 @@ class AuthService {
         factorType: 'totp',
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       const user = await authHelpers.getCurrentUser()
       if (user) {
@@ -472,7 +472,7 @@ class AuthService {
         code,
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       await auditLogger.log({
         action: 'MFA_VERIFIED',
@@ -526,7 +526,7 @@ class AuthService {
       updated_at: new Date().toISOString(),
     })
 
-    if (error) throw error
+    if (error) {throw error}
 
     // ユーザーロールエントリ作成
     await supabase.from('user_roles').insert({
@@ -617,7 +617,7 @@ class AuthService {
    */
   getLockoutRemainingTime(email: string): number {
     const attempts = this.loginAttempts.get(email) || []
-    if (attempts.length === 0) return 0
+    if (attempts.length === 0) {return 0}
 
     const lastAttempt = attempts[attempts.length - 1]
     const timePassed = Date.now() - lastAttempt.getTime()
@@ -632,7 +632,7 @@ class AuthService {
    * @returns 暗号化済み文字列
    * @private
    */
-  private async encryptSensitiveData(data: any): Promise<string> {
+  private async encryptSensitiveData(data: unknown): Promise<string> {
     try {
       // Web Crypto APIを使用した安全な暗号化
       const encoder = new TextEncoder()
@@ -678,7 +678,7 @@ class AuthService {
    * @returns 復号化済みデータ
    * @private
    */
-  private async decryptSensitiveData(encryptedData: string): Promise<any> {
+  private async decryptSensitiveData(encryptedData: string): Promise<unknown> {
     try {
       const keyData = sessionStorage.getItem('_ek')
       const ivData = sessionStorage.getItem('_iv')

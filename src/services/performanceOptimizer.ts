@@ -132,7 +132,7 @@ class PerformanceOptimizer {
    * Check memory usage and suggest garbage collection
    */
   checkMemoryUsage() {
-    if (!performance.memory) return
+    if (!performance.memory) {return}
 
     const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = performance.memory
     const memoryPressure = usedJSHeapSize / jsHeapSizeLimit
@@ -224,7 +224,7 @@ class PerformanceOptimizer {
     const {
       memoize = true,
       preload = false,
-      virtualizeThreshold: _virtualizeThreshold = 100,
+      virtualizeThreshold = 100,
     } = options
 
     let OptimizedComponent = Component
@@ -335,7 +335,7 @@ class PerformanceOptimizer {
   optimizeImage(img, options = {}) {
     const { quality = 0.8, maxWidth = 1920, maxHeight = 1080, format = 'webp' } = options
 
-    if (!img || !img.src) return img
+    if (!img || !img.src) {return img}
 
     // Create optimized version
     const canvas = document.createElement('canvas')

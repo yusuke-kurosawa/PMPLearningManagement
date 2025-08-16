@@ -38,7 +38,7 @@ interface TouchList {
   [index: number]: Touch
 }
 
-interface TouchEvent extends UIEvent {
+interface _TouchEvent extends UIEvent {
   touches: TouchList
   targetTouches: TouchList
   changedTouches: TouchList

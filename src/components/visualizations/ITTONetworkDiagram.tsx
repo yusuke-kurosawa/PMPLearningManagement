@@ -231,22 +231,22 @@ const ITTONetworkDiagram = () => {
 
   // Get node color based on type
   const getNodeColor = (node) => {
-    if (node.type === 'input') return '#3B82F6' // blue
-    if (node.type === 'tool') return '#10B981' // green
-    if (node.type === 'output') return '#F59E0B' // amber
-    if (node.group === 'Initiating') return '#8B5CF6' // violet
-    if (node.group === 'Planning') return '#3B82F6' // blue
-    if (node.group === 'Executing') return '#10B981' // green
-    if (node.group === 'Monitoring & Controlling') return '#F59E0B' // amber
-    if (node.group === 'Closing') return '#EF4444' // red
+    if (node.type === 'input') {return '#3B82F6'} // blue
+    if (node.type === 'tool') {return '#10B981'} // green
+    if (node.type === 'output') {return '#F59E0B'} // amber
+    if (node.group === 'Initiating') {return '#8B5CF6'} // violet
+    if (node.group === 'Planning') {return '#3B82F6'} // blue
+    if (node.group === 'Executing') {return '#10B981'} // green
+    if (node.group === 'Monitoring & Controlling') {return '#F59E0B'} // amber
+    if (node.group === 'Closing') {return '#EF4444'} // red
     return '#6B7280' // gray
   }
 
   // Get node shape component
   const _getNodeShape = (node) => {
-    if (node.type === 'input') return Circle
-    if (node.type === 'tool') return Square
-    if (node.type === 'output') return Triangle
+    if (node.type === 'input') {return Circle}
+    if (node.type === 'tool') {return Square}
+    if (node.type === 'output') {return Triangle}
     return Circle
   }
 
@@ -255,7 +255,7 @@ const ITTONetworkDiagram = () => {
     const fromNode = allNodes.find((n) => n.id === from)
     const toNode = allNodes.find((n) => n.id === to)
 
-    if (!fromNode || !toNode) return ''
+    if (!fromNode || !toNode) {return ''}
 
     const dx = toNode.position.x - fromNode.position.x
     const dy = toNode.position.y - fromNode.position.y
@@ -356,7 +356,7 @@ const ITTONetworkDiagram = () => {
             const fromNode = allNodes.find((n) => n.id === conn.from)
             const toNode = allNodes.find((n) => n.id === conn.to)
 
-            if (!fromNode || !toNode) return null
+            if (!fromNode || !toNode) {return null}
 
             return (
               <g key={idx}>

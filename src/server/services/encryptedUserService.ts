@@ -22,7 +22,7 @@ const EncryptedUserDataSchema = z.object({
   address: z.string().optional(),
 })
 
-const _DecryptionInputSchema = z.object({
+const __DecryptionInputSchema = z.object({
   // TODO: Will be used in future
   encrypted: z.string(),
   iv: z.string(),
@@ -408,6 +408,6 @@ export class EncryptedUserService {
 }
 
 // サービスインスタンスのエクスポート
-export const _encryptedUserService = new EncryptedUserService()
+export const __encryptedUserService = new EncryptedUserService()
 
 export default EncryptedUserService

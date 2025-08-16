@@ -239,7 +239,7 @@ class AICoachingService {
    */
   generateWeeklySchedule(profile, weaknesses, learningGoals) {
     const availableHours = profile.availableStudyTime || 10 // hours per week
-    const _intensity = learningGoals.intensity || 'moderate'
+    const intensity = learningGoals.intensity || 'moderate'
 
     const schedule = {
       totalWeeklyHours: availableHours,
@@ -400,8 +400,8 @@ class AICoachingService {
    * Generate post-certification career development path
    */
   generatePostCertificationPath(profile, learningGoals) {
-    const _careerLevel = learningGoals.currentRole || 'aspiring_pm'
-    const _targetRole = learningGoals.targetRole || 'senior_pm'
+    const careerLevel = learningGoals.currentRole || 'aspiring_pm'
+    const targetRole = learningGoals.targetRole || 'senior_pm'
 
     return {
       immediate: {
@@ -443,7 +443,7 @@ class AICoachingService {
    * Utility methods
    */
   calculateAverage(scores) {
-    if (scores.length === 0) return 0
+    if (scores.length === 0) {return 0}
     return scores.reduce((sum, score) => sum + score, 0) / scores.length
   }
 

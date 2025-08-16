@@ -82,31 +82,31 @@ const GlobalSearch: React.FC = () => {
 
   // 結果アイコンの取得
   const getResultIcon = (type, subtype) => {
-    if (type === 'process') return <FileText className="h-4 w-4" />
+    if (type === 'process') {return <FileText className="h-4 w-4" />}
     if (type === 'itto') {
-      if (subtype === 'tool') return <Wrench className="h-4 w-4" />
+      if (subtype === 'tool') {return <Wrench className="h-4 w-4" />}
       return <ArrowRight className="h-4 w-4" />
     }
-    if (type === 'glossary') return <FileText className="h-4 w-4" />
+    if (type === 'glossary') {return <FileText className="h-4 w-4" />}
     return <FileText className="h-4 w-4" />
   }
 
   // 結果のタイプラベル
   const getTypeLabel = (type, subtype) => {
-    if (type === 'process') return 'プロセス'
+    if (type === 'process') {return 'プロセス'}
     if (type === 'itto') {
-      if (subtype === 'input') return 'インプット'
-      if (subtype === 'tool') return 'ツールと技法'
-      if (subtype === 'output') return 'アウトプット'
+      if (subtype === 'input') {return 'インプット'}
+      if (subtype === 'tool') {return 'ツールと技法'}
+      if (subtype === 'output') {return 'アウトプット'}
     }
-    if (type === 'glossary') return '用語'
-    if (type === 'feature') return '機能'
+    if (type === 'glossary') {return '用語'}
+    if (type === 'feature') {return '機能'}
     return ''
   }
 
   // 検索結果のハイライト
   const highlightMatch = (text, query) => {
-    if (!query) return text
+    if (!query) {return text}
     const regex = new RegExp(`(${query})`, 'gi')
     return text.split(regex).map((part, index) =>
       regex.test(part) ? (

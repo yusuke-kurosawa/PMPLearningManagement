@@ -2,7 +2,6 @@
  * Enhanced Learning Progress Dashboard with Real-time Backend Integration
  * Developer 2: Learning Progress Developer Implementation
  */
-
 import React, { useState, useEffect } from 'react'
 import {
   _BarChart3,
@@ -59,7 +58,6 @@ import {
   Radar,
 } from 'recharts'
 import { format, subDays } from 'date-fns'
-
 const EnhancedProgressDashboard: React.FC = () => {
   const { toast } = useToast()
   const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'achievements'>(
@@ -67,7 +65,6 @@ const EnhancedProgressDashboard: React.FC = () => {
   )
   // //   const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week') // TODO: Will be used in future // TODO: Will be used in future
   const [isExporting, setIsExporting] = useState(false)
-
   // Store state and actions
   const {
     processProgress,
@@ -91,19 +88,16 @@ const EnhancedProgressDashboard: React.FC = () => {
     checkAchievements,
     exportProgress,
   } = useProgressStore()
-
   // Load data on mount
   useEffect(() => {
     loadProgress()
     checkAchievements()
   }, [])
-
   // Auto-sync with server every 5 minutes
   useEffect(() => {
     const interval = setInterval(syncWithServer, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
-
   const handleExportProgress = async () => {
     setIsExporting(true)
     try {
@@ -117,7 +111,6 @@ const EnhancedProgressDashboard: React.FC = () => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-
       toast({
         title: 'Progress Exported',
         description: 'Your learning progress has been exported successfully.',
@@ -132,7 +125,6 @@ const EnhancedProgressDashboard: React.FC = () => {
       setIsExporting(false)
     }
   }
-
   const handleCreateGoal = async (goalData: unknown) => {
     try {
       await createGoal(goalData)
@@ -148,7 +140,6 @@ const EnhancedProgressDashboard: React.FC = () => {
       })
     }
   }
-
   // Chart data preparation
   const weeklyProgress = getWeeklyProgress()
   const monthlyTrends = getMonthlyTrends()
@@ -157,7 +148,6 @@ const EnhancedProgressDashboard: React.FC = () => {
   const weakAreas = getWeakAreas()
   const strongAreas = getStrongAreas()
   const recommendations = getRecommendedStudy()
-
   // Process mastery distribution
   const masteryDistribution = Object.values(processProgress).reduce(
     (acc, process) => {
@@ -166,7 +156,6 @@ const EnhancedProgressDashboard: React.FC = () => {
     },
     {} as Record<string, number>
   )
-
   const masteryChartData = Object.entries(masteryDistribution).map(([level, count]) => ({
     name: level.replace('_', ' ').toUpperCase(),
     value: count,
@@ -179,7 +168,6 @@ const EnhancedProgressDashboard: React.FC = () => {
         mastered: '#10b981',
       }[level] || '#gray-400',
   }))
-
   // Knowledge area performance
   const knowledgeAreaData = Object.entries(
     Object.values(processProgress).reduce(
@@ -188,7 +176,7 @@ const EnhancedProgressDashboard: React.FC = () => {
           acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 }
         }
         acc[process.knowledgeArea].total += 1
-        if (process.masteryLevel === 'mastered') acc[process.knowledgeArea].mastered += 1
+        if (process.masteryLevel === 'mastered') {acc[process.knowledgeArea].mastered += 1}
         acc[process.knowledgeArea].studyTime += process.studyTime
         return acc
       },
@@ -200,19 +188,16 @@ const EnhancedProgressDashboard: React.FC = () => {
     studyTime: data.studyTime,
     fullMark: 100,
   }))
-
   // Recent achievements (last 30 days)
   const recentAchievements = achievements
     .filter((a) => a.isUnlocked && a.unlockedAt && a.unlockedAt > subDays(new Date(), 30))
     .sort((a, b) => (b.unlockedAt?.getTime() || 0) - (a.unlockedAt?.getTime() || 0))
     .slice(0, 5)
-
   // Active goals with progress
   const activeGoals = goals
     .filter((g) => !g.isCompleted)
     .sort((a, b) => (a.targetDate?.getTime() || 0) - (b.targetDate?.getTime() || 0))
     .slice(0, 3)
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -226,7 +211,6 @@ const EnhancedProgressDashboard: React.FC = () => {
       </div>
     )
   }
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="mx-auto max-w-7xl">
@@ -253,7 +237,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </Button>
             </div>
           </div>
-
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
               <div className="flex items-center gap-2">
@@ -263,7 +246,6 @@ const EnhancedProgressDashboard: React.FC = () => {
             </div>
           )}
         </div>
-
         {/* Key Metrics Cards */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Total Study Time */}
@@ -282,7 +264,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* Overall Progress */}
           <Card>
             <CardContent className="p-6">
@@ -298,7 +279,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* Study Streak */}
           <Card>
             <CardContent className="p-6">
@@ -316,7 +296,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* Achievements */}
           <Card>
             <CardContent className="p-6">
@@ -335,7 +314,6 @@ const EnhancedProgressDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-
         <Tabs
           value={activeView}
           onValueChange={(value) =>
@@ -349,7 +327,6 @@ const EnhancedProgressDashboard: React.FC = () => {
             <TabsTrigger value="goals">Goals</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
           </TabsList>
-
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -385,7 +362,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
-
               {/* Mastery Distribution */}
               <Card>
                 <CardHeader>
@@ -426,7 +402,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Weak Areas */}
               <Card>
@@ -458,7 +433,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                   )}
                 </CardContent>
               </Card>
-
               {/* Strong Areas */}
               <Card>
                 <CardHeader>
@@ -489,7 +463,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                   )}
                 </CardContent>
               </Card>
-
               {/* Recommendations */}
               <Card>
                 <CardHeader>
@@ -515,7 +488,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </Card>
             </div>
           </TabsContent>
-
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -542,7 +514,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
-
               {/* Knowledge Area Performance Radar */}
               <Card>
                 <CardHeader>
@@ -566,7 +537,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-
             {/* Detailed Process Progress Table */}
             <Card>
               <CardHeader>
@@ -627,7 +597,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* Goals Tab */}
           <TabsContent value="goals" className="space-y-6">
             <div className="flex items-center justify-between">
@@ -647,7 +616,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                 Create Goal
               </Button>
             </div>
-
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {activeGoals.map((goal) => (
                 <Card key={goal.id}>
@@ -677,7 +645,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                 </Card>
               ))}
             </div>
-
             {/* Completed Goals */}
             <Card>
               <CardHeader>
@@ -711,7 +678,6 @@ const EnhancedProgressDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* Achievements Tab */}
           <TabsContent value="achievements" className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -753,7 +719,6 @@ const EnhancedProgressDashboard: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
               {/* All Achievements Grid */}
               {achievements.map((achievement) => (
                 <Card
@@ -808,5 +773,4 @@ const EnhancedProgressDashboard: React.FC = () => {
     </div>
   )
 }
-
 export default EnhancedProgressDashboard

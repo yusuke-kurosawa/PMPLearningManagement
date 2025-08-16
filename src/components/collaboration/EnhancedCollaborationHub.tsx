@@ -198,7 +198,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   // Core state
   const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([])
   const [activeGroup, setActiveGroup] = useState<StudyGroup | null>(null)
-  const [_groupMembers, setGroupMembers] = useState<GroupMember[]>([])
+  const [, setGroupMembers] = useState<GroupMember[]>([])
   const [discussions, setDiscussions] = useState<DiscussionThread[]>([])
   const [activeThread, setActiveThread] = useState<DiscussionThread | null>(null)
   const [replies, setReplies] = useState<DiscussionReply[]>([])
@@ -214,15 +214,15 @@ const EnhancedCollaborationHub: React.FC = () => {
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false)
   const [showCreateThreadDialog, setShowCreateThreadDialog] = useState(false)
   const [showCreateNoteDialog, setShowCreateNoteDialog] = useState(false)
-  const [_showGroupSettingsDialog, _setShowGroupSettingsDialog] = useState(false)
+  const [,] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'alphabetical'>('recent')
 
   // Real-time state
-  const [isOnline, _setIsOnline] = useState(true)
-  const [onlineMembers, _setOnlineMembers] = useState<Set<string>>(new Set())
-  const [_typingUsers, _setTypingUsers] = useState<Set<string>>(new Set())
+  const [isOnline] = useState(true)
+  const [onlineMembers] = useState<Set<string>>(new Set())
+  const [,] = useState<Set<string>>(new Set())
 
   // Form state
   const [newGroup, setNewGroup] = useState({
@@ -397,7 +397,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleCreateThread = async () => {
-    if (!activeGroup) return
+    if (!activeGroup) {return}
 
     try {
       const thread = await api.collaboration.createDiscussion.mutate({
@@ -429,7 +429,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleCreateNote = async () => {
-    if (!activeGroup) return
+    if (!activeGroup) {return}
 
     try {
       const note = await api.collaboration.createSharedNote.mutate({
@@ -462,7 +462,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   }
 
   const handleReplyToThread = async () => {
-    if (!activeThread || !replyContent.trim()) return
+    if (!activeThread || !replyContent.trim()) {return}
 
     try {
       const reply = await api.collaboration.replyToDiscussion.mutate({

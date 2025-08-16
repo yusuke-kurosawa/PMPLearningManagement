@@ -2,7 +2,6 @@
  * Enhanced PMBOK Matrix with Database Integration and Advanced Features
  * Developer 4: PMBOK Integration Developer Implementation
  */
-
 import React, { useState, useEffect, useMemo } from 'react'
 import { logger } from '../../services/logger'
 import {
@@ -43,7 +42,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { Switch } from '../ui/switch'
 import { Separator } from '../ui/separator'
-
 interface PMBOKProcess {
   id: string
   name: string
@@ -82,7 +80,6 @@ interface PMBOKProcess {
   lastUpdated: Date
   version: 6 | 7
 }
-
 interface UserProgress {
   processId: string
   studyTime: number
@@ -92,7 +89,6 @@ interface UserProgress {
   notes?: string
   completedActivities: string[]
 }
-
 const KNOWLEDGE_AREAS = [
   'Project Integration Management',
   'Project Scope Management',
@@ -105,7 +101,6 @@ const KNOWLEDGE_AREAS = [
   'Project Procurement Management',
   'Project Stakeholder Management',
 ]
-
 const PROCESS_GROUPS = [
   'Initiating',
   'Planning',
@@ -113,7 +108,6 @@ const PROCESS_GROUPS = [
   'Monitoring and Controlling',
   'Closing',
 ]
-
 // TODO: Will be used in future
 // const PMBOK7_PERFORMANCE_DOMAINS = [
 //   'Stakeholders',
@@ -125,16 +119,13 @@ const PROCESS_GROUPS = [
 //   'Measurement',
 //   'Uncertainty',
 // ]
-
 const EnhancedPMBOKMatrix: React.FC = () => {
   const { toast } = useToast()
-
   // State
   const [processes, setProcesses] = useState<PMBOKProcess[]>([])
   const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   // Filters and search
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKnowledgeArea, setSelectedKnowledgeArea] = useState<string>('all')
@@ -143,30 +134,25 @@ const EnhancedPMBOKMatrix: React.FC = () => {
   //   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all') // TODO: Will be used in future
   const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
   const [showOnlyUnstudied, setShowOnlyUnstudied] = useState(false)
-
   // UI state
   const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set())
   const [selectedProcess, setSelectedProcess] = useState<PMBOKProcess | null>(null)
   const [showProcessDetails, setShowProcessDetails] = useState(false)
   const [viewMode, setViewMode] = useState<'matrix' | 'list' | 'cards'>('matrix')
   const [compactMode, setCompactMode] = useState(false)
-
   // Load data
   useEffect(() => {
     loadPMBOKData()
     loadUserProgress()
   }, [])
-
   const loadPMBOKData = async () => {
     setIsLoading(true)
     setError(null)
-
     try {
       const data = await api.pmbok.getProcesses.query({
         version: selectedVersion === 'both' ? undefined : selectedVersion,
         includeDetails: true,
       })
-
       setProcesses(data)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load PMBOK data'
@@ -180,7 +166,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       setIsLoading(false)
     }
   }
-
   const loadUserProgress = async () => {
     try {
       const progress = await api.pmbok.getUserProgress.query()
@@ -191,7 +176,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         },
         {} as Record<string, UserProgress>
       )
-
       setUserProgress(progressMap)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -199,7 +183,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       }
     }
   }
-
   // Filter processes
   const filteredProcesses = useMemo(() => {
     return processes.filter((process) => {
@@ -215,40 +198,32 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           process.inputs.some((input) => input.name.toLowerCase().includes(query)) ||
           process.outputs.some((output) => output.name.toLowerCase().includes(query)) ||
           process.toolsAndTechniques.some((tool) => tool.name.toLowerCase().includes(query))
-
-        if (!matchesSearch) return false
+        if (!matchesSearch) {return false}
       }
-
       // Knowledge area filter
       if (selectedKnowledgeArea !== 'all' && process.knowledgeArea !== selectedKnowledgeArea) {
         return false
       }
-
       // Process group filter
       if (selectedProcessGroup !== 'all' && process.processGroup !== selectedProcessGroup) {
         return false
       }
-
       // Version filter
       if (selectedVersion !== 'both' && process.version !== selectedVersion) {
         return false
       }
-
       // Difficulty filter
       if (selectedDifficulty !== 'all' && process.difficulty !== selectedDifficulty) {
         return false
       }
-
       // Bookmarked filter
       if (showOnlyBookmarked && !userProgress[process.id]?.bookmarked) {
         return false
       }
-
       // Unstudied filter
       if (showOnlyUnstudied && userProgress[process.id]?.masteryLevel !== 'not_started') {
         return false
       }
-
       return true
     })
   }, [
@@ -262,11 +237,9 @@ const EnhancedPMBOKMatrix: React.FC = () => {
     showOnlyUnstudied,
     userProgress,
   ])
-
   // Group processes by knowledge area and process group for matrix view
   const processMatrix = useMemo(() => {
     const matrix: Record<string, Record<string, PMBOKProcess[]>> = {}
-
     KNOWLEDGE_AREAS.forEach((ka) => {
       matrix[ka] = {}
       PROCESS_GROUPS.forEach((pg) => {
@@ -275,15 +248,12 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         )
       })
     })
-
     return matrix
   }, [filteredProcesses])
-
   // Handle process interactions
   const toggleBookmark = async (processId: string) => {
     const currentProgress = userProgress[processId]
     const newBookmarkedState = !currentProgress?.bookmarked
-
     // Optimistic update
     setUserProgress((prev) => ({
       ...prev,
@@ -296,13 +266,11 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         completedActivities: prev[processId]?.completedActivities || [],
       },
     }))
-
     try {
       await api.pmbok.updateUserProgress.mutate({
         processId,
         updates: { bookmarked: newBookmarkedState },
       })
-
       toast({
         title: newBookmarkedState ? 'Process Bookmarked' : 'Bookmark Removed',
         description: `${processes.find((p) => p.id === processId)?.name}`,
@@ -316,7 +284,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           bookmarked: !newBookmarkedState,
         },
       }))
-
       toast({
         title: 'Failed to Update Bookmark',
         description: error instanceof Error ? error.message : 'An error occurred',
@@ -324,10 +291,8 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       })
     }
   }
-
   const updateMasteryLevel = async (processId: string, level: UserProgress['masteryLevel']) => {
     const currentProgress = userProgress[processId]
-
     // Optimistic update
     setUserProgress((prev) => ({
       ...prev,
@@ -341,7 +306,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         lastStudied: new Date(),
       },
     }))
-
     try {
       await api.pmbok.updateUserProgress.mutate({
         processId,
@@ -350,7 +314,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           lastStudied: new Date(),
         },
       })
-
       toast({
         title: 'Progress Updated',
         description: `Mastery level set to ${level.replace('_', ' ')}`,
@@ -367,7 +330,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           completedActivities: [],
         },
       }))
-
       toast({
         title: 'Failed to Update Progress',
         description: error instanceof Error ? error.message : 'An error occurred',
@@ -375,7 +337,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       })
     }
   }
-
   const toggleExpanded = (processId: string) => {
     setExpandedProcesses((prev) => {
       const next = new Set(prev)
@@ -387,12 +348,10 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       return next
     })
   }
-
   const showDetails = (process: PMBOKProcess) => {
     setSelectedProcess(process)
     setShowProcessDetails(true)
   }
-
   const getMasteryColor = (level: UserProgress['masteryLevel']) => {
     switch (level) {
       case 'mastered':
@@ -407,7 +366,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         return 'bg-gray-100 text-gray-800 border-gray-300'
     }
   }
-
   const getProgressStats = () => {
     const total = processes.length
     const studied = Object.values(userProgress).filter(
@@ -415,12 +373,9 @@ const EnhancedPMBOKMatrix: React.FC = () => {
     ).length
     const mastered = Object.values(userProgress).filter((p) => p.masteryLevel === 'mastered').length
     const bookmarked = Object.values(userProgress).filter((p) => p.bookmarked).length
-
     return { total, studied, mastered, bookmarked }
   }
-
   const stats = getProgressStats()
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -434,7 +389,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       </div>
     )
   }
-
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gray-50">
@@ -450,7 +404,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   processes
                 </p>
               </div>
-
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => loadPMBOKData()}>
                   <RefreshCw className="mr-2 h-4 w-4" />
@@ -465,7 +418,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                 </Button>
               </div>
             </div>
-
             {error && (
               <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="flex items-center gap-2">
@@ -474,7 +426,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                 </div>
               </div>
             )}
-
             {/* Progress Overview */}
             <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
               <Card>
@@ -490,7 +441,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -505,7 +455,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -519,7 +468,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -534,7 +482,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-
             {/* Filters and Controls */}
             <Card className="mb-6">
               <CardContent className="p-4">
@@ -549,7 +496,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       className="pl-10"
                     />
                   </div>
-
                   {/* Version Toggle */}
                   <Select
                     value={selectedVersion.toString()}
@@ -564,7 +510,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>
-
                   {/* Knowledge Area _Filter */}
                   <Select value={selectedKnowledgeArea} onValueChange={setSelectedKnowledgeArea}>
                     <SelectTrigger className="w-48">
@@ -579,7 +524,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       ))}
                     </SelectContent>
                   </Select>
-
                   {/* Process Group _Filter */}
                   <Select value={selectedProcessGroup} onValueChange={setSelectedProcessGroup}>
                     <SelectTrigger className="w-48">
@@ -594,7 +538,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       ))}
                     </SelectContent>
                   </Select>
-
                   {/* View Mode */}
                   <Select
                     value={viewMode}
@@ -610,23 +553,19 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="mt-4 flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Switch checked={showOnlyBookmarked} onCheckedChange={setShowOnlyBookmarked} />
-                    <label className="text-sm text-gray-600">Bookmarked only</label>
+                    <label className="text-sm text-gray-600" htmlFor="field-xqeh5mqmp">Bookmarked only</label>
                   </div>
-
                   <div className="flex items-center gap-2">
                     <Switch checked={showOnlyUnstudied} onCheckedChange={setShowOnlyUnstudied} />
-                    <label className="text-sm text-gray-600">Unstudied only</label>
+                    <label className="text-sm text-gray-600" htmlFor="field-k43194bw6">Unstudied only</label>
                   </div>
-
                   <div className="flex items-center gap-2">
                     <Switch checked={compactMode} onCheckedChange={setCompactMode} />
-                    <label className="text-sm text-gray-600">Compact mode</label>
+                    <label className="text-sm text-gray-600" htmlFor="field-1bpc0fz4y">Compact mode</label>
                   </div>
-
                   <Badge variant="outline" className="ml-auto">
                     {filteredProcesses.length} of {processes.length} processes
                   </Badge>
@@ -634,7 +573,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-
           {/* Content based on view mode */}
           {viewMode === 'matrix' ? (
             /* Matrix View */
@@ -651,7 +589,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       {pg}
                     </div>
                   ))}
-
                   {/* Matrix rows */}
                   {KNOWLEDGE_AREAS.map((ka) => (
                     <React.Fragment key={ka}>
@@ -668,7 +605,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                           {processMatrix[ka][pg].map((process) => {
                             const progress = userProgress[process.id]
                             const isExpanded = expandedProcesses.has(process.id)
-
                             return (
                               <div
                                 key={process.id}
@@ -694,7 +630,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                           <p className="max-w-xs">{process.description}</p>
                                         </TooltipContent>
                                       </Tooltip>
-
                                       <div className="mt-1 flex items-center gap-1">
                                         <Badge variant="outline" className="text-xs">
                                           PMBOK {process.version}
@@ -713,7 +648,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                         </Badge>
                                       </div>
                                     </div>
-
                                     <div className="ml-2 flex items-center gap-1">
                                       <Button
                                         variant="ghost"
@@ -727,7 +661,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                           <Bookmark className="h-3 w-3 text-gray-400" />
                                         )}
                                       </Button>
-
                                       <Button
                                         variant="ghost"
                                         size="sm"
@@ -742,13 +675,11 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                       </Button>
                                     </div>
                                   </div>
-
                                   {isExpanded && (
                                     <div className="mt-2 space-y-2 border-t border-gray-200 pt-2">
                                       <div className="text-xs text-gray-600">
                                         <strong>Purpose:</strong> {process.purpose}
                                       </div>
-
                                       <div className="text-xs">
                                         <strong>Key Inputs:</strong>{' '}
                                         {process.inputs
@@ -756,7 +687,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                           .map((i) => i.name)
                                           .join(', ')}
                                       </div>
-
                                       <div className="text-xs">
                                         <strong>Key Outputs:</strong>{' '}
                                         {process.outputs
@@ -764,7 +694,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                           .map((o) => o.name)
                                           .join(', ')}
                                       </div>
-
                                       <div className="mt-2 flex items-center gap-2">
                                         <Select
                                           value={progress?.masteryLevel || 'not_started'}
@@ -783,7 +712,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                             <SelectItem value="mastered">Mastered</SelectItem>
                                           </SelectContent>
                                         </Select>
-
                                         <Button size="sm" onClick={() => showDetails(process)}>
                                           <ExternalLink className="mr-1 h-3 w-3" />
                                           Details
@@ -808,7 +736,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
               {filteredProcesses.map((process) => {
                 const progress = userProgress[process.id]
                 const isExpanded = expandedProcesses.has(process.id)
-
                 return (
                   <Card
                     key={process.id}
@@ -825,16 +752,13 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                             <Badge variant="secondary">{process.processGroup}</Badge>
                             <Badge variant="outline">PMBOK {process.version}</Badge>
                           </div>
-
                           <p className="mb-3 text-gray-600">{process.description}</p>
-
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>🎯 {process.purpose}</span>
                             <span>⏱️ ~{process.studyTime} min</span>
                             <span>📊 {process.difficulty}</span>
                           </div>
                         </div>
-
                         <div className="ml-4 flex items-center gap-2">
                           <Button
                             variant="ghost"
@@ -847,7 +771,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                               <Bookmark className="h-4 w-4" />
                             )}
                           </Button>
-
                           <Button
                             variant="ghost"
                             size="sm"
@@ -859,14 +782,12 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                               <ChevronDown className="h-4 w-4" />
                             )}
                           </Button>
-
                           <Button size="sm" onClick={() => showDetails(process)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </Button>
                         </div>
                       </div>
-
                       {isExpanded && (
                         <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -881,7 +802,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                   ))}
                               </ul>
                             </div>
-
                             <div>
                               <h4 className="mb-2 font-medium text-gray-900">
                                 Key Tools & Techniques
@@ -895,7 +815,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                   ))}
                               </ul>
                             </div>
-
                             <div>
                               <h4 className="mb-2 font-medium text-gray-900">Key Outputs</h4>
                               <ul className="space-y-1 text-sm text-gray-600">
@@ -908,7 +827,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                               </ul>
                             </div>
                           </div>
-
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-gray-600">Mastery Level:</span>
@@ -930,7 +848,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                                 </SelectContent>
                               </Select>
                             </div>
-
                             {progress?.lastStudied && (
                               <div className="text-sm text-gray-500">
                                 Last studied: {format(progress.lastStudied, 'MMM dd, yyyy')}
@@ -949,7 +866,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProcesses.map((process) => {
                 const progress = userProgress[process.id]
-
                 return (
                   <Card
                     key={process.id}
@@ -973,7 +889,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                           )}
                         </Button>
                       </div>
-
                       <div className="mt-2 flex flex-wrap gap-1">
                         <Badge variant="outline" className="text-xs">
                           {process.knowledgeArea}
@@ -986,17 +901,14 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         </Badge>
                       </div>
                     </CardHeader>
-
                     <CardContent className="pt-0">
                       <p className="mb-4 line-clamp-3 text-sm text-gray-600">
                         {process.description}
                       </p>
-
                       <div className="space-y-3">
                         <div className="text-xs text-gray-500">
                           <strong>Purpose:</strong> {process.purpose}
                         </div>
-
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>Study time: ~{process.studyTime} min</span>
                           <Badge
@@ -1012,9 +924,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                             {process.difficulty}
                           </Badge>
                         </div>
-
                         <Separator />
-
                         <div className="flex items-center gap-2">
                           <Select
                             value={progress?.masteryLevel || 'not_started'}
@@ -1033,7 +943,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                               <SelectItem value="mastered">Mastered</SelectItem>
                             </SelectContent>
                           </Select>
-
                           <Button size="sm" onClick={() => showDetails(process)}>
                             <Eye className="mr-1 h-3 w-3" />
                             Details
@@ -1046,7 +955,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
               })}
             </div>
           )}
-
           {/* Process Details Dialog */}
           <Dialog open={showProcessDetails} onOpenChange={setShowProcessDetails}>
             <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
@@ -1072,7 +980,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   {selectedProcess?.knowledgeArea} • {selectedProcess?.processGroup}
                 </DialogDescription>
               </DialogHeader>
-
               {selectedProcess && (
                 <Tabs defaultValue="overview" className="mt-4">
                   <TabsList className="grid w-full grid-cols-4">
@@ -1081,18 +988,15 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     <TabsTrigger value="relationships">Relationships</TabsTrigger>
                     <TabsTrigger value="study">Study Guide</TabsTrigger>
                   </TabsList>
-
                   <TabsContent value="overview" className="space-y-4">
                     <div>
                       <h3 className="mb-2 text-lg font-semibold">Description</h3>
                       <p className="text-gray-700">{selectedProcess.description}</p>
                     </div>
-
                     <div>
                       <h3 className="mb-2 text-lg font-semibold">Purpose</h3>
                       <p className="text-gray-700">{selectedProcess.purpose}</p>
                     </div>
-
                     <div>
                       <h3 className="mb-2 text-lg font-semibold">Key Benefits</h3>
                       <ul className="list-inside list-disc space-y-1 text-gray-700">
@@ -1101,7 +1005,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         ))}
                       </ul>
                     </div>
-
                     {selectedProcess.pmbok7Domains && selectedProcess.pmbok7Domains.length > 0 && (
                       <div>
                         <h3 className="mb-2 text-lg font-semibold">PMBOK 7 Performance Domains</h3>
@@ -1115,7 +1018,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       </div>
                     )}
                   </TabsContent>
-
                   <TabsContent value="itto" className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                       <div>
@@ -1142,7 +1044,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                           ))}
                         </div>
                       </div>
-
                       <div>
                         <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
                           <Settings className="h-5 w-5 text-green-600" />
@@ -1170,7 +1071,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                           ))}
                         </div>
                       </div>
-
                       <div>
                         <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
                           <ArrowRight className="h-5 w-5 rotate-180 transform text-purple-600" />
@@ -1197,7 +1097,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       </div>
                     </div>
                   </TabsContent>
-
                   <TabsContent value="relationships" className="space-y-4">
                     {selectedProcess.relatedProcesses.length > 0 && (
                       <div>
@@ -1205,13 +1104,12 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                           {selectedProcess.relatedProcesses.map((relatedId) => {
                             const relatedProcess = processes.find((p) => p.id === relatedId)
-                            if (!relatedProcess) return null
-
+                            if (!relatedProcess) {return null}
                             return (
                               <div
                                 key={relatedId}
                                 className="cursor-pointer rounded border border-gray-200 p-3 hover:bg-gray-50"
-                                onClick={() => setSelectedProcess(relatedProcess)}
+                                onClick={() = role="button" tabIndex={0}> setSelectedProcess(relatedProcess)}
                               >
                                 <div className="text-sm font-medium">{relatedProcess.name}</div>
                                 <div className="text-xs text-gray-600">
@@ -1223,7 +1121,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         </div>
                       </div>
                     )}
-
                     {selectedProcess.prerequisites && selectedProcess.prerequisites.length > 0 && (
                       <div>
                         <h3 className="mb-3 text-lg font-semibold">Prerequisites</h3>
@@ -1235,14 +1132,12 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                       </div>
                     )}
                   </TabsContent>
-
                   <TabsContent value="study" className="space-y-4">
                     <div>
                       <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
                         <Lightbulb className="h-5 w-5 text-yellow-600" />
                         Study Recommendations
                       </h3>
-
                       <div className="space-y-3">
                         <div className="rounded border border-blue-200 bg-blue-50 p-4">
                           <h4 className="mb-2 font-medium text-blue-900">📚 Study Focus Areas</h4>
@@ -1253,7 +1148,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                             <li>• Practice with sample scenarios and questions</li>
                           </ul>
                         </div>
-
                         <div className="rounded border border-green-200 bg-green-50 p-4">
                           <h4 className="mb-2 font-medium text-green-900">
                             ⏱️ Estimated Study Time
@@ -1264,7 +1158,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                             Additional 30-60 minutes for practice and reinforcement
                           </p>
                         </div>
-
                         <div className="rounded border border-yellow-200 bg-yellow-50 p-4">
                           <h4 className="mb-2 font-medium text-yellow-900">🎯 Learning Tips</h4>
                           <ul className="space-y-1 text-sm text-yellow-800">
@@ -1275,7 +1168,6 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                           </ul>
                         </div>
                       </div>
-
                       <div className="mt-4 flex items-center gap-2">
                         <span className="text-sm text-gray-600">Current Mastery Level:</span>
                         <Select
@@ -1307,5 +1199,4 @@ const EnhancedPMBOKMatrix: React.FC = () => {
     </TooltipProvider>
   )
 }
-
 export default EnhancedPMBOKMatrix

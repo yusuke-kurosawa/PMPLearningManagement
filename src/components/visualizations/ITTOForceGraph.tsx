@@ -318,7 +318,7 @@ const ITTOForceGraph = React.memo(() => {
 
   // Memoized filtered data
   const { filteredNodes, filteredLinks } = useMemo(() => {
-    if (!graphData) return { filteredNodes: [], filteredLinks: [] }
+    if (!graphData) {return { filteredNodes: [], filteredLinks: [] }}
 
     let nodes = [...graphData.nodes]
     let links = [...graphData.links]
@@ -360,7 +360,7 @@ const ITTOForceGraph = React.memo(() => {
   }, [graphData, selectedFilters])
 
   useEffect(() => {
-    if (!graphData || isLoading) return
+    if (!graphData || isLoading) {return}
 
     const width = dimensions.width
     const height = dimensions.height
@@ -561,7 +561,7 @@ const ITTOForceGraph = React.memo(() => {
     // Drag functions with touch support
     function drag(simulation) {
       function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart()
+        if (!event.active) {simulation.alphaTarget(0.3).restart()}
         d.fx = d.x
         d.fy = d.y
       }
@@ -572,7 +572,7 @@ const ITTOForceGraph = React.memo(() => {
       }
 
       function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0)
+        if (!event.active) {simulation.alphaTarget(0)}
         d.fx = null
         d.fy = null
       }

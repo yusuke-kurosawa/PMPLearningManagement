@@ -3,7 +3,7 @@ import { X, Tag, ExternalLink } from 'lucide-react'
 import { glossaryCategories } from '../../data/schemas/glossary/pmpGlossary'
 
 const GlossaryDialog = ({ term, onClose, onNavigateToGlossary }) => {
-  if (!term) return null
+  if (!term) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -36,7 +36,7 @@ const GlossaryDialog = ({ term, onClose, onNavigateToGlossary }) => {
               <div className="flex flex-wrap gap-2">
                 {term.categories.map((catId) => {
                   const category = glossaryCategories.find((c) => c.id === catId)
-                  if (!category) return null
+                  if (!category) {return null}
                   return (
                     <span
                       key={catId}

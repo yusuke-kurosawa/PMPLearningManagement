@@ -201,7 +201,7 @@ const FlashCardLearning = () => {
 
   const getAccuracy = () => {
     const total = sessionStats.correctAnswers + sessionStats.incorrectAnswers
-    if (total === 0) return 0
+    if (total === 0) {return 0}
     return Math.round((sessionStats.correctAnswers / total) * 100)
   }
 

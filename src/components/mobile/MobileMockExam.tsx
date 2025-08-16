@@ -51,7 +51,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
 
   // Timer
   useEffect(() => {
-    if (isPaused || timeRemaining <= 0) return
+    if (isPaused || timeRemaining <= 0) {return}
 
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -141,7 +141,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
     onSwipeRight: handlePrevious,
   })
 
-  if (!currentQuestion) return null
+  if (!currentQuestion) {return null}
 
   return (
     <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-900">

@@ -201,13 +201,13 @@ export class EnhancedPrismaClient extends PrismaClient {
    */
   private extractQueryType(query: string): string {
     const normalized = query.trim().toLowerCase()
-    if (normalized.startsWith('select')) return 'SELECT'
-    if (normalized.startsWith('insert')) return 'INSERT'
-    if (normalized.startsWith('update')) return 'UPDATE'
-    if (normalized.startsWith('delete')) return 'DELETE'
-    if (normalized.startsWith('begin')) return 'TRANSACTION'
-    if (normalized.startsWith('commit')) return 'COMMIT'
-    if (normalized.startsWith('rollback')) return 'ROLLBACK'
+    if (normalized.startsWith('select')) {return 'SELECT'}
+    if (normalized.startsWith('insert')) {return 'INSERT'}
+    if (normalized.startsWith('update')) {return 'UPDATE'}
+    if (normalized.startsWith('delete')) {return 'DELETE'}
+    if (normalized.startsWith('begin')) {return 'TRANSACTION'}
+    if (normalized.startsWith('commit')) {return 'COMMIT'}
+    if (normalized.startsWith('rollback')) {return 'ROLLBACK'}
     return 'OTHER'
   }
 
@@ -284,7 +284,7 @@ export class EnhancedPrismaClient extends PrismaClient {
    */
   private calculateAvgConnectionTime(): number {
     const stats = Array.from(this.queryStats.values())
-    if (stats.length === 0) return 0
+    if (stats.length === 0) {return 0}
 
     const totalDuration = stats.reduce((sum, stat) => sum + stat.totalDuration, 0)
     const totalCount = stats.reduce((sum, stat) => sum + stat.count, 0)

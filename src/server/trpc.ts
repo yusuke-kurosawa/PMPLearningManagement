@@ -51,7 +51,7 @@ export const publicProcedure = t.procedure
  * Middleware for timing procedures
  */
 const timingMiddleware = t.middleware(async ({ next }) => {
-  const _start = Date.now()
+  const start = Date.now()
 
   const result = await next()
 

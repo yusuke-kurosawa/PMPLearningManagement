@@ -27,7 +27,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
 
   // Auto-refresh data
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {return}
 
     const updateData = () => {
       setStats(getStats())
@@ -54,13 +54,6 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const _formatBytes = (bytes) => {
-    if (!bytes) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
 
   const formatPercentage = (value) => {
     return (value * 100).toFixed(1) + '%'
@@ -78,7 +71,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     alert('Diagnostics completed. Check console for details.')
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -225,8 +218,8 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
             <div className="space-y-4">
               {/* Rotation Policy */}
               <div>
-                <label className="mb-2 block text-sm font-medium">Rotation Policy</label>
-                <div className="flex space-x-2">
+                <label className="mb-2 block text-sm font-medium" htmlFor="rotation-policy">Rotation Policy</label>
+                <div className="flex space-x-2" id="rotation-policy" role="group" aria-labelledby="rotation-policy">
                   {['aggressive', 'normal', 'conservative'].map((policy) => (
                     <button
                       key={policy}
@@ -245,8 +238,9 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
 
               {/* Refresh Interval */}
               <div>
-                <label className="mb-2 block text-sm font-medium">Refresh Interval</label>
+                <label className="mb-2 block text-sm font-medium" htmlFor="refresh-interval">Refresh Interval</label>
                 <select
+                  id="refresh-interval"
                   value={refreshInterval}
                   onChange={(e) => setRefreshInterval(Number(e.target.value))}
                   className="rounded border border-gray-300 px-3 py-1 text-sm"

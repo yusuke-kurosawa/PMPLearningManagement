@@ -232,7 +232,7 @@ class ContextManager {
    */
   has(key: string): boolean {
     const item = this.cache.get(key)
-    if (!item) return false
+    if (!item) {return false}
 
     // TTL チェック
     if (Date.now() - item.timestamp > item.ttl) {
@@ -274,7 +274,7 @@ class ContextManager {
     try {
       // 本番環境では適切な圧縮ライブラリを使用することを推奨
       return btoa(encodeURIComponent(data))
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.warn('Compression failed, using original data')
       }
@@ -291,7 +291,7 @@ class ContextManager {
   private decompress(compressedData: string): string {
     try {
       return decodeURIComponent(atob(compressedData))
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.warn('Decompression failed, using original data')
       }
@@ -314,7 +314,7 @@ class ContextManager {
    * @private
    */
   private enforceMaxSize(): void {
-    if (this.cache.size <= this.maxCacheSize) return
+    if (this.cache.size <= this.maxCacheSize) {return}
 
     // 優先度と最終アクセス時刻でソート
     const entries: EvictionEntry[] = Array.from(this.cache.entries())
@@ -467,7 +467,7 @@ class ContextManager {
    * @private
    */
   private calculateAverageAccessCount(): number {
-    if (this.cache.size === 0) return 0
+    if (this.cache.size === 0) {return 0}
     const totalAccesses = Array.from(this.cache.values()).reduce(
       (total, item) => total + item.accessCount,
       0
@@ -541,7 +541,7 @@ class ContextManager {
   async restoreFromArchive<T = unknown>(key: string): Promise<T | null> {
     try {
       const archive = localStorage.getItem('contextArchive')
-      if (!archive) return null
+      if (!archive) {return null}
 
       const archiveData = JSON.parse(archive) as Record<string, ContextItem>
       const item = archiveData[key]

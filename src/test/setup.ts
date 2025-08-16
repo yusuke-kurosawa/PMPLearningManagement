@@ -8,7 +8,7 @@ let server
 try {
   const serverModule = await import('./mocks/server')
   server = serverModule.server
-} catch (error) {
+} catch (_error) {
   if (process.env.NODE_ENV === 'development') {
     logger.warn('MSW server not available, skipping mock server setup')
   }

@@ -99,7 +99,7 @@ const VisualizationHub = () => {
   ]
 
   const handleViewChange = (viewId) => {
-    if (viewId === selectedView) return
+    if (viewId === selectedView) {return}
 
     setIsTransitioning(true)
     setTimeout(() => {

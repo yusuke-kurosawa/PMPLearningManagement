@@ -45,7 +45,7 @@ const Register: React.FC = () => {
   // Clear errors on unmount
   useEffect(() => {
     return () => {
-      if (clearError) clearError()
+      if (clearError) {clearError()}
     }
   }, [clearError])
 
@@ -53,12 +53,12 @@ const Register: React.FC = () => {
   const calculatePasswordStrength = (password) => {
     let strength = 0
 
-    if (password.length >= 8) strength++
-    if (password.length >= 12) strength++
-    if (/[a-z]/.test(password)) strength++
-    if (/[A-Z]/.test(password)) strength++
-    if (/[0-9]/.test(password)) strength++
-    if (/[^a-zA-Z0-9]/.test(password)) strength++
+    if (password.length >= 8) {strength++}
+    if (password.length >= 12) {strength++}
+    if (/[a-z]/.test(password)) {strength++}
+    if (/[A-Z]/.test(password)) {strength++}
+    if (/[0-9]/.test(password)) {strength++}
+    if (/[^a-zA-Z0-9]/.test(password)) {strength++}
 
     return Math.min(strength, 5)
   }
@@ -164,19 +164,19 @@ const Register: React.FC = () => {
 
   // Get password strength color
   const getPasswordStrengthColor: React.FC = () => {
-    if (passwordStrength <= 1) return 'bg-red-500'
-    if (passwordStrength <= 2) return 'bg-orange-500'
-    if (passwordStrength <= 3) return 'bg-yellow-500'
-    if (passwordStrength <= 4) return 'bg-blue-500'
+    if (passwordStrength <= 1) {return 'bg-red-500'}
+    if (passwordStrength <= 2) {return 'bg-orange-500'}
+    if (passwordStrength <= 3) {return 'bg-yellow-500'}
+    if (passwordStrength <= 4) {return 'bg-blue-500'}
     return 'bg-green-500'
   }
 
   // Get password strength text
   const getPasswordStrengthText: React.FC = () => {
-    if (passwordStrength <= 1) return 'Weak'
-    if (passwordStrength <= 2) return 'Fair'
-    if (passwordStrength <= 3) return 'Good'
-    if (passwordStrength <= 4) return 'Strong'
+    if (passwordStrength <= 1) {return 'Weak'}
+    if (passwordStrength <= 2) {return 'Fair'}
+    if (passwordStrength <= 3) {return 'Good'}
+    if (passwordStrength <= 4) {return 'Strong'}
     return 'Very Strong'
   }
 

@@ -93,7 +93,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
                   : node.type === 'output'
                     ? 1
                     : 0
-            if (!levels[level]) levels[level] = []
+            if (!levels[level]) {levels[level] = []}
             levels[level].push(node)
           })
 
@@ -158,7 +158,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
 
   // グラフ描画
   useEffect(() => {
-    if (!data || !svgRef.current) return
+    if (!data || !svgRef.current) {return}
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -290,7 +290,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
           .attr('transform', 'scale(1)')
       })
       .on('click', (event, d) => {
-        if (onNodeClick) onNodeClick(d)
+        if (onNodeClick) {onNodeClick(d)}
 
         // 複数選択モード
         if (event.shiftKey) {
@@ -321,7 +321,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
     // ドラッグ機能
     function drag(simulation) {
       function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart()
+        if (!event.active) {simulation.alphaTarget(0.3).restart()}
         event.subject.fx = event.subject.x
         event.subject.fy = event.subject.y
       }
@@ -332,7 +332,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
       }
 
       function dragended(event) {
-        if (!event.active) simulation.alphaTarget(0)
+        if (!event.active) {simulation.alphaTarget(0)}
         if (selectedLayout === 'force') {
           event.subject.fx = null
           event.subject.fy = null

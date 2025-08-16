@@ -7,6 +7,7 @@ import StudyGroups from './StudyGroups'
 import collaborationService from '../../services/collaborationService'
 
 const CollaborationHub = () => {
+  const [showHistory, setShowHistory] = useState(false);
   const { settings } = useTheme()
   const [activeTab, setActiveTab] = useState('notes')
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '')
@@ -57,7 +58,6 @@ const CollaborationHub = () => {
                   ? 'border-gray-600 bg-gray-700 text-white'
                   : 'border-gray-300 bg-white'
               }`}
-              autoFocus
             />
             <button
               onClick={handleSetUsername}

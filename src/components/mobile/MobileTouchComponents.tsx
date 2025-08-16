@@ -83,11 +83,11 @@ export const TouchExpandableCard = ({ title, children, defaultExpanded = false }
       if (deltaY < 0 && !isExpanded) {
         // Swipe up to expand
         setIsExpanded(true)
-        if (navigator.vibrate) navigator.vibrate(15)
+        if (navigator.vibrate) {navigator.vibrate(15)}
       } else if (deltaY > 0 && isExpanded) {
         // Swipe down to collapse
         setIsExpanded(false)
-        if (navigator.vibrate) navigator.vibrate(15)
+        if (navigator.vibrate) {navigator.vibrate(15)}
       }
     }
 
@@ -148,7 +148,7 @@ export const TouchActionBar = ({ items = [], onAction }) => {
 
   const handleAction = (item) => {
     setActiveItem(item.id)
-    if (navigator.vibrate) navigator.vibrate(20)
+    if (navigator.vibrate) {navigator.vibrate(20)}
 
     // Reset active state after animation
     setTimeout(() => setActiveItem(null), 200)
@@ -205,7 +205,7 @@ export const TouchLongPressMenu = ({ children, menuItems = [], onMenuAction }) =
     longPressTimer.current = setTimeout(() => {
       setMenuPosition({ x: touch.clientX, y: touch.clientY })
       setShowMenu(true)
-      if (navigator.vibrate) navigator.vibrate(50)
+      if (navigator.vibrate) {navigator.vibrate(50)}
     }, 500)
   }
 
@@ -297,7 +297,7 @@ export const SwipeableListItem = ({ children, leftActions = [], rightActions = [
   }
 
   const handleTouchMove = (e) => {
-    if (!isSwipping) return
+    if (!isSwipping) {return}
 
     currentX.current = e.touches[0].clientX
     const deltaX = currentX.current - startX.current

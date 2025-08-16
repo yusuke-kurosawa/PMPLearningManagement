@@ -377,7 +377,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: updates,
       })
 
-      if (error) throw error
+      if (error) {throw error}
 
       setUser(data.user)
       toast.success('Profile updated successfully')
@@ -419,7 +419,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshSession: async () => {
       try {
         const { data, error } = await supabase.auth.refreshSession()
-        if (error) throw error
+        if (error) {throw error}
         if (data.session) {
           setSession(data.session)
         }

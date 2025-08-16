@@ -28,7 +28,7 @@ const IntegratedView = React.memo(() => {
     throttle((e) => {
       if (isDragging) {
         const container = e.currentTarget.closest('.split-container')
-        if (!container) return
+        if (!container) {return}
         const rect = container.getBoundingClientRect()
         const x = e.clientX - rect.left
         const newRatio = (x / rect.width) * 100

@@ -154,7 +154,6 @@ const ForgotPasswordForm: React.FC<{ onBackToLogin }> = ({ onBackToLogin }) => {
                 handleInputChange()
               }}
               disabled={loading || isSubmitting}
-              autoFocus
             />
           </div>
           {errors.email && (

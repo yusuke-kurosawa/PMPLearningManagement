@@ -101,10 +101,10 @@ const PMBOK7PerformanceDomains: React.FC = () => {
           {/* 相互作用の線を描画 */}
           {pmbok7PerformanceDomains.map((domain) =>
             domain.interactions.map((targetId) => {
-              if (targetId === 'all') return null
+              if (targetId === 'all') {return null}
               const source = positions[domain.id]
               const target = positions[targetId]
-              if (!source || !target) return null
+              if (!source || !target) {return null}
 
               return (
                 <line
@@ -391,7 +391,7 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                           const targetDomain = pmbok7PerformanceDomains.find(
                             (d) => d.id === interactionId
                           )
-                          if (!targetDomain) return null
+                          if (!targetDomain) {return null}
                           const Icon = domainIcons[targetDomain.id]
 
                           return (

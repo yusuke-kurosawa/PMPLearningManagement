@@ -298,7 +298,7 @@ export class AdvancedCacheManager {
    */
   private async invalidateDependencies(key: string): Promise<void> {
     const dependencies = this.dependencyGraph.get(key)
-    if (!dependencies) return
+    if (!dependencies) {return}
 
     const invalidationTasks = Array.from(dependencies).map((depKey) => {
       // 依存キーの形式: "strategy:identifier"
@@ -324,7 +324,7 @@ export class AdvancedCacheManager {
     const refreshKey = `${keyStrategy}:${identifier}`
 
     // 既にリフレッシュがスケジュールされている場合はスキップ
-    if (this.refreshQueue.has(refreshKey)) return
+    if (this.refreshQueue.has(refreshKey)) {return}
 
     this.refreshQueue.add(refreshKey)
     this.refreshCallbacks.set(refreshKey, async () => {
@@ -387,7 +387,7 @@ export class AdvancedCacheManager {
   private startBackgroundRefresh(): void {
     setInterval(async () => {
       const refreshTasks = Array.from(this.refreshCallbacks.values())
-      if (refreshTasks.length === 0) return
+      if (refreshTasks.length === 0) {return}
 
       if (process.env.NODE_ENV === 'development') {
         logger.debug(`Processing ${refreshTasks.length} background refresh tasks`)
@@ -418,7 +418,7 @@ export class AdvancedCacheManager {
       async ({ keyStrategy, identifier, dataFetcher, config }) => {
         try {
           const result = await this.cacheAside(keyStrategy, identifier, dataFetcher, config)
-          if (!result.hit) warmedUp++
+          if (!result.hit) {warmedUp++}
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
             logger.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
