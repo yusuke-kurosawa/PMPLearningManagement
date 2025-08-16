@@ -387,13 +387,48 @@ class AuditLogger {
   }
 
   /**
-   * 一意ID生成
+   * 一意ID生成（暗号学的に安全）
    * @returns 生成されたID
    * @private
    */
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const timestamp = Date.now()
+    
+    try {
+      // Web Crypto APIを使用した安全な乱数生成
+      if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+        const randomArray = new Uint8Array(16)
+        window.crypto.getRandomValues(randomArray)
+        const randomString = Array.from(randomArray, byte => byte.toString(36)).join('')
+        return `${timestamp}-${randomString}`
+      }
+      
+      // Node.js環境での安全な乱数生成
+      if (typeof require !== 'undefined') {
+        try {
+          const crypto = require('crypto')
+          const randomBytes = crypto.randomBytes(16)
+          const randomString = randomBytes.toString('hex').substring(0, 12)
+          return `${timestamp}-${randomString}`
+        } catch (nodeError) {
+          console.warn('Node.js crypto module利用不可:', nodeError)
+        }
+      }
+      
+      // 最終フォールバック（開発環境専用、暗号学的に安全でない）
+      console.warn('⚠️ セキュリティ警告: 開発環境フォールバック使用。本番環境ではCrypto APIが必要です。')
+      const timestamp_suffix = Date.now().toString(36)
+      const counter = (this.fallbackCounter = (this.fallbackCounter || 0) + 1)
+      return `${timestamp}-dev-${timestamp_suffix}-${counter.toString(36)}`
+      
+    } catch (error) {
+      console.error('ID生成エラー:', error)
+      // 緊急フォールバック（タイムスタンプベース）
+      return `${timestamp}-emergency-${timestamp.toString(36)}`
+    }
   }
+
+  private fallbackCounter: number = 0
 
   /**
    * セッションID取得（セッションストレージから）

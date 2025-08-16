@@ -533,14 +533,14 @@ class ProjectStatusUpdater {
         return { total: 0, breakdown: {} }
       }
 
-      // 総バンドルサイズ
-      const { stdout } = await execAsync(`du -sb ${distPath}`, { cwd: this.rootDir })
+      // 総バンドルサイズ（セキュア版）
+      const { stdout } = await execAsync('du -sb .', { cwd: path.resolve(this.rootDir, distPath) })
       const totalSize = parseInt(stdout.split('\t')[0])
 
-      // ファイル別サイズ分析
+      // ファイル別サイズ分析（セキュア版）
       const { stdout: fileList } = await execAsync(
-        `find ${distPath} -name "*.js" -o -name "*.css" | xargs ls -la`,
-        { cwd: this.rootDir }
+        'find . -name "*.js" -o -name "*.css" | xargs ls -la',
+        { cwd: path.resolve(this.rootDir, distPath) }
       )
 
       const breakdown = {}
@@ -635,8 +635,8 @@ class ProjectStatusUpdater {
         return {}
       }
 
-      const { stdout } = await execAsync(`find ${distPath} -name "*.js" | head -5 | xargs wc -c`, {
-        cwd: this.rootDir,
+      const { stdout } = await execAsync('find . -name "*.js" | head -5 | xargs wc -c', {
+        cwd: path.resolve(this.rootDir, distPath),
       })
 
       const composition = {
@@ -645,16 +645,16 @@ class ProjectStatusUpdater {
         assetFiles: 0,
       }
 
-      // JS、CSS、その他のアセットファイル数をカウント
-      const { stdout: jsCount } = await execAsync(`find ${distPath} -name "*.js" | wc -l`, {
-        cwd: this.rootDir,
+      // JS、CSS、その他のアセットファイル数をカウント（セキュア版）
+      const { stdout: jsCount } = await execAsync('find . -name "*.js" | wc -l', {
+        cwd: path.resolve(this.rootDir, distPath),
       })
-      const { stdout: cssCount } = await execAsync(`find ${distPath} -name "*.css" | wc -l`, {
-        cwd: this.rootDir,
+      const { stdout: cssCount } = await execAsync('find . -name "*.css" | wc -l', {
+        cwd: path.resolve(this.rootDir, distPath),
       })
       const { stdout: assetCount } = await execAsync(
-        `find ${distPath} -type f ! -name "*.js" ! -name "*.css" | wc -l`,
-        { cwd: this.rootDir }
+        'find . -type f ! -name "*.js" ! -name "*.css" | wc -l',
+        { cwd: path.resolve(this.rootDir, distPath) }
       )
 
       composition.jsFiles = parseInt(jsCount.trim())

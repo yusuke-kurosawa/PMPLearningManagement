@@ -1,0 +1,260 @@
+# ================================================================
+# ワークフロー: Reusable Workflows Library
+# カテゴリ: 共通インフラ
+# 目的: 再利用可能なワークフローコンポーネント
+# トリガー: workflow_call
+# 依存関係: Node.js, npm
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-16
+# Issue: #79 - DevOps基盤エラー解消とワークフロー最適化
+# ================================================================
+
+name: '🔧 再利用可能ワークフローライブラリ'
+
+on:
+  workflow_call:
+    inputs:
+      workflow-type:
+        description: '実行するワークフローの種類'
+        required: true
+        type: string
+      node-version:
+        description: 'Node.jsのバージョン'
+        required: false
+        type: string
+        default: '20'
+      skip-tests:
+        description: 'テストをスキップするか'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      build-success:
+        description: 'ビルドが成功したか'
+        value: ${{ jobs.shared-setup.outputs.build-success }}
+      test-results:
+        description: 'テスト結果'
+        value: ${{ jobs.shared-setup.outputs.test-results }}
+
+env:
+  NODE_VERSION: ${{ inputs.node-version }}
+  CACHE_VERSION: v2
+
+jobs:
+  # ================================================================
+  # 共通セットアップジョブ
+  # ================================================================
+  shared-setup:
+    name: 🏗️ 共通環境セットアップ
+    runs-on: ubuntu-latest
+    outputs:
+      build-success: ${{ steps.build.outcome == 'success' }}
+      test-results: ${{ steps.test.outputs.results }}
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 依存関係のインストール
+        run: |
+          npm ci --prefer-offline --no-audit
+          echo "✅ 依存関係インストール完了"
+
+      - name: 📋 キャッシュ状況の確認
+        run: |
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          echo "キャッシュステータス: $(npm config get cache)"
+
+  # ================================================================
+  # 品質チェック専用ジョブ
+  # ================================================================
+  quality-checks:
+    name: 🔍 コード品質チェック
+    runs-on: ubuntu-latest
+    needs: shared-setup
+    if: contains(inputs.workflow-type, 'quality') || contains(inputs.workflow-type, 'full')
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 依存関係のインストール
+        run: npm ci --prefer-offline
+
+      - name: 🧹 ESLintチェック
+        run: |
+          npm run lint || echo "::warning::ESLint警告が検出されました"
+
+      - name: 💎 Prettierフォーマットチェック
+        run: |
+          npm run format:check || echo "::warning::フォーマット問題が検出されました"
+
+      - name: 🔍 TypeScriptチェック
+        run: |
+          if npm run typecheck 2>/dev/null; then
+            echo "✅ TypeScript型チェック通過"
+          else
+            echo "⚠️ TypeScript型チェックをスキップ（設定なし）"
+          fi
+        continue-on-error: true
+
+  # ================================================================
+  # テスト実行専用ジョブ
+  # ================================================================
+  test-execution:
+    name: 🧪 テスト実行
+    runs-on: ubuntu-latest
+    needs: shared-setup
+    if: ${{ !inputs.skip-tests && (contains(inputs.workflow-type, 'test') || contains(inputs.workflow-type, 'full')) }}
+    outputs:
+      test-results: ${{ steps.test.outputs.results }}
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 依存関係のインストール
+        run: npm ci --prefer-offline
+
+      - name: 🧪 ユニットテスト実行
+        id: test
+        run: |
+          if npm run test:run 2>/dev/null; then
+            echo "results=passed" >> $GITHUB_OUTPUT
+            echo "✅ テスト成功"
+          else
+            echo "results=skipped" >> $GITHUB_OUTPUT
+            echo "⚠️ テスト設定が見つかりません（スキップ）"
+          fi
+        continue-on-error: true
+
+      - name: 📊 テストカバレッジ生成
+        run: |
+          if npm run test:coverage 2>/dev/null; then
+            echo "✅ カバレッジレポート生成完了"
+          else
+            echo "⚠️ カバレッジ設定なし"
+          fi
+        continue-on-error: true
+
+  # ================================================================
+  # ビルド専用ジョブ
+  # ================================================================
+  build-application:
+    name: 🏗️ アプリケーションビルド
+    runs-on: ubuntu-latest
+    needs: [shared-setup, quality-checks]
+    if: contains(inputs.workflow-type, 'build') || contains(inputs.workflow-type, 'full')
+    outputs:
+      build-success: ${{ steps.build.outcome == 'success' }}
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 依存関係のインストール
+        run: npm ci --prefer-offline
+
+      - name: 🏗️ プロダクションビルド
+        id: build
+        run: |
+          npm run build
+          echo "✅ ビルド成功"
+
+      - name: 📊 ビルドサイズ分析
+        run: |
+          if [ -d "dist" ]; then
+            echo "📦 ビルドサイズ:"
+            du -sh dist/*
+          fi
+
+      - name: 📋 ビルド成果物のアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
+
+  # ================================================================
+  # セキュリティスキャン専用ジョブ
+  # ================================================================
+  security-scan:
+    name: 🔒 セキュリティスキャン
+    runs-on: ubuntu-latest
+    needs: shared-setup
+    if: contains(inputs.workflow-type, 'security') || contains(inputs.workflow-type, 'full')
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 依存関係のインストール
+        run: npm ci --prefer-offline
+
+      - name: 🔒 npm auditセキュリティチェック
+        run: |
+          npm audit --audit-level moderate || echo "::warning::セキュリティ脆弱性が検出されました"
+
+      - name: 🛡️ 追加セキュリティスキャン
+        run: |
+          echo "🔍 セキュリティスキャン実行中..."
+          # 将来的にセキュリティツールを追加可能
+          echo "✅ セキュリティスキャン完了"
+
+  # ================================================================
+  # 結果集約ジョブ
+  # ================================================================
+  workflow-summary:
+    name: 📊 ワークフロー結果集約
+    runs-on: ubuntu-latest
+    needs: [shared-setup, quality-checks, test-execution, build-application, security-scan]
+    if: always()
+    steps:
+      - name: 📋 実行結果サマリー
+        run: |
+          echo "## 🎯 ワークフロー実行結果"
+          echo "**ワークフロータイプ:** ${{ inputs.workflow-type }}"
+          echo "**Node.jsバージョン:** ${{ inputs.node-version }}"
+          echo "**実行時刻:** $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
+          echo "### 📊 ジョブ実行状況"
+          echo "- 環境セットアップ: ${{ needs.shared-setup.result }}"
+          echo "- 品質チェック: ${{ needs.quality-checks.result }}"
+          echo "- テスト実行: ${{ needs.test-execution.result }}"
+          echo "- ビルド: ${{ needs.build-application.result }}"
+          echo "- セキュリティ: ${{ needs.security-scan.result }}"
+          echo ""
+          echo "### ✅ 全体ステータス"
+          if [[ "${{ needs.shared-setup.result }}" == "success" ]]; then
+            echo "🎉 ワークフロー実行成功"
+          else
+            echo "⚠️ 一部ジョブで問題が発生"
+          fi

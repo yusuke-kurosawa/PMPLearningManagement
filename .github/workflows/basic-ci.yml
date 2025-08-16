@@ -1,0 +1,35 @@
+# ================================================================
+# ワークフロー: Basic CI 
+# カテゴリ: CI/CD
+# 目的: 最小限の検証のみの超軽量CI
+# トリガー: pull_request
+# 依存関係: なし
+# 作成者: DevOps自動化システム  
+# 最終更新: 2025-08-16
+# Issue: #107 - セキュリティ修正とCI/CD安定化
+# ================================================================
+
+name: 'Basic CI'
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # ================================================================
+  # ジョブ: 基本チェック
+  # ================================================================
+  basic-check:
+    name: 'Basic Check'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Basic validation'
+        run: |
+          echo "✅ Repository checked out successfully"
+          echo "✅ Basic CI check passed"

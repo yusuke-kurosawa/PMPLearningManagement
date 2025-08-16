@@ -239,14 +239,15 @@ class AuthService {
       // ユーザーロールと権限を取得
       const userRole = await authHelpers.getUserRole(data.user.id)
 
-      // ユーザーデータをローカルストレージに保存
-      localStorage.setItem(
-        'user_profile',
-        JSON.stringify({
-          ...data.user,
-          role: userRole,
-        })
-      )
+      // ユーザーデータを暗号化してローカルストレージに保存
+      const userProfile = {
+        ...data.user,
+        role: userRole,
+      }
+      
+      // 機密データ暗号化（セキュリティ強化）
+      const encryptedProfile = await this.encryptSensitiveData(userProfile)
+      localStorage.setItem('user_profile', encryptedProfile)
 
       // 成功ログイン記録
       await auditLogger.log({
@@ -623,6 +624,103 @@ class AuthService {
     const remaining = Math.max(0, this.lockoutDuration - timePassed)
 
     return Math.ceil(remaining / 1000) // 秒単位で返却
+  }
+
+  /**
+   * 機密データ暗号化
+   * @param data - 暗号化対象データ
+   * @returns 暗号化済み文字列
+   * @private
+   */
+  private async encryptSensitiveData(data: any): Promise<string> {
+    try {
+      // Web Crypto APIを使用した安全な暗号化
+      const encoder = new TextEncoder()
+      const plaintext = encoder.encode(JSON.stringify(data))
+      
+      // 暗号化キーを生成（セッション固有）
+      const key = await window.crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      )
+      
+      // 初期化ベクトル生成
+      const iv = window.crypto.getRandomValues(new Uint8Array(12))
+      
+      // 暗号化実行
+      const ciphertext = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        plaintext
+      )
+      
+      // キーをセッションストレージに保存（メモリ上のみ）
+      const keyBuffer = await window.crypto.subtle.exportKey('raw', key)
+      sessionStorage.setItem('_ek', Array.from(new Uint8Array(keyBuffer)).join(','))
+      sessionStorage.setItem('_iv', Array.from(iv).join(','))
+      
+      // Base64エンコードして返却
+      return btoa(String.fromCharCode(...new Uint8Array(ciphertext)))
+    } catch (error) {
+      // 暗号化失敗時はアラート出力（開発時のみ）
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('暗号化に失敗しました。平文でフォールバック:', error)
+      }
+      // フォールバック: 最低限の難読化
+      return btoa(JSON.stringify(data))
+    }
+  }
+
+  /**
+   * 機密データ復号化
+   * @param encryptedData - 暗号化済みデータ
+   * @returns 復号化済みデータ
+   * @private
+   */
+  private async decryptSensitiveData(encryptedData: string): Promise<any> {
+    try {
+      const keyData = sessionStorage.getItem('_ek')
+      const ivData = sessionStorage.getItem('_iv')
+      
+      if (!keyData || !ivData) {
+        // キーが見つからない場合はBase64デコードでフォールバック
+        return JSON.parse(atob(encryptedData))
+      }
+      
+      // キーとIVを復元
+      const keyBuffer = new Uint8Array(keyData.split(',').map(x => parseInt(x)))
+      const iv = new Uint8Array(ivData.split(',').map(x => parseInt(x)))
+      
+      // キーをインポート
+      const key = await window.crypto.subtle.importKey(
+        'raw',
+        keyBuffer,
+        { name: 'AES-GCM' },
+        false,
+        ['decrypt']
+      )
+      
+      // Base64デコード
+      const ciphertext = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0))
+      
+      // 復号化実行
+      const plaintext = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        ciphertext
+      )
+      
+      // JSON復元
+      const decoder = new TextDecoder()
+      return JSON.parse(decoder.decode(plaintext))
+    } catch (error) {
+      // 復号化失敗時はBase64デコードでフォールバック
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('復号化に失敗しました。フォールバック復号化:', error)
+      }
+      return JSON.parse(atob(encryptedData))
+    }
   }
 }
 
