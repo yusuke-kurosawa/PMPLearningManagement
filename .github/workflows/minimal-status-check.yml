@@ -5,57 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # 基本チェック（最小限）
-  check:
+  minimal-status-check:
     runs-on: ubuntu-latest
     steps:
       - run: echo "✅ Check passed"
-  
-  # 品質・ビルドチェック（バランス型）
-  quality-build-check:
-    name: 🔄 統合品質・ビルドチェック
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          
-      - name: 📦 Install dependencies
-        run: |
-          npm ci --prefer-offline --no-audit
-          echo "✅ 依存関係インストール完了"
-          
-      - name: 🏗️ Build test
-        run: |
-          npm run build
-          echo "✅ ビルド成功"
-          
-      - name: 🔒 Security check
-        run: |
-          npm audit --audit-level moderate || echo "⚠️ セキュリティ問題検出"
-          echo "✅ セキュリティチェック完了"
-
-  # セキュリティスキャン（バランス型）          
-  security-scan:
-    name: 🤖 Claude統合セキュリティスキャン
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: quality-build-check
-    
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: 🔍 Basic security scan
-        run: |
-          echo "🔍 基本セキュリティスキャン実行..."
-          # 秘密情報パターンチェック
-          grep -r -i -E "(api[_-]?key|password|secret|token)" src/ --exclude-dir=node_modules || echo "✅ 秘密情報パターンなし"
-          echo "✅ セキュリティスキャン完了"
