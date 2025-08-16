@@ -67,8 +67,7 @@ export class SLOManager extends EventEmitter {
   private monitoringInterval: NodeJS.Timer | null = null
   private prometheusRegistry: client.Registry
 
-  // SLO Compliance Metrics
-  private sloComplianceGauge: client.Gauge<string>
+  // SLO Compliance private sloComplianceGauge: client.Gauge<string>
   private sloViolationsCounter: client.Counter<string>
   private alertsSentCounter: client.Counter<string>
   private errorBudgetGauge: client.Gauge<string>

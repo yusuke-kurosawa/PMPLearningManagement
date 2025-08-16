@@ -246,7 +246,7 @@ export class KeyManagementSystem {
 
     if (process.env.NODE_ENV === 'development') {
       logger.info(
-        `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
+        `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key?.expiresAt)})`
       )
     }
   }

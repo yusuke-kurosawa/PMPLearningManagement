@@ -51,8 +51,8 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
           prompt: 'consent',
@@ -135,7 +135,7 @@ export const authOptions: NextAuthOptions = {
 
       // For credentials provider, check if email is verified
       const existingUser = await prisma.user.findUnique({
-        where: { email: user.email! },
+        where: { email: user.email || '' },
       })
 
       if (!existingUser?.emailVerified) {

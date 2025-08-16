@@ -40,7 +40,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -63,7 +63,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -106,7 +106,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -128,7 +128,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'malicious-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -159,7 +159,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {

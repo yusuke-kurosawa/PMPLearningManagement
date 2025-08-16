@@ -316,7 +316,7 @@ export class RedisCacheManager {
       for (let i = 0; i < identifiers.length; i++) {
         if (values[i]) {
           try {
-            const entry: CacheEntry<T> = JSON.parse(values[i]!)
+            const entry: CacheEntry<T> = JSON.parse(values[i] || '{}')
             results.set(identifiers[i], entry.data)
             this.stats.hits++
           } catch (error) {
