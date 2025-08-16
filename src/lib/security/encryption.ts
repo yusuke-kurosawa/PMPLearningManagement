@@ -176,7 +176,7 @@ export class SymmetricEncryption {
       }
 
       const iv = crypto.randomBytes(ENCRYPTION_CONFIG.ivLength)
-      const cipher = crypto.createCipher(ENCRYPTION_CONFIG.algorithm, key)
+      const cipher = crypto.createCipheriv(ENCRYPTION_CONFIG.algorithm, key, iv)
       cipher.setAAD(Buffer.from('pmp-learning-system'))
 
       let encrypted = cipher.update(data, 'utf8', 'hex')
@@ -217,7 +217,7 @@ export class SymmetricEncryption {
         )
       }
 
-      const decipher = crypto.createDecipher(ENCRYPTION_CONFIG.algorithm, key)
+      const decipher = crypto.createDecipheriv(ENCRYPTION_CONFIG.algorithm, key, Buffer.from(input.iv, 'hex'))
       decipher.setAAD(Buffer.from('pmp-learning-system'))
       decipher.setAuthTag(Buffer.from(input.tag, 'hex'))
 
