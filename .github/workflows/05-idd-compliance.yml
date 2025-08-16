@@ -45,8 +45,9 @@ jobs:
 
       - name: Check PR Title for Issue Reference
         id: check-title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
           if echo "$PR_TITLE" | grep -qE '#[0-9]+'; then
             echo "✅ PR title contains issue reference"
             echo "has_issue_ref=true" >> $GITHUB_OUTPUT
@@ -57,8 +58,9 @@ jobs:
 
       - name: Check PR Body for Issue Reference
         id: check-body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          PR_BODY="${{ github.event.pull_request.body }}"
           if echo "$PR_BODY" | grep -qE '(closes|fixes|resolves|references) #[0-9]+'; then
             echo "✅ PR body contains issue reference"
             echo "has_issue_ref=true" >> $GITHUB_OUTPUT
@@ -73,7 +75,7 @@ jobs:
           echo "Checking commits for issue references..."
           
           # PRのコミットを取得
-          COMMITS=$(git log --format="%H %s" origin/${{ github.base_ref }}..HEAD 2>/dev/null || git log --format="%H %s" -n 20)
+          COMMITS=$(git log --format="%H %s" "origin/$BASE_REF..HEAD" 2>/dev/null || git log --format="%H %s" -n 20)
           
           TOTAL_COMMITS=0
           COMPLIANT_COMMITS=0

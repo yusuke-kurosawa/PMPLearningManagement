@@ -42,17 +42,19 @@ jobs:
           fetch-depth: 0
 
       - name: 📊 PR差分の最適化取得
-      id: diff
-      run: |
-        # Get changed files for filtering
-        git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+        id: diff
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Get changed files for filtering
+          git diff --name-only "origin/$BASE_REF...HEAD" > changed_files.txt
         
         # Filter relevant files (exclude docs, configs)
         grep -E '\.(js|jsx|ts|tsx|json|css)$' changed_files.txt > relevant_files.txt || true
         
         # Get focused diff only for relevant files
         if [ -s relevant_files.txt ]; then
-          git diff origin/${{ github.base_ref }}...HEAD -- $(cat relevant_files.txt | tr '\n' ' ') > pr_diff.txt
+          git diff "origin/$BASE_REF...HEAD" -- $(cat relevant_files.txt | tr '\n' ' ') > pr_diff.txt
           # Limit diff size more intelligently
           head -c 8000 pr_diff.txt > limited_diff.txt  # 文字数制限
         else
@@ -71,14 +73,14 @@ jobs:
 
       - name: 🤖 Claude APIによる高度レビュー分析
         id: review
-      env:
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      run: |
-        PR_TITLE="${{ github.event.pull_request.title }}"
-        PR_BODY="${{ github.event.pull_request.body }}"
-        DIFF="${{ steps.diff.outputs.diff }}"
-        FILES_CHANGED="${{ steps.diff.outputs.files_changed }}"
-        RELEVANT_FILES="${{ steps.diff.outputs.relevant_files }}"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          DIFF: ${{ steps.diff.outputs.diff }}
+          FILES_CHANGED: ${{ steps.diff.outputs.files_changed }}
+          RELEVANT_FILES: ${{ steps.diff.outputs.relevant_files }}
+        run: |
         
         # Skip if no relevant changes
         if [ "$RELEVANT_FILES" = "0" ]; then
