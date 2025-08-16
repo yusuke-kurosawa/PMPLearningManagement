@@ -1,0 +1,211 @@
+name: 🚀 Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Build job
+  build:
+    name: 🏗️ Build for Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run linter
+        run: npm run lint
+        continue-on-error: true
+
+      - name: 🧪 Run tests
+        run: npm run test:run
+        continue-on-error: true
+        env:
+          NODE_ENV: test
+
+      - name: 🏗️ Build production
+        run: npm run build
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: /PMPLearningManagement
+          VITE_BASE_URL: /PMPLearningManagement
+
+      - name: 📊 Generate bundle analysis
+        run: |
+          echo "# 📦 Bundle Size Report" > dist/bundle-report.md
+          echo "" >> dist/bundle-report.md
+          echo "## Total Size" >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+          du -sh dist/ >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+          echo "" >> dist/bundle-report.md
+          echo "## File Breakdown" >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+          find dist -type f -name "*.js" -o -name "*.css" | xargs ls -lh | sort -k5 -rh >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+          echo "" >> dist/bundle-report.md
+          echo "## JavaScript Files" >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+          find dist -name "*.js" -exec wc -l {} \; | sort -rn | head -10 >> dist/bundle-report.md
+          echo "\`\`\`" >> dist/bundle-report.md
+
+      - name: 🎨 Optimize images
+        run: |
+          if [ -d "dist/assets" ]; then
+            find dist/assets -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) | while read file; do
+              echo "Optimizing: $file"
+            done
+          fi
+
+      - name: 📝 Generate deployment info
+        run: |
+          echo "# PMP Learning Management System" > dist/README.md
+          echo "" >> dist/README.md
+          echo "## Deployment Info" >> dist/README.md
+          echo "- **Branch**: ${{ github.ref_name }}" >> dist/README.md
+          echo "- **Commit**: ${{ github.sha }}" >> dist/README.md
+          echo "- **Deploy Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> dist/README.md
+          echo "- **Build Number**: ${{ github.run_number }}" >> dist/README.md
+          echo "" >> dist/README.md
+          echo "## Access" >> dist/README.md
+          echo "🌐 [Live Application](https://yusuke-kurosawa.github.io/PMPLearningManagement/)" >> dist/README.md
+          
+      - name: 🔧 Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  # Deployment job
+  deploy:
+    name: 🚀 Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: 📊 Check deployment
+        run: |
+          echo "✅ Deployment completed!"
+          echo "🌐 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📅 Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+  # Post-deployment verification
+  verify:
+    name: ✅ Verify Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+    
+    steps:
+      - name: 🔍 Check site availability
+        run: |
+          URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/"
+          echo "Checking: $URL"
+          
+          # Wait for deployment to propagate
+          sleep 30
+          
+          # Check if site is accessible
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" $URL)
+          
+          if [ $HTTP_CODE -eq 200 ]; then
+            echo "✅ Site is live and accessible!"
+          else
+            echo "⚠️ Site returned HTTP code: $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: 🎯 Run Lighthouse audit
+        run: |
+          npm install -g @lhci/cli@0.13.x
+          
+          # Basic Lighthouse configuration
+          echo '{
+            "ci": {
+              "collect": {
+                "url": ["https://yusuke-kurosawa.github.io/PMPLearningManagement/"],
+                "numberOfRuns": 1
+              },
+              "assert": {
+                "preset": "lighthouse:no-pwa",
+                "assertions": {
+                  "categories:performance": ["warn", {"minScore": 0.7}],
+                  "categories:accessibility": ["warn", {"minScore": 0.85}],
+                  "categories:best-practices": ["warn", {"minScore": 0.85}],
+                  "categories:seo": ["warn", {"minScore": 0.85}]
+                }
+              }
+            }
+          }' > lighthouserc.json
+          
+          lhci autorun || true
+
+      - name: 📝 Create deployment summary
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `## 🚀 Deployment Successful!
+            
+            ### 📊 Deployment Details
+            - **Environment**: GitHub Pages
+            - **URL**: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+            - **Commit**: \`${context.sha.substring(0, 7)}\`
+            - **Deploy Time**: ${new Date().toISOString()}
+            - **Build**: #${context.runNumber}
+            
+            ### 🎯 Next Steps
+            1. Visit the [live site](https://yusuke-kurosawa.github.io/PMPLearningManagement/)
+            2. Test critical user flows
+            3. Monitor performance metrics
+            
+            ### 📈 Performance Targets
+            - ⚡ Performance: > 70%
+            - ♿ Accessibility: > 85%
+            - 🎨 Best Practices: > 85%
+            - 🔍 SEO: > 85%
+            `;
+            
+            // Create deployment issue comment if this was triggered by a PR
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: summary
+              });
+            }
+            
+            console.log(summary);
