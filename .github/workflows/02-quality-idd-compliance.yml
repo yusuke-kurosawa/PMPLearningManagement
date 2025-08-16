@@ -1,4 +1,16 @@
-name: '📋 Issue-Driven Development Workflow'
+# ================================================================
+# 📋 品質: Issue-Driven Developmentコンプライアンス
+# ================================================================
+# 目的: IDDメソドロジーの遵守を自動的に検証・強制
+# 実行タイミング: Issue/PRの作成・編集時、push時
+# 主な処理:
+#   - Issueテンプレート検証
+#   - PRとIssueの紐付け確認
+#   - コミットメッセージのIssue参照検証
+#   - コンプライアンスレポート生成
+# ================================================================
+
+name: '📋 Quality - IDD Compliance'
 
 on:
   issues:
@@ -8,8 +20,15 @@ on:
   push:
     branches: [main, develop]
 
+# 環境変数
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# パーミッション設定（最小権限の原則）
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   # Validate issue format and auto-label

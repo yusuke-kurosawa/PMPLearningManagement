@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { logger } from '../../services/logger'
 
 // Rate Limiting 設定スキーマ
-const RateLimitConfigSchema = z.object({
+const _RateLimitConfigSchema = z.object({
   windowMs: z.number().positive(),
   maxRequests: z.number().positive(),
   skipSuccessfulRequests: z.boolean().optional().default(false),
@@ -17,7 +17,7 @@ const RateLimitConfigSchema = z.object({
   onLimitReached: z.function().optional(),
 })
 
-export type RateLimitConfig = z.infer<typeof RateLimitConfigSchema>
+export type RateLimitConfig = z.infer<typeof _RateLimitConfigSchema>
 
 // Rate Limiting 結果
 export interface RateLimitResult {

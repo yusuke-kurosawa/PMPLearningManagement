@@ -1,4 +1,16 @@
-name: IDD Metrics Collector
+# ================================================================
+# 📊 品質: IDDメトリクス収集・ダッシュボード
+# ================================================================
+# 目的: IDDコンプライアンス率の測定と可視化
+# 実行タイミング: 6時間ごとの定期実行、mainへのpush時、手動実行
+# 主な処理:
+#   - コミット・Issue・PRのメトリクス収集
+#   - コンプライアンス率の計算
+#   - ダッシュボードHTML生成
+#   - GitHub Pagesへのデプロイ
+# ================================================================
+
+name: '📊 Quality - IDD Metrics'
 
 on:
   schedule:
@@ -7,12 +19,18 @@ on:
   push:
     branches: [main]
 
+# パーミッション設定
 permissions:
-  contents: write
-  issues: read
-  pull-requests: read
-  pages: write
-  id-token: write
+  contents: write      # README更新用
+  issues: read        # Issueメトリクス収集用
+  pull-requests: read # PRメトリクス収集用
+  pages: write       # GitHub Pagesデプロイ用
+  id-token: write    # GitHub Pages認証用
+
+# ワークフロー同時実行制御
+concurrency:
+  group: "idd-metrics-${{ github.ref }}"
+  cancel-in-progress: false  # メトリクス収集はキャンセルしない
 
 jobs:
   collect-metrics:
