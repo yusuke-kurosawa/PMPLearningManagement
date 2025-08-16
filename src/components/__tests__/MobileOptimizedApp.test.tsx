@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import MobileOptimizedApp from '../mobile/MobileOptimizedApp'
-import type { ServiceWorkerRegistration } from '../../types/service-worker'
+import type { ServiceWorkerRegistration as _ServiceWorkerRegistration } from '../../types/service-worker'
 
 expect.extend(toHaveNoViolations)
 

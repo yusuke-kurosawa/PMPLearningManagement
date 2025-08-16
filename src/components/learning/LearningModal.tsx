@@ -15,7 +15,7 @@ const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, pro
   
   const modalRef = useRef(null)
   const closeButtonRef = useRef(null)
-  const firstFocusableRef = useRef(null)
+  const _firstFocusableRef = useRef(null)
 
   useEffect(() => {
     if (isOpen && process) {

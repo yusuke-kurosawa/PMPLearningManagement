@@ -527,9 +527,9 @@ const Navigation = () => {
           aria-label="パンくずナビゲーション"
         >
           <div className="mx-auto max-w-7xl px-4">
-            <ol className="flex items-center py-3 text-sm" role="list">
+            <ol className="flex items-center py-3 text-sm">
               {breadcrumbs.map((crumb, index) => (
-                <li key={crumb.path} className="flex items-center" role="listitem">
+                <li key={crumb.path} className="flex items-center">
                   {index > 0 && (
                     <ChevronRight className="mx-2 h-4 w-4 text-gray-400" aria-hidden="true" />
                   )}
