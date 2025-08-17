@@ -13,6 +13,7 @@ export interface ContextStats {
   cacheHitRate: number
   averageAccessCount: number
   compressionRatio: number
+  memoryUsage: number
 }
 
 // Monitoring Data
@@ -21,7 +22,7 @@ export interface MonitoringData {
   policy: 'normal' | 'aggressive' | 'conservative'
   metrics: Record<string, any>
   lastCleanup: number
-  nextCleanup?: number
+  nextCleanup: number
 }
 
 // Performance Metrics
@@ -99,4 +100,10 @@ export interface PerformanceOptimizerReturn {
   observeForLazyLoading: (element: Element, loadHandler: () => void) => void
   debounce: <T extends (...args: any[]) => any>(func: T, wait: number) => T
   throttle: <T extends (...args: any[]) => any>(func: T, limit: number) => T
+}
+
+// Context Manager Dashboard Props
+export interface ContextManagerDashboardProps {
+  isOpen?: boolean
+  onClose: () => void
 }

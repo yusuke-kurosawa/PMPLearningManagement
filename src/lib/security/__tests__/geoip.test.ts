@@ -39,20 +39,9 @@ describe('GeoIPService', () => {
 
   beforeEach(() => {
     service = new GeoIPService()
-<<<<<<< HEAD
-    nock.cleanAll()
-    // nockを有効化し、実際のHTTPリクエストを無効化
-    nock.disableNetConnect()
   })
 
   afterEach(() => {
-    nock.cleanAll()
-    nock.enableNetConnect() // テスト終了時にネット接続を復元
-=======
-  })
-
-  afterEach(() => {
->>>>>>> main
     vi.clearAllMocks()
   })
 
