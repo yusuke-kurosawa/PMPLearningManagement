@@ -5,25 +5,47 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
+import type {
+  IPromptLogService,
+  PromptLogConfig,
+  DEFAULT_PROMPT_LOG_CONFIG,
+  PromptData,
+  ResponseData,
+  InteractionData,
+  PromptLogEntry,
+  ResponseLogEntry,
+  InteractionLogEntry,
+  BaseLogEntry,
+  LogQueryFilters,
+  QueryResult,
+  LogStatistics,
+  ExportOptions,
+  ExportResult,
+  ExportFormat,
+  CostBreakdown,
+  EnvironmentInfo,
+  PaginationInfo,
+  TagStatistics,
+  UserActivitySummary,
+  UserActivity,
+  CostAnalysis,
+  ModelCostBreakdown,
+} from '../types/services/prompt-log'
+import type { UserId, Count, Percentage } from '../types/common/base'
 
-class PromptLogService {
+class PromptLogService implements IPromptLogService {
+  private dbName: string = 'PromptLogDB'
+  private dbVersion: number = 1
+  private storeName: string = 'promptLogs'
+  private db: IDBDatabase | null = null
+  private queue: BaseLogEntry[] = []
+  private isProcessing: boolean = false
+  private config: PromptLogConfig
+  private sessionId: string
+  private flushTimer?: NodeJS.Timeout
+
   constructor() {
-    this.dbName = 'PromptLogDB'
-    this.dbVersion = 1
-    this.storeName = 'promptLogs'
-    this.db = null
-    this.queue = []
-    this.isProcessing = false
-    this.config = {
-      maxQueueSize: 100,
-      flushInterval: 5000, // 5 seconds
-      maxLogAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      enableCompression: true,
-      enableEncryption: false,
-      enableAnalytics: true,
-      privacyMode: false,
-      retentionPolicy: 'rolling', // 'rolling' | 'archive' | 'delete'
-    }
+    this.config = { ...DEFAULT_PROMPT_LOG_CONFIG }
     this.sessionId = this.generateSessionId()
     this.initializeDB()
     this.startFlushTimer()
@@ -32,7 +54,7 @@ class PromptLogService {
   /**
    * Initialize IndexedDB for log storage
    */
-  async initializeDB() {
+  private async initializeDB(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion)
 
@@ -48,7 +70,7 @@ class PromptLogService {
       }
 
       request.onupgradeneeded = (event) => {
-        const db = event.target.result
+        const db = (event.target as IDBOpenDBRequest).result
 
         // Create object store if it doesn't exist
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -72,20 +94,20 @@ class PromptLogService {
   /**
    * Generate unique session ID
    */
-  generateSessionId() {
+  private generateSessionId(): string {
     return `session_${Date.now()}_${uuidv4()}`
   }
 
   /**
    * Log a prompt interaction
    */
-  async logPrompt(data) {
-    const logEntry = {
+  async logPrompt(data: PromptData): Promise<string> {
+    const logEntry: PromptLogEntry = {
       id: uuidv4(),
       timestamp: Date.now(),
       sessionId: this.sessionId,
       type: 'prompt',
-      userId: data.userId || 'anonymous',
+      userId: data.userId || ('anonymous' as UserId),
       prompt: this.sanitizeContent(data.prompt),
       context: data.context || {},
       metadata: {
@@ -108,14 +130,14 @@ class PromptLogService {
   /**
    * Log an AI response
    */
-  async logResponse(promptId, data) {
-    const logEntry = {
+  async logResponse(promptId: string, data: ResponseData): Promise<string> {
+    const logEntry: ResponseLogEntry = {
       id: uuidv4(),
       timestamp: Date.now(),
       sessionId: this.sessionId,
       type: 'response',
       promptId: promptId,
-      userId: data.userId || 'anonymous',
+      userId: data.userId || ('anonymous' as UserId),
       response: this.sanitizeContent(data.response),
       model: data.model || 'unknown',
       metadata: {
@@ -144,22 +166,23 @@ class PromptLogService {
   /**
    * Log user interaction/feedback
    */
-  async logInteraction(data) {
-    const logEntry = {
+  async logInteraction(data: InteractionData): Promise<string> {
+    const logEntry: InteractionLogEntry = {
       id: uuidv4(),
       timestamp: Date.now(),
       sessionId: this.sessionId,
       type: 'interaction',
-      userId: data.userId || 'anonymous',
+      userId: data.userId || ('anonymous' as UserId),
       promptId: data.promptId,
       responseId: data.responseId,
-      action: data.action, // 'like', 'dislike', 'flag', 'copy', 'share', etc.
+      action: data.action,
       feedback: data.feedback,
       rating: data.rating,
       metadata: {
         source: data.source,
         context: data.context,
       },
+      status: 'completed',
     }
 
     return this.addToQueue(logEntry)
@@ -168,7 +191,7 @@ class PromptLogService {
   /**
    * Add log entry to queue for batch processing
    */
-  async addToQueue(entry) {
+  private async addToQueue(entry: BaseLogEntry): Promise<string> {
     this.queue.push(entry)
 
     // Auto-flush if queue is full
@@ -182,8 +205,8 @@ class PromptLogService {
   /**
    * Flush queued logs to storage
    */
-  async flush() {
-    if (this.isProcessing || this.queue.length === 0) {
+  async flush(): Promise<void> {
+    if (this.isProcessing || this.queue.length === 0 || !this.db) {
       return
     }
 
@@ -198,22 +221,22 @@ class PromptLogService {
       for (const log of logsToProcess) {
         // Apply compression if enabled
         if (this.config.enableCompression) {
-          log.compressed = true
-          log.data = this.compress(log)
+          ;(log as any).compressed = true
+          ;(log as any).data = this.compress(log)
         }
 
         // Apply encryption if enabled
         if (this.config.enableEncryption) {
-          log.encrypted = true
-          log.data = await this.encrypt(log.data || log)
+          ;(log as any).encrypted = true
+          ;(log as any).data = await this.encrypt((log as any).data || log)
         }
 
         objectStore.add(log)
       }
 
-      await new Promise((resolve, reject) => {
-        transaction.oncomplete = resolve
-        transaction.onerror = reject
+      await new Promise<void>((resolve, reject) => {
+        transaction.oncomplete = () => resolve()
+        transaction.onerror = () => reject(transaction.error)
       })
 
       console.info(`Flushed ${logsToProcess.length} logs to storage`)
@@ -234,8 +257,8 @@ class PromptLogService {
   /**
    * Start automatic flush timer
    */
-  startFlushTimer() {
-    setInterval(() => {
+  private startFlushTimer(): void {
+    this.flushTimer = setInterval(() => {
       this.flush()
     }, this.config.flushInterval)
   }
@@ -243,13 +266,17 @@ class PromptLogService {
   /**
    * Query logs with filters
    */
-  async queryLogs(filters = {}) {
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([this.storeName], 'readonly')
-      const objectStore = transaction.objectStore(this.storeName)
-      const results = []
+  async queryLogs(filters: LogQueryFilters = {}): Promise<QueryResult<BaseLogEntry>> {
+    if (!this.db) {
+      throw new Error('Database not initialized')
+    }
 
-      let request
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], 'readonly')
+      const objectStore = transaction.objectStore(this.storeName)
+      const results: BaseLogEntry[] = []
+
+      let request: IDBRequest<IDBCursorWithValue | null>
       if (filters.index && filters.value) {
         const index = objectStore.index(filters.index)
         request = index.openCursor(IDBKeyRange.only(filters.value))
@@ -260,9 +287,9 @@ class PromptLogService {
       }
 
       request.onsuccess = (event) => {
-        const cursor = event.target.result
+        const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result
         if (cursor) {
-          const log = cursor.value
+          const log = cursor.value as BaseLogEntry
 
           // Apply additional filters
           if (this.matchesFilters(log, filters)) {
@@ -287,57 +314,73 @@ class PromptLogService {
   /**
    * Get log statistics
    */
-  async getStatistics(timeRange = null) {
-    const logs = await this.queryLogs({
-      range: timeRange ? IDBKeyRange.bound(timeRange.start, timeRange.end) : null,
+  async getStatistics(timeRange?: { start: number; end: number }): Promise<LogStatistics> {
+    const queryResult = await this.queryLogs({
+      range: timeRange ? IDBKeyRange.bound(timeRange.start, timeRange.end) : undefined,
     })
+    const logs = queryResult.data
 
     return {
-      totalLogs: logs.length,
-      promptCount: logs.filter((l) => l.type === 'prompt').length,
-      responseCount: logs.filter((l) => l.type === 'response').length,
-      interactionCount: logs.filter((l) => l.type === 'interaction').length,
+      totalLogs: logs.length as Count,
+      promptCount: logs.filter((l) => l.type === 'prompt').length as Count,
+      responseCount: logs.filter((l) => l.type === 'response').length as Count,
+      interactionCount: logs.filter((l) => l.type === 'interaction').length as Count,
       averageResponseTime: this.calculateAverageResponseTime(logs),
       averageTokenUsage: this.calculateAverageTokenUsage(logs),
       errorRate: this.calculateErrorRate(logs),
       topTags: this.getTopTags(logs),
       userActivity: this.getUserActivity(logs),
       costAnalysis: this.analyzeCosts(logs),
+      timeRange: timeRange || { start: 0, end: Date.now() },
     }
   }
 
   /**
    * Export logs in specified format
    */
-  async exportLogs(format = 'json', filters = {}) {
-    const logs = await this.queryLogs(filters)
+  async exportLogs(options: ExportOptions = { format: 'json' }): Promise<ExportResult> {
+    const queryResult = await this.queryLogs(options.filters)
+    const logs = queryResult.data
 
-    switch (format) {
+    let exportedData: string
+    switch (options.format) {
       case 'json':
-        return JSON.stringify(logs, null, 2)
-
+        exportedData = JSON.stringify(logs, null, 2)
+        break
       case 'jsonl':
-        return logs.map((log) => JSON.stringify(log)).join('\n')
-
+        exportedData = logs.map((log) => JSON.stringify(log)).join('\n')
+        break
       case 'csv':
-        return this.convertToCSV(logs)
-
+        exportedData = this.convertToCSV(logs)
+        break
       case 'markdown':
-        return this.convertToMarkdown(logs)
-
+        exportedData = this.convertToMarkdown(logs)
+        break
       default:
-        throw new Error(`Unsupported export format: ${format}`)
+        throw new Error(`Unsupported export format: ${options.format}`)
+    }
+
+    return {
+      data: exportedData,
+      format: options.format,
+      recordCount: logs.length as Count,
+      size: new Blob([exportedData]).size,
+      generatedAt: new Date().toISOString() as any,
     }
   }
 
   /**
    * Clean up old logs based on retention policy
    */
-  async cleanupOldLogs() {
+  async cleanupOldLogs(): Promise<Count> {
+    if (!this.db) {
+      throw new Error('Database not initialized')
+    }
+
     const cutoffTime = Date.now() - this.config.maxLogAge
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([this.storeName], 'readwrite')
+      const transaction = this.db!.transaction([this.storeName], 'readwrite')
       const objectStore = transaction.objectStore(this.storeName)
       const index = objectStore.index('timestamp')
       const range = IDBKeyRange.upperBound(cutoffTime)
@@ -346,7 +389,7 @@ class PromptLogService {
       const request = index.openCursor(range)
 
       request.onsuccess = (event) => {
-        const cursor = event.target.result
+        const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result
         if (cursor) {
           if (this.config.retentionPolicy === 'archive') {
             // Archive before deletion
@@ -357,7 +400,7 @@ class PromptLogService {
           cursor.continue()
         } else {
           console.info(`Cleaned up ${deletedCount} old logs`)
-          resolve(deletedCount)
+          resolve(deletedCount as Count)
         }
       }
 
@@ -366,9 +409,60 @@ class PromptLogService {
   }
 
   /**
+   * Clear all logs
+   */
+  async clearAllLogs(): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not initialized')
+    }
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], 'readwrite')
+      const objectStore = transaction.objectStore(this.storeName)
+      const request = objectStore.clear()
+
+      request.onsuccess = () => {
+        console.info('All logs cleared')
+        resolve()
+      }
+
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  /**
+   * Update configuration
+   */
+  updateConfig(newConfig: Partial<PromptLogConfig>): void {
+    this.config = { ...this.config, ...newConfig }
+    console.info('PromptLog configuration updated:', this.config)
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfig(): PromptLogConfig {
+    return { ...this.config }
+  }
+
+  /**
+   * Destroy service and clean up resources
+   */
+  destroy(): void {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer)
+    }
+    if (this.db) {
+      this.db.close()
+    }
+  }
+
+  // ==================== Private Helper Methods ====================
+
+  /**
    * Sanitize content for privacy
    */
-  sanitizeContent(content) {
+  private sanitizeContent(content: string): string {
     if (!this.config.privacyMode) {
       return content
     }
@@ -392,7 +486,7 @@ class PromptLogService {
   /**
    * Estimate token count for content
    */
-  estimateTokens(content) {
+  private estimateTokens(content: string): number {
     // Simple estimation: ~4 characters per token
     return Math.ceil(content.length / 4)
   }
@@ -400,8 +494,12 @@ class PromptLogService {
   /**
    * Calculate cost based on token usage
    */
-  calculateCost(data) {
-    const rates = {
+  private calculateCost(data: ResponseData): CostBreakdown | undefined {
+    if (!data.model || !data.promptTokens || !data.completionTokens) {
+      return undefined
+    }
+
+    const rates: Record<string, { prompt: number; completion: number }> = {
       'gpt-4': { prompt: 0.03, completion: 0.06 },
       'gpt-3.5-turbo': { prompt: 0.001, completion: 0.002 },
       'claude-3': { prompt: 0.015, completion: 0.075 },
@@ -423,7 +521,7 @@ class PromptLogService {
   /**
    * Compress log data
    */
-  compress(data) {
+  private compress(data: unknown): string {
     // Simple compression using base64 encoding
     // In production, use a proper compression library like pako
     const jsonString = JSON.stringify(data)
@@ -433,14 +531,14 @@ class PromptLogService {
   /**
    * Decompress log data
    */
-  decompress(compressedData) {
+  private decompress(compressedData: string): unknown {
     return JSON.parse(decodeURIComponent(atob(compressedData)))
   }
 
   /**
    * Encrypt log data (placeholder - implement actual encryption)
    */
-  async encrypt(data) {
+  private async encrypt(data: unknown): Promise<string> {
     // Placeholder - implement actual encryption using Web Crypto API
     return btoa(JSON.stringify(data))
   }
@@ -448,7 +546,7 @@ class PromptLogService {
   /**
    * Decrypt log data (placeholder - implement actual decryption)
    */
-  async decrypt(encryptedData) {
+  private async decrypt(encryptedData: string): Promise<unknown> {
     // Placeholder - implement actual decryption using Web Crypto API
     return JSON.parse(atob(encryptedData))
   }
@@ -456,16 +554,16 @@ class PromptLogService {
   /**
    * Process log for reading (decompress/decrypt)
    */
-  processLogForReading(log) {
+  private processLogForReading(log: any): BaseLogEntry {
     let processedLog = { ...log }
 
     if (log.compressed && log.data) {
-      processedLog = this.decompress(log.data)
+      processedLog = this.decompress(log.data) as BaseLogEntry
     }
 
     if (log.encrypted && log.data) {
       // Note: This should be async in production
-      processedLog = JSON.parse(atob(log.data))
+      processedLog = JSON.parse(atob(log.data)) as BaseLogEntry
     }
 
     return processedLog
@@ -474,7 +572,7 @@ class PromptLogService {
   /**
    * Check if log matches filters
    */
-  matchesFilters(log, filters) {
+  private matchesFilters(log: BaseLogEntry, filters: LogQueryFilters): boolean {
     if (filters.userId && log.userId !== filters.userId) {
       return false
     }
@@ -500,7 +598,10 @@ class PromptLogService {
   /**
    * Sort logs
    */
-  sortLogs(logs, sortConfig = { field: 'timestamp', order: 'desc' }) {
+  private sortLogs(
+    logs: BaseLogEntry[],
+    sortConfig: { field: string; order: 'asc' | 'desc' } = { field: 'timestamp', order: 'desc' }
+  ): BaseLogEntry[] {
     return logs.sort((a, b) => {
       const aValue = this.getNestedValue(a, sortConfig.field)
       const bValue = this.getNestedValue(b, sortConfig.field)
@@ -516,7 +617,11 @@ class PromptLogService {
   /**
    * Paginate logs
    */
-  paginateLogs(logs, page = 1, limit = 50) {
+  private paginateLogs(
+    logs: BaseLogEntry[],
+    page: number = 1,
+    limit: number = 50
+  ): QueryResult<BaseLogEntry> {
     const start = (page - 1) * limit
     const end = start + limit
 
@@ -530,60 +635,67 @@ class PromptLogService {
         hasNext: end < logs.length,
         hasPrev: page > 1,
       },
+      totalCount: logs.length,
+      hasMore: end < logs.length,
     }
   }
 
   /**
    * Get nested value from object
    */
-  getNestedValue(obj, path) {
+  private getNestedValue(obj: any, path: string): any {
     return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
   /**
    * Calculate average response time
    */
-  calculateAverageResponseTime(logs) {
-    const responses = logs.filter((l) => l.type === 'response' && l.metrics?.latency)
+  private calculateAverageResponseTime(logs: BaseLogEntry[]): number {
+    const responses = logs.filter(
+      (l): l is ResponseLogEntry => l.type === 'response' && 'metrics' in l && !!l.metrics?.latency
+    )
     if (responses.length === 0) {
       return 0
     }
 
-    const totalLatency = responses.reduce((sum, r) => sum + r.metrics.latency, 0)
+    const totalLatency = responses.reduce((sum, r) => sum + (r.metrics.latency || 0), 0)
     return totalLatency / responses.length
   }
 
   /**
    * Calculate average token usage
    */
-  calculateAverageTokenUsage(logs) {
-    const responses = logs.filter((l) => l.type === 'response' && l.metadata?.totalTokens)
+  private calculateAverageTokenUsage(logs: BaseLogEntry[]): number {
+    const responses = logs.filter(
+      (l): l is ResponseLogEntry =>
+        l.type === 'response' && 'metadata' in l && !!l.metadata?.totalTokens
+    )
     if (responses.length === 0) {
       return 0
     }
 
-    const totalTokens = responses.reduce((sum, r) => sum + r.metadata.totalTokens, 0)
+    const totalTokens = responses.reduce((sum, r) => sum + (r.metadata.totalTokens || 0), 0)
     return totalTokens / responses.length
   }
 
   /**
    * Calculate error rate
    */
-  calculateErrorRate(logs) {
+  private calculateErrorRate(logs: BaseLogEntry[]): Percentage {
     const responses = logs.filter((l) => l.type === 'response')
     if (responses.length === 0) {
-      return 0
+      return 0 as Percentage
     }
 
-    const errors = responses.filter((r) => r.status === 'error' || r.error)
-    return (errors.length / responses.length) * 100
+    const errors = responses.filter((r) => r.status === 'error' || ('error' in r && r.error))
+    return ((errors.length / responses.length) * 100) as Percentage
   }
 
   /**
    * Get top tags
    */
-  getTopTags(logs, limit = 10) {
-    const tagCounts = {}
+  private getTopTags(logs: BaseLogEntry[], limit: number = 10): TagStatistics[] {
+    const tagCounts: Record<string, number> = {}
 
     logs.forEach((log) => {
       if (log.metadata?.tags) {
@@ -596,24 +708,30 @@ class PromptLogService {
     return Object.entries(tagCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, limit)
-      .map(([tag, count]) => ({ tag, count }))
+      .map(([tag, count]) => ({
+        tag,
+        count: count as Count,
+        percentage: ((count / logs.length) * 100) as Percentage,
+      }))
   }
 
   /**
    * Analyze user activity
    */
-  getUserActivity(logs) {
-    const userActivity = {}
+  private getUserActivity(logs: BaseLogEntry[]): UserActivitySummary {
+    const userActivity: UserActivitySummary = {}
 
     logs.forEach((log) => {
-      const userId = log.userId || 'anonymous'
+      const userId = String(log.userId || 'anonymous')
       if (!userActivity[userId]) {
         userActivity[userId] = {
-          promptCount: 0,
-          responseCount: 0,
-          interactionCount: 0,
-          totalTokens: 0,
-          errors: 0,
+          promptCount: 0 as Count,
+          responseCount: 0 as Count,
+          interactionCount: 0 as Count,
+          totalTokens: 0 as Count,
+          errors: 0 as Count,
+          averageSessionDuration: 0,
+          lastActiveTime: 0,
         }
       }
 
@@ -622,8 +740,8 @@ class PromptLogService {
       }
       if (log.type === 'response') {
         userActivity[userId].responseCount++
-        if (log.metadata?.totalTokens) {
-          userActivity[userId].totalTokens += log.metadata.totalTokens
+        if ('metadata' in log && log.metadata?.totalTokens) {
+          userActivity[userId].totalTokens += log.metadata.totalTokens as Count
         }
         if (log.status === 'error') {
           userActivity[userId].errors++
@@ -631,6 +749,10 @@ class PromptLogService {
       }
       if (log.type === 'interaction') {
         userActivity[userId].interactionCount++
+      }
+
+      if (log.timestamp > userActivity[userId].lastActiveTime) {
+        userActivity[userId].lastActiveTime = log.timestamp
       }
     })
 
@@ -640,16 +762,18 @@ class PromptLogService {
   /**
    * Analyze costs
    */
-  analyzeCosts(logs) {
-    const responses = logs.filter((l) => l.type === 'response' && l.metrics?.cost)
+  private analyzeCosts(logs: BaseLogEntry[]): CostAnalysis {
+    const responses = logs.filter(
+      (l): l is ResponseLogEntry => l.type === 'response' && 'metrics' in l && !!l.metrics?.cost
+    )
 
     return {
-      totalCost: responses.reduce((sum, r) => sum + r.metrics.cost.total, 0),
-      promptCost: responses.reduce((sum, r) => sum + r.metrics.cost.prompt, 0),
-      completionCost: responses.reduce((sum, r) => sum + r.metrics.cost.completion, 0),
+      totalCost: responses.reduce((sum, r) => sum + (r.metrics.cost?.total || 0), 0),
+      promptCost: responses.reduce((sum, r) => sum + (r.metrics.cost?.prompt || 0), 0),
+      completionCost: responses.reduce((sum, r) => sum + (r.metrics.cost?.completion || 0), 0),
       averageCostPerRequest:
         responses.length > 0
-          ? responses.reduce((sum, r) => sum + r.metrics.cost.total, 0) / responses.length
+          ? responses.reduce((sum, r) => sum + (r.metrics.cost?.total || 0), 0) / responses.length
           : 0,
       costByModel: this.groupCostsByModel(responses),
     }
@@ -658,20 +782,20 @@ class PromptLogService {
   /**
    * Group costs by model
    */
-  groupCostsByModel(responses) {
-    const costByModel = {}
+  private groupCostsByModel(responses: ResponseLogEntry[]): ModelCostBreakdown {
+    const costByModel: ModelCostBreakdown = {}
 
     responses.forEach((response) => {
       const model = response.model || 'unknown'
       if (!costByModel[model]) {
         costByModel[model] = {
           total: 0,
-          count: 0,
+          count: 0 as Count,
           average: 0,
         }
       }
 
-      costByModel[model].total += response.metrics.cost.total
+      costByModel[model].total += response.metrics.cost?.total || 0
       costByModel[model].count++
     })
 
@@ -686,7 +810,7 @@ class PromptLogService {
   /**
    * Convert logs to CSV format
    */
-  convertToCSV(logs) {
+  private convertToCSV(logs: BaseLogEntry[]): string {
     if (logs.length === 0) {
       return ''
     }
@@ -704,6 +828,7 @@ class PromptLogService {
     ]
 
     const rows = logs.map((log) => {
+      const responseLog = log as ResponseLogEntry
       return [
         log.id,
         new Date(log.timestamp).toISOString(),
@@ -711,9 +836,9 @@ class PromptLogService {
         log.userId,
         log.sessionId,
         log.status || '',
-        log.model || '',
-        log.metadata?.totalTokens || '',
-        log.metrics?.cost?.total || '',
+        responseLog.model || '',
+        responseLog.metadata?.totalTokens || '',
+        responseLog.metrics?.cost?.total || '',
       ]
     })
 
@@ -723,7 +848,7 @@ class PromptLogService {
   /**
    * Convert logs to Markdown format
    */
-  convertToMarkdown(logs) {
+  private convertToMarkdown(logs: BaseLogEntry[]): string {
     let markdown = '# Prompt Logs\n\n'
 
     logs.forEach((log) => {
@@ -733,12 +858,14 @@ class PromptLogService {
       markdown += `- **Session**: ${log.sessionId}\n`
 
       if (log.type === 'prompt') {
-        markdown += `- **Prompt**: ${log.prompt}\n`
+        const promptLog = log as PromptLogEntry
+        markdown += `- **Prompt**: ${promptLog.prompt}\n`
       } else if (log.type === 'response') {
-        markdown += `- **Model**: ${log.model}\n`
-        markdown += `- **Response**: ${log.response?.substring(0, 200)}...\n`
-        markdown += `- **Tokens**: ${log.metadata?.totalTokens || 'N/A'}\n`
-        markdown += `- **Cost**: $${log.metrics?.cost?.total || 'N/A'}\n`
+        const responseLog = log as ResponseLogEntry
+        markdown += `- **Model**: ${responseLog.model}\n`
+        markdown += `- **Response**: ${responseLog.response?.substring(0, 200)}...\n`
+        markdown += `- **Tokens**: ${responseLog.metadata?.totalTokens || 'N/A'}\n`
+        markdown += `- **Cost**: $${responseLog.metrics?.cost?.total || 'N/A'}\n`
       }
 
       markdown += '\n---\n\n'
@@ -750,7 +877,7 @@ class PromptLogService {
   /**
    * Archive log to external storage
    */
-  async archiveLog(log) {
+  private async archiveLog(log: BaseLogEntry): Promise<void> {
     // Implement external storage archival (e.g., to server, cloud storage)
     console.info(`Archiving log: ${log.id}`)
   }
@@ -758,7 +885,7 @@ class PromptLogService {
   /**
    * Analyze recent logs for insights
    */
-  async analyzeRecentLogs() {
+  private async analyzeRecentLogs(): Promise<void> {
     // Implement real-time analytics
     const recentLogs = await this.queryLogs({
       range: IDBKeyRange.lowerBound(Date.now() - 3600000), // Last hour
@@ -780,7 +907,7 @@ class PromptLogService {
   /**
    * Get environment information
    */
-  getEnvironment() {
+  private getEnvironment(): EnvironmentInfo {
     return {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -788,51 +915,6 @@ class PromptLogService {
       screenResolution: `${window.screen.width}x${window.screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       timestamp: Date.now(),
-    }
-  }
-
-  /**
-   * Clear all logs
-   */
-  async clearAllLogs() {
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([this.storeName], 'readwrite')
-      const objectStore = transaction.objectStore(this.storeName)
-      const request = objectStore.clear()
-
-      request.onsuccess = () => {
-        console.info('All logs cleared')
-        resolve()
-      }
-
-      request.onerror = () => reject(request.error)
-    })
-  }
-
-  /**
-   * Update configuration
-   */
-  updateConfig(newConfig) {
-    this.config = { ...this.config, ...newConfig }
-    console.info('PromptLog configuration updated:', this.config)
-  }
-
-  /**
-   * Get current configuration
-   */
-  getConfig() {
-    return { ...this.config }
-  }
-
-  /**
-   * Destroy service and clean up resources
-   */
-  destroy() {
-    if (this.flushTimer) {
-      clearInterval(this.flushTimer)
-    }
-    if (this.db) {
-      this.db.close()
     }
   }
 }

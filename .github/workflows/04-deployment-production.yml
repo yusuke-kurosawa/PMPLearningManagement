@@ -1,27 +1,15 @@
-# ====================================================================
-# 🚀 Deployment - Production
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - 手動実行
-#
-# 主な処理:
-#   1. 🏗️ プロダクションビルド
-#   2. 🚀 本番デプロイ
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F680 Deployment - Production"
-'on':
+name: 🚀 Deployment - Production
+"on":
   push:
     branches:
       - main
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
 permissions:
   contents: read
   pages: write
@@ -31,38 +19,38 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    name: "\U0001F3D7️ プロダクションビルド"
+    name: "🔧 ビルド: build"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: "\U0001F4E5 ソースコード取得"
+      - name: 📥 ソースコード取得
         uses: actions/checkout@v4
-      - name: "\U0001F527 Node.jsセットアップ"
+      - name: 🔧 Node.jsセットアップ
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
           cache: npm
-      - name: "\U0001F4E6 依存関係インストール"
+      - name: 📦 依存関係インストール
         run: npm ci
-      - name: "\U0001F3D7️ ビルド実行"
-        run: 'npm run build:optimized'
+      - name: 🏗️ ビルド実行
+        run: npm run build:optimized
         env:
           NODE_ENV: production
       - name: ⚙️ GitHub Pages設定
         uses: actions/configure-pages@v4
-      - name: "\U0001F4E4 アーティファクトアップロード"
+      - name: 📤 アーティファクトアップロード
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
   deploy:
-    name: "\U0001F680 本番デプロイ"
+    name: 🚀 本番デプロイ
     environment:
       name: github-pages
-      url: '${{ steps.deployment.outputs.page_url }}'
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
     steps:
-      - name: "\U0001F680 GitHub Pagesデプロイ"
+      - name: 🚀 GitHub Pagesデプロイ
         id: deployment
         uses: actions/deploy-pages@v4

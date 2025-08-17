@@ -1,0 +1,226 @@
+{
+  "timestamp": "2025-08-17T12:15:41.888Z",
+  "guidelines": {
+    "integratedGuidelinesExists": false,
+    "actionsDocumentationExists": true,
+    "lastModified": null,
+    "status": "needs-attention"
+  },
+  "workflows": {
+    "totalWorkflows": 40,
+    "categories": 9,
+    "categoryDistribution": {
+      "00": [
+        "00-meta-devops-orchestrator.yml",
+        "00-meta-workflow-compliance.yml",
+        "00-meta-workflow-validator.yml"
+      ],
+      "01": [
+        "01-ci-balanced.yml",
+        "01-ci-build-main.yml",
+        "01-ci-continuous-integration.yml",
+        "01-ci-lighthouse.yml",
+        "01-core-ci-cd.yml",
+        "01-core-status-check.yml",
+        "01-deploy-cd--production.yml",
+        "01-deploy-workflow.yml",
+        "01-quality-comprehensive-check.yml"
+      ],
+      "02": [
+        "02-cd-continuous-deployment.yml",
+        "02-performance-optimization.yml",
+        "02-quality-content--assurance.yml",
+        "02-quality-header-validation.yml",
+        "02-quality-idd-compliance.yml",
+        "02-quality-idd-metrics.yml",
+        "02-quality-test.yml",
+        "02-test-reusable--runner.yml",
+        "02-test-reusable-s.yml"
+      ],
+      "03": [
+        "03-security-comprehensive-scan.yml",
+        "03-security-scan-comprehensive.yml",
+        "03-security-scan.yml"
+      ],
+      "04": [
+        "04-deployment-production.yml",
+        "04-integration-ai-claude.yml",
+        "04-integration-full-test.yml",
+        "04-monitoring-analysis.yml",
+        "04-monitoring-optimization.yml",
+        "04-monitoring-ormance-budget.yml",
+        "04-monitoring-perf--comprehensive.yml",
+        "04-security-devsecops.yml"
+      ],
+      "05": [
+        "05-automation-logger.yml",
+        "05-automation-weekly--summary.yml",
+        "05-performance-monitoring.yml"
+      ],
+      "07": [
+        "07-self-healing-system.yml"
+      ],
+      "08": [
+        "08-developer-devops-documentation.yml"
+      ],
+      "09": [
+        "09-reusable-build.yml",
+        "09-reusable-node-setup.yml",
+        "09-reusable-setup.yml"
+      ]
+    },
+    "issues": 0,
+    "issueDetails": [],
+    "status": "healthy"
+  },
+  "actions": {
+    "totalActions": 15,
+    "healthyActions": 11,
+    "healthScore": "73.3",
+    "actionDetails": {
+      "cache-dependencies": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "checkout-code": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "composite": {
+        "hasActionYml": false,
+        "hasDocumentation": false,
+        "lastModified": null,
+        "issues": [
+          "Missing action.yml file"
+        ],
+        "status": "needs-attention"
+      },
+      "deploy-preview": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-09T08:51:17.149Z",
+        "issues": [
+          "Missing Japanese documentation"
+        ],
+        "status": "needs-attention"
+      },
+      "idd-validator": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T09:11:15.964Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "notification": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "performance-audit": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-09T08:52:15.993Z",
+        "issues": [
+          "Missing Japanese documentation"
+        ],
+        "status": "needs-attention"
+      },
+      "quality-check": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T09:11:15.964Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "report-generator": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "security-audit": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T09:11:15.964Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "security-scan": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "setup-environment": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "setup-node": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T09:55:55.914Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "setup-node-env": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-17T06:01:23.806Z",
+        "issues": [],
+        "status": "healthy"
+      },
+      "setup-project": {
+        "hasActionYml": true,
+        "hasDocumentation": false,
+        "lastModified": "2025-08-09T08:50:32.373Z",
+        "issues": [
+          "Missing Japanese documentation"
+        ],
+        "status": "needs-attention"
+      }
+    },
+    "status": "needs-improvement"
+  },
+  "integration": {
+    "crossReferences": {
+      "guidelinesToActions": false,
+      "actionsToGuidelines": true,
+      "workflowReferences": false
+    },
+    "integrationScore": "33.3",
+    "status": "needs-improvement"
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "guidelines",
+      "title": "Update Guidelines Documentation",
+      "description": "Ensure integrated guidelines and actions documentation are up to date"
+    },
+    {
+      "priority": "medium",
+      "category": "actions",
+      "title": "Improve Custom Actions Health",
+      "description": "Update action.yml files and documentation for unhealthy actions"
+    },
+    {
+      "priority": "low",
+      "category": "integration",
+      "title": "Enhance Documentation Cross-References",
+      "description": "Add missing links between guidelines and actions documentation"
+    }
+  ]
+}

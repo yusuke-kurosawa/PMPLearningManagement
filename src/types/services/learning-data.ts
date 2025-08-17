@@ -4,7 +4,7 @@
  */
 
 import type { UserId, Timestamp, Score, Percentage, Count } from '../common/base'
-import type { ProcessId, KnowledgeAreaId, ProcessGroup } from '../pmbok/process'
+import type { KnowledgeAreaId, ProcessGroup } from '../pmbok/process'
 
 // ==================== 基本学習データ型 ====================
 
@@ -16,9 +16,9 @@ export type LearningDataKey = 'pmp-learning-data' | 'pmp-session-data'
 /**
  * イベントタイプ
  */
-export type EventType = 
+export type EventType =
   | 'session_start'
-  | 'session_end' 
+  | 'session_end'
   | 'page_view'
   | 'quiz_complete'
   | 'module_complete'
@@ -30,7 +30,7 @@ export type EventType =
 /**
  * 学習ステータス
  */
-export type LearningStatus = 
+export type LearningStatus =
   | 'not-started'
   | 'in-progress'
   | 'completed'
@@ -45,7 +45,7 @@ export type ImprovementTrend = 'improving' | 'declining' | 'stable' | 'insuffici
 /**
  * レコメンデーションタイプ
  */
-export type RecommendationType = 
+export type RecommendationType =
   | 'learning_method'
   | 'focus_area'
   | 'consistency'

@@ -1,28 +1,5 @@
-# ====================================================================
-# 📋 Quality - IDD Compliance
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - Issue作成・更新時
-#   - プルリクエスト作成・更新時
-#   - コードプッシュ時
-#   - 手動実行
-#
-# 主な処理:
-#   1. 📌 処理: Validate Issue Format
-#   2. 📌 処理: Validate Pull Request
-#   3. 📌 処理: Validate Commit Messages
-#   4. 📊 レポート: Generate IDD Compliance Report
-#   5. 📌 処理: Notify IDD Violations
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F4CB Quality - IDD Compliance"
-'on':
+name: 📋 Quality - IDD Compliance
+"on":
   issues:
     types:
       - opened
@@ -39,9 +16,15 @@ name: "\U0001F4CB Quality - IDD Compliance"
     branches:
       - main
       - develop
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
 env:
-  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 permissions:
   contents: read
   issues: write
@@ -50,14 +33,63 @@ jobs:
   validate-issue:
     if: github.event_name == 'issues'
     runs-on: ubuntu-latest
-    name: "\U0001F4CC 処理: Validate Issue Format"
+    name: "📌 処理: Validate Issue Format"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Validate Issue Template
         uses: actions/github-script@v7
         with:
-          script: "const issue = context.payload.issue;\nconst body = issue.body || '';\n\n// Check if issue follows template structure\nconst hasRequiredSections = [\n  '## \U0001F4CB',  // Description section\n  '## \U0001F50D',  // Steps/Details section\n  '## ✅'   // Acceptance criteria\n].every(section => body.includes(section));\n\nif (!hasRequiredSections) {\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: issue.number,\n    body: `⚠️ **Issue Template Validation Failed**\n    \n    This issue doesn't follow the required template structure. Please update your issue to include:\n    - Clear description section\n    - Detailed steps or requirements\n    - Acceptance criteria\n    \n    Use one of our issue templates to ensure proper formatting.`\n  });\n  \n  await github.rest.issues.addLabels({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: issue.number,\n    labels: ['needs-template', 'status:blocked']\n  });\n} else {\n  // Remove validation labels if they exist\n  try {\n    await github.rest.issues.removeLabel({\n      owner: context.repo.owner,\n      repo: context.repo.repo,\n      issue_number: issue.number,\n      name: 'needs-template'\n    });\n  } catch (e) {} // Label might not exist\n  \n  await github.rest.issues.addLabels({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: issue.number,\n    labels: ['status:ready']\n  });\n}\n"
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+
+            // Check if issue follows template structure
+            const hasRequiredSections = [
+              '## 📋',  // Description section
+              '## 🔍',  // Steps/Details section
+              '## ✅'   // Acceptance criteria
+            ].every(section => body.includes(section));
+
+            if (!hasRequiredSections) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `⚠️ **Issue Template Validation Failed**
+                
+                This issue doesn't follow the required template structure. Please update your issue to include:
+                - Clear description section
+                - Detailed steps or requirements
+                - Acceptance criteria
+                
+                Use one of our issue templates to ensure proper formatting.`
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['needs-template', 'status:blocked']
+              });
+            } else {
+              // Remove validation labels if they exist
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name: 'needs-template'
+                });
+              } catch (e) {} // Label might not exist
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['status:ready']
+              });
+            }
       - name: Auto-assign based on labels
         uses: actions/github-script@v7
         with:
@@ -88,17 +120,98 @@ jobs:
   validate-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    name: "\U0001F4CC 処理: Validate Pull Request"
+    name: "📌 処理: Validate Pull Request"
     steps:
       - name: Check PR has linked issues
         uses: actions/github-script@v7
         with:
-          script: "const pr = context.payload.pull_request;\nconst body = pr.body || '';\nconst title = pr.title || '';\n\n// Check for issue references in PR body or title\nconst issueReferences = [\n  /(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\\s+#\\d+/gi,\n  /(?:refs?|references?)\\s+#\\d+/gi,\n  /#\\d+/gi\n];\n\nconst hasIssueReference = issueReferences.some(pattern => \n  pattern.test(body) || pattern.test(title)\n);\n\nif (!hasIssueReference) {\n  await github.rest.pulls.createReview({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    pull_number: pr.number,\n    event: 'REQUEST_CHANGES',\n    body: `\U0001F6AB **Issue-Driven Development Violation**\n    \n    This pull request must reference at least one issue. Please:\n    \n    1. Link to the issue(s) this PR addresses using:\n       - \"Closes #123\" or \"Fixes #123\" to auto-close issues\n       - \"Refs #123\" or \"References #123\" for related issues\n    \n    2. Update the PR description to explain how this addresses the linked issue(s)\n    \n    **No code can be merged without proper issue traceability.**`\n  });\n  \n  await github.rest.issues.addLabels({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: pr.number,\n    labels: ['needs-issue-link', 'status:blocked']\n  });\n  \n  return;\n}\n\n// Extract issue numbers\nconst issueNumbers = [];\nbody.replace(/#(\\d+)/g, (match, num) => {\n  issueNumbers.push(parseInt(num));\n});\ntitle.replace(/#(\\d+)/g, (match, num) => {\n  issueNumbers.push(parseInt(num));\n});\n\n// Verify referenced issues exist and are open\nfor (const issueNum of [...new Set(issueNumbers)]) {\n  try {\n    const issue = await github.rest.issues.get({\n      owner: context.repo.owner,\n      repo: context.repo.repo,\n      issue_number: issueNum\n    });\n    \n    if (issue.data.state === 'closed') {\n      await github.rest.pulls.createReview({\n        owner: context.repo.owner,\n        repo: context.repo.repo,\n        pull_number: pr.number,\n        event: 'COMMENT',\n        body: `⚠️ **Warning**: Referenced issue #${issueNum} is already closed. Please verify this is intentional.`\n      });\n    }\n  } catch (error) {\n    await github.rest.pulls.createReview({\n      owner: context.repo.owner,\n      repo: context.repo.repo,\n      pull_number: pr.number,\n      event: 'REQUEST_CHANGES',\n      body: `❌ **Invalid Issue Reference**: Issue #${issueNum} does not exist. Please reference valid issues.`\n    });\n  }\n}\n"
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const title = pr.title || '';
+
+            // Check for issue references in PR body or title
+            const issueReferences = [
+              /(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#\d+/gi,
+              /(?:refs?|references?)\s+#\d+/gi,
+              /#\d+/gi
+            ];
+
+            const hasIssueReference = issueReferences.some(pattern => 
+              pattern.test(body) || pattern.test(title)
+            );
+
+            if (!hasIssueReference) {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                event: 'REQUEST_CHANGES',
+                body: `🚫 **Issue-Driven Development Violation**
+                
+                This pull request must reference at least one issue. Please:
+                
+                1. Link to the issue(s) this PR addresses using:
+                   - "Closes #123" or "Fixes #123" to auto-close issues
+                   - "Refs #123" or "References #123" for related issues
+                
+                2. Update the PR description to explain how this addresses the linked issue(s)
+                
+                **No code can be merged without proper issue traceability.**`
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['needs-issue-link', 'status:blocked']
+              });
+              
+              return;
+            }
+
+            // Extract issue numbers
+            const issueNumbers = [];
+            body.replace(/#(\d+)/g, (match, num) => {
+              issueNumbers.push(parseInt(num));
+            });
+            title.replace(/#(\d+)/g, (match, num) => {
+              issueNumbers.push(parseInt(num));
+            });
+
+            // Verify referenced issues exist and are open
+            for (const issueNum of [...new Set(issueNumbers)]) {
+              try {
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNum
+                });
+                
+                if (issue.data.state === 'closed') {
+                  await github.rest.pulls.createReview({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    event: 'COMMENT',
+                    body: `⚠️ **Warning**: Referenced issue #${issueNum} is already closed. Please verify this is intentional.`
+                  });
+                }
+              } catch (error) {
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  event: 'REQUEST_CHANGES',
+                  body: `❌ **Invalid Issue Reference**: Issue #${issueNum} does not exist. Please reference valid issues.`
+                });
+              }
+            }
     timeout-minutes: 30
   validate-commits:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    name: "\U0001F4CC 処理: Validate Commit Messages"
+    name: "📌 処理: Validate Commit Messages"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -147,7 +260,7 @@ jobs:
     timeout-minutes: 30
   generate-report:
     runs-on: ubuntu-latest
-    name: "\U0001F4CA レポート: Generate IDD Compliance Report"
+    name: "🔧 レポート: generate-report"
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
@@ -155,10 +268,13 @@ jobs:
       - name: Generate compliance report
         uses: actions/github-script@v7
         with:
-          script: |
+          script: >
             // Get all issues and PRs from last 30 days
+
             const thirtyDaysAgo = new Date();
+
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
 
             const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
@@ -168,15 +284,21 @@ jobs:
               per_page: 100
             });
 
+
             const pulls = issues.filter(item => item.pull_request);
+
             const actualIssues = issues.filter(item => !item.pull_request);
 
+
             // Calculate metrics
+
             const totalPRs = pulls.length;
+
             const prsWithIssues = pulls.filter(pr => {
               const body = pr.body || '';
               return /#\d+/.test(body);
             }).length;
+
 
             const totalCommits = await github.rest.repos.listCommits({
               owner: context.repo.owner,
@@ -185,10 +307,12 @@ jobs:
               per_page: 100
             });
 
+
             const commitsWithIssues = totalCommits.data.filter(commit => {
               const message = commit.commit.message;
               return /#\d+/.test(message);
             }).length;
+
 
             const compliance = {
               prCompliance: (prsWithIssues / totalPRs * 100).toFixed(1),
@@ -198,27 +322,45 @@ jobs:
               avgIssueAge: 'TBD', // Calculate average age of open issues
             };
 
+
             const report = `# IDD Compliance Report
 
+
             Generated: ${new Date().toISOString()}
+
             Period: Last 30 days
+
 
             ## Metrics
 
+
             - **PR Compliance**: ${compliance.prCompliance}% (${prsWithIssues}/${totalPRs} PRs link to issues)
-            - **Commit Compliance**: ${compliance.commitCompliance}% (${commitsWithIssues}/${totalCommits.data.length} commits reference issues)
+
+            - **Commit Compliance**: ${compliance.commitCompliance}% (${commitsWithIssues}/${totalCommits.data.length}
+            commits reference issues)
+
             - **Total Issues**: ${compliance.totalIssues}
+
             - **Open Issues**: ${compliance.openIssues}
+
 
             ## Recommendations
 
-            ${compliance.prCompliance < 90 ? '⚠️ PR compliance is below 90%. Ensure all PRs reference issues.' : '✅ PR compliance is good.'}
-            ${compliance.commitCompliance < 80 ? '⚠️ Commit compliance is below 80%. Ensure commits reference issues.' : '✅ Commit compliance is good.'}
+
+            ${compliance.prCompliance < 90 ? '⚠️ PR compliance is below 90%. Ensure all PRs reference issues.' : '✅ PR
+            compliance is good.'}
+
+            ${compliance.commitCompliance < 80 ? '⚠️ Commit compliance is below 80%. Ensure commits reference issues.' :
+            '✅ Commit compliance is good.'}
+
             `;
+
 
             console.log(report);
 
+
             // Store report as artifact or comment
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -229,7 +371,7 @@ jobs:
     timeout-minutes: 30
   notify-violations:
     runs-on: ubuntu-latest
-    name: "\U0001F4CC 処理: Notify IDD Violations"
+    name: "📌 処理: Notify IDD Violations"
     if: failure()
     steps:
       - name: Notify team of violations
@@ -240,5 +382,5 @@ jobs:
             // Here you could integrate with Slack, Discord, or email notifications
     timeout-minutes: 30
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

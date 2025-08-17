@@ -1,27 +1,5 @@
-# ====================================================================
-# 📦 Core CI/CD Pipeline
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - プルリクエスト作成・更新時
-#   - 手動実行
-#   - スケジュール実行
-#
-# 主な処理:
-#   1. 🔄 統合品質・ビルドチェック
-#   2. 🤖 Claude統合セキュリティスキャン
-#   3. 🚀 デプロイ: 🚀 Deploy to GitHub Pages
-#   4. 🚀 デプロイ: ✅ Post-Deploy Validation
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F4E6 Core CI/CD Pipeline"
-'on':
+name: 📦 Core CI/CD Pipeline
+"on":
   push:
     branches:
       - main
@@ -29,32 +7,38 @@ name: "\U0001F4E6 Core CI/CD Pipeline"
   pull_request:
     branches:
       - main
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
   schedule:
     - cron: 0 6 * * 1
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
   CACHE_VERSION: v1
 jobs:
   integrated-checks:
-    name: "\U0001F504 統合品質・ビルドチェック"
+    name: 🔄 統合品質・ビルドチェック
     uses: ./.github/workflows/00-reusable-workflows.yml
     with:
       workflow-type: full
-      node-version: '20'
+      node-version: "20"
       skip-tests: false
     timeout-minutes: 30
   claude-security-scan:
-    name: "\U0001F916 Claude統合セキュリティスキャン"
+    name: 🤖 Claude統合セキュリティスキャン
     uses: ./.github/workflows/00-reusable-workflows.yml
     needs: integrated-checks
     with:
       workflow-type: security
-      node-version: '20'
+      node-version: "20"
       skip-tests: true
     timeout-minutes: 30
   deploy:
-    name: "\U0001F680 デプロイ: \U0001F680 Deploy to GitHub Pages"
+    name: "🔧 デプロイ: deploy"
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
@@ -65,48 +49,48 @@ jobs:
       group: production-deploy
       cancel-in-progress: false
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F3D7️ Setup Node.js"
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - name: "\U0001F4E6 Install dependencies"
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: "\U0001F3D7️ Build for production"
+      - name: 🏗️ Build for production
         run: npm run build
-      - name: "\U0001F680 Deploy to GitHub Pages"
+      - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: '${{ secrets.GITHUB_TOKEN }}'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: pmp-learning.dev
           enable_jekyll: false
-      - name: "\U0001F3AF Performance audit"
+      - name: 🎯 Performance audit
         run: |
           if [ -f "scripts/lighthouse-audit.js" ]; then
             npm run audit:lighthouse
           fi
     timeout-minutes: 30
   post-deploy-validation:
-    name: "\U0001F680 デプロイ: ✅ Post-Deploy Validation"
+    name: "🔧 デプロイ: post-deploy-validation"
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: deploy
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F50D Health check"
+      - name: 🔍 Health check
         run: |
           sleep 30  # Wait for deployment
           curl -f https://pmp-learning.dev || exit 1
-      - name: "\U0001F4CA Performance metrics"
+      - name: 📊 Performance metrics
         run: |
           if [ -f "scripts/performance-metrics.js" ]; then
             npm run metrics:performance
           fi
-      - name: "\U0001F4E2 Notify deployment success"
+      - name: 📢 Notify deployment success
         if: success()
         run: |
           echo "✅ Deployment successful to https://pmp-learning.dev"
@@ -117,5 +101,5 @@ permissions:
   checks: write
   pull-requests: write
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

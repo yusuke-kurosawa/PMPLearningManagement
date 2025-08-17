@@ -1,36 +1,14 @@
-# ====================================================================
-# 🚀 [CD] Continuous Deployment / 継続的デプロイメント
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - workflow_run
-#   - リリース作成時
-#   - 手動実行
-#
-# 主な処理:
-#   1. 🚀 デプロイ: 🚪 [Gate] Deployment Readiness
-#   2. 🏗️ ビルド: 🏗️ [Build] Application Build
-#   3. 🚀 デプロイ: 🚀 [Deploy] ${{ needs.deployment-gate.outputs.deploy_environment }}
-#   4. 🧪 テスト: 🧪 [Test] Post-Deployment Validation
-#   5. 🚀 デプロイ: 📢 [Notify] Deployment Results
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F680 [CD] Continuous Deployment / 継続的デプロイメント"
+name: 🚀 [CD] Continuous Deployment / 継続的デプロイメント
 permissions:
   contents: read
   pages: write
   id-token: write
   deployments: write
   issues: write
-'on':
+"on":
   workflow_run:
     workflows:
-      - "\U0001F504 [CI] Continuous Integration / 継続的インテグレーション"
+      - 🔄 [CI] Continuous Integration / 継続的インテグレーション
     types:
       - completed
     branches:
@@ -60,32 +38,32 @@ permissions:
         default: false
         type: boolean
 env:
-  STAGING_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/staging'
-  PRODUCTION_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
+  STAGING_URL: https://yusuke-kurosawa.github.io/PMPLearningManagement/staging
+  PRODUCTION_URL: https://yusuke-kurosawa.github.io/PMPLearningManagement/
   DEPLOY_TIMEOUT: 600
   HEALTH_CHECK_RETRIES: 10
   HEALTH_CHECK_INTERVAL: 30
 jobs:
   deployment-gate:
-    name: "\U0001F680 デプロイ: \U0001F6AA [Gate] Deployment Readiness"
+    name: "🔧 デプロイ: deployment-gate"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
-      deploy_environment: '${{ steps.determine-env.outputs.environment }}'
-      deploy_ready: '${{ steps.gate-check.outputs.ready }}'
-      ci_status: '${{ steps.check-ci.outputs.status }}'
-      quality_score: '${{ steps.quality-assessment.outputs.score }}'
+      deploy_environment: ${{ steps.determine-env.outputs.environment }}
+      deploy_ready: ${{ steps.gate-check.outputs.ready }}
+      ci_status: ${{ steps.check-ci.outputs.status }}
+      quality_score: ${{ steps.quality-assessment.outputs.score }}
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: '${{ github.token }}'
-      - name: "\U0001F50D Check CI Status"
+          token: ${{ github.token }}
+      - name: 🔍 Check CI Status
         id: check-ci
         uses: actions/github-script@v7
         with:
-          github-token: '${{ github.token }}'
+          github-token: ${{ github.token }}
           script: |
             // CI実行結果の確認
             const { owner, repo } = context.repo;
@@ -128,74 +106,281 @@ jobs:
             core.setOutput('status', ciStatus);
             core.setOutput('successful_runs', successfulRuns);
             core.setOutput('total_runs', totalRuns);
-      - name: "\U0001F3AF Determine Deployment Environment"
+      - name: 🎯 Determine Deployment Environment
         id: determine-env
-        run: "echo \"\U0001F3AF Determining deployment environment...\"\n\n# 環境決定ロジック\nif [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n  environment=\"${{ github.event.inputs.environment }}\"\n  echo \"\U0001F4CB Manual deployment to: $environment\"\nelif [[ \"${{ github.event_name }}\" == \"release\" ]]; then\n  environment=\"production\"\n  echo \"\U0001F4E6 Release deployment to: $environment\"\nelif [[ \"${{ github.ref }}\" == \"refs/heads/main\" ]]; then\n  environment=\"production\"\n  echo \"\U0001F3AF Main branch deployment to: $environment\"\nelif [[ \"${{ github.ref }}\" == \"refs/heads/develop\" ]]; then\n  environment=\"staging\"\n  echo \"\U0001F9EA Develop branch deployment to: $environment\"\nelse\n  environment=\"preview\"\n  echo \"\U0001F440 Feature branch deployment to: $environment\"\nfi\n\necho \"environment=$environment\" >> $GITHUB_OUTPUT\necho \"\U0001F3AF Target environment: $environment\"\n"
-      - name: "\U0001F4CA Quality Assessment"
+        run: |
+          echo "🎯 Determining deployment environment..."
+
+          # 環境決定ロジック
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            environment="${{ github.event.inputs.environment }}"
+            echo "📋 Manual deployment to: $environment"
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            environment="production"
+            echo "📦 Release deployment to: $environment"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            environment="production"
+            echo "🎯 Main branch deployment to: $environment"
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            environment="staging"
+            echo "🧪 Develop branch deployment to: $environment"
+          else
+            environment="preview"
+            echo "👀 Feature branch deployment to: $environment"
+          fi
+
+          echo "environment=$environment" >> $GITHUB_OUTPUT
+          echo "🎯 Target environment: $environment"
+      - name: 📊 Quality Assessment
         id: quality-assessment
-        run: "echo \"\U0001F4CA Assessing deployment quality...\"\n\nquality_score=100\nquality_issues=()\n\n# CI結果による評価\nci_status=\"${{ steps.check-ci.outputs.status }}\"\ncase \"$ci_status\" in\n  \"success\")\n    echo \"✅ CI checks passed\"\n    ;;\n  \"failure\")\n    echo \"❌ CI checks failed\"\n    quality_score=$((quality_score - 30))\n    quality_issues+=(\"ci-failed\")\n    ;;\n  \"no-ci-runs\")\n    echo \"⚠️ No CI runs found\"\n    quality_score=$((quality_score - 20))\n    quality_issues+=(\"no-ci\")\n    ;;\nesac\n\n# ブランチ保護ルール確認\nif [[ \"${{ github.ref }}\" == \"refs/heads/main\" ]] && [[ \"${{ steps.check-ci.outputs.status }}\" != \"success\" ]]; then\n  echo \"❌ Main branch deployment without successful CI\"\n  quality_score=$((quality_score - 40))\n  quality_issues+=(\"unsafe-main-deploy\")\nfi\n\n# 強制デプロイチェック\nif [[ \"${{ github.event.inputs.force_deploy }}\" == \"true\" ]]; then\n  echo \"⚠️ Force deployment requested\"\n  quality_score=$((quality_score - 10))\n  quality_issues+=(\"force-deploy\")\nfi\n\necho \"\U0001F4CA Quality Score: ${quality_score}/100\"\necho \"score=$quality_score\" >> $GITHUB_OUTPUT\necho \"issues=${quality_issues[*]}\" >> $GITHUB_OUTPUT\n"
-      - name: "\U0001F6AA Deployment Gate Decision"
+        run: >
+          echo "📊 Assessing deployment quality..."
+
+
+          quality_score=100
+
+          quality_issues=()
+
+
+          # CI結果による評価
+
+          ci_status="${{ steps.check-ci.outputs.status }}"
+
+          case "$ci_status" in
+            "success")
+              echo "✅ CI checks passed"
+              ;;
+            "failure")
+              echo "❌ CI checks failed"
+              quality_score=$((quality_score - 30))
+              quality_issues+=("ci-failed")
+              ;;
+            "no-ci-runs")
+              echo "⚠️ No CI runs found"
+              quality_score=$((quality_score - 20))
+              quality_issues+=("no-ci")
+              ;;
+          esac
+
+
+          # ブランチ保護ルール確認
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] && [[ "${{ steps.check-ci.outputs.status }}" != "success"
+          ]]; then
+            echo "❌ Main branch deployment without successful CI"
+            quality_score=$((quality_score - 40))
+            quality_issues+=("unsafe-main-deploy")
+          fi
+
+
+          # 強制デプロイチェック
+
+          if [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
+            echo "⚠️ Force deployment requested"
+            quality_score=$((quality_score - 10))
+            quality_issues+=("force-deploy")
+          fi
+
+
+          echo "📊 Quality Score: ${quality_score}/100"
+
+          echo "score=$quality_score" >> $GITHUB_OUTPUT
+
+          echo "issues=${quality_issues[*]}" >> $GITHUB_OUTPUT
+      - name: 🚪 Deployment Gate Decision
         id: gate-check
-        run: "echo \"\U0001F6AA Making deployment gate decision...\"\n\nquality_score=\"${{ steps.quality-assessment.outputs.score }}\"\nenvironment=\"${{ steps.determine-env.outputs.environment }}\"\nforce_deploy=\"${{ github.event.inputs.force_deploy }}\"\n\n# 環境別の品質閾値\ncase \"$environment\" in\n  \"production\")\n    required_score=85\n    echo \"\U0001F3AF Production deployment - High quality required (${required_score}+)\"\n    ;;\n  \"staging\")\n    required_score=70\n    echo \"\U0001F9EA Staging deployment - Medium quality required (${required_score}+)\"\n    ;;\n  \"preview\")\n    required_score=50\n    echo \"\U0001F440 Preview deployment - Basic quality required (${required_score}+)\"\n    ;;\nesac\n\n# ゲート判定\ndeploy_ready=\"false\"\n\nif [[ $quality_score -ge $required_score ]]; then\n  echo \"✅ Quality gate passed: ${quality_score} >= ${required_score}\"\n  deploy_ready=\"true\"\nelif [[ \"$force_deploy\" == \"true\" ]]; then\n  echo \"⚠️ Quality gate bypassed by force deployment\"\n  deploy_ready=\"true\"\nelse\n  echo \"❌ Quality gate failed: ${quality_score} < ${required_score}\"\n  deploy_ready=\"false\"\nfi\n\necho \"ready=$deploy_ready\" >> $GITHUB_OUTPUT\necho \"required_score=$required_score\" >> $GITHUB_OUTPUT\n\nif [[ \"$deploy_ready\" == \"false\" ]]; then\n  echo \"\U0001F6AB Deployment blocked by quality gate\"\n  exit 1\nelse\n  echo \"\U0001F680 Deployment approved\"\nfi\n"
+        run: |
+          echo "🚪 Making deployment gate decision..."
+
+          quality_score="${{ steps.quality-assessment.outputs.score }}"
+          environment="${{ steps.determine-env.outputs.environment }}"
+          force_deploy="${{ github.event.inputs.force_deploy }}"
+
+          # 環境別の品質閾値
+          case "$environment" in
+            "production")
+              required_score=85
+              echo "🎯 Production deployment - High quality required (${required_score}+)"
+              ;;
+            "staging")
+              required_score=70
+              echo "🧪 Staging deployment - Medium quality required (${required_score}+)"
+              ;;
+            "preview")
+              required_score=50
+              echo "👀 Preview deployment - Basic quality required (${required_score}+)"
+              ;;
+          esac
+
+          # ゲート判定
+          deploy_ready="false"
+
+          if [[ $quality_score -ge $required_score ]]; then
+            echo "✅ Quality gate passed: ${quality_score} >= ${required_score}"
+            deploy_ready="true"
+          elif [[ "$force_deploy" == "true" ]]; then
+            echo "⚠️ Quality gate bypassed by force deployment"
+            deploy_ready="true"
+          else
+            echo "❌ Quality gate failed: ${quality_score} < ${required_score}"
+            deploy_ready="false"
+          fi
+
+          echo "ready=$deploy_ready" >> $GITHUB_OUTPUT
+          echo "required_score=$required_score" >> $GITHUB_OUTPUT
+
+          if [[ "$deploy_ready" == "false" ]]; then
+            echo "🚫 Deployment blocked by quality gate"
+            exit 1
+          else
+            echo "🚀 Deployment approved"
+          fi
   build-for-deployment:
-    name: "\U0001F3D7️ ビルド: \U0001F3D7️ [Build] Application Build"
+    name: "🔧 ビルド: build-for-deployment"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: deployment-gate
     if: needs.deployment-gate.outputs.deploy_ready == 'true'
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
-          token: '${{ github.token }}'
+          token: ${{ github.token }}
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
           cache: npm
-      - name: "\U0001F4E6 Install Dependencies"
-        run: "echo \"\U0001F4E6 Installing dependencies for deployment build...\"\nnpm ci --only=production\n"
-      - name: "\U0001F3D7️ Environment-specific Build"
-        run: "echo \"\U0001F3D7️ Building for environment: ${{ needs.deployment-gate.outputs.deploy_environment }}\"\n\n# 環境変数設定\nenvironment=\"${{ needs.deployment-gate.outputs.deploy_environment }}\"\n\ncase \"$environment\" in\n  \"production\")\n    echo \"\U0001F3AF Production build configuration\"\n    export NODE_ENV=production\n    export VITE_ENV=production\n    export VITE_BASE_URL=\"${{ env.PRODUCTION_URL }}\"\n    ;;\n  \"staging\")\n    echo \"\U0001F9EA Staging build configuration\"\n    export NODE_ENV=production\n    export VITE_ENV=staging\n    export VITE_BASE_URL=\"${{ env.STAGING_URL }}\"\n    ;;\n  \"preview\")\n    echo \"\U0001F440 Preview build configuration\"\n    export NODE_ENV=production\n    export VITE_ENV=preview\n    export VITE_BASE_URL=\"https://yusuke-kurosawa.github.io/PMPLearningManagement/preview\"\n    ;;\nesac\n\n# 最適化ビルド実行\nnpm run build\n\n# ビルド結果の検証\nif [[ -d \"dist\" ]]; then\n  echo \"✅ Build successful\"\n  echo \"\U0001F4CA Build size analysis:\"\n  du -sh dist/\n  ls -la dist/\nelse\n  echo \"❌ Build failed - dist directory not found\"\n  exit 1\nfi\n"
+      - name: 📦 Install Dependencies
+        run: |
+          echo "📦 Installing dependencies for deployment build..."
+          npm ci --only=production
+      - name: 🏗️ Environment-specific Build
+        run: |
+          echo "🏗️ Building for environment: ${{ needs.deployment-gate.outputs.deploy_environment }}"
+
+          # 環境変数設定
+          environment="${{ needs.deployment-gate.outputs.deploy_environment }}"
+
+          case "$environment" in
+            "production")
+              echo "🎯 Production build configuration"
+              export NODE_ENV=production
+              export VITE_ENV=production
+              export VITE_BASE_URL="${{ env.PRODUCTION_URL }}"
+              ;;
+            "staging")
+              echo "🧪 Staging build configuration"
+              export NODE_ENV=production
+              export VITE_ENV=staging
+              export VITE_BASE_URL="${{ env.STAGING_URL }}"
+              ;;
+            "preview")
+              echo "👀 Preview build configuration"
+              export NODE_ENV=production
+              export VITE_ENV=preview
+              export VITE_BASE_URL="https://yusuke-kurosawa.github.io/PMPLearningManagement/preview"
+              ;;
+          esac
+
+          # 最適化ビルド実行
+          npm run build
+
+          # ビルド結果の検証
+          if [[ -d "dist" ]]; then
+            echo "✅ Build successful"
+            echo "📊 Build size analysis:"
+            du -sh dist/
+            ls -la dist/
+          else
+            echo "❌ Build failed - dist directory not found"
+            exit 1
+          fi
         id: build
-      - name: "\U0001F4E6 Prepare Deployment Artifacts"
-        run: "echo \"\U0001F4E6 Preparing deployment artifacts...\"\n\n# デプロイメント情報ファイル作成\ncat > dist/deployment-info.json << EOF\n{\n  \"environment\": \"${{ needs.deployment-gate.outputs.deploy_environment }}\",\n  \"commit_sha\": \"${{ github.sha }}\",\n  \"build_timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\n  \"branch\": \"${{ github.ref_name }}\",\n  \"actor\": \"${{ github.actor }}\",\n  \"workflow_run\": \"${{ github.run_id }}\"\n}\nEOF\n\n# ヘルスチェックエンドポイント\ncat > dist/health.json << EOF\n{\n  \"status\": \"healthy\",\n  \"version\": \"${{ github.sha }}\",\n  \"environment\": \"${{ needs.deployment-gate.outputs.deploy_environment }}\",\n  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"\n}\nEOF\n\necho \"✅ Deployment artifacts prepared\"\n"
-      - name: "\U0001F4E4 Upload Build Artifacts"
+      - name: 📦 Prepare Deployment Artifacts
+        run: |
+          echo "📦 Preparing deployment artifacts..."
+
+          # デプロイメント情報ファイル作成
+          cat > dist/deployment-info.json << EOF
+          {
+            "environment": "${{ needs.deployment-gate.outputs.deploy_environment }}",
+            "commit_sha": "${{ github.sha }}",
+            "build_timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "branch": "${{ github.ref_name }}",
+            "actor": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+          # ヘルスチェックエンドポイント
+          cat > dist/health.json << EOF
+          {
+            "status": "healthy",
+            "version": "${{ github.sha }}",
+            "environment": "${{ needs.deployment-gate.outputs.deploy_environment }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "✅ Deployment artifacts prepared"
+      - name: 📤 Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: 'deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}'
+          name: deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: dist/
           retention-days: 30
   deploy-to-environment:
-    name: "\U0001F680 デプロイ: \U0001F680 [Deploy] ${{ needs.deployment-gate.outputs.deploy_environment }}"
+    name: "🔧 デプロイ: deploy-to-environment"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs:
       - deployment-gate
       - build-for-deployment
-    environment: '${{ needs.deployment-gate.outputs.deploy_environment }}'
+    environment: ${{ needs.deployment-gate.outputs.deploy_environment }}
     steps:
-      - name: "\U0001F4E5 Download Build Artifacts"
+      - name: 📥 Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: 'deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}'
+          name: deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: dist/
-      - name: "\U0001F4C4 Setup GitHub Pages"
+      - name: 📄 Setup GitHub Pages
         if: needs.deployment-gate.outputs.deploy_environment == 'production'
         uses: actions/configure-pages@v4
-      - name: "\U0001F680 Deploy to GitHub Pages"
+      - name: 🚀 Deploy to GitHub Pages
         if: needs.deployment-gate.outputs.deploy_environment == 'production'
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: 'deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}'
+          artifact_name: deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           preview: false
         id: pages-deployment
-      - name: "\U0001F9EA Deploy to ${{ needs.deployment-gate.outputs.deploy_environment }}"
+      - name: 🧪 Deploy to ${{ needs.deployment-gate.outputs.deploy_environment }}
         if: needs.deployment-gate.outputs.deploy_environment != 'production'
-        run: "echo \"\U0001F9EA Deploying to ${{ needs.deployment-gate.outputs.deploy_environment }} environment...\"\n\n# 環境別のデプロイ処理（GitHub Pagesの場合はシミュレーション）\nenvironment=\"${{ needs.deployment-gate.outputs.deploy_environment }}\"\n\ncase \"$environment\" in\n  \"staging\")\n    echo \"\U0001F9EA Staging deployment simulation\"\n    # 実際のstagingデプロイロジック\n    echo \"Would deploy to: ${{ env.STAGING_URL }}\"\n    ;;\n  \"preview\")\n    echo \"\U0001F440 Preview deployment simulation\"\n    # 実際のpreviewデプロイロジック\n    echo \"Would deploy to preview environment\"\n    ;;\nesac\n\n# デプロイ結果のシミュレーション\necho \"✅ Deployment to $environment completed successfully\"\necho \"deployment_url=${{ env.PRODUCTION_URL }}\" >> $GITHUB_OUTPUT\n"
+        run: |
+          echo "🧪 Deploying to ${{ needs.deployment-gate.outputs.deploy_environment }} environment..."
+
+          # 環境別のデプロイ処理（GitHub Pagesの場合はシミュレーション）
+          environment="${{ needs.deployment-gate.outputs.deploy_environment }}"
+
+          case "$environment" in
+            "staging")
+              echo "🧪 Staging deployment simulation"
+              # 実際のstagingデプロイロジック
+              echo "Would deploy to: ${{ env.STAGING_URL }}"
+              ;;
+            "preview")
+              echo "👀 Preview deployment simulation"
+              # 実際のpreviewデプロイロジック
+              echo "Would deploy to preview environment"
+              ;;
+          esac
+
+          # デプロイ結果のシミュレーション
+          echo "✅ Deployment to $environment completed successfully"
+          echo "deployment_url=${{ env.PRODUCTION_URL }}" >> $GITHUB_OUTPUT
         id: alt-deployment
   post-deployment-tests:
-    name: "\U0001F9EA テスト: \U0001F9EA [Test] Post-Deployment Validation"
+    name: "🔧 テスト: post-deployment-tests"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs:
@@ -203,17 +388,114 @@ jobs:
       - deploy-to-environment
     if: github.event.inputs.skip_tests != 'true'
     steps:
-      - name: "\U0001F3E5 Health Check"
-        run: "echo \"\U0001F3E5 Performing post-deployment health check...\"\n\n# デプロイURL決定\nenvironment=\"${{ needs.deployment-gate.outputs.deploy_environment }}\"\ncase \"$environment\" in\n  \"production\")\n    target_url=\"${{ env.PRODUCTION_URL }}\"\n    ;;\n  \"staging\")\n    target_url=\"${{ env.STAGING_URL }}\"\n    ;;\n  *)\n    target_url=\"${{ env.PRODUCTION_URL }}\"\n    ;;\nesac\n\necho \"\U0001F3AF Testing URL: $target_url\"\n\n# ヘルスチェック実行\nretry_count=0\nmax_retries=${{ env.HEALTH_CHECK_RETRIES }}\n\nwhile [[ $retry_count -lt $max_retries ]]; do\n  echo \"\U0001F50D Health check attempt $((retry_count + 1))/$max_retries...\"\n  \n  if curl -f -s -o /dev/null -w \"%{http_code}\" \"$target_url\" | grep -q \"200\"; then\n    echo \"✅ Health check passed\"\n    health_status=\"healthy\"\n    break\n  else\n    echo \"⚠️ Health check failed, retrying in ${{ env.HEALTH_CHECK_INTERVAL }}s...\"\n    sleep ${{ env.HEALTH_CHECK_INTERVAL }}\n    retry_count=$((retry_count + 1))\n  fi\ndone\n\nif [[ $retry_count -eq $max_retries ]]; then\n  echo \"❌ Health check failed after $max_retries attempts\"\n  health_status=\"unhealthy\"\n  exit 1\nfi\n\necho \"health_status=$health_status\" >> $GITHUB_OUTPUT\n"
+      - name: 🏥 Health Check
+        run: |
+          echo "🏥 Performing post-deployment health check..."
+
+          # デプロイURL決定
+          environment="${{ needs.deployment-gate.outputs.deploy_environment }}"
+          case "$environment" in
+            "production")
+              target_url="${{ env.PRODUCTION_URL }}"
+              ;;
+            "staging")
+              target_url="${{ env.STAGING_URL }}"
+              ;;
+            *)
+              target_url="${{ env.PRODUCTION_URL }}"
+              ;;
+          esac
+
+          echo "🎯 Testing URL: $target_url"
+
+          # ヘルスチェック実行
+          retry_count=0
+          max_retries=${{ env.HEALTH_CHECK_RETRIES }}
+
+          while [[ $retry_count -lt $max_retries ]]; do
+            echo "🔍 Health check attempt $((retry_count + 1))/$max_retries..."
+            
+            if curl -f -s -o /dev/null -w "%{http_code}" "$target_url" | grep -q "200"; then
+              echo "✅ Health check passed"
+              health_status="healthy"
+              break
+            else
+              echo "⚠️ Health check failed, retrying in ${{ env.HEALTH_CHECK_INTERVAL }}s..."
+              sleep ${{ env.HEALTH_CHECK_INTERVAL }}
+              retry_count=$((retry_count + 1))
+            fi
+          done
+
+          if [[ $retry_count -eq $max_retries ]]; then
+            echo "❌ Health check failed after $max_retries attempts"
+            health_status="unhealthy"
+            exit 1
+          fi
+
+          echo "health_status=$health_status" >> $GITHUB_OUTPUT
         id: health-check
-      - name: "\U0001F4A8 Smoke Tests"
-        run: "echo \"\U0001F4A8 Running smoke tests...\"\n\ntarget_url=\"${{ env.PRODUCTION_URL }}\"\n\n# 基本機能テスト\necho \"\U0001F9EA Testing basic functionality...\"\n\n# HTMLコンテンツ確認\nif curl -s \"$target_url\" | grep -q \"<title>\"; then\n  echo \"✅ HTML content loaded\"\nelse\n  echo \"❌ HTML content not found\"\n  exit 1\nfi\n\n# JavaScript実行確認（基本チェック）\nif curl -s \"$target_url\" | grep -q \"script\"; then\n  echo \"✅ JavaScript files referenced\"\nelse\n  echo \"⚠️ No JavaScript references found\"\nfi\n\n# CSS実行確認\nif curl -s \"$target_url\" | grep -q \"stylesheet\"; then\n  echo \"✅ CSS files referenced\"\nelse\n  echo \"⚠️ No CSS references found\"\nfi\n\necho \"✅ Smoke tests completed\"\n"
+      - name: 💨 Smoke Tests
+        run: |
+          echo "💨 Running smoke tests..."
+
+          target_url="${{ env.PRODUCTION_URL }}"
+
+          # 基本機能テスト
+          echo "🧪 Testing basic functionality..."
+
+          # HTMLコンテンツ確認
+          if curl -s "$target_url" | grep -q "<title>"; then
+            echo "✅ HTML content loaded"
+          else
+            echo "❌ HTML content not found"
+            exit 1
+          fi
+
+          # JavaScript実行確認（基本チェック）
+          if curl -s "$target_url" | grep -q "script"; then
+            echo "✅ JavaScript files referenced"
+          else
+            echo "⚠️ No JavaScript references found"
+          fi
+
+          # CSS実行確認
+          if curl -s "$target_url" | grep -q "stylesheet"; then
+            echo "✅ CSS files referenced"
+          else
+            echo "⚠️ No CSS references found"
+          fi
+
+          echo "✅ Smoke tests completed"
         id: smoke-tests
       - name: ⚡ Performance Check
-        run: "echo \"⚡ Running basic performance check...\"\n\ntarget_url=\"${{ env.PRODUCTION_URL }}\"\n\n# 応答時間測定\nresponse_time=$(curl -o /dev/null -s -w \"%{time_total}\" \"$target_url\")\nresponse_time_ms=$(echo \"$response_time * 1000\" | bc -l | cut -d. -f1)\n\necho \"\U0001F4CA Response time: ${response_time_ms}ms\"\n\n# パフォーマンス閾値チェック\nif [[ $response_time_ms -lt 3000 ]]; then\n  echo \"✅ Performance within acceptable range\"\n  performance_status=\"good\"\nelif [[ $response_time_ms -lt 5000 ]]; then\n  echo \"⚠️ Performance needs improvement\"\n  performance_status=\"warning\"\nelse\n  echo \"❌ Performance below acceptable threshold\"\n  performance_status=\"poor\"\nfi\n\necho \"performance_status=$performance_status\" >> $GITHUB_OUTPUT\necho \"response_time_ms=$response_time_ms\" >> $GITHUB_OUTPUT\n"
+        run: |
+          echo "⚡ Running basic performance check..."
+
+          target_url="${{ env.PRODUCTION_URL }}"
+
+          # 応答時間測定
+          response_time=$(curl -o /dev/null -s -w "%{time_total}" "$target_url")
+          response_time_ms=$(echo "$response_time * 1000" | bc -l | cut -d. -f1)
+
+          echo "📊 Response time: ${response_time_ms}ms"
+
+          # パフォーマンス閾値チェック
+          if [[ $response_time_ms -lt 3000 ]]; then
+            echo "✅ Performance within acceptable range"
+            performance_status="good"
+          elif [[ $response_time_ms -lt 5000 ]]; then
+            echo "⚠️ Performance needs improvement"
+            performance_status="warning"
+          else
+            echo "❌ Performance below acceptable threshold"
+            performance_status="poor"
+          fi
+
+          echo "performance_status=$performance_status" >> $GITHUB_OUTPUT
+          echo "response_time_ms=$response_time_ms" >> $GITHUB_OUTPUT
         id: performance-check
   deployment-notification:
-    name: "\U0001F680 デプロイ: \U0001F4E2 [Notify] Deployment Results"
+    name: "🔧 デプロイ: deployment-notification"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
@@ -223,20 +505,226 @@ jobs:
       - post-deployment-tests
     if: always()
     steps:
-      - name: "\U0001F4CB Generate Deployment Report"
-        run: "echo \"\U0001F4CB Generating deployment report...\"\n\n# 全体的な成功/失敗判定\noverall_status=\"success\"\nif [[ \"${{ needs.deploy-to-environment.result }}\" != \"success\" ]]; then\n  overall_status=\"failure\"\nelif [[ \"${{ needs.post-deployment-tests.result }}\" == \"failure\" ]]; then\n  overall_status=\"warning\"\nfi\n\ncat > deployment-report.md << EOF\n# \U0001F680 Deployment Report\n\n## \U0001F4CA Deployment Summary / デプロイ概要\n\n- **Environment**: ${{ needs.deployment-gate.outputs.deploy_environment }}\n- **Status**: $([ \"$overall_status\" == \"success\" ] && echo \"✅ SUCCESS\" || [ \"$overall_status\" == \"warning\" ] && echo \"⚠️ WARNING\" || echo \"❌ FAILURE\")\n- **Deployment Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')\n- **Branch**: ${{ github.ref_name }}\n- **Commit**: ${{ github.sha }}\n- **Actor**: ${{ github.actor }}\n\n## \U0001F3AF Job Results / ジョブ結果\n\n| Stage | Status | Details |\n|-------|--------|---------|\n| **Quality Gate** | ${{ needs.deployment-gate.result }} | Score: ${{ needs.deployment-gate.outputs.quality_score }}/100 |\n| **Build** | ${{ needs.build-for-deployment.result }} | Application built for ${{ needs.deployment-gate.outputs.deploy_environment }} |\n| **Deployment** | ${{ needs.deploy-to-environment.result }} | Deployed to ${{ needs.deployment-gate.outputs.deploy_environment }} |\n| **Post-Deploy Tests** | ${{ needs.post-deployment-tests.result }} | Health & smoke tests |\n\n## \U0001F517 Access Information / アクセス情報\n\nEOF\n\n# 環境別のアクセス情報\nenvironment=\"${{ needs.deployment-gate.outputs.deploy_environment }}\"\ncase \"$environment\" in\n  \"production\")\n    echo \"- **Production URL**: ${{ env.PRODUCTION_URL }}\" >> deployment-report.md\n    ;;\n  \"staging\")\n    echo \"- **Staging URL**: ${{ env.STAGING_URL }}\" >> deployment-report.md\n    ;;\n  *)\n    echo \"- **Preview URL**: Available in environment logs\" >> deployment-report.md\n    ;;\nesac\n\ncat >> deployment-report.md << EOF\n\n## \U0001F4C8 Performance Metrics / パフォーマンス指標\n\nEOF\n\nif [[ \"${{ needs.post-deployment-tests.result }}\" == \"success\" ]]; then\n  cat >> deployment-report.md << EOF\n- **Health Status**: ${{ needs.post-deployment-tests.outputs.health_status || 'N/A' }}\n- **Response Time**: ${{ needs.post-deployment-tests.outputs.response_time_ms || 'N/A' }}ms\n- **Performance Status**: ${{ needs.post-deployment-tests.outputs.performance_status || 'N/A' }}\nEOF\nelse\n  echo \"- **Post-deployment tests**: Skipped or failed\" >> deployment-report.md\nfi\n\ncat >> deployment-report.md << EOF\n\n## \U0001F3AF Next Steps / 次のステップ\n\nEOF\n\nif [[ \"$overall_status\" == \"success\" ]]; then\n  cat >> deployment-report.md << EOF\n✅ **Deployment successful** - All systems operational\n\n- Monitor application performance\n- Verify user functionality\n- Check error logs periodically\nEOF\nelif [[ \"$overall_status\" == \"warning\" ]]; then\n  cat >> deployment-report.md << EOF\n⚠️ **Deployment completed with warnings** - Review required\n\n- Check post-deployment test results\n- Monitor application behavior\n- Consider rollback if issues persist\nEOF\nelse\n  cat >> deployment-report.md << EOF\n❌ **Deployment failed** - Immediate action required\n\n- Review deployment logs\n- Check application configuration\n- Prepare rollback plan\n- Notify stakeholders\nEOF\nfi\n\necho \"\" >> deployment-report.md\necho \"---\" >> deployment-report.md\necho \"*Generated by Continuous Deployment Pipeline at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*\" >> deployment-report.md\n"
-      - name: "\U0001F6A8 Create Deployment Issue"
-        if: needs.deploy-to-environment.result == 'failure' || (needs.post-deployment-tests.result == 'failure' && github.event.inputs.skip_tests != 'true')
+      - name: 📋 Generate Deployment Report
+        run: >
+          echo "📋 Generating deployment report..."
+
+
+          # 全体的な成功/失敗判定
+
+          overall_status="success"
+
+          if [[ "${{ needs.deploy-to-environment.result }}" != "success" ]]; then
+            overall_status="failure"
+          elif [[ "${{ needs.post-deployment-tests.result }}" == "failure" ]]; then
+            overall_status="warning"
+          fi
+
+
+          cat > deployment-report.md << EOF
+
+          # 🚀 Deployment Report
+
+
+          ## 📊 Deployment Summary / デプロイ概要
+
+
+          - **Environment**: ${{ needs.deployment-gate.outputs.deploy_environment }}
+
+          - **Status**: $([ "$overall_status" == "success" ] && echo "✅ SUCCESS" || [ "$overall_status" == "warning" ]
+          && echo "⚠️ WARNING" || echo "❌ FAILURE")
+
+          - **Deployment Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+
+          - **Branch**: ${{ github.ref_name }}
+
+          - **Commit**: ${{ github.sha }}
+
+          - **Actor**: ${{ github.actor }}
+
+
+          ## 🎯 Job Results / ジョブ結果
+
+
+          | Stage | Status | Details |
+
+          |-------|--------|---------|
+
+          | **Quality Gate** | ${{ needs.deployment-gate.result }} | Score: ${{
+          needs.deployment-gate.outputs.quality_score }}/100 |
+
+          | **Build** | ${{ needs.build-for-deployment.result }} | Application built for ${{
+          needs.deployment-gate.outputs.deploy_environment }} |
+
+          | **Deployment** | ${{ needs.deploy-to-environment.result }} | Deployed to ${{
+          needs.deployment-gate.outputs.deploy_environment }} |
+
+          | **Post-Deploy Tests** | ${{ needs.post-deployment-tests.result }} | Health & smoke tests |
+
+
+          ## 🔗 Access Information / アクセス情報
+
+
+          EOF
+
+
+          # 環境別のアクセス情報
+
+          environment="${{ needs.deployment-gate.outputs.deploy_environment }}"
+
+          case "$environment" in
+            "production")
+              echo "- **Production URL**: ${{ env.PRODUCTION_URL }}" >> deployment-report.md
+              ;;
+            "staging")
+              echo "- **Staging URL**: ${{ env.STAGING_URL }}" >> deployment-report.md
+              ;;
+            *)
+              echo "- **Preview URL**: Available in environment logs" >> deployment-report.md
+              ;;
+          esac
+
+
+          cat >> deployment-report.md << EOF
+
+
+          ## 📈 Performance Metrics / パフォーマンス指標
+
+
+          EOF
+
+
+          if [[ "${{ needs.post-deployment-tests.result }}" == "success" ]]; then
+            cat >> deployment-report.md << EOF
+          - **Health Status**: ${{ needs.post-deployment-tests.outputs.health_status || 'N/A' }}
+
+          - **Response Time**: ${{ needs.post-deployment-tests.outputs.response_time_ms || 'N/A' }}ms
+
+          - **Performance Status**: ${{ needs.post-deployment-tests.outputs.performance_status || 'N/A' }}
+
+          EOF
+
+          else
+            echo "- **Post-deployment tests**: Skipped or failed" >> deployment-report.md
+          fi
+
+
+          cat >> deployment-report.md << EOF
+
+
+          ## 🎯 Next Steps / 次のステップ
+
+
+          EOF
+
+
+          if [[ "$overall_status" == "success" ]]; then
+            cat >> deployment-report.md << EOF
+          ✅ **Deployment successful** - All systems operational
+
+
+          - Monitor application performance
+
+          - Verify user functionality
+
+          - Check error logs periodically
+
+          EOF
+
+          elif [[ "$overall_status" == "warning" ]]; then
+            cat >> deployment-report.md << EOF
+          ⚠️ **Deployment completed with warnings** - Review required
+
+
+          - Check post-deployment test results
+
+          - Monitor application behavior
+
+          - Consider rollback if issues persist
+
+          EOF
+
+          else
+            cat >> deployment-report.md << EOF
+          ❌ **Deployment failed** - Immediate action required
+
+
+          - Review deployment logs
+
+          - Check application configuration
+
+          - Prepare rollback plan
+
+          - Notify stakeholders
+
+          EOF
+
+          fi
+
+
+          echo "" >> deployment-report.md
+
+          echo "---" >> deployment-report.md
+
+          echo "*Generated by Continuous Deployment Pipeline at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*" >>
+          deployment-report.md
+      - name: 🚨 Create Deployment Issue
+        if: >-
+          needs.deploy-to-environment.result == 'failure' || (needs.post-deployment-tests.result == 'failure' &&
+          github.event.inputs.skip_tests != 'true')
         uses: actions/github-script@v7
         with:
-          github-token: '${{ github.token }}'
-          script: "const environment = '${{ needs.deployment-gate.outputs.deploy_environment }}';\nconst deployResult = '${{ needs.deploy-to-environment.result }}';\nconst testResult = '${{ needs.post-deployment-tests.result }}';\n\nlet priority = 'high';\nif (environment === 'production') {\n  priority = 'critical';\n}\n\nawait github.rest.issues.create({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  title: `\U0001F6A8 Deployment Failure - ${environment.toUpperCase()} Environment`,\n  body: `\n## \U0001F6A8 Deployment Failure Alert\n\n**Environment**: ${environment}\n**Priority**: ${priority.toUpperCase()}\n**Failure Time**: ${new Date().toISOString()}\n**Commit**: ${context.sha}\n**Actor**: ${context.actor}\n\n### \U0001F4CA Failure Details\n- **Deployment Job**: ${deployResult}\n- **Post-Deploy Tests**: ${testResult}\n- **Workflow Run**: ${context.runId}\n\n### \U0001F50D Investigation Steps\n1. Check deployment logs in workflow run\n2. Verify application configuration\n3. Test deployment process in staging\n4. Review recent code changes\n5. Check external dependencies\n\n### \U0001F3AF Recovery Actions\n1. **Immediate**: Assess impact and communicate to stakeholders\n2. **Short-term**: Implement hotfix or rollback as needed\n3. **Long-term**: Update deployment process to prevent recurrence\n\n**This issue was automatically created by the CD pipeline.**\n  `,\n  labels: ['deployment', 'failure', priority, 'auto-generated']\n});\n"
-      - name: "\U0001F4E4 Upload Deployment Report"
+          github-token: ${{ github.token }}
+          script: |
+            const environment = '${{ needs.deployment-gate.outputs.deploy_environment }}';
+            const deployResult = '${{ needs.deploy-to-environment.result }}';
+            const testResult = '${{ needs.post-deployment-tests.result }}';
+
+            let priority = 'high';
+            if (environment === 'production') {
+              priority = 'critical';
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Deployment Failure - ${environment.toUpperCase()} Environment`,
+              body: `
+            ## 🚨 Deployment Failure Alert
+
+            **Environment**: ${environment}
+            **Priority**: ${priority.toUpperCase()}
+            **Failure Time**: ${new Date().toISOString()}
+            **Commit**: ${context.sha}
+            **Actor**: ${context.actor}
+
+            ### 📊 Failure Details
+            - **Deployment Job**: ${deployResult}
+            - **Post-Deploy Tests**: ${testResult}
+            - **Workflow Run**: ${context.runId}
+
+            ### 🔍 Investigation Steps
+            1. Check deployment logs in workflow run
+            2. Verify application configuration
+            3. Test deployment process in staging
+            4. Review recent code changes
+            5. Check external dependencies
+
+            ### 🎯 Recovery Actions
+            1. **Immediate**: Assess impact and communicate to stakeholders
+            2. **Short-term**: Implement hotfix or rollback as needed
+            3. **Long-term**: Update deployment process to prevent recurrence
+
+            **This issue was automatically created by the CD pipeline.**
+              `,
+              labels: ['deployment', 'failure', priority, 'auto-generated']
+            });
+      - name: 📤 Upload Deployment Report
         uses: actions/upload-artifact@v4
         with:
-          name: 'deployment-report-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}'
+          name: deployment-report-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: deployment-report.md
           retention-days: 90
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

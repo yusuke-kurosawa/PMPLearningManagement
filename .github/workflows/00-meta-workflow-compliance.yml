@@ -28,6 +28,12 @@ on:
       - '.github/workflows/**'
       - '.claude/context/github-actions-rules.md'
   workflow_dispatch:
+    inputs:
+      compliance_threshold:
+        description: '準拠率の最小許容値（%）'
+        required: false
+        default: '95'
+        type: string
   schedule:
     - cron: '0 2 * * *'  # 毎日午前2時
 

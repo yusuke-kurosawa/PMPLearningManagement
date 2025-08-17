@@ -39,20 +39,9 @@ describe('GeoIPService', () => {
 
   beforeEach(() => {
     service = new GeoIPService()
-<<<<<<< HEAD
-    nock.cleanAll()
-    // nockを有効化し、実際のHTTPリクエストを無効化
-    nock.disableNetConnect()
   })
 
   afterEach(() => {
-    nock.cleanAll()
-    nock.enableNetConnect() // テスト終了時にネット接続を復元
-=======
-  })
-
-  afterEach(() => {
->>>>>>> main
     vi.clearAllMocks()
   })
 
@@ -132,7 +121,7 @@ describe('GeoIPService', () => {
     it('should handle various IP formats correctly', async () => {
       // Test with specific known valid IPs instead of property-based testing
       const validIPs = ['1.1.1.1', '8.8.8.8', '203.0.113.1']
-      
+
       for (const ip of validIPs) {
         const result = await service.getGeoLocation(ip)
         expect(result).not.toBeNull()

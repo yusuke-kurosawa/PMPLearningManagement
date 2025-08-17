@@ -381,11 +381,14 @@ export type CostAnalysis = {
 /**
  * モデル別コスト内訳
  */
-export type ModelCostBreakdown = Record<string, {
-  total: number
-  count: Count
-  average: number
-}>
+export type ModelCostBreakdown = Record<
+  string,
+  {
+    total: number
+    count: Count
+    average: number
+  }
+>
 
 // ==================== エクスポート形式型 ====================
 

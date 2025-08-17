@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-08-17T12:15:37.372Z",
+  "summary": {
+    "total": 40,
+    "compliant": 0,
+    "complianceRate": 0,
+    "status": "needs-improvement"
+  },
+  "violations": [],
+  "guidelines": {
+    "naming": {
+      "workflowNamePattern": {},
+      "fileNamePattern": {},
+      "categories": {
+        "00": [
+          "meta"
+        ],
+        "01": [
+          "ci",
+          "core",
+          "deploy"
+        ],
+        "02": [
+          "quality",
+          "test",
+          "cd",
+          "performance"
+        ],
+        "03": [
+          "security"
+        ],
+        "04": [
+          "monitoring",
+          "integration",
+          "deployment",
+          "security"
+        ],
+        "05": [
+          "automation",
+          "performance"
+        ],
+        "07": [
+          "self-healing"
+        ],
+        "08": [
+          "developer"
+        ],
+        "09": [
+          "reusable"
+        ]
+      }
+    },
+    "structure": {
+      "requiredFields": [
+        "name",
+        "on",
+        "permissions",
+        "jobs"
+      ],
+      "requiredTriggers": [
+        "workflow_dispatch"
+      ],
+      "requiredPermissions": true,
+      "requiredConcurrency": true,
+      "requiredTimeout": true,
+      "requiredJapaneseComments": true
+    },
+    "security": {
+      "noHardcodedSecrets": true,
+      "versionPinning": true,
+      "minimalPermissions": true,
+      "secretsUsage": {}
+    },
+    "documentation": {
+      "fileHeader": true,
+      "japaneseJobNames": true,
+      "stepDescriptions": true,
+      "purposeDocumentation": true
+    }
+  }
+}

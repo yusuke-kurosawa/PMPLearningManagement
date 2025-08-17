@@ -1,0 +1,1483 @@
+{
+  "timestamp": "2025-08-17T12:11:43.958Z",
+  "summary": {
+    "totalFiles": 245,
+    "compliantFiles": 245,
+    "violationFiles": 0,
+    "complianceRate": 100
+  },
+  "violations": [],
+  "compliant": [
+    {
+      "file": ".claude/README.md",
+      "rule": ".claude",
+      "lineCount": 33,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/agents/README.md",
+      "rule": ".claude",
+      "lineCount": 22,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/context/context-manager.md",
+      "rule": ".claude",
+      "lineCount": 39,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/context/project-summary.md",
+      "rule": ".claude",
+      "lineCount": 33,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/context/quick-navigation.md",
+      "rule": ".claude",
+      "lineCount": 22,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/context/tech-decisions.md",
+      "rule": ".claude",
+      "lineCount": 25,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/context/todo-list.md",
+      "rule": ".claude",
+      "lineCount": 9,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/operations/README.md",
+      "rule": ".claude",
+      "lineCount": 21,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/policies/README.md",
+      "rule": ".claude",
+      "lineCount": 33,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/prompts/README.md",
+      "rule": ".claude",
+      "lineCount": 32,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/quick-ref/commands.md",
+      "rule": ".claude",
+      "lineCount": 32,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/quick-ref/file-locations.md",
+      "rule": ".claude",
+      "lineCount": 36,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/quick-ref/github-actions.md",
+      "rule": ".claude",
+      "lineCount": 42,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/rules/README.md",
+      "rule": ".claude",
+      "lineCount": 20,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": ".claude/templates/README.md",
+      "rule": ".claude",
+      "lineCount": 13,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "README.md",
+      "rule": ".",
+      "lineCount": 94,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "SECURITY.md",
+      "rule": ".",
+      "lineCount": 45,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_AI_TRANSLATION_INTEGRATION.md",
+      "rule": "docs",
+      "lineCount": 295,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_AI_USER_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 448,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_INTEGRATION_CHECKLIST.md",
+      "rule": "docs",
+      "lineCount": 132,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_INTEGRATION_QUICK_START.md",
+      "rule": "docs",
+      "lineCount": 235,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_INTEGRATION_SETUP.md",
+      "rule": "docs",
+      "lineCount": 445,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_INTEGRATION_VERIFICATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 308,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_PROJECT_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 655,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CLAUDE_USAGE_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 916,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/CONSOLIDATED_INDEX.md",
+      "rule": "docs",
+      "lineCount": 24,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/DEPENDABOT_RESOLUTION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 127,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/DEVOPS_BEST_PRACTICES.md",
+      "rule": "docs",
+      "lineCount": 571,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/DEVOPS_FOUNDATION_COMPLETE.md",
+      "rule": "docs",
+      "lineCount": 255,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/GITHUB_ACTIONS_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 305,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/GITHUB_ACTIONS_OPTIMIZATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 376,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/IDD_AGENT_GUIDELINES.md",
+      "rule": "docs",
+      "lineCount": 602,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/IDD_AUTOMATION_IMPLEMENTATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 314,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/IDD_IMPLEMENTATION_STATUS.md",
+      "rule": "docs",
+      "lineCount": 355,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/ISSUES_JAPANESE_TRANSLATION.md",
+      "rule": "docs",
+      "lineCount": 461,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/ISSUE_TRANSLATION_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 398,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/ISSUE_TRANSLATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 285,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/MAINTENANCE_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 418,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/OPTIMIZATION_REPORT_2025-08-16.md",
+      "rule": "docs",
+      "lineCount": 227,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/PROMPT_LOG_IMPLEMENTATION.md",
+      "rule": "docs",
+      "lineCount": 642,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/README.md",
+      "rule": "docs",
+      "lineCount": 97,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/README_TECHNICAL.md",
+      "rule": "docs",
+      "lineCount": 296,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/SECURITY_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 181,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/SECURITY_NEXT_STEPS_COMPLETION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 160,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/SECURITY_OPERATIONS.md",
+      "rule": "docs",
+      "lineCount": 330,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/SECURITY_REMEDIATION_FINAL_REPORT.md",
+      "rule": "docs",
+      "lineCount": 247,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/SECURITY_SCAN_IMMEDIATE_RESPONSE_REPORT.md",
+      "rule": "docs",
+      "lineCount": 208,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/TRANSLATION_TEST_RESULT.md",
+      "rule": "docs",
+      "lineCount": 128,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/TYPESCRIPT_IMPROVEMENT_PLAN.md",
+      "rule": "docs",
+      "lineCount": 99,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/TYPESCRIPT_MIGRATION_ROADMAP.md",
+      "rule": "docs",
+      "lineCount": 596,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/WORKFLOW_NAMING_RULES.md",
+      "rule": "docs",
+      "lineCount": 328,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/analytics/README.md",
+      "rule": "docs",
+      "lineCount": 230,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/analytics/metrics-dashboard.md",
+      "rule": "docs",
+      "lineCount": 359,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/api/README.md",
+      "rule": "docs",
+      "lineCount": 64,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/architecture/README.md",
+      "rule": "docs",
+      "lineCount": 150,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/api/API_SPECIFICATION.md",
+      "rule": "docs",
+      "lineCount": 849,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/api/BACKEND_ARCHITECTURE.md",
+      "rule": "docs",
+      "lineCount": 3315,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/architecture/DATABASE_DESIGN.md",
+      "rule": "docs",
+      "lineCount": 1379,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/architecture/MODULAR_ARCHITECTURE_DESIGN.md",
+      "rule": "docs",
+      "lineCount": 1721,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/architecture/SYSTEM_ARCHITECTURE_PLAN.md",
+      "rule": "docs",
+      "lineCount": 1123,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/architecture/UI_DESIGN_SPECIFICATION.md",
+      "rule": "docs",
+      "lineCount": 2396,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/deployment/CLOUD_DEPLOYMENT_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 333,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/deployment/DEPLOYMENT.md",
+      "rule": "docs",
+      "lineCount": 499,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/deployment/DETAILED_FEATURE_SPECIFICATIONS.md",
+      "rule": "docs",
+      "lineCount": 855,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/deployment/INFRASTRUCTURE_DEVOPS.md",
+      "rule": "docs",
+      "lineCount": 726,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/guides/FRONTEND_MIGRATION_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 1473,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/guides/README.md",
+      "rule": "docs",
+      "lineCount": 72,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/ADVANCED_CICD_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 383,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/AUTHENTICATION_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 376,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/CICD_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 262,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/CI_CD_IMPLEMENTATION.md",
+      "rule": "docs",
+      "lineCount": 248,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/DEVOPS_IMPLEMENTATION_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 418,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/ENTERPRISE_DEVOPS_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 374,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/FRONTEND_TEAM_COORDINATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 355,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/IMPLEMENTATION_STATUS_REPORT.md",
+      "rule": "docs",
+      "lineCount": 398,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 380,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/MOBILE_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 354,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/PRODUCT_MANAGEMENT_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 249,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/SECURITY_IMPLEMENTATION_PLAN.md",
+      "rule": "docs",
+      "lineCount": 745,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/TEST_IMPLEMENTATION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 248,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/implementation/TEST_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 168,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/COMPETITIVE_ANALYSIS_AND_DIFFERENTIATION.md",
+      "rule": "docs",
+      "lineCount": 576,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/COMPREHENSIVE_PROJECT_CONTEXT.md",
+      "rule": "docs",
+      "lineCount": 1086,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/DATABASE_SETUP.md",
+      "rule": "docs",
+      "lineCount": 547,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/DIRECTORY_STRUCTURE.md",
+      "rule": "docs",
+      "lineCount": 352,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/FRONTEND_TEAM_COORDINATION.md",
+      "rule": "docs",
+      "lineCount": 457,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/NON_FUNCTIONAL_REQUIREMENTS.md",
+      "rule": "docs",
+      "lineCount": 503,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/PRODUCT_FEATURE_MATRIX.md",
+      "rule": "docs",
+      "lineCount": 284,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/PROJECT_STRUCTURE.md",
+      "rule": "docs",
+      "lineCount": 176,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/REQUIREMENTS_DEFINITION.md",
+      "rule": "docs",
+      "lineCount": 1545,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/misc/TEAM_ROLE_ASSIGNMENT.md",
+      "rule": "docs",
+      "lineCount": 196,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/planning/GITHUB_ISSUE_MANAGEMENT_PLAN.md",
+      "rule": "docs",
+      "lineCount": 613,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/planning/MIGRATION_ROADMAP.md",
+      "rule": "docs",
+      "lineCount": 394,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/planning/PRODUCT_ROADMAP.md",
+      "rule": "docs",
+      "lineCount": 556,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/planning/PROJECT_MANAGEMENT_PLAN.md",
+      "rule": "docs",
+      "lineCount": 690,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/planning/SPRINT_PLAN.md",
+      "rule": "docs",
+      "lineCount": 395,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/CLAUDE_AI_INTEGRATION_FINAL_REPORT.md",
+      "rule": "docs",
+      "lineCount": 221,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/CLAUDE_AI_INTEGRATION_TEST_REPORT.md",
+      "rule": "docs",
+      "lineCount": 363,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/CLAUDE_AI_OPERATIONS_ANNOUNCEMENT.md",
+      "rule": "docs",
+      "lineCount": 191,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/CLAUDE_AI_SUCCESS_METRICS_DASHBOARD.md",
+      "rule": "docs",
+      "lineCount": 192,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/CONTENT_QUALITY_ASSURANCE_IMPLEMENTATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 305,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/ES_MODULE_FIX_SUGGESTIONS.md",
+      "rule": "docs",
+      "lineCount": 141,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/GITHUB_ACTIONS_ARTIFACT_FIX_REPORT.md",
+      "rule": "docs",
+      "lineCount": 117,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/GITHUB_ACTIONS_FIX_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 86,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/INTEGRATION_TEST_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 44,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/MIGRATION_PLAN_DEVOPS_AUTOMATION.md",
+      "rule": "docs",
+      "lineCount": 303,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/OPTIMIZATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 190,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/PHASE1_ERROR_RESOLUTION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 145,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/PHASE1_VERIFICATION_ANALYSIS_REPORT.md",
+      "rule": "docs",
+      "lineCount": 238,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/PR123_COMPLETION_SUMMARY.md",
+      "rule": "docs",
+      "lineCount": 142,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/PR125_MERGE_COMPLETION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 171,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/QUALITY_SCRIPTS_FIX_REPORT.md",
+      "rule": "docs",
+      "lineCount": 144,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/TEST_IMPROVEMENT_REPORT.md",
+      "rule": "docs",
+      "lineCount": 157,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/WORLD_CLASS_DEVOPS_ACHIEVEMENT_REPORT.md",
+      "rule": "docs",
+      "lineCount": 439,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/claude-integration-report-20250810-093727.md",
+      "rule": "docs",
+      "lineCount": 36,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/reports/typescript-improvement-final-report.md",
+      "rule": "docs",
+      "lineCount": 74,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/security/AUTHENTICATION_SECURITY.md",
+      "rule": "docs",
+      "lineCount": 306,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/security/COMPLIANCE_SECURITY_POLICIES.md",
+      "rule": "docs",
+      "lineCount": 773,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/security/COMPREHENSIVE_SECURITY_AUDIT_REPORT.md",
+      "rule": "docs",
+      "lineCount": 419,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/security/DATABASE_SECURITY_SCHEMA.md",
+      "rule": "docs",
+      "lineCount": 585,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/archive/testing/TEST_PLAN.md",
+      "rule": "docs",
+      "lineCount": 1232,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/business/case-studies.md",
+      "rule": "docs",
+      "lineCount": 438,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/business/competitive-analysis.md",
+      "rule": "docs",
+      "lineCount": 264,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/business/whitepaper.md",
+      "rule": "docs",
+      "lineCount": 415,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/API_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 4183,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/ARCHITECTURE_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 6633,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/DEPLOYMENT_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 2403,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/GUIDES_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 2013,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/IMPLEMENTATION_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 5004,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/MISC_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 6225,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/PLANNING_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 2632,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/SECURITY_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 2113,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/consolidated/TESTING_CONSOLIDATED.md",
+      "rule": "docs",
+      "lineCount": 3625,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/data/knowledge_areas.md",
+      "rule": "docs",
+      "lineCount": 102,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/data/process_groups.md",
+      "rule": "docs",
+      "lineCount": 91,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/developer-guide/setup.md",
+      "rule": "docs",
+      "lineCount": 372,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/developers/api-integration-guide.md",
+      "rule": "docs",
+      "lineCount": 576,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/developers/plugin-development-guide.md",
+      "rule": "docs",
+      "lineCount": 494,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/README.md",
+      "rule": "docs",
+      "lineCount": 42,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/README.md",
+      "rule": "docs",
+      "lineCount": 291,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/architecture/README.md",
+      "rule": "docs",
+      "lineCount": 141,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/architecture/architect-reviewer.md",
+      "rule": "docs",
+      "lineCount": 135,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/architecture/cloud-architect.md",
+      "rule": "docs",
+      "lineCount": 143,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/architecture/microservices-architect.md",
+      "rule": "docs",
+      "lineCount": 185,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/code-reviewer.md",
+      "rule": "docs",
+      "lineCount": 223,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/coordination/README.md",
+      "rule": "docs",
+      "lineCount": 17,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/coordination/agent-organizer.md",
+      "rule": "docs",
+      "lineCount": 135,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/coordination/context-manager.md",
+      "rule": "docs",
+      "lineCount": 143,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/README.md",
+      "rule": "docs",
+      "lineCount": 268,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/development/README.md",
+      "rule": "docs",
+      "lineCount": 20,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/development/backend-developer.md",
+      "rule": "docs",
+      "lineCount": 246,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/development/frontend-developer.md",
+      "rule": "docs",
+      "lineCount": 194,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/development/fullstack-developer.md",
+      "rule": "docs",
+      "lineCount": 55,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/development/development/mobile-app-developer.md",
+      "rule": "docs",
+      "lineCount": 41,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/devops/github-actions-optimizer.md",
+      "rule": "docs",
+      "lineCount": 267,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/devops/github-actions-specialist.md",
+      "rule": "docs",
+      "lineCount": 221,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/devops/infrastructure/README.md",
+      "rule": "docs",
+      "lineCount": 260,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/devops/infrastructure/database-admin.md",
+      "rule": "docs",
+      "lineCount": 213,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/devops/infrastructure/devops-engineer.md",
+      "rule": "docs",
+      "lineCount": 59,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/management/README.md",
+      "rule": "docs",
+      "lineCount": 275,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/management/business-analyst.md",
+      "rule": "docs",
+      "lineCount": 108,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/management/product-manager.md",
+      "rule": "docs",
+      "lineCount": 163,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/management/project-manager.md",
+      "rule": "docs",
+      "lineCount": 165,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/management/scrum-master.md",
+      "rule": "docs",
+      "lineCount": 77,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/qa/quality/README.md",
+      "rule": "docs",
+      "lineCount": 289,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/qa/quality/qa-expert.md",
+      "rule": "docs",
+      "lineCount": 39,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/qa/quality/test-automator.md",
+      "rule": "docs",
+      "lineCount": 114,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/agent-definitions/security/security-auditor.md",
+      "rule": "docs",
+      "lineCount": 47,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture/architecture-summary.md",
+      "rule": "docs",
+      "lineCount": 190,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture/deployment-setup.md",
+      "rule": "docs",
+      "lineCount": 927,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture/infrastructure-management.md",
+      "rule": "docs",
+      "lineCount": 1134,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture/key-decisions.md",
+      "rule": "docs",
+      "lineCount": 246,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture/monitoring-setup.md",
+      "rule": "docs",
+      "lineCount": 919,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/architecture-review-guide.md",
+      "rule": "docs",
+      "lineCount": 36,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/automation-backup.md",
+      "rule": "docs",
+      "lineCount": 250,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/automation-guide.md",
+      "rule": "docs",
+      "lineCount": 627,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/ci-cd-guide.md",
+      "rule": "docs",
+      "lineCount": 462,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/claude-sync-instructions.md",
+      "rule": "docs",
+      "lineCount": 25,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/code-review-guide.md",
+      "rule": "docs",
+      "lineCount": 181,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/commands-reference.md",
+      "rule": "docs",
+      "lineCount": 286,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/configuration-guide.md",
+      "rule": "docs",
+      "lineCount": 43,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/data-input-guide.md",
+      "rule": "docs",
+      "lineCount": 126,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/data-management.md",
+      "rule": "docs",
+      "lineCount": 45,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/devops-backup.md",
+      "rule": "docs",
+      "lineCount": 178,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/document-placement-rules.md",
+      "rule": "docs",
+      "lineCount": 258,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/e2e-testing.md",
+      "rule": "docs",
+      "lineCount": 70,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/file-locations-reference.md",
+      "rule": "docs",
+      "lineCount": 290,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/fun-labels-guide.md",
+      "rule": "docs",
+      "lineCount": 270,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/github-actions-reference.md",
+      "rule": "docs",
+      "lineCount": 411,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/implementation-status.md",
+      "rule": "docs",
+      "lineCount": 212,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/prefixed-labels-guide.md",
+      "rule": "docs",
+      "lineCount": 223,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/project-map.md",
+      "rule": "docs",
+      "lineCount": 147,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/project-status.md",
+      "rule": "docs",
+      "lineCount": 271,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/recent-changes.md",
+      "rule": "docs",
+      "lineCount": 129,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/scripts-guide.md",
+      "rule": "docs",
+      "lineCount": 109,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/source-code-structure.md",
+      "rule": "docs",
+      "lineCount": 48,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/templates-guide.md",
+      "rule": "docs",
+      "lineCount": 303,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/testing-guidelines.md",
+      "rule": "docs",
+      "lineCount": 282,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/development/workflow-creation-guide.md",
+      "rule": "docs",
+      "lineCount": 332,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/devops/BRANCH_PROTECTION_RULES.md",
+      "rule": "docs",
+      "lineCount": 277,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/devops/SMALL_PR_STRATEGY.md",
+      "rule": "docs",
+      "lineCount": 199,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/devops/WORLD_CLASS_DEVOPS_IMPLEMENTATION.md",
+      "rule": "docs",
+      "lineCount": 400,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/enterprise/README.md",
+      "rule": "docs",
+      "lineCount": 183,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/enterprise/roi-calculator.md",
+      "rule": "docs",
+      "lineCount": 239,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/github-actions/DEVOPS_FOUNDATION_REPORT.md",
+      "rule": "docs",
+      "lineCount": 214,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/github-actions/README.md",
+      "rule": "docs",
+      "lineCount": 179,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/github-actions/WORKFLOW_STANDARDS.md",
+      "rule": "docs",
+      "lineCount": 591,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/github-actions/reports/optimization-suggestions.md",
+      "rule": "docs",
+      "lineCount": 79,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/github-actions/reports/workflow-analysis.md",
+      "rule": "docs",
+      "lineCount": 431,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/i18n/README.md",
+      "rule": "docs",
+      "lineCount": 145,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/i18n/en/README.md",
+      "rule": "docs",
+      "lineCount": 51,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/i18n/ja/README.md",
+      "rule": "docs",
+      "lineCount": 51,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/operations/README.md",
+      "rule": "docs",
+      "lineCount": 408,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/operations/deployment/README.md",
+      "rule": "docs",
+      "lineCount": 438,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/organization/DOCUMENTATION_REORGANIZATION_PLAN.md",
+      "rule": "docs",
+      "lineCount": 186,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/organization/NAVIGATION_GUIDE.md",
+      "rule": "docs",
+      "lineCount": 112,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/README.md",
+      "rule": "docs",
+      "lineCount": 237,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/coding-standards.md",
+      "rule": "docs",
+      "lineCount": 281,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/compliance-policy.md",
+      "rule": "docs",
+      "lineCount": 1329,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/contribution-guidelines.md",
+      "rule": "docs",
+      "lineCount": 718,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/data-governance.md",
+      "rule": "docs",
+      "lineCount": 1021,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/deployment-policy.md",
+      "rule": "docs",
+      "lineCount": 988,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/devops-standards.md",
+      "rule": "docs",
+      "lineCount": 123,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/documentation-rules.md",
+      "rule": "docs",
+      "lineCount": 135,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/eslint-standards.md",
+      "rule": "docs",
+      "lineCount": 221,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/github-actions.md",
+      "rule": "docs",
+      "lineCount": 307,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/idd-process.md",
+      "rule": "docs",
+      "lineCount": 325,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/incident-response.md",
+      "rule": "docs",
+      "lineCount": 1059,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/review-process.md",
+      "rule": "docs",
+      "lineCount": 623,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/policies/security-policy.md",
+      "rule": "docs",
+      "lineCount": 1004,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/product/README.md",
+      "rule": "docs",
+      "lineCount": 367,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/product-strategy/vision.md",
+      "rule": "docs",
+      "lineCount": 277,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/ci-cd-optimization.md",
+      "rule": "docs",
+      "lineCount": 1032,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/debugging.md",
+      "rule": "docs",
+      "lineCount": 590,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/deployment-checklist.md",
+      "rule": "docs",
+      "lineCount": 990,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/incident-analysis.md",
+      "rule": "docs",
+      "lineCount": 950,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/monitoring-observability.md",
+      "rule": "docs",
+      "lineCount": 1109,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/performance-optimization.md",
+      "rule": "docs",
+      "lineCount": 781,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/prompts/security-audit.md",
+      "rule": "docs",
+      "lineCount": 1185,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/questions/README.md",
+      "rule": "docs",
+      "lineCount": 33,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/security/README.md",
+      "rule": "docs",
+      "lineCount": 134,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/translated_issues_test/test_translation_report.md",
+      "rule": "docs",
+      "lineCount": 132,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/user-guide/QUICK_START.md",
+      "rule": "docs",
+      "lineCount": 149,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/user-guide/README.md",
+      "rule": "docs",
+      "lineCount": 188,
+      "status": "COMPLIANT"
+    },
+    {
+      "file": "docs/user-guide/quick-start.md",
+      "rule": "docs",
+      "lineCount": 199,
+      "status": "COMPLIANT"
+    }
+  ],
+  "recommendations": []
+}

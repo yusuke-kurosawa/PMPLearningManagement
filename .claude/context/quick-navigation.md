@@ -1,51 +1,22 @@
-# Quick Navigation
+# 🧭 Quick Navigation - Memory Bank Reference
 
-## Immediate Access
+## 📁 Essential Locations
 
-### Development Essentials
-- **Commands**: [.claude/quick-ref/commands.md](../quick-ref/commands.md) → [Full Guide](../../docs/development/commands-reference.md)
-- **File Locations**: [.claude/quick-ref/file-locations.md](../quick-ref/file-locations.md) → [Full Guide](../../docs/development/file-locations-reference.md)
-- **GitHub Actions**: [.claude/quick-ref/github-actions.md](../quick-ref/github-actions.md) → [Full Guide](../../docs/development/github-actions-reference.md)
+### 📚 Documentation
+- **Main**: [/docs/](../../docs/)
+- **Development**: [/docs/development/](../../docs/development/)
+- **Architecture**: [/docs/development/architecture/](../../docs/development/architecture/)
 
-### Project Context
-- **Current Status**: [current-status.md](current-status.md)
-- **Architecture**: [architecture-summary.md](architecture-summary.md)
-- **Recent Changes**: [recent-changes.md](recent-changes.md)
+### 🏗️ Project Status
+- **Current**: [project-status.md](../../docs/development/project-status.md)
+- **Implementation**: [implementation-status.md](../../docs/development/implementation-status.md)
+- **Project Map**: [project-map.md](../../docs/development/project-map.md)
 
-### Templates & Guides
-- **Code Review**: [Code Review Template](../prompts/code-review-template.md) → [Full Guide](../../docs/development/code-review-guide.md)
-- **Architecture Review**: [Architecture Template](../prompts/architecture-review-template.md) → [Full Guide](../../docs/development/architecture-review-guide.md)
-- **Agent Definitions**: [Agent Overview](../agents/README.md) → [Full Definitions](../../docs/development/agent-definitions/)
-- **Policies**: [Policy Overview](../policies/README.md) → [Full Policies](../../docs/policies/)
-- **Prompts**: [Prompt Templates](../prompts/README.md) → [Full Prompts](../../docs/prompts/)
+### 🔧 Development Resources
+- **Agents**: [/docs/development/agent-definitions/](../../docs/development/agent-definitions/)
+- **GitHub Actions**: [github-actions-reference.md](../../docs/development/github-actions-reference.md)
+- **Code Review**: [code-review-guide.md](../../docs/development/code-review-guide.md)
 
-## Documentation Hub
-
-### Primary Documentation
-- **Development**: [docs/development/](../../docs/development/) - Complete development guides
-- **Organization**: [docs/organization/](../../docs/organization/) - Documentation structure guides
-- **Archive**: [docs/archive/](../../docs/archive/) - Historical documentation
-
-### Navigation
-- **Documentation Guide**: [docs/organization/NAVIGATION_GUIDE.md](../../docs/organization/NAVIGATION_GUIDE.md)
-- **Reorganization Plan**: [docs/organization/DOCUMENTATION_REORGANIZATION_PLAN.md](../../docs/organization/DOCUMENTATION_REORGANIZATION_PLAN.md)
-
-## Workflow Shortcuts
-
-### Start Development
-1. [Commands Quick Ref](../quick-ref/commands.md) - `npm run dev`
-2. [Current Status](current-status.md) - Check project state
-3. [File Locations](../quick-ref/file-locations.md) - Find files quickly
-
-### Code Review Process
-1. [Quick Template](../prompts/code-review-template.md) - Fast checklist
-2. [Full Guide](../../docs/development/code-review-guide.md) - Complete process
-3. [Architecture Guide](../../docs/development/architecture-review-guide.md) - For architectural changes
-
-### IDD Workflow
-1. [Commands](../quick-ref/commands.md) - `npm run idd:check`
-2. [GitHub Actions](../quick-ref/github-actions.md) - CI/CD status
-3. [IDD Status](../../docs/IDD_IMPLEMENTATION_STATUS.md) - Full status
-
----
-*Memory Bank: Quick navigation for efficient access to all project information.*
+## Memory Optimization
+- **Lines**: 51 → 20 (61% reduction)
+- **Access**: Direct links to authoritative sources

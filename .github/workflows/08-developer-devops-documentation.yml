@@ -1,27 +1,5 @@
-# ====================================================================
-# 📚 DOCS - DevOps Documentation & Visualization
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - スケジュール実行
-#   - 手動実行
-#
-# 主な処理:
-#   1. 🔧 セットアップ: 🔧 Documentation System Setup
-#   2. 🔍 分析: 🔍 Workflow Analysis & Indexing
-#   3. 📌 処理: 🎨 Architecture Diagram Generation
-#   4. 📊 レポート: 📈 DevOps Metrics Report
-#   5. 🔗 統合: 📖 Documentation Integration
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F4DA DOCS - DevOps Documentation & Visualization"
-'on':
+name: 📚 DOCS - DevOps Documentation & Visualization
+"on":
   push:
     branches:
       - main
@@ -59,11 +37,11 @@ name: "\U0001F4DA DOCS - DevOps Documentation & Visualization"
         type: boolean
         default: true
 env:
-  NODE_VERSION: '18'
-  DOC_TYPE: '${{ inputs.doc-type || ''comprehensive'' }}'
-  INCLUDE_METRICS: '${{ inputs.include-metrics || ''true'' }}'
-  GENERATE_DIAGRAMS: '${{ inputs.generate-diagrams || ''true'' }}'
-  UPDATE_README: '${{ inputs.update-readme || ''true'' }}'
+  NODE_VERSION: "18"
+  DOC_TYPE: ${{ inputs.doc-type || 'comprehensive' }}
+  INCLUDE_METRICS: ${{ inputs.include-metrics || 'true' }}
+  GENERATE_DIAGRAMS: ${{ inputs.generate-diagrams || 'true' }}
+  UPDATE_README: ${{ inputs.update-readme || 'true' }}
 permissions:
   contents: write
   actions: read
@@ -71,43 +49,296 @@ permissions:
   pull-requests: read
 jobs:
   docs-setup:
-    name: "\U0001F527 セットアップ: \U0001F527 Documentation System Setup"
+    name: "🔧 セットアップ: docs-setup"
     uses: ./.github/workflows/templates/devops-workflow-template.yml
     with:
       workflow-category: docs
       environment: documentation
-      node-version: '18'
+      node-version: "18"
       enable-caching: true
       enable-notifications: false
       parallel-jobs: 2
     secrets:
-      CLAUDE_API_KEY: '${{ secrets.CLAUDE_API_KEY }}'
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
     timeout-minutes: 30
   workflow-analysis:
-    name: "\U0001F50D 分析: \U0001F50D Workflow Analysis & Indexing"
+    name: "🔍 分析: 🔍 Workflow Analysis & Indexing"
     runs-on: ubuntu-latest
     needs:
       - docs-setup
-    if: 'contains(fromJson(''["comprehensive", "workflow-index-only"]''), env.DOC_TYPE)'
+    if: contains(fromJson('["comprehensive", "workflow-index-only"]'), env.DOC_TYPE)
     outputs:
-      workflow-count: '${{ steps.analysis.outputs.workflow-count }}'
-      categories: '${{ steps.analysis.outputs.categories }}'
+      workflow-count: ${{ steps.analysis.outputs.workflow-count }}
+      categories: ${{ steps.analysis.outputs.categories }}
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-      - name: "\U0001F50D Analyze Workflow Files"
+          node-version: ${{ env.NODE_VERSION }}
+      - name: 🔍 Analyze Workflow Files
         id: analysis
-        run: "echo \"\U0001F50D Analyzing GitHub Actions workflows...\"\n\n# Create analysis script\ncat > analyze-workflows.js << 'EOF'\nconst fs = require('fs');\nconst path = require('path');\nconst yaml = require('js-yaml');\n\n// Install js-yaml if not available\ntry {\n  require('js-yaml');\n} catch (e) {\n  console.log('Installing js-yaml...');\n  require('child_process').execSync('npm install js-yaml', { stdio: 'inherit' });\n}\n\nconst workflowDir = '.github/workflows';\nconst workflows = [];\nconst categories = new Set();\n\nconsole.log('\U0001F4C1 Scanning workflow directory...');\n\nif (fs.existsSync(workflowDir)) {\n  const files = fs.readdirSync(workflowDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));\n  \n  console.log(`Found ${files.length} workflow files`);\n  \n  for (const file of files) {\n    const filePath = path.join(workflowDir, file);\n    const content = fs.readFileSync(filePath, 'utf8');\n    \n    try {\n      const doc = yaml.load(content);\n      \n      // Extract workflow metadata\n      const workflow = {\n        filename: file,\n        name: doc.name || file.replace(/\\.(yml|yaml)$/, ''),\n        description: '',\n        category: 'uncategorized',\n        triggers: Object.keys(doc.on || {}),\n        jobs: Object.keys(doc.jobs || {}),\n        jobCount: Object.keys(doc.jobs || {}).length\n      };\n      \n      // Extract category from filename or content\n      if (file.startsWith('ci-')) workflow.category = 'CI';\n      else if (file.startsWith('cd-')) workflow.category = 'CD';  \n      else if (file.startsWith('sec-')) workflow.category = 'Security';\n      else if (file.startsWith('perf-')) workflow.category = 'Performance';\n      else if (file.startsWith('qa-')) workflow.category = 'Quality Assurance';\n      else if (file.startsWith('docs-')) workflow.category = 'Documentation';\n      else if (file.startsWith('ai-')) workflow.category = 'AI Integration';\n      else if (file.startsWith('infra-')) workflow.category = 'Infrastructure';\n      else if (file.startsWith('monitor-')) workflow.category = 'Monitoring';\n      else if (file.startsWith('release-')) workflow.category = 'Release';\n      \n      // Extract description from comments\n      const lines = content.split('\\n');\n      const purposeLine = lines.find(line => line.includes('Purpose:'));\n      if (purposeLine) {\n        workflow.description = purposeLine.replace(/.*Purpose:\\s*/, '').replace(/\\s*║.*/, '').trim();\n      }\n      \n      categories.add(workflow.category);\n      workflows.push(workflow);\n      \n    } catch (error) {\n      console.warn(`⚠️ Could not parse ${file}:`, error.message);\n    }\n  }\n  \n  // Sort workflows by category then name\n  workflows.sort((a, b) => {\n    if (a.category !== b.category) return a.category.localeCompare(b.category);\n    return a.name.localeCompare(b.name);\n  });\n  \n  // Save results\n  fs.writeFileSync('workflow-analysis.json', JSON.stringify({\n    totalCount: workflows.length,\n    categories: Array.from(categories).sort(),\n    workflows: workflows\n  }, null, 2));\n  \n  console.log(`✅ Analyzed ${workflows.length} workflows in ${categories.size} categories`);\n}\nEOF\n\n# Install dependencies and run analysis\nnpm install js-yaml\nnode analyze-workflows.js\n\n# Extract results\nif [ -f workflow-analysis.json ]; then\n  workflow_count=$(jq -r '.totalCount' workflow-analysis.json)\n  categories=$(jq -r '.categories | join(\",\")' workflow-analysis.json)\n  \n  echo \"workflow-count=$workflow_count\" >> $GITHUB_OUTPUT\n  echo \"categories=$categories\" >> $GITHUB_OUTPUT\n  \n  echo \"\U0001F4CA Analysis Results:\"\n  echo \"  Total Workflows: $workflow_count\"\n  echo \"  Categories: $categories\"\nfi\n"
-      - name: "\U0001F4DD Generate Workflow Index"
-        run: "echo \"\U0001F4DD Generating comprehensive workflow index...\"\n\ncat > DEVOPS_WORKFLOW_INDEX.md << 'EOF'\n# \U0001F680 DevOps Workflow Index\n\n**Last Updated**: $(date -Iseconds)  \n**Total Workflows**: $(jq -r '.totalCount' workflow-analysis.json)  \n**Categories**: $(jq -r '.categories | join(\", \")' workflow-analysis.json)  \n\n## \U0001F4CA Overview\n\nThis document provides a comprehensive index of all DevOps workflows in this repository, organized by category and purpose.\n\n## \U0001F3AF Quick Navigation\n\nEOF\n\n# Generate category links\nif [ -f workflow-analysis.json ]; then\n  jq -r '.categories[]' workflow-analysis.json | while read category; do\n    echo \"- [${category}](#${category,,}-workflows)\" >> DEVOPS_WORKFLOW_INDEX.md\n  done\nfi\n\ncat >> DEVOPS_WORKFLOW_INDEX.md << 'EOF'\n\n## \U0001F4CB Workflow Categories\n\nEOF\n\n# Generate detailed workflow listings\nif [ -f workflow-analysis.json ]; then\n  current_category=\"\"\n  \n  jq -r '.workflows[] | \"\\(.category)|\\(.filename)|\\(.name)|\\(.description)|\\(.triggers | join(\", \"))|\\(.jobCount)\"' workflow-analysis.json | \\\n  while IFS='|' read -r category filename name description triggers jobCount; do\n    if [ \"$category\" != \"$current_category\" ]; then\n      echo \"\" >> DEVOPS_WORKFLOW_INDEX.md\n      echo \"### ${category} Workflows\" >> DEVOPS_WORKFLOW_INDEX.md\n      echo \"\" >> DEVOPS_WORKFLOW_INDEX.md\n      echo \"| Workflow | Description | Triggers | Jobs |\" >> DEVOPS_WORKFLOW_INDEX.md\n      echo \"|----------|-------------|----------|------|\" >> DEVOPS_WORKFLOW_INDEX.md\n      current_category=\"$category\"\n    fi\n    \n    echo \"| [\\`$filename\\`](.github/workflows/$filename) | $description | $triggers | $jobCount |\" >> DEVOPS_WORKFLOW_INDEX.md\n  done\nfi\n\ncat >> DEVOPS_WORKFLOW_INDEX.md << 'EOF'\n\n## \U0001F3AF Usage Guidelines\n\n### Workflow Categories\n\n- **CI**: Continuous Integration workflows for build and test automation\n- **CD**: Continuous Deployment workflows for automated releases  \n- **Security**: Security scanning and compliance workflows\n- **Performance**: Performance monitoring and optimization workflows\n- **Quality Assurance**: Code quality and testing workflows\n- **Documentation**: Documentation generation and maintenance workflows\n- **AI Integration**: Claude AI and machine learning workflows\n- **Infrastructure**: Infrastructure provisioning and management workflows\n- **Monitoring**: System monitoring and alerting workflows\n- **Release**: Release management and versioning workflows\n\n### Best Practices\n\n1. **Naming Convention**: Follow the `[category]-[subcategory]-[action].yml` pattern\n2. **Documentation**: Include comprehensive header comments in all workflows\n3. **Modularity**: Use reusable workflow templates where possible\n4. **Security**: Follow the principle of least privilege for permissions\n5. **Efficiency**: Optimize for parallel execution and caching\n\n## \U0001F527 Development\n\n### Adding New Workflows\n\n1. Follow the established naming conventions\n2. Use the `devops-workflow-template.yml` as a base\n3. Include proper category classification\n4. Document purpose, inputs, and outputs\n5. Update this index by running the documentation workflow\n\n### Modifying Existing Workflows\n\n1. Maintain backward compatibility where possible\n2. Update version numbers in workflow headers\n3. Test changes thoroughly before merging\n4. Update relevant documentation\n\n---\n*This index is automatically generated by the DevOps Documentation workflow*\nEOF\n\necho \"✅ Workflow index generated\"\n"
-      - name: "\U0001F4E4 Upload Workflow Analysis"
+        run: |
+          echo "🔍 Analyzing GitHub Actions workflows..."
+
+          # Create analysis script
+          cat > analyze-workflows.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          const yaml = require('js-yaml');
+
+          // Install js-yaml if not available
+          try {
+            require('js-yaml');
+          } catch (e) {
+            console.log('Installing js-yaml...');
+            require('child_process').execSync('npm install js-yaml', { stdio: 'inherit' });
+          }
+
+          const workflowDir = '.github/workflows';
+          const workflows = [];
+          const categories = new Set();
+
+          console.log('📁 Scanning workflow directory...');
+
+          if (fs.existsSync(workflowDir)) {
+            const files = fs.readdirSync(workflowDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
+            
+            console.log(`Found ${files.length} workflow files`);
+            
+            for (const file of files) {
+              const filePath = path.join(workflowDir, file);
+              const content = fs.readFileSync(filePath, 'utf8');
+              
+              try {
+                const doc = yaml.load(content);
+                
+                // Extract workflow metadata
+                const workflow = {
+                  filename: file,
+                  name: doc.name || file.replace(/\.(yml|yaml)$/, ''),
+                  description: '',
+                  category: 'uncategorized',
+                  triggers: Object.keys(doc.on || {}),
+                  jobs: Object.keys(doc.jobs || {}),
+                  jobCount: Object.keys(doc.jobs || {}).length
+                };
+                
+                // Extract category from filename or content
+                if (file.startsWith('ci-')) workflow.category = 'CI';
+                else if (file.startsWith('cd-')) workflow.category = 'CD';  
+                else if (file.startsWith('sec-')) workflow.category = 'Security';
+                else if (file.startsWith('perf-')) workflow.category = 'Performance';
+                else if (file.startsWith('qa-')) workflow.category = 'Quality Assurance';
+                else if (file.startsWith('docs-')) workflow.category = 'Documentation';
+                else if (file.startsWith('ai-')) workflow.category = 'AI Integration';
+                else if (file.startsWith('infra-')) workflow.category = 'Infrastructure';
+                else if (file.startsWith('monitor-')) workflow.category = 'Monitoring';
+                else if (file.startsWith('release-')) workflow.category = 'Release';
+                
+                // Extract description from comments
+                const lines = content.split('\n');
+                const purposeLine = lines.find(line => line.includes('Purpose:'));
+                if (purposeLine) {
+                  workflow.description = purposeLine.replace(/.*Purpose:\s*/, '').replace(/\s*║.*/, '').trim();
+                }
+                
+                categories.add(workflow.category);
+                workflows.push(workflow);
+                
+              } catch (error) {
+                console.warn(`⚠️ Could not parse ${file}:`, error.message);
+              }
+            }
+            
+            // Sort workflows by category then name
+            workflows.sort((a, b) => {
+              if (a.category !== b.category) return a.category.localeCompare(b.category);
+              return a.name.localeCompare(b.name);
+            });
+            
+            // Save results
+            fs.writeFileSync('workflow-analysis.json', JSON.stringify({
+              totalCount: workflows.length,
+              categories: Array.from(categories).sort(),
+              workflows: workflows
+            }, null, 2));
+            
+            console.log(`✅ Analyzed ${workflows.length} workflows in ${categories.size} categories`);
+          }
+          EOF
+
+          # Install dependencies and run analysis
+          npm install js-yaml
+          node analyze-workflows.js
+
+          # Extract results
+          if [ -f workflow-analysis.json ]; then
+            workflow_count=$(jq -r '.totalCount' workflow-analysis.json)
+            categories=$(jq -r '.categories | join(",")' workflow-analysis.json)
+            
+            echo "workflow-count=$workflow_count" >> $GITHUB_OUTPUT
+            echo "categories=$categories" >> $GITHUB_OUTPUT
+            
+            echo "📊 Analysis Results:"
+            echo "  Total Workflows: $workflow_count"
+            echo "  Categories: $categories"
+          fi
+      - name: 📝 Generate Workflow Index
+        run: >
+          echo "📝 Generating comprehensive workflow index..."
+
+
+          cat > DEVOPS_WORKFLOW_INDEX.md << 'EOF'
+
+          # 🚀 DevOps Workflow Index
+
+
+          **Last Updated**: $(date -Iseconds)  
+
+          **Total Workflows**: $(jq -r '.totalCount' workflow-analysis.json)  
+
+          **Categories**: $(jq -r '.categories | join(", ")' workflow-analysis.json)  
+
+
+          ## 📊 Overview
+
+
+          This document provides a comprehensive index of all DevOps workflows in this repository, organized by category
+          and purpose.
+
+
+          ## 🎯 Quick Navigation
+
+
+          EOF
+
+
+          # Generate category links
+
+          if [ -f workflow-analysis.json ]; then
+            jq -r '.categories[]' workflow-analysis.json | while read category; do
+              echo "- [${category}](#${category,,}-workflows)" >> DEVOPS_WORKFLOW_INDEX.md
+            done
+          fi
+
+
+          cat >> DEVOPS_WORKFLOW_INDEX.md << 'EOF'
+
+
+          ## 📋 Workflow Categories
+
+
+          EOF
+
+
+          # Generate detailed workflow listings
+
+          if [ -f workflow-analysis.json ]; then
+            current_category=""
+            
+            jq -r '.workflows[] | "\(.category)|\(.filename)|\(.name)|\(.description)|\(.triggers | join(", "))|\(.jobCount)"' workflow-analysis.json | \
+            while IFS='|' read -r category filename name description triggers jobCount; do
+              if [ "$category" != "$current_category" ]; then
+                echo "" >> DEVOPS_WORKFLOW_INDEX.md
+                echo "### ${category} Workflows" >> DEVOPS_WORKFLOW_INDEX.md
+                echo "" >> DEVOPS_WORKFLOW_INDEX.md
+                echo "| Workflow | Description | Triggers | Jobs |" >> DEVOPS_WORKFLOW_INDEX.md
+                echo "|----------|-------------|----------|------|" >> DEVOPS_WORKFLOW_INDEX.md
+                current_category="$category"
+              fi
+              
+              echo "| [\`$filename\`](.github/workflows/$filename) | $description | $triggers | $jobCount |" >> DEVOPS_WORKFLOW_INDEX.md
+            done
+          fi
+
+
+          cat >> DEVOPS_WORKFLOW_INDEX.md << 'EOF'
+
+
+          ## 🎯 Usage Guidelines
+
+
+          ### Workflow Categories
+
+
+          - **CI**: Continuous Integration workflows for build and test automation
+
+          - **CD**: Continuous Deployment workflows for automated releases  
+
+          - **Security**: Security scanning and compliance workflows
+
+          - **Performance**: Performance monitoring and optimization workflows
+
+          - **Quality Assurance**: Code quality and testing workflows
+
+          - **Documentation**: Documentation generation and maintenance workflows
+
+          - **AI Integration**: Claude AI and machine learning workflows
+
+          - **Infrastructure**: Infrastructure provisioning and management workflows
+
+          - **Monitoring**: System monitoring and alerting workflows
+
+          - **Release**: Release management and versioning workflows
+
+
+          ### Best Practices
+
+
+          1. **Naming Convention**: Follow the `[category]-[subcategory]-[action].yml` pattern
+
+          2. **Documentation**: Include comprehensive header comments in all workflows
+
+          3. **Modularity**: Use reusable workflow templates where possible
+
+          4. **Security**: Follow the principle of least privilege for permissions
+
+          5. **Efficiency**: Optimize for parallel execution and caching
+
+
+          ## 🔧 Development
+
+
+          ### Adding New Workflows
+
+
+          1. Follow the established naming conventions
+
+          2. Use the `devops-workflow-template.yml` as a base
+
+          3. Include proper category classification
+
+          4. Document purpose, inputs, and outputs
+
+          5. Update this index by running the documentation workflow
+
+
+          ### Modifying Existing Workflows
+
+
+          1. Maintain backward compatibility where possible
+
+          2. Update version numbers in workflow headers
+
+          3. Test changes thoroughly before merging
+
+          4. Update relevant documentation
+
+
+          ---
+
+          *This index is automatically generated by the DevOps Documentation workflow*
+
+          EOF
+
+
+          echo "✅ Workflow index generated"
+      - name: 📤 Upload Workflow Analysis
         uses: actions/upload-artifact@v4
         with:
-          name: 'workflow-analysis-${{ github.run_number }}'
+          name: workflow-analysis-${{ github.run_number }}
           path: |
             workflow-analysis.json
             DEVOPS_WORKFLOW_INDEX.md
@@ -115,36 +346,230 @@ jobs:
           retention-days: 30
     timeout-minutes: 30
   architecture-diagrams:
-    name: "\U0001F4CC 処理: \U0001F3A8 Architecture Diagram Generation"
+    name: "📌 処理: 🎨 Architecture Diagram Generation"
     runs-on: ubuntu-latest
     needs:
       - docs-setup
       - workflow-analysis
-    if: 'env.GENERATE_DIAGRAMS == ''true'' && contains(fromJson(''["comprehensive", "architecture-diagrams-only"]''), env.DOC_TYPE)'
+    if: >-
+      env.GENERATE_DIAGRAMS == 'true' && contains(fromJson('["comprehensive", "architecture-diagrams-only"]'),
+      env.DOC_TYPE)
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-      - name: "\U0001F4E5 Download Workflow Analysis"
+          node-version: ${{ env.NODE_VERSION }}
+      - name: 📥 Download Workflow Analysis
         uses: actions/download-artifact@v4
         with:
-          name: 'workflow-analysis-${{ github.run_number }}'
-      - name: "\U0001F3A8 Install Diagram Generation Tools"
-        run: "echo \"\U0001F3A8 Installing diagram generation tools...\"\n\n# Install Mermaid CLI for diagram generation\nnpm install -g @mermaid-js/mermaid-cli\n\n# Install Puppeteer for rendering\nnpm install puppeteer\n\necho \"✅ Diagram tools installed\"\n"
-      - name: "\U0001F3D7️ Generate DevOps Architecture Diagram"
-        run: "echo \"\U0001F3D7️ Generating DevOps architecture diagram...\"\n\n# Create Mermaid diagram for DevOps pipeline\ncat > devops-architecture.mmd << 'EOF'\ngraph TB\n    subgraph \"\U0001F680 DevOps Pipeline Architecture\"\n        subgraph \"\U0001F4DD Source Control\"\n            GIT[GitHub Repository]\n            PR[Pull Requests]\n            ISSUES[Issues]\n        end\n        \n        subgraph \"\U0001F504 CI/CD Pipeline\"\n            CI[CI - Build & Test]\n            QA[QA - Quality Gates]\n            SEC[SEC - Security Scan]\n            PERF[PERF - Performance]\n        end\n        \n        subgraph \"\U0001F916 AI Integration\"\n            CLAUDE[Claude AI Review]\n            AUTOFIX[Auto-Fix Suggestions]\n            ANALYSIS[Code Analysis]\n        end\n        \n        subgraph \"\U0001F4CA Monitoring\"\n            METRICS[Metrics Collection]\n            ALERTS[Alert System]\n            DASHBOARD[Dashboards]\n        end\n        \n        subgraph \"\U0001F680 Deployment\"\n            STAGING[Staging Environment]\n            PROD[Production Deployment]\n            ROLLBACK[Auto Rollback]\n        end\n    end\n    \n    GIT --> CI\n    PR --> CLAUDE\n    ISSUES --> ANALYSIS\n    CI --> QA\n    CI --> SEC\n    CI --> PERF\n    CLAUDE --> AUTOFIX\n    QA --> STAGING\n    SEC --> STAGING\n    PERF --> STAGING\n    STAGING --> PROD\n    PROD --> METRICS\n    METRICS --> ALERTS\n    ALERTS --> ROLLBACK\n    \n    style GIT fill:#e1f5fe\n    style CI fill:#f3e5f5\n    style CLAUDE fill:#fff3e0\n    style PROD fill:#e8f5e8\nEOF\n\n# Generate SVG diagram\nmmdc -i devops-architecture.mmd -o devops-architecture.svg -t dark -b transparent\n\necho \"✅ DevOps architecture diagram generated\"\n"
-      - name: "\U0001F504 Generate Workflow Flow Diagram"
-        run: "echo \"\U0001F504 Generating workflow flow diagram...\"\n\n# Create workflow flow diagram\ncat > workflow-flow.mmd << 'EOF'\nflowchart TD\n    START([Code Push/PR])\n    \n    subgraph \"\U0001F50D Analysis Phase\"\n        CHANGE[Change Detection]\n        COMPLEXITY[Complexity Analysis]\n    end\n    \n    subgraph \"✅ Quality Phase\"\n        LINT[Linting]\n        TEST[Testing]\n        SECURITY[Security Scan]\n        PERFORMANCE[Performance Test]\n    end\n    \n    subgraph \"\U0001F916 AI Phase\"\n        CLAUDE_REVIEW[Claude Review]\n        AUTO_FIX[Auto-Fix Generation]\n    end\n    \n    subgraph \"\U0001F3D7️ Build Phase\"  \n        BUILD[Production Build]\n        ARTIFACTS[Artifact Generation]\n    end\n    \n    subgraph \"\U0001F3AF Quality Gate\"\n        GATE{Quality Gate}\n        APPROVAL[Approval Required]\n    end\n    \n    subgraph \"\U0001F680 Deploy Phase\"\n        STAGING[Staging Deploy]\n        PRODUCTION[Production Deploy]\n    end\n    \n    END([✅ Complete])\n    FAIL([❌ Failed])\n    \n    START --> CHANGE\n    CHANGE --> COMPLEXITY\n    COMPLEXITY --> LINT\n    LINT --> TEST\n    TEST --> SECURITY\n    SECURITY --> PERFORMANCE\n    PERFORMANCE --> CLAUDE_REVIEW\n    CLAUDE_REVIEW --> AUTO_FIX\n    AUTO_FIX --> BUILD\n    BUILD --> ARTIFACTS\n    ARTIFACTS --> GATE\n    \n    GATE -->|Pass| STAGING\n    GATE -->|Fail| FAIL\n    GATE -->|Manual Review| APPROVAL\n    APPROVAL --> STAGING\n    STAGING --> PRODUCTION\n    PRODUCTION --> END\n    \n    style START fill:#e8f5e8\n    style GATE fill:#fff3e0\n    style END fill:#e8f5e8\n    style FAIL fill:#ffebee\nEOF\n\nmmdc -i workflow-flow.mmd -o workflow-flow.svg -t dark -b transparent\n\necho \"✅ Workflow flow diagram generated\"\n"
-      - name: "\U0001F4CA Generate Metrics Visualization"
+          name: workflow-analysis-${{ github.run_number }}
+      - name: 🎨 Install Diagram Generation Tools
+        run: |
+          echo "🎨 Installing diagram generation tools..."
+
+          # Install Mermaid CLI for diagram generation
+          npm install -g @mermaid-js/mermaid-cli
+
+          # Install Puppeteer for rendering
+          npm install puppeteer
+
+          echo "✅ Diagram tools installed"
+      - name: 🏗️ Generate DevOps Architecture Diagram
+        run: |
+          echo "🏗️ Generating DevOps architecture diagram..."
+
+          # Create Mermaid diagram for DevOps pipeline
+          cat > devops-architecture.mmd << 'EOF'
+          graph TB
+              subgraph "🚀 DevOps Pipeline Architecture"
+                  subgraph "📝 Source Control"
+                      GIT[GitHub Repository]
+                      PR[Pull Requests]
+                      ISSUES[Issues]
+                  end
+                  
+                  subgraph "🔄 CI/CD Pipeline"
+                      CI[CI - Build & Test]
+                      QA[QA - Quality Gates]
+                      SEC[SEC - Security Scan]
+                      PERF[PERF - Performance]
+                  end
+                  
+                  subgraph "🤖 AI Integration"
+                      CLAUDE[Claude AI Review]
+                      AUTOFIX[Auto-Fix Suggestions]
+                      ANALYSIS[Code Analysis]
+                  end
+                  
+                  subgraph "📊 Monitoring"
+                      METRICS[Metrics Collection]
+                      ALERTS[Alert System]
+                      DASHBOARD[Dashboards]
+                  end
+                  
+                  subgraph "🚀 Deployment"
+                      STAGING[Staging Environment]
+                      PROD[Production Deployment]
+                      ROLLBACK[Auto Rollback]
+                  end
+              end
+              
+              GIT --> CI
+              PR --> CLAUDE
+              ISSUES --> ANALYSIS
+              CI --> QA
+              CI --> SEC
+              CI --> PERF
+              CLAUDE --> AUTOFIX
+              QA --> STAGING
+              SEC --> STAGING
+              PERF --> STAGING
+              STAGING --> PROD
+              PROD --> METRICS
+              METRICS --> ALERTS
+              ALERTS --> ROLLBACK
+              
+              style GIT fill:#e1f5fe
+              style CI fill:#f3e5f5
+              style CLAUDE fill:#fff3e0
+              style PROD fill:#e8f5e8
+          EOF
+
+          # Generate SVG diagram
+          mmdc -i devops-architecture.mmd -o devops-architecture.svg -t dark -b transparent
+
+          echo "✅ DevOps architecture diagram generated"
+      - name: 🔄 Generate Workflow Flow Diagram
+        run: |
+          echo "🔄 Generating workflow flow diagram..."
+
+          # Create workflow flow diagram
+          cat > workflow-flow.mmd << 'EOF'
+          flowchart TD
+              START([Code Push/PR])
+              
+              subgraph "🔍 Analysis Phase"
+                  CHANGE[Change Detection]
+                  COMPLEXITY[Complexity Analysis]
+              end
+              
+              subgraph "✅ Quality Phase"
+                  LINT[Linting]
+                  TEST[Testing]
+                  SECURITY[Security Scan]
+                  PERFORMANCE[Performance Test]
+              end
+              
+              subgraph "🤖 AI Phase"
+                  CLAUDE_REVIEW[Claude Review]
+                  AUTO_FIX[Auto-Fix Generation]
+              end
+              
+              subgraph "🏗️ Build Phase"  
+                  BUILD[Production Build]
+                  ARTIFACTS[Artifact Generation]
+              end
+              
+              subgraph "🎯 Quality Gate"
+                  GATE{Quality Gate}
+                  APPROVAL[Approval Required]
+              end
+              
+              subgraph "🚀 Deploy Phase"
+                  STAGING[Staging Deploy]
+                  PRODUCTION[Production Deploy]
+              end
+              
+              END([✅ Complete])
+              FAIL([❌ Failed])
+              
+              START --> CHANGE
+              CHANGE --> COMPLEXITY
+              COMPLEXITY --> LINT
+              LINT --> TEST
+              TEST --> SECURITY
+              SECURITY --> PERFORMANCE
+              PERFORMANCE --> CLAUDE_REVIEW
+              CLAUDE_REVIEW --> AUTO_FIX
+              AUTO_FIX --> BUILD
+              BUILD --> ARTIFACTS
+              ARTIFACTS --> GATE
+              
+              GATE -->|Pass| STAGING
+              GATE -->|Fail| FAIL
+              GATE -->|Manual Review| APPROVAL
+              APPROVAL --> STAGING
+              STAGING --> PRODUCTION
+              PRODUCTION --> END
+              
+              style START fill:#e8f5e8
+              style GATE fill:#fff3e0
+              style END fill:#e8f5e8
+              style FAIL fill:#ffebee
+          EOF
+
+          mmdc -i workflow-flow.mmd -o workflow-flow.svg -t dark -b transparent
+
+          echo "✅ Workflow flow diagram generated"
+      - name: 📊 Generate Metrics Visualization
         if: env.INCLUDE_METRICS == 'true'
-        run: "echo \"\U0001F4CA Generating metrics visualization...\"\n\n# Create metrics dashboard diagram\ncat > metrics-dashboard.mmd << 'EOF'\ngraph LR\n    subgraph \"\U0001F4CA DevOps Metrics Dashboard\"\n        subgraph \"\U0001F680 Deployment Metrics\"\n            DEPLOY_FREQ[Deployment Frequency]\n            LEAD_TIME[Lead Time]\n            MTTR[Mean Time to Recovery]\n            CHANGE_FAIL[Change Failure Rate]\n        end\n        \n        subgraph \"\U0001F4C8 Quality Metrics\"\n            CODE_COV[Code Coverage]\n            BUG_RATE[Bug Detection Rate]\n            TECH_DEBT[Technical Debt]\n            SECURITY[Security Score]\n        end\n        \n        subgraph \"⚡ Performance Metrics\"\n            BUILD_TIME[Build Time]\n            TEST_TIME[Test Execution Time]\n            BUNDLE_SIZE[Bundle Size]\n            LIGHTHOUSE[Lighthouse Score]\n        end\n        \n        subgraph \"\U0001F916 AI Metrics\"\n            REVIEW_ACC[Review Accuracy]\n            AUTO_FIX[Auto-Fix Success]\n            ISSUE_RES[Issue Resolution]\n        end\n    end\n    \n    DEPLOY_FREQ --> DASHBOARD[\U0001F4CA Executive Dashboard]\n    LEAD_TIME --> DASHBOARD\n    CODE_COV --> DASHBOARD\n    BUILD_TIME --> DASHBOARD\n    REVIEW_ACC --> DASHBOARD\n    \n    style DASHBOARD fill:#e3f2fd\n    style DEPLOY_FREQ fill:#e8f5e8\n    style CODE_COV fill:#f3e5f5\n    style BUILD_TIME fill:#fff3e0\n    style REVIEW_ACC fill:#fce4ec\nEOF\n\nmmdc -i metrics-dashboard.mmd -o metrics-dashboard.svg -t dark -b transparent\n\necho \"✅ Metrics dashboard diagram generated\"\n"
-      - name: "\U0001F4E4 Upload Architecture Diagrams"
+        run: |
+          echo "📊 Generating metrics visualization..."
+
+          # Create metrics dashboard diagram
+          cat > metrics-dashboard.mmd << 'EOF'
+          graph LR
+              subgraph "📊 DevOps Metrics Dashboard"
+                  subgraph "🚀 Deployment Metrics"
+                      DEPLOY_FREQ[Deployment Frequency]
+                      LEAD_TIME[Lead Time]
+                      MTTR[Mean Time to Recovery]
+                      CHANGE_FAIL[Change Failure Rate]
+                  end
+                  
+                  subgraph "📈 Quality Metrics"
+                      CODE_COV[Code Coverage]
+                      BUG_RATE[Bug Detection Rate]
+                      TECH_DEBT[Technical Debt]
+                      SECURITY[Security Score]
+                  end
+                  
+                  subgraph "⚡ Performance Metrics"
+                      BUILD_TIME[Build Time]
+                      TEST_TIME[Test Execution Time]
+                      BUNDLE_SIZE[Bundle Size]
+                      LIGHTHOUSE[Lighthouse Score]
+                  end
+                  
+                  subgraph "🤖 AI Metrics"
+                      REVIEW_ACC[Review Accuracy]
+                      AUTO_FIX[Auto-Fix Success]
+                      ISSUE_RES[Issue Resolution]
+                  end
+              end
+              
+              DEPLOY_FREQ --> DASHBOARD[📊 Executive Dashboard]
+              LEAD_TIME --> DASHBOARD
+              CODE_COV --> DASHBOARD
+              BUILD_TIME --> DASHBOARD
+              REVIEW_ACC --> DASHBOARD
+              
+              style DASHBOARD fill:#e3f2fd
+              style DEPLOY_FREQ fill:#e8f5e8
+              style CODE_COV fill:#f3e5f5
+              style BUILD_TIME fill:#fff3e0
+              style REVIEW_ACC fill:#fce4ec
+          EOF
+
+          mmdc -i metrics-dashboard.mmd -o metrics-dashboard.svg -t dark -b transparent
+
+          echo "✅ Metrics dashboard diagram generated"
+      - name: 📤 Upload Architecture Diagrams
         uses: actions/upload-artifact@v4
         with:
-          name: 'architecture-diagrams-${{ github.run_number }}'
+          name: architecture-diagrams-${{ github.run_number }}
           path: |
             devops-architecture.svg
             workflow-flow.svg
@@ -153,29 +578,325 @@ jobs:
           retention-days: 90
     timeout-minutes: 30
   metrics-report:
-    name: "\U0001F4CA レポート: \U0001F4C8 DevOps Metrics Report"
+    name: "🔧 レポート: metrics-report"
     runs-on: ubuntu-latest
     needs:
       - docs-setup
       - workflow-analysis
-    if: 'env.INCLUDE_METRICS == ''true'' && contains(fromJson(''["comprehensive", "metrics-report-only"]''), env.DOC_TYPE)'
+    if: env.INCLUDE_METRICS == 'true' && contains(fromJson('["comprehensive", "metrics-report-only"]'), env.DOC_TYPE)
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F4CA Collect Workflow Execution Metrics"
+      - name: 📊 Collect Workflow Execution Metrics
         id: metrics
-        run: "echo \"\U0001F4CA Collecting DevOps pipeline metrics...\"\n\n# Get recent workflow runs via GitHub API\nworkflow_runs=$(curl -s -H \"Authorization: token ${{ secrets.GITHUB_TOKEN }}\" \\\n  \"https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=100\" | \\\n  jq -r '.workflow_runs[] | select(.created_at > (now - 86400*7 | strftime(\"%Y-%m-%dT%H:%M:%SZ\"))) | \"\\(.name)|\\(.status)|\\(.conclusion)|\\(.run_started_at)|\\(.updated_at)\"')\n\n# Calculate metrics\ntotal_runs=0\nsuccess_runs=0\nfailed_runs=0\navg_duration=0\ntotal_duration=0\n\nwhile IFS='|' read -r name status conclusion started updated; do\n  if [ -n \"$name\" ]; then\n    total_runs=$((total_runs + 1))\n    \n    if [ \"$conclusion\" = \"success\" ]; then\n      success_runs=$((success_runs + 1))\n    elif [ \"$conclusion\" = \"failure\" ]; then\n      failed_runs=$((failed_runs + 1))\n    fi\n    \n    # Calculate duration (simplified)\n    if [ -n \"$started\" ] && [ -n \"$updated\" ]; then\n      start_ts=$(date -d \"$started\" +%s 2>/dev/null || echo \"0\")\n      end_ts=$(date -d \"$updated\" +%s 2>/dev/null || echo \"0\")\n      if [ \"$start_ts\" -gt 0 ] && [ \"$end_ts\" -gt 0 ]; then\n        duration=$((end_ts - start_ts))\n        total_duration=$((total_duration + duration))\n      fi\n    fi\n  fi\ndone <<< \"$workflow_runs\"\n\nif [ \"$total_runs\" -gt 0 ]; then\n  success_rate=$(echo \"scale=2; $success_runs * 100 / $total_runs\" | bc 2>/dev/null || echo \"0\")\n  failure_rate=$(echo \"scale=2; $failed_runs * 100 / $total_runs\" | bc 2>/dev/null || echo \"0\")\n  avg_duration=$(echo \"scale=0; $total_duration / $total_runs\" | bc 2>/dev/null || echo \"0\")\nelse\n  success_rate=0\n  failure_rate=0\n  avg_duration=0\nfi\n\necho \"total-runs=$total_runs\" >> $GITHUB_OUTPUT\necho \"success-rate=$success_rate\" >> $GITHUB_OUTPUT\necho \"failure-rate=$failure_rate\" >> $GITHUB_OUTPUT\necho \"avg-duration=$avg_duration\" >> $GITHUB_OUTPUT\n\necho \"\U0001F4CA Metrics Summary:\"\necho \"  Total Runs (7 days): $total_runs\"\necho \"  Success Rate: ${success_rate}%\"\necho \"  Average Duration: ${avg_duration}s\"\n"
-      - name: "\U0001F4C8 Generate Comprehensive Metrics Report"
-        run: "echo \"\U0001F4C8 Generating comprehensive metrics report...\"\n\n# Create comprehensive metrics report\ncat > DEVOPS_METRICS_REPORT.md << EOF\n# \U0001F4CA DevOps Pipeline Metrics Report\n\n**Report Generated**: $(date -Iseconds)  \n**Period**: Last 7 days  \n**Repository**: ${{ github.repository }}  \n\n## \U0001F3AF Executive Summary\n\n| Metric | Value | Target | Status |\n|--------|-------|--------|--------|\n| Total Workflow Runs | ${{ steps.metrics.outputs.total-runs }} | - | ℹ️ INFO |\n| Success Rate | ${{ steps.metrics.outputs.success-rate }}% | >90% | $([[ $(echo \"${{ steps.metrics.outputs.success-rate }} >= 90\" | bc -l 2>/dev/null) == \"1\" ]] && echo \"✅ GOOD\" || echo \"⚠️ NEEDS IMPROVEMENT\") |\n| Average Duration | ${{ steps.metrics.outputs.avg-duration }}s | <300s | $([[ \"${{ steps.metrics.outputs.avg-duration }}\" -le 300 ]] && echo \"✅ GOOD\" || echo \"⚠️ REVIEW\") |\n| Total Workflows | ${{ needs.workflow-analysis.outputs.workflow-count }} | - | ℹ️ INFO |\n| Active Categories | $(echo \"${{ needs.workflow-analysis.outputs.categories }}\" | tr ',' '\\n' | wc -l) | - | ℹ️ INFO |\n\n## \U0001F4C8 Performance Trends\n\n### Deployment Metrics (DORA)\n\nBased on industry-standard DORA metrics:\n\n- **Deployment Frequency**: $(echo \"scale=2; ${{ steps.metrics.outputs.total-runs }} / 7\" | bc 2>/dev/null || echo \"0\") deployments/day\n- **Lead Time**: Estimated ${{ steps.metrics.outputs.avg-duration }}s (from commit to production)\n- **Change Failure Rate**: ${{ steps.metrics.outputs.failure-rate }}%\n- **Mean Time to Recovery**: <1 hour (automated rollback enabled)\n\n### Quality Metrics\n\n- **Workflow Categories**: ${{ needs.workflow-analysis.outputs.categories }}\n- **Automation Coverage**: >95% (comprehensive pipeline coverage)\n- **Security Scanning**: Integrated in all workflows\n- **Performance Monitoring**: Real-time metrics collection\n\n### AI Integration Metrics\n\n- **Claude AI Reviews**: Enabled for all PRs\n- **Auto-Fix Suggestions**: Available for common issues\n- **Issue Auto-Processing**: Intelligent labeling and routing\n\n## \U0001F3AF Performance Benchmarks\n\n### Industry Comparison\n\n| Metric | Our Value | Industry Average | Elite Performers |\n|--------|-----------|------------------|------------------|\n| Deployment Frequency | $(echo \"scale=1; ${{ steps.metrics.outputs.total-runs }} / 7\" | bc 2>/dev/null || echo \"0\")/day | 1/week | Multiple/day |\n| Lead Time | ${{ steps.metrics.outputs.avg-duration }}s | 1-7 days | <1 hour |\n| Change Failure Rate | ${{ steps.metrics.outputs.failure-rate }}% | 15% | <5% |\n| Recovery Time | <1 hour | 1-7 days | <1 hour |\n\n### DevOps Maturity Assessment\n\nBased on our metrics, we are performing at:\n\nEOF\n\n# Calculate maturity level\nsuccess_rate=\"${{ steps.metrics.outputs.success-rate }}\"\navg_duration=\"${{ steps.metrics.outputs.avg-duration }}\"\n\nif [[ $(echo \"$success_rate >= 95\" | bc -l 2>/dev/null) == \"1\" ]] && [[ \"$avg_duration\" -le 300 ]]; then\n  maturity=\"\U0001F680 **ELITE** level\"\nelif [[ $(echo \"$success_rate >= 85\" | bc -l 2>/dev/null) == \"1\" ]] && [[ \"$avg_duration\" -le 600 ]]; then\n  maturity=\"\U0001F4C8 **HIGH** level\"\nelif [[ $(echo \"$success_rate >= 70\" | bc -l 2>/dev/null) == \"1\" ]]; then\n  maturity=\"\U0001F4CA **MEDIUM** level\"\nelse\n  maturity=\"\U0001F4C9 **LOW** level\"\nfi\n\necho \"- **DevOps Maturity**: $maturity\" >> DEVOPS_METRICS_REPORT.md\n\ncat >> DEVOPS_METRICS_REPORT.md << 'EOF'\n\n## \U0001F50D Detailed Analysis\n\n### Strengths\n- Comprehensive workflow coverage across all categories\n- Integrated AI-powered code review and suggestions\n- Automated quality gates and security scanning\n- Real-time performance monitoring\n- Multi-stage deployment pipeline\n\n### Areas for Improvement\nEOF\n\n# Add improvement recommendations based on metrics\nif [[ $(echo \"$success_rate < 90\" | bc -l 2>/dev/null) == \"1\" ]]; then\n  echo \"- **Success Rate**: Below 90% target - investigate failure patterns\" >> DEVOPS_METRICS_REPORT.md\nfi\n\nif [[ \"$avg_duration\" -gt 300 ]]; then\n  echo \"- **Build Duration**: Above 5-minute target - optimize pipeline performance\" >> DEVOPS_METRICS_REPORT.md\nfi\n\ncat >> DEVOPS_METRICS_REPORT.md << 'EOF'\n\n### Recommendations\n\n1. **Short Term** (1-2 weeks)\n   - Optimize slow-running workflows\n   - Implement workflow caching improvements\n   - Add missing test coverage\n\n2. **Medium Term** (1-3 months)\n   - Enhance monitoring and alerting\n   - Implement advanced deployment strategies\n   - Expand AI-driven optimizations\n\n3. **Long Term** (3-6 months)\n   - Machine learning-based predictive scaling\n   - Advanced chaos engineering practices\n   - Cross-team DevOps standardization\n\n## \U0001F4CA Workflow Category Breakdown\n\nEOF\n\n# Add category breakdown\necho \"${{ needs.workflow-analysis.outputs.categories }}\" | tr ',' '\\n' | while read category; do\n  echo \"- **$category**: Core functionality implemented\" >> DEVOPS_METRICS_REPORT.md\ndone\n\ncat >> DEVOPS_METRICS_REPORT.md << 'EOF'\n\n## \U0001F680 Next Steps\n\n1. **Review** this metrics report with the development team\n2. **Prioritize** improvement areas based on business impact\n3. **Implement** recommended optimizations\n4. **Monitor** progress with updated metrics\n5. **Iterate** on pipeline improvements continuously\n\n## \U0001F4CB Action Items\n\n- [ ] Address workflows with high failure rates\n- [ ] Optimize build times for workflows exceeding 5 minutes\n- [ ] Enhance monitoring dashboards with real-time metrics\n- [ ] Implement advanced deployment strategies (blue-green, canary)\n- [ ] Expand test automation coverage\n\n---\n*This report is automatically generated by the DevOps Documentation workflow*  \n*Next update: $(date -d \"+1 day\" -Iseconds)*\nEOF\n\necho \"✅ Comprehensive metrics report generated\"\n"
-      - name: "\U0001F4E4 Upload Metrics Report"
+        run: |
+          echo "📊 Collecting DevOps pipeline metrics..."
+
+          # Get recent workflow runs via GitHub API
+          workflow_runs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=100" | \
+            jq -r '.workflow_runs[] | select(.created_at > (now - 86400*7 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | "\(.name)|\(.status)|\(.conclusion)|\(.run_started_at)|\(.updated_at)"')
+
+          # Calculate metrics
+          total_runs=0
+          success_runs=0
+          failed_runs=0
+          avg_duration=0
+          total_duration=0
+
+          while IFS='|' read -r name status conclusion started updated; do
+            if [ -n "$name" ]; then
+              total_runs=$((total_runs + 1))
+              
+              if [ "$conclusion" = "success" ]; then
+                success_runs=$((success_runs + 1))
+              elif [ "$conclusion" = "failure" ]; then
+                failed_runs=$((failed_runs + 1))
+              fi
+              
+              # Calculate duration (simplified)
+              if [ -n "$started" ] && [ -n "$updated" ]; then
+                start_ts=$(date -d "$started" +%s 2>/dev/null || echo "0")
+                end_ts=$(date -d "$updated" +%s 2>/dev/null || echo "0")
+                if [ "$start_ts" -gt 0 ] && [ "$end_ts" -gt 0 ]; then
+                  duration=$((end_ts - start_ts))
+                  total_duration=$((total_duration + duration))
+                fi
+              fi
+            fi
+          done <<< "$workflow_runs"
+
+          if [ "$total_runs" -gt 0 ]; then
+            success_rate=$(echo "scale=2; $success_runs * 100 / $total_runs" | bc 2>/dev/null || echo "0")
+            failure_rate=$(echo "scale=2; $failed_runs * 100 / $total_runs" | bc 2>/dev/null || echo "0")
+            avg_duration=$(echo "scale=0; $total_duration / $total_runs" | bc 2>/dev/null || echo "0")
+          else
+            success_rate=0
+            failure_rate=0
+            avg_duration=0
+          fi
+
+          echo "total-runs=$total_runs" >> $GITHUB_OUTPUT
+          echo "success-rate=$success_rate" >> $GITHUB_OUTPUT
+          echo "failure-rate=$failure_rate" >> $GITHUB_OUTPUT
+          echo "avg-duration=$avg_duration" >> $GITHUB_OUTPUT
+
+          echo "📊 Metrics Summary:"
+          echo "  Total Runs (7 days): $total_runs"
+          echo "  Success Rate: ${success_rate}%"
+          echo "  Average Duration: ${avg_duration}s"
+      - name: 📈 Generate Comprehensive Metrics Report
+        run: >
+          echo "📈 Generating comprehensive metrics report..."
+
+
+          # Create comprehensive metrics report
+
+          cat > DEVOPS_METRICS_REPORT.md << EOF
+
+          # 📊 DevOps Pipeline Metrics Report
+
+
+          **Report Generated**: $(date -Iseconds)  
+
+          **Period**: Last 7 days  
+
+          **Repository**: ${{ github.repository }}  
+
+
+          ## 🎯 Executive Summary
+
+
+          | Metric | Value | Target | Status |
+
+          |--------|-------|--------|--------|
+
+          | Total Workflow Runs | ${{ steps.metrics.outputs.total-runs }} | - | ℹ️ INFO |
+
+          | Success Rate | ${{ steps.metrics.outputs.success-rate }}% | >90% | $([[ $(echo "${{
+          steps.metrics.outputs.success-rate }} >= 90" | bc -l 2>/dev/null) == "1" ]] && echo "✅ GOOD" || echo "⚠️ NEEDS
+          IMPROVEMENT") |
+
+          | Average Duration | ${{ steps.metrics.outputs.avg-duration }}s | <300s | $([[ "${{
+          steps.metrics.outputs.avg-duration }}" -le 300 ]] && echo "✅ GOOD" || echo "⚠️ REVIEW") |
+
+          | Total Workflows | ${{ needs.workflow-analysis.outputs.workflow-count }} | - | ℹ️ INFO |
+
+          | Active Categories | $(echo "${{ needs.workflow-analysis.outputs.categories }}" | tr ',' '\n' | wc -l) | - |
+          ℹ️ INFO |
+
+
+          ## 📈 Performance Trends
+
+
+          ### Deployment Metrics (DORA)
+
+
+          Based on industry-standard DORA metrics:
+
+
+          - **Deployment Frequency**: $(echo "scale=2; ${{ steps.metrics.outputs.total-runs }} / 7" | bc 2>/dev/null ||
+          echo "0") deployments/day
+
+          - **Lead Time**: Estimated ${{ steps.metrics.outputs.avg-duration }}s (from commit to production)
+
+          - **Change Failure Rate**: ${{ steps.metrics.outputs.failure-rate }}%
+
+          - **Mean Time to Recovery**: <1 hour (automated rollback enabled)
+
+
+          ### Quality Metrics
+
+
+          - **Workflow Categories**: ${{ needs.workflow-analysis.outputs.categories }}
+
+          - **Automation Coverage**: >95% (comprehensive pipeline coverage)
+
+          - **Security Scanning**: Integrated in all workflows
+
+          - **Performance Monitoring**: Real-time metrics collection
+
+
+          ### AI Integration Metrics
+
+
+          - **Claude AI Reviews**: Enabled for all PRs
+
+          - **Auto-Fix Suggestions**: Available for common issues
+
+          - **Issue Auto-Processing**: Intelligent labeling and routing
+
+
+          ## 🎯 Performance Benchmarks
+
+
+          ### Industry Comparison
+
+
+          | Metric | Our Value | Industry Average | Elite Performers |
+
+          |--------|-----------|------------------|------------------|
+
+          | Deployment Frequency | $(echo "scale=1; ${{ steps.metrics.outputs.total-runs }} / 7" | bc 2>/dev/null ||
+          echo "0")/day | 1/week | Multiple/day |
+
+          | Lead Time | ${{ steps.metrics.outputs.avg-duration }}s | 1-7 days | <1 hour |
+
+          | Change Failure Rate | ${{ steps.metrics.outputs.failure-rate }}% | 15% | <5% |
+
+          | Recovery Time | <1 hour | 1-7 days | <1 hour |
+
+
+          ### DevOps Maturity Assessment
+
+
+          Based on our metrics, we are performing at:
+
+
+          EOF
+
+
+          # Calculate maturity level
+
+          success_rate="${{ steps.metrics.outputs.success-rate }}"
+
+          avg_duration="${{ steps.metrics.outputs.avg-duration }}"
+
+
+          if [[ $(echo "$success_rate >= 95" | bc -l 2>/dev/null) == "1" ]] && [[ "$avg_duration" -le 300 ]]; then
+            maturity="🚀 **ELITE** level"
+          elif [[ $(echo "$success_rate >= 85" | bc -l 2>/dev/null) == "1" ]] && [[ "$avg_duration" -le 600 ]]; then
+            maturity="📈 **HIGH** level"
+          elif [[ $(echo "$success_rate >= 70" | bc -l 2>/dev/null) == "1" ]]; then
+            maturity="📊 **MEDIUM** level"
+          else
+            maturity="📉 **LOW** level"
+          fi
+
+
+          echo "- **DevOps Maturity**: $maturity" >> DEVOPS_METRICS_REPORT.md
+
+
+          cat >> DEVOPS_METRICS_REPORT.md << 'EOF'
+
+
+          ## 🔍 Detailed Analysis
+
+
+          ### Strengths
+
+          - Comprehensive workflow coverage across all categories
+
+          - Integrated AI-powered code review and suggestions
+
+          - Automated quality gates and security scanning
+
+          - Real-time performance monitoring
+
+          - Multi-stage deployment pipeline
+
+
+          ### Areas for Improvement
+
+          EOF
+
+
+          # Add improvement recommendations based on metrics
+
+          if [[ $(echo "$success_rate < 90" | bc -l 2>/dev/null) == "1" ]]; then
+            echo "- **Success Rate**: Below 90% target - investigate failure patterns" >> DEVOPS_METRICS_REPORT.md
+          fi
+
+
+          if [[ "$avg_duration" -gt 300 ]]; then
+            echo "- **Build Duration**: Above 5-minute target - optimize pipeline performance" >> DEVOPS_METRICS_REPORT.md
+          fi
+
+
+          cat >> DEVOPS_METRICS_REPORT.md << 'EOF'
+
+
+          ### Recommendations
+
+
+          1. **Short Term** (1-2 weeks)
+             - Optimize slow-running workflows
+             - Implement workflow caching improvements
+             - Add missing test coverage
+
+          2. **Medium Term** (1-3 months)
+             - Enhance monitoring and alerting
+             - Implement advanced deployment strategies
+             - Expand AI-driven optimizations
+
+          3. **Long Term** (3-6 months)
+             - Machine learning-based predictive scaling
+             - Advanced chaos engineering practices
+             - Cross-team DevOps standardization
+
+          ## 📊 Workflow Category Breakdown
+
+
+          EOF
+
+
+          # Add category breakdown
+
+          echo "${{ needs.workflow-analysis.outputs.categories }}" | tr ',' '\n' | while read category; do
+            echo "- **$category**: Core functionality implemented" >> DEVOPS_METRICS_REPORT.md
+          done
+
+
+          cat >> DEVOPS_METRICS_REPORT.md << 'EOF'
+
+
+          ## 🚀 Next Steps
+
+
+          1. **Review** this metrics report with the development team
+
+          2. **Prioritize** improvement areas based on business impact
+
+          3. **Implement** recommended optimizations
+
+          4. **Monitor** progress with updated metrics
+
+          5. **Iterate** on pipeline improvements continuously
+
+
+          ## 📋 Action Items
+
+
+          - [ ] Address workflows with high failure rates
+
+          - [ ] Optimize build times for workflows exceeding 5 minutes
+
+          - [ ] Enhance monitoring dashboards with real-time metrics
+
+          - [ ] Implement advanced deployment strategies (blue-green, canary)
+
+          - [ ] Expand test automation coverage
+
+
+          ---
+
+          *This report is automatically generated by the DevOps Documentation workflow*  
+
+          *Next update: $(date -d "+1 day" -Iseconds)*
+
+          EOF
+
+
+          echo "✅ Comprehensive metrics report generated"
+      - name: 📤 Upload Metrics Report
         uses: actions/upload-artifact@v4
         with:
-          name: 'metrics-report-${{ github.run_number }}'
+          name: metrics-report-${{ github.run_number }}
           path: DEVOPS_METRICS_REPORT.md
           retention-days: 90
     timeout-minutes: 30
   documentation-integration:
-    name: "\U0001F517 統合: \U0001F4D6 Documentation Integration"
+    name: "🔗 統合: 📖 Documentation Integration"
     runs-on: ubuntu-latest
     needs:
       - docs-setup
@@ -184,36 +905,340 @@ jobs:
       - metrics-report
     if: always()
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-      - name: "\U0001F4E5 Download All Documentation Artifacts"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 📥 Download All Documentation Artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: '*-${{ github.run_number }}'
+          pattern: "*-${{ github.run_number }}"
           merge-multiple: true
         continue-on-error: true
-      - name: "\U0001F4D6 Create Comprehensive DevOps Documentation"
-        run: "echo \"\U0001F4D6 Creating comprehensive DevOps documentation...\"\n\n# Create docs directory if it doesn't exist\nmkdir -p docs/devops\n\n# Move generated documentation to docs directory\nif [ -f DEVOPS_WORKFLOW_INDEX.md ]; then\n  mv DEVOPS_WORKFLOW_INDEX.md docs/devops/\nfi\n\nif [ -f DEVOPS_METRICS_REPORT.md ]; then\n  mv DEVOPS_METRICS_REPORT.md docs/devops/\nfi\n\n# Move diagrams to docs directory\nmkdir -p docs/devops/diagrams\nif [ -f devops-architecture.svg ]; then\n  mv *.svg docs/devops/diagrams/ 2>/dev/null || true\nfi\n\n# Create master DevOps documentation index\ncat > docs/devops/README.md << 'EOF'\n# \U0001F680 DevOps Documentation Hub\n\nWelcome to the comprehensive DevOps documentation for the PMPLearningManagement project.\n\n## \U0001F4DA Documentation Index\n\n### \U0001F527 Workflows & Automation\n- [**Workflow Index**](DEVOPS_WORKFLOW_INDEX.md) - Complete catalog of all DevOps workflows\n- [**Architecture Map**](../../.github/devops-architecture-map.md) - DevOps infrastructure overview\n\n### \U0001F4CA Metrics & Analytics\n- [**Metrics Report**](DEVOPS_METRICS_REPORT.md) - Performance and quality metrics\n- [**Benchmarks**](../../.github/devops-architecture-map.md#-성공지표) - Success criteria and targets\n\n### \U0001F3A8 Architecture Diagrams\n- [**DevOps Pipeline**](diagrams/devops-architecture.svg) - Complete pipeline architecture\n- [**Workflow Flow**](diagrams/workflow-flow.svg) - Step-by-step process flow\n- [**Metrics Dashboard**](diagrams/metrics-dashboard.svg) - Monitoring and metrics visualization\n\n### \U0001F6E0️ Templates & Standards\n- [**Workflow Template**](../../.github/workflows/templates/devops-workflow-template.yml) - Standard workflow base\n- [**Naming Conventions**](../../.github/devops-architecture-map.md#-새로운-카테고리별-명명규칙) - Workflow naming standards\n\n## \U0001F3AF Quick Start\n\n### For Developers\n1. Review the [Workflow Index](DEVOPS_WORKFLOW_INDEX.md) to understand available automation\n2. Check the [Metrics Report](DEVOPS_METRICS_REPORT.md) for current performance\n3. Follow naming conventions when creating new workflows\n\n### For DevOps Engineers  \n1. Use the [DevOps Template](../../.github/workflows/templates/devops-workflow-template.yml) for new workflows\n2. Monitor metrics and optimize based on the [Metrics Report](DEVOPS_METRICS_REPORT.md)\n3. Update architecture diagrams when adding new components\n\n### For Project Managers\n1. Review [Success Metrics](DEVOPS_METRICS_REPORT.md#-executive-summary) for project health\n2. Track [DevOps Maturity](DEVOPS_METRICS_REPORT.md#devops-maturity-assessment) progress\n3. Prioritize improvements based on [Recommendations](DEVOPS_METRICS_REPORT.md#recommendations)\n\n## \U0001F4C8 Continuous Improvement\n\nThis documentation is automatically updated daily by the DevOps Documentation workflow. \nAll metrics and diagrams reflect the current state of our DevOps pipeline.\n\n**Last Updated**: $(date -Iseconds)  \n**Auto-Update Schedule**: Daily at 1 AM UTC  \n\n---\n*Powered by automated DevOps documentation system*\nEOF\n"
-      - name: "\U0001F4DD Update Main README (Optional)"
+      - name: 📖 Create Comprehensive DevOps Documentation
+        run: >
+          echo "📖 Creating comprehensive DevOps documentation..."
+
+
+          # Create docs directory if it doesn't exist
+
+          mkdir -p docs/devops
+
+
+          # Move generated documentation to docs directory
+
+          if [ -f DEVOPS_WORKFLOW_INDEX.md ]; then
+            mv DEVOPS_WORKFLOW_INDEX.md docs/devops/
+          fi
+
+
+          if [ -f DEVOPS_METRICS_REPORT.md ]; then
+            mv DEVOPS_METRICS_REPORT.md docs/devops/
+          fi
+
+
+          # Move diagrams to docs directory
+
+          mkdir -p docs/devops/diagrams
+
+          if [ -f devops-architecture.svg ]; then
+            mv *.svg docs/devops/diagrams/ 2>/dev/null || true
+          fi
+
+
+          # Create master DevOps documentation index
+
+          cat > docs/devops/README.md << 'EOF'
+
+          # 🚀 DevOps Documentation Hub
+
+
+          Welcome to the comprehensive DevOps documentation for the PMPLearningManagement project.
+
+
+          ## 📚 Documentation Index
+
+
+          ### 🔧 Workflows & Automation
+
+          - [**Workflow Index**](DEVOPS_WORKFLOW_INDEX.md) - Complete catalog of all DevOps workflows
+
+          - [**Architecture Map**](../../.github/devops-architecture-map.md) - DevOps infrastructure overview
+
+
+          ### 📊 Metrics & Analytics
+
+          - [**Metrics Report**](DEVOPS_METRICS_REPORT.md) - Performance and quality metrics
+
+          - [**Benchmarks**](../../.github/devops-architecture-map.md#-성공지표) - Success criteria and targets
+
+
+          ### 🎨 Architecture Diagrams
+
+          - [**DevOps Pipeline**](diagrams/devops-architecture.svg) - Complete pipeline architecture
+
+          - [**Workflow Flow**](diagrams/workflow-flow.svg) - Step-by-step process flow
+
+          - [**Metrics Dashboard**](diagrams/metrics-dashboard.svg) - Monitoring and metrics visualization
+
+
+          ### 🛠️ Templates & Standards
+
+          - [**Workflow Template**](../../.github/workflows/templates/devops-workflow-template.yml) - Standard workflow
+          base
+
+          - [**Naming Conventions**](../../.github/devops-architecture-map.md#-새로운-카테고리별-명명규칙) - Workflow naming
+          standards
+
+
+          ## 🎯 Quick Start
+
+
+          ### For Developers
+
+          1. Review the [Workflow Index](DEVOPS_WORKFLOW_INDEX.md) to understand available automation
+
+          2. Check the [Metrics Report](DEVOPS_METRICS_REPORT.md) for current performance
+
+          3. Follow naming conventions when creating new workflows
+
+
+          ### For DevOps Engineers  
+
+          1. Use the [DevOps Template](../../.github/workflows/templates/devops-workflow-template.yml) for new workflows
+
+          2. Monitor metrics and optimize based on the [Metrics Report](DEVOPS_METRICS_REPORT.md)
+
+          3. Update architecture diagrams when adding new components
+
+
+          ### For Project Managers
+
+          1. Review [Success Metrics](DEVOPS_METRICS_REPORT.md#-executive-summary) for project health
+
+          2. Track [DevOps Maturity](DEVOPS_METRICS_REPORT.md#devops-maturity-assessment) progress
+
+          3. Prioritize improvements based on [Recommendations](DEVOPS_METRICS_REPORT.md#recommendations)
+
+
+          ## 📈 Continuous Improvement
+
+
+          This documentation is automatically updated daily by the DevOps Documentation workflow. 
+
+          All metrics and diagrams reflect the current state of our DevOps pipeline.
+
+
+          **Last Updated**: $(date -Iseconds)  
+
+          **Auto-Update Schedule**: Daily at 1 AM UTC  
+
+
+          ---
+
+          *Powered by automated DevOps documentation system*
+
+          EOF
+      - name: 📝 Update Main README (Optional)
         if: env.UPDATE_README == 'true'
-        run: "echo \"\U0001F4DD Updating main README with DevOps section...\"\n\nif [ -f README.md ]; then\n  # Check if DevOps section already exists\n  if ! grep -q \"## \U0001F680 DevOps & CI/CD\" README.md; then\n    # Add DevOps section before the existing sections\n    cat >> README_DEVOPS_SECTION.md << 'EOF'\n\n## \U0001F680 DevOps & CI/CD\n\nThis project features a comprehensive DevOps pipeline with automated CI/CD, quality gates, security scanning, and AI-powered code review.\n\n### \U0001F4CA Pipeline Status\n\n- **Total Workflows**: $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo \"46+\")\n- **Success Rate**: ${{ needs.metrics-report.outputs.success-rate || '95+' }}%\n- **Categories**: CI/CD, Security, Performance, AI Integration, Documentation\n\n### \U0001F527 Key Features\n\n- **\U0001F916 AI-Powered**: Claude AI integration for automated code review and suggestions\n- **\U0001F512 Security-First**: Comprehensive security scanning and compliance validation\n- **⚡ Performance**: Real-time monitoring and optimization\n- **\U0001F4CA Metrics-Driven**: DORA metrics and comprehensive reporting\n- **\U0001F680 Automation**: 95%+ automated pipeline coverage\n\n### \U0001F4DA Documentation\n\n- [**DevOps Hub**](docs/devops/README.md) - Complete DevOps documentation\n- [**Workflow Index**](docs/devops/DEVOPS_WORKFLOW_INDEX.md) - All workflows catalog\n- [**Metrics Report**](docs/devops/DEVOPS_METRICS_REPORT.md) - Performance analytics\n- [**Architecture Diagrams**](docs/devops/diagrams/) - Visual pipeline overview\n\n---\n\nEOF\n    \n    # Insert DevOps section after the main project description\n    sed -i '/## プロジェクト概要/r README_DEVOPS_SECTION.md' README.md\n    rm README_DEVOPS_SECTION.md\n    \n    echo \"✅ DevOps section added to README.md\"\n  else\n    echo \"ℹ️ DevOps section already exists in README.md\"\n  fi\nfi\n"
-      - name: "\U0001F4BE Commit Documentation Updates"
-        run: "echo \"\U0001F4BE Committing documentation updates...\"\n\n# Configure git\ngit config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\n\n# Add all documentation changes\ngit add docs/devops/\ngit add README.md 2>/dev/null || true\n\n# Check if there are changes to commit\nif git diff --staged --quiet; then\n  echo \"ℹ️ No documentation changes to commit\"\nelse\n  git commit -m \"docs: \U0001F4DA Update DevOps documentation and diagrams\n\n  - Generated comprehensive workflow index with $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo 'N/A') workflows\n  - Updated metrics report with latest performance data  \n  - Refreshed architecture diagrams\n  - Updated DevOps documentation hub\n  \n  \U0001F916 Generated with DevOps Documentation Pipeline\"\n  \n  echo \"✅ Documentation changes committed\"\nfi\n"
-      - name: "\U0001F680 Push Documentation Updates"
+        run: >
+          echo "📝 Updating main README with DevOps section..."
+
+
+          if [ -f README.md ]; then
+            # Check if DevOps section already exists
+            if ! grep -q "## 🚀 DevOps & CI/CD" README.md; then
+              # Add DevOps section before the existing sections
+              cat >> README_DEVOPS_SECTION.md << 'EOF'
+
+          ## 🚀 DevOps & CI/CD
+
+
+          This project features a comprehensive DevOps pipeline with automated CI/CD, quality gates, security scanning,
+          and AI-powered code review.
+
+
+          ### 📊 Pipeline Status
+
+
+          - **Total Workflows**: $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo "46+")
+
+          - **Success Rate**: ${{ needs.metrics-report.outputs.success-rate || '95+' }}%
+
+          - **Categories**: CI/CD, Security, Performance, AI Integration, Documentation
+
+
+          ### 🔧 Key Features
+
+
+          - **🤖 AI-Powered**: Claude AI integration for automated code review and suggestions
+
+          - **🔒 Security-First**: Comprehensive security scanning and compliance validation
+
+          - **⚡ Performance**: Real-time monitoring and optimization
+
+          - **📊 Metrics-Driven**: DORA metrics and comprehensive reporting
+
+          - **🚀 Automation**: 95%+ automated pipeline coverage
+
+
+          ### 📚 Documentation
+
+
+          - [**DevOps Hub**](docs/devops/README.md) - Complete DevOps documentation
+
+          - [**Workflow Index**](docs/devops/DEVOPS_WORKFLOW_INDEX.md) - All workflows catalog
+
+          - [**Metrics Report**](docs/devops/DEVOPS_METRICS_REPORT.md) - Performance analytics
+
+          - [**Architecture Diagrams**](docs/devops/diagrams/) - Visual pipeline overview
+
+
+          ---
+
+
+          EOF
+              
+              # Insert DevOps section after the main project description
+              sed -i '/## プロジェクト概要/r README_DEVOPS_SECTION.md' README.md
+              rm README_DEVOPS_SECTION.md
+              
+              echo "✅ DevOps section added to README.md"
+            else
+              echo "ℹ️ DevOps section already exists in README.md"
+            fi
+          fi
+      - name: 💾 Commit Documentation Updates
+        run: |
+          echo "💾 Committing documentation updates..."
+
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add all documentation changes
+          git add docs/devops/
+          git add README.md 2>/dev/null || true
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "ℹ️ No documentation changes to commit"
+          else
+            git commit -m "docs: 📚 Update DevOps documentation and diagrams
+
+            - Generated comprehensive workflow index with $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo 'N/A') workflows
+            - Updated metrics report with latest performance data  
+            - Refreshed architecture diagrams
+            - Updated DevOps documentation hub
+            
+            🤖 Generated with DevOps Documentation Pipeline"
+            
+            echo "✅ Documentation changes committed"
+          fi
+      - name: 🚀 Push Documentation Updates
         if: github.event_name != 'pull_request'
-        run: "echo \"\U0001F680 Pushing documentation updates...\"\n\nif git log --oneline -1 | grep -q \"docs:\"; then\n  git push origin ${{ github.ref_name }}\n  echo \"✅ Documentation updates pushed\"\nelse\n  echo \"ℹ️ No documentation updates to push\"\nfi\n"
-      - name: "\U0001F4E4 Upload Final Documentation Package"
+        run: |
+          echo "🚀 Pushing documentation updates..."
+
+          if git log --oneline -1 | grep -q "docs:"; then
+            git push origin ${{ github.ref_name }}
+            echo "✅ Documentation updates pushed"
+          else
+            echo "ℹ️ No documentation updates to push"
+          fi
+      - name: 📤 Upload Final Documentation Package
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 'complete-devops-documentation-${{ github.run_number }}'
+          name: complete-devops-documentation-${{ github.run_number }}
           path: docs/devops/
           retention-days: 90
-      - name: "\U0001F4CA Generate Documentation Summary"
-        run: "echo \"\U0001F4CA Generating documentation generation summary...\"\n\ncat > documentation-generation-summary.md << EOF\n# \U0001F4DA Documentation Generation Summary\n\n**Generation Date**: $(date -Iseconds)\n**Workflow Run**: #${{ github.run_number }}\n**Commit**: ${{ github.sha }}\n\n## ✅ Generated Documentation\n\nEOF\n\n# List generated files\necho \"### \U0001F4CB Files Generated\" >> documentation-generation-summary.md\necho \"\" >> documentation-generation-summary.md\n\nif [ -f docs/devops/DEVOPS_WORKFLOW_INDEX.md ]; then\n  echo \"- ✅ **Workflow Index**: Complete catalog of $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo 'N/A') workflows\" >> documentation-generation-summary.md\nfi\n\nif [ -f docs/devops/DEVOPS_METRICS_REPORT.md ]; then\n  echo \"- ✅ **Metrics Report**: Performance analytics and benchmarks\" >> documentation-generation-summary.md\nfi\n\nif [ -d docs/devops/diagrams ] && [ \"$(ls -A docs/devops/diagrams 2>/dev/null)\" ]; then\n  echo \"- ✅ **Architecture Diagrams**: $(ls docs/devops/diagrams/*.svg 2>/dev/null | wc -l) SVG diagrams generated\" >> documentation-generation-summary.md\nfi\n\necho \"- ✅ **DevOps Hub**: Central documentation index created\" >> documentation-generation-summary.md\n\ncat >> documentation-generation-summary.md << EOF\n\n## \U0001F4CA Statistics\n\n- **Total Workflows Documented**: ${{ needs.workflow-analysis.outputs.workflow-count }}\n- **Workflow Categories**: ${{ needs.workflow-analysis.outputs.categories }}\n- **Documentation Type**: ${{ env.DOC_TYPE }}\n- **Diagrams Generated**: ${{ env.GENERATE_DIAGRAMS }}\n- **Metrics Included**: ${{ env.INCLUDE_METRICS }}\n\n## \U0001F517 Access Points\n\n- [DevOps Documentation Hub](docs/devops/README.md)\n- [Workflow Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)\n\n---\n*Auto-generated by DevOps Documentation Pipeline v2.0.0*\nEOF\n\ncat documentation-generation-summary.md\n\necho \"✅ Documentation generation completed successfully!\"\n"
+      - name: 📊 Generate Documentation Summary
+        run: >
+          echo "📊 Generating documentation generation summary..."
+
+
+          cat > documentation-generation-summary.md << EOF
+
+          # 📚 Documentation Generation Summary
+
+
+          **Generation Date**: $(date -Iseconds)
+
+          **Workflow Run**: #${{ github.run_number }}
+
+          **Commit**: ${{ github.sha }}
+
+
+          ## ✅ Generated Documentation
+
+
+          EOF
+
+
+          # List generated files
+
+          echo "### 📋 Files Generated" >> documentation-generation-summary.md
+
+          echo "" >> documentation-generation-summary.md
+
+
+          if [ -f docs/devops/DEVOPS_WORKFLOW_INDEX.md ]; then
+            echo "- ✅ **Workflow Index**: Complete catalog of $(cat workflow-analysis.json | jq -r '.totalCount' 2>/dev/null || echo 'N/A') workflows" >> documentation-generation-summary.md
+          fi
+
+
+          if [ -f docs/devops/DEVOPS_METRICS_REPORT.md ]; then
+            echo "- ✅ **Metrics Report**: Performance analytics and benchmarks" >> documentation-generation-summary.md
+          fi
+
+
+          if [ -d docs/devops/diagrams ] && [ "$(ls -A docs/devops/diagrams 2>/dev/null)" ]; then
+            echo "- ✅ **Architecture Diagrams**: $(ls docs/devops/diagrams/*.svg 2>/dev/null | wc -l) SVG diagrams generated" >> documentation-generation-summary.md
+          fi
+
+
+          echo "- ✅ **DevOps Hub**: Central documentation index created" >> documentation-generation-summary.md
+
+
+          cat >> documentation-generation-summary.md << EOF
+
+
+          ## 📊 Statistics
+
+
+          - **Total Workflows Documented**: ${{ needs.workflow-analysis.outputs.workflow-count }}
+
+          - **Workflow Categories**: ${{ needs.workflow-analysis.outputs.categories }}
+
+          - **Documentation Type**: ${{ env.DOC_TYPE }}
+
+          - **Diagrams Generated**: ${{ env.GENERATE_DIAGRAMS }}
+
+          - **Metrics Included**: ${{ env.INCLUDE_METRICS }}
+
+
+          ## 🔗 Access Points
+
+
+          - [DevOps Documentation Hub](docs/devops/README.md)
+
+          - [Workflow Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id
+          }}#artifacts)
+
+
+          ---
+
+          *Auto-generated by DevOps Documentation Pipeline v2.0.0*
+
+          EOF
+
+
+          cat documentation-generation-summary.md
+
+
+          echo "✅ Documentation generation completed successfully!"
     timeout-minutes: 30
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

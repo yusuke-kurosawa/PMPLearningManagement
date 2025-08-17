@@ -1,28 +1,12 @@
-# ====================================================================
-# 🔧 Reusable Setup
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - 他ワークフローからの呼び出し
-#
-# 主な処理:
-#   1. 🔧 セットアップ: Environment Setup
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F527 Reusable Setup"
-'on':
+name: 🔧 Reusable Setup
+"on":
   workflow_call:
     inputs:
       node-version:
         description: Node.js version
         required: false
         type: string
-        default: '18'
+        default: "18"
       install-dependencies:
         description: Install npm dependencies
         required: false
@@ -36,21 +20,28 @@ name: "\U0001F527 Reusable Setup"
     outputs:
       setup-complete:
         description: Setup completion status
-        value: '${{ jobs.setup.outputs.complete }}'
+        value: ${{ jobs.setup.outputs.complete }}
       node-version:
         description: Installed Node.js version
-        value: '${{ jobs.setup.outputs.node-version }}'
+        value: ${{ jobs.setup.outputs.node-version }}
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
 env:
   CACHE_VERSION: v2
   NODE_ENV: production
 jobs:
   setup:
-    name: "\U0001F527 セットアップ: Environment Setup"
+    name: "🔧 セットアップ: setup"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
-      complete: '${{ steps.final.outputs.complete }}'
-      node-version: '${{ steps.versions.outputs.node }}'
+      complete: ${{ steps.final.outputs.complete }}
+      node-version: ${{ steps.versions.outputs.node }}
     steps:
       - name: Checkout repository
         uses: ./.github/actions/checkout-code
@@ -59,8 +50,8 @@ jobs:
       - name: Setup Node.js environment
         uses: ./.github/actions/setup-node
         with:
-          node-version: '${{ inputs.node-version }}'
-          install-dependencies: '${{ inputs.install-dependencies }}'
+          node-version: ${{ inputs.node-version }}
+          install-dependencies: ${{ inputs.install-dependencies }}
       - name: Cache project dependencies
         if: inputs.install-dependencies
         uses: ./.github/actions/cache-dependencies
@@ -102,5 +93,5 @@ permissions:
   checks: write
   pull-requests: write
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

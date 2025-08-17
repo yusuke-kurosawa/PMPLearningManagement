@@ -315,6 +315,79 @@ export type {
   ITTOTypes,
 } from './pmbok/itto'
 
+// ==================== サービス型エクスポート ====================
+
+// プロンプトログサービス型
+export type {
+  // ログ型
+  LogType,
+  LogStatus,
+  RetentionPolicy,
+  InteractionAction,
+  PromptLogConfig,
+  BaseLogEntry,
+  PromptLogEntry,
+  ResponseLogEntry,
+  InteractionLogEntry,
+
+  // メトリック・分析型
+  PromptMetrics,
+  ResponseMetrics,
+  CostBreakdown,
+  LogStatistics,
+  TagStatistics,
+  UserActivitySummary,
+  CostAnalysis,
+
+  // クエリ・エクスポート型
+  LogQueryFilters,
+  QueryResult,
+  ExportFormat,
+  ExportOptions,
+  ExportResult,
+
+  // サービスインターフェース
+  IPromptLogService,
+
+  // 統合型
+  PromptLogTypes,
+} from './services/prompt-log'
+
+// 学習データサービス型
+export type {
+  // 基本データ型
+  LearningData,
+  LearningSession,
+  EventType,
+  LearningProgressData,
+  PerformanceData,
+  EngagementData,
+  EffectivenessData,
+
+  // 活動・スコア型
+  SessionActivity,
+  QuizScore,
+  ExamScore,
+  CompletedModule,
+  WeakArea,
+
+  // 分析・レコメンデーション型
+  LearningRecommendation,
+  LearningReport,
+  LearningTrendAnalysis,
+  Achievement as LearningAchievement,
+  LearningDashboardData,
+
+  // 設定型
+  LearningDataCollectorConfig,
+
+  // サービスインターフェース
+  ILearningDataCollector,
+
+  // 統合型
+  LearningDataTypes,
+} from './services/learning-data'
+
 // ==================== 学習型エクスポート ====================
 
 // 学習進捗型

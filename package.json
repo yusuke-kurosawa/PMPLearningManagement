@@ -46,7 +46,9 @@
     "lint:header": "eslint src --ext .js,.jsx,.ts,.tsx -c .eslintrc.header.json",
     "lint:header:fix": "eslint src --ext .js,.jsx,.ts,.tsx -c .eslintrc.header.json --fix",
     "header:validate": "npm run lint:header",
-    "header:apply": "npm run lint:header:fix"
+    "header:apply": "npm run lint:header:fix",
+    "audit:placement": "node scripts/document-placement-auditor.js",
+    "audit:placement:fix": "node scripts/document-placement-auditor.js --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -81,6 +83,7 @@
     "d3-sankey": "^0.12.3",
     "date-fns": "^3.2.0",
     "framer-motion": "^12.23.12",
+    "js-yaml": "^4.1.0",
     "lucide-react": "^0.303.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -116,7 +119,6 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.16",
-    "bundlesize": "^0.18.2",
     "chai": "^5.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",

@@ -1,27 +1,5 @@
-# ====================================================================
-# 📦 CI/CD - Lighthouse CI   PWA Performance Monitoring
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - プルリクエスト作成・更新時
-#   - スケジュール実行
-#   - 手動実行
-#
-# 主な処理:
-#   1. 📋 監査: Lighthouse Audit
-#   2. 📌 処理: Lighthouse Mobile Audit
-#   3. ⚡ パフォーマンス: Performance Budget Check
-#   4. 📊 監視: Real User Monitoring Setup
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F4E6 CI/CD - Lighthouse CI   PWA Performance Monitoring"
-'on':
+name: 📦 CI/CD - Lighthouse CI   PWA Performance Monitoring
+"on":
   push:
     branches:
       - main
@@ -31,10 +9,16 @@ name: "\U0001F4E6 CI/CD - Lighthouse CI   PWA Performance Monitoring"
       - main
   schedule:
     - cron: 0 0 * * 0
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
 jobs:
   lighthouse-audit:
-    name: "\U0001F4CB 監査: Lighthouse Audit"
+    name: "📋 監査: Lighthouse Audit"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -53,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -76,16 +60,16 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
         env:
-          LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}'
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: 'lighthouse-results-${{ github.run_id }}-${{ strategy.job-index }}'
+          name: lighthouse-results-${{ github.run_id }}-${{ strategy.job-index }}
           path: .lighthouseci/
     timeout-minutes: 30
   lighthouse-mobile:
-    name: "\U0001F4CC 処理: Lighthouse Mobile Audit"
+    name: "📌 処理: Lighthouse Mobile Audit"
     runs-on: ubuntu-latest
     needs: lighthouse-audit
     steps:
@@ -94,7 +78,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -115,7 +99,7 @@ jobs:
           temporaryPublicStorage: true
     timeout-minutes: 30
   performance-budget-check:
-    name: '⚡ パフォーマンス: Performance Budget Check'
+    name: "🔧 チェック: performance-budget-check"
     runs-on: ubuntu-latest
     needs:
       - lighthouse-audit
@@ -132,7 +116,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
       - name: Install analysis tools
         run: |
           npm install -g @lhci/cli lighthouse
@@ -141,7 +125,7 @@ jobs:
         run: |
           node ./scripts/analyze-lighthouse-trends.js
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check performance budgets
         run: |
           node ./scripts/check-performance-budget.js
@@ -150,10 +134,44 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: "const fs = require('fs');\nconst path = './lighthouse-results/performance-summary.json';\n\nif (fs.existsSync(path)) {\n  const results = JSON.parse(fs.readFileSync(path, 'utf8'));\n  \n  const comment = `## \U0001F680 PWA Performance Report\n  \n  ### Overall Scores\n  - **Performance**: ${results.performance}/100 ${results.performance >= 90 ? '✅' : results.performance >= 70 ? '⚠️' : '❌'}\n  - **Accessibility**: ${results.accessibility}/100 ${results.accessibility >= 90 ? '✅' : '⚠️'}\n  - **Best Practices**: ${results.bestPractices}/100 ${results.bestPractices >= 90 ? '✅' : '⚠️'}\n  - **SEO**: ${results.seo}/100 ${results.seo >= 90 ? '✅' : '⚠️'}\n  - **PWA**: ${results.pwa}/100 ${results.pwa >= 90 ? '✅' : '⚠️'}\n\n  ### Core Web Vitals\n  - **LCP**: ${results.lcp}s ${results.lcp <= 2.5 ? '✅' : '❌'}\n  - **FID**: ${results.fid}ms ${results.fid <= 100 ? '✅' : '❌'}\n  - **CLS**: ${results.cls} ${results.cls <= 0.1 ? '✅' : '❌'}\n\n  ### Performance Budget Status\n  - **Bundle Size**: ${results.bundleSize}MB ${results.bundleSizeStatus}\n  - **Load Time**: ${results.loadTime}s ${results.loadTimeStatus}\n  \n  [View detailed report](${results.reportUrl})\n  `;\n  \n  github.rest.issues.createComment({\n    issue_number: context.issue.number,\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    body: comment\n  });\n}\n"
+          script: |
+            const fs = require('fs');
+            const path = './lighthouse-results/performance-summary.json';
+
+            if (fs.existsSync(path)) {
+              const results = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              const comment = `## 🚀 PWA Performance Report
+              
+              ### Overall Scores
+              - **Performance**: ${results.performance}/100 ${results.performance >= 90 ? '✅' : results.performance >= 70 ? '⚠️' : '❌'}
+              - **Accessibility**: ${results.accessibility}/100 ${results.accessibility >= 90 ? '✅' : '⚠️'}
+              - **Best Practices**: ${results.bestPractices}/100 ${results.bestPractices >= 90 ? '✅' : '⚠️'}
+              - **SEO**: ${results.seo}/100 ${results.seo >= 90 ? '✅' : '⚠️'}
+              - **PWA**: ${results.pwa}/100 ${results.pwa >= 90 ? '✅' : '⚠️'}
+
+              ### Core Web Vitals
+              - **LCP**: ${results.lcp}s ${results.lcp <= 2.5 ? '✅' : '❌'}
+              - **FID**: ${results.fid}ms ${results.fid <= 100 ? '✅' : '❌'}
+              - **CLS**: ${results.cls} ${results.cls <= 0.1 ? '✅' : '❌'}
+
+              ### Performance Budget Status
+              - **Bundle Size**: ${results.bundleSize}MB ${results.bundleSizeStatus}
+              - **Load Time**: ${results.loadTime}s ${results.loadTimeStatus}
+              
+              [View detailed report](${results.reportUrl})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
     timeout-minutes: 30
   web-vitals-monitoring:
-    name: "\U0001F4CA 監視: Real User Monitoring Setup"
+    name: "📊 監視: Real User Monitoring Setup"
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -174,5 +192,5 @@ permissions:
   checks: write
   pull-requests: write
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

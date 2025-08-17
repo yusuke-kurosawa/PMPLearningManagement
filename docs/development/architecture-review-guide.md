@@ -1,252 +1,36 @@
-# アーキテクチャレビュー・プロンプトテンプレート
+# Architecture Review Template → [Full Guide](../../docs/development/architecture-review-guide.md)
 
-## システムアーキテクチャ全体レビュー
-
-```
-PMPLearningManagementのシステムアーキテクチャをレビューしてください。
-
-現在の構成：
-- フロントエンド: React + TypeScript
-- バックエンド: Node.js + tRPC
-- データベース: PostgreSQL + Prisma
-- キャッシュ: Redis
-- デプロイ: GitHub Pages → AWS移行予定
-
-評価観点：
-1. スケーラビリティ
-2. 保守性
-3. パフォーマンス
-4. セキュリティ
-5. コスト効率
-```
-
-## マイクロサービス移行評価
+## Quick Architecture Review Request
 
 ```
-現在のモノリスアーキテクチャからマイクロサービスへの移行を評価してください。
+Please review the following architectural changes:
 
-現状：
-- モノリシックなReactアプリケーション
-- LocalStorage使用
+**Component/System**: [name]
+**Change Type**: [new feature/modification/refactor]
+**Issue**: #[issue-number]
 
-移行計画：
-- 認証サービス
-- 学習サービス
-- コンテンツサービス
-- 分析サービス
+**Architecture aspects**:
+- [ ] Design patterns used
+- [ ] Scalability implications
+- [ ] Performance impact
+- [ ] Security considerations
+- [ ] Maintainability
 
-評価項目：
-- 移行の必要性
-- 分割境界の妥当性
-- 移行リスク
-- 期待される効果
+**Specific questions**: [any specific architectural concerns]
 ```
 
-## データベース設計レビュー
+## Quick Architecture Checklist
 
-```
-Prismaスキーマとデータベース設計をレビューしてください。
+- [ ] Follows established patterns
+- [ ] Scalable design
+- [ ] Performance optimized
+- [ ] Security by design
+- [ ] Maintainable structure
+- [ ] Testable architecture
+- [ ] Documentation complete
 
-[schema.prismaの内容]
+**For complete architecture review guidelines, patterns, and detailed evaluation criteria**:
+📖 [Architecture Review Guide](../../docs/development/architecture-review-guide.md)
 
-チェック項目：
-- 正規化レベル
-- インデックス戦略
-- リレーション設計
-- パフォーマンス考慮
-- スケーラビリティ
-```
-
-## API設計レビュー
-
-```
-tRPC APIの設計をレビューしてください。
-
-現在のルーター構成：
-- auth（認証）
-- user（ユーザー）
-- learning（学習）
-- payment（決済）
-
-評価観点：
-- エンドポイント設計
-- 型安全性
-- エラーハンドリング
-- レート制限
-- キャッシュ戦略
-```
-
-## セキュリティアーキテクチャレビュー
-
-```
-セキュリティアーキテクチャをレビューしてください。
-
-実装済み：
-- JWT認証
-- RBAC認可
-- AES-256暗号化
-- CSRF対策
-- XSS対策
-
-確認事項：
-- 脅威モデリング
-- 脆弱性評価
-- コンプライアンス
-- インシデント対応
-- 監査ログ
-```
-
-## パフォーマンスアーキテクチャレビュー
-
-```
-パフォーマンスアーキテクチャを分析してください。
-
-現在の実装：
-- コード分割
-- 遅延ロード
-- Redisキャッシュ
-- CDN（GitHub提供）
-
-目標値：
-- 初期ロード < 3秒
-- TTI < 5秒
-- API応答 < 200ms
-
-改善提案をお願いします。
-```
-
-## インフラストラクチャレビュー
-
-```
-インフラ構成をレビューしてください。
-
-現在：GitHub Pages
-将来：AWS（ECS, RDS, ElastiCache, CloudFront）
-
-評価項目：
-- 可用性
-- 災害復旧
-- コスト最適化
-- 自動スケーリング
-- モニタリング
-```
-
-## CI/CDパイプラインレビュー
-
-```
-CI/CDパイプラインをレビューしてください。
-
-現在のワークフロー：
-1. コードプッシュ
-2. 自動テスト
-3. ビルド
-4. デプロイ
-
-改善点：
-- ステージング環境
-- カナリアデプロイ
-- ロールバック戦略
-- 品質ゲート
-```
-
-## モニタリング戦略レビュー
-
-```
-モニタリング・可観測性戦略をレビューしてください。
-
-実装予定：
-- Prometheus（メトリクス）
-- Grafana（ビジュアライゼーション）
-- Sentry（エラートラッキング）
-- CloudWatch（ログ）
-
-評価：
-- カバレッジ
-- アラート設定
-- ダッシュボード
-- SLI/SLO定義
-```
-
-## データフロー分析
-
-```
-システム全体のデータフローを分析してください。
-
-フロー：
-ユーザー → React → tRPC → Service → Prisma → PostgreSQL
-                ↓
-              Redis
-
-ボトルネック分析と最適化提案をお願いします。
-```
-
-## 技術債務評価
-
-```
-技術債務を評価してください。
-
-既知の債務：
-- LocalStorage使用
-- 部分的なTypeScript移行
-- 大規模コンポーネント
-- anyの使用
-
-優先順位付けと解消計画の提案をお願いします。
-```
-
-## スケーラビリティ評価
-
-```
-スケーラビリティを評価してください。
-
-想定負荷：
-- 同時接続数: 10,000
-- 月間アクティブユーザー: 100,000
-- データ量: 1TB
-
-現在のアーキテクチャでの対応可能性と必要な改善を提案してください。
-```
-
-## 災害復旧計画レビュー
-
-```
-災害復旧計画をレビューしてください。
-
-RTO: 4時間
-RPO: 1時間
-
-バックアップ戦略：
-- データベース: 日次
-- ファイル: 週次
-
-改善提案をお願いします。
-```
-
-## コスト最適化レビュー
-
-```
-インフラコストを最適化してください。
-
-現在の構成と月額コスト：
-[コスト内訳]
-
-最適化の観点：
-- リソースの適正化
-- リザーブドインスタンス
-- スポットインスタンス
-- 自動シャットダウン
-- CDN活用
-```
-
-## 移行戦略レビュー
-
-```
-GitHub Pages → AWS移行戦略をレビューしてください。
-
-移行計画：
-フェーズ1: 静的コンテンツ
-フェーズ2: API
-フェーズ3: データベース
-
-リスクと対策の評価をお願いします。
-```
+---
+*Memory Bank: Quick template for immediate use. See full guide for comprehensive architectural review process.*

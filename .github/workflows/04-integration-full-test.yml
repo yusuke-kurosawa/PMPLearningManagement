@@ -1,27 +1,5 @@
-# ====================================================================
-# 🧪 統合テストスイート / Integration Test Suite
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - プルリクエスト作成・更新時
-#   - スケジュール実行
-#   - 手動実行
-#
-# 主な処理:
-#   1. 🧪 単体テスト / Unit Tests
-#   2. 🔗 統合テスト / Integration Tests
-#   3. 🎭 E2Eテスト / E2E Tests
-#   4. 📊 テストレポート / Test Report
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F9EA 統合テストスイート / Integration Test Suite"
-'on':
+name: 🧪 統合テストスイート / Integration Test Suite
+"on":
   push:
     branches:
       - main
@@ -64,82 +42,226 @@ name: "\U0001F9EA 統合テストスイート / Integration Test Suite"
           - webkit
           - all
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: "18"
   COVERAGE_THRESHOLD: 80
   CACHE_VERSION: v1
 concurrency:
-  group: 'test-${{ github.workflow }}-${{ github.ref }}'
+  group: test-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   unit-tests:
-    name: "\U0001F9EA 単体テスト / Unit Tests"
+    name: 🧪 単体テスト / Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
-      passed: '${{ steps.test.outputs.passed }}'
-      failed: '${{ steps.test.outputs.failed }}'
-      coverage: '${{ steps.test.outputs.coverage }}'
-      status: '${{ steps.evaluate.outputs.status }}'
+      passed: ${{ steps.test.outputs.passed }}
+      failed: ${{ steps.test.outputs.failed }}
+      coverage: ${{ steps.test.outputs.coverage }}
+      status: ${{ steps.evaluate.outputs.status }}
     strategy:
       matrix:
         node-version:
           - 18
           - 20
     steps:
-      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
+      - name: 📥 リポジトリチェックアウト / Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F527 環境セットアップ (Node ${{ matrix.node-version }}) / Setup Environment"
+      - name: 🔧 環境セットアップ (Node ${{ matrix.node-version }}) / Setup Environment
         uses: ./.github/actions/setup-environment
         with:
-          node-version: '${{ matrix.node-version }}'
-          cache-key: 'test-unit-${{ env.CACHE_VERSION }}'
-      - name: "\U0001F9EA 単体テスト実行 / Run Unit Tests"
+          node-version: ${{ matrix.node-version }}
+          cache-key: test-unit-${{ env.CACHE_VERSION }}
+      - name: 🧪 単体テスト実行 / Run Unit Tests
         id: test
-        run: "echo \"\U0001F9EA Running unit tests...\"\n\n# テスト実行とカバレッジ収集\nnpm run test:unit -- --coverage --reporter=json --outputFile=test-results.json || TEST_FAILED=true\n\n# 結果解析\nif [ -f test-results.json ]; then\n  PASSED=$(jq '.numPassedTests // 0' test-results.json)\n  FAILED=$(jq '.numFailedTests // 0' test-results.json)\n  TOTAL=$(jq '.numTotalTests // 0' test-results.json)\nelse\n  PASSED=0\n  FAILED=0\n  TOTAL=0\nfi\n\n# カバレッジ解析\nif [ -f coverage/coverage-summary.json ]; then\n  COVERAGE=$(jq '.total.lines.pct // 0' coverage/coverage-summary.json)\nelse\n  COVERAGE=0\nfi\n\necho \"passed=$PASSED\" >> $GITHUB_OUTPUT\necho \"failed=$FAILED\" >> $GITHUB_OUTPUT\necho \"total=$TOTAL\" >> $GITHUB_OUTPUT\necho \"coverage=$COVERAGE\" >> $GITHUB_OUTPUT\n\n# サマリー出力\necho \"==========================================\"\necho \"\U0001F4CA 単体テスト結果 (Node ${{ matrix.node-version }})\"\necho \"==========================================\"\necho \"✅ Passed: $PASSED\"\necho \"❌ Failed: $FAILED\"\necho \"\U0001F4CA Total: $TOTAL\"\necho \"\U0001F4C8 Coverage: ${COVERAGE}%\"\necho \"==========================================\"\n\n# 失敗時はエラー終了\nif [ \"$TEST_FAILED\" = \"true\" ]; then\n  exit 1\nfi\n"
-      - name: "\U0001F4CA 結果評価 / Evaluate Results"
+        run: |
+          echo "🧪 Running unit tests..."
+
+          # テスト実行とカバレッジ収集
+          npm run test:unit -- --coverage --reporter=json --outputFile=test-results.json || TEST_FAILED=true
+
+          # 結果解析
+          if [ -f test-results.json ]; then
+            PASSED=$(jq '.numPassedTests // 0' test-results.json)
+            FAILED=$(jq '.numFailedTests // 0' test-results.json)
+            TOTAL=$(jq '.numTotalTests // 0' test-results.json)
+          else
+            PASSED=0
+            FAILED=0
+            TOTAL=0
+          fi
+
+          # カバレッジ解析
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(jq '.total.lines.pct // 0' coverage/coverage-summary.json)
+          else
+            COVERAGE=0
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+
+          # サマリー出力
+          echo "=========================================="
+          echo "📊 単体テスト結果 (Node ${{ matrix.node-version }})"
+          echo "=========================================="
+          echo "✅ Passed: $PASSED"
+          echo "❌ Failed: $FAILED"
+          echo "📊 Total: $TOTAL"
+          echo "📈 Coverage: ${COVERAGE}%"
+          echo "=========================================="
+
+          # 失敗時はエラー終了
+          if [ "$TEST_FAILED" = "true" ]; then
+            exit 1
+          fi
+      - name: 📊 結果評価 / Evaluate Results
         id: evaluate
-        run: "FAILED=\"${{ steps.test.outputs.failed }}\"\nCOVERAGE=\"${{ steps.test.outputs.coverage }}\"\nTHRESHOLD=\"${{ env.COVERAGE_THRESHOLD }}\"\n\nif [ \"$FAILED\" -gt 0 ]; then\n  STATUS=\"failure\"\n  EMOJI=\"❌\"\n  MESSAGE=\"単体テストが失敗しました\"\nelif [ \"${COVERAGE%.*}\" -lt \"$THRESHOLD\" ]; then\n  STATUS=\"warning\"\n  EMOJI=\"⚠️\"\n  MESSAGE=\"カバレッジが閾値を下回っています\"\nelse\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"すべての単体テストが成功しました\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI 単体テスト結果 (Node ${{ matrix.node-version }})\n\n**ステータス**: $MESSAGE\n\n| メトリクス | 値 |\n|-----------|-----|\n| ✅ 成功 | ${{ steps.test.outputs.passed }} |\n| ❌ 失敗 | ${{ steps.test.outputs.failed }} |\n| \U0001F4CA 合計 | ${{ steps.test.outputs.total }} |\n| \U0001F4C8 カバレッジ | ${COVERAGE}% / ${THRESHOLD}% |\nEOF\n"
-      - name: "\U0001F4E4 アーティファクトアップロード / Upload Artifacts"
+        run: |
+          FAILED="${{ steps.test.outputs.failed }}"
+          COVERAGE="${{ steps.test.outputs.coverage }}"
+          THRESHOLD="${{ env.COVERAGE_THRESHOLD }}"
+
+          if [ "$FAILED" -gt 0 ]; then
+            STATUS="failure"
+            EMOJI="❌"
+            MESSAGE="単体テストが失敗しました"
+          elif [ "${COVERAGE%.*}" -lt "$THRESHOLD" ]; then
+            STATUS="warning"
+            EMOJI="⚠️"
+            MESSAGE="カバレッジが閾値を下回っています"
+          else
+            STATUS="success"
+            EMOJI="✅"
+            MESSAGE="すべての単体テストが成功しました"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          # GitHub Summary
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## $EMOJI 単体テスト結果 (Node ${{ matrix.node-version }})
+
+          **ステータス**: $MESSAGE
+
+          | メトリクス | 値 |
+          |-----------|-----|
+          | ✅ 成功 | ${{ steps.test.outputs.passed }} |
+          | ❌ 失敗 | ${{ steps.test.outputs.failed }} |
+          | 📊 合計 | ${{ steps.test.outputs.total }} |
+          | 📈 カバレッジ | ${COVERAGE}% / ${THRESHOLD}% |
+          EOF
+      - name: 📤 アーティファクトアップロード / Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 'unit-test-results-node-${{ matrix.node-version }}-${{ github.run_id }}'
+          name: unit-test-results-node-${{ matrix.node-version }}-${{ github.run_id }}
           path: |
             test-results.json
             coverage/
           retention-days: 7
   integration-tests:
-    name: "\U0001F517 統合テスト / Integration Tests"
+    name: 🔗 統合テスト / Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 25
     outputs:
-      passed: '${{ steps.test.outputs.passed }}'
-      failed: '${{ steps.test.outputs.failed }}'
-      status: '${{ steps.evaluate.outputs.status }}'
+      passed: ${{ steps.test.outputs.passed }}
+      failed: ${{ steps.test.outputs.failed }}
+      status: ${{ steps.evaluate.outputs.status }}
     steps:
-      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
+      - name: 📥 リポジトリチェックアウト / Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F527 環境セットアップ / Setup Environment"
+      - name: 🔧 環境セットアップ / Setup Environment
         uses: ./.github/actions/setup-environment
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-          cache-key: 'test-integration-${{ env.CACHE_VERSION }}'
-      - name: "\U0001F6E0️ テスト環境準備 / Prepare Test Environment"
-        run: "echo \"\U0001F6E0️ Setting up test environment...\"\n\n# テスト用環境変数設定\ncat > .env.test <<EOF\nVITE_API_URL=http://localhost:3001\nVITE_SUPABASE_URL=https://test.supabase.co\nVITE_SUPABASE_ANON_KEY=test-key\nNODE_ENV=test\nEOF\n\necho \"✅ Test environment ready\"\n"
-      - name: "\U0001F517 統合テスト実行 / Run Integration Tests"
+          node-version: ${{ env.NODE_VERSION }}
+          cache-key: test-integration-${{ env.CACHE_VERSION }}
+      - name: 🛠️ テスト環境準備 / Prepare Test Environment
+        run: |
+          echo "🛠️ Setting up test environment..."
+
+          # テスト用環境変数設定
+          cat > .env.test <<EOF
+          VITE_API_URL=http://localhost:3001
+          VITE_SUPABASE_URL=https://test.supabase.co
+          VITE_SUPABASE_ANON_KEY=test-key
+          NODE_ENV=test
+          EOF
+
+          echo "✅ Test environment ready"
+      - name: 🔗 統合テスト実行 / Run Integration Tests
         id: test
-        run: "echo \"\U0001F517 Running integration tests...\"\n\n# 統合テスト実行\nnpm run test:integration -- --reporter=json --outputFile=integration-results.json || TEST_FAILED=true\n\n# 結果解析\nif [ -f integration-results.json ]; then\n  PASSED=$(jq '.numPassedTests // 0' integration-results.json)\n  FAILED=$(jq '.numFailedTests // 0' integration-results.json)\n  TOTAL=$(jq '.numTotalTests // 0' integration-results.json)\nelse\n  # デフォルト値（テストがない場合）\n  PASSED=10\n  FAILED=0\n  TOTAL=10\nfi\n\necho \"passed=$PASSED\" >> $GITHUB_OUTPUT\necho \"failed=$FAILED\" >> $GITHUB_OUTPUT\necho \"total=$TOTAL\" >> $GITHUB_OUTPUT\n\necho \"==========================================\"\necho \"\U0001F4CA 統合テスト結果\"\necho \"==========================================\"\necho \"✅ Passed: $PASSED\"\necho \"❌ Failed: $FAILED\"\necho \"\U0001F4CA Total: $TOTAL\"\necho \"==========================================\"\n\nif [ \"$TEST_FAILED\" = \"true\" ]; then\n  exit 1\nfi\n"
-      - name: "\U0001F4CA 結果評価 / Evaluate Results"
+        run: |
+          echo "🔗 Running integration tests..."
+
+          # 統合テスト実行
+          npm run test:integration -- --reporter=json --outputFile=integration-results.json || TEST_FAILED=true
+
+          # 結果解析
+          if [ -f integration-results.json ]; then
+            PASSED=$(jq '.numPassedTests // 0' integration-results.json)
+            FAILED=$(jq '.numFailedTests // 0' integration-results.json)
+            TOTAL=$(jq '.numTotalTests // 0' integration-results.json)
+          else
+            # デフォルト値（テストがない場合）
+            PASSED=10
+            FAILED=0
+            TOTAL=10
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+          echo "=========================================="
+          echo "📊 統合テスト結果"
+          echo "=========================================="
+          echo "✅ Passed: $PASSED"
+          echo "❌ Failed: $FAILED"
+          echo "📊 Total: $TOTAL"
+          echo "=========================================="
+
+          if [ "$TEST_FAILED" = "true" ]; then
+            exit 1
+          fi
+      - name: 📊 結果評価 / Evaluate Results
         id: evaluate
-        run: "FAILED=\"${{ steps.test.outputs.failed }}\"\n\nif [ \"$FAILED\" -gt 0 ]; then\n  STATUS=\"failure\"\n  EMOJI=\"❌\"\n  MESSAGE=\"統合テストが失敗しました\"\nelse\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"すべての統合テストが成功しました\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI 統合テスト結果\n\n**ステータス**: $MESSAGE\n\n| メトリクス | 値 |\n|-----------|-----|\n| ✅ 成功 | ${{ steps.test.outputs.passed }} |\n| ❌ 失敗 | ${{ steps.test.outputs.failed }} |\n| \U0001F4CA 合計 | ${{ steps.test.outputs.total }} |\nEOF\n"
+        run: |
+          FAILED="${{ steps.test.outputs.failed }}"
+
+          if [ "$FAILED" -gt 0 ]; then
+            STATUS="failure"
+            EMOJI="❌"
+            MESSAGE="統合テストが失敗しました"
+          else
+            STATUS="success"
+            EMOJI="✅"
+            MESSAGE="すべての統合テストが成功しました"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          # GitHub Summary
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## $EMOJI 統合テスト結果
+
+          **ステータス**: $MESSAGE
+
+          | メトリクス | 値 |
+          |-----------|-----|
+          | ✅ 成功 | ${{ steps.test.outputs.passed }} |
+          | ❌ 失敗 | ${{ steps.test.outputs.failed }} |
+          | 📊 合計 | ${{ steps.test.outputs.total }} |
+          EOF
   e2e-tests:
-    name: "\U0001F3AD E2Eテスト / E2E Tests"
+    name: "🔧 テスト: e2e-tests"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
-      passed: '${{ steps.test.outputs.passed }}'
-      failed: '${{ steps.test.outputs.failed }}'
-      status: '${{ steps.evaluate.outputs.status }}'
+      passed: ${{ steps.test.outputs.passed }}
+      failed: ${{ steps.test.outputs.failed }}
+      status: ${{ steps.evaluate.outputs.status }}
     strategy:
       matrix:
         browser:
@@ -147,31 +269,104 @@ jobs:
           - firefox
           - webkit
     steps:
-      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
+      - name: 📥 リポジトリチェックアウト / Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F527 環境セットアップ / Setup Environment"
+      - name: 🔧 環境セットアップ / Setup Environment
         uses: ./.github/actions/setup-environment
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-          cache-key: 'test-e2e-${{ env.CACHE_VERSION }}'
-      - name: "\U0001F3AD Playwrightインストール / Install Playwright"
-        run: "echo \"\U0001F3AD Installing Playwright browsers...\"\nnpx playwright install --with-deps ${{ matrix.browser }}\necho \"✅ Playwright ready\"\n"
-      - name: "\U0001F3D7️ ビルドとサーバー起動 / Build and Start Server"
-        run: "echo \"\U0001F3D7️ Building application...\"\nnpm run build\n\necho \"\U0001F680 Starting preview server...\"\nnpm run preview &\nSERVER_PID=$!\necho \"SERVER_PID=$SERVER_PID\" >> $GITHUB_ENV\n\n# サーバー起動待機\necho \"⏳ Waiting for server...\"\nnpx wait-on http://localhost:4173 -t 30000\necho \"✅ Server is ready\"\n"
-      - name: "\U0001F3AD E2Eテスト実行 (${{ matrix.browser }}) / Run E2E Tests"
+          node-version: ${{ env.NODE_VERSION }}
+          cache-key: test-e2e-${{ env.CACHE_VERSION }}
+      - name: 🎭 Playwrightインストール / Install Playwright
+        run: |
+          echo "🎭 Installing Playwright browsers..."
+          npx playwright install --with-deps ${{ matrix.browser }}
+          echo "✅ Playwright ready"
+      - name: 🏗️ ビルドとサーバー起動 / Build and Start Server
+        run: |
+          echo "🏗️ Building application..."
+          npm run build
+
+          echo "🚀 Starting preview server..."
+          npm run preview &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+
+          # サーバー起動待機
+          echo "⏳ Waiting for server..."
+          npx wait-on http://localhost:4173 -t 30000
+          echo "✅ Server is ready"
+      - name: 🎭 E2Eテスト実行 (${{ matrix.browser }}) / Run E2E Tests
         id: test
-        run: "echo \"\U0001F3AD Running E2E tests on ${{ matrix.browser }}...\"\n\n# E2Eテスト実行\nnpx playwright test --browser=${{ matrix.browser }} --reporter=json > e2e-results.json || TEST_FAILED=true\n\n# 結果解析\nif [ -f e2e-results.json ]; then\n  PASSED=$(jq '.stats.expected // 0' e2e-results.json)\n  FAILED=$(jq '.stats.unexpected // 0' e2e-results.json)\n  TOTAL=$((PASSED + FAILED))\nelse\n  # デフォルト値\n  PASSED=5\n  FAILED=0\n  TOTAL=5\nfi\n\necho \"passed=$PASSED\" >> $GITHUB_OUTPUT\necho \"failed=$FAILED\" >> $GITHUB_OUTPUT\necho \"total=$TOTAL\" >> $GITHUB_OUTPUT\n\necho \"==========================================\"\necho \"\U0001F4CA E2Eテスト結果 (${{ matrix.browser }})\"\necho \"==========================================\"\necho \"✅ Passed: $PASSED\"\necho \"❌ Failed: $FAILED\"\necho \"\U0001F4CA Total: $TOTAL\"\necho \"==========================================\"\n\nif [ \"$TEST_FAILED\" = \"true\" ]; then\n  exit 1\nfi\n"
-      - name: "\U0001F4CA 結果評価 / Evaluate Results"
+        run: |
+          echo "🎭 Running E2E tests on ${{ matrix.browser }}..."
+
+          # E2Eテスト実行
+          npx playwright test --browser=${{ matrix.browser }} --reporter=json > e2e-results.json || TEST_FAILED=true
+
+          # 結果解析
+          if [ -f e2e-results.json ]; then
+            PASSED=$(jq '.stats.expected // 0' e2e-results.json)
+            FAILED=$(jq '.stats.unexpected // 0' e2e-results.json)
+            TOTAL=$((PASSED + FAILED))
+          else
+            # デフォルト値
+            PASSED=5
+            FAILED=0
+            TOTAL=5
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+          echo "=========================================="
+          echo "📊 E2Eテスト結果 (${{ matrix.browser }})"
+          echo "=========================================="
+          echo "✅ Passed: $PASSED"
+          echo "❌ Failed: $FAILED"
+          echo "📊 Total: $TOTAL"
+          echo "=========================================="
+
+          if [ "$TEST_FAILED" = "true" ]; then
+            exit 1
+          fi
+      - name: 📊 結果評価 / Evaluate Results
         id: evaluate
-        run: "FAILED=\"${{ steps.test.outputs.failed }}\"\n\nif [ \"$FAILED\" -gt 0 ]; then\n  STATUS=\"failure\"\n  EMOJI=\"❌\"\n  MESSAGE=\"E2Eテストが失敗しました\"\nelse\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"すべてのE2Eテストが成功しました\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI E2Eテスト結果 (${{ matrix.browser }})\n\n**ステータス**: $MESSAGE\n\n| メトリクス | 値 |\n|-----------|-----|\n| ✅ 成功 | ${{ steps.test.outputs.passed }} |\n| ❌ 失敗 | ${{ steps.test.outputs.failed }} |\n| \U0001F4CA 合計 | ${{ steps.test.outputs.total }} |\nEOF\n"
-      - name: "\U0001F4F8 スクリーンショット保存 / Save Screenshots"
+        run: |
+          FAILED="${{ steps.test.outputs.failed }}"
+
+          if [ "$FAILED" -gt 0 ]; then
+            STATUS="failure"
+            EMOJI="❌"
+            MESSAGE="E2Eテストが失敗しました"
+          else
+            STATUS="success"
+            EMOJI="✅"
+            MESSAGE="すべてのE2Eテストが成功しました"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          # GitHub Summary
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## $EMOJI E2Eテスト結果 (${{ matrix.browser }})
+
+          **ステータス**: $MESSAGE
+
+          | メトリクス | 値 |
+          |-----------|-----|
+          | ✅ 成功 | ${{ steps.test.outputs.passed }} |
+          | ❌ 失敗 | ${{ steps.test.outputs.failed }} |
+          | 📊 合計 | ${{ steps.test.outputs.total }} |
+          EOF
+      - name: 📸 スクリーンショット保存 / Save Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: 'e2e-screenshots-${{ matrix.browser }}-${{ github.run_id }}'
+          name: e2e-screenshots-${{ matrix.browser }}-${{ github.run_id }}
           path: test-results/
           retention-days: 7
-      - name: "\U0001F6D1 サーバー停止 / Stop Server"
+      - name: 🛑 サーバー停止 / Stop Server
         if: always()
         run: |
           if [ -n "$SERVER_PID" ]; then
@@ -179,7 +374,7 @@ jobs:
             echo "✅ Server stopped"
           fi
   test-report:
-    name: "\U0001F4CA テストレポート / Test Report"
+    name: "🔧 テスト: test-report"
     runs-on: ubuntu-latest
     needs:
       - unit-tests
@@ -188,13 +383,13 @@ jobs:
     if: always()
     timeout-minutes: 10
     steps:
-      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
+      - name: 📥 リポジトリチェックアウト / Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F4E6 アーティファクトダウンロード / Download Artifacts"
+      - name: 📦 アーティファクトダウンロード / Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: test-artifacts/
-      - name: "\U0001F4CA 統合レポート生成 / Generate Consolidated Report"
+      - name: 📊 統合レポート生成 / Generate Consolidated Report
         uses: ./.github/actions/report-generator
         with:
           report-type: test
@@ -202,11 +397,63 @@ jobs:
           output-format: all
           upload-artifact: true
           include-trends: true
-      - name: "\U0001F4AC PRコメント / PR Comment"
+      - name: 💬 PRコメント / PR Comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: "const unitStatus = '${{ needs.unit-tests.outputs.status }}';\nconst integrationStatus = '${{ needs.integration-tests.outputs.status }}';\nconst e2eStatus = '${{ needs.e2e-tests.outputs.status }}';\n\nconst getEmoji = (status) => {\n  switch(status) {\n    case 'success': return '✅';\n    case 'failure': return '❌';\n    case 'warning': return '⚠️';\n    default: return 'ℹ️';\n  }\n};\n\nconst comment = `\n## \U0001F9EA テスト結果サマリー\n\n| テストタイプ | ステータス | 詳細 |\n|-------------|-----------|------|\n| 単体テスト | ${getEmoji(unitStatus)} | カバレッジ: ${{ needs.unit-tests.outputs.coverage }}% |\n| 統合テスト | ${getEmoji(integrationStatus)} | - |\n| E2Eテスト | ${getEmoji(e2eStatus)} | 3ブラウザでテスト済み |\n\n[詳細なテストレポート](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;\n\n// 既存コメントを検索して更新または作成\nconst { data: comments } = await github.rest.issues.listComments({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  issue_number: context.issue.number,\n});\n\nconst botComment = comments.find(comment => \n  comment.user.type === 'Bot' && \n  comment.body.includes('テスト結果サマリー')\n);\n\nif (botComment) {\n  await github.rest.issues.updateComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    comment_id: botComment.id,\n    body: comment\n  });\n} else {\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: context.issue.number,\n    body: comment\n  });\n}\n"
+          script: |
+            const unitStatus = '${{ needs.unit-tests.outputs.status }}';
+            const integrationStatus = '${{ needs.integration-tests.outputs.status }}';
+            const e2eStatus = '${{ needs.e2e-tests.outputs.status }}';
+
+            const getEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'warning': return '⚠️';
+                default: return 'ℹ️';
+              }
+            };
+
+            const comment = `
+            ## 🧪 テスト結果サマリー
+
+            | テストタイプ | ステータス | 詳細 |
+            |-------------|-----------|------|
+            | 単体テスト | ${getEmoji(unitStatus)} | カバレッジ: ${{ needs.unit-tests.outputs.coverage }}% |
+            | 統合テスト | ${getEmoji(integrationStatus)} | - |
+            | E2Eテスト | ${getEmoji(e2eStatus)} | 3ブラウザでテスト済み |
+
+            [詳細なテストレポート](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            // 既存コメントを検索して更新または作成
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('テスト結果サマリー')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
 permissions:
   contents: read
   actions: read

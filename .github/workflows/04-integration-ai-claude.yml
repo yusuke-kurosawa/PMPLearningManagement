@@ -1,29 +1,5 @@
-# ====================================================================
-# 🤖 AI - Claude Code Integration
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - プルリクエスト作成・更新時
-#   - Issue作成・更新時
-#   - 手動実行
-#
-# 主な処理:
-#   1. 🔧 セットアップ: 🔧 Claude AI Integration Setup
-#   2. 🔍 分析: 🔍 Code Change Analysis
-#   3. 🤖 Claude: 🤖 Claude AI Code Review
-#   4. 📌 処理: 🔧 Auto-Fix Suggestions
-#   5. 📌 処理: 💬 Generate PR Comment
-#   6. 📌 処理: 🎫 Auto Issue Processing
-#   7. 📊 レポート: 📊 Claude Integration Report
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F916 AI - Claude Code Integration"
-'on':
+name: 🤖 AI - Claude Code Integration
+"on":
   pull_request:
     types:
       - opened
@@ -74,11 +50,11 @@ name: "\U0001F916 AI - Claude Code Integration"
         required: false
         type: string
 env:
-  NODE_VERSION: '18'
-  ANALYSIS_TYPE: '${{ inputs.analysis-type || ''comprehensive-review'' }}'
-  REVIEW_DEPTH: '${{ inputs.review-depth || ''detailed'' }}'
-  AUTO_FIX_LEVEL: '${{ inputs.auto-fix-level || ''safe-only'' }}'
-  TARGET_FILES: '${{ inputs.target-files || '''' }}'
+  NODE_VERSION: "18"
+  ANALYSIS_TYPE: ${{ inputs.analysis-type || 'comprehensive-review' }}
+  REVIEW_DEPTH: ${{ inputs.review-depth || 'detailed' }}
+  AUTO_FIX_LEVEL: ${{ inputs.auto-fix-level || 'safe-only' }}
+  TARGET_FILES: ${{ inputs.target-files || '' }}
   CLAUDE_MODEL: claude-3-5-sonnet-20241022
   CLAUDE_MAX_TOKENS: 8192
   CLAUDE_TEMPERATURE: 0.3
@@ -90,75 +66,271 @@ permissions:
   checks: write
 jobs:
   claude-setup:
-    name: "\U0001F527 セットアップ: \U0001F527 Claude AI Integration Setup"
+    name: "🔧 セットアップ: claude-setup"
     uses: ./.github/workflows/templates/devops-workflow-template.yml
     with:
       workflow-category: ai
       environment: claude-integration
-      node-version: '18'
+      node-version: "18"
       enable-caching: true
       enable-notifications: false
       parallel-jobs: 2
     secrets:
-      CLAUDE_API_KEY: '${{ secrets.CLAUDE_API_KEY }}'
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
     timeout-minutes: 30
   code-analysis:
-    name: "\U0001F50D 分析: \U0001F50D Code Change Analysis"
+    name: "🔍 分析: 🔍 Code Change Analysis"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
     if: github.event_name == 'pull_request' || env.TARGET_FILES != ''
     outputs:
-      changed-files: '${{ steps.changes.outputs.changed-files }}'
-      analysis-scope: '${{ steps.scope.outputs.scope }}'
-      complexity-score: '${{ steps.complexity.outputs.score }}'
+      changed-files: ${{ steps.changes.outputs.changed-files }}
+      analysis-scope: ${{ steps.scope.outputs.scope }}
+      complexity-score: ${{ steps.complexity.outputs.score }}
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: '${{ secrets.GITHUB_TOKEN }}'
-      - name: "\U0001F50D Detect Changed Files"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔍 Detect Changed Files
         id: changes
-        run: "if [ \"${{ github.event_name }}\" == \"pull_request\" ]; then\n  echo \"\U0001F50D Analyzing PR changes...\"\n  \n  # Get changed files in PR\n  changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | tr '\\n' ',' | sed 's/,$//')\n  \n  # Filter for relevant files\n  relevant_files=$(echo \"$changed_files\" | tr ',' '\\n' | grep -E '\\.(js|jsx|ts|tsx|json|md|yml|yaml)$' | tr '\\n' ',' | sed 's/,$//')\n  \n  echo \"changed-files=${relevant_files}\" >> $GITHUB_OUTPUT\n  echo \"\U0001F4C1 Changed files: ${relevant_files}\"\n  \nelif [ -n \"${{ env.TARGET_FILES }}\" ]; then\n  echo \"\U0001F3AF Using specified target files...\"\n  echo \"changed-files=${{ env.TARGET_FILES }}\" >> $GITHUB_OUTPUT\n  echo \"\U0001F4C1 Target files: ${{ env.TARGET_FILES }}\"\nelse\n  echo \"changed-files=\" >> $GITHUB_OUTPUT\nfi\n"
-      - name: "\U0001F4CA Analysis Scope Determination"
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔍 Analyzing PR changes..."
+            
+            # Get changed files in PR
+            changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | tr '\n' ',' | sed 's/,$//')
+            
+            # Filter for relevant files
+            relevant_files=$(echo "$changed_files" | tr ',' '\n' | grep -E '\.(js|jsx|ts|tsx|json|md|yml|yaml)$' | tr '\n' ',' | sed 's/,$//')
+            
+            echo "changed-files=${relevant_files}" >> $GITHUB_OUTPUT
+            echo "📁 Changed files: ${relevant_files}"
+            
+          elif [ -n "${{ env.TARGET_FILES }}" ]; then
+            echo "🎯 Using specified target files..."
+            echo "changed-files=${{ env.TARGET_FILES }}" >> $GITHUB_OUTPUT
+            echo "📁 Target files: ${{ env.TARGET_FILES }}"
+          else
+            echo "changed-files=" >> $GITHUB_OUTPUT
+          fi
+      - name: 📊 Analysis Scope Determination
         id: scope
-        run: "changed_files=\"${{ steps.changes.outputs.changed-files }}\"\n\nif [ -z \"$changed_files\" ]; then\n  echo \"scope=repository-wide\" >> $GITHUB_OUTPUT\n  echo \"\U0001F4CA Scope: Repository-wide analysis\"\nelse\n  file_count=$(echo \"$changed_files\" | tr ',' '\\n' | wc -l)\n  \n  if [ \"$file_count\" -le 5 ]; then\n    echo \"scope=focused\" >> $GITHUB_OUTPUT  \n    echo \"\U0001F4CA Scope: Focused analysis ($file_count files)\"\n  elif [ \"$file_count\" -le 15 ]; then\n    echo \"scope=moderate\" >> $GITHUB_OUTPUT\n    echo \"\U0001F4CA Scope: Moderate analysis ($file_count files)\"\n  else\n    echo \"scope=comprehensive\" >> $GITHUB_OUTPUT\n    echo \"\U0001F4CA Scope: Comprehensive analysis ($file_count files)\"\n  fi\nfi\n"
-      - name: "\U0001F9EE Code Complexity Assessment"
+        run: |
+          changed_files="${{ steps.changes.outputs.changed-files }}"
+
+          if [ -z "$changed_files" ]; then
+            echo "scope=repository-wide" >> $GITHUB_OUTPUT
+            echo "📊 Scope: Repository-wide analysis"
+          else
+            file_count=$(echo "$changed_files" | tr ',' '\n' | wc -l)
+            
+            if [ "$file_count" -le 5 ]; then
+              echo "scope=focused" >> $GITHUB_OUTPUT  
+              echo "📊 Scope: Focused analysis ($file_count files)"
+            elif [ "$file_count" -le 15 ]; then
+              echo "scope=moderate" >> $GITHUB_OUTPUT
+              echo "📊 Scope: Moderate analysis ($file_count files)"
+            else
+              echo "scope=comprehensive" >> $GITHUB_OUTPUT
+              echo "📊 Scope: Comprehensive analysis ($file_count files)"
+            fi
+          fi
+      - name: 🧮 Code Complexity Assessment
         id: complexity
-        run: "echo \"\U0001F9EE Assessing code complexity...\"\n\nchanged_files=\"${{ steps.changes.outputs.changed-files }}\"\ntotal_complexity=0\nfile_count=0\n\nif [ -n \"$changed_files\" ]; then\n  for file in $(echo \"$changed_files\" | tr ',' '\\n'); do\n    if [ -f \"$file\" ] && [[ \"$file\" =~ \\.(js|jsx|ts|tsx)$ ]]; then\n      # Simple complexity metric based on file size and structure\n      lines=$(wc -l < \"$file\" 2>/dev/null || echo \"0\")\n      functions=$(grep -c \"function\\\\|const.*=>\\\\|=>\\\\|class \" \"$file\" 2>/dev/null || echo \"0\")\n      complexity=$((lines / 10 + functions * 2))\n      total_complexity=$((total_complexity + complexity))\n      file_count=$((file_count + 1))\n      \n      echo \"  $file: $complexity complexity points\"\n    fi\n  done\nfi\n\nif [ \"$file_count\" -gt 0 ]; then\n  avg_complexity=$((total_complexity / file_count))\nelse\n  avg_complexity=0\nfi\n\necho \"score=${avg_complexity}\" >> $GITHUB_OUTPUT\necho \"\U0001F9EE Average complexity score: $avg_complexity\"\n"
+        run: |
+          echo "🧮 Assessing code complexity..."
+
+          changed_files="${{ steps.changes.outputs.changed-files }}"
+          total_complexity=0
+          file_count=0
+
+          if [ -n "$changed_files" ]; then
+            for file in $(echo "$changed_files" | tr ',' '\n'); do
+              if [ -f "$file" ] && [[ "$file" =~ \.(js|jsx|ts|tsx)$ ]]; then
+                # Simple complexity metric based on file size and structure
+                lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+                functions=$(grep -c "function\\|const.*=>\\|=>\\|class " "$file" 2>/dev/null || echo "0")
+                complexity=$((lines / 10 + functions * 2))
+                total_complexity=$((total_complexity + complexity))
+                file_count=$((file_count + 1))
+                
+                echo "  $file: $complexity complexity points"
+              fi
+            done
+          fi
+
+          if [ "$file_count" -gt 0 ]; then
+            avg_complexity=$((total_complexity / file_count))
+          else
+            avg_complexity=0
+          fi
+
+          echo "score=${avg_complexity}" >> $GITHUB_OUTPUT
+          echo "🧮 Average complexity score: $avg_complexity"
     timeout-minutes: 30
   claude-code-review:
-    name: "\U0001F916 Claude: \U0001F916 Claude AI Code Review"
+    name: "🔧 処理: claude-code-review"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
       - code-analysis
-    if: 'contains(fromJson(''["comprehensive-review", "code-quality-audit"]''), env.ANALYSIS_TYPE)'
+    if: contains(fromJson('["comprehensive-review", "code-quality-audit"]'), env.ANALYSIS_TYPE)
     outputs:
-      review-summary: '${{ steps.claude-review.outputs.summary }}'
-      issues-found: '${{ steps.claude-review.outputs.issues-count }}'
+      review-summary: ${{ steps.claude-review.outputs.summary }}
+      issues-found: ${{ steps.claude-review.outputs.issues-count }}
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-      - name: "\U0001F50D Collect Code Context"
+          node-version: ${{ env.NODE_VERSION }}
+      - name: 🔍 Collect Code Context
         id: context
-        run: "echo \"\U0001F50D Collecting code context for Claude analysis...\"\n\nchanged_files=\"${{ needs.code-analysis.outputs.changed-files }}\"\n\nif [ -n \"$changed_files\" ]; then\n  # Collect changed file contents\n  echo \"\U0001F4C1 Collecting file contents...\"\n  \n  context_file=\"claude-context.json\"\n  echo '{\"files\": [' > \"$context_file\"\n  \n  first=true\n  for file in $(echo \"$changed_files\" | tr ',' '\\n'); do\n    if [ -f \"$file\" ]; then\n      if [ \"$first\" = true ]; then\n        first=false\n      else\n        echo ',' >> \"$context_file\"\n      fi\n      \n      echo \"  {\" >> \"$context_file\"\n      echo \"    \\\"path\\\": \\\"$file\\\",\" >> \"$context_file\"\n      echo \"    \\\"content\\\": $(cat \"$file\" | jq -Rs .)\" >> \"$context_file\"\n      echo \"  }\" >> \"$context_file\"\n    fi\n  done\n  \n  echo ']}' >> \"$context_file\"\n  \n  echo \"context-file=$context_file\" >> $GITHUB_OUTPUT\n  echo \"✅ Context collected for $(echo \"$changed_files\" | tr ',' '\\n' | wc -l) files\"\nelse\n  echo \"context-file=\" >> $GITHUB_OUTPUT\n  echo \"ℹ️ No specific files to analyze\"\nfi\n"
-      - name: "\U0001F916 Claude AI Analysis"
+        run: |
+          echo "🔍 Collecting code context for Claude analysis..."
+
+          changed_files="${{ needs.code-analysis.outputs.changed-files }}"
+
+          if [ -n "$changed_files" ]; then
+            # Collect changed file contents
+            echo "📁 Collecting file contents..."
+            
+            context_file="claude-context.json"
+            echo '{"files": [' > "$context_file"
+            
+            first=true
+            for file in $(echo "$changed_files" | tr ',' '\n'); do
+              if [ -f "$file" ]; then
+                if [ "$first" = true ]; then
+                  first=false
+                else
+                  echo ',' >> "$context_file"
+                fi
+                
+                echo "  {" >> "$context_file"
+                echo "    \"path\": \"$file\"," >> "$context_file"
+                echo "    \"content\": $(cat "$file" | jq -Rs .)" >> "$context_file"
+                echo "  }" >> "$context_file"
+              fi
+            done
+            
+            echo ']}' >> "$context_file"
+            
+            echo "context-file=$context_file" >> $GITHUB_OUTPUT
+            echo "✅ Context collected for $(echo "$changed_files" | tr ',' '\n' | wc -l) files"
+          else
+            echo "context-file=" >> $GITHUB_OUTPUT
+            echo "ℹ️ No specific files to analyze"
+          fi
+      - name: 🤖 Claude AI Analysis
         id: claude-review
         if: secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY
-        run: "echo \"\U0001F916 Initiating Claude AI analysis...\"\n\napi_key=\"${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}\"\ncontext_file=\"${{ steps.context.outputs.context-file }}\"\n\nif [ -z \"$api_key\" ]; then\n  echo \"⚠️ No Claude API key available, skipping AI analysis\"\n  echo \"summary=API key not available\" >> $GITHUB_OUTPUT\n  echo \"issues-count=0\" >> $GITHUB_OUTPUT\n  exit 0\nfi\n\nif [ -z \"$context_file\" ] || [ ! -f \"$context_file\" ]; then\n  echo \"⚠️ No context file available, skipping analysis\"\n  echo \"summary=No files to analyze\" >> $GITHUB_OUTPUT\n  echo \"issues-count=0\" >> $GITHUB_OUTPUT\n  exit 0\nfi\n\n# Prepare Claude prompt based on analysis type\ncase \"${{ env.ANALYSIS_TYPE }}\" in\n  \"comprehensive-review\")\n    prompt=\"Perform a comprehensive code review of the provided files. Focus on:\n    1. Code quality and best practices\n    2. Potential bugs and issues\n    3. Performance optimization opportunities\n    4. Security vulnerabilities\n    5. Architecture and design patterns\n    6. Documentation and maintainability\n    \n    Provide specific, actionable feedback with line numbers where applicable.\"\n    ;;\n  \"code-quality-audit\")\n    prompt=\"Conduct a detailed code quality audit focusing on:\n    1. Code style and consistency\n    2. Error handling and edge cases\n    3. Testing coverage gaps\n    4. Refactoring opportunities\n    5. Code complexity reduction\n    \n    Provide prioritized recommendations for improvement.\"\n    ;;\n  *)\n    prompt=\"Analyze the provided code files and provide insights on code quality, potential issues, and improvement suggestions.\"\n    ;;\nesac\n\n# Create request payload\ncat > claude-request.json << EOF\n{\n  \"model\": \"${{ env.CLAUDE_MODEL }}\",\n  \"max_tokens\": ${{ env.CLAUDE_MAX_TOKENS }},\n  \"temperature\": ${{ env.CLAUDE_TEMPERATURE }},\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Project: PMPLearningManagement - PMP Learning Platform\\\\n\\\\nTask: $prompt\\\\n\\\\nCode files to analyze:\\\\n$(cat \"$context_file\" | jq -c .)\"\n    }\n  ]\n}\nEOF\n\n# Make API request to Claude\nresponse=$(curl -s -X POST \"https://api.anthropic.com/v1/messages\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"x-api-key: $api_key\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -d @claude-request.json || echo '{\"error\": \"API request failed\"}')\n\necho \"$response\" > claude-response.json\n\n# Parse Claude's response\nif echo \"$response\" | jq -e '.content[0].text' > /dev/null 2>&1; then\n  claude_analysis=$(echo \"$response\" | jq -r '.content[0].text')\n  \n  # Save detailed analysis\n  echo \"$claude_analysis\" > claude-detailed-analysis.md\n  \n  # Extract summary and issue count\n  summary=$(echo \"$claude_analysis\" | head -n 3 | tr '\\n' ' ')\n  issues_count=$(echo \"$claude_analysis\" | grep -c \"Issue\\\\|Problem\\\\|Bug\\\\|Warning\\\\|Error\" || echo \"0\")\n  \n  echo \"summary=${summary:0:500}\" >> $GITHUB_OUTPUT\n  echo \"issues-count=$issues_count\" >> $GITHUB_OUTPUT\n  \n  echo \"✅ Claude analysis completed\"\n  echo \"\U0001F4CA Issues identified: $issues_count\"\n  echo \"\U0001F4DD Summary: $summary\"\nelse\n  error_msg=$(echo \"$response\" | jq -r '.error.message // \"Unknown API error\"')\n  echo \"❌ Claude API error: $error_msg\"\n  echo \"summary=API error: $error_msg\" >> $GITHUB_OUTPUT\n  echo \"issues-count=0\" >> $GITHUB_OUTPUT\nfi\n"
-      - name: "\U0001F4E4 Upload Claude Analysis"
+        run: |
+          echo "🤖 Initiating Claude AI analysis..."
+
+          api_key="${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}"
+          context_file="${{ steps.context.outputs.context-file }}"
+
+          if [ -z "$api_key" ]; then
+            echo "⚠️ No Claude API key available, skipping AI analysis"
+            echo "summary=API key not available" >> $GITHUB_OUTPUT
+            echo "issues-count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ -z "$context_file" ] || [ ! -f "$context_file" ]; then
+            echo "⚠️ No context file available, skipping analysis"
+            echo "summary=No files to analyze" >> $GITHUB_OUTPUT
+            echo "issues-count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Prepare Claude prompt based on analysis type
+          case "${{ env.ANALYSIS_TYPE }}" in
+            "comprehensive-review")
+              prompt="Perform a comprehensive code review of the provided files. Focus on:
+              1. Code quality and best practices
+              2. Potential bugs and issues
+              3. Performance optimization opportunities
+              4. Security vulnerabilities
+              5. Architecture and design patterns
+              6. Documentation and maintainability
+              
+              Provide specific, actionable feedback with line numbers where applicable."
+              ;;
+            "code-quality-audit")
+              prompt="Conduct a detailed code quality audit focusing on:
+              1. Code style and consistency
+              2. Error handling and edge cases
+              3. Testing coverage gaps
+              4. Refactoring opportunities
+              5. Code complexity reduction
+              
+              Provide prioritized recommendations for improvement."
+              ;;
+            *)
+              prompt="Analyze the provided code files and provide insights on code quality, potential issues, and improvement suggestions."
+              ;;
+          esac
+
+          # Create request payload
+          cat > claude-request.json << EOF
+          {
+            "model": "${{ env.CLAUDE_MODEL }}",
+            "max_tokens": ${{ env.CLAUDE_MAX_TOKENS }},
+            "temperature": ${{ env.CLAUDE_TEMPERATURE }},
+            "messages": [
+              {
+                "role": "user",
+                "content": "Project: PMPLearningManagement - PMP Learning Platform\\n\\nTask: $prompt\\n\\nCode files to analyze:\\n$(cat "$context_file" | jq -c .)"
+              }
+            ]
+          }
+          EOF
+
+          # Make API request to Claude
+          response=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $api_key" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @claude-request.json || echo '{"error": "API request failed"}')
+
+          echo "$response" > claude-response.json
+
+          # Parse Claude's response
+          if echo "$response" | jq -e '.content[0].text' > /dev/null 2>&1; then
+            claude_analysis=$(echo "$response" | jq -r '.content[0].text')
+            
+            # Save detailed analysis
+            echo "$claude_analysis" > claude-detailed-analysis.md
+            
+            # Extract summary and issue count
+            summary=$(echo "$claude_analysis" | head -n 3 | tr '\n' ' ')
+            issues_count=$(echo "$claude_analysis" | grep -c "Issue\\|Problem\\|Bug\\|Warning\\|Error" || echo "0")
+            
+            echo "summary=${summary:0:500}" >> $GITHUB_OUTPUT
+            echo "issues-count=$issues_count" >> $GITHUB_OUTPUT
+            
+            echo "✅ Claude analysis completed"
+            echo "📊 Issues identified: $issues_count"
+            echo "📝 Summary: $summary"
+          else
+            error_msg=$(echo "$response" | jq -r '.error.message // "Unknown API error"')
+            echo "❌ Claude API error: $error_msg"
+            echo "summary=API error: $error_msg" >> $GITHUB_OUTPUT
+            echo "issues-count=0" >> $GITHUB_OUTPUT
+          fi
+      - name: 📤 Upload Claude Analysis
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 'claude-analysis-${{ github.run_number }}'
+          name: claude-analysis-${{ github.run_number }}
           path: |
             claude-detailed-analysis.md
             claude-response.json
@@ -167,7 +339,7 @@ jobs:
           retention-days: 30
     timeout-minutes: 30
   auto-fix-suggestions:
-    name: "\U0001F4CC 処理: \U0001F527 Auto-Fix Suggestions"
+    name: "📌 処理: 🔧 Auto-Fix Suggestions"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
@@ -175,21 +347,94 @@ jobs:
       - claude-code-review
     if: env.AUTO_FIX_LEVEL != 'none' && needs.claude-code-review.outputs.issues-found != '0'
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F4E5 Download Claude Analysis"
+      - name: 📥 Download Claude Analysis
         uses: actions/download-artifact@v4
         with:
-          name: 'claude-analysis-${{ github.run_number }}'
-      - name: "\U0001F527 Generate Auto-Fix Suggestions"
+          name: claude-analysis-${{ github.run_number }}
+      - name: 🔧 Generate Auto-Fix Suggestions
         id: auto-fix
         if: secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY
-        run: "echo \"\U0001F527 Generating auto-fix suggestions...\"\n\napi_key=\"${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}\"\n\nif [ ! -f claude-detailed-analysis.md ]; then\n  echo \"⚠️ No Claude analysis found, skipping auto-fix\"\n  exit 0\nfi\n\n# Read Claude's analysis\nanalysis_content=$(cat claude-detailed-analysis.md)\n\n# Create auto-fix request based on level\ncase \"${{ env.AUTO_FIX_LEVEL }}\" in\n  \"safe-only\")\n    fix_prompt=\"Based on your analysis, provide ONLY safe, non-breaking fixes such as:\n    - Import statement corrections\n    - Simple syntax improvements  \n    - Basic formatting fixes\n    - Adding missing semicolons or commas\n    Do NOT suggest changes that could affect functionality.\"\n    ;;\n  \"moderate\")\n    fix_prompt=\"Based on your analysis, provide moderate-risk fixes including:\n    - Code style improvements\n    - Basic refactoring suggestions\n    - Error handling enhancements\n    - Performance optimizations with minimal risk\n    Clearly mark any changes that might need testing.\"\n    ;;\n  \"aggressive\")\n    fix_prompt=\"Based on your analysis, provide comprehensive fixes including:\n    - Architecture improvements\n    - Major refactoring suggestions\n    - Advanced optimizations\n    - Breaking changes if necessary\n    Clearly document all changes and their implications.\"\n    ;;\nesac\n\ncat > auto-fix-request.json << EOF\n{\n  \"model\": \"${{ env.CLAUDE_MODEL }}\",\n  \"max_tokens\": ${{ env.CLAUDE_MAX_TOKENS }},\n  \"temperature\": 0.1,\n  \"messages\": [\n    {\n      \"role\": \"user\", \n      \"content\": \"Previous analysis:\\\\n$analysis_content\\\\n\\\\n$fix_prompt\\\\n\\\\nProvide specific code changes in a structured format with before/after examples.\"\n    }\n  ]\n}\nEOF\n\n# Get auto-fix suggestions from Claude\nfix_response=$(curl -s -X POST \"https://api.anthropic.com/v1/messages\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"x-api-key: $api_key\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -d @auto-fix-request.json || echo '{\"error\": \"Fix request failed\"}')\n\necho \"$fix_response\" > auto-fix-response.json\n\nif echo \"$fix_response\" | jq -e '.content[0].text' > /dev/null 2>&1; then\n  fix_suggestions=$(echo \"$fix_response\" | jq -r '.content[0].text')\n  echo \"$fix_suggestions\" > auto-fix-suggestions.md\n  \n  echo \"✅ Auto-fix suggestions generated\"\n  echo \"\U0001F4DD Level: ${{ env.AUTO_FIX_LEVEL }}\"\nelse\n  echo \"❌ Failed to generate auto-fix suggestions\"\n  echo \"No auto-fix suggestions available\" > auto-fix-suggestions.md\nfi\n"
-      - name: "\U0001F4E4 Upload Auto-Fix Suggestions"
+        run: |
+          echo "🔧 Generating auto-fix suggestions..."
+
+          api_key="${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}"
+
+          if [ ! -f claude-detailed-analysis.md ]; then
+            echo "⚠️ No Claude analysis found, skipping auto-fix"
+            exit 0
+          fi
+
+          # Read Claude's analysis
+          analysis_content=$(cat claude-detailed-analysis.md)
+
+          # Create auto-fix request based on level
+          case "${{ env.AUTO_FIX_LEVEL }}" in
+            "safe-only")
+              fix_prompt="Based on your analysis, provide ONLY safe, non-breaking fixes such as:
+              - Import statement corrections
+              - Simple syntax improvements  
+              - Basic formatting fixes
+              - Adding missing semicolons or commas
+              Do NOT suggest changes that could affect functionality."
+              ;;
+            "moderate")
+              fix_prompt="Based on your analysis, provide moderate-risk fixes including:
+              - Code style improvements
+              - Basic refactoring suggestions
+              - Error handling enhancements
+              - Performance optimizations with minimal risk
+              Clearly mark any changes that might need testing."
+              ;;
+            "aggressive")
+              fix_prompt="Based on your analysis, provide comprehensive fixes including:
+              - Architecture improvements
+              - Major refactoring suggestions
+              - Advanced optimizations
+              - Breaking changes if necessary
+              Clearly document all changes and their implications."
+              ;;
+          esac
+
+          cat > auto-fix-request.json << EOF
+          {
+            "model": "${{ env.CLAUDE_MODEL }}",
+            "max_tokens": ${{ env.CLAUDE_MAX_TOKENS }},
+            "temperature": 0.1,
+            "messages": [
+              {
+                "role": "user", 
+                "content": "Previous analysis:\\n$analysis_content\\n\\n$fix_prompt\\n\\nProvide specific code changes in a structured format with before/after examples."
+              }
+            ]
+          }
+          EOF
+
+          # Get auto-fix suggestions from Claude
+          fix_response=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $api_key" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @auto-fix-request.json || echo '{"error": "Fix request failed"}')
+
+          echo "$fix_response" > auto-fix-response.json
+
+          if echo "$fix_response" | jq -e '.content[0].text' > /dev/null 2>&1; then
+            fix_suggestions=$(echo "$fix_response" | jq -r '.content[0].text')
+            echo "$fix_suggestions" > auto-fix-suggestions.md
+            
+            echo "✅ Auto-fix suggestions generated"
+            echo "📝 Level: ${{ env.AUTO_FIX_LEVEL }}"
+          else
+            echo "❌ Failed to generate auto-fix suggestions"
+            echo "No auto-fix suggestions available" > auto-fix-suggestions.md
+          fi
+      - name: 📤 Upload Auto-Fix Suggestions
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 'auto-fix-suggestions-${{ github.run_number }}'
+          name: auto-fix-suggestions-${{ github.run_number }}
           path: |
             auto-fix-suggestions.md
             auto-fix-response.json
@@ -197,7 +442,7 @@ jobs:
           retention-days: 30
     timeout-minutes: 30
   pr-comment-generation:
-    name: "\U0001F4CC 処理: \U0001F4AC Generate PR Comment"
+    name: "📌 処理: 💬 Generate PR Comment"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
@@ -206,36 +451,241 @@ jobs:
       - auto-fix-suggestions
     if: always() && github.event_name == 'pull_request'
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F4E5 Download All Analysis Results"
+      - name: 📥 Download All Analysis Results
         uses: actions/download-artifact@v4
         with:
-          pattern: '*-${{ github.run_number }}'
+          pattern: "*-${{ github.run_number }}"
           merge-multiple: true
         continue-on-error: true
-      - name: "\U0001F4AC Create PR Comment"
+      - name: 💬 Create PR Comment
         uses: actions/github-script@v7
         with:
-          script: "const fs = require('fs');\n\n// Collect analysis results\nconst analysisExists = fs.existsSync('claude-detailed-analysis.md');\nconst fixExists = fs.existsSync('auto-fix-suggestions.md');\n\nlet commentBody = `## \U0001F916 Claude AI Code Review\\n\\n`;\ncommentBody += `**Analysis Type**: ${{ env.ANALYSIS_TYPE }}\\n`;\ncommentBody += `**Review Depth**: ${{ env.REVIEW_DEPTH }}\\n`;\ncommentBody += `**Auto-Fix Level**: ${{ env.AUTO_FIX_LEVEL }}\\n\\n`;\n\n// Add analysis summary\nconst reviewSummary = `${{ needs.claude-code-review.outputs.review-summary || 'Analysis not available' }}`;\nconst issuesFound = `${{ needs.claude-code-review.outputs.issues-found || '0' }}`;\n\ncommentBody += `### \U0001F4CA Analysis Summary\\n`;\ncommentBody += `- **Issues Found**: ${issuesFound}\\n`;\ncommentBody += `- **Complexity Score**: ${{ needs.code-analysis.outputs.complexity-score || 'N/A' }}\\n`;\ncommentBody += `- **Analysis Scope**: ${{ needs.code-analysis.outputs.analysis-scope || 'N/A' }}\\n\\n`;\n\nif (reviewSummary !== 'Analysis not available') {\n  commentBody += `### \U0001F50D Key Findings\\n${reviewSummary}\\n\\n`;\n}\n\n// Add detailed analysis if available\nif (analysisExists) {\n  try {\n    const detailedAnalysis = fs.readFileSync('claude-detailed-analysis.md', 'utf8');\n    commentBody += `<details>\\n<summary>\U0001F4CB Detailed Analysis</summary>\\n\\n`;\n    commentBody += `\\`\\`\\`\\n${detailedAnalysis.substring(0, 5000)}\\n\\`\\`\\`\\n`;\n    if (detailedAnalysis.length > 5000) {\n      commentBody += `\\n*Analysis truncated. Full report available in workflow artifacts.*\\n`;\n    }\n    commentBody += `\\n</details>\\n\\n`;\n  } catch (error) {\n    console.log('Could not read detailed analysis:', error.message);\n  }\n}\n\n// Add auto-fix suggestions if available\nif (fixExists && \"${{ env.AUTO_FIX_LEVEL }}\" !== 'none') {\n  try {\n    const fixSuggestions = fs.readFileSync('auto-fix-suggestions.md', 'utf8');\n    commentBody += `<details>\\n<summary>\U0001F527 Auto-Fix Suggestions</summary>\\n\\n`;\n    commentBody += `${fixSuggestions.substring(0, 3000)}\\n`;\n    if (fixSuggestions.length > 3000) {\n      commentBody += `\\n*Suggestions truncated. Full report available in workflow artifacts.*\\n`;\n    }\n    commentBody += `\\n</details>\\n\\n`;\n  } catch (error) {\n    console.log('Could not read fix suggestions:', error.message);\n  }\n}\n\n// Add workflow information\ncommentBody += `### \U0001F517 Resources\\n`;\ncommentBody += `- [Full Analysis Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\\n`;\ncommentBody += `- [Detailed Reports (Artifacts)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)\\n\\n`;\n\ncommentBody += `---\\n*Powered by Claude AI Integration Pipeline v2.0.0*`;\n\n// Find existing Claude comment or create new one\nconst { data: comments } = await github.rest.issues.listComments({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  issue_number: context.issue.number\n});\n\nconst existingComment = comments.find(comment => \n  comment.user.login === 'github-actions[bot]' && \n  comment.body.includes('\U0001F916 Claude AI Code Review')\n);\n\nif (existingComment) {\n  await github.rest.issues.updateComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    comment_id: existingComment.id,\n    body: commentBody\n  });\n  console.log('Updated existing Claude review comment');\n} else {\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: context.issue.number,\n    body: commentBody\n  });\n  console.log('Created new Claude review comment');\n}\n"
+          script: >
+            const fs = require('fs');
+
+
+            // Collect analysis results
+
+            const analysisExists = fs.existsSync('claude-detailed-analysis.md');
+
+            const fixExists = fs.existsSync('auto-fix-suggestions.md');
+
+
+            let commentBody = `## 🤖 Claude AI Code Review\n\n`;
+
+            commentBody += `**Analysis Type**: ${{ env.ANALYSIS_TYPE }}\n`;
+
+            commentBody += `**Review Depth**: ${{ env.REVIEW_DEPTH }}\n`;
+
+            commentBody += `**Auto-Fix Level**: ${{ env.AUTO_FIX_LEVEL }}\n\n`;
+
+
+            // Add analysis summary
+
+            const reviewSummary = `${{ needs.claude-code-review.outputs.review-summary || 'Analysis not available' }}`;
+
+            const issuesFound = `${{ needs.claude-code-review.outputs.issues-found || '0' }}`;
+
+
+            commentBody += `### 📊 Analysis Summary\n`;
+
+            commentBody += `- **Issues Found**: ${issuesFound}\n`;
+
+            commentBody += `- **Complexity Score**: ${{ needs.code-analysis.outputs.complexity-score || 'N/A' }}\n`;
+
+            commentBody += `- **Analysis Scope**: ${{ needs.code-analysis.outputs.analysis-scope || 'N/A' }}\n\n`;
+
+
+            if (reviewSummary !== 'Analysis not available') {
+              commentBody += `### 🔍 Key Findings\n${reviewSummary}\n\n`;
+            }
+
+
+            // Add detailed analysis if available
+
+            if (analysisExists) {
+              try {
+                const detailedAnalysis = fs.readFileSync('claude-detailed-analysis.md', 'utf8');
+                commentBody += `<details>\n<summary>📋 Detailed Analysis</summary>\n\n`;
+                commentBody += `\`\`\`\n${detailedAnalysis.substring(0, 5000)}\n\`\`\`\n`;
+                if (detailedAnalysis.length > 5000) {
+                  commentBody += `\n*Analysis truncated. Full report available in workflow artifacts.*\n`;
+                }
+                commentBody += `\n</details>\n\n`;
+              } catch (error) {
+                console.log('Could not read detailed analysis:', error.message);
+              }
+            }
+
+
+            // Add auto-fix suggestions if available
+
+            if (fixExists && "${{ env.AUTO_FIX_LEVEL }}" !== 'none') {
+              try {
+                const fixSuggestions = fs.readFileSync('auto-fix-suggestions.md', 'utf8');
+                commentBody += `<details>\n<summary>🔧 Auto-Fix Suggestions</summary>\n\n`;
+                commentBody += `${fixSuggestions.substring(0, 3000)}\n`;
+                if (fixSuggestions.length > 3000) {
+                  commentBody += `\n*Suggestions truncated. Full report available in workflow artifacts.*\n`;
+                }
+                commentBody += `\n</details>\n\n`;
+              } catch (error) {
+                console.log('Could not read fix suggestions:', error.message);
+              }
+            }
+
+
+            // Add workflow information
+
+            commentBody += `### 🔗 Resources\n`;
+
+            commentBody += `- [Full Analysis Workflow](${{ github.server_url }}/${{ github.repository
+            }}/actions/runs/${{ github.run_id }})\n`;
+
+            commentBody += `- [Detailed Reports (Artifacts)](${{ github.server_url }}/${{ github.repository
+            }}/actions/runs/${{ github.run_id }}#artifacts)\n\n`;
+
+
+            commentBody += `---\n*Powered by Claude AI Integration Pipeline v2.0.0*`;
+
+
+            // Find existing Claude comment or create new one
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+
+            const existingComment = comments.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('🤖 Claude AI Code Review')
+            );
+
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+              console.log('Updated existing Claude review comment');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              console.log('Created new Claude review comment');
+            }
     timeout-minutes: 30
   issue-auto-processing:
-    name: "\U0001F4CC 処理: \U0001F3AB Auto Issue Processing"
+    name: "📌 処理: 🎫 Auto Issue Processing"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
-    if: 'github.event_name == ''issues'' && contains(github.event.issue.labels.*.name, ''claude-analysis'')'
+    if: github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'claude-analysis')
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F916 Process Issue with Claude"
+      - name: 🤖 Process Issue with Claude
         if: secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY
         uses: actions/github-script@v7
         with:
-          script: "const issueTitle = context.payload.issue.title;\nconst issueBody = context.payload.issue.body;\nconst apiKey = '${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}';\n\nif (!apiKey) {\n  console.log('No Claude API key available');\n  return;\n}\n\nconst prompt = `\nAnalyze this GitHub issue for the PMPLearningManagement project:\n\nTitle: ${issueTitle}\nBody: ${issueBody}\n\nProvide:\n1. Issue classification (bug, feature, enhancement, question)\n2. Priority assessment (low, medium, high, critical)\n3. Estimated effort (small, medium, large)\n4. Technical approach suggestions\n5. Implementation steps\n6. Related files that might need changes\n\nFormat your response in markdown for easy reading.\n`;\n\ntry {\n  const response = await fetch('https://api.anthropic.com/v1/messages', {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      'x-api-key': apiKey,\n      'anthropic-version': '2023-06-01'\n    },\n    body: JSON.stringify({\n      model: '${{ env.CLAUDE_MODEL }}',\n      max_tokens: 2048,\n      temperature: 0.3,\n      messages: [{\n        role: 'user',\n        content: prompt\n      }]\n    })\n  });\n  \n  const data = await response.json();\n  \n  if (data.content && data.content[0] && data.content[0].text) {\n    const analysis = data.content[0].text;\n    \n    const commentBody = `## \U0001F916 Claude AI Issue Analysis\\n\\n${analysis}\\n\\n---\\n*Auto-generated by Claude Issue Processing*`;\n    \n    await github.rest.issues.createComment({\n      owner: context.repo.owner,\n      repo: context.repo.repo,\n      issue_number: context.issue.number,\n      body: commentBody\n    });\n    \n    // Try to extract and apply labels\n    if (analysis.includes('Priority: high') || analysis.includes('critical')) {\n      await github.rest.issues.addLabels({\n        owner: context.repo.owner,\n        repo: context.repo.repo,\n        issue_number: context.issue.number,\n        labels: ['high-priority']\n      });\n    }\n    \n    if (analysis.includes('bug') || analysis.includes('Bug')) {\n      await github.rest.issues.addLabels({\n        owner: context.repo.owner,\n        repo: context.repo.repo,\n        issue_number: context.issue.number,\n        labels: ['bug']\n      });\n    }\n    \n    console.log('Claude issue analysis completed');\n  } else {\n    console.log('No analysis content received from Claude');\n  }\n} catch (error) {\n  console.error('Claude API error:', error);\n}\n"
+          script: |
+            const issueTitle = context.payload.issue.title;
+            const issueBody = context.payload.issue.body;
+            const apiKey = '${{ secrets.CLAUDE_API_KEY || secrets.ANTHROPIC_API_KEY }}';
+
+            if (!apiKey) {
+              console.log('No Claude API key available');
+              return;
+            }
+
+            const prompt = `
+            Analyze this GitHub issue for the PMPLearningManagement project:
+
+            Title: ${issueTitle}
+            Body: ${issueBody}
+
+            Provide:
+            1. Issue classification (bug, feature, enhancement, question)
+            2. Priority assessment (low, medium, high, critical)
+            3. Estimated effort (small, medium, large)
+            4. Technical approach suggestions
+            5. Implementation steps
+            6. Related files that might need changes
+
+            Format your response in markdown for easy reading.
+            `;
+
+            try {
+              const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': apiKey,
+                  'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                  model: '${{ env.CLAUDE_MODEL }}',
+                  max_tokens: 2048,
+                  temperature: 0.3,
+                  messages: [{
+                    role: 'user',
+                    content: prompt
+                  }]
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (data.content && data.content[0] && data.content[0].text) {
+                const analysis = data.content[0].text;
+                
+                const commentBody = `## 🤖 Claude AI Issue Analysis\n\n${analysis}\n\n---\n*Auto-generated by Claude Issue Processing*`;
+                
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+                
+                // Try to extract and apply labels
+                if (analysis.includes('Priority: high') || analysis.includes('critical')) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['high-priority']
+                  });
+                }
+                
+                if (analysis.includes('bug') || analysis.includes('Bug')) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['bug']
+                  });
+                }
+                
+                console.log('Claude issue analysis completed');
+              } else {
+                console.log('No analysis content received from Claude');
+              }
+            } catch (error) {
+              console.error('Claude API error:', error);
+            }
     timeout-minutes: 30
   claude-report-integration:
-    name: "\U0001F4CA レポート: \U0001F4CA Claude Integration Report"
+    name: "🔧 レポート: claude-report-integration"
     runs-on: ubuntu-latest
     needs:
       - claude-setup
@@ -244,24 +694,100 @@ jobs:
       - auto-fix-suggestions
     if: always()
     steps:
-      - name: "\U0001F4E5 Checkout Repository"
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: "\U0001F4E5 Download All Claude Results"
+      - name: 📥 Download All Claude Results
         uses: actions/download-artifact@v4
         with:
-          pattern: '*-${{ github.run_number }}'
+          pattern: "*-${{ github.run_number }}"
           merge-multiple: true
         continue-on-error: true
-      - name: "\U0001F4CA Generate Integration Report"
-        run: "echo \"\U0001F4CA Generating Claude integration report...\"\n\n# Collect metrics\nissues_found=\"${{ needs.claude-code-review.outputs.issues-found || '0' }}\"\ncomplexity_score=\"${{ needs.code-analysis.outputs.complexity-score || 'N/A' }}\"\nanalysis_scope=\"${{ needs.code-analysis.outputs.analysis-scope || 'N/A' }}\"\n\ncat > claude-integration-report.md << EOF\n# \U0001F916 Claude AI Integration Report\n\n**Analysis Date**: $(date -Iseconds)  \n**Commit**: ${{ github.sha }}  \n**Branch**: ${{ github.ref_name }}  \n**Workflow Run**: ${{ github.run_number }}  \n\n## \U0001F4CA Analysis Overview\n\n| Metric | Value |\n|--------|--------|\n| Analysis Type | ${{ env.ANALYSIS_TYPE }} |\n| Review Depth | ${{ env.REVIEW_DEPTH }} |\n| Auto-Fix Level | ${{ env.AUTO_FIX_LEVEL }} |\n| Issues Found | ${issues_found} |\n| Complexity Score | ${complexity_score} |\n| Analysis Scope | ${analysis_scope} |\n| Code Analysis | ${{ needs.code-analysis.result }} |\n| Claude Review | ${{ needs.claude-code-review.result }} |\n| Auto-Fix | ${{ needs.auto-fix-suggestions.result }} |\n\n## \U0001F3AF Key Insights\n\nEOF\n\n# Add Claude analysis summary if available\nif [ -f claude-detailed-analysis.md ]; then\n  echo \"### \U0001F50D Claude Analysis Summary\" >> claude-integration-report.md\n  echo '```' >> claude-integration-report.md\n  head -n 10 claude-detailed-analysis.md >> claude-integration-report.md\n  echo '```' >> claude-integration-report.md\n  echo \"\" >> claude-integration-report.md\nfi\n\n# Add auto-fix summary if available  \nif [ -f auto-fix-suggestions.md ]; then\n  echo \"### \U0001F527 Auto-Fix Suggestions Available\" >> claude-integration-report.md\n  echo \"- Auto-fix level: ${{ env.AUTO_FIX_LEVEL }}\" >> claude-integration-report.md\n  echo \"- Suggestions generated based on Claude analysis\" >> claude-integration-report.md\n  echo \"\" >> claude-integration-report.md\nfi\n\ncat >> claude-integration-report.md << EOF\n## \U0001F4C8 Impact Assessment\n\n### Benefits Delivered\n- Automated code review insights\n- Proactive issue identification\n- Architecture and quality feedback\n- Development velocity improvement\n\n### Next Steps\n1. Review detailed analysis in artifacts\n2. Implement suggested improvements\n3. Apply auto-fix recommendations where appropriate\n4. Monitor impact on code quality metrics\n\n## \U0001F517 Resources\n\n- [Detailed Claude Analysis](claude-detailed-analysis.md)\n- [Auto-Fix Suggestions](auto-fix-suggestions.md)\n- [Full Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n---\n*Powered by Claude AI Integration v2.0.0*\nEOF\n\ncat claude-integration-report.md\n"
-      - name: "\U0001F4E4 Upload Integration Report"
+      - name: 📊 Generate Integration Report
+        run: |
+          echo "📊 Generating Claude integration report..."
+
+          # Collect metrics
+          issues_found="${{ needs.claude-code-review.outputs.issues-found || '0' }}"
+          complexity_score="${{ needs.code-analysis.outputs.complexity-score || 'N/A' }}"
+          analysis_scope="${{ needs.code-analysis.outputs.analysis-scope || 'N/A' }}"
+
+          cat > claude-integration-report.md << EOF
+          # 🤖 Claude AI Integration Report
+
+          **Analysis Date**: $(date -Iseconds)  
+          **Commit**: ${{ github.sha }}  
+          **Branch**: ${{ github.ref_name }}  
+          **Workflow Run**: ${{ github.run_number }}  
+
+          ## 📊 Analysis Overview
+
+          | Metric | Value |
+          |--------|--------|
+          | Analysis Type | ${{ env.ANALYSIS_TYPE }} |
+          | Review Depth | ${{ env.REVIEW_DEPTH }} |
+          | Auto-Fix Level | ${{ env.AUTO_FIX_LEVEL }} |
+          | Issues Found | ${issues_found} |
+          | Complexity Score | ${complexity_score} |
+          | Analysis Scope | ${analysis_scope} |
+          | Code Analysis | ${{ needs.code-analysis.result }} |
+          | Claude Review | ${{ needs.claude-code-review.result }} |
+          | Auto-Fix | ${{ needs.auto-fix-suggestions.result }} |
+
+          ## 🎯 Key Insights
+
+          EOF
+
+          # Add Claude analysis summary if available
+          if [ -f claude-detailed-analysis.md ]; then
+            echo "### 🔍 Claude Analysis Summary" >> claude-integration-report.md
+            echo '```' >> claude-integration-report.md
+            head -n 10 claude-detailed-analysis.md >> claude-integration-report.md
+            echo '```' >> claude-integration-report.md
+            echo "" >> claude-integration-report.md
+          fi
+
+          # Add auto-fix summary if available  
+          if [ -f auto-fix-suggestions.md ]; then
+            echo "### 🔧 Auto-Fix Suggestions Available" >> claude-integration-report.md
+            echo "- Auto-fix level: ${{ env.AUTO_FIX_LEVEL }}" >> claude-integration-report.md
+            echo "- Suggestions generated based on Claude analysis" >> claude-integration-report.md
+            echo "" >> claude-integration-report.md
+          fi
+
+          cat >> claude-integration-report.md << EOF
+          ## 📈 Impact Assessment
+
+          ### Benefits Delivered
+          - Automated code review insights
+          - Proactive issue identification
+          - Architecture and quality feedback
+          - Development velocity improvement
+
+          ### Next Steps
+          1. Review detailed analysis in artifacts
+          2. Implement suggested improvements
+          3. Apply auto-fix recommendations where appropriate
+          4. Monitor impact on code quality metrics
+
+          ## 🔗 Resources
+
+          - [Detailed Claude Analysis](claude-detailed-analysis.md)
+          - [Auto-Fix Suggestions](auto-fix-suggestions.md)
+          - [Full Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ---
+          *Powered by Claude AI Integration v2.0.0*
+          EOF
+
+          cat claude-integration-report.md
+      - name: 📤 Upload Integration Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: 'claude-integration-report-${{ github.run_number }}'
+          name: claude-integration-report-${{ github.run_number }}
           path: claude-integration-report.md
           retention-days: 90
     timeout-minutes: 30
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

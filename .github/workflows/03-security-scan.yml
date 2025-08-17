@@ -1,28 +1,5 @@
-# ====================================================================
-# 🔒 Security Scan
-# ====================================================================
-# 目的: ワークフロー自動実行
-#
-# 実行タイミング:
-#   - コードプッシュ時
-#   - プルリクエスト作成・更新時
-#   - スケジュール実行
-#   - 手動実行
-#
-# 主な処理:
-#   1. 📋 監査: 📦 Dependency Security Audit
-#   2. 🔍 分析: 🔍 CodeQL Security Analysis
-#   3. 🔒 セキュリティ: 🛡️ Custom Security Checks
-#   4. ✓ チェック: 🔐 OWASP Dependency Check
-#   5. 🔒 セキュリティ: 📋 Generate Security Report
-#
-# 依存関係: Node.js, npm, GitHub Actions
-# 実行時間目安: 約10-15分
-# 最終更新: 2025-08-17
-# ====================================================================
-
-name: "\U0001F512 Security Scan"
-'on':
+name: 🔒 Security Scan
+"on":
   push:
     branches:
       - main
@@ -32,88 +9,104 @@ name: "\U0001F512 Security Scan"
       - main
   schedule:
     - cron: 0 2 * * 1
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: デバッグモードを有効にする
+        required: false
+        default: "false"
+        type: boolean
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: "18"
 jobs:
   dependency-audit:
-    name: "\U0001F4CB 監査: \U0001F4E6 Dependency Security Audit"
+    name: "📋 監査: 📦 Dependency Security Audit"
     runs-on: ubuntu-latest
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F3D7️ Setup Node.js"
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - name: "\U0001F4E6 Install dependencies"
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: "\U0001F512 Run npm audit"
+      - name: 🔒 Run npm audit
         run: |
           npm audit --audit-level moderate --json > audit-results.json || true
-      - name: "\U0001F4CA Process audit results"
+      - name: 📊 Process audit results
         run: |
           if [ -f "scripts/process-audit-results.js" ]; then
             npm run security:process-audit
           fi
-      - name: "\U0001F4CA Upload audit results"
+      - name: 📊 Upload audit results
         uses: actions/upload-artifact@v4
         with:
           name: dependency-audit-results
           path: audit-results.json
     timeout-minutes: 30
   codeql-analysis:
-    name: "\U0001F50D 分析: \U0001F50D CodeQL Security Analysis"
+    name: "🔍 分析: 🔍 CodeQL Security Analysis"
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F50D Initialize CodeQL"
+      - name: 🔍 Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: javascript
-      - name: "\U0001F3D7️ Build application"
+      - name: 🏗️ Build application
         run: |
           npm ci
           npm run build
-      - name: "\U0001F50D Perform CodeQL Analysis"
+      - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
     timeout-minutes: 30
   custom-security-checks:
-    name: "\U0001F512 セキュリティ: \U0001F6E1️ Custom Security Checks"
+    name: "🔧 チェック: custom-security-checks"
     runs-on: ubuntu-latest
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F3D7️ Setup Node.js"
+      - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - name: "\U0001F4E6 Install dependencies"
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: "\U0001F50D Scan for hardcoded secrets"
-        run: "echo \"\U0001F50D Scanning for potential secrets...\"\ngrep -r -i -E \"(api[_-]?key|password|secret|token)\" src/ --exclude-dir=node_modules || true\ngrep -r -E \"(['\\\"])[A-Za-z0-9]{20,}(['\\\"])\" src/ --exclude-dir=node_modules || true\n"
-      - name: "\U0001F512 Check for insecure patterns"
-        run: "echo \"\U0001F512 Checking for insecure coding patterns...\"\n# Check for eval usage\ngrep -r \"eval(\" src/ --include=\"*.js\" --include=\"*.jsx\" --include=\"*.ts\" --include=\"*.tsx\" || true\n# Check for innerHTML usage without sanitization\ngrep -r \"innerHTML\" src/ --include=\"*.js\" --include=\"*.jsx\" --include=\"*.ts\" --include=\"*.tsx\" || true\n# Check for document.write usage\ngrep -r \"document\\.write\" src/ --include=\"*.js\" --include=\"*.jsx\" --include=\"*.ts\" --include=\"*.tsx\" || true\n"
-      - name: "\U0001F6E1️ Run custom security script"
+      - name: 🔍 Scan for hardcoded secrets
+        run: |
+          echo "🔍 Scanning for potential secrets..."
+          grep -r -i -E "(api[_-]?key|password|secret|token)" src/ --exclude-dir=node_modules || true
+          grep -r -E "(['\"])[A-Za-z0-9]{20,}(['\"])" src/ --exclude-dir=node_modules || true
+      - name: 🔒 Check for insecure patterns
+        run: |
+          echo "🔒 Checking for insecure coding patterns..."
+          # Check for eval usage
+          grep -r "eval(" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+          # Check for innerHTML usage without sanitization
+          grep -r "innerHTML" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+          # Check for document.write usage
+          grep -r "document\.write" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" || true
+      - name: 🛡️ Run custom security script
         run: |
           if [ -f "scripts/security-audit.js" ]; then
             npm run security:custom-checks
           fi
     timeout-minutes: 30
   owasp-dependency-check:
-    name: "✓ チェック: \U0001F510 OWASP Dependency Check"
+    name: "🔧 チェック: owasp-dependency-check"
     runs-on: ubuntu-latest
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F510 Run OWASP Dependency Check"
+      - name: 🔐 Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         id: depcheck
         with:
@@ -121,14 +114,14 @@ jobs:
           path: .
           format: JSON
           out: reports
-      - name: "\U0001F4CA Upload OWASP results"
+      - name: 📊 Upload OWASP results
         uses: actions/upload-artifact@v4
         with:
           name: owasp-dependency-check-results
           path: reports/
     timeout-minutes: 30
   security-report:
-    name: "\U0001F512 セキュリティ: \U0001F4CB Generate Security Report"
+    name: "🔧 レポート: security-report"
     runs-on: ubuntu-latest
     needs:
       - dependency-audit
@@ -137,20 +130,46 @@ jobs:
       - owasp-dependency-check
     if: always()
     steps:
-      - name: "\U0001F4E5 Checkout repository"
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: "\U0001F4CA Download all artifacts"
+      - name: 📊 Download all artifacts
         uses: actions/download-artifact@v4
-      - name: "\U0001F4CB Generate comprehensive security report"
-        run: "mkdir -p security-reports\necho \"# \U0001F512 Security Audit Report\" > security-reports/security-summary.md\necho \"\" >> security-reports/security-summary.md\necho \"Generated: $(date)\" >> security-reports/security-summary.md\necho \"\" >> security-reports/security-summary.md\n\necho \"## \U0001F4CA Audit Summary\" >> security-reports/security-summary.md\necho \"- Dependency Audit: ${{ needs.dependency-audit.result }}\" >> security-reports/security-summary.md\necho \"- CodeQL Analysis: ${{ needs.codeql-analysis.result }}\" >> security-reports/security-summary.md\necho \"- Custom Checks: ${{ needs.custom-security-checks.result }}\" >> security-reports/security-summary.md\necho \"- OWASP Check: ${{ needs.owasp-dependency-check.result }}\" >> security-reports/security-summary.md\necho \"\" >> security-reports/security-summary.md\n\necho \"## \U0001F6E1️ Security Status\" >> security-reports/security-summary.md\nif [[ \"${{ needs.dependency-audit.result }}\" == \"success\" && \n      \"${{ needs.codeql-analysis.result }}\" == \"success\" && \n      \"${{ needs.custom-security-checks.result }}\" == \"success\" ]]; then\n  echo \"✅ No critical security issues detected\" >> security-reports/security-summary.md\nelse\n  echo \"⚠️ Security issues require attention\" >> security-reports/security-summary.md\nfi\n"
-      - name: "\U0001F4CA Upload security report"
+      - name: 📋 Generate comprehensive security report
+        run: |
+          mkdir -p security-reports
+          echo "# 🔒 Security Audit Report" > security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+          echo "Generated: $(date)" >> security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+
+          echo "## 📊 Audit Summary" >> security-reports/security-summary.md
+          echo "- Dependency Audit: ${{ needs.dependency-audit.result }}" >> security-reports/security-summary.md
+          echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> security-reports/security-summary.md
+          echo "- Custom Checks: ${{ needs.custom-security-checks.result }}" >> security-reports/security-summary.md
+          echo "- OWASP Check: ${{ needs.owasp-dependency-check.result }}" >> security-reports/security-summary.md
+          echo "" >> security-reports/security-summary.md
+
+          echo "## 🛡️ Security Status" >> security-reports/security-summary.md
+          if [[ "${{ needs.dependency-audit.result }}" == "success" && 
+                "${{ needs.codeql-analysis.result }}" == "success" && 
+                "${{ needs.custom-security-checks.result }}" == "success" ]]; then
+            echo "✅ No critical security issues detected" >> security-reports/security-summary.md
+          else
+            echo "⚠️ Security issues require attention" >> security-reports/security-summary.md
+          fi
+      - name: 📊 Upload security report
         uses: actions/upload-artifact@v4
         with:
           name: security-audit-report
           path: security-reports/
           retention-days: 30
-      - name: "\U0001F4E2 Security status summary"
-        run: "echo \"## \U0001F512 Security Audit Results\" >> $GITHUB_STEP_SUMMARY\necho \"- Dependency Audit: ${{ needs.dependency-audit.result }}\" >> $GITHUB_STEP_SUMMARY\necho \"- CodeQL Analysis: ${{ needs.codeql-analysis.result }}\" >> $GITHUB_STEP_SUMMARY\necho \"- Custom Security Checks: ${{ needs.custom-security-checks.result }}\" >> $GITHUB_STEP_SUMMARY\necho \"- OWASP Dependency Check: ${{ needs.owasp-dependency-check.result }}\" >> $GITHUB_STEP_SUMMARY\n"
+      - name: 📢 Security status summary
+        run: |
+          echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependency Audit: ${{ needs.dependency-audit.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Custom Security Checks: ${{ needs.custom-security-checks.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- OWASP Dependency Check: ${{ needs.owasp-dependency-check.result }}" >> $GITHUB_STEP_SUMMARY
     timeout-minutes: 30
 permissions:
   contents: read
@@ -158,5 +177,5 @@ permissions:
   checks: write
   pull-requests: write
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
