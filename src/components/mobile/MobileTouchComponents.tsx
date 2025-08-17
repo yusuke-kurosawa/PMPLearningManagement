@@ -83,11 +83,15 @@ export const TouchExpandableCard = ({ title, children, defaultExpanded = false }
       if (deltaY < 0 && !isExpanded) {
         // Swipe up to expand
         setIsExpanded(true)
-        if (navigator.vibrate) {navigator.vibrate(15)}
+        if (navigator.vibrate) {
+          navigator.vibrate(15)
+        }
       } else if (deltaY > 0 && isExpanded) {
         // Swipe down to collapse
         setIsExpanded(false)
-        if (navigator.vibrate) {navigator.vibrate(15)}
+        if (navigator.vibrate) {
+          navigator.vibrate(15)
+        }
       }
     }
 
@@ -98,25 +102,25 @@ export const TouchExpandableCard = ({ title, children, defaultExpanded = false }
   return (
     <div
       ref={cardRef}
-      className="overflow-hidden rounded-xl border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+      className='overflow-hidden rounded-xl border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'
     >
       <div
-        className="cursor-pointer touch-manipulation select-none p-4 active:bg-gray-50 dark:active:bg-gray-700"
+        className='cursor-pointer touch-manipulation select-none p-4 active:bg-gray-50 dark:active:bg-gray-700'
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-          <div className="flex items-center gap-2">
-            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>{title}</h3>
+          <div className='flex items-center gap-2'>
+            {isExpanded ? <ChevronUp className='h-5 w-5' /> : <ChevronDown className='h-5 w-5' />}
           </div>
         </div>
 
         {/* Swipe indicator */}
-        <div className="mt-2 flex justify-center">
-          <div className="h-1 w-12 rounded-full bg-gray-300 dark:bg-gray-600" />
+        <div className='mt-2 flex justify-center'>
+          <div className='h-1 w-12 rounded-full bg-gray-300 dark:bg-gray-600' />
         </div>
       </div>
 
@@ -127,7 +131,7 @@ export const TouchExpandableCard = ({ title, children, defaultExpanded = false }
           ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <div className="border-t p-4 pt-0 dark:border-gray-700">{children}</div>
+        <div className='border-t p-4 pt-0 dark:border-gray-700'>{children}</div>
       </div>
     </div>
   )
@@ -148,7 +152,9 @@ export const TouchActionBar = ({ items = [], onAction }) => {
 
   const handleAction = (item) => {
     setActiveItem(item.id)
-    if (navigator.vibrate) {navigator.vibrate(20)}
+    if (navigator.vibrate) {
+      navigator.vibrate(20)
+    }
 
     // Reset active state after animation
     setTimeout(() => setActiveItem(null), 200)
@@ -159,8 +165,8 @@ export const TouchActionBar = ({ items = [], onAction }) => {
   }
 
   return (
-    <div className="border-t bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex items-center justify-around">
+    <div className='border-t bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+      <div className='flex items-center justify-around'>
         {actionItems.map((item) => {
           const Icon = item.icon
           const isActive = activeItem === item.id
@@ -180,7 +186,7 @@ export const TouchActionBar = ({ items = [], onAction }) => {
               `}
             >
               <Icon className={`h-6 w-6 ${item.color || 'text-gray-600 dark:text-gray-400'}`} />
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              <span className='text-xs font-medium text-gray-600 dark:text-gray-400'>
                 {item.label}
               </span>
             </button>
@@ -205,7 +211,9 @@ export const TouchLongPressMenu = ({ children, menuItems = [], onMenuAction }) =
     longPressTimer.current = setTimeout(() => {
       setMenuPosition({ x: touch.clientX, y: touch.clientY })
       setShowMenu(true)
-      if (navigator.vibrate) {navigator.vibrate(50)}
+      if (navigator.vibrate) {
+        navigator.vibrate(50)
+      }
     }, 500)
   }
 
@@ -251,14 +259,14 @@ export const TouchLongPressMenu = ({ children, menuItems = [], onMenuAction }) =
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="touch-manipulation"
+        className='touch-manipulation'
       >
         {children}
       </div>
 
       {showMenu && (
         <div
-          className="fixed z-50 min-w-[160px] rounded-xl border bg-white py-2 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+          className='fixed z-50 min-w-[160px] rounded-xl border bg-white py-2 shadow-2xl dark:border-gray-700 dark:bg-gray-800'
           style={{
             left: Math.min(menuPosition.x, window.innerWidth - 180),
             top: Math.min(menuPosition.y, window.innerHeight - menuItems.length * 48 - 20),
@@ -270,10 +278,10 @@ export const TouchLongPressMenu = ({ children, menuItems = [], onMenuAction }) =
               <button
                 key={index}
                 onClick={() => handleMenuAction(item)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                className='flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700'
               >
-                {Icon && <Icon className="h-4 w-4" />}
-                <span className="text-sm font-medium">{item.label}</span>
+                {Icon && <Icon className='h-4 w-4' />}
+                <span className='text-sm font-medium'>{item.label}</span>
               </button>
             )
           })}
@@ -297,7 +305,9 @@ export const SwipeableListItem = ({ children, leftActions = [], rightActions = [
   }
 
   const handleTouchMove = (e) => {
-    if (!isSwipping) {return}
+    if (!isSwipping) {
+      return
+    }
 
     currentX.current = e.touches[0].clientX
     const deltaX = currentX.current - startX.current
@@ -323,16 +333,16 @@ export const SwipeableListItem = ({ children, leftActions = [], rightActions = [
   }
 
   return (
-    <div className="relative overflow-hidden">
+    <div className='relative overflow-hidden'>
       {/* Left actions */}
       {leftActions.length > 0 && (
-        <div className="absolute bottom-0 left-0 top-0 flex items-center bg-green-500 px-4 text-white">
+        <div className='absolute bottom-0 left-0 top-0 flex items-center bg-green-500 px-4 text-white'>
           {leftActions.map((action, index) => {
             const Icon = action.icon
             return (
-              <div key={index} className="flex flex-col items-center">
-                {Icon && <Icon className="h-5 w-5" />}
-                <span className="mt-1 text-xs">{action.label}</span>
+              <div key={index} className='flex flex-col items-center'>
+                {Icon && <Icon className='h-5 w-5' />}
+                <span className='mt-1 text-xs'>{action.label}</span>
               </div>
             )
           })}
@@ -341,13 +351,13 @@ export const SwipeableListItem = ({ children, leftActions = [], rightActions = [
 
       {/* Right actions */}
       {rightActions.length > 0 && (
-        <div className="absolute bottom-0 right-0 top-0 flex items-center bg-red-500 px-4 text-white">
+        <div className='absolute bottom-0 right-0 top-0 flex items-center bg-red-500 px-4 text-white'>
           {rightActions.map((action, index) => {
             const Icon = action.icon
             return (
-              <div key={index} className="flex flex-col items-center">
-                {Icon && <Icon className="h-5 w-5" />}
-                <span className="mt-1 text-xs">{action.label}</span>
+              <div key={index} className='flex flex-col items-center'>
+                {Icon && <Icon className='h-5 w-5' />}
+                <span className='mt-1 text-xs'>{action.label}</span>
               </div>
             )
           })}
@@ -357,7 +367,7 @@ export const SwipeableListItem = ({ children, leftActions = [], rightActions = [
       {/* Main content */}
       <div
         ref={itemRef}
-        className="touch-manipulation bg-white transition-transform duration-200 ease-out dark:bg-gray-800"
+        className='touch-manipulation bg-white transition-transform duration-200 ease-out dark:bg-gray-800'
         style={{ transform: `translateX(${swipeOffset}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

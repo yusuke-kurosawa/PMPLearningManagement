@@ -6,7 +6,7 @@ import Navigation from '../layout/Navigation'
 
 // Mock GlobalSearch component to avoid complex dependencies in unit tests
 vi.mock('../shared/GlobalSearch', () => ({
-  default: () => <div data-testid="global-search">Global Search</div>,
+  default: () => <div data-testid='global-search'>Global Search</div>,
 }))
 
 // Mock useTheme hook from ThemeContext
@@ -19,10 +19,10 @@ vi.mock('../../contexts/ThemeContext', () => ({
     toggleDarkMode: vi.fn(),
     isDarkMode: false,
     toggleTheme: vi.fn(),
-  })
+  }),
 }))
 
-// Mock useAuth hook from AuthContext  
+// Mock useAuth hook from AuthContext
 vi.mock('../../contexts/AuthContext', () => ({
   default: React.createContext(null),
   useAuth: () => ({
@@ -35,12 +35,12 @@ vi.mock('../../contexts/AuthContext', () => ({
     isAdmin: false,
     isInstructor: false,
     signOut: vi.fn(),
-  })
+  }),
 }))
 
 // Mock SettingsTrigger component
 vi.mock('../shared/SettingsTrigger', () => ({
-  default: () => <div data-testid="settings-trigger">Settings</div>,
+  default: () => <div data-testid='settings-trigger'>Settings</div>,
 }))
 
 describe('Navigation', () => {

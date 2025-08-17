@@ -1,0 +1,278 @@
+name: "Dependency Roadmap Management"
+
+on:
+  issues:
+    types: [opened, edited, closed, labeled]
+  pull_request:
+    types: [closed]
+
+jobs:
+  dependency-analysis:
+    if: contains(github.event.issue.labels.*.name, 'dependency-mapping') || contains(github.event.issue.body, 'BLOCKS') || contains(github.event.issue.body, 'DEPENDS ON')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse and create dependency links
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = context.issue;
+            const body = context.payload.issue.body || '';
+            
+            // Parse dependency relationships from issue body
+            const blockingPattern = /#(\d+).*(?:BLOCKS|blocks)/gi;
+            const dependsPattern = /#(\d+).*(?:DEPENDS ON|depends on|BLOCKED BY|blocked by)/gi;
+            
+            let blocking = [];
+            let dependsOn = [];
+            let match;
+            
+            // Find issues this blocks
+            while ((match = blockingPattern.exec(body)) !== null) {
+              blocking.push(match[1]);
+            }
+            
+            // Find issues this depends on
+            while ((match = dependsPattern.exec(body)) !== null) {
+              dependsOn.push(match[1]);
+            }
+            
+            console.log(`Found dependencies - Blocking: ${blocking}, Depends on: ${dependsOn}`);
+            
+            // Create dependency tracking comment
+            let dependencyComment = `## 🔗 Dependency Analysis
+            
+            **Issue**: #${issue.number}
+            **Status**: Dependency mapping updated
+            
+            ### Dependency Graph
+            `;
+            
+            if (dependsOn.length > 0) {
+              dependencyComment += `\n**Prerequisites** (must complete first):\n`;
+              for (const dep of dependsOn) {
+                dependencyComment += `- [ ] #${dep} ⬇️ blocks this issue\n`;
+              }
+            }
+            
+            if (blocking.length > 0) {
+              dependencyComment += `\n**Downstream Impact** (waiting for this):\n`;
+              for (const blocked of blocking) {
+                dependencyComment += `- [ ] #${blocked} ⬆️ blocked by this issue\n`;
+              }
+            }
+            
+            dependencyComment += `\n### Roadmap Impact
+            - **Critical Path**: ${blocking.length > 0 ? 'Yes - blocks other work' : 'No - can work independently'}
+            - **Parallelizable**: ${dependsOn.length === 0 ? 'Yes - no prerequisites' : 'Partial - has dependencies'}
+            - **Risk Level**: ${dependsOn.length > 2 ? 'High - multiple dependencies' : dependsOn.length > 0 ? 'Medium - some dependencies' : 'Low - independent work'}
+            
+            ---
+            *Dependency tracking updated automatically*`;
+            
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: dependencyComment
+            });
+            
+            // Add appropriate labels based on dependency analysis
+            let newLabels = [];
+            if (blocking.length > 0) newLabels.push('critical-path');
+            if (dependsOn.length > 2) newLabels.push('high-dependency-risk');
+            if (dependsOn.length === 0 && blocking.length === 0) newLabels.push('independent-work');
+            
+            if (newLabels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: newLabels
+              });
+            }
+
+  roadmap-update:
+    if: github.event.action == 'closed' && github.event.issue.state == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update dependent issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const closedIssue = context.payload.issue;
+            
+            // Search for issues that depend on this closed issue
+            const query = `repo:${owner}/${repo} is:open #${closedIssue.number} BLOCKED BY OR DEPENDS ON`;
+            
+            try {
+              const searchResults = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:open "#${closedIssue.number}"`,
+                per_page: 100
+              });
+              
+              for (const item of searchResults.data.items) {
+                if (item.body && (item.body.includes(`#${closedIssue.number}`) && 
+                   (item.body.toLowerCase().includes('blocked by') || 
+                    item.body.toLowerCase().includes('depends on')))) {
+                  
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: item.number,
+                    body: `🟢 **Dependency Resolved**: #${closedIssue.number} has been completed.
+                    
+                    This issue may now be ready to start development if all other dependencies are resolved.
+                    
+                    Please review prerequisite checklist and update issue status accordingly.`
+                  });
+                  
+                  // Add label to indicate dependency was resolved
+                  await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: item.number,
+                    labels: ['dependency-resolved']
+                  });
+                }
+              }
+            } catch (error) {
+              console.log('Error searching for dependent issues:', error);
+            }
+
+  generate-roadmap-report:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event.issue && contains(github.event.issue.labels.*.name, 'generate-roadmap'))
+    steps:
+      - name: Generate development roadmap
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get all open issues with roadmap-related labels
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+              sort: 'created',
+              direction: 'asc'
+            });
+            
+            // Categorize issues by quarter and dependencies
+            const roadmapData = {
+              'Q1-2024': { independent: [], dependent: [], critical: [] },
+              'Q2-2024': { independent: [], dependent: [], critical: [] },
+              'Q3-2024': { independent: [], dependent: [], critical: [] },
+              'Q4-2024': { independent: [], dependent: [], critical: [] },
+              'Q1-2025': { independent: [], dependent: [], critical: [] }
+            };
+            
+            for (const issue of issues.data) {
+              const labels = issue.labels.map(l => l.name);
+              const body = issue.body || '';
+              
+              // Determine quarter (simplified logic)
+              let quarter = 'Q1-2024'; // default
+              if (body.includes('Q2 2024')) quarter = 'Q2-2024';
+              else if (body.includes('Q3 2024')) quarter = 'Q3-2024';
+              else if (body.includes('Q4 2024')) quarter = 'Q4-2024';
+              else if (body.includes('Q1 2025')) quarter = 'Q1-2025';
+              
+              // Categorize by dependency type
+              let category = 'independent';
+              if (labels.includes('critical-path')) category = 'critical';
+              else if (labels.includes('high-dependency-risk')) category = 'dependent';
+              
+              if (roadmapData[quarter]) {
+                roadmapData[quarter][category].push({
+                  number: issue.number,
+                  title: issue.title,
+                  labels: labels
+                });
+              }
+            }
+            
+            // Generate roadmap report
+            let roadmapReport = `# 🗺️ Development Roadmap Report
+            Generated: ${new Date().toISOString().split('T')[0]}
+            
+            ## Executive Summary
+            - **Total Open Issues**: ${issues.data.length}
+            - **Critical Path Items**: ${issues.data.filter(i => i.labels.some(l => l.name === 'critical-path')).length}
+            - **High Risk Dependencies**: ${issues.data.filter(i => i.labels.some(l => l.name === 'high-dependency-risk')).length}
+            - **Independent Work Items**: ${issues.data.filter(i => i.labels.some(l => l.name === 'independent-work')).length}
+            
+            ## Quarterly Roadmap
+            `;
+            
+            for (const [quarter, data] of Object.entries(roadmapData)) {
+              const total = data.critical.length + data.dependent.length + data.independent.length;
+              if (total > 0) {
+                roadmapReport += `\n### ${quarter} (${total} items)
+                
+                **🔴 Critical Path** (${data.critical.length} items):
+                ${data.critical.map(item => `- #${item.number} ${item.title}`).join('\n') || '- None'}
+                
+                **🟡 Dependent Work** (${data.dependent.length} items):
+                ${data.dependent.map(item => `- #${item.number} ${item.title}`).join('\n') || '- None'}
+                
+                **🟢 Independent Work** (${data.independent.length} items):
+                ${data.independent.map(item => `- #${item.number} ${item.title}`).join('\n') || '- None'}
+                `;
+              }
+            }
+            
+            roadmapReport += `
+            ## Recommendations
+            1. **Prioritize Critical Path**: Focus on critical path items to unblock downstream work
+            2. **Parallel Development**: Leverage independent work items for parallel team development
+            3. **Risk Mitigation**: Monitor high-dependency items and create fallback plans
+            4. **Team Coordination**: Ensure proper communication for cross-team dependencies
+            
+            ## Next Actions
+            - Review and validate dependency mappings
+            - Assign critical path items to senior team members
+            - Create technical spikes for high-risk items
+            - Set up sprint planning based on this roadmap
+            `;
+            
+            // Create or update roadmap issue
+            try {
+              const existingIssues = await github.rest.issues.listForRepo({
+                owner,
+                repo,
+                labels: 'roadmap-report',
+                state: 'open'
+              });
+              
+              if (existingIssues.data.length > 0) {
+                // Update existing roadmap issue
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existingIssues.data[0].number,
+                  body: roadmapReport
+                });
+                console.log(`Updated roadmap issue #${existingIssues.data[0].number}`);
+              } else {
+                // Create new roadmap issue
+                const newIssue = await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title: `📊 Development Roadmap - ${new Date().toISOString().split('T')[0]}`,
+                  body: roadmapReport,
+                  labels: ['roadmap-report', 'documentation', 'priority:high']
+                });
+                console.log(`Created roadmap issue #${newIssue.data.number}`);
+              }
+            } catch (error) {
+              console.log('Error creating/updating roadmap issue:', error);
+            }
+
+# Schedule roadmap report generation weekly on Mondays at 8 AM UTC
+on:
+  schedule:
+    - cron: '0 8 * * 1'

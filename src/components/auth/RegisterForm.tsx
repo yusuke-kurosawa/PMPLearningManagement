@@ -133,35 +133,47 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
   }
 
   const getPasswordStrengthColor: React.FC = () => {
-    if (passwordStrength < 30) {return 'bg-red-500'}
-    if (passwordStrength < 60) {return 'bg-yellow-500'}
-    if (passwordStrength < 80) {return 'bg-blue-500'}
+    if (passwordStrength < 30) {
+      return 'bg-red-500'
+    }
+    if (passwordStrength < 60) {
+      return 'bg-yellow-500'
+    }
+    if (passwordStrength < 80) {
+      return 'bg-blue-500'
+    }
     return 'bg-green-500'
   }
 
   const getPasswordStrengthText: React.FC = () => {
-    if (passwordStrength < 30) {return 'Weak'}
-    if (passwordStrength < 60) {return 'Fair'}
-    if (passwordStrength < 80) {return 'Good'}
+    if (passwordStrength < 30) {
+      return 'Weak'
+    }
+    if (passwordStrength < 60) {
+      return 'Fair'
+    }
+    if (passwordStrength < 80) {
+      return 'Good'
+    }
     return 'Strong'
   }
 
   // Show success message after registration
   if (isRegistered) {
     return (
-      <Card className="mx-auto w-full max-w-md p-6">
-        <div className="text-center">
-          <div className="mb-4">
-            <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+      <Card className='mx-auto w-full max-w-md p-6'>
+        <div className='text-center'>
+          <div className='mb-4'>
+            <CheckCircle className='mx-auto h-16 w-16 text-green-500' />
           </div>
-          <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
             Account Created!
           </h2>
-          <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+          <p className='mb-6 text-sm text-gray-600 dark:text-gray-400'>
             We&apos;ve sent a confirmation email to your inbox. Please click the link in the email
             to verify your account before signing in.
           </p>
-          <Button onClick={onToggleMode} className="w-full">
+          <Button onClick={onToggleMode} className='w-full'>
             Go to Sign In
           </Button>
         </div>
@@ -170,35 +182,35 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md p-6">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create Account</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+    <Card className='mx-auto w-full max-w-md p-6'>
+      <div className='mb-6 text-center'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>Create Account</h2>
+        <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
           Start your PMP learning journey
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
         {/* Global error message */}
         {(error || errors.root) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
+          <div className='rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20'>
+            <p className='text-sm text-red-600 dark:text-red-400'>
               {error || errors.root?.message}
             </p>
           </div>
         )}
 
         {/* Name field */}
-        <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='name' className='text-sm font-medium'>
             Full Name
           </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <User className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="name"
-              type="text"
-              placeholder="Enter your full name"
+              id='name'
+              type='text'
+              placeholder='Enter your full name'
               className={`pl-10 ${errors.name ? 'border-red-500' : ''}`}
               {...register('name')}
               onChange={(e) => {
@@ -209,21 +221,21 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
             />
           </div>
           {errors.name && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.name.message}</p>
           )}
         </div>
 
         {/* Email field */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='email' className='text-sm font-medium'>
             Email Address
           </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <Mail className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
+              id='email'
+              type='email'
+              placeholder='Enter your email'
               className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
               {...register('email')}
               onChange={(e) => {
@@ -234,57 +246,57 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.email.message}</p>
           )}
         </div>
 
         {/* Role selection */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">I am a</Label>
-          <div className="space-y-2">
-            <div className="flex items-center">
+        <div className='space-y-2'>
+          <Label className='text-sm font-medium'>I am a</Label>
+          <div className='space-y-2'>
+            <div className='flex items-center'>
               <input
-                id="role-student"
-                type="radio"
+                id='role-student'
+                type='radio'
                 value={ROLES.STUDENT}
                 {...register('role')}
-                className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                className='h-4 w-4 border-gray-300 text-primary focus:ring-primary'
                 disabled={loading || isSubmitting}
               />
-              <Label htmlFor="role-student" className="ml-2 text-sm">
+              <Label htmlFor='role-student' className='ml-2 text-sm'>
                 Student - Learning PMP concepts
               </Label>
             </div>
-            <div className="flex items-center">
+            <div className='flex items-center'>
               <input
-                id="role-instructor"
-                type="radio"
+                id='role-instructor'
+                type='radio'
                 value={ROLES.INSTRUCTOR}
                 {...register('role')}
-                className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                className='h-4 w-4 border-gray-300 text-primary focus:ring-primary'
                 disabled={loading || isSubmitting}
               />
-              <Label htmlFor="role-instructor" className="ml-2 text-sm">
+              <Label htmlFor='role-instructor' className='ml-2 text-sm'>
                 Instructor - Teaching PMP concepts
               </Label>
             </div>
           </div>
           {errors.role && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.role.message}</p>
           )}
         </div>
 
         {/* Password field */}
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='password' className='text-sm font-medium'>
             Password
           </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="password"
+              id='password'
               type={showPassword ? 'text' : 'password'}
-              placeholder="Create a strong password"
+              placeholder='Create a strong password'
               className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
               {...register('password')}
               onChange={(e) => {
@@ -294,29 +306,29 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
               disabled={loading || isSubmitting}
             />
             <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              type='button'
+              className='absolute right-3 top-3 rounded text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
               onClick={() => setShowPassword(!showPassword)}
               disabled={loading || isSubmitting}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
             </button>
           </div>
 
           {/* Password strength indicator */}
           {watchPassword && (
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Password strength:</span>
+            <div className='space-y-1'>
+              <div className='flex items-center justify-between'>
+                <span className='text-xs text-gray-500'>Password strength:</span>
                 <span
                   className={`text-xs font-medium ${passwordStrength >= 60 ? 'text-green-600' : 'text-red-600'}`}
                 >
                   {getPasswordStrengthText()}
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-gray-200">
+              <div className='h-2 w-full rounded-full bg-gray-200'>
                 <div
                   className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
                   style={{ width: `${passwordStrength}%` }}
@@ -326,21 +338,21 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
           )}
 
           {errors.password && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.password.message}</p>
           )}
         </div>
 
         {/* Confirm Password field */}
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='confirmPassword' className='text-sm font-medium'>
             Confirm Password
           </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="confirmPassword"
+              id='confirmPassword'
               type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirm your password"
+              placeholder='Confirm your password'
               className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
               {...register('confirmPassword')}
               onChange={(e) => {
@@ -350,57 +362,57 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
               disabled={loading || isSubmitting}
             />
             <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              type='button'
+              className='absolute right-3 top-3 rounded text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               disabled={loading || isSubmitting}
               aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               aria-pressed={showConfirmPassword}
             >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showConfirmPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className='text-sm text-red-600 dark:text-red-400'>
               {errors.confirmPassword.message}
             </p>
           )}
         </div>
 
         {/* Terms and conditions */}
-        <div className="space-y-2">
-          <div className="flex items-center">
+        <div className='space-y-2'>
+          <div className='flex items-center'>
             <input
-              id="agreedToTerms"
-              type="checkbox"
+              id='agreedToTerms'
+              type='checkbox'
               {...register('agreedToTerms')}
-              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              className='h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
               disabled={loading || isSubmitting}
             />
             <Label
-              htmlFor="agreedToTerms"
-              className="ml-2 text-sm text-gray-600 dark:text-gray-400"
+              htmlFor='agreedToTerms'
+              className='ml-2 text-sm text-gray-600 dark:text-gray-400'
             >
               I agree to the{' '}
-              <a href="#/terms" className="text-primary underline hover:text-primary/80">
+              <a href='#/terms' className='text-primary underline hover:text-primary/80'>
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="#/privacy" className="text-primary underline hover:text-primary/80">
+              <a href='#/privacy' className='text-primary underline hover:text-primary/80'>
                 Privacy Policy
               </a>
             </Label>
           </div>
           {errors.agreedToTerms && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.agreedToTerms.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.agreedToTerms.message}</p>
           )}
         </div>
 
         {/* Submit button */}
-        <Button type="submit" className="w-full" disabled={loading || isSubmitting}>
+        <Button type='submit' className='w-full' disabled={loading || isSubmitting}>
           {loading || isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Creating account...
             </>
           ) : (
@@ -410,12 +422,12 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
       </form>
 
       {/* Sign in link */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className='mt-6 text-center'>
+        <p className='text-sm text-gray-600 dark:text-gray-400'>
           Already have an account?{' '}
           <button
             onClick={onToggleMode}
-            className="font-medium text-primary hover:text-primary/80"
+            className='font-medium text-primary hover:text-primary/80'
             disabled={loading || isSubmitting}
           >
             Sign in

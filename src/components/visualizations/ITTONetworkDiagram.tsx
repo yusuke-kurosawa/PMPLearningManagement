@@ -231,22 +231,44 @@ const ITTONetworkDiagram = () => {
 
   // Get node color based on type
   const getNodeColor = (node) => {
-    if (node.type === 'input') {return '#3B82F6'} // blue
-    if (node.type === 'tool') {return '#10B981'} // green
-    if (node.type === 'output') {return '#F59E0B'} // amber
-    if (node.group === 'Initiating') {return '#8B5CF6'} // violet
-    if (node.group === 'Planning') {return '#3B82F6'} // blue
-    if (node.group === 'Executing') {return '#10B981'} // green
-    if (node.group === 'Monitoring & Controlling') {return '#F59E0B'} // amber
-    if (node.group === 'Closing') {return '#EF4444'} // red
+    if (node.type === 'input') {
+      return '#3B82F6'
+    } // blue
+    if (node.type === 'tool') {
+      return '#10B981'
+    } // green
+    if (node.type === 'output') {
+      return '#F59E0B'
+    } // amber
+    if (node.group === 'Initiating') {
+      return '#8B5CF6'
+    } // violet
+    if (node.group === 'Planning') {
+      return '#3B82F6'
+    } // blue
+    if (node.group === 'Executing') {
+      return '#10B981'
+    } // green
+    if (node.group === 'Monitoring & Controlling') {
+      return '#F59E0B'
+    } // amber
+    if (node.group === 'Closing') {
+      return '#EF4444'
+    } // red
     return '#6B7280' // gray
   }
 
   // Get node shape component
   const _getNodeShape = (node) => {
-    if (node.type === 'input') {return Circle}
-    if (node.type === 'tool') {return Square}
-    if (node.type === 'output') {return Triangle}
+    if (node.type === 'input') {
+      return Circle
+    }
+    if (node.type === 'tool') {
+      return Square
+    }
+    if (node.type === 'output') {
+      return Triangle
+    }
     return Circle
   }
 
@@ -255,7 +277,9 @@ const ITTONetworkDiagram = () => {
     const fromNode = allNodes.find((n) => n.id === from)
     const toNode = allNodes.find((n) => n.id === to)
 
-    if (!fromNode || !toNode) {return ''}
+    if (!fromNode || !toNode) {
+      return ''
+    }
 
     const dx = toNode.position.x - fromNode.position.x
     const dy = toNode.position.y - fromNode.position.y
@@ -297,53 +321,53 @@ const ITTONetworkDiagram = () => {
   const connectedNodes = hoveredNode ? getConnectedNodes(hoveredNode) : new Set()
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-gray-50">
-      <div className="absolute left-4 top-4 z-10 rounded-lg bg-white p-4 shadow-lg">
-        <h2 className="mb-2 text-lg font-bold">PMBOK ITTO Network Diagram</h2>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center space-x-2">
-            <Circle className="h-4 w-4 text-blue-500" />
+    <div className='relative h-screen w-full overflow-hidden bg-gray-50'>
+      <div className='absolute left-4 top-4 z-10 rounded-lg bg-white p-4 shadow-lg'>
+        <h2 className='mb-2 text-lg font-bold'>PMBOK ITTO Network Diagram</h2>
+        <div className='space-y-2 text-sm'>
+          <div className='flex items-center space-x-2'>
+            <Circle className='h-4 w-4 text-blue-500' />
             <span>Inputs / Process (Initiating)</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Square className="h-4 w-4 text-green-500" />
+          <div className='flex items-center space-x-2'>
+            <Square className='h-4 w-4 text-green-500' />
             <span>Tools & Techniques</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Triangle className="h-4 w-4 text-amber-500" />
+          <div className='flex items-center space-x-2'>
+            <Triangle className='h-4 w-4 text-amber-500' />
             <span>Outputs</span>
           </div>
-          <div className="mt-2 border-t pt-2">
-            <p className="text-xs text-gray-600">Scroll to zoom, drag to pan</p>
-            <p className="text-xs text-gray-600">Click nodes for details</p>
+          <div className='mt-2 border-t pt-2'>
+            <p className='text-xs text-gray-600'>Scroll to zoom, drag to pan</p>
+            <p className='text-xs text-gray-600'>Click nodes for details</p>
           </div>
         </div>
       </div>
 
       <svg
         ref={svgRef}
-        width="100%"
-        height="100%"
+        width='100%'
+        height='100%'
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         style={{ cursor: 'grab' }}
       >
         <defs>
           <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
+            id='arrowhead'
+            markerWidth='10'
+            markerHeight='7'
+            refX='9'
+            refY='3.5'
+            orient='auto'
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="#6B7280" />
+            <polygon points='0 0, 10 3.5, 0 7' fill='#6B7280' />
           </marker>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          <filter id='glow'>
+            <feGaussianBlur stdDeviation='3' result='coloredBlur' />
             <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in='coloredBlur' />
+              <feMergeNode in='SourceGraphic' />
             </feMerge>
           </filter>
         </defs>
@@ -356,7 +380,9 @@ const ITTONetworkDiagram = () => {
             const fromNode = allNodes.find((n) => n.id === conn.from)
             const toNode = allNodes.find((n) => n.id === conn.to)
 
-            if (!fromNode || !toNode) {return null}
+            if (!fromNode || !toNode) {
+              return null
+            }
 
             return (
               <g key={idx}>
@@ -367,7 +393,7 @@ const ITTONetworkDiagram = () => {
                   y2={toNode.position.y}
                   stroke={isHighlighted ? '#3B82F6' : '#E5E7EB'}
                   strokeWidth={isHighlighted ? 3 : 2}
-                  markerEnd="url(#arrowhead)"
+                  markerEnd='url(#arrowhead)'
                   opacity={hoveredNode && !isHighlighted ? 0.2 : 1}
                   style={{
                     transition: 'all 0.3s ease',
@@ -376,10 +402,10 @@ const ITTONetworkDiagram = () => {
                 >
                   {isHighlighted && (
                     <animate
-                      attributeName="stroke-dasharray"
-                      values="0,5;5,5"
-                      dur="0.5s"
-                      repeatCount="indefinite"
+                      attributeName='stroke-dasharray'
+                      values='0,5;5,5'
+                      dur='0.5s'
+                      repeatCount='indefinite'
                     />
                   )}
                 </line>
@@ -397,7 +423,7 @@ const ITTONetworkDiagram = () => {
               <g
                 key={node.id}
                 transform={`translate(${node.position.x}, ${node.position.y})`}
-                className="cursor-pointer"
+                className='cursor-pointer'
                 onClick={() => setSelectedNode(node)}
                 onMouseEnter={() => setHoveredNode(node.id)}
                 onMouseLeave={() => setHoveredNode(null)}
@@ -406,7 +432,7 @@ const ITTONetworkDiagram = () => {
               >
                 <circle
                   r={isHighlighted ? 35 : 30}
-                  fill="white"
+                  fill='white'
                   stroke={color}
                   strokeWidth={isHighlighted ? 4 : 2}
                   filter={isHighlighted ? 'url(#glow)' : 'none'}
@@ -417,9 +443,9 @@ const ITTONetworkDiagram = () => {
                 {!node.type && <Circle x={-12} y={-12} size={24} color={color} fill={color} />}
                 <text
                   y={45}
-                  textAnchor="middle"
-                  className="pointer-events-none text-xs font-medium"
-                  fill="#374151"
+                  textAnchor='middle'
+                  className='pointer-events-none text-xs font-medium'
+                  fill='#374151'
                 >
                   {node.name.length > 20 ? node.name.substring(0, 20) + '...' : node.name}
                 </text>
@@ -431,38 +457,38 @@ const ITTONetworkDiagram = () => {
 
       {/* Node details modal */}
       {selectedNode && (
-        <div className="absolute bottom-4 right-4 z-10 max-w-md rounded-lg bg-white p-6 shadow-xl">
-          <div className="mb-4 flex items-start justify-between">
-            <h3 className="text-lg font-bold">{selectedNode.name}</h3>
+        <div className='absolute bottom-4 right-4 z-10 max-w-md rounded-lg bg-white p-6 shadow-xl'>
+          <div className='mb-4 flex items-start justify-between'>
+            <h3 className='text-lg font-bold'>{selectedNode.name}</h3>
             <button
               onClick={() => setSelectedNode(null)}
-              className="text-gray-400 hover:text-gray-600"
+              className='text-gray-400 hover:text-gray-600'
             >
               ×
             </button>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className='space-y-2 text-sm'>
             {selectedNode.type && (
               <p>
-                <span className="font-semibold">Type:</span>{' '}
+                <span className='font-semibold'>Type:</span>{' '}
                 {selectedNode.type.charAt(0).toUpperCase() + selectedNode.type.slice(1)}
               </p>
             )}
             {selectedNode.group && (
               <p>
-                <span className="font-semibold">Process Group:</span> {selectedNode.group}
+                <span className='font-semibold'>Process Group:</span> {selectedNode.group}
               </p>
             )}
             {selectedNode.area && (
               <p>
-                <span className="font-semibold">Knowledge Area:</span> {selectedNode.area}
+                <span className='font-semibold'>Knowledge Area:</span> {selectedNode.area}
               </p>
             )}
 
-            <div className="mt-4 border-t pt-4">
-              <p className="flex items-center text-xs text-gray-600">
-                <Info className="mr-1 h-4 w-4" />
+            <div className='mt-4 border-t pt-4'>
+              <p className='flex items-center text-xs text-gray-600'>
+                <Info className='mr-1 h-4 w-4' />
                 Click other nodes to explore relationships
               </p>
             </div>

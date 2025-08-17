@@ -1,0 +1,209 @@
+{
+  "report_meta": {
+    "generated_at": "2025-08-12T05:44:59.432Z",
+    "validator_version": "1.0.0",
+    "project": "PMPLearningManagement"
+  },
+  "compliance_summary": {
+    "overall_score": 68.79999999999998,
+    "status": "NEEDS_IMPROVEMENT",
+    "meets_pmp_standards": false
+  },
+  "detailed_scores": {
+    "process_completeness": "51.0",
+    "itto_consistency": "100.0",
+    "terminology_accuracy": "50.0",
+    "relationship_validity": "80.0"
+  },
+  "quality_gates": {
+    "process_gate": false,
+    "itto_gate": true,
+    "terminology_gate": false,
+    "relationship_gate": false
+  },
+  "issues": [
+    {
+      "severity": "HIGH",
+      "message": "スケジュール知識エリア: 期待6プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "コスト知識エリア: 期待4プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "品質知識エリア: 期待3プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "資源知識エリア: 期待6プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "コミュニケーション知識エリア: 期待3プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "リスク知識エリア: 期待7プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "調達知識エリア: 期待3プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "HIGH",
+      "message": "ステークホルダー知識エリア: 期待4プロセス、実際0プロセス",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "MEDIUM",
+      "message": "計画プロセス群: 5プロセス (推奨範囲: 20-25)",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "MEDIUM",
+      "message": "実行プロセス群: 2プロセス (推奨範囲: 8-12)",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "MEDIUM",
+      "message": "監視・コントロールプロセス群: 4プロセス (推奨範囲: 10-15)",
+      "timestamp": "2025-08-12T05:44:59.428Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクトマネジメント計画書の作成: インプット「その他のプロセスからのアウトプット」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクト作業の指揮・マネジメント: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクト知識のマネジメント: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクト作業の監視・コントロール: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス 統合変更管理: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクトやフェーズの終結: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス プロジェクトやフェーズの終結: インプット「調達文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス 要求事項の収集: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス スコープの定義: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス WBSの作成: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス スコープの妥当性確認: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス スコープの妥当性確認: インプット「検証済み成果物」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    },
+    {
+      "severity": "LOW",
+      "message": "プロセス スコープのコントロール: インプット「プロジェクト文書」の出所が不明",
+      "timestamp": "2025-08-12T05:44:59.431Z"
+    }
+  ],
+  "recommendations": [
+    {
+      "message": "用語集に以下の用語を追加することを推奨:",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - プロジェクト",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - プロジェクトを",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - プロジェクト・マネジャーに",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - するプロセス",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - ビジネス",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - のプロセス",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - データ",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - とチームに",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - するスキル",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "  - プロジェクトマネジメント",
+      "timestamp": "2025-08-12T05:44:59.430Z"
+    },
+    {
+      "message": "PMBOK第7版の12原則が適切に定義されています",
+      "timestamp": "2025-08-12T05:44:59.432Z"
+    },
+    {
+      "message": "PMBOK第7版の8パフォーマンスドメインが適切に定義されています",
+      "timestamp": "2025-08-12T05:44:59.432Z"
+    },
+    {
+      "message": "PMBOK第6版から第7版へのマッピング情報が利用可能です",
+      "timestamp": "2025-08-12T05:44:59.432Z"
+    }
+  ],
+  "next_actions": [
+    "プロセス定義の完全性を向上させる",
+    "用語集の充実化を図る",
+    "プロセス間の関係性を明確化する"
+  ]
+}

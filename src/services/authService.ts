@@ -170,7 +170,9 @@ class AuthService {
         },
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       // ユーザープロファイル作成
       if (data.user) {
@@ -244,7 +246,7 @@ class AuthService {
         ...data.user,
         role: userRole,
       }
-      
+
       // 機密データ暗号化（セキュリティ強化）
       const encryptedProfile = await this.encryptSensitiveData(userProfile)
       localStorage.setItem('user_profile', encryptedProfile)
@@ -281,7 +283,9 @@ class AuthService {
         },
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       await auditLogger.log({
         action: 'OAUTH_LOGIN_INITIATED',
@@ -345,7 +349,9 @@ class AuthService {
         redirectTo: `${import.meta.env.VITE_APP_URL}/reset-password`,
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       await auditLogger.log({
         action: 'PASSWORD_RESET_REQUESTED',
@@ -377,7 +383,9 @@ class AuthService {
         password: newPassword,
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       const user = await authHelpers.getCurrentUser()
       if (user) {
@@ -413,7 +421,9 @@ class AuthService {
         type: 'email',
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       await auditLogger.log({
         action: 'EMAIL_VERIFIED',
@@ -439,7 +449,9 @@ class AuthService {
         factorType: 'totp',
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       const user = await authHelpers.getCurrentUser()
       if (user) {
@@ -472,7 +484,9 @@ class AuthService {
         code,
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       await auditLogger.log({
         action: 'MFA_VERIFIED',
@@ -526,7 +540,9 @@ class AuthService {
       updated_at: new Date().toISOString(),
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
 
     // ユーザーロールエントリ作成
     await supabase.from('user_roles').insert({
@@ -617,7 +633,9 @@ class AuthService {
    */
   getLockoutRemainingTime(email: string): number {
     const attempts = this.loginAttempts.get(email) || []
-    if (attempts.length === 0) {return 0}
+    if (attempts.length === 0) {
+      return 0
+    }
 
     const lastAttempt = attempts[attempts.length - 1]
     const timePassed = Date.now() - lastAttempt.getTime()
@@ -637,29 +655,24 @@ class AuthService {
       // Web Crypto APIを使用した安全な暗号化
       const encoder = new TextEncoder()
       const plaintext = encoder.encode(JSON.stringify(data))
-      
+
       // 暗号化キーを生成（セッション固有）
-      const key = await window.crypto.subtle.generateKey(
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      )
-      
+      const key = await window.crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
+        'encrypt',
+        'decrypt',
+      ])
+
       // 初期化ベクトル生成
       const iv = window.crypto.getRandomValues(new Uint8Array(12))
-      
+
       // 暗号化実行
-      const ciphertext = await window.crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
-        key,
-        plaintext
-      )
-      
+      const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext)
+
       // キーをセッションストレージに保存（メモリ上のみ）
       const keyBuffer = await window.crypto.subtle.exportKey('raw', key)
       sessionStorage.setItem('_ek', Array.from(new Uint8Array(keyBuffer)).join(','))
       sessionStorage.setItem('_iv', Array.from(iv).join(','))
-      
+
       // Base64エンコードして返却
       return btoa(String.fromCharCode(...new Uint8Array(ciphertext)))
     } catch (error) {
@@ -682,16 +695,16 @@ class AuthService {
     try {
       const keyData = sessionStorage.getItem('_ek')
       const ivData = sessionStorage.getItem('_iv')
-      
+
       if (!keyData || !ivData) {
         // キーが見つからない場合はBase64デコードでフォールバック
         return JSON.parse(atob(encryptedData))
       }
-      
+
       // キーとIVを復元
-      const keyBuffer = new Uint8Array(keyData.split(',').map(x => parseInt(x)))
-      const iv = new Uint8Array(ivData.split(',').map(x => parseInt(x)))
-      
+      const keyBuffer = new Uint8Array(keyData.split(',').map((x) => parseInt(x)))
+      const iv = new Uint8Array(ivData.split(',').map((x) => parseInt(x)))
+
       // キーをインポート
       const key = await window.crypto.subtle.importKey(
         'raw',
@@ -700,17 +713,13 @@ class AuthService {
         false,
         ['decrypt']
       )
-      
+
       // Base64デコード
-      const ciphertext = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0))
-      
+      const ciphertext = Uint8Array.from(atob(encryptedData), (c) => c.charCodeAt(0))
+
       // 復号化実行
-      const plaintext = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
-        key,
-        ciphertext
-      )
-      
+      const plaintext = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext)
+
       // JSON復元
       const decoder = new TextDecoder()
       return JSON.parse(decoder.decode(plaintext))

@@ -187,7 +187,9 @@ const ProcessFlowDiagram = React.memo(() => {
 
   // D3.jsでの描画
   useEffect(() => {
-    if (!svgRef.current || !processData) {return}
+    if (!svgRef.current || !processData) {
+      return
+    }
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -520,25 +522,25 @@ const ProcessFlowDiagram = React.memo(() => {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col bg-gray-50">
+    <div className='flex h-screen w-full flex-col bg-gray-50'>
       {/* ヘッダー */}
-      <div className="border-b bg-white p-4 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <div className='border-b bg-white p-4 shadow-sm'>
+        <div className='mx-auto flex max-w-7xl items-center justify-between'>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">プロセスフロー図</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className='text-2xl font-bold text-gray-800'>プロセスフロー図</h1>
+            <p className='mt-1 text-sm text-gray-600'>
               PMBOKプロセスの時系列的な流れと相互関係を視覚化
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className='flex items-center gap-4'>
             {/* 知識エリアフィルター */}
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-gray-500" />
+            <div className='flex items-center gap-2'>
+              <Filter className='h-5 w-5 text-gray-500' />
               <select
                 value={selectedKnowledgeArea}
                 onChange={(e) => setSelectedKnowledgeArea(e.target.value)}
-                className="rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className='rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
               >
                 {knowledgeAreas.map((area) => (
                   <option key={area.id} value={area.id}>
@@ -549,7 +551,7 @@ const ProcessFlowDiagram = React.memo(() => {
             </div>
 
             {/* アニメーションコントロール */}
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <button
                 onClick={handleAnimation}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
@@ -560,12 +562,12 @@ const ProcessFlowDiagram = React.memo(() => {
               >
                 {isAnimating ? (
                   <>
-                    <Pause className="h-4 w-4" />
+                    <Pause className='h-4 w-4' />
                     一時停止
                   </>
                 ) : (
                   <>
-                    <Play className="h-4 w-4" />
+                    <Play className='h-4 w-4' />
                     フロー再生
                   </>
                 )}
@@ -573,10 +575,10 @@ const ProcessFlowDiagram = React.memo(() => {
 
               <button
                 onClick={handleReset}
-                className="rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200"
-                title="リセット"
+                className='rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200'
+                title='リセット'
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className='h-4 w-4' />
               </button>
             </div>
           </div>
@@ -584,30 +586,30 @@ const ProcessFlowDiagram = React.memo(() => {
       </div>
 
       {/* メインコンテンツ */}
-      <div ref={containerRef} className="relative flex-1">
-        <svg ref={svgRef} className="h-full w-full" />
+      <div ref={containerRef} className='relative flex-1'>
+        <svg ref={svgRef} className='h-full w-full' />
 
         {/* 凡例 */}
-        <div className="absolute bottom-4 left-4 rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="mb-2 text-sm font-semibold text-gray-700">接続線の種類</h3>
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-0.5 w-8 bg-blue-500"></div>
+        <div className='absolute bottom-4 left-4 rounded-lg bg-white p-4 shadow-lg'>
+          <h3 className='mb-2 text-sm font-semibold text-gray-700'>接続線の種類</h3>
+          <div className='space-y-1 text-xs'>
+            <div className='flex items-center gap-2'>
+              <div className='h-0.5 w-8 bg-blue-500'></div>
               <span>主要フロー</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-0.5 w-8 bg-green-500"></div>
+            <div className='flex items-center gap-2'>
+              <div className='h-0.5 w-8 bg-green-500'></div>
               <span>順次実行</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <div
-                className="h-0.5 w-8 bg-yellow-500"
+                className='h-0.5 w-8 bg-yellow-500'
                 style={{ borderStyle: 'dashed', borderWidth: '1px 0' }}
               ></div>
               <span>フィードバック</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-0.5 w-8 bg-purple-500"></div>
+            <div className='flex items-center gap-2'>
+              <div className='h-0.5 w-8 bg-purple-500'></div>
               <span>並行実行</span>
             </div>
           </div>

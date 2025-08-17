@@ -217,7 +217,11 @@ export class SymmetricEncryption {
         )
       }
 
-      const decipher = crypto.createDecipheriv(ENCRYPTION_CONFIG.algorithm, key, Buffer.from(input.iv, 'hex'))
+      const decipher = crypto.createDecipheriv(
+        ENCRYPTION_CONFIG.algorithm,
+        key,
+        Buffer.from(input.iv, 'hex')
+      )
       decipher.setAAD(Buffer.from('pmp-learning-system'))
       decipher.setAuthTag(Buffer.from(input.tag, 'hex'))
 

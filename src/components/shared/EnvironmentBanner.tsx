@@ -73,27 +73,27 @@ export const EnvironmentBanner: React.FC<EnvironmentBannerProps> = ({ className 
         ${className}
       `}
     >
-      <div className="flex items-center space-x-2">
-        <IconComponent className="h-4 w-4" />
-        <span className="font-bold">{config.label}</span>
-        <span className="hidden sm:inline">•</span>
-        <span className="hidden sm:inline">{config.description}</span>
+      <div className='flex items-center space-x-2'>
+        <IconComponent className='h-4 w-4' />
+        <span className='font-bold'>{config.label}</span>
+        <span className='hidden sm:inline'>•</span>
+        <span className='hidden sm:inline'>{config.description}</span>
       </div>
 
-      <div className="flex items-center space-x-4 text-xs opacity-75">
+      <div className='flex items-center space-x-4 text-xs opacity-75'>
         {branch && (
-          <span className="hidden md:inline">
-            Branch: <code className="rounded bg-black bg-opacity-20 px-1">{branch}</code>
+          <span className='hidden md:inline'>
+            Branch: <code className='rounded bg-black bg-opacity-20 px-1'>{branch}</code>
           </span>
         )}
         {version && (
-          <span className="hidden lg:inline">
+          <span className='hidden lg:inline'>
             Version:{' '}
-            <code className="rounded bg-black bg-opacity-20 px-1">{version.substring(0, 7)}</code>
+            <code className='rounded bg-black bg-opacity-20 px-1'>{version.substring(0, 7)}</code>
           </span>
         )}
         {buildTime && (
-          <span className="hidden xl:inline">Built: {new Date(buildTime).toLocaleString()}</span>
+          <span className='hidden xl:inline'>Built: {new Date(buildTime).toLocaleString()}</span>
         )}
       </div>
     </div>

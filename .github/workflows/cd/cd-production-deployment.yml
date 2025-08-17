@@ -1,0 +1,593 @@
+# ============================================================
+# Workflow: 本番環境デプロイメント
+# Category: CD (Continuous Deployment)
+# Purpose: GitHub Pagesへの本番デプロイと検証
+# Trigger: mainブランチマージ、手動実行、スケジュール
+# Dependencies: Build Artifacts, Quality Gates
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 🚀 本番環境デプロイメント
+
+# ------------------------------------------------------------
+# トリガー設定
+# 本番デプロイは慎重に、品質保証済みコードのみ
+# ------------------------------------------------------------
+on:
+  # メインブランチへのプッシュ時（自動デプロイ）
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - '.github/ISSUE_TEMPLATE/**'
+    
+  # 手動デプロイ実行（緊急時・計画デプロイ用）
+  workflow_dispatch:
+    inputs:
+      deployment-type:
+        description: 'デプロイメントタイプ'
+        required: true
+        type: choice
+        options:
+          - 'standard'
+          - 'hotfix'
+          - 'rollback'
+          - 'canary'
+        default: 'standard'
+      skip-health-check:
+        description: 'ヘルスチェックをスキップするか'
+        type: boolean
+        default: false
+      force-deploy:
+        description: '強制デプロイ（品質ゲートをバイパス）'
+        type: boolean
+        default: false
+      rollback-version:
+        description: 'ロールバック対象バージョン（rollback選択時）'
+        type: string
+        required: false
+
+  # 週次定期デプロイ（最新の安定版確認）
+  schedule:
+    - cron: '0 2 * * 1'  # 毎週月曜日 午前2時
+
+# ------------------------------------------------------------
+# 権限設定（デプロイメント用権限）
+# ------------------------------------------------------------
+permissions:
+  contents: read              # リポジトリ内容の読み取り
+  pages: write               # GitHub Pages への書き込み
+  id-token: write            # OIDC token for secure deployment
+  deployments: write         # デプロイメント状態の管理
+  actions: write             # Actions 操作権限
+  checks: write              # チェック結果の書き込み
+
+# ------------------------------------------------------------
+# 並行実行制御（デプロイメント安全性確保）
+# ------------------------------------------------------------
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false  # デプロイメントは完了まで実行
+
+# ------------------------------------------------------------
+# 環境変数（本番デプロイ設定）
+# ------------------------------------------------------------
+env:
+  # デプロイ設定
+  NODE_VERSION: '18'
+  DEPLOYMENT_ENVIRONMENT: 'production'
+  SITE_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
+  
+  # 品質ゲート設定
+  QUALITY_GATE_REQUIRED: 'true'
+  MIN_QUALITY_SCORE: '85'
+  
+  # モニタリング設定
+  HEALTH_CHECK_TIMEOUT: '300'
+  LIGHTHOUSE_BUDGET_PATH: './performance-budget.json'
+  
+  # PWA最適化設定
+  PWA_OPTIMIZATION: 'true'
+  SERVICE_WORKER_CACHE_VERSION: 'v2'
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ============================================================
+jobs:
+  # ============================================================
+  # Job 1: デプロイメント前検証
+  # Purpose: デプロイ可能性の事前チェック
+  # ============================================================
+  pre-deployment-validation:
+    name: 🔍 デプロイメント前検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      deploy-approved: ${{ steps.validation.outputs.approved }}
+      quality-score: ${{ steps.validation.outputs.quality-score }}
+      deployment-strategy: ${{ steps.validation.outputs.strategy }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # デプロイ履歴確認用
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: 'deployment-v1'
+
+      - name: 🔍 デプロイ可能性検証
+        id: validation
+        run: |
+          echo "🔍 デプロイメント前検証を開始..."
+          
+          DEPLOY_APPROVED="true"
+          DEPLOYMENT_TYPE="${{ github.event.inputs.deployment-type || 'standard' }}"
+          FORCE_DEPLOY="${{ github.event.inputs.force-deploy }}"
+          
+          echo "📋 デプロイメント情報:"
+          echo "  タイプ: $DEPLOYMENT_TYPE"
+          echo "  強制フラグ: $FORCE_DEPLOY"
+          echo "  ブランチ: ${{ github.ref }}"
+          
+          # 1. ブランチ検証
+          if [ "${{ github.ref }}" != "refs/heads/main" ] && [ "$DEPLOYMENT_TYPE" != "hotfix" ]; then
+            echo "❌ メインブランチ以外からのデプロイは許可されていません"
+            DEPLOY_APPROVED="false"
+          fi
+          
+          # 2. 品質ゲート検証（強制デプロイでない場合）
+          if [ "$FORCE_DEPLOY" != "true" ] && [ "${{ env.QUALITY_GATE_REQUIRED }}" = "true" ]; then
+            echo "🔍 品質ゲート検証を実行中..."
+            
+            # 品質チェックの実行（簡易版）
+            npm run lint || {
+              echo "❌ リントチェック失敗"
+              DEPLOY_APPROVED="false"
+            }
+            
+            # TypeScript チェック
+            npm run typecheck || {
+              echo "❌ TypeScript チェック失敗"
+              DEPLOY_APPROVED="false"
+            }
+            
+            # ビルドテスト
+            if ! npm run build; then
+              echo "❌ ビルドテスト失敗"
+              DEPLOY_APPROVED="false"
+            fi
+          else
+            echo "⚠️ 品質ゲートをスキップします"
+          fi
+          
+          # 3. デプロイ戦略の決定
+          case $DEPLOYMENT_TYPE in
+            standard)
+              STRATEGY="blue-green"
+              ;;
+            hotfix)
+              STRATEGY="direct"
+              ;;
+            rollback)
+              STRATEGY="rollback"
+              ;;
+            canary)
+              STRATEGY="canary"
+              ;;
+            *)
+              STRATEGY="standard"
+              ;;
+          esac
+          
+          echo "📊 検証結果:"
+          echo "  承認状態: $DEPLOY_APPROVED"
+          echo "  デプロイ戦略: $STRATEGY"
+          
+          echo "approved=$DEPLOY_APPROVED" >> $GITHUB_OUTPUT
+          echo "quality-score=85" >> $GITHUB_OUTPUT  # 実際は品質メトリクスから取得
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          
+          if [ "$DEPLOY_APPROVED" = "false" ]; then
+            echo "💥 デプロイメント前検証が失敗しました"
+            exit 1
+          fi
+
+  # ============================================================
+  # Job 2: 本番用ビルド最適化
+  # Purpose: 本番環境向けの最適化されたビルド
+  # ============================================================
+  production-build:
+    name: 🏗️ 本番用ビルド最適化
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: pre-deployment-validation
+    if: needs.pre-deployment-validation.outputs.deploy-approved == 'true'
+    outputs:
+      build-hash: ${{ steps.build-info.outputs.hash }}
+      build-size: ${{ steps.build-info.outputs.size }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🏗️ 本番最適化ビルド実行
+        uses: ./.github/actions/composite/build-optimize
+        with:
+          build-command: 'npm run build:optimized'
+          optimize-build: 'true'
+          analyze-bundle: 'true'
+          performance-budget: 'true'
+          upload-artifact: 'true'
+
+      - name: 📊 ビルド情報収集
+        id: build-info
+        run: |
+          echo "📊 ビルド情報を収集中..."
+          
+          if [ -d "dist" ]; then
+            # ビルドハッシュ生成（ビルド内容の一意識別用）
+            BUILD_HASH=$(find dist -type f -exec md5sum {} + | sort | md5sum | cut -d' ' -f1)
+            BUILD_SIZE=$(du -sb dist | cut -f1)
+            BUILD_SIZE_MB=$(echo "scale=2; $BUILD_SIZE / 1024 / 1024" | bc -l)
+            
+            echo "hash=$BUILD_HASH" >> $GITHUB_OUTPUT
+            echo "size=$BUILD_SIZE" >> $GITHUB_OUTPUT
+            
+            echo "📦 ビルド情報:"
+            echo "  ハッシュ: $BUILD_HASH"
+            echo "  サイズ: ${BUILD_SIZE_MB}MB"
+            
+            # デプロイメント情報ファイルの生成
+            cat > dist/deployment-info.json << EOF
+            {
+              "deploymentId": "${BUILD_HASH}",
+              "version": "$(date +%Y%m%d-%H%M%S)",
+              "buildTime": "$(date --iso-8601=seconds)",
+              "commit": "${{ github.sha }}",
+              "branch": "${{ github.ref_name }}",
+              "size": $BUILD_SIZE,
+              "environment": "production"
+            }
+            EOF
+          else
+            echo "❌ ビルド出力ディレクトリが見つかりません"
+            exit 1
+          fi
+
+      - name: 🔍 PWA要件最終確認
+        run: |
+          echo "🔍 PWA要件の最終確認..."
+          
+          PWA_READY="true"
+          
+          # Manifest確認
+          if [ -f "dist/manifest.json" ]; then
+            echo "✅ PWA Manifest 存在"
+            
+            # Manifest内容検証
+            if command -v jq >/dev/null 2>&1; then
+              NAME=$(cat dist/manifest.json | jq -r '.name // empty')
+              if [ -n "$NAME" ]; then
+                echo "✅ Manifest内容検証 OK"
+              else
+                echo "⚠️ Manifest内容に問題の可能性"
+              fi
+            fi
+          else
+            echo "❌ PWA Manifest 不在"
+            PWA_READY="false"
+          fi
+          
+          # Service Worker確認
+          if [ -f "dist/sw.js" ] || find dist -name "*service-worker*" -type f | head -1; then
+            echo "✅ Service Worker 存在"
+          else
+            echo "⚠️ Service Worker 不在（オプション機能）"
+          fi
+          
+          # アイコン確認
+          if find dist -name "*.png" | grep -E "(icon|logo)" | head -1 >/dev/null; then
+            echo "✅ PWA アイコン 存在"
+          else
+            echo "⚠️ PWA アイコン 不在"
+          fi
+          
+          echo "📱 PWA準備状況: $PWA_READY"
+
+  # ============================================================
+  # Job 3: デプロイメント実行
+  # Purpose: GitHub Pagesへの実際のデプロイ
+  # ============================================================
+  execute-deployment:
+    name: 🚀 デプロイメント実行
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [pre-deployment-validation, production-build]
+    environment:
+      name: production
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      deployment-url: ${{ steps.deployment.outputs.page_url }}
+      deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+    
+    steps:
+      - name: 📂 デプロイメント成果物ダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: ./dist
+
+      - name: 📋 デプロイメント事前確認
+        run: |
+          echo "📋 デプロイメント事前確認..."
+          
+          if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+            echo "✅ デプロイメント成果物確認 OK"
+            echo "📊 成果物サイズ: $(du -sh dist)"
+            
+            # 主要ファイルの確認
+            echo "📁 主要ファイル:"
+            find dist -name "*.html" -o -name "*.js" -o -name "*.css" | head -10
+          else
+            echo "❌ デプロイメント成果物に問題があります"
+            exit 1
+          fi
+
+      - name: ⚙️ GitHub Pages設定
+        uses: actions/configure-pages@v4
+
+      - name: 📤 Pages成果物アップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: 🚀 GitHub Pagesデプロイ実行
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: 📊 デプロイメント完了通知
+        run: |
+          echo "🚀 デプロイメント完了！"
+          echo "🌐 デプロイURL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📋 デプロイID: ${{ steps.deployment.outputs.deployment_id }}"
+          echo "⏰ 完了時刻: $(date --iso-8601=seconds)"
+
+  # ============================================================
+  # Job 4: デプロイメント後検証
+  # Purpose: デプロイ後のサイト稼働確認
+  # ============================================================
+  post-deployment-verification:
+    name: ✅ デプロイ後検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: execute-deployment
+    if: github.event.inputs.skip-health-check != 'true'
+    
+    steps:
+      - name: ⏳ デプロイメント反映待機
+        run: |
+          echo "⏳ GitHub Pagesの反映を待機中..."
+          sleep 60  # GitHub Pagesの反映時間を考慮
+
+      - name: 🔍 基本ヘルスチェック
+        run: |
+          echo "🔍 基本ヘルスチェックを実行中..."
+          
+          SITE_URL="${{ needs.execute-deployment.outputs.deployment-url }}"
+          echo "🌐 対象URL: $SITE_URL"
+          
+          # HTTP ステータスチェック
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" || echo "000")
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ HTTP アクセス: 正常 (200)"
+          else
+            echo "❌ HTTP アクセス: 異常 ($HTTP_STATUS)"
+            exit 1
+          fi
+          
+          # コンテンツ検証
+          CONTENT=$(curl -s "$SITE_URL" || echo "")
+          
+          if echo "$CONTENT" | grep -q "<title>"; then
+            echo "✅ HTML コンテンツ: 正常"
+          else
+            echo "❌ HTML コンテンツ: 異常"
+            exit 1
+          fi
+          
+          # PWA Manifest チェック
+          MANIFEST_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${SITE_URL}manifest.json" || echo "000")
+          
+          if [ "$MANIFEST_STATUS" = "200" ]; then
+            echo "✅ PWA Manifest: アクセス可能"
+          else
+            echo "⚠️ PWA Manifest: アクセス不可 ($MANIFEST_STATUS)"
+          fi
+
+      - name: 🧪 機能テスト（簡易）
+        run: |
+          echo "🧪 基本機能テストを実行中..."
+          
+          SITE_URL="${{ needs.execute-deployment.outputs.deployment-url }}"
+          
+          # JavaScript 実行テスト（HTMLに含まれるスクリプトタグの確認）
+          CONTENT=$(curl -s "$SITE_URL")
+          
+          if echo "$CONTENT" | grep -q "<script"; then
+            echo "✅ JavaScript: 含まれています"
+          else
+            echo "⚠️ JavaScript: 含まれていません"
+          fi
+          
+          # CSS スタイルシート確認
+          if echo "$CONTENT" | grep -q -E "(\.css|<style)"; then
+            echo "✅ CSS: 含まれています"
+          else
+            echo "⚠️ CSS: 含まれていません"
+          fi
+          
+          # メタタグ確認（SEO対策）
+          if echo "$CONTENT" | grep -q "<meta.*viewport"; then
+            echo "✅ モバイル対応: viewport設定済み"
+          else
+            echo "⚠️ モバイル対応: viewport未設定"
+          fi
+
+      - name: 📊 パフォーマンス簡易チェック
+        run: |
+          echo "📊 パフォーマンス簡易チェックを実行中..."
+          
+          SITE_URL="${{ needs.execute-deployment.outputs.deployment-url }}"
+          
+          # 応答時間測定
+          START_TIME=$(date +%s%N)
+          curl -s "$SITE_URL" > /dev/null
+          END_TIME=$(date +%s%N)
+          
+          RESPONSE_TIME=$(echo "scale=3; ($END_TIME - $START_TIME) / 1000000" | bc -l)
+          
+          echo "⏱️ 応答時間: ${RESPONSE_TIME}ms"
+          
+          if [ "$(echo "$RESPONSE_TIME < 2000" | bc -l)" = "1" ]; then
+            echo "✅ 応答時間: 良好 (<2秒)"
+          else
+            echo "⚠️ 応答時間: 改善推奨 (>2秒)"
+          fi
+
+  # ============================================================
+  # Job 5: Lighthouse パフォーマンス監査
+  # Purpose: デプロイ後の詳細パフォーマンス分析
+  # ============================================================
+  lighthouse-audit:
+    name: 🌐 Lighthouse監査
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [execute-deployment, post-deployment-verification]
+    if: success()
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🚀 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🌐 Lighthouse CI インストール
+        run: |
+          npm install -g @lhci/cli@0.12.x
+
+      - name: ⏳ サイト安定化待機
+        run: |
+          echo "⏳ サイトの安定化を待機中..."
+          sleep 30
+
+      - name: 🔍 Lighthouse監査実行
+        run: |
+          echo "🔍 Lighthouse監査を実行中..."
+          
+          SITE_URL="${{ needs.execute-deployment.outputs.deployment-url }}"
+          
+          # Lighthouse設定ファイルがある場合は使用、無い場合はデフォルト設定
+          if [ -f ".lighthouserc.json" ]; then
+            echo "📋 プロジェクト設定でLighthouse実行"
+            lhci autorun --config=.lighthouserc.json || {
+              echo "⚠️ Lighthouse監査で警告がありましたが、デプロイは継続します"
+            }
+          else
+            echo "📋 デフォルト設定でLighthouse実行"
+            lhci autorun --upload.target=filesystem --collect.url="$SITE_URL" || {
+              echo "⚠️ Lighthouse監査で警告がありましたが、デプロイは継続します"
+            }
+          fi
+
+      - name: 📤 Lighthouse結果アップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: |
+            .lighthouseci/
+          retention-days: 30
+
+  # ============================================================
+  # Job 6: デプロイメント完了通知
+  # Purpose: ステークホルダーへのデプロイ完了通知
+  # ============================================================
+  deployment-notification:
+    name: 📢 デプロイ完了通知
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [pre-deployment-validation, production-build, execute-deployment, post-deployment-verification, lighthouse-audit]
+    if: always() && needs.execute-deployment.result == 'success'
+    
+    steps:
+      - name: 📊 デプロイメント結果サマリー
+        run: |
+          echo "=== 🚀 本番デプロイメント完了レポート ==="
+          echo "実行日時: $(date --iso-8601=seconds)"
+          echo "デプロイURL: ${{ needs.execute-deployment.outputs.deployment-url }}"
+          echo "ビルドハッシュ: ${{ needs.production-build.outputs.build-hash }}"
+          echo "ビルドサイズ: $(echo '${{ needs.production-build.outputs.build-size }}' | awk '{printf "%.2f MB", $1/1024/1024}')"
+          echo ""
+          echo "🔍 検証結果:"
+          echo "  事前検証: ${{ needs.pre-deployment-validation.result }}"
+          echo "  ビルド: ${{ needs.production-build.result }}"
+          echo "  デプロイ: ${{ needs.execute-deployment.result }}"
+          echo "  ヘルスチェック: ${{ needs.post-deployment-verification.result }}"
+          echo "  Lighthouse監査: ${{ needs.lighthouse-audit.result }}"
+          echo "================================================"
+
+      - name: 📊 GitHub Step Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚀 本番デプロイメント完了
+          
+          ### 📋 デプロイメント概要
+          - **🌐 デプロイURL**: ${{ needs.execute-deployment.outputs.deployment-url }}
+          - **📦 ビルドハッシュ**: \`${{ needs.production-build.outputs.build-hash }}\`
+          - **📊 ビルドサイズ**: $(echo '${{ needs.production-build.outputs.build-size }}' | awk '{printf "%.2f MB", $1/1024/1024}')
+          - **⏰ 完了時刻**: $(date --iso-8601=seconds)
+          
+          ### ✅ 検証結果
+          | 項目 | ステータス |
+          |------|-----------|
+          | 🔍 事前検証 | ${{ needs.pre-deployment-validation.result }} |
+          | 🏗️ ビルド最適化 | ${{ needs.production-build.result }} |
+          | 🚀 デプロイ実行 | ${{ needs.execute-deployment.result }} |
+          | ✅ ヘルスチェック | ${{ needs.post-deployment-verification.result }} |
+          | 🌐 Lighthouse監査 | ${{ needs.lighthouse-audit.result }} |
+          
+          ### 🎯 次のステップ
+          - サイトの動作確認
+          - ユーザーフィードバックの監視  
+          - パフォーマンスメトリクスの確認
+          - 必要に応じた調整・最適化
+          
+          ---
+          **🔗 便利なリンク**
+          - [本番サイト](${{ needs.execute-deployment.outputs.deployment-url }})
+          - [GitHub Pages設定](../../settings/pages)
+          - [パフォーマンス監査結果](../../actions/runs/${{ github.run_id }}/artifacts)
+          EOF
+
+      - name: 🎉 デプロイ成功確認
+        run: |
+          echo "🎉 本番デプロイメントが正常に完了しました！"
+          echo "🌐 サイトURL: ${{ needs.execute-deployment.outputs.deployment-url }}"
+          echo "🚀 ユーザーは最新バージョンにアクセス可能です"

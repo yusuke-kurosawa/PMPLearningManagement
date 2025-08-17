@@ -86,35 +86,35 @@ const LoginForm = ({ onToggleMode, onForgotPassword }) => {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md p-6">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+    <Card className='mx-auto w-full max-w-md p-6'>
+      <div className='mb-6 text-center'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>Welcome Back</h2>
+        <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
           Sign in to your PMP Learning account
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
         {/* Global error message */}
         {(error || errors.root) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
+          <div className='rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20'>
+            <p className='text-sm text-red-600 dark:text-red-400'>
               {error || errors.root?.message}
             </p>
           </div>
         )}
 
         {/* Email field */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='email' className='text-sm font-medium'>
             Email Address
           </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <Mail className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
+              id='email'
+              type='email'
+              placeholder='Enter your email'
               className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
               {...register('email')}
               onChange={(e) => {
@@ -125,21 +125,21 @@ const LoginForm = ({ onToggleMode, onForgotPassword }) => {
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.email.message}</p>
           )}
         </div>
 
         {/* Password field */}
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium">
+        <div className='space-y-2'>
+          <Label htmlFor='password' className='text-sm font-medium'>
             Password
           </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className='relative'>
+            <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
             <Input
-              id="password"
+              id='password'
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
+              placeholder='Enter your password'
               className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
               {...register('password')}
               onChange={(e) => {
@@ -149,40 +149,40 @@ const LoginForm = ({ onToggleMode, onForgotPassword }) => {
               disabled={loading || isSubmitting}
             />
             <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              type='button'
+              className='absolute right-3 top-3 rounded text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
               onClick={() => setShowPassword(!showPassword)}
               disabled={loading || isSubmitting}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
             </button>
           </div>
           {errors.password && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+            <p className='text-sm text-red-600 dark:text-red-400'>{errors.password.message}</p>
           )}
         </div>
 
         {/* Remember me and forgot password */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center'>
             <input
-              id="remember-me"
-              type="checkbox"
+              id='remember-me'
+              type='checkbox'
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              className='h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
               disabled={loading || isSubmitting}
             />
-            <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+            <Label htmlFor='remember-me' className='ml-2 text-sm text-gray-600 dark:text-gray-400'>
               Remember me
             </Label>
           </div>
           <button
-            type="button"
+            type='button'
             onClick={onForgotPassword}
-            className="text-sm font-medium text-primary hover:text-primary/80"
+            className='text-sm font-medium text-primary hover:text-primary/80'
             disabled={loading || isSubmitting}
           >
             Forgot password?
@@ -190,10 +190,10 @@ const LoginForm = ({ onToggleMode, onForgotPassword }) => {
         </div>
 
         {/* Submit button */}
-        <Button type="submit" className="w-full" disabled={loading || isSubmitting}>
+        <Button type='submit' className='w-full' disabled={loading || isSubmitting}>
           {loading || isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Signing in...
             </>
           ) : (
@@ -203,12 +203,12 @@ const LoginForm = ({ onToggleMode, onForgotPassword }) => {
       </form>
 
       {/* Sign up link */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className='mt-6 text-center'>
+        <p className='text-sm text-gray-600 dark:text-gray-400'>
           Don&apos;t have an account?{' '}
           <button
             onClick={onToggleMode}
-            className="font-medium text-primary hover:text-primary/80"
+            className='font-medium text-primary hover:text-primary/80'
             disabled={loading || isSubmitting}
           >
             Sign up for free

@@ -13,8 +13,8 @@ import { logger } from '../../services/logger'
 
 // Web Push設定
 const VAPID_CONFIG = {
-  publicKey: process.env.VAPID_PUBLIC_KEY || "",
-  privateKey: process.env.VAPID_PRIVATE_KEY || "",
+  publicKey: process.env.VAPID_PUBLIC_KEY || '',
+  privateKey: process.env.VAPID_PRIVATE_KEY || '',
   subject: process.env.VAPID_SUBJECT || 'mailto:admin@pmplm.com',
 }
 
@@ -510,11 +510,17 @@ export class PushNotificationService {
   }> {
     try {
       const where: unknown = {}
-      if (userId) {where.userId = userId}
+      if (userId) {
+        where.userId = userId
+      }
       if (startDate || endDate) {
         where.createdAt = {}
-        if (startDate) {where.createdAt.gte = startDate}
-        if (endDate) {where.createdAt.lte = endDate}
+        if (startDate) {
+          where.createdAt.gte = startDate
+        }
+        if (endDate) {
+          where.createdAt.lte = endDate
+        }
       }
 
       const [historyStats, deviceStats] = await Promise.all([

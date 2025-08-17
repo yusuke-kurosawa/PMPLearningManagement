@@ -9,7 +9,8 @@
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -42,6 +43,8 @@
   ],
   "rules": {
     "react/react-in-jsx-scope": "off",
+    "react/display-name": "error",
+    "react/no-unescaped-entities": "off",
     "react/prop-types": "off",
     "react/jsx-uses-react": "off",
     "react/jsx-uses-vars": "error",
@@ -51,12 +54,16 @@
     "prefer-const": "error",
     "no-var": "error",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-undef": "off",
+    "no-case-declarations": "error",
+    "no-useless-escape": "error",
     "eqeqeq": ["error", "smart"],
     "curly": ["error", "all"],
     "jsx-a11y/no-autofocus": "warn",
     "jsx-a11y/click-events-have-key-events": "warn",
     "jsx-a11y/no-static-element-interactions": "warn",
-    "jsx-a11y/label-has-associated-control": "warn"
+    "jsx-a11y/label-has-associated-control": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
   },
   "settings": {
     "react": {

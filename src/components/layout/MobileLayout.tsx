@@ -70,52 +70,52 @@ export function MobileLayout({ children }: MobileLayoutProps) {
   const hideBottomNav = pathname?.startsWith('/exam') || pathname?.includes('/fullscreen')
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className='flex h-screen flex-col bg-gray-50 dark:bg-gray-900'>
       {/* Offline Banner */}
       {showOfflineBanner && (
-        <div className="flex items-center justify-between bg-orange-600 px-4 py-2 text-sm text-white">
-          <div className="flex items-center space-x-2">
-            <WifiOff className="h-4 w-4" />
+        <div className='flex items-center justify-between bg-orange-600 px-4 py-2 text-sm text-white'>
+          <div className='flex items-center space-x-2'>
+            <WifiOff className='h-4 w-4' />
             <span>オフラインモード - 一部機能が制限されます</span>
           </div>
           <Button
-            variant="ghost"
-            size="icon"
+            variant='ghost'
+            size='icon'
             onClick={() => setShowOfflineBanner(false)}
-            className="h-6 w-6 text-white hover:bg-orange-700"
+            className='h-6 w-6 text-white hover:bg-orange-700'
           >
-            <X className="h-4 w-4" />
+            <X className='h-4 w-4' />
           </Button>
         </div>
       )}
 
       {/* Install App Banner */}
       {showInstallPrompt && (
-        <div className="bg-blue-600 px-4 py-3 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm font-medium">ホーム画面に追加</p>
-              <p className="text-xs opacity-90">
+        <div className='bg-blue-600 px-4 py-3 text-white'>
+          <div className='flex items-center justify-between'>
+            <div className='flex-1'>
+              <p className='text-sm font-medium'>ホーム画面に追加</p>
+              <p className='text-xs opacity-90'>
                 より快適に利用するためアプリをインストールしてください
               </p>
             </div>
-            <div className="ml-3 flex items-center space-x-2">
+            <div className='ml-3 flex items-center space-x-2'>
               <Button
-                variant="secondary"
-                size="sm"
+                variant='secondary'
+                size='sm'
                 onClick={handleInstallApp}
-                className="text-blue-600"
+                className='text-blue-600'
               >
-                <Download className="mr-1 h-4 w-4" />
+                <Download className='mr-1 h-4 w-4' />
                 追加
               </Button>
               <Button
-                variant="ghost"
-                size="icon"
+                variant='ghost'
+                size='icon'
                 onClick={handleDismissInstall}
-                className="h-6 w-6 text-white hover:bg-blue-700"
+                className='h-6 w-6 text-white hover:bg-blue-700'
               >
-                <X className="h-4 w-4" />
+                <X className='h-4 w-4' />
               </Button>
             </div>
           </div>
@@ -138,7 +138,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
       </main>
 
       {/* Network Status Indicator */}
-      <div className="fixed right-4 top-16 z-30 lg:hidden">
+      <div className='fixed right-4 top-16 z-30 lg:hidden'>
         <div
           className={`
           rounded-full p-1 transition-colors
@@ -149,7 +149,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
           }
         `}
         >
-          {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+          {isOnline ? <Wifi className='h-3 w-3' /> : <WifiOff className='h-3 w-3' />}
         </div>
       </div>
 

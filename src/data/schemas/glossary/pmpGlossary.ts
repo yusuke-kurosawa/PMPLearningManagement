@@ -1,5 +1,5 @@
 // PMP用語集データ
-export const _glossaryCategories = [
+export const glossaryCategories = [
   { id: 'general', name: '一般', color: 'bg-gray-500' },
   { id: 'scope', name: 'スコープ', color: 'bg-blue-500' },
   { id: 'schedule', name: 'スケジュール', color: 'bg-cyan-500' },

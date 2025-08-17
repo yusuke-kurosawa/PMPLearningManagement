@@ -1,0 +1,313 @@
+# ============================================================
+# Workflow: CI 基本チェック
+# Category: CI (Continuous Integration)
+# Purpose: プルリクエストとプッシュ時の基本的な品質チェック（高速実行）
+# Trigger: プルリクエスト、メインブランチプッシュ
+# Dependencies: Node.js 18、Composite Actions
+# Author: Claude Code DevOps Team
+# Version: 1.0.0
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 🔄 CI 基本チェック
+
+# ------------------------------------------------------------
+# トリガー設定
+# 高頻度で実行される基本チェックなので、効率性を重視
+# ------------------------------------------------------------
+on:
+  # プルリクエスト時（すべてのブランチ対象）
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+  
+  # メインブランチへのプッシュ時
+  push:
+    branches: [ main, develop ]
+    
+  # 手動実行（デバッグ・緊急時用）
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        description: 'テストをスキップするか'
+        type: boolean
+        default: false
+        required: false
+      debug-mode:
+        description: 'デバッグモードで実行するか'
+        type: boolean
+        default: false
+        required: false
+
+# ------------------------------------------------------------
+# 権限設定（セキュリティ重視）
+# ------------------------------------------------------------
+permissions:
+  contents: read          # リポジトリ内容の読み取り
+  pull-requests: write    # PRコメントの書き込み
+  checks: write          # チェック結果の書き込み
+  actions: read          # Actions情報の読み取り
+
+# ------------------------------------------------------------
+# 並行実行制御（リソース効率化）
+# ------------------------------------------------------------
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true  # 新しい実行時に古い実行をキャンセル
+
+# ------------------------------------------------------------
+# 環境変数（グローバル設定）
+# ------------------------------------------------------------
+env:
+  NODE_VERSION: '18'                    # Node.jsバージョン
+  CACHE_VERSION: 'v2'                   # キャッシュバージョン
+  CI: true                             # CI環境フラグ
+  FORCE_COLOR: 1                       # カラー出力の強制
+
+# ------------------------------------------------------------
+# ジョブ定義
+# ------------------------------------------------------------
+jobs:
+  # ============================================================
+  # Job 1: 変更ファイル分析
+  # Purpose: 変更されたファイルを分析し、必要なチェックを最適化
+  # ============================================================
+  detect-changes:
+    name: 📂 変更ファイル分析
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      # ファイル種別ごとの変更フラグ
+      code-changed: ${{ steps.changes.outputs.code }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
+      config-changed: ${{ steps.changes.outputs.config }}
+      tests-changed: ${{ steps.changes.outputs.tests }}
+      # 変更されたファイル一覧
+      changed-files: ${{ steps.changes.outputs.changed-files }}
+    
+    steps:
+      - name: 📂 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 変更分析のため完全履歴取得
+
+      - name: 🔍 変更ファイル検出
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'src/**/*.{js,jsx,ts,tsx}'
+              - 'lib/**/*.{js,jsx,ts,tsx}'
+              - '*.{js,jsx,ts,tsx}'
+            docs:
+              - '**.md'
+              - 'docs/**'
+            config:
+              - 'package*.json'
+              - '*.config.{js,ts,mjs}'
+              - 'tsconfig*.json'
+              - '.eslint*'
+              - '.prettier*'
+            tests:
+              - '**/*.test.{js,jsx,ts,tsx}'
+              - '**/*.spec.{js,jsx,ts,tsx}'
+              - 'e2e/**'
+              - 'tests/**'
+          list-files: shell
+          list-files-json: true
+
+      - name: 📋 変更サマリー出力
+        run: |
+          echo "=== 📊 変更ファイル分析結果 ==="
+          echo "コード変更: ${{ steps.changes.outputs.code }}"
+          echo "ドキュメント変更: ${{ steps.changes.outputs.docs }}"
+          echo "設定変更: ${{ steps.changes.outputs.config }}"
+          echo "テスト変更: ${{ steps.changes.outputs.tests }}"
+          echo "================================"
+
+  # ============================================================
+  # Job 2: 並行品質チェック（基本）
+  # Purpose: Linting、TypeScript、フォーマットの高速チェック
+  # ============================================================
+  quality-checks:
+    name: 🔍 品質チェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: detect-changes
+    # コードまたは設定が変更された場合のみ実行
+    if: needs.detect-changes.outputs.code-changed == 'true' || needs.detect-changes.outputs.config-changed == 'true'
+    
+    strategy:
+      # 並行実行でチェック時間を短縮
+      fail-fast: false
+      matrix:
+        check-type: [lint, typecheck, format]
+        
+    steps:
+      - name: 🚀 環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: ${{ env.CACHE_VERSION }}
+
+      - name: 🔍 品質チェック実行 - ${{ matrix.check-type }}
+        run: |
+          case "${{ matrix.check-type }}" in
+            lint)
+              echo "🔍 ESLintチェック実行"
+              npm run lint
+              ;;
+            typecheck) 
+              echo "🎯 TypeScriptチェック実行"
+              npm run typecheck
+              ;;
+            format)
+              echo "🎨 Prettierフォーマットチェック実行"
+              npm run format:check
+              ;;
+          esac
+
+  # ============================================================  
+  # Job 3: 単体テスト（条件付き実行）
+  # Purpose: 高速な単体テストでロジックの正確性を確認
+  # ============================================================
+  unit-tests:
+    name: 🧪 単体テスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: detect-changes
+    # コードまたはテストが変更された場合のみ実行
+    if: |
+      needs.detect-changes.outputs.code-changed == 'true' || 
+      needs.detect-changes.outputs.tests-changed == 'true' ||
+      github.event.inputs.skip-tests != 'true'
+    
+    steps:
+      - name: 🚀 環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: ${{ env.CACHE_VERSION }}
+
+      - name: 🧪 単体テスト実行
+        run: |
+          echo "🧪 単体テストを実行中..."
+          npm run test:run
+          
+      - name: 📊 テストカバレッジ生成
+        run: |
+          echo "📊 テストカバレッジを生成中..."
+          npm run test:coverage
+          
+      - name: 📤 カバレッジレポートのアップロード
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  # ============================================================
+  # Job 4: ビルドテスト（高速）
+  # Purpose: ビルドが正常に完了するかの確認
+  # ============================================================
+  build-test:
+    name: 🏗️  ビルドテスト
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [detect-changes, quality-checks]
+    # コードまたは設定変更がある場合のみ実行
+    if: |
+      always() && 
+      (needs.detect-changes.outputs.code-changed == 'true' || needs.detect-changes.outputs.config-changed == 'true') &&
+      !failure()
+    
+    steps:
+      - name: 🚀 環境セットアップ
+        uses: ./.github/actions/composite/setup-node-cache
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-version: ${{ env.CACHE_VERSION }}
+
+      - name: 🏗️  ビルド実行
+        uses: ./.github/actions/composite/build-optimize
+        with:
+          optimize-build: 'false'    # 高速化のため基本ビルド
+          analyze-bundle: 'false'    # CI基本チェックではスキップ
+          performance-budget: 'false' # CI基本チェックではスキップ
+          upload-artifact: 'false'   # 成果物は不要
+
+  # ============================================================
+  # Job 5: 結果サマリーと通知
+  # Purpose: すべてのチェック結果の集約とPR通知
+  # ============================================================
+  ci-summary:
+    name: 📋 CI結果サマリー
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [detect-changes, quality-checks, unit-tests, build-test]
+    if: always()
+    
+    steps:
+      - name: 📊 結果集約
+        run: |
+          echo "=== 🔄 CI基本チェック結果サマリー ==="
+          echo "変更分析: ${{ needs.detect-changes.result }}"
+          echo "品質チェック: ${{ needs.quality-checks.result }}"  
+          echo "単体テスト: ${{ needs.unit-tests.result }}"
+          echo "ビルドテスト: ${{ needs.build-test.result }}"
+          echo "========================================="
+          
+          # 全体的な成功可否の判定
+          if [[ "${{ needs.quality-checks.result }}" == "success" && 
+                "${{ needs.unit-tests.result }}" != "failure" && 
+                "${{ needs.build-test.result }}" != "failure" ]]; then
+            echo "✅ CI基本チェック: 全て成功"
+            echo "overall-status=success" >> $GITHUB_ENV
+          else
+            echo "❌ CI基本チェック: 一部失敗あり"
+            echo "overall-status=failure" >> $GITHUB_ENV
+          fi
+
+      - name: 💬 PR通知コメント
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const overallStatus = process.env.overall-status;
+            const statusIcon = overallStatus === 'success' ? '✅' : '❌';
+            
+            const comment = \`🔄 **CI基本チェック結果**
+
+            ${statusIcon} **全体ステータス**: ${overallStatus}
+            
+            **詳細結果:**
+            - 📂 変更分析: ${{ needs.detect-changes.result }}
+            - 🔍 品質チェック: ${{ needs.quality-checks.result }}
+            - 🧪 単体テスト: ${{ needs.unit-tests.result }}  
+            - 🏗️  ビルドテスト: ${{ needs.build-test.result }}
+            
+            **変更サマリー:**
+            - コード変更: ${{ needs.detect-changes.outputs.code-changed }}
+            - ドキュメント変更: ${{ needs.detect-changes.outputs.docs-changed }}
+            - 設定変更: ${{ needs.detect-changes.outputs.config-changed }}
+            - テスト変更: ${{ needs.detect-changes.outputs.tests-changed }}
+            
+            _実行時間の最適化により、変更のないファイル種別のチェックはスキップされています。_\`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: 🎯 最終結果の設定
+        run: |
+          if [ "${{ env.overall-status }}" = "failure" ]; then
+            echo "💥 CI基本チェックで問題が検出されました"
+            exit 1
+          else
+            echo "✅ CI基本チェックが正常に完了しました"
+          fi

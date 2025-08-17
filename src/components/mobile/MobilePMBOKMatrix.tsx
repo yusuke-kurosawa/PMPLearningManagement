@@ -123,37 +123,37 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className='flex h-full flex-col'>
       {/* Search and Filter Bar */}
-      <div className="space-y-3 border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+      <div className='space-y-3 border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+        <div className='flex items-center space-x-2'>
+          <div className='relative flex-1'>
+            <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400' />
             <Input
-              placeholder="プロセスを検索..."
+              placeholder='プロセスを検索...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className='pl-10'
             />
           </div>
 
           <Sheet open={showFilters} onOpenChange={setShowFilters}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
+              <Button variant='outline' size='icon'>
+                <Filter className='h-4 w-4' />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
+            <SheetContent side='right' className='w-[280px]'>
               <SheetHeader>
                 <SheetTitle>フィルター</SheetTitle>
               </SheetHeader>
 
-              <div className="mt-6 space-y-6">
+              <div className='mt-6 space-y-6'>
                 <div>
-                  <h3 className="mb-3 font-medium">知識エリア</h3>
-                  <div className="space-y-2">
+                  <h3 className='mb-3 font-medium'>知識エリア</h3>
+                  <div className='space-y-2'>
                     {knowledgeAreas.map((area) => (
-                      <div key={area} className="flex items-center space-x-2">
+                      <div key={area} className='flex items-center space-x-2'>
                         <Checkbox
                           id={`ka-${area}`}
                           checked={selectedKnowledgeAreas.includes(area)}
@@ -163,7 +163,7 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
                         />
                         <label
                           htmlFor={`ka-${area}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                         >
                           {area}
                         </label>
@@ -173,10 +173,10 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
                 </div>
 
                 <div>
-                  <h3 className="mb-3 font-medium">プロセス群</h3>
-                  <div className="space-y-2">
+                  <h3 className='mb-3 font-medium'>プロセス群</h3>
+                  <div className='space-y-2'>
                     {processGroups.map((group) => (
-                      <div key={group} className="flex items-center space-x-2">
+                      <div key={group} className='flex items-center space-x-2'>
                         <Checkbox
                           id={`pg-${group}`}
                           checked={selectedProcessGroups.includes(group)}
@@ -186,7 +186,7 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
                         />
                         <label
                           htmlFor={`pg-${group}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                         >
                           {group}
                         </label>
@@ -199,13 +199,13 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
           </Sheet>
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+        <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400'>
           <span>{filteredProcesses.length} プロセスが見つかりました</span>
           {(selectedKnowledgeAreas.length < knowledgeAreas.length ||
             selectedProcessGroups.length < processGroups.length) && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={() => {
                 setSelectedKnowledgeAreas(knowledgeAreas)
                 setSelectedProcessGroups(processGroups)
@@ -218,10 +218,12 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
       </div>
 
       {/* Process List */}
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+      <div className='flex-1 space-y-4 overflow-y-auto px-4 py-4'>
         {knowledgeAreas.map((area) => {
           const areaProcesses = groupedProcesses[area] || []
-          if (areaProcesses.length === 0) {return null}
+          if (areaProcesses.length === 0) {
+            return null
+          }
 
           return (
             <Card key={area}>
@@ -230,17 +232,17 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
                 onOpenChange={() => toggleKnowledgeArea(area)}
               >
                 <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{area}</CardTitle>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary" className="text-xs">
+                  <CardHeader className='cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50'>
+                    <div className='flex items-center justify-between'>
+                      <CardTitle className='text-base'>{area}</CardTitle>
+                      <div className='flex items-center space-x-2'>
+                        <Badge variant='secondary' className='text-xs'>
                           {areaProcesses.length}
                         </Badge>
                         {expandedKnowledgeAreas.has(area) ? (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className='h-4 w-4' />
                         ) : (
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className='h-4 w-4' />
                         )}
                       </div>
                     </div>
@@ -248,39 +250,39 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                  <CardContent className="space-y-3 pt-0">
+                  <CardContent className='space-y-3 pt-0'>
                     {areaProcesses.map((process) => (
                       <div
                         key={process.id}
-                        className="cursor-pointer rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50"
+                        className='cursor-pointer rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50'
                         onClick={() => handleProcessSelect(process)}
                       >
-                        <div className="mb-2 flex items-start justify-between">
-                          <h4 className="flex-1 text-sm font-medium leading-relaxed text-gray-900 dark:text-gray-100">
+                        <div className='mb-2 flex items-start justify-between'>
+                          <h4 className='flex-1 text-sm font-medium leading-relaxed text-gray-900 dark:text-gray-100'>
                             {process.name}
                           </h4>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="ml-2 h-6 w-6 flex-shrink-0"
+                            variant='ghost'
+                            size='icon'
+                            className='ml-2 h-6 w-6 flex-shrink-0'
                           >
-                            <Eye className="h-3 w-3" />
+                            <Eye className='h-3 w-3' />
                           </Button>
                         </div>
 
                         <Badge
                           className={`text-xs ${getProcessGroupColor(process.processGroup)}`}
-                          variant="secondary"
+                          variant='secondary'
                         >
                           {process.processGroup}
                         </Badge>
 
-                        <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div className='mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400'>
                           <span>
                             I:{process.inputs.length} T:{process.tools.length} O:
                             {process.outputs.length}
                           </span>
-                          <BookOpen className="h-3 w-3" />
+                          <BookOpen className='h-3 w-3' />
                         </div>
                       </div>
                     ))}
@@ -294,19 +296,19 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
 
       {/* Process Detail Sheet */}
       <Sheet open={!!selectedProcess} onOpenChange={() => setSelectedProcess(null)}>
-        <SheetContent side="bottom" className="h-[80vh]">
+        <SheetContent side='bottom' className='h-[80vh]'>
           {selectedProcess && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-left">{selectedProcess.name}</SheetTitle>
+                <SheetTitle className='text-left'>{selectedProcess.name}</SheetTitle>
               </SheetHeader>
 
-              <div className="mt-6 space-y-6 overflow-y-auto">
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">{selectedProcess.knowledgeArea}</Badge>
+              <div className='mt-6 space-y-6 overflow-y-auto'>
+                <div className='flex flex-wrap gap-2'>
+                  <Badge variant='outline'>{selectedProcess.knowledgeArea}</Badge>
                   <Badge
                     className={getProcessGroupColor(selectedProcess.processGroup)}
-                    variant="secondary"
+                    variant='secondary'
                   >
                     {selectedProcess.processGroup}
                   </Badge>
@@ -314,59 +316,59 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
 
                 {selectedProcess.description && (
                   <div>
-                    <h3 className="mb-2 font-medium">概要</h3>
-                    <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    <h3 className='mb-2 font-medium'>概要</h3>
+                    <p className='text-sm leading-relaxed text-gray-600 dark:text-gray-400'>
                       {selectedProcess.description}
                     </p>
                   </div>
                 )}
 
                 <div>
-                  <h3 className="mb-2 font-medium text-blue-600 dark:text-blue-400">
+                  <h3 className='mb-2 font-medium text-blue-600 dark:text-blue-400'>
                     インプット ({selectedProcess.inputs.length})
                   </h3>
-                  <div className="space-y-1">
+                  <div className='space-y-1'>
                     {selectedProcess.inputs.map((input, idx) => (
                       <div
                         key={idx}
-                        className="flex items-start text-sm text-gray-700 dark:text-gray-300"
+                        className='flex items-start text-sm text-gray-700 dark:text-gray-300'
                       >
-                        <span className="mr-2 text-blue-600 dark:text-blue-400">•</span>
-                        <span className="flex-1">{input}</span>
+                        <span className='mr-2 text-blue-600 dark:text-blue-400'>•</span>
+                        <span className='flex-1'>{input}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="mb-2 font-medium text-green-600 dark:text-green-400">
+                  <h3 className='mb-2 font-medium text-green-600 dark:text-green-400'>
                     ツールと技法 ({selectedProcess.tools.length})
                   </h3>
-                  <div className="space-y-1">
+                  <div className='space-y-1'>
                     {selectedProcess.tools.map((tool, idx) => (
                       <div
                         key={idx}
-                        className="flex items-start text-sm text-gray-700 dark:text-gray-300"
+                        className='flex items-start text-sm text-gray-700 dark:text-gray-300'
                       >
-                        <span className="mr-2 text-green-600 dark:text-green-400">•</span>
-                        <span className="flex-1">{tool}</span>
+                        <span className='mr-2 text-green-600 dark:text-green-400'>•</span>
+                        <span className='flex-1'>{tool}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="mb-2 font-medium text-purple-600 dark:text-purple-400">
+                  <h3 className='mb-2 font-medium text-purple-600 dark:text-purple-400'>
                     アウトプット ({selectedProcess.outputs.length})
                   </h3>
-                  <div className="space-y-1">
+                  <div className='space-y-1'>
                     {selectedProcess.outputs.map((output, idx) => (
                       <div
                         key={idx}
-                        className="flex items-start text-sm text-gray-700 dark:text-gray-300"
+                        className='flex items-start text-sm text-gray-700 dark:text-gray-300'
                       >
-                        <span className="mr-2 text-purple-600 dark:text-purple-400">•</span>
-                        <span className="flex-1">{output}</span>
+                        <span className='mr-2 text-purple-600 dark:text-purple-400'>•</span>
+                        <span className='flex-1'>{output}</span>
                       </div>
                     ))}
                   </div>

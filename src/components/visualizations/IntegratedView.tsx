@@ -28,7 +28,9 @@ const IntegratedView = React.memo(() => {
     throttle((e) => {
       if (isDragging) {
         const container = e.currentTarget.closest('.split-container')
-        if (!container) {return}
+        if (!container) {
+          return
+        }
         const rect = container.getBoundingClientRect()
         const x = e.clientX - rect.left
         const newRatio = (x / rect.width) * 100
@@ -79,18 +81,18 @@ const IntegratedView = React.memo(() => {
   }, [isMobile, fullscreenView])
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className='flex h-screen flex-col'>
       {/* Header */}
-      <div className="flex items-center justify-between border-b bg-white px-2 py-2 sm:px-4">
-        <h2 className="text-sm font-semibold sm:text-lg">Integrated View</h2>
-        <div className="flex gap-2">
+      <div className='flex items-center justify-between border-b bg-white px-2 py-2 sm:px-4'>
+        <h2 className='text-sm font-semibold sm:text-lg'>Integrated View</h2>
+        <div className='flex gap-2'>
           {!isMobile && (
             <button
               onClick={resetSplit}
-              className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs transition-colors hover:bg-gray-200 sm:px-3 sm:text-sm"
+              className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs transition-colors hover:bg-gray-200 sm:px-3 sm:text-sm'
             >
-              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Reset Layout</span>
+              <RotateCcw className='h-3 w-3 sm:h-4 sm:w-4' />
+              <span className='hidden sm:inline'>Reset Layout</span>
             </button>
           )}
         </div>
@@ -98,7 +100,7 @@ const IntegratedView = React.memo(() => {
 
       {/* Split View Container */}
       <div
-        className="split-container relative flex flex-1"
+        className='split-container relative flex flex-1'
         onMouseMove={handleMouseMove}
         style={{ cursor: isDragging ? 'col-resize' : 'default' }}
       >
@@ -111,22 +113,22 @@ const IntegratedView = React.memo(() => {
           }}
         >
           {!isMobile && (
-            <div className="absolute right-2 top-2 z-10">
+            <div className='absolute right-2 top-2 z-10'>
               <button
                 onClick={() => toggleFullscreen('matrix')}
-                className="rounded bg-white p-1.5 shadow transition-colors hover:bg-gray-100 sm:p-2"
+                className='rounded bg-white p-1.5 shadow transition-colors hover:bg-gray-100 sm:p-2'
                 title={fullscreenView === 'matrix' ? 'Exit fullscreen' : 'Fullscreen'}
               >
                 {fullscreenView === 'matrix' ? (
-                  <Minimize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Minimize2 className='h-3 w-3 sm:h-4 sm:w-4' />
                 ) : (
-                  <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Maximize2 className='h-3 w-3 sm:h-4 sm:w-4' />
                 )}
               </button>
             </div>
           )}
           <React.Suspense
-            fallback={<div className="flex h-full items-center justify-center">読み込み中...</div>}
+            fallback={<div className='flex h-full items-center justify-center'>読み込み中...</div>}
           >
             <PMBOKMatrix />
           </React.Suspense>
@@ -135,11 +137,11 @@ const IntegratedView = React.memo(() => {
         {/* Divider */}
         {!fullscreenView && !isMobile && (
           <div
-            className="group relative w-1 cursor-col-resize bg-gray-300 transition-colors hover:bg-blue-500 sm:w-2"
+            className='group relative w-1 cursor-col-resize bg-gray-300 transition-colors hover:bg-blue-500 sm:w-2'
             onMouseDown={handleMouseDown}
           >
-            <div className="absolute left-1/2 top-1/2 flex h-16 w-8 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center">
-              <Grip className="h-4 w-4 text-gray-500 transition-colors group-hover:text-white" />
+            <div className='absolute left-1/2 top-1/2 flex h-16 w-8 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center'>
+              <Grip className='h-4 w-4 text-gray-500 transition-colors group-hover:text-white' />
             </div>
           </div>
         )}
@@ -155,22 +157,22 @@ const IntegratedView = React.memo(() => {
           }}
         >
           {!isMobile && (
-            <div className="absolute left-2 top-2 z-10">
+            <div className='absolute left-2 top-2 z-10'>
               <button
                 onClick={() => toggleFullscreen('network')}
-                className="rounded bg-white p-1.5 shadow transition-colors hover:bg-gray-100 sm:p-2"
+                className='rounded bg-white p-1.5 shadow transition-colors hover:bg-gray-100 sm:p-2'
                 title={fullscreenView === 'network' ? 'Exit fullscreen' : 'Fullscreen'}
               >
                 {fullscreenView === 'network' ? (
-                  <Minimize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Minimize2 className='h-3 w-3 sm:h-4 sm:w-4' />
                 ) : (
-                  <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Maximize2 className='h-3 w-3 sm:h-4 sm:w-4' />
                 )}
               </button>
             </div>
           )}
           <React.Suspense
-            fallback={<div className="flex h-full items-center justify-center">読み込み中...</div>}
+            fallback={<div className='flex h-full items-center justify-center'>読み込み中...</div>}
           >
             <ITTOForceGraph />
           </React.Suspense>
@@ -179,19 +181,19 @@ const IntegratedView = React.memo(() => {
 
       {/* Status Bar */}
       {!isMobile && (
-        <div className="border-t bg-gray-100 px-2 py-1 text-xs text-gray-600 sm:px-4">
-          <div className="flex justify-between">
+        <div className='border-t bg-gray-100 px-2 py-1 text-xs text-gray-600 sm:px-4'>
+          <div className='flex justify-between'>
             <span>
               Split: {Math.round(splitRatio)}% / {Math.round(100 - splitRatio)}%
             </span>
-            <span className="hidden sm:inline">Drag the divider to adjust the view sizes</span>
+            <span className='hidden sm:inline'>Drag the divider to adjust the view sizes</span>
           </div>
         </div>
       )}
 
       {/* Mobile View Toggle */}
       {isMobile && (
-        <div className="flex gap-2 border-t bg-white p-2">
+        <div className='flex gap-2 border-t bg-white p-2'>
           <button
             onClick={() => setMobileView('matrix')}
             className={`flex-1 rounded px-3 py-2 text-sm font-medium transition-colors ${

@@ -1,0 +1,114 @@
+# ================================================================
+# Claude Rules: GitHub Workflow Naming Convention
+# Purpose: 世界クラスDevOps基盤のワークフロー命名規則
+# Author: Claude Code Actions
+# Version: 1.0.0
+# ================================================================
+
+workflow_naming_rules:
+  # カテゴリ別命名規則
+  categories:
+    "00-meta": 
+      description: "メタワークフロー（ワークフロー管理・最適化）"
+      examples:
+        - "00-meta-workflow-validator.yml"
+        - "00-meta-optimization-engine.yml"
+        - "00-meta-dependency-manager.yml"
+    
+    "01-ci":
+      description: "継続的インテグレーション"
+      examples:
+        - "01-ci-continuous-integration.yml"
+        - "01-ci-code-quality-gate.yml"
+        - "01-ci-automated-testing.yml"
+    
+    "02-cd":
+      description: "継続的デプロイメント"
+      examples:
+        - "02-cd-continuous-deployment.yml"
+        - "02-cd-staging-deployment.yml"
+        - "02-cd-production-release.yml"
+    
+    "03-quality":
+      description: "品質ゲート・コード品質"
+      examples:
+        - "03-quality-gate-comprehensive.yml"
+        - "03-quality-accessibility-audit.yml"
+        - "03-quality-performance-budget.yml"
+    
+    "04-security":
+      description: "セキュリティ・DevSecOps"
+      examples:
+        - "04-security-devsecops.yml"
+        - "04-security-vulnerability-scan.yml"
+        - "04-security-compliance-check.yml"
+    
+    "05-performance":
+      description: "パフォーマンス監視・最適化"
+      examples:
+        - "05-performance-monitoring.yml"
+        - "05-performance-lighthouse-audit.yml"
+        - "05-performance-bundle-analyzer.yml"
+    
+    "06-claude":
+      description: "Claude統合・AI支援機能"
+      examples:
+        - "06-claude-code-actions.yml"
+        - "06-claude-auto-reviewer.yml"
+        - "06-claude-optimization-engine.yml"
+    
+    "07-self":
+      description: "自己修復・自己改善システム"
+      examples:
+        - "07-self-healing-system.yml"
+        - "07-self-optimization.yml"
+        - "07-self-monitoring.yml"
+
+  # 命名パターン
+  naming_pattern: "{category}-{number}-{function}-{detail}.yml"
+  
+  # 必須要素
+  required_elements:
+    - category: "カテゴリ（00-07）"
+    - number: "番号（meta, ci, cd, quality, security, performance, claude, self）"
+    - function: "機能名（kebab-case）"
+    - detail: "詳細（kebab-case、オプション）"
+
+# ワークフロー内コメント規則
+comment_standards:
+  header_template: |
+    # ================================================================
+    # Workflow: {workflow_name}
+    # Purpose: {purpose_japanese}
+    #          {purpose_english}
+    # Trigger: {trigger_conditions}
+    # Dependencies: {dependencies}
+    # Author: Claude Code Actions
+    # Version: {version}
+    # ================================================================
+  
+  job_comment_template: |
+    # --------------------------------
+    # 🎯 {job_name} / {job_description}
+    # --------------------------------
+  
+  step_comment_template: |
+    # {step_description}
+
+# 品質基準
+quality_standards:
+  max_jobs_per_workflow: 10
+  max_steps_per_job: 20
+  required_permissions: "最小権限の原則"
+  required_error_handling: true
+  required_notifications: true
+  required_metrics_collection: true
+
+# 禁止事項
+forbidden_patterns:
+  - pattern: "test-*"
+    reason: "テスト用ワークフローは03-quality-*を使用"
+  - pattern: "deploy-*"
+    reason: "デプロイワークフローは02-cd-*を使用"
+  - pattern: "build-*"
+    reason: "ビルドワークフローは01-ci-*を使用"

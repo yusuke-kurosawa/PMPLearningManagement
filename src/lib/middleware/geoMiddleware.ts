@@ -214,10 +214,15 @@ export function geoEnhancedDDoSMiddleware() {
         // 高脅威地域からのアクセスは厳しく制限
         let _baseLimit = 100 // 基本制限（1分間）
 
-        if (geoLocation.threat > 70) {_baseLimit = 20}
-        else if (geoLocation.threat > 50) {_baseLimit = 50}
-        else if (geoLocation.proxy || geoLocation.vpn) {_baseLimit = 30}
-        else if (geoLocation.hosting) {_baseLimit = 40}
+        if (geoLocation.threat > 70) {
+          _baseLimit = 20
+        } else if (geoLocation.threat > 50) {
+          _baseLimit = 50
+        } else if (geoLocation.proxy || geoLocation.vpn) {
+          _baseLimit = 30
+        } else if (geoLocation.hosting) {
+          _baseLimit = 40
+        }
 
         // カスタム制限設定でDDoS保護をチェック
         const protection = await ddosProtection.checkProtection(clientIP, userAgent, userId)

@@ -24,11 +24,7 @@ const mockThemeContext = {
 // Create a mock settings context provider
 const _MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
   // Use a simple Context.Provider since we're mocking
-  return React.createElement(
-    'div',
-    { 'data-testid': 'mock-settings-provider' },
-    children
-  )
+  return React.createElement('div', { 'data-testid': 'mock-settings-provider' }, children)
 }
 
 // Mock auth context value

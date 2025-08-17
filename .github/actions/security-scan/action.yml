@@ -1,0 +1,211 @@
+name: 'Security Vulnerability Scan'
+description: '包括的なセキュリティ脆弱性スキャンを実行'
+author: 'PMPLearningManagement Team'
+
+inputs:
+  scan-type:
+    description: 'スキャンタイプ'
+    required: false
+    default: 'all'
+    # Options: all, dependencies, code, secrets, containers
+    
+  severity-threshold:
+    description: '脆弱性の深刻度閾値'
+    required: false
+    default: 'high'
+    # Options: low, medium, high, critical
+    
+  fail-on-issues:
+    description: '問題発見時に失敗させる'
+    required: false
+    default: 'true'
+    
+  upload-results:
+    description: '結果をアーティファクトとしてアップロード'
+    required: false
+    default: 'true'
+
+outputs:
+  vulnerabilities-found:
+    description: '脆弱性が発見されたか'
+    value: ${{ steps.aggregate.outputs.found }}
+    
+  critical-count:
+    description: 'クリティカル脆弱性の数'
+    value: ${{ steps.aggregate.outputs.critical }}
+    
+  high-count:
+    description: '高レベル脆弱性の数'
+    value: ${{ steps.aggregate.outputs.high }}
+    
+  report-path:
+    description: 'セキュリティレポートのパス'
+    value: ${{ steps.aggregate.outputs.report }}
+
+runs:
+  using: "composite"
+  steps:
+    # 作業ディレクトリの準備
+    - name: 📁 作業ディレクトリの準備
+      shell: bash
+      run: |
+        mkdir -p security-reports
+        echo "SCAN_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+        
+    # 依存関係のスキャン
+    - name: 🔍 依存関係の脆弱性スキャン
+      if: contains(inputs.scan-type, 'all') || contains(inputs.scan-type, 'dependencies')
+      shell: bash
+      run: |
+        echo "::group::npm audit実行"
+        
+        # npm auditの実行
+        npm audit --json > security-reports/npm-audit.json || true
+        
+        # 結果の解析
+        VULNS=$(cat security-reports/npm-audit.json | jq '.metadata.vulnerabilities')
+        CRITICAL=$(echo $VULNS | jq '.critical // 0')
+        HIGH=$(echo $VULNS | jq '.high // 0')
+        MODERATE=$(echo $VULNS | jq '.moderate // 0')
+        LOW=$(echo $VULNS | jq '.low // 0')
+        
+        echo "📊 npm audit結果:"
+        echo "  Critical: $CRITICAL"
+        echo "  High: $HIGH"
+        echo "  Moderate: $MODERATE"
+        echo "  Low: $LOW"
+        
+        # 閾値チェック
+        if [ "${{ inputs.severity-threshold }}" == "critical" ] && [ "$CRITICAL" -gt 0 ]; then
+          echo "::error::クリティカルな脆弱性が見つかりました"
+          echo "NPM_AUDIT_FAILED=true" >> $GITHUB_ENV
+        elif [ "${{ inputs.severity-threshold }}" == "high" ] && [ "$HIGH" -gt 0 ]; then
+          echo "::warning::高レベルの脆弱性が見つかりました"
+          echo "NPM_AUDIT_FAILED=true" >> $GITHUB_ENV
+        fi
+        
+        echo "::endgroup::"
+        
+    # コードスキャン（Semgrep）
+    - name: 🔍 コードセキュリティスキャン
+      if: contains(inputs.scan-type, 'all') || contains(inputs.scan-type, 'code')
+      shell: bash
+      run: |
+        echo "::group::Semgrepスキャン"
+        
+        # Semgrepのインストール（Docker経由）
+        docker run --rm -v "${PWD}:/src" \
+          returntocorp/semgrep:latest \
+          semgrep --config=auto \
+          --json \
+          --output=/src/security-reports/semgrep.json \
+          /src || true
+          
+        # 結果の解析
+        if [ -f "security-reports/semgrep.json" ]; then
+          FINDINGS=$(cat security-reports/semgrep.json | jq '.results | length')
+          echo "📊 Semgrep結果: $FINDINGS 件の問題を検出"
+          
+          if [ "$FINDINGS" -gt 0 ]; then
+            echo "::warning::コードセキュリティの問題が見つかりました"
+            cat security-reports/semgrep.json | jq '.results[] | {path: .path, message: .extra.message}'
+          fi
+        fi
+        
+        echo "::endgroup::"
+        
+    # シークレットスキャン
+    - name: 🔍 シークレットスキャン
+      if: contains(inputs.scan-type, 'all') || contains(inputs.scan-type, 'secrets')
+      shell: bash
+      run: |
+        echo "::group::シークレットスキャン"
+        
+        # GitLeaksを使用したシークレットスキャン
+        docker run --rm -v "${PWD}:/src" \
+          zricethezav/gitleaks:latest \
+          detect --source="/src" \
+          --report-format=json \
+          --report-path=/src/security-reports/gitleaks.json \
+          --no-git || true
+          
+        if [ -f "security-reports/gitleaks.json" ]; then
+          LEAKS=$(cat security-reports/gitleaks.json | jq '. | length')
+          if [ "$LEAKS" -gt 0 ]; then
+            echo "::error::シークレットの漏洩が検出されました！"
+            echo "SECRETS_FOUND=true" >> $GITHUB_ENV
+          else
+            echo "✅ シークレットの漏洩は検出されませんでした"
+          fi
+        fi
+        
+        echo "::endgroup::"
+        
+    # OWASP Dependency Check
+    - name: 🔍 OWASP依存関係チェック
+      if: contains(inputs.scan-type, 'all') || contains(inputs.scan-type, 'dependencies')
+      shell: bash
+      run: |
+        echo "::group::OWASP Dependency Check"
+        
+        # 簡易チェック（本番環境では完全版を使用）
+        if [ -f "package-lock.json" ]; then
+          # 既知の脆弱性データベースとの照合
+          echo "📊 OWASP Dependency Checkを実行中..."
+          # 実際のOWASP Dependency Checkの実装はここに追加
+        fi
+        
+        echo "::endgroup::"
+        
+    # 結果の集約
+    - name: 📊 スキャン結果の集約
+      id: aggregate
+      shell: bash
+      run: |
+        echo "::group::結果集約"
+        
+        # レポートの生成
+        cat > security-reports/summary.json <<EOF
+        {
+          "scan_date": "${{ env.SCAN_DATE }}",
+          "scan_type": "${{ inputs.scan-type }}",
+          "vulnerabilities": {
+            "npm_audit": ${NPM_AUDIT_FAILED:-false},
+            "secrets": ${SECRETS_FOUND:-false}
+          },
+          "counts": {
+            "critical": ${CRITICAL:-0},
+            "high": ${HIGH:-0},
+            "moderate": ${MODERATE:-0},
+            "low": ${LOW:-0}
+          }
+        }
+        EOF
+        
+        # 出力の設定
+        echo "found=$([[ "$NPM_AUDIT_FAILED" == "true" || "$SECRETS_FOUND" == "true" ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+        echo "critical=${CRITICAL:-0}" >> $GITHUB_OUTPUT
+        echo "high=${HIGH:-0}" >> $GITHUB_OUTPUT
+        echo "report=security-reports/summary.json" >> $GITHUB_OUTPUT
+        
+        echo "::endgroup::"
+        
+    # レポートのアップロード
+    - name: 📤 セキュリティレポートのアップロード
+      if: inputs.upload-results == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-scan-results-${{ github.run_id }}
+        path: security-reports/
+        retention-days: 30
+        
+    # 最終チェック
+    - name: ⚠️ セキュリティチェック結果
+      shell: bash
+      run: |
+        if [[ "${{ inputs.fail-on-issues }}" == "true" ]] && [[ "${{ steps.aggregate.outputs.found }}" == "true" ]]; then
+          echo "::error::セキュリティ問題が検出されました。詳細はレポートを確認してください。"
+          exit 1
+        else
+          echo "✅ セキュリティスキャン完了"
+        fi

@@ -82,35 +82,55 @@ const GlobalSearch: React.FC = () => {
 
   // 結果アイコンの取得
   const getResultIcon = (type, subtype) => {
-    if (type === 'process') {return <FileText className="h-4 w-4" />}
-    if (type === 'itto') {
-      if (subtype === 'tool') {return <Wrench className="h-4 w-4" />}
-      return <ArrowRight className="h-4 w-4" />
+    if (type === 'process') {
+      return <FileText className='h-4 w-4' />
     }
-    if (type === 'glossary') {return <FileText className="h-4 w-4" />}
-    return <FileText className="h-4 w-4" />
+    if (type === 'itto') {
+      if (subtype === 'tool') {
+        return <Wrench className='h-4 w-4' />
+      }
+      return <ArrowRight className='h-4 w-4' />
+    }
+    if (type === 'glossary') {
+      return <FileText className='h-4 w-4' />
+    }
+    return <FileText className='h-4 w-4' />
   }
 
   // 結果のタイプラベル
   const getTypeLabel = (type, subtype) => {
-    if (type === 'process') {return 'プロセス'}
-    if (type === 'itto') {
-      if (subtype === 'input') {return 'インプット'}
-      if (subtype === 'tool') {return 'ツールと技法'}
-      if (subtype === 'output') {return 'アウトプット'}
+    if (type === 'process') {
+      return 'プロセス'
     }
-    if (type === 'glossary') {return '用語'}
-    if (type === 'feature') {return '機能'}
+    if (type === 'itto') {
+      if (subtype === 'input') {
+        return 'インプット'
+      }
+      if (subtype === 'tool') {
+        return 'ツールと技法'
+      }
+      if (subtype === 'output') {
+        return 'アウトプット'
+      }
+    }
+    if (type === 'glossary') {
+      return '用語'
+    }
+    if (type === 'feature') {
+      return '機能'
+    }
     return ''
   }
 
   // 検索結果のハイライト
   const highlightMatch = (text, query) => {
-    if (!query) {return text}
+    if (!query) {
+      return text
+    }
     const regex = new RegExp(`(${query})`, 'gi')
     return text.split(regex).map((part, index) =>
       regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 font-semibold dark:bg-yellow-700">
+        <mark key={index} className='bg-yellow-200 font-semibold dark:bg-yellow-700'>
           {part}
         </mark>
       ) : (
@@ -159,24 +179,24 @@ const GlobalSearch: React.FC = () => {
           transition-colors
         `}
       >
-        <Search className="h-4 w-4" />
-        <span className="hidden sm:inline">検索...</span>
-        <kbd className="hidden items-center gap-1 rounded bg-gray-200 px-2 py-1 text-xs dark:bg-gray-600 md:inline-flex">
-          <Command className="h-3 w-3" />K
+        <Search className='h-4 w-4' />
+        <span className='hidden sm:inline'>検索...</span>
+        <kbd className='hidden items-center gap-1 rounded bg-gray-200 px-2 py-1 text-xs dark:bg-gray-600 md:inline-flex'>
+          <Command className='h-3 w-3' />K
         </kbd>
       </button>
 
       {/* 検索モーダル */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto">
+        <div className='fixed inset-0 z-[100] overflow-y-auto'>
           {/* オーバーレイ */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            className='fixed inset-0 bg-black/50 backdrop-blur-sm'
             onClick={() => setIsOpen(false)}
           />
 
           {/* 検索パネル */}
-          <div className="relative flex min-h-screen items-start justify-center px-4 pt-16">
+          <div className='relative flex min-h-screen items-start justify-center px-4 pt-16'>
             <div
               className={`
               relative w-full max-w-2xl rounded-xl shadow-2xl
@@ -185,15 +205,17 @@ const GlobalSearch: React.FC = () => {
             `}
             >
               {/* 検索入力 */}
-              <div className="relative border-b dark:border-gray-700">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+              <div className='relative border-b dark:border-gray-700'>
+                <Search className='absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400' />
                 <input
+                  aria-label='Input field'
+                  id='input-1754995293950-189'
                   ref={searchInputRef}
-                  type="text"
+                  type='text'
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="プロセス、ITTO、用語を検索..."
+                  placeholder='プロセス、ITTO、用語を検索...'
                   className={`
                     w-full py-4 pl-12 pr-12 text-lg
                     ${
@@ -207,17 +229,17 @@ const GlobalSearch: React.FC = () => {
                 {query && (
                   <button
                     onClick={() => setQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className='absolute right-4 top-1/2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-200 dark:hover:bg-gray-700'
                   >
-                    <X className="h-4 w-4" />
+                    <X className='h-4 w-4' />
                   </button>
                 )}
               </div>
 
               {/* オートコンプリート候補 */}
               {suggestions.length > 0 && (
-                <div className="border-b px-4 py-2 dark:border-gray-700">
-                  <div className="flex flex-wrap gap-2">
+                <div className='border-b px-4 py-2 dark:border-gray-700'>
+                  <div className='flex flex-wrap gap-2'>
                     {suggestions.map((suggestion, index) => (
                       <button
                         key={index}
@@ -240,13 +262,13 @@ const GlobalSearch: React.FC = () => {
               )}
 
               {/* 検索結果 */}
-              <div ref={resultsRef} className="max-h-[60vh] overflow-y-auto">
+              <div ref={resultsRef} className='max-h-[60vh] overflow-y-auto'>
                 {isSearching ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                  <div className='flex items-center justify-center py-8'>
+                    <Loader2 className='h-6 w-6 animate-spin text-blue-500' />
                   </div>
                 ) : results.length > 0 ? (
-                  <div className="py-2">
+                  <div className='py-2'>
                     {results.map((result, index) => (
                       <button
                         key={result.id}
@@ -266,9 +288,9 @@ const GlobalSearch: React.FC = () => {
                         >
                           {getResultIcon(result.type, result.subtype)}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium dark:text-white">
+                        <div className='min-w-0 flex-1'>
+                          <div className='flex items-center gap-2'>
+                            <h4 className='font-medium dark:text-white'>
                               {highlightMatch(result.title, query)}
                             </h4>
                             <span
@@ -285,12 +307,12 @@ const GlobalSearch: React.FC = () => {
                             </span>
                           </div>
                           {result.content && (
-                            <p className="mt-1 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                            <p className='mt-1 line-clamp-2 text-sm text-gray-600 dark:text-gray-400'>
                               {highlightMatch(result.content, query)}
                             </p>
                           )}
                           {result.parentProcess && (
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                            <p className='mt-1 text-xs text-gray-500 dark:text-gray-500'>
                               {result.parentProcess}
                             </p>
                           )}
@@ -299,27 +321,27 @@ const GlobalSearch: React.FC = () => {
                     ))}
                   </div>
                 ) : query.length >= 2 ? (
-                  <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+                  <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
                     「{query}」に一致する結果が見つかりませんでした
                   </div>
                 ) : (
-                  <div className="p-4">
+                  <div className='p-4'>
                     {/* 検索履歴 */}
                     {searchHistory.length > 0 && (
-                      <div className="mb-6">
-                        <div className="mb-2 flex items-center justify-between">
-                          <h3 className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            <Clock className="h-4 w-4" />
+                      <div className='mb-6'>
+                        <div className='mb-2 flex items-center justify-between'>
+                          <h3 className='flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <Clock className='h-4 w-4' />
                             最近の検索
                           </h3>
                           <button
                             onClick={() => searchService.clearHistory()}
-                            className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                            className='text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                           >
                             クリア
                           </button>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className='flex flex-wrap gap-2'>
                           {searchHistory.map((item, index) => (
                             <button
                               key={index}
@@ -343,11 +365,11 @@ const GlobalSearch: React.FC = () => {
 
                     {/* 人気の検索 */}
                     <div>
-                      <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <TrendingUp className="h-4 w-4" />
+                      <h3 className='mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
+                        <TrendingUp className='h-4 w-4' />
                         人気の検索
                       </h3>
-                      <div className="flex flex-wrap gap-2">
+                      <div className='flex flex-wrap gap-2'>
                         {popularSearches.slice(0, 8).map((item, index) => (
                           <button
                             key={index}
@@ -378,17 +400,17 @@ const GlobalSearch: React.FC = () => {
                 text-gray-500 dark:border-gray-700 dark:text-gray-400
               `}
               >
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700">↑↓</kbd>
+                <div className='flex items-center gap-4'>
+                  <span className='flex items-center gap-1'>
+                    <kbd className='rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700'>↑↓</kbd>
                     移動
                   </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700">Enter</kbd>
+                  <span className='flex items-center gap-1'>
+                    <kbd className='rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700'>Enter</kbd>
                     選択
                   </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700">Esc</kbd>
+                  <span className='flex items-center gap-1'>
+                    <kbd className='rounded bg-gray-200 px-1.5 py-0.5 dark:bg-gray-700'>Esc</kbd>
                     閉じる
                   </span>
                 </div>

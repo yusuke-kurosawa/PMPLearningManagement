@@ -1,13 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import App from './App.tsx'
 import './index.css'
 
-// パフォーマンスモニタリング
+// Performance monitoring
 if (process.env.NODE_ENV === 'production') {
-  import('./utils/performance-monitor').then(({ performanceMonitor }) => {
-    performanceMonitor.startMonitoring()
-  })
+  // Initialize performance monitoring
+  import('./utils/performance-monitor')
+    .then(({ performanceMonitor }) => {
+      performanceMonitor.startMonitoring()
+      console.log('🚀 Performance monitoring system loaded')
+    })
+    .catch((error) => {
+      console.warn('Performance monitoring system failed to load:', error)
+    })
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

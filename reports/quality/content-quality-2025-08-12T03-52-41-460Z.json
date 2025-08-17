@@ -1,0 +1,144 @@
+{
+  "report_meta": {
+    "generated_at": "2025-08-12T03:52:41.460Z",
+    "checker_version": "1.0.0",
+    "project": "PMPLearningManagement"
+  },
+  "quality_summary": {
+    "overall_score": 64.66479591836735,
+    "meets_educational_standards": false,
+    "ready_for_pmp_preparation": false
+  },
+  "detailed_scores": {
+    "content_clarity": "100.0",
+    "learning_effectiveness": "51.5",
+    "exam_preparation": "46.6",
+    "accessibility": "64.0"
+  },
+  "quality_gates": {
+    "clarity_gate": true,
+    "effectiveness_gate": false,
+    "exam_prep_gate": false,
+    "accessibility_gate": false
+  },
+  "detailed_analysis": {
+    "clarity": {
+      "readability_scores": [
+        {
+          "process": "プロジェクト憲章の作成",
+          "score": 0.72
+        },
+        {
+          "process": "プロジェクトマネジメント計画書の作成",
+          "score": 0.7800000000000001
+        },
+        {
+          "process": "プロジェクト作業の指揮・マネジメント",
+          "score": 0.72
+        },
+        {
+          "process": "プロジェクト知識のマネジメント",
+          "score": 0.7133333333333335
+        },
+        {
+          "process": "プロジェクト作業の監視・コントロール",
+          "score": 0.7000000000000001
+        },
+        {
+          "process": "統合変更管理",
+          "score": 0.7000000000000001
+        },
+        {
+          "process": "プロジェクトやフェーズの終結",
+          "score": 0.7000000000000001
+        },
+        {
+          "process": "スコープ・マネジメントの計画",
+          "score": 0.7000000000000001
+        },
+        {
+          "process": "要求事項の収集",
+          "score": 0.7000000000000001
+        },
+        {
+          "process": "スコープの定義",
+          "score": 0.72
+        },
+        {
+          "process": "WBSの作成",
+          "score": 0.72
+        },
+        {
+          "process": "スコープの妥当性確認",
+          "score": 0.72
+        },
+        {
+          "process": "スコープのコントロール",
+          "score": 0.72
+        }
+      ],
+      "complexity_issues": [],
+      "clarity_suggestions": [
+        "原則「チーム (Team)」の説明を改善",
+        "原則「ステークホルダー (Stakeholders)」の説明を改善",
+        "原則「リーダーシップ (Leadership)」の説明を改善",
+        "原則「テーラリング (Tailoring)」の説明を改善",
+        "原則「品質 (Quality)」の説明を改善",
+        "原則「複雑性 (Complexity)」の説明を改善",
+        "原則「リスク (Risk)」の説明を改善"
+      ]
+    },
+    "effectiveness": {
+      "bloom_taxonomy_coverage": {
+        "remembering": 3,
+        "understanding": 0,
+        "applying": 0,
+        "analyzing": 9,
+        "evaluating": 11,
+        "creating": 2
+      },
+      "learning_path_quality": 0.8,
+      "interactive_elements": 0.7999999999999999,
+      "assessment_alignment": 0.5
+    },
+    "exam_preparation": {
+      "process_coverage": 0.2653061224489796,
+      "itto_mastery": 1,
+      "practical_scenarios": 0.5,
+      "exam_format_alignment": 0.5,
+      "question_quality": 0
+    },
+    "accessibility": {
+      "text_alternatives": 0,
+      "color_contrast": 0.95,
+      "keyboard_navigation": 0.9,
+      "screen_reader_compatibility": 0.9
+    }
+  },
+  "issues": [
+    {
+      "severity": "MEDIUM",
+      "message": "学習レベルのバランスが不適切 (5.0%)",
+      "timestamp": "2025-08-12T03:52:41.459Z"
+    }
+  ],
+  "recommendations": [
+    {
+      "message": "49プロセス全体のカバレッジを向上させる",
+      "timestamp": "2025-08-12T03:52:41.459Z"
+    },
+    {
+      "message": "実務シナリオベースの学習コンテンツを追加",
+      "timestamp": "2025-08-12T03:52:41.459Z"
+    },
+    {
+      "message": "図表やグラフにテキスト代替を追加",
+      "timestamp": "2025-08-12T03:52:41.460Z"
+    }
+  ],
+  "improvement_actions": [
+    "インタラクティブな学習要素の追加",
+    "PMP試験対策コンテンツの充実化",
+    "WCAG 2.1 AA準拠のアクセシビリティ強化"
+  ]
+}

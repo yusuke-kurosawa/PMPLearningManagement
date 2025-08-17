@@ -15,8 +15,8 @@ vi.mock('../lib/supabase', () => ({
       signUp: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
       signOut: vi.fn().mockResolvedValue({ error: null }),
       onAuthStateChange: vi.fn().mockReturnValue({
-        data: { subscription: { unsubscribe: vi.fn() } }
-      })
+        data: { subscription: { unsubscribe: vi.fn() } },
+      }),
     },
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
@@ -25,8 +25,8 @@ vi.mock('../lib/supabase', () => ({
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    }))
-  }
+    })),
+  },
 }))
 
 // Mock Nock to prevent conflicts with MSW
@@ -139,25 +139,33 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock ServiceWorkerRegistration globally
 if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {
-  (window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
+  ;(window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
     scope = '/'
     updateViaCache = 'none' as const
     active = null
     installing = null
     waiting = null
     onupdatefound = null
-    
-    async getNotifications() { return [] }
-    async showNotification() { return }
-    async update() { return }
-    async unregister() { return false }
-    
+
+    async getNotifications() {
+      return []
+    }
+    async showNotification() {
+      return
+    }
+    async update() {
+      return
+    }
+    async unregister() {
+      return false
+    }
+
     pushManager = {
       getSubscription: vi.fn(),
       subscribe: vi.fn(),
       permissionState: vi.fn(),
     }
-    
+
     prototype = ServiceWorkerRegistration.prototype
   }
 }

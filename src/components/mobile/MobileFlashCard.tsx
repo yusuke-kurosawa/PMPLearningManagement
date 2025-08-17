@@ -83,26 +83,28 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
     onDoubleTap: handleFlip,
   })
 
-  if (!currentCard) {return null}
+  if (!currentCard) {
+    return null
+  }
 
   return (
-    <div className="mx-auto flex h-full max-w-lg flex-col px-4 py-6">
+    <div className='mx-auto flex h-full max-w-lg flex-col px-4 py-6'>
       {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+      <div className='mb-6'>
+        <div className='mb-2 flex items-center justify-between'>
+          <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>
             カード {currentIndex + 1} / {cards.length}
           </span>
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>
             {Math.round(progress)}%
           </span>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className='h-2' />
       </div>
 
       {/* Card Container */}
-      <div className="perspective-1000 flex flex-1 items-center justify-center">
-        <AnimatePresence mode="wait">
+      <div className='perspective-1000 flex flex-1 items-center justify-center'>
+        <AnimatePresence mode='wait'>
           <motion.div
             key={currentCard.id}
             initial={{
@@ -115,10 +117,10 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
               opacity: 0,
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="w-full"
+            className='w-full'
           >
             <Card
-              className="relative aspect-[3/4] w-full cursor-pointer touch-none select-none"
+              className='relative aspect-[3/4] w-full cursor-pointer touch-none select-none'
               onClick={handleFlip}
             >
               <div
@@ -128,8 +130,8 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
               `}
               >
                 {/* Front Side */}
-                <div className="backface-hidden absolute inset-0 flex h-full w-full flex-col p-6">
-                  <div className="mb-4">
+                <div className='backface-hidden absolute inset-0 flex h-full w-full flex-col p-6'>
+                  <div className='mb-4'>
                     <span
                       className={`
                       inline-block rounded-full px-2 py-1 text-xs font-semibold
@@ -150,43 +152,43 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
                     </span>
                   </div>
 
-                  <div className="flex flex-1 flex-col items-center justify-center text-center">
-                    <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  <div className='flex flex-1 flex-col items-center justify-center text-center'>
+                    <h3 className='mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100'>
                       {currentCard.processName}
                     </h3>
-                    <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                    <p className='mb-2 text-sm text-gray-600 dark:text-gray-400'>
                       知識エリア: {currentCard.knowledgeArea}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>
                       プロセス群: {currentCard.processGroup}
                     </p>
                   </div>
 
-                  <div className="text-center">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">タップして答えを見る</p>
+                  <div className='text-center'>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>タップして答えを見る</p>
                   </div>
                 </div>
 
                 {/* Back Side */}
-                <div className="backface-hidden rotate-y-180 absolute inset-0 h-full w-full overflow-y-auto p-6">
-                  <h4 className="mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
+                <div className='backface-hidden rotate-y-180 absolute inset-0 h-full w-full overflow-y-auto p-6'>
+                  <h4 className='mb-4 text-lg font-bold text-gray-900 dark:text-gray-100'>
                     ITTO詳細
                   </h4>
 
-                  <div className="space-y-4">
+                  <div className='space-y-4'>
                     <div>
-                      <h5 className="mb-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <h5 className='mb-2 text-sm font-semibold text-blue-600 dark:text-blue-400'>
                         インプット ({currentCard.inputs.length})
                       </h5>
-                      <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                      <ul className='space-y-1 text-sm text-gray-700 dark:text-gray-300'>
                         {currentCard.inputs.slice(0, 3).map((input, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span className="flex-1">{input}</span>
+                          <li key={idx} className='flex items-start'>
+                            <span className='mr-2'>•</span>
+                            <span className='flex-1'>{input}</span>
                           </li>
                         ))}
                         {currentCard.inputs.length > 3 && (
-                          <li className="text-gray-500 dark:text-gray-400">
+                          <li className='text-gray-500 dark:text-gray-400'>
                             他 {currentCard.inputs.length - 3} 項目
                           </li>
                         )}
@@ -194,18 +196,18 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
                     </div>
 
                     <div>
-                      <h5 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
+                      <h5 className='mb-2 text-sm font-semibold text-green-600 dark:text-green-400'>
                         ツールと技法 ({currentCard.tools.length})
                       </h5>
-                      <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                      <ul className='space-y-1 text-sm text-gray-700 dark:text-gray-300'>
                         {currentCard.tools.slice(0, 3).map((tool, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span className="flex-1">{tool}</span>
+                          <li key={idx} className='flex items-start'>
+                            <span className='mr-2'>•</span>
+                            <span className='flex-1'>{tool}</span>
                           </li>
                         ))}
                         {currentCard.tools.length > 3 && (
-                          <li className="text-gray-500 dark:text-gray-400">
+                          <li className='text-gray-500 dark:text-gray-400'>
                             他 {currentCard.tools.length - 3} 項目
                           </li>
                         )}
@@ -213,18 +215,18 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
                     </div>
 
                     <div>
-                      <h5 className="mb-2 text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <h5 className='mb-2 text-sm font-semibold text-purple-600 dark:text-purple-400'>
                         アウトプット ({currentCard.outputs.length})
                       </h5>
-                      <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                      <ul className='space-y-1 text-sm text-gray-700 dark:text-gray-300'>
                         {currentCard.outputs.slice(0, 3).map((output, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span className="flex-1">{output}</span>
+                          <li key={idx} className='flex items-start'>
+                            <span className='mr-2'>•</span>
+                            <span className='flex-1'>{output}</span>
                           </li>
                         ))}
                         {currentCard.outputs.length > 3 && (
-                          <li className="text-gray-500 dark:text-gray-400">
+                          <li className='text-gray-500 dark:text-gray-400'>
                             他 {currentCard.outputs.length - 3} 項目
                           </li>
                         )}
@@ -239,52 +241,52 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
       </div>
 
       {/* Control Buttons */}
-      <div className="mt-6 space-y-4">
+      <div className='mt-6 space-y-4'>
         {/* Flip and Navigation */}
-        <div className="flex items-center justify-between">
+        <div className='flex items-center justify-between'>
           <Button
-            variant="outline"
-            size="icon"
+            variant='outline'
+            size='icon'
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="h-12 w-12"
+            className='h-12 w-12'
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className='h-5 w-5' />
           </Button>
 
-          <Button variant="secondary" onClick={handleFlip} className="h-12 px-6">
-            <RotateCw className="mr-2 h-5 w-5" />
+          <Button variant='secondary' onClick={handleFlip} className='h-12 px-6'>
+            <RotateCw className='mr-2 h-5 w-5' />
             回転
           </Button>
 
           <Button
-            variant="outline"
-            size="icon"
+            variant='outline'
+            size='icon'
             onClick={handleNext}
             disabled={currentIndex === cards.length - 1}
-            className="h-12 w-12"
+            className='h-12 w-12'
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className='h-5 w-5' />
           </Button>
         </div>
 
         {/* Result Marking */}
         {isFlipped && (
-          <div className="flex gap-4">
+          <div className='flex gap-4'>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => handleMarkResult(false)}
-              className="h-12 flex-1 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className='h-12 flex-1 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20'
             >
-              <X className="mr-2 h-5 w-5 text-red-600" />
+              <X className='mr-2 h-5 w-5 text-red-600' />
               わからない
             </Button>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => handleMarkResult(true)}
-              className="h-12 flex-1 border-green-200 hover:bg-green-50 dark:hover:bg-green-900/20"
+              className='h-12 flex-1 border-green-200 hover:bg-green-50 dark:hover:bg-green-900/20'
             >
-              <Check className="mr-2 h-5 w-5 text-green-600" />
+              <Check className='mr-2 h-5 w-5 text-green-600' />
               わかる
             </Button>
           </div>
@@ -292,7 +294,7 @@ export function MobileFlashCard({ cards, onComplete }: MobileFlashCardProps) {
       </div>
 
       {/* Gesture Hints */}
-      <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+      <div className='mt-4 text-center text-xs text-gray-500 dark:text-gray-400'>
         <p>スワイプで前後移動 • ダブルタップで回転</p>
       </div>
     </div>

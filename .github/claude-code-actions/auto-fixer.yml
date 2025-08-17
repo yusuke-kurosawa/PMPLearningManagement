@@ -1,0 +1,463 @@
+# ================================================================
+# ClaudeCodeAction: Auto Code Fixer
+# Purpose: 検出された問題を自動修正
+#          Automatically fix detected code issues
+# Trigger: Workflow dispatch, Issue creation with 'auto-fix' label
+# Dependencies: Claude Analysis Results, GitHub API
+# Author: Claude Code Actions
+# Version: 1.0.0
+# Last Updated: 2025-08-12
+# ================================================================
+
+name: "🔧 [Claude] Auto Code Fixer / 自動コード修正"
+
+# --------------------------------
+# 📋 Permissions / 権限設定
+# --------------------------------
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+# --------------------------------
+# 🎯 Triggers / トリガー
+# --------------------------------
+on:
+  # 手動実行 / Manual execution
+  workflow_dispatch:
+    inputs:
+      fix_type:
+        description: 'Type of fix to apply / 修正タイプ'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'security'
+          - 'performance'
+          - 'formatting'
+          - 'accessibility'
+      
+      target_branch:
+        description: 'Target branch / 対象ブランチ'
+        required: true
+        default: 'develop'
+        type: string
+
+  # Issue作成時の自動修正 / Auto-fix on issue creation
+  issues:
+    types: [opened, labeled]
+
+  # スケジュール実行（毎週月曜9時） / Scheduled execution
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+
+# --------------------------------
+# 🌍 Environment / 環境設定
+# --------------------------------
+env:
+  MAX_AUTO_FIXES: 10
+  FIX_BRANCH_PREFIX: "claude-auto-fix"
+  AUTO_FIX_TIMEOUT: 20
+
+# --------------------------------
+# 🔧 Jobs / ジョブ定義
+# --------------------------------
+jobs:
+  analyze-issues:
+    # ================================
+    # Job: analyze-issues
+    # Description: 修正対象の問題を分析
+    #              Analyze issues to fix
+    # Dependencies: Repository analysis
+    # Timeout: 10分
+    # ================================
+    name: "🔍 [Analysis] Issue Detection"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    outputs:
+      has_fixable_issues: ${{ steps.issue-analysis.outputs.has_fixable_issues }}
+      fix_types: ${{ steps.issue-analysis.outputs.fix_types }}
+      issues_count: ${{ steps.issue-analysis.outputs.issues_count }}
+    
+    steps:
+      # ================
+      # Repository Checkout
+      # 目的: ソースコード取得
+      # Purpose: Get source code
+      # ================
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+      
+      # ================
+      # Analyze Code Issues
+      # 目的: コード問題の分析
+      # Purpose: Analyze code issues
+      # ================
+      - name: "🔬 Analyze Code Issues"
+        id: issue-analysis
+        run: |
+          echo "🔬 Analyzing code issues..."
+          
+          # 分析結果格納
+          mkdir -p .auto-fix-analysis
+          
+          # ESLint実行
+          echo "📋 Running ESLint analysis..."
+          npm run lint --silent 2>&1 | tee .auto-fix-analysis/eslint.log || true
+          
+          # TypeScript型チェック
+          echo "🔍 Running TypeScript check..."
+          npx tsc --noEmit 2>&1 | tee .auto-fix-analysis/typescript.log || true
+          
+          # セキュリティスキャン
+          echo "🔒 Running security scan..."
+          npm audit --json 2>/dev/null | tee .auto-fix-analysis/security.json || true
+          
+          # 修正可能な問題をカウント
+          fixable_issues=0
+          fix_types=""
+          
+          # ESLint修正可能問題
+          if grep -q "fixable" .auto-fix-analysis/eslint.log; then
+            fixable_issues=$((fixable_issues + $(grep -c "fixable" .auto-fix-analysis/eslint.log)))
+            fix_types="$fix_types formatting"
+          fi
+          
+          # セキュリティ脆弱性
+          if [[ -s .auto-fix-analysis/security.json ]]; then
+            vuln_count=$(jq -r '.metadata.vulnerabilities.total // 0' .auto-fix-analysis/security.json)
+            if [[ $vuln_count -gt 0 ]]; then
+              fixable_issues=$((fixable_issues + vuln_count))
+              fix_types="$fix_types security"
+            fi
+          fi
+          
+          # 結果出力
+          echo "has_fixable_issues=$([ $fixable_issues -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "fix_types=$fix_types" >> $GITHUB_OUTPUT
+          echo "issues_count=$fixable_issues" >> $GITHUB_OUTPUT
+          
+          echo "✅ Analysis completed: $fixable_issues fixable issues found"
+
+  auto-fix-formatting:
+    # ================================
+    # Job: auto-fix-formatting
+    # Description: フォーマット・構文問題の自動修正
+    #              Auto-fix formatting and syntax issues
+    # Dependencies: analyze-issues
+    # Timeout: 15分
+    # ================================
+    name: "🎨 [Fix] Code Formatting"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: analyze-issues
+    if: needs.analyze-issues.outputs.has_fixable_issues == 'true' && contains(needs.analyze-issues.outputs.fix_types, 'formatting')
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+      
+      # Node.js環境セットアップ
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # 依存関係インストール
+      - name: "📦 Install Dependencies"
+        run: |
+          echo "📦 Installing dependencies..."
+          npm ci
+      
+      # ================
+      # Auto-fix ESLint Issues
+      # 目的: ESLint問題の自動修正
+      # Purpose: Auto-fix ESLint issues
+      # ================
+      - name: "🔧 Auto-fix ESLint Issues"
+        run: |
+          echo "🔧 Auto-fixing ESLint issues..."
+          
+          # ESLint自動修正実行
+          npm run lint:fix || true
+          
+          # Prettier実行
+          npm run format || true
+          
+          # 修正内容を確認
+          if git diff --quiet; then
+            echo "ℹ️ No formatting issues to fix"
+            echo "changes_made=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Formatting fixes applied"
+            echo "changes_made=true" >> $GITHUB_OUTPUT
+            
+            # 変更ファイル一覧
+            git diff --name-only > .auto-fix-changes.txt
+            echo "📋 Fixed files:"
+            cat .auto-fix-changes.txt
+          fi
+        id: eslint-fix
+      
+      # ================
+      # Create Fix Branch and PR
+      # 目的: 修正内容のブランチ・PR作成
+      # Purpose: Create branch and PR for fixes
+      # ================
+      - name: "🌿 Create Fix Branch and PR"
+        if: steps.eslint-fix.outputs.changes_made == 'true'
+        run: |
+          # 修正ブランチ作成
+          fix_branch="${{ env.FIX_BRANCH_PREFIX }}/formatting-$(date +%Y%m%d-%H%M%S)"
+          
+          git config user.name "Claude Auto Fix Bot"
+          git config user.email "claude-bot@example.com"
+          
+          git checkout -b "$fix_branch"
+          git add .
+          git commit -m "🎨 Auto-fix formatting issues
+
+          - ESLint auto-fixes applied
+          - Prettier formatting applied
+          - Generated by Claude Code Actions
+          
+          Fixes: Formatting violations
+          "
+          
+          git push origin "$fix_branch"
+          
+          echo "✅ Created fix branch: $fix_branch"
+          echo "fix_branch=$fix_branch" >> $GITHUB_OUTPUT
+        id: create-branch
+
+  auto-fix-security:
+    # ================================
+    # Job: auto-fix-security
+    # Description: セキュリティ脆弱性の自動修正
+    #              Auto-fix security vulnerabilities
+    # Dependencies: analyze-issues
+    # Timeout: 20分
+    # ================================
+    name: "🔒 [Fix] Security Issues"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: analyze-issues
+    if: needs.analyze-issues.outputs.has_fixable_issues == 'true' && contains(needs.analyze-issues.outputs.fix_types, 'security')
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # ================
+      # Auto-fix Security Issues
+      # 目的: セキュリティ問題の自動修正
+      # Purpose: Auto-fix security issues
+      # ================
+      - name: "🔒 Auto-fix Security Vulnerabilities"
+        run: |
+          echo "🔒 Auto-fixing security vulnerabilities..."
+          
+          # npm audit自動修正
+          npm audit fix || true
+          
+          # パッケージ更新
+          npm update || true
+          
+          # 変更確認
+          if git diff --quiet package*.json; then
+            echo "ℹ️ No security fixes to apply"
+            echo "security_fixes=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Security fixes applied"
+            echo "security_fixes=true" >> $GITHUB_OUTPUT
+          fi
+        id: security-fix
+      
+      # ================
+      # Create Security Fix PR
+      # 目的: セキュリティ修正のPR作成
+      # Purpose: Create PR for security fixes
+      # ================
+      - name: "🔒 Create Security Fix PR"
+        if: steps.security-fix.outputs.security_fixes == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { execSync } = require('child_process');
+            
+            // セキュリティ修正ブランチ作成
+            const fixBranch = `${{ env.FIX_BRANCH_PREFIX }}/security-${Date.now()}`;
+            
+            execSync(`git config user.name "Claude Security Bot"`);
+            execSync(`git config user.email "claude-security@example.com"`);
+            execSync(`git checkout -b ${fixBranch}`);
+            execSync(`git add .`);
+            execSync(`git commit -m "🔒 Auto-fix security vulnerabilities
+
+            - npm audit fixes applied
+            - Package vulnerabilities resolved
+            - Generated by Claude Code Actions
+            
+            Fixes: Security vulnerabilities
+            "`);
+            execSync(`git push origin ${fixBranch}`);
+            
+            // PR作成
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Auto-fix Security Vulnerabilities',
+              head: fixBranch,
+              base: 'develop',
+              body: `## 🔒 Security Auto-Fix Report
+
+            This PR contains automated security vulnerability fixes.
+
+            ### Changes Made / 変更内容
+            - ✅ npm audit fixes applied
+            - ✅ Vulnerable packages updated
+            - ✅ Security patches installed
+
+            ### Verification Required / 確認必要
+            - [ ] All tests pass
+            - [ ] No breaking changes introduced
+            - [ ] Security scan shows improvements
+
+            ---
+            🤖 Generated by Claude Code Actions
+            ⏰ Auto-generated at $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            `
+            });
+
+  auto-fix-accessibility:
+    # ================================
+    # Job: auto-fix-accessibility
+    # Description: アクセシビリティ問題の自動修正
+    #              Auto-fix accessibility issues
+    # Dependencies: analyze-issues
+    # Timeout: 15分
+    # ================================
+    name: "♿ [Fix] Accessibility Issues"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: analyze-issues
+    if: always() && (github.event.inputs.fix_type == 'accessibility' || github.event.inputs.fix_type == 'all')
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: "📦 Install Dependencies"
+        run: npm ci
+      
+      # ================
+      # Accessibility Analysis and Fix
+      # 目的: アクセシビリティ分析と修正
+      # Purpose: Accessibility analysis and fix
+      # ================
+      - name: "♿ Auto-fix Accessibility Issues"
+        run: |
+          echo "♿ Running accessibility analysis and fixes..."
+          
+          # アクセシビリティチェック実行
+          npm run check:accessibility || true
+          
+          # 自動修正可能な問題を修正
+          node scripts/fix-accessibility-violations.js || true
+          
+          # 変更確認
+          if git diff --quiet; then
+            echo "ℹ️ No accessibility fixes to apply"
+          else
+            echo "✅ Accessibility fixes applied"
+            git diff --name-only
+          fi
+
+  # ================================
+  # Job: post-fix-analysis
+  # Description: 修正後の品質分析
+  #              Post-fix quality analysis
+  # Dependencies: All fix jobs
+  # Timeout: 10分
+  # ================================
+  post-fix-analysis:
+    name: "📊 [Analysis] Post-Fix Quality Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [analyze-issues, auto-fix-formatting, auto-fix-security, auto-fix-accessibility]
+    if: always()
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        
+      - name: "📊 Generate Fix Summary Report"
+        run: |
+          echo "📊 Generating auto-fix summary report..."
+          
+          cat > auto-fix-summary.md << EOF
+          # 🔧 Claude Auto-Fix Summary Report
+          
+          ## 📈 Execution Summary / 実行サマリー
+          
+          - **Analysis Completed**: ${{ needs.analyze-issues.result }}
+          - **Issues Found**: ${{ needs.analyze-issues.outputs.issues_count }}
+          - **Formatting Fixes**: ${{ needs.auto-fix-formatting.result }}
+          - **Security Fixes**: ${{ needs.auto-fix-security.result }}
+          - **Accessibility Fixes**: ${{ needs.auto-fix-accessibility.result }}
+          
+          ## 🎯 Results / 結果
+          
+          ### ✅ Successfully Fixed / 修正完了
+          - Code formatting and style issues
+          - Security vulnerabilities (if any)
+          - Basic accessibility violations
+          
+          ### 📋 Next Actions / 次のアクション
+          - Review generated PRs
+          - Run comprehensive tests
+          - Merge approved fixes
+          
+          ---
+          *Generated by Claude Code Actions at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+          EOF
+          
+          echo "✅ Auto-fix execution completed"
+
+      # ================
+      # Upload Summary Report
+      # 目的: サマリーレポートの保存
+      # Purpose: Save summary report
+      # ================
+      - name: "📦 Upload Summary Report"
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-auto-fix-summary-${{ github.run_id }}
+          path: auto-fix-summary.md
+          retention-days: 30

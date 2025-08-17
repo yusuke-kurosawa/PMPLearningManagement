@@ -126,20 +126,20 @@ const Home: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12 transition-colors dark:bg-gray-900">
-      <div className="mx-auto max-w-6xl">
+    <div className='min-h-screen bg-gray-50 px-4 py-12 transition-colors dark:bg-gray-900'>
+      <div className='mx-auto max-w-6xl'>
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
+        <div className='mb-12 text-center'>
+          <h1 className='mb-4 text-4xl font-bold text-gray-900 dark:text-white'>
             PMBOK第6版 学習管理システム
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+          <p className='mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300'>
             プロセス、インプット、ツールと技法、アウトプットのインタラクティブな視覚化を通じて、プロジェクトマネジメント知識体系（PMBOK）を探索・理解できます。
           </p>
         </div>
 
         {/* Feature Cards */}
-        <div className="mb-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className='mb-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {features.map((feature) => {
             const Icon = feature.icon
             return (
@@ -161,17 +161,17 @@ const Home: React.FC = () => {
                     {feature.highlight ? 'AI' : 'NEW'}
                   </div>
                 )}
-                <div className="p-6">
+                <div className='p-6'>
                   <div
                     className={`${feature.color} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
                   >
-                    <Icon className="h-6 w-6 text-white" />
+                    <Icon className='h-6 w-6 text-white' />
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold dark:text-white">{feature.title}</h3>
-                  <p className="mb-4 text-gray-600 dark:text-gray-300">{feature.description}</p>
-                  <div className="flex items-center font-medium text-blue-600 dark:text-blue-400">
+                  <h3 className='mb-2 text-xl font-semibold dark:text-white'>{feature.title}</h3>
+                  <p className='mb-4 text-gray-600 dark:text-gray-300'>{feature.description}</p>
+                  <div className='flex items-center font-medium text-blue-600 dark:text-blue-400'>
                     <span>詳しく見る</span>
-                    <ArrowRight className="ml-1 h-4 w-4" />
+                    <ArrowRight className='ml-1 h-4 w-4' />
                   </div>
                 </div>
               </Link>
@@ -180,50 +180,50 @@ const Home: React.FC = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="rounded-lg bg-white p-8 shadow-md dark:bg-gray-800">
-          <h2 className="mb-6 text-center text-2xl font-semibold dark:text-white">
+        <div className='rounded-lg bg-white p-8 shadow-md dark:bg-gray-800'>
+          <h2 className='mb-6 text-center text-2xl font-semibold dark:text-white'>
             PMBOK第6版の概要
           </h2>
-          <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+          <div className='grid grid-cols-2 gap-6 text-center md:grid-cols-4'>
             <div>
-              <div className="text-3xl font-bold text-blue-600">49</div>
-              <div className="text-gray-600 dark:text-gray-300">プロセス</div>
+              <div className='text-3xl font-bold text-blue-600'>49</div>
+              <div className='text-gray-600 dark:text-gray-300'>プロセス</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600">10</div>
-              <div className="text-gray-600 dark:text-gray-300">知識エリア</div>
+              <div className='text-3xl font-bold text-green-600'>10</div>
+              <div className='text-gray-600 dark:text-gray-300'>知識エリア</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-purple-600">5</div>
-              <div className="text-gray-600 dark:text-gray-300">プロセス群</div>
+              <div className='text-3xl font-bold text-purple-600'>5</div>
+              <div className='text-gray-600 dark:text-gray-300'>プロセス群</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-amber-600">ITTO</div>
-              <div className="text-gray-600 dark:text-gray-300">フレームワーク</div>
+              <div className='text-3xl font-bold text-amber-600'>ITTO</div>
+              <div className='text-gray-600 dark:text-gray-300'>フレームワーク</div>
             </div>
           </div>
         </div>
 
         {/* Learning Tips */}
-        <div className="mt-12 rounded-lg bg-blue-50 p-6 dark:bg-blue-900/20">
-          <h3 className="mb-3 text-lg font-semibold dark:text-white">学習のヒント</h3>
-          <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
+        <div className='mt-12 rounded-lg bg-blue-50 p-6 dark:bg-blue-900/20'>
+          <h3 className='mb-3 text-lg font-semibold dark:text-white'>学習のヒント</h3>
+          <ul className='space-y-2 text-sm text-gray-700 dark:text-gray-300'>
+            <li className='flex items-start'>
+              <span className='mr-2'>•</span>
               <span>マトリックスビューを使用して、PMBOKプロセスの全体構造を理解しましょう</span>
             </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
+            <li className='flex items-start'>
+              <span className='mr-2'>•</span>
               <span>
                 ネットワークダイアグラムを探索して、インプット、ツール、アウトプット間の関係を視覚化しましょう
               </span>
             </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
+            <li className='flex items-start'>
+              <span className='mr-2'>•</span>
               <span>統合ビューでは、より深い理解のために両方の視点を同時に確認できます</span>
             </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
+            <li className='flex items-start'>
+              <span className='mr-2'>•</span>
               <span>プロセスをクリックして詳細なITTO情報を確認し、依存関係を理解しましょう</span>
             </li>
           </ul>

@@ -93,7 +93,9 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
                   : node.type === 'output'
                     ? 1
                     : 0
-            if (!levels[level]) {levels[level] = []}
+            if (!levels[level]) {
+              levels[level] = []
+            }
             levels[level].push(node)
           })
 
@@ -158,7 +160,9 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
 
   // グラフ描画
   useEffect(() => {
-    if (!data || !svgRef.current) {return}
+    if (!data || !svgRef.current) {
+      return
+    }
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -290,7 +294,9 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
           .attr('transform', 'scale(1)')
       })
       .on('click', (event, d) => {
-        if (onNodeClick) {onNodeClick(d)}
+        if (onNodeClick) {
+          onNodeClick(d)
+        }
 
         // 複数選択モード
         if (event.shiftKey) {
@@ -321,7 +327,9 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
     // ドラッグ機能
     function drag(simulation) {
       function dragstarted(event) {
-        if (!event.active) {simulation.alphaTarget(0.3).restart()}
+        if (!event.active) {
+          simulation.alphaTarget(0.3).restart()
+        }
         event.subject.fx = event.subject.x
         event.subject.fy = event.subject.y
       }
@@ -332,7 +340,9 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
       }
 
       function dragended(event) {
-        if (!event.active) {simulation.alphaTarget(0)}
+        if (!event.active) {
+          simulation.alphaTarget(0)
+        }
         if (selectedLayout === 'force') {
           event.subject.fx = null
           event.subject.fy = null
@@ -391,13 +401,13 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
       className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : 'h-full w-full'}`}
     >
       {/* コントロールパネル */}
-      <div className="absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg">
+      <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">レイアウト</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>レイアウト</label>
           <select
             value={selectedLayout}
             onChange={(e) => setSelectedLayout(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
+            className='w-full rounded-md border border-gray-300 px-3 py-2'
           >
             {Object.entries(layouts).map(([key, name]) => (
               <option key={key} value={key}>
@@ -408,11 +418,11 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">カラーテーマ</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>カラーテーマ</label>
           <select
             value={selectedTheme}
             onChange={(e) => setSelectedTheme(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
+            className='w-full rounded-md border border-gray-300 px-3 py-2'
           >
             {Object.entries(themes).map(([key, theme]) => (
               <option key={key} value={key}>
@@ -423,67 +433,67 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">アニメーション速度</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>アニメーション速度</label>
           <input
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
+            type='range'
+            min='0.5'
+            max='2'
+            step='0.1'
             value={animationSpeed}
             onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-            className="w-full"
+            className='w-full'
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">ノードサイズ</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>ノードサイズ</label>
           <input
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
+            type='range'
+            min='0.5'
+            max='2'
+            step='0.1'
             value={nodeSize}
             onChange={(e) => setNodeSize(parseFloat(e.target.value))}
-            className="w-full"
+            className='w-full'
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <input
-            type="checkbox"
-            id="showLabels"
+            type='checkbox'
+            id='showLabels'
             checked={showLabels}
             onChange={(e) => setShowLabels(e.target.checked)}
-            className="rounded"
+            className='rounded'
           />
-          <label htmlFor="showLabels" className="text-sm text-gray-700">
+          <label htmlFor='showLabels' className='text-sm text-gray-700'>
             ラベルを表示
           </label>
         </div>
 
-        <div className="flex gap-2">
+        <div className='flex gap-2'>
           <button
             onClick={toggleFullscreen}
-            className="flex-1 rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+            className='flex-1 rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700'
           >
-            <Maximize2 className="mx-auto h-4 w-4" />
+            <Maximize2 className='mx-auto h-4 w-4' />
           </button>
           <button
             onClick={exportSVG}
-            className="flex-1 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700"
+            className='flex-1 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700'
           >
-            <Download className="mx-auto h-4 w-4" />
+            <Download className='mx-auto h-4 w-4' />
           </button>
         </div>
       </div>
 
       {/* ホバー情報 */}
       {hoveredNode && (
-        <div className="absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="font-semibold text-gray-900">{hoveredNode.name}</h3>
-          <p className="text-sm text-gray-600">タイプ: {hoveredNode.type}</p>
+        <div className='absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg'>
+          <h3 className='font-semibold text-gray-900'>{hoveredNode.name}</h3>
+          <p className='text-sm text-gray-600'>タイプ: {hoveredNode.type}</p>
           {hoveredNode.description && (
-            <p className="mt-2 text-sm text-gray-700">{hoveredNode.description}</p>
+            <p className='mt-2 text-sm text-gray-700'>{hoveredNode.description}</p>
           )}
         </div>
       )}
@@ -493,7 +503,7 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
-        className="h-full w-full"
+        className='h-full w-full'
       />
     </div>
   )

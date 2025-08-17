@@ -1,0 +1,145 @@
+# ================================================================
+# Claude Rules: Comment Standards for DevOps
+# Purpose: 世界クラスDevOps基盤のコメント標準規則
+# Author: Claude Code Actions  
+# Version: 1.0.0
+# ================================================================
+
+comment_standards:
+  # ワークフローヘッダー（必須）
+  workflow_header:
+    template: |
+      # ================================================================
+      # Workflow: {category}-{number}-{function}-{detail}
+      # Purpose: {purpose_japanese}
+      #          {purpose_english}
+      # Trigger: {trigger_conditions}
+      # Dependencies: {dependencies}
+      # Author: Claude Code Actions
+      # Version: {version}
+      # Last Updated: {date}
+      # ================================================================
+    
+    required_fields:
+      - purpose_japanese: "日本語での目的説明"
+      - purpose_english: "English purpose description"
+      - trigger_conditions: "トリガー条件"
+      - dependencies: "依存関係"
+      - version: "バージョン"
+      - date: "更新日（YYYY-MM-DD）"
+
+  # ワークフロー名（絵文字付き）
+  workflow_name:
+    pattern: '"🚀 [{emoji}] {japanese_name} / {english_name}"'
+    emoji_mapping:
+      "00-meta": "🎯"
+      "01-ci": "🔄" 
+      "02-cd": "🚀"
+      "03-quality": "✅"
+      "04-security": "🔒"
+      "05-performance": "⚡"
+      "06-claude": "🤖"
+      "07-self": "🔧"
+
+  # セクション区切り
+  section_headers:
+    permissions:
+      template: |
+        # --------------------------------
+        # 📋 Permissions / 権限設定
+        # --------------------------------
+    
+    triggers:
+      template: |
+        # --------------------------------
+        # 🎯 Triggers / トリガー
+        # --------------------------------
+    
+    environment:
+      template: |
+        # --------------------------------
+        # 🌍 Environment / 環境設定
+        # --------------------------------
+    
+    jobs:
+      template: |
+        # --------------------------------
+        # 🔧 Jobs / ジョブ定義
+        # --------------------------------
+
+  # ジョブコメント
+  job_comments:
+    template: |
+      # ================================
+      # Job: {job_name}
+      # Description: {description_japanese}
+      #              {description_english}
+      # Dependencies: {dependencies}
+      # Timeout: {timeout}
+      # ================================
+    
+    display_name_pattern: '"📦 [{emoji}] {japanese_name} / {english_name}"'
+
+  # ステップコメント
+  step_comments:
+    single_line: "# {action}: {description_japanese} / {description_english}"
+    multi_line: |
+      # ================
+      # {step_name}
+      # 目的: {purpose_japanese}
+      # Purpose: {purpose_english}
+      # ================
+
+  # インラインコメント
+  inline_comments:
+    variables: "# {variable_name}: {description}"
+    conditions: "# Condition: {condition_explanation}"
+    complex_logic: "# Logic: {logic_explanation}"
+
+# 日英対訳辞書
+translation_dictionary:
+  # 一般用語
+  general:
+    "継続的インテグレーション": "Continuous Integration"
+    "継続的デプロイメント": "Continuous Deployment"
+    "品質ゲート": "Quality Gate"
+    "セキュリティスキャン": "Security Scan"
+    "パフォーマンス監視": "Performance Monitoring"
+    "自動修復": "Auto-healing"
+    "メトリクス収集": "Metrics Collection"
+    
+  # 技術用語
+  technical:
+    "ビルド": "Build"
+    "テスト": "Test"
+    "デプロイ": "Deploy"
+    "監視": "Monitor"
+    "修復": "Fix"
+    "最適化": "Optimize"
+    "検証": "Validate"
+
+# 品質チェック
+quality_checks:
+  required_elements:
+    - "全ワークフローにヘッダーコメント必須"
+    - "全ジョブに説明コメント必須"
+    - "複雑な処理には日英両方のコメント必須"
+    - "エラーハンドリング箇所にコメント必須"
+  
+  forbidden_elements:
+    - "TODOコメントの残存"
+    - "デバッグ用コメント"
+    - "不完全なコメント"
+    - "無意味なコメント"
+
+# 自動化ルール
+automation_rules:
+  auto_add_comments:
+    - "新規ワークフロー作成時にヘッダー自動追加"
+    - "ジョブ追加時に説明コメント追加プロンプト"
+    - "複雑な条件式にコメント追加推奨"
+  
+  comment_validation:
+    - "ヘッダーコメントの完全性チェック"
+    - "日英対訳の一貫性チェック" 
+    - "コメントの最新性チェック"

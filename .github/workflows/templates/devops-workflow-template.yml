@@ -1,0 +1,278 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║ DevOps Workflow Template - World-Class CI/CD Base                        ║
+# ║ Category: TEMPLATE                                                        ║
+# ║ Purpose: 共通ワークフロー要素とDevOps標準パターンを提供                      ║
+# ║ Usage: 他のワークフローでこのテンプレートを拡張して使用                       ║
+# ║ Author: Claude DevOps Agent                                               ║
+# ║ Version: 1.0.0                                                            ║
+# ║ Last Modified: 2025-08-12                                                 ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+name: 🎯 DevOps Workflow Template
+
+on:
+  workflow_call:
+    inputs:
+      workflow-category:
+        description: 'Workflow category (ci/cd/qa/sec/perf/docs/infra/monitor/release/ai)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: false
+        type: string
+        default: 'development'
+      node-version:
+        description: 'Node.js version'
+        required: false
+        type: string
+        default: '18'
+      enable-caching:
+        description: 'Enable dependency caching'
+        required: false
+        type: boolean
+        default: true
+      enable-notifications:
+        description: 'Enable Slack notifications'
+        required: false
+        type: boolean
+        default: false
+      parallel-jobs:
+        description: 'Number of parallel jobs'
+        required: false
+        type: number
+        default: 4
+    outputs:
+      build-status:
+        description: 'Build execution status'
+        value: ${{ jobs.setup.outputs.status }}
+      execution-time:
+        description: 'Total execution time in seconds'
+        value: ${{ jobs.setup.outputs.execution-time }}
+      artifacts-url:
+        description: 'URL to generated artifacts'
+        value: ${{ jobs.setup.outputs.artifacts-url }}
+    secrets:
+      CLAUDE_API_KEY:
+        required: false
+      SLACK_WEBHOOK:
+        required: false
+
+env:
+  NODE_VERSION: ${{ inputs.node-version }}
+  ENVIRONMENT: ${{ inputs.environment }}
+  CATEGORY: ${{ inputs.workflow-category }}
+  
+  # DevOps標準環境変数
+  CI: true
+  FORCE_COLOR: 1
+  NODE_ENV: ${{ inputs.environment == 'production' && 'production' || 'development' }}
+  
+  # パフォーマンス最適化
+  NODE_OPTIONS: '--max-old-space-size=4096'
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+  
+  # セキュリティ設定
+  NPM_CONFIG_AUDIT_LEVEL: 'high'
+  NPM_CONFIG_FUND: false
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════
+  # 共通セットアップジョブ
+  # ═══════════════════════════════════════════════════════════════════════
+  setup:
+    name: 🔧 DevOps環境セットアップ
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      status: ${{ steps.validation.outputs.status }}
+      execution-time: ${{ steps.timing.outputs.duration }}
+      cache-key: ${{ steps.cache.outputs.cache-hit }}
+      node-version: ${{ steps.node.outputs.version }}
+      
+    steps:
+      # ─────────────────────────────────────────────────────────────────
+      # タイミング開始
+      # ─────────────────────────────────────────────────────────────────
+      - name: ⏱️ Start Timing
+        id: start-time
+        run: echo "start-time=$(date +%s)" >> $GITHUB_OUTPUT
+
+      # ─────────────────────────────────────────────────────────────────
+      # ソースコードチェックアウト
+      # ─────────────────────────────────────────────────────────────────
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 完全履歴（Git履歴分析用）
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─────────────────────────────────────────────────────────────────
+      # Node.js セットアップ
+      # ─────────────────────────────────────────────────────────────────
+      - name: ⚡ Setup Node.js ${{ env.NODE_VERSION }}
+        id: node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ inputs.enable-caching && 'npm' || '' }}
+
+      # ─────────────────────────────────────────────────────────────────
+      # システム情報収集
+      # ─────────────────────────────────────────────────────────────────
+      - name: 📊 System Information
+        run: |
+          echo "🖥️ Runner Information:"
+          echo "  OS: ${{ runner.os }}"
+          echo "  Architecture: ${{ runner.arch }}"
+          echo "  Temp: ${{ runner.temp }}"
+          echo "  Tool Cache: ${{ runner.tool_cache }}"
+          echo ""
+          echo "📦 Node.js Information:"
+          echo "  Version: $(node --version)"
+          echo "  NPM Version: $(npm --version)"
+          echo "  Platform: $(node -p 'process.platform')"
+          echo "  Architecture: $(node -p 'process.arch')"
+          echo ""
+          echo "🔧 Environment:"
+          echo "  Category: ${{ env.CATEGORY }}"
+          echo "  Environment: ${{ env.ENVIRONMENT }}"
+          echo "  Caching: ${{ inputs.enable-caching }}"
+          echo "  Parallel Jobs: ${{ inputs.parallel-jobs }}"
+
+      # ─────────────────────────────────────────────────────────────────
+      # 依存関係インストール
+      # ─────────────────────────────────────────────────────────────────
+      - name: 📦 Install Dependencies
+        id: deps
+        run: |
+          echo "📥 Installing dependencies..."
+          if [ "${{ inputs.enable-caching }}" == "true" ]; then
+            npm ci --prefer-offline --no-audit
+          else
+            npm ci --no-audit
+          fi
+          
+          echo "✅ Dependencies installed successfully"
+          npm list --depth=0 || true
+
+      # ─────────────────────────────────────────────────────────────────
+      # プロジェクト検証
+      # ─────────────────────────────────────────────────────────────────
+      - name: 🔍 Project Validation
+        id: validation
+        run: |
+          echo "🔍 Validating project structure..."
+          
+          # 必須ファイルチェック
+          required_files=("package.json" "vite.config.js" "src/App.jsx")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Required file missing: $file"
+              echo "status=failed" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          done
+          
+          # package.json検証
+          if ! npm run --silent --if-present validate 2>/dev/null; then
+            echo "⚠️ No validation script found in package.json"
+          fi
+          
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "✅ Project validation passed"
+
+      # ─────────────────────────────────────────────────────────────────
+      # セキュリティ監査
+      # ─────────────────────────────────────────────────────────────────
+      - name: 🔒 Security Audit
+        continue-on-error: true
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level=high || echo "⚠️ Security vulnerabilities found"
+
+      # ─────────────────────────────────────────────────────────────────
+      # タイミング終了
+      # ─────────────────────────────────────────────────────────────────
+      - name: ⏱️ Calculate Execution Time
+        id: timing
+        run: |
+          start_time="${{ steps.start-time.outputs.start-time }}"
+          end_time="$(date +%s)"
+          duration=$((end_time - start_time))
+          echo "duration=${duration}" >> $GITHUB_OUTPUT
+          echo "⏱️ Setup completed in ${duration} seconds"
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # 通知ジョブ（オプション）
+  # ═══════════════════════════════════════════════════════════════════════
+  notification:
+    name: 📢 Workflow Notification
+    needs: [setup]
+    runs-on: ubuntu-latest
+    if: ${{ inputs.enable-notifications && always() }}
+    
+    steps:
+      - name: 📢 Send Slack Notification
+        if: ${{ secrets.SLACK_WEBHOOK }}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.setup.result }}
+          channel: '#devops-alerts'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: |
+            {
+              "title": "DevOps Workflow: ${{ env.CATEGORY }}",
+              "value": "Environment: ${{ env.ENVIRONMENT }}\nStatus: ${{ needs.setup.result }}\nExecution Time: ${{ needs.setup.outputs.execution-time }}s",
+              "short": false
+            }
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # メトリクス収集ジョブ
+  # ═══════════════════════════════════════════════════════════════════════
+  metrics:
+    name: 📊 Collect DevOps Metrics
+    needs: [setup]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📊 Generate Metrics Report
+        run: |
+          cat > devops-metrics.json << EOF
+          {
+            "workflow": {
+              "category": "${{ env.CATEGORY }}",
+              "environment": "${{ env.ENVIRONMENT }}",
+              "execution_time": ${{ needs.setup.outputs.execution-time }},
+              "status": "${{ needs.setup.result }}",
+              "node_version": "${{ env.NODE_VERSION }}",
+              "runner_os": "${{ runner.os }}",
+              "timestamp": "$(date -Iseconds)",
+              "commit_sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}"
+            },
+            "performance": {
+              "setup_duration": ${{ needs.setup.outputs.execution-time }},
+              "cache_hit": "${{ needs.setup.outputs.cache-key }}",
+              "parallel_jobs": ${{ inputs.parallel-jobs }}
+            }
+          }
+          EOF
+          
+          echo "📊 DevOps Metrics Generated:"
+          cat devops-metrics.json | jq '.'
+
+      - name: 💾 Upload Metrics Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devops-metrics-${{ env.CATEGORY }}-${{ github.run_number }}
+          path: devops-metrics.json
+          retention-days: 30

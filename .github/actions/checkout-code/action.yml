@@ -1,0 +1,68 @@
+# ============================================================
+# Reusable Action: Checkout Code
+# Purpose: 標準化されたコードチェックアウト
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
+
+name: 'Checkout Code'
+description: 'リポジトリコードを標準設定でチェックアウトします'
+
+inputs:
+  fetch-depth:
+    description: 'Git履歴の取得深度'
+    required: false
+    default: '1'
+  ref:
+    description: 'チェックアウトするブランチ/タグ/SHA'
+    required: false
+    default: ''
+  token:
+    description: 'GitHub token for authentication'
+    required: false
+    default: ${{ github.token }}
+  submodules:
+    description: 'サブモジュールをチェックアウトするか'
+    required: false
+    default: 'false'
+  lfs:
+    description: 'Git LFSを使用するか'
+    required: false
+    default: 'false'
+
+outputs:
+  commit:
+    description: 'チェックアウトしたコミットSHA'
+    value: ${{ steps.checkout.outputs.commit }}
+
+runs:
+  using: 'composite'
+  steps:
+    # ------------------------------------------------------------
+    # コードのチェックアウト
+    # ------------------------------------------------------------
+    - name: Checkout repository
+      id: checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        ref: ${{ inputs.ref }}
+        token: ${{ inputs.token }}
+        submodules: ${{ inputs.submodules }}
+        lfs: ${{ inputs.lfs }}
+
+    # ------------------------------------------------------------
+    # チェックアウト情報の表示
+    # ------------------------------------------------------------
+    - name: Display checkout info
+      shell: bash
+      run: |
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: $(git branch --show-current)"
+        echo "Commit: $(git rev-parse HEAD)"
+        echo "Author: $(git log -1 --pretty=format:'%an <%ae>')"
+        echo "Date: $(git log -1 --pretty=format:'%ad')"
+        echo "Message: $(git log -1 --pretty=format:'%s')"
+        
+        # Output commit SHA
+        echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT

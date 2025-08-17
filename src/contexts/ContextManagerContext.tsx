@@ -15,13 +15,13 @@ import type {
   StoreOptions,
   ContextMonitoringReturn,
   ContextStorageReturn,
-  PerformanceOptimizerReturn
+  PerformanceOptimizerReturn,
 } from '../types/context'
 
 const ContextManagerContext = createContext<ContextManagerAPI | null>(null)
 
 interface ContextManagerProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export const ContextManagerProvider: React.FC<ContextManagerProviderProps> = ({ children }) => {
@@ -206,7 +206,10 @@ export const useContextMonitoring = (): ContextMonitoringReturn => {
 }
 
 // HOC for automatic performance optimization
-export const withPerformanceOptimization = <P extends object>(Component: React.ComponentType<P>, options = {}) => {
+export const withPerformanceOptimization = <P extends object>(
+  Component: React.ComponentType<P>,
+  options = {}
+) => {
   const OptimizedComponent = React.memo(Component)
 
   OptimizedComponent.displayName = `Optimized(${Component.displayName || Component.name})`

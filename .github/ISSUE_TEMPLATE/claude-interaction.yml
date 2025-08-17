@@ -1,0 +1,104 @@
+name: Claude Code Interaction Log
+description: Automated log for Claude Code interactions and decisions
+title: "[Claude-Log] "
+labels: ["claude-code", "automated", "documentation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🤖 Claude Code Interaction Log
+        This issue automatically documents interactions with Claude Code for tracking and knowledge preservation.
+
+  - type: dropdown
+    id: interaction-type
+    attributes:
+      label: Interaction Type
+      description: What type of interaction was this?
+      options:
+        - Feature Implementation
+        - Bug Fix
+        - Refactoring
+        - Architecture Decision
+        - Performance Optimization
+        - Documentation Update
+        - Testing
+        - Configuration Change
+        - Discussion/Analysis
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How critical is this interaction?
+      options:
+        - Critical (Breaking changes/Major features)
+        - High (Important features/fixes)
+        - Medium (Regular development)
+        - Low (Minor improvements)
+        - Info (Documentation only)
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-request
+    attributes:
+      label: User Request/Instruction
+      description: Original request from the user
+      placeholder: "Paste the original user instruction here..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: claude-analysis
+    attributes:
+      label: Claude's Analysis
+      description: Key analysis points and decision rationale
+      placeholder: "Summary of Claude's analysis..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-details
+    attributes:
+      label: Implementation Details
+      description: What was actually implemented/changed
+      placeholder: |
+        - Files modified:
+        - Key changes:
+        - Technologies used:
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-snippets
+    attributes:
+      label: Key Code Snippets
+      description: Important code changes or examples
+      render: javascript
+      placeholder: "```javascript\n// Your code here\n```"
+
+  - type: textarea
+    id: outcomes
+    attributes:
+      label: Outcomes & Results
+      description: What was achieved and any follow-up needed
+      placeholder: |
+        ✅ Completed:
+        ⚠️ Warnings:
+        📝 Follow-up needed:
+
+  - type: textarea
+    id: metadata
+    attributes:
+      label: Metadata
+      description: Additional tracking information
+      value: |
+        - Session ID: 
+        - Timestamp: 
+        - Model: claude-opus-4-1
+        - Tokens used: 
+        - Related Issues: 
+        - Related PRs:

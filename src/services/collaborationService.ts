@@ -17,9 +17,15 @@ class CollaborationService {
       const savedComments = localStorage.getItem('comments')
       const savedGroups = localStorage.getItem('studyGroups')
 
-      if (savedNotes) {this.notes = JSON.parse(savedNotes)}
-      if (savedComments) {this.comments = JSON.parse(savedComments)}
-      if (savedGroups) {this.studyGroups = JSON.parse(savedGroups)}
+      if (savedNotes) {
+        this.notes = JSON.parse(savedNotes)
+      }
+      if (savedComments) {
+        this.comments = JSON.parse(savedComments)
+      }
+      if (savedGroups) {
+        this.studyGroups = JSON.parse(savedGroups)
+      }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         logger.error('コラボレーションデータの読み込みエラー:', error)

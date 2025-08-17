@@ -4,139 +4,139 @@
  */
 
 interface ServiceWorkerRegistration {
-  scope: string;
-  updateViaCache: 'all' | 'imports' | 'none';
-  active: ServiceWorker | null;
-  installing: ServiceWorker | null;
-  waiting: ServiceWorker | null;
-  
+  scope: string
+  updateViaCache: 'all' | 'imports' | 'none'
+  active: ServiceWorker | null
+  installing: ServiceWorker | null
+  waiting: ServiceWorker | null
+
   // Event handlers
-  onupdatefound: ((this: ServiceWorkerRegistration, ev: Event) => any) | null;
-  
+  onupdatefound: ((this: ServiceWorkerRegistration, ev: Event) => any) | null
+
   // Methods
-  getNotifications(filter?: GetNotificationOptions): Promise<Notification[]>;
-  showNotification(title: string, options?: NotificationOptions): Promise<void>;
-  update(): Promise<void>;
-  unregister(): Promise<boolean>;
-  
+  getNotifications(filter?: GetNotificationOptions): Promise<Notification[]>
+  showNotification(title: string, options?: NotificationOptions): Promise<void>
+  update(): Promise<void>
+  unregister(): Promise<boolean>
+
   // Push Manager
-  pushManager: PushManager;
-  
+  pushManager: PushManager
+
   // Navigation Preload Manager
-  navigationPreload?: NavigationPreloadManager;
-  
+  navigationPreload?: NavigationPreloadManager
+
   // Background Sync
-  sync?: SyncManager;
-  
+  sync?: SyncManager
+
   // Periodic Background Sync
-  periodicSync?: PeriodicSyncManager;
-  
+  periodicSync?: PeriodicSyncManager
+
   // Payment Handler
-  paymentManager?: PaymentManager;
-  
+  paymentManager?: PaymentManager
+
   // Content Index
-  index?: ContentIndex;
+  index?: ContentIndex
 }
 
 interface SyncManager {
-  getTags(): Promise<string[]>;
-  register(tag: string): Promise<void>;
+  getTags(): Promise<string[]>
+  register(tag: string): Promise<void>
 }
 
 interface PeriodicSyncManager {
-  getTags(): Promise<string[]>;
-  register(tag: string, options?: { minInterval: number }): Promise<void>;
-  unregister(tag: string): Promise<void>;
+  getTags(): Promise<string[]>
+  register(tag: string, options?: { minInterval: number }): Promise<void>
+  unregister(tag: string): Promise<void>
 }
 
 interface PaymentManager {
-  userHint?: string;
-  instruments: PaymentInstruments;
+  userHint?: string
+  instruments: PaymentInstruments
 }
 
 interface PaymentInstruments {
-  delete(instrumentKey: string): Promise<boolean>;
-  get(instrumentKey: string): Promise<PaymentInstrument | undefined>;
-  keys(): Promise<string[]>;
-  has(instrumentKey: string): Promise<boolean>;
-  set(instrumentKey: string, details: PaymentInstrument): Promise<void>;
-  clear(): Promise<void>;
+  delete(instrumentKey: string): Promise<boolean>
+  get(instrumentKey: string): Promise<PaymentInstrument | undefined>
+  keys(): Promise<string[]>
+  has(instrumentKey: string): Promise<boolean>
+  set(instrumentKey: string, details: PaymentInstrument): Promise<void>
+  clear(): Promise<void>
 }
 
 interface PaymentInstrument {
-  name: string;
-  icons: ImageObject[];
-  method: string;
-  capabilities?: object;
+  name: string
+  icons: ImageObject[]
+  method: string
+  capabilities?: object
 }
 
 interface ImageObject {
-  src: string;
-  sizes?: string;
-  type?: string;
+  src: string
+  sizes?: string
+  type?: string
 }
 
 interface ContentIndex {
-  add(entries: ContentIndexEntry): Promise<void>;
-  delete(id: string): Promise<void>;
-  getAll(): Promise<ContentIndexEntry[]>;
+  add(entries: ContentIndexEntry): Promise<void>
+  delete(id: string): Promise<void>
+  getAll(): Promise<ContentIndexEntry[]>
 }
 
 interface ContentIndexEntry {
-  id: string;
-  title: string;
-  description: string;
-  category: 'homepage' | 'article' | 'video' | 'audio' | '';
-  icons?: ImageObject[];
-  url: string;
+  id: string
+  title: string
+  description: string
+  category: 'homepage' | 'article' | 'video' | 'audio' | ''
+  icons?: ImageObject[]
+  url: string
 }
 
 interface NavigationPreloadManager {
-  enable(): Promise<void>;
-  disable(): Promise<void>;
-  setHeaderValue(value: string): Promise<void>;
-  getState(): Promise<NavigationPreloadState>;
+  enable(): Promise<void>
+  disable(): Promise<void>
+  setHeaderValue(value: string): Promise<void>
+  getState(): Promise<NavigationPreloadState>
 }
 
 interface NavigationPreloadState {
-  enabled: boolean;
-  headerValue: string;
+  enabled: boolean
+  headerValue: string
 }
 
 interface GetNotificationOptions {
-  tag?: string;
+  tag?: string
 }
 
 // Extend Window interface for Service Worker properties
 interface _Window {
   ServiceWorkerRegistration?: {
-    prototype: ServiceWorkerRegistration;
-    new(): ServiceWorkerRegistration;
-  };
+    prototype: ServiceWorkerRegistration
+    new (): ServiceWorkerRegistration
+  }
 }
 
 // Extend Navigator interface
 interface _Navigator {
-  serviceWorker?: ServiceWorkerContainer;
+  serviceWorker?: ServiceWorkerContainer
 }
 
 interface ServiceWorkerContainer {
-  controller: ServiceWorker | null;
-  ready: Promise<ServiceWorkerRegistration>;
-  
-  getRegistration(scope?: string): Promise<ServiceWorkerRegistration | undefined>;
-  getRegistrations(): Promise<ServiceWorkerRegistration[]>;
-  register(scriptURL: string, options?: RegistrationOptions): Promise<ServiceWorkerRegistration>;
-  
-  oncontrollerchange: ((this: ServiceWorkerContainer, ev: Event) => any) | null;
-  onmessage: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null;
-  onmessageerror: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null;
+  controller: ServiceWorker | null
+  ready: Promise<ServiceWorkerRegistration>
+
+  getRegistration(scope?: string): Promise<ServiceWorkerRegistration | undefined>
+  getRegistrations(): Promise<ServiceWorkerRegistration[]>
+  register(scriptURL: string, options?: RegistrationOptions): Promise<ServiceWorkerRegistration>
+
+  oncontrollerchange: ((this: ServiceWorkerContainer, ev: Event) => any) | null
+  onmessage: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null
+  onmessageerror: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null
 }
 
 interface RegistrationOptions {
-  scope?: string;
-  type?: 'classic' | 'module';
-  updateViaCache?: 'all' | 'imports' | 'none';
+  scope?: string
+  type?: 'classic' | 'module'
+  updateViaCache?: 'all' | 'imports' | 'none'
 }
 
 // Export types for use in other files

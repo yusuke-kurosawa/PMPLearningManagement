@@ -453,10 +453,10 @@ export const withAuth = (Component, requiredRole = null) => {
     useEffect(() => {
       if (!loading && !isAuthenticated) {
         navigate('/login')
-      } else if (!loading && requiredRole && !hasRole(requiredRole)) {
+      } else if (!loading && requiredRole && hasRole && !hasRole(requiredRole)) {
         navigate('/unauthorized')
       }
-    }, [isAuthenticated, role, loading, navigate])
+    }, [isAuthenticated, role, loading, navigate, hasRole])
 
     if (loading) {
       return (

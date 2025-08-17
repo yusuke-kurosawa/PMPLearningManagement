@@ -97,14 +97,18 @@ const PMBOK7PerformanceDomains: React.FC = () => {
           settings.darkMode ? 'bg-gray-800' : 'bg-white'
         }`}
       >
-        <svg className="absolute inset-0 h-full w-full">
+        <svg className='absolute inset-0 h-full w-full'>
           {/* 相互作用の線を描画 */}
           {pmbok7PerformanceDomains.map((domain) =>
             domain.interactions.map((targetId) => {
-              if (targetId === 'all') {return null}
+              if (targetId === 'all') {
+                return null
+              }
               const source = positions[domain.id]
               const target = positions[targetId]
-              if (!source || !target) {return null}
+              if (!source || !target) {
+                return null
+              }
 
               return (
                 <line
@@ -114,8 +118,8 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                   x2={`${target.x}%`}
                   y2={`${target.y}%`}
                   stroke={settings.darkMode ? '#4B5563' : '#D1D5DB'}
-                  strokeWidth="1"
-                  strokeDasharray="5,5"
+                  strokeWidth='1'
+                  strokeDasharray='5,5'
                 />
               )
             })
@@ -161,15 +165,15 @@ const PMBOK7PerformanceDomains: React.FC = () => {
   return (
     <div className={`p-6 ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
       {/* ヘッダー */}
-      <div className="mb-8">
-        <h1 className="mb-3 text-3xl font-bold">PMBOK第7版 - 8つのパフォーマンスドメイン</h1>
+      <div className='mb-8'>
+        <h1 className='mb-3 text-3xl font-bold'>PMBOK第7版 - 8つのパフォーマンスドメイン</h1>
         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           プロジェクトパフォーマンスを構成する相互関連した活動領域
         </p>
       </div>
 
       {/* ビューモード切替 */}
-      <div className="mb-6 flex gap-2">
+      <div className='mb-6 flex gap-2'>
         <button
           onClick={() => setViewMode('grid')}
           className={`rounded-lg px-4 py-2 ${
@@ -198,7 +202,7 @@ const PMBOK7PerformanceDomains: React.FC = () => {
 
       {/* コンテンツ表示 */}
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
           {pmbok7PerformanceDomains.map((domain) => {
             const Icon = domainIcons[domain.id]
             const color = domainColors[domain.id]
@@ -213,12 +217,12 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                 } ${selectedDomain?.id === domain.id ? 'ring-2 ring-blue-500' : ''}`}
                 onClick={() => setSelectedDomain(domain)}
               >
-                <div className="p-6">
+                <div className='p-6'>
                   <div className={`mb-4 rounded-lg p-3 ${getColorClasses(color, 'bg')}`}>
                     <Icon className={`h-8 w-8 ${getColorClasses(color, 'text')}`} />
                   </div>
 
-                  <h3 className="mb-2 text-lg font-semibold">{domain.name}</h3>
+                  <h3 className='mb-2 text-lg font-semibold'>{domain.name}</h3>
                   <p
                     className={`mb-4 text-sm ${
                       settings.darkMode ? 'text-gray-300' : 'text-gray-600'
@@ -228,11 +232,11 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                   </p>
 
                   {/* フォーカスエリア */}
-                  <div className="mb-3">
-                    <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide">
+                  <div className='mb-3'>
+                    <h4 className='mb-1 text-xs font-semibold uppercase tracking-wide'>
                       フォーカスエリア
                     </h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className='flex flex-wrap gap-1'>
                       {domain.focusAreas.slice(0, 3).map((area, index) => (
                         <span
                           key={index}
@@ -258,8 +262,8 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                   </div>
 
                   {/* 期待される成果 */}
-                  <div className="flex items-center gap-1 text-xs">
-                    <CheckCircle className="h-3 w-3" />
+                  <div className='flex items-center gap-1 text-xs'>
+                    <CheckCircle className='h-3 w-3' />
                     <span>{domain.outcomes.length}個の期待成果</span>
                   </div>
                 </div>
@@ -274,19 +278,19 @@ const PMBOK7PerformanceDomains: React.FC = () => {
       {/* 選択されたドメインの詳細モーダル */}
       {selectedDomain && (
         <div className={`fixed inset-0 z-50 overflow-y-auto`}>
-          <div className="min-h-screen px-4 text-center">
+          <div className='min-h-screen px-4 text-center'>
             <div
-              className="fixed inset-0 bg-black bg-opacity-50"
+              className='fixed inset-0 bg-black bg-opacity-50'
               onClick={() => setSelectedDomain(null)}
             />
 
-            <div className="my-8 inline-block w-full max-w-4xl transform text-left align-middle transition-all">
+            <div className='my-8 inline-block w-full max-w-4xl transform text-left align-middle transition-all'>
               <div
                 className={`rounded-lg shadow-xl ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}
               >
-                <div className="p-6">
-                  <div className="mb-6 flex items-start justify-between">
-                    <div className="flex items-start gap-4">
+                <div className='p-6'>
+                  <div className='mb-6 flex items-start justify-between'>
+                    <div className='flex items-start gap-4'>
                       <div
                         className={`rounded-lg p-3 ${getColorClasses(
                           domainColors[selectedDomain.id],
@@ -298,7 +302,7 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                         })}
                       </div>
                       <div>
-                        <h3 className="mb-2 text-2xl font-bold">{selectedDomain.name}</h3>
+                        <h3 className='mb-2 text-2xl font-bold'>{selectedDomain.name}</h3>
                         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                           {selectedDomain.description}
                         </p>
@@ -306,20 +310,20 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setSelectedDomain(null)}
-                      className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className='rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700'
                     >
-                      <span className="sr-only">閉じる</span>×
+                      <span className='sr-only'>閉じる</span>×
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                     {/* フォーカスエリア */}
                     <div>
-                      <h4 className="mb-3 flex items-center gap-2 font-semibold">
-                        <Target className="h-4 w-4" />
+                      <h4 className='mb-3 flex items-center gap-2 font-semibold'>
+                        <Target className='h-4 w-4' />
                         フォーカスエリア
                       </h4>
-                      <div className="space-y-2">
+                      <div className='space-y-2'>
                         {selectedDomain.focusAreas.map((area, index) => (
                           <div
                             key={index}
@@ -327,8 +331,8 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                               settings.darkMode ? 'bg-gray-700' : 'bg-gray-100'
                             }`}
                           >
-                            <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm">{area}</span>
+                            <ChevronRight className='mt-0.5 h-4 w-4 flex-shrink-0' />
+                            <span className='text-sm'>{area}</span>
                           </div>
                         ))}
                       </div>
@@ -336,11 +340,11 @@ const PMBOK7PerformanceDomains: React.FC = () => {
 
                     {/* 期待される成果 */}
                     <div>
-                      <h4 className="mb-3 flex items-center gap-2 font-semibold">
-                        <CheckCircle className="h-4 w-4" />
+                      <h4 className='mb-3 flex items-center gap-2 font-semibold'>
+                        <CheckCircle className='h-4 w-4' />
                         期待される成果
                       </h4>
-                      <div className="space-y-2">
+                      <div className='space-y-2'>
                         {selectedDomain.outcomes.map((outcome, index) => (
                           <div
                             key={index}
@@ -361,7 +365,7 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                                 )}`}
                               />
                             </div>
-                            <span className="text-sm">{outcome}</span>
+                            <span className='text-sm'>{outcome}</span>
                           </div>
                         ))}
                       </div>
@@ -369,9 +373,9 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                   </div>
 
                   {/* 相互作用 */}
-                  <div className="mt-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold">
-                      <Link className="h-4 w-4" />
+                  <div className='mt-6'>
+                    <h4 className='mb-3 flex items-center gap-2 font-semibold'>
+                      <Link className='h-4 w-4' />
                       他のドメインとの相互作用
                     </h4>
                     {selectedDomain.interactions[0] === 'all' ? (
@@ -380,18 +384,20 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                           settings.darkMode ? 'bg-gray-700' : 'bg-blue-50'
                         }`}
                       >
-                        <p className="flex items-center gap-2 text-sm">
-                          <AlertCircle className="h-4 w-4" />
+                        <p className='flex items-center gap-2 text-sm'>
+                          <AlertCircle className='h-4 w-4' />
                           このドメインはすべての他のドメインと相互作用します
                         </p>
                       </div>
                     ) : (
-                      <div className="flex flex-wrap gap-3">
+                      <div className='flex flex-wrap gap-3'>
                         {selectedDomain.interactions.map((interactionId) => {
                           const targetDomain = pmbok7PerformanceDomains.find(
                             (d) => d.id === interactionId
                           )
-                          if (!targetDomain) {return null}
+                          if (!targetDomain) {
+                            return null
+                          }
                           const Icon = domainIcons[targetDomain.id]
 
                           return (
@@ -401,8 +407,8 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                                 settings.darkMode ? 'bg-gray-700' : 'bg-gray-100'
                               }`}
                             >
-                              <Icon className="h-4 w-4" />
-                              <span className="text-sm">{targetDomain.name}</span>
+                              <Icon className='h-4 w-4' />
+                              <span className='text-sm'>{targetDomain.name}</span>
                             </div>
                           )
                         })}
@@ -416,8 +422,8 @@ const PMBOK7PerformanceDomains: React.FC = () => {
                       settings.darkMode ? 'bg-gray-700' : 'bg-amber-50'
                     }`}
                   >
-                    <h4 className="mb-2 flex items-center gap-2 font-semibold">
-                      <AlertCircle className="h-4 w-4" />
+                    <h4 className='mb-2 flex items-center gap-2 font-semibold'>
+                      <AlertCircle className='h-4 w-4' />
                       実践のポイント
                     </h4>
                     <p

@@ -374,12 +374,20 @@ export class LearningService {
 
       const where: unknown = { userId }
 
-      if (knowledgeArea) {where.knowledgeArea = knowledgeArea}
-      if (processGroup) {where.processGroup = processGroup}
+      if (knowledgeArea) {
+        where.knowledgeArea = knowledgeArea
+      }
+      if (processGroup) {
+        where.processGroup = processGroup
+      }
       if (dateFrom || dateTo) {
         where.createdAt = {}
-        if (dateFrom) {where.createdAt.gte = dateFrom}
-        if (dateTo) {where.createdAt.lte = dateTo}
+        if (dateFrom) {
+          where.createdAt.gte = dateFrom
+        }
+        if (dateTo) {
+          where.createdAt.lte = dateTo
+        }
       }
 
       const [sessions, total, totalStats] = await Promise.all([

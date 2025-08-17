@@ -15,6 +15,10 @@ import {
   databaseEncryption,
 } from '../encryption'
 
+// テスト用環境変数を32バイト以上に設定
+process.env.APP_SECRET = 'test-encryption-secret-key-32-chars-minimum-length-required'
+process.env.ADMIN_SECRET = 'test-admin-secret-key-32-chars-minimum-length-required'
+
 // テスト用の環境変数設定
 const originalEnv = process.env
 
@@ -23,7 +27,7 @@ describe('データ暗号化システム', () => {
     // テスト用環境変数の設定
     process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex')
     process.env.HASH_PEPPER = crypto.randomBytes(16).toString('hex')
-    process.env.APP_SECRET = 'test-app-secret-for-hmac-operations'
+    process.env.APP_SECRET = crypto.randomBytes(32).toString('hex') // 32バイト = 64文字のhex
   })
 
   afterEach(() => {
@@ -162,7 +166,7 @@ describe('データ暗号化システム', () => {
 
       const hash1 = hashing.hashSensitiveData(data, true)
       // 1ミリ秒待機して異なるタイムスタンプを確保
-      await new Promise(resolve => setTimeout(resolve, 1))
+      await new Promise((resolve) => setTimeout(resolve, 1))
       const hash2 = hashing.hashSensitiveData(data, true)
 
       expect(hash1).not.toBe(hash2)
@@ -253,11 +257,11 @@ describe('データ暗号化システム', () => {
       }
 
       const encryptionResult = encryption.encrypt(JSON.stringify(tokenData), true)
-      
+
       // 同じインスタンスで復号化してデータを確認
       const decryptedData = encryption.decrypt(encryptionResult)
       const parsedData = JSON.parse(decryptedData)
-      
+
       expect(parsedData.payload).toEqual(payload)
     })
 
@@ -434,11 +438,11 @@ describe('データ暗号化システム', () => {
       delete process.env.ENCRYPTION_MASTER_KEY
       delete process.env.HASH_PEPPER
       delete process.env.APP_SECRET
-      
+
       // NODE_ENVをproductionに設定してエラーを発生させる
       const originalNodeEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'production'
-      
+
       try {
         expect(() => new SymmetricEncryption()).toThrow('暗号化設定エラー')
       } finally {

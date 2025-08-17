@@ -295,36 +295,36 @@ const ProjectSimulator = () => {
 
   if (simulationState === 'menu') {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
+      <div className='min-h-screen bg-gray-50 p-6 dark:bg-gray-900'>
+        <div className='mx-auto max-w-6xl'>
+          <div className='mb-12 text-center'>
+            <h1 className='mb-4 text-4xl font-bold text-gray-900 dark:text-white'>
               リアルプロジェクト・シミュレーター
             </h1>
-            <p className="mx-auto mb-6 max-w-3xl text-lg text-gray-600 dark:text-gray-300">
+            <p className='mx-auto mb-6 max-w-3xl text-lg text-gray-600 dark:text-gray-300'>
               実際のプロジェクトシナリオでPMBOK知識を実践的に学習。リアルタイムの意思決定で本物のPMスキルを身につけましょう。
             </p>
-            <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
-              <div className="flex items-center">
-                <Trophy className="mr-1 h-4 w-4" />
+            <div className='flex items-center justify-center space-x-6 text-sm text-gray-500'>
+              <div className='flex items-center'>
+                <Trophy className='mr-1 h-4 w-4' />
                 経験値: {experience}
               </div>
-              <div className="flex items-center">
-                <Star className="mr-1 h-4 w-4" />
+              <div className='flex items-center'>
+                <Star className='mr-1 h-4 w-4' />
                 バッジ: {badges.length}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
             {scenarios.map((scenario) => (
               <div
                 key={scenario.id}
-                className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800"
+                className='overflow-hidden rounded-lg bg-white shadow-lg dark:bg-gray-800'
               >
-                <div className="p-6">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="text-3xl">{scenario.icon}</div>
+                <div className='p-6'>
+                  <div className='mb-4 flex items-center justify-between'>
+                    <div className='text-3xl'>{scenario.icon}</div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${getDifficultyColor(scenario.difficulty)}`}
                     >
@@ -332,39 +332,39 @@ const ProjectSimulator = () => {
                     </span>
                   </div>
 
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                  <h3 className='mb-2 text-xl font-semibold text-gray-900 dark:text-white'>
                     {scenario.title}
                   </h3>
-                  <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                  <p className='mb-4 text-sm text-gray-600 dark:text-gray-300'>
                     {scenario.description}
                   </p>
 
-                  <div className="mb-4 grid grid-cols-2 gap-4 text-xs">
-                    <div className="flex items-center text-gray-500">
-                      <Calendar className="mr-1 h-3 w-3" />
+                  <div className='mb-4 grid grid-cols-2 gap-4 text-xs'>
+                    <div className='flex items-center text-gray-500'>
+                      <Calendar className='mr-1 h-3 w-3' />
                       {scenario.duration}日
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <DollarSign className="mr-1 h-3 w-3" />¥{scenario.budget.toLocaleString()}
+                    <div className='flex items-center text-gray-500'>
+                      <DollarSign className='mr-1 h-3 w-3' />¥{scenario.budget.toLocaleString()}
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <Users className="mr-1 h-3 w-3" />
+                    <div className='flex items-center text-gray-500'>
+                      <Users className='mr-1 h-3 w-3' />
                       {scenario.teamSize}名
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <Target className="mr-1 h-3 w-3" />
+                    <div className='flex items-center text-gray-500'>
+                      <Target className='mr-1 h-3 w-3' />
                       {scenario.industry}
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  <div className='mb-4'>
+                    <h4 className='mb-2 text-sm font-medium text-gray-900 dark:text-white'>
                       学習目標:
                     </h4>
-                    <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <ul className='space-y-1 text-xs text-gray-600 dark:text-gray-300'>
                       {scenario.learningObjectives.slice(0, 3).map((objective, index) => (
-                        <li key={index} className="flex items-center">
-                          <BookOpen className="mr-1 h-3 w-3 flex-shrink-0" />
+                        <li key={index} className='flex items-center'>
+                          <BookOpen className='mr-1 h-3 w-3 flex-shrink-0' />
                           {objective}
                         </li>
                       ))}
@@ -373,9 +373,9 @@ const ProjectSimulator = () => {
 
                   <button
                     onClick={() => startSimulation(scenario)}
-                    className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                    className='flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'
                   >
-                    <Play className="mr-2 h-4 w-4" />
+                    <Play className='mr-2 h-4 w-4' />
                     シミュレーション開始
                   </button>
                 </div>
@@ -388,18 +388,18 @@ const ProjectSimulator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
-      <div className="mx-auto max-w-6xl">
+    <div className='min-h-screen bg-gray-50 p-6 dark:bg-gray-900'>
+      <div className='mx-auto max-w-6xl'>
         {/* Simulation Header */}
-        <div className="mb-6 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-          <div className="mb-4 flex items-center justify-between">
+        <div className='mb-6 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800'>
+          <div className='mb-4 flex items-center justify-between'>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
                 {currentScenario?.title}
               </h1>
-              <p className="text-gray-600 dark:text-gray-300">{currentScenario?.description}</p>
+              <p className='text-gray-600 dark:text-gray-300'>{currentScenario?.description}</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <button
                 onClick={pauseSimulation}
                 className={`rounded-lg p-2 ${
@@ -409,25 +409,25 @@ const ProjectSimulator = () => {
                 }`}
               >
                 {simulationState === 'running' ? (
-                  <Pause className="h-4 w-4" />
+                  <Pause className='h-4 w-4' />
                 ) : (
-                  <Play className="h-4 w-4" />
+                  <Play className='h-4 w-4' />
                 )}
               </button>
               <button
                 onClick={resetSimulation}
-                className="rounded-lg bg-gray-600 p-2 text-white hover:bg-gray-700"
+                className='rounded-lg bg-gray-600 p-2 text-white hover:bg-gray-700'
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className='h-4 w-4' />
               </button>
             </div>
           </div>
 
           {/* Time and Status */}
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <Clock className="mr-1 h-4 w-4" />
+          <div className='flex items-center justify-between text-sm text-gray-500'>
+            <div className='flex items-center space-x-4'>
+              <div className='flex items-center'>
+                <Clock className='mr-1 h-4 w-4' />
                 経過時間: {Math.floor(timeElapsed / 60)}分{timeElapsed % 60}秒
               </div>
               <div
@@ -440,41 +440,41 @@ const ProjectSimulator = () => {
                 {simulationState === 'running' ? '実行中' : '一時停止'}
               </div>
             </div>
-            <div className="font-medium text-blue-600">経験値: {experience} XP</div>
+            <div className='font-medium text-blue-600'>経験値: {experience} XP</div>
           </div>
         </div>
 
         {/* Current Challenge */}
         {currentChallenge && (
-          <div className="mb-6 rounded-lg border-l-4 border-orange-500 bg-orange-50 p-6 dark:bg-orange-900/20">
-            <div className="mb-4 flex items-start justify-between">
+          <div className='mb-6 rounded-lg border-l-4 border-orange-500 bg-orange-50 p-6 dark:bg-orange-900/20'>
+            <div className='mb-4 flex items-start justify-between'>
               <div>
-                <h2 className="mb-2 text-xl font-semibold text-orange-900 dark:text-orange-100">
+                <h2 className='mb-2 text-xl font-semibold text-orange-900 dark:text-orange-100'>
                   🚨 {currentChallenge.title}
                 </h2>
-                <p className="text-orange-800 dark:text-orange-200">
+                <p className='text-orange-800 dark:text-orange-200'>
                   {currentChallenge.description}
                 </p>
               </div>
-              <div className="text-sm text-orange-600 dark:text-orange-300">
+              <div className='text-sm text-orange-600 dark:text-orange-300'>
                 制限時間: {currentChallenge.timeLimit}秒
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
               {currentChallenge.options.map((option, index) => (
                 <button
                   key={index}
                   onClick={() => handleDecision(option)}
-                  className="rounded-lg border-2 border-transparent bg-white p-4 text-left hover:border-blue-500 dark:bg-gray-700"
+                  className='rounded-lg border-2 border-transparent bg-white p-4 text-left hover:border-blue-500 dark:bg-gray-700'
                 >
-                  <div className="mb-2 font-medium text-gray-900 dark:text-white">
+                  <div className='mb-2 font-medium text-gray-900 dark:text-white'>
                     {option.text}
                   </div>
-                  <div className="mb-2 text-sm text-blue-600 dark:text-blue-400">
+                  <div className='mb-2 text-sm text-blue-600 dark:text-blue-400'>
                     📋 {option.pmbokProcess}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className='text-xs text-gray-500 dark:text-gray-400'>
                     {option.explanation}
                   </div>
                 </button>
@@ -484,71 +484,71 @@ const ProjectSimulator = () => {
         )}
 
         {/* Project Metrics */}
-        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-5">
-          <div className="rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800">
-            <div className="text-2xl font-bold text-green-600">
+        <div className='mb-6 grid grid-cols-1 gap-6 md:grid-cols-5'>
+          <div className='rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800'>
+            <div className='text-2xl font-bold text-green-600'>
               ¥{Math.round(projectMetrics.budget / 1000)}K
             </div>
-            <div className="text-sm text-gray-500">残予算</div>
+            <div className='text-sm text-gray-500'>残予算</div>
           </div>
-          <div className="rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800">
+          <div className='rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800'>
             <div
               className={`text-2xl font-bold ${getMetricColor(projectMetrics.timeline, 'timeline')}`}
             >
               {Math.round(projectMetrics.timeline)}日
             </div>
-            <div className="text-sm text-gray-500">残日数</div>
+            <div className='text-sm text-gray-500'>残日数</div>
           </div>
-          <div className="rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800">
+          <div className='rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800'>
             <div
               className={`text-2xl font-bold ${getMetricColor(projectMetrics.teamSatisfaction)}`}
             >
               {Math.round(projectMetrics.teamSatisfaction)}%
             </div>
-            <div className="text-sm text-gray-500">チーム満足度</div>
+            <div className='text-sm text-gray-500'>チーム満足度</div>
           </div>
-          <div className="rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800">
+          <div className='rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800'>
             <div
               className={`text-2xl font-bold ${getMetricColor(projectMetrics.stakeholderSatisfaction)}`}
             >
               {Math.round(projectMetrics.stakeholderSatisfaction)}%
             </div>
-            <div className="text-sm text-gray-500">ステークホルダー満足度</div>
+            <div className='text-sm text-gray-500'>ステークホルダー満足度</div>
           </div>
-          <div className="rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800">
+          <div className='rounded-lg bg-white p-4 text-center shadow dark:bg-gray-800'>
             <div className={`text-2xl font-bold ${getMetricColor(projectMetrics.qualityScore)}`}>
               {Math.round(projectMetrics.qualityScore)}%
             </div>
-            <div className="text-sm text-gray-500">品質スコア</div>
+            <div className='text-sm text-gray-500'>品質スコア</div>
           </div>
         </div>
 
         {/* Decision History */}
         {decisions.length > 0 && (
-          <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <h2 className="mb-4 flex items-center text-xl font-semibold text-gray-900 dark:text-white">
-              <BarChart3 className="mr-2 h-5 w-5" />
+          <div className='rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800'>
+            <h2 className='mb-4 flex items-center text-xl font-semibold text-gray-900 dark:text-white'>
+              <BarChart3 className='mr-2 h-5 w-5' />
               意思決定履歴
             </h2>
-            <div className="max-h-60 space-y-4 overflow-y-auto">
+            <div className='max-h-60 space-y-4 overflow-y-auto'>
               {decisions.map((decision) => (
                 <div
                   key={decision.id}
-                  className="rounded-lg border border-gray-200 p-4 dark:border-gray-600"
+                  className='rounded-lg border border-gray-200 p-4 dark:border-gray-600'
                 >
-                  <div className="mb-2 flex items-start justify-between">
-                    <h3 className="font-medium text-gray-900 dark:text-white">
+                  <div className='mb-2 flex items-start justify-between'>
+                    <h3 className='font-medium text-gray-900 dark:text-white'>
                       {decision.challenge}
                     </h3>
-                    <span className="text-xs text-gray-500">
+                    <span className='text-xs text-gray-500'>
                       {Math.floor(decision.timestamp / 60)}:
                       {(decision.timestamp % 60).toString().padStart(2, '0')}
                     </span>
                   </div>
-                  <div className="mb-1 text-sm text-gray-600 dark:text-gray-300">
+                  <div className='mb-1 text-sm text-gray-600 dark:text-gray-300'>
                     選択: {decision.option}
                   </div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400">
+                  <div className='text-xs text-blue-600 dark:text-blue-400'>
                     PMBOKプロセス: {decision.pmbokProcess}
                   </div>
                 </div>

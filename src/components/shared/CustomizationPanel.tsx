@@ -47,7 +47,7 @@ const CustomizationPanel: React.FC = () => {
               : 'bg-white text-gray-700 hover:bg-gray-100'
           }
         `}
-        aria-label="カスタマイズ設定"
+        aria-label='カスタマイズ設定'
       >
         <Settings className={`h-6 w-6 ${isOpen ? 'rotate-90' : ''} transition-transform`} />
       </button>
@@ -68,7 +68,7 @@ const CustomizationPanel: React.FC = () => {
           ${settings.darkMode ? 'border-gray-700' : 'border-gray-200'}
         `}
         >
-          <h3 className="text-lg font-semibold">カスタマイズ設定</h3>
+          <h3 className='text-lg font-semibold'>カスタマイズ設定</h3>
           <button
             onClick={() => setIsOpen(false)}
             className={`
@@ -76,17 +76,17 @@ const CustomizationPanel: React.FC = () => {
               dark:hover:bg-gray-700
             `}
           >
-            <X className="h-5 w-5" />
+            <X className='h-5 w-5' />
           </button>
         </div>
 
         {/* 設定項目 */}
-        <div className="space-y-6 p-4">
+        <div className='space-y-6 p-4'>
           {/* ダークモード */}
           <div>
-            <label className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                {settings.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            <label className='flex items-center justify-between'>
+              <span className='flex items-center gap-2'>
+                {settings.darkMode ? <Moon className='h-4 w-4' /> : <Sun className='h-4 w-4' />}
                 ダークモード
               </span>
               <button
@@ -110,11 +110,11 @@ const CustomizationPanel: React.FC = () => {
 
           {/* プライマリカラー */}
           <div>
-            <label className="mb-3 flex items-center gap-2">
-              <Palette className="h-4 w-4" />
+            <label className='mb-3 flex items-center gap-2'>
+              <Palette className='h-4 w-4' />
               テーマカラー
             </label>
-            <div className="flex gap-2">
+            <div className='flex gap-2'>
               {colorOptions.map((option) => (
                 <button
                   key={option.value}
@@ -128,7 +128,7 @@ const CustomizationPanel: React.FC = () => {
                   title={option.label}
                 >
                   {settings.primaryColor === option.value && (
-                    <Check className="mx-auto h-6 w-6 text-white" />
+                    <Check className='mx-auto h-6 w-6 text-white' />
                   )}
                 </button>
               ))}
@@ -137,11 +137,11 @@ const CustomizationPanel: React.FC = () => {
 
           {/* フォントサイズ */}
           <div>
-            <label className="mb-3 flex items-center gap-2">
-              <Type className="h-4 w-4" />
+            <label className='mb-3 flex items-center gap-2'>
+              <Type className='h-4 w-4' />
               文字サイズ
             </label>
-            <div className="flex gap-2">
+            <div className='flex gap-2'>
               {fontSizeOptions.map((option) => (
                 <button
                   key={option.value}
@@ -167,46 +167,46 @@ const CustomizationPanel: React.FC = () => {
           </div>
 
           {/* その他の設定 */}
-          <div className="space-y-3">
+          <div className='space-y-3'>
             {/* コンパクトモード */}
-            <label className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Layout className="h-4 w-4" />
+            <label className='flex items-center justify-between'>
+              <span className='flex items-center gap-2'>
+                <Layout className='h-4 w-4' />
                 コンパクト表示
               </span>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={settings.compactMode}
                 onChange={(e) => updateSettings({ compactMode: e.target.checked })}
-                className="rounded"
+                className='rounded'
               />
             </label>
 
             {/* アニメーション */}
-            <label className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
+            <label className='flex items-center justify-between'>
+              <span className='flex items-center gap-2'>
+                <Zap className='h-4 w-4' />
                 アニメーション
               </span>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={settings.animations}
                 onChange={(e) => updateSettings({ animations: e.target.checked })}
-                className="rounded"
+                className='rounded'
               />
             </label>
 
             {/* 高コントラスト */}
-            <label className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
+            <label className='flex items-center justify-between'>
+              <span className='flex items-center gap-2'>
+                <Eye className='h-4 w-4' />
                 高コントラスト
               </span>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={settings.highContrast}
                 onChange={(e) => updateSettings({ highContrast: e.target.checked })}
-                className="rounded"
+                className='rounded'
               />
             </label>
           </div>
@@ -228,7 +228,7 @@ const CustomizationPanel: React.FC = () => {
               }
             `}
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className='h-4 w-4' />
             設定をリセット
           </button>
         </div>

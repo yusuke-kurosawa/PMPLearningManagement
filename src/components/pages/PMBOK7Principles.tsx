@@ -106,15 +106,15 @@ const PMBOK7Principles: React.FC = () => {
   return (
     <div className={`p-6 ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
       {/* ヘッダー */}
-      <div className="mb-8">
-        <h1 className="mb-3 text-3xl font-bold">PMBOK第7版 - 12のプロジェクトマネジメント原則</h1>
+      <div className='mb-8'>
+        <h1 className='mb-3 text-3xl font-bold'>PMBOK第7版 - 12のプロジェクトマネジメント原則</h1>
         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           プロジェクトマネジメントの指針となる基本原則
         </p>
       </div>
 
       {/* 原則グリッド */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className='mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {pmbok7Principles.map((principle) => {
           const Icon = principleIcons[principle.id]
           const color = principleColors[principle.id]
@@ -130,8 +130,8 @@ const PMBOK7Principles: React.FC = () => {
               } ${selectedPrinciple?.id === principle.id ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => setSelectedPrinciple(principle)}
             >
-              <div className="p-6">
-                <div className="mb-4 flex items-start justify-between">
+              <div className='p-6'>
+                <div className='mb-4 flex items-start justify-between'>
                   <div className={`rounded-lg p-3 ${getColorClasses(color, 'bg')}`}>
                     <Icon className={`h-6 w-6 ${getColorClasses(color, 'text')}`} />
                   </div>
@@ -148,14 +148,14 @@ const PMBOK7Principles: React.FC = () => {
                   </button>
                 </div>
 
-                <h3 className="mb-2 text-lg font-semibold">{principle.name}</h3>
+                <h3 className='mb-2 text-lg font-semibold'>{principle.name}</h3>
                 <p className={`text-sm ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   {principle.description}
                 </p>
 
                 {/* 展開時の詳細 */}
                 {isExpanded && (
-                  <div className="mt-4 border-t pt-4 dark:border-gray-700">
+                  <div className='mt-4 border-t pt-4 dark:border-gray-700'>
                     <p
                       className={`mb-3 text-sm ${
                         settings.darkMode ? 'text-gray-400' : 'text-gray-700'
@@ -163,8 +163,8 @@ const PMBOK7Principles: React.FC = () => {
                     >
                       {principle.details}
                     </p>
-                    <div className="space-y-1">
-                      <h4 className="mb-2 text-sm font-medium">主要なアクション:</h4>
+                    <div className='space-y-1'>
+                      <h4 className='mb-2 text-sm font-medium'>主要なアクション:</h4>
                       {principle.keyActions.map((action, index) => (
                         <div
                           key={index}
@@ -190,19 +190,19 @@ const PMBOK7Principles: React.FC = () => {
       {/* 選択された原則の詳細パネル */}
       {selectedPrinciple && (
         <div className={`fixed inset-0 z-50 overflow-y-auto`}>
-          <div className="min-h-screen px-4 text-center">
+          <div className='min-h-screen px-4 text-center'>
             <div
-              className="fixed inset-0 bg-black bg-opacity-50"
+              className='fixed inset-0 bg-black bg-opacity-50'
               onClick={() => setSelectedPrinciple(null)}
             />
 
-            <div className="my-8 inline-block w-full max-w-3xl transform text-left align-middle transition-all">
+            <div className='my-8 inline-block w-full max-w-3xl transform text-left align-middle transition-all'>
               <div
                 className={`rounded-lg shadow-xl ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}
               >
-                <div className="p-6">
-                  <div className="mb-6 flex items-start justify-between">
-                    <div className="flex items-start gap-4">
+                <div className='p-6'>
+                  <div className='mb-6 flex items-start justify-between'>
+                    <div className='flex items-start gap-4'>
                       <div
                         className={`rounded-lg p-3 ${getColorClasses(
                           principleColors[selectedPrinciple.id],
@@ -214,7 +214,7 @@ const PMBOK7Principles: React.FC = () => {
                         })}
                       </div>
                       <div>
-                        <h3 className="mb-2 text-2xl font-bold">{selectedPrinciple.name}</h3>
+                        <h3 className='mb-2 text-2xl font-bold'>{selectedPrinciple.name}</h3>
                         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                           {selectedPrinciple.description}
                         </p>
@@ -222,17 +222,17 @@ const PMBOK7Principles: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setSelectedPrinciple(null)}
-                      className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className='rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700'
                     >
-                      <span className="sr-only">閉じる</span>×
+                      <span className='sr-only'>閉じる</span>×
                     </button>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className='space-y-6'>
                     {/* 詳細説明 */}
                     <div>
-                      <h4 className="mb-2 flex items-center gap-2 font-semibold">
-                        <Info className="h-4 w-4" />
+                      <h4 className='mb-2 flex items-center gap-2 font-semibold'>
+                        <Info className='h-4 w-4' />
                         詳細説明
                       </h4>
                       <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -242,8 +242,8 @@ const PMBOK7Principles: React.FC = () => {
 
                     {/* 主要なアクション */}
                     <div>
-                      <h4 className="mb-3 font-semibold">実践のための主要なアクション</h4>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <h4 className='mb-3 font-semibold'>実践のための主要なアクション</h4>
+                      <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
                         {selectedPrinciple.keyActions.map((action, index) => (
                           <div
                             key={index}
@@ -266,7 +266,7 @@ const PMBOK7Principles: React.FC = () => {
                                 {index + 1}
                               </span>
                             </div>
-                            <span className="text-sm">{action}</span>
+                            <span className='text-sm'>{action}</span>
                           </div>
                         ))}
                       </div>
@@ -278,8 +278,8 @@ const PMBOK7Principles: React.FC = () => {
                         settings.darkMode ? 'bg-gray-700' : 'bg-blue-50'
                       }`}
                     >
-                      <h4 className="mb-2 flex items-center gap-2 font-semibold">
-                        <Target className="h-4 w-4" />
+                      <h4 className='mb-2 flex items-center gap-2 font-semibold'>
+                        <Target className='h-4 w-4' />
                         実践のヒント
                       </h4>
                       <p

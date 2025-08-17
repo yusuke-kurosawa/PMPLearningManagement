@@ -16,7 +16,7 @@ const { promisify } = require('util')
 const execAsync = promisify(exec)
 
 class ProjectStatusUpdater {
-  constructor() {
+  constructor(options = {}) {
     this.rootDir = path.join(__dirname, '..')
     this.claudeFile = path.join(this.rootDir, 'CLAUDE.md')
     this.statusFile = path.join(this.rootDir, '.claude', 'context', 'project-status.md')
@@ -24,6 +24,11 @@ class ProjectStatusUpdater {
     // GitHub API設定（環境変数または引数から取得）
     this.githubToken = process.env.GITHUB_TOKEN
     this.repository = process.env.GITHUB_REPOSITORY || 'yusuke-kurosawa/PMPLearningManagement'
+
+    // 実行オプション
+    this.demoMode = options.demo || process.argv.includes('--demo')
+    this.skipBuild = options.skipBuild || process.argv.includes('--skip-build')
+    this.skipTests = options.skipTests || process.argv.includes('--skip-tests')
 
     // 品質閾値設定
     this.qualityThresholds = {
@@ -39,6 +44,10 @@ class ProjectStatusUpdater {
       buildTime: null,
       bundleSize: null,
       testExecutionTime: null,
+    }
+
+    if (this.demoMode) {
+      console.log('🎭 デモモードで実行中 - 重い処理はスキップします')
     }
   }
 
@@ -134,6 +143,11 @@ class ProjectStatusUpdater {
   }
 
   async getTestCoverage() {
+    if (this.demoMode) {
+      console.log('🎭 テストカバレッジ測定をスキップ（デモモード）')
+      return 65 + Math.random() * 25 // デモデータ: 65-90%
+    }
+
     try {
       // テストカバレッジレポートの生成と解析
       const { stdout } = await execAsync('npm run test:coverage -- --reporter=json-summary', {
@@ -509,6 +523,11 @@ class ProjectStatusUpdater {
   }
 
   async measureBuildTime() {
+    if (this.demoMode || this.skipBuild) {
+      console.log('🎭 ビルド時間測定をスキップ（デモモード）')
+      return 45000 + Math.random() * 15000 // デモデータ: 45-60秒
+    }
+
     try {
       const startTime = Date.now()
       await execAsync('npm run build', { cwd: this.rootDir })
@@ -533,14 +552,14 @@ class ProjectStatusUpdater {
         return { total: 0, breakdown: {} }
       }
 
-      // 総バンドルサイズ（セキュア版）
-      const { stdout } = await execAsync('du -sb .', { cwd: path.resolve(this.rootDir, distPath) })
+      // 総バンドルサイズ
+      const { stdout } = await execAsync(`du -sb ${distPath}`, { cwd: this.rootDir })
       const totalSize = parseInt(stdout.split('\t')[0])
 
-      // ファイル別サイズ分析（セキュア版）
+      // ファイル別サイズ分析
       const { stdout: fileList } = await execAsync(
-        'find . -name "*.js" -o -name "*.css" | xargs ls -la',
-        { cwd: path.resolve(this.rootDir, distPath) }
+        `find ${distPath} -name "*.js" -o -name "*.css" | xargs ls -la`,
+        { cwd: this.rootDir }
       )
 
       const breakdown = {}
@@ -565,6 +584,11 @@ class ProjectStatusUpdater {
   }
 
   async measureTestExecutionTime() {
+    if (this.demoMode || this.skipTests) {
+      console.log('🎭 テスト実行時間測定をスキップ（デモモード）')
+      return 12000 + Math.random() * 8000 // デモデータ: 12-20秒
+    }
+
     try {
       const startTime = Date.now()
       await execAsync('npm run test:run', { cwd: this.rootDir })
@@ -635,8 +659,8 @@ class ProjectStatusUpdater {
         return {}
       }
 
-      const { stdout } = await execAsync('find . -name "*.js" | head -5 | xargs wc -c', {
-        cwd: path.resolve(this.rootDir, distPath),
+      const { stdout } = await execAsync(`find ${distPath} -name "*.js" | head -5 | xargs wc -c`, {
+        cwd: this.rootDir,
       })
 
       const composition = {
@@ -645,16 +669,16 @@ class ProjectStatusUpdater {
         assetFiles: 0,
       }
 
-      // JS、CSS、その他のアセットファイル数をカウント（セキュア版）
-      const { stdout: jsCount } = await execAsync('find . -name "*.js" | wc -l', {
-        cwd: path.resolve(this.rootDir, distPath),
+      // JS、CSS、その他のアセットファイル数をカウント
+      const { stdout: jsCount } = await execAsync(`find ${distPath} -name "*.js" | wc -l`, {
+        cwd: this.rootDir,
       })
-      const { stdout: cssCount } = await execAsync('find . -name "*.css" | wc -l', {
-        cwd: path.resolve(this.rootDir, distPath),
+      const { stdout: cssCount } = await execAsync(`find ${distPath} -name "*.css" | wc -l`, {
+        cwd: this.rootDir,
       })
       const { stdout: assetCount } = await execAsync(
-        'find . -type f ! -name "*.js" ! -name "*.css" | wc -l',
-        { cwd: path.resolve(this.rootDir, distPath) }
+        `find ${distPath} -type f ! -name "*.js" ! -name "*.css" | wc -l`,
+        { cwd: this.rootDir }
       )
 
       composition.jsFiles = parseInt(jsCount.trim())

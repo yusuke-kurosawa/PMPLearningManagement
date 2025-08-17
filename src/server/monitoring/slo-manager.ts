@@ -463,15 +463,27 @@ export class SLOManager extends EventEmitter {
     const { warning, critical, emergency } = slo.alertThresholds
 
     if (slo.category === SLOCategory.AVAILABILITY || slo.category === SLOCategory.QUALITY) {
-      if (currentValue <= emergency) {return SLOSeverity.CRITICAL}
-      if (currentValue <= critical) {return SLOSeverity.HIGH}
-      if (currentValue <= warning) {return SLOSeverity.MEDIUM}
+      if (currentValue <= emergency) {
+        return SLOSeverity.CRITICAL
+      }
+      if (currentValue <= critical) {
+        return SLOSeverity.HIGH
+      }
+      if (currentValue <= warning) {
+        return SLOSeverity.MEDIUM
+      }
       return SLOSeverity.LOW
     } else {
       // For performance metrics
-      if (currentValue >= emergency) {return SLOSeverity.CRITICAL}
-      if (currentValue >= critical) {return SLOSeverity.HIGH}
-      if (currentValue >= warning) {return SLOSeverity.MEDIUM}
+      if (currentValue >= emergency) {
+        return SLOSeverity.CRITICAL
+      }
+      if (currentValue >= critical) {
+        return SLOSeverity.HIGH
+      }
+      if (currentValue >= warning) {
+        return SLOSeverity.MEDIUM
+      }
       return SLOSeverity.LOW
     }
   }

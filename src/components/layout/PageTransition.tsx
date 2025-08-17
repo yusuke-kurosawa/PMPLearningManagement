@@ -5,7 +5,7 @@ const PageTransition = ({ children }) => {
   const location = useLocation()
 
   return (
-    <div key={location.pathname} className="animate-fade-in">
+    <div key={location.pathname} className='animate-fade-in'>
       {children}
     </div>
   )

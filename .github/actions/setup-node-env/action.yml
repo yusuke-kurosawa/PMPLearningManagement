@@ -1,0 +1,94 @@
+name: 'Setup Node.js Environment'
+description: 'PMPLearningManagement用の標準Node.js環境セットアップ'
+author: 'PMPLearningManagement Team'
+
+inputs:
+  node-version:
+    description: 'Node.jsバージョン'
+    required: false
+    default: '18'
+  
+  install-dependencies:
+    description: '依存関係を自動インストール'
+    required: false
+    default: 'true'
+    
+  cache-key-prefix:
+    description: 'キャッシュキーのプレフィックス'
+    required: false
+    default: 'node'
+    
+  working-directory:
+    description: '作業ディレクトリ'
+    required: false
+    default: '.'
+
+outputs:
+  cache-hit:
+    description: 'キャッシュがヒットしたか'
+    value: ${{ steps.cache.outputs.cache-hit }}
+    
+  node-version:
+    description: '実際に使用されたNode.jsバージョン'
+    value: ${{ steps.setup.outputs.node-version }}
+
+runs:
+  using: "composite"
+  steps:
+    # Node.jsのセットアップ
+    - name: 🔧 Node.js ${{ inputs.node-version }}のセットアップ
+      id: setup
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+        
+    # キャッシュの設定
+    - name: 📦 依存関係キャッシュの設定
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          ${{ inputs.working-directory }}/node_modules
+          ${{ inputs.working-directory }}/.next/cache
+        key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles(format('{0}/package-lock.json', inputs.working-directory)) }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
+          ${{ runner.os }}-
+          
+    # 依存関係のインストール
+    - name: 📦 依存関係のインストール
+      if: inputs.install-dependencies == 'true' && steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "::group::依存関係のインストール"
+        npm ci --prefer-offline --no-audit
+        echo "::endgroup::"
+        
+    # 環境の検証
+    - name: ✅ 環境の検証
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "::group::環境情報"
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        echo "Working directory: $(pwd)"
+        echo "::endgroup::"
+        
+        # package.jsonの存在確認
+        if [ ! -f "package.json" ]; then
+          echo "::error::package.jsonが見つかりません"
+          exit 1
+        fi
+        
+        # node_modulesの確認
+        if [ "${{ inputs.install-dependencies }}" == "true" ] && [ ! -d "node_modules" ]; then
+          echo "::error::node_modulesディレクトリが見つかりません"
+          exit 1
+        fi
+        
+        echo "✅ 環境セットアップ完了"

@@ -50,7 +50,9 @@ export const authHelpers = {
       data: { user },
       error,
     } = await supabase.auth.getUser()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return user
   },
 
@@ -62,7 +64,9 @@ export const authHelpers = {
       data: { session },
       error,
     } = await supabase.auth.getSession()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return session
   },
 
@@ -82,7 +86,9 @@ export const authHelpers = {
       },
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -95,7 +101,9 @@ export const authHelpers = {
       password,
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -114,7 +122,9 @@ export const authHelpers = {
       },
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -123,7 +133,9 @@ export const authHelpers = {
    */
   signOut: async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
   },
 
   /**
@@ -134,7 +146,9 @@ export const authHelpers = {
       redirectTo: `${import.meta.env.VITE_APP_URL}/#/auth/reset-password`,
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -146,7 +160,9 @@ export const authHelpers = {
       password: newPassword,
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -158,7 +174,9 @@ export const authHelpers = {
       data: updates,
     })
 
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -167,7 +185,9 @@ export const authHelpers = {
    */
   refreshSession: async () => {
     const { data, error } = await supabase.auth.refreshSession()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return data
   },
 
@@ -176,7 +196,9 @@ export const authHelpers = {
    */
   getUserRole: async () => {
     const user = await authHelpers.getCurrentUser()
-    if (!user) {return 'guest'}
+    if (!user) {
+      return 'guest'
+    }
 
     return user.user_metadata?.role || user.app_metadata?.role || 'student'
   },
@@ -343,16 +365,28 @@ export const authValidation = {
     let score = 0
     const checks = authValidation.isValidPassword(password)
 
-    if (checks.requirements.minLength) {score += 25}
-    if (checks.requirements.hasLowercase) {score += 25}
-    if (checks.requirements.hasUppercase) {score += 25}
-    if (checks.requirements.hasNumber) {score += 25}
+    if (checks.requirements.minLength) {
+      score += 25
+    }
+    if (checks.requirements.hasLowercase) {
+      score += 25
+    }
+    if (checks.requirements.hasUppercase) {
+      score += 25
+    }
+    if (checks.requirements.hasNumber) {
+      score += 25
+    }
 
     // Additional points for special characters
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {score += 10}
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      score += 10
+    }
 
     // Additional points for length beyond minimum
-    if (password.length > 12) {score += 10}
+    if (password.length > 12) {
+      score += 10
+    }
 
     return Math.min(score, 100)
   },

@@ -1,55 +1,58 @@
-# ====================================================================
-# プルリクエスト検証パイプライン
-# ====================================================================
-# 目的: プルリクエストの品質検証と自動レビューを実行し、
-#      マージ前に問題を早期発見する
-# 
-# 実行タイミング:
-#   - プルリクエストのオープン時
-#   - プルリクエストの更新時（synchronize）
-#   - プルリクエストの再オープン時
-#   - ドラフトから準備完了への変更時
-#
-# 主な処理:
-#   1. PR情報の収集とラベリング
-#   2. コミットメッセージの検証
-#   3. ファイル変更の分析
-#   4. コード品質チェック
-#   5. セキュリティスキャン
-#   6. テストの実行
-#   7. PR統計情報の生成とコメント
-# ====================================================================
+# ============================================================
+# Workflow: Pull Request Validation
+# Purpose: PRの品質検証、自動レビュー、マージ前の問題検出
+# Trigger: PRのオープン、更新、再オープン、ready_for_review
+# Dependencies: Node.js 18, GitHub Actions
+# Author: Claude Code
+# Last Modified: 2025-08-12
+# ============================================================
 
-name: 🔍 プルリクエスト品質検証
+name: 🔍 PR品質検証
 
+# ------------------------------------------------------------
+# Trigger Configuration
+# ------------------------------------------------------------
 on:
+  # PRイベント時に実行
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [main, develop]
 
+# ------------------------------------------------------------
+# Permissions
+# ------------------------------------------------------------
 permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-  security-events: write
+  contents: read           # リポジトリ内容の読み取り
+  pull-requests: write     # PRコメントとラベルの管理
+  checks: write           # チェック結果の書き込み
+  security-events: write  # セキュリティイベントの書き込み
 
+# ------------------------------------------------------------
+# Concurrency Control
+# ------------------------------------------------------------
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
+# ------------------------------------------------------------
+# Environment Variables
+# ------------------------------------------------------------
 env:
   NODE_VERSION: '18'
+  CACHE_VERSION: 'v2'
 
+# ------------------------------------------------------------
+# Jobs Definition
+# ------------------------------------------------------------
 jobs:
-  # PR基本情報の収集とサイズ分析
+  # ============================================================
+  # Job: PR Information Collection
+  # Purpose: PRのサイズ分析と自動ラベリング
+  # ============================================================
   pr-info:
-    name: 🏷️ PR基本情報収集とサイズ分析
-    # 🎯 目的: PRのサイズとタイプを分析してラベルを自動付与
-    # ⏱️ 推定時間: 1-2分
-    # 🔧 主要処理: ファイル変更数分析、PR情報抽出、ラベル自動付与
-    # 📋 成果物: サイズラベル、タイプラベル
-    # ⚠️ 注意点: ドラフトPRは除外される
+    name: 🏷️ PR情報収集
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.event.pull_request.draft == false
     
     steps:
@@ -77,10 +80,14 @@ jobs:
           configuration-path: .github/labeler.yml
           sync-labels: true
 
-  # Enhanced Code Quality
+  # ============================================================
+  # Job: Code Quality Analysis
+  # Purpose: コード品質の包括的分析
+  # ============================================================
   code-quality:
-    name: Code Quality Analysis
+    name: 📦 コード品質分析
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: github.event.pull_request.draft == false
     
     steps:
@@ -231,10 +238,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-results
+          name: e2e-results-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report/
             test-results/
+          if-no-files-found: warn
           retention-days: 3
 
   # Security scan for PR

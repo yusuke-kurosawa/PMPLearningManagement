@@ -1,0 +1,5149 @@
+{
+  "report_meta": {
+    "generated_at": "2025-08-12T09:41:49.885Z",
+    "checker_version": "1.0.0",
+    "project": "PMPLearningManagement",
+    "standard": "WCAG 2.1 AA"
+  },
+  "compliance_summary": {
+    "overall_score": 68.46156351791532,
+    "compliance_status": "NON_COMPLIANT",
+    "wcag_aa_ready": false,
+    "violations_count": 12,
+    "warnings_count": 138
+  },
+  "detailed_scores": {
+    "wcag_compliance": "0.0",
+    "contrast_compliance": "100.0",
+    "keyboard_accessibility": "96.8",
+    "screen_reader_support": "100.0",
+    "japanese_support": "91.0"
+  },
+  "accessibility_gates": {
+    "wcag_gate": false,
+    "contrast_gate": true,
+    "keyboard_gate": true,
+    "screen_reader_gate": true
+  },
+  "detailed_analysis": {
+    "wcag": {
+      "violations_found": 12,
+      "warnings_found": 138,
+      "rules_checked": 5,
+      "compliance_by_component": {
+        "ContextManagerDashboard": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 87
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 130
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 162
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 168
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 190
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 217
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ContextManagerDashboard",
+              "location": 272
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ContextManagerDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ContextManagerDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ContextManagerDashboard"
+            }
+          ]
+        },
+        "PWAManager": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "PWAOptimizationDashboard": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PWAOptimizationDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PWAOptimizationDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PWAOptimizationDashboard"
+            }
+          ]
+        },
+        "providers": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "App.mobile.test": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "Home.test": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "MobileOptimizedApp.test": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "Navigation.test": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "AuthCallback": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "AuthCallback",
+              "location": 146
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "AuthCallback",
+              "location": 160
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "AuthCallback",
+              "location": 193
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "AuthCallback"
+            }
+          ]
+        },
+        "AuthPage": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "ForgotPasswordForm": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ForgotPasswordForm",
+              "location": 87
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ForgotPasswordForm",
+              "location": 123
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ForgotPasswordForm",
+              "location": 180
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ForgotPasswordForm"
+            }
+          ]
+        },
+        "Login": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Login",
+              "location": 147
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Login"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Login"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Login"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Login"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Login"
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "component": "Login"
+            }
+          ]
+        },
+        "LoginForm": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LoginForm",
+              "location": 91
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LoginForm"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LoginForm"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LoginForm"
+            }
+          ]
+        },
+        "ProtectedRoute": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ProtectedRoute",
+              "location": 58
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ProtectedRoute",
+              "location": 92
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProtectedRoute"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProtectedRoute"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProtectedRoute"
+            }
+          ]
+        },
+        "Register": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Register",
+              "location": 199
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Register"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Register"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Register"
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "component": "Register"
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "component": "Register"
+            }
+          ]
+        },
+        "RegisterForm": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "RegisterForm",
+              "location": 157
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "RegisterForm",
+              "location": 175
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "RegisterForm"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "RegisterForm"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "RegisterForm"
+            }
+          ]
+        },
+        "ResetPasswordForm": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ResetPasswordForm",
+              "location": 140
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ResetPasswordForm",
+              "location": 165
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ResetPasswordForm",
+              "location": 196
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ResetPasswordForm",
+              "location": 317
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ResetPasswordForm"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ResetPasswordForm"
+            }
+          ]
+        },
+        "UserProfile": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "UserProfile"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "UserProfile"
+            }
+          ]
+        },
+        "AICoachingDashboard": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "AICoachingDashboard"
+            }
+          ]
+        },
+        "CollaborationHub": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "CollaborationHub",
+              "location": 49
+            }
+          ],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "CollaborationHub"
+            }
+          ]
+        },
+        "DataManagement": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "DataManagement"
+            }
+          ]
+        },
+        "DiscussionThread": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "DiscussionThread",
+              "location": 118
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "DiscussionThread",
+              "location": 229
+            }
+          ],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "DiscussionThread",
+              "location": 105
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DiscussionThread"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DiscussionThread"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DiscussionThread"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DiscussionThread"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "DiscussionThread"
+            }
+          ]
+        },
+        "EnhancedCollaborationHub": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedCollaborationHub"
+            }
+          ]
+        },
+        "SharedNotes": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "SharedNotes",
+              "location": 255
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "SharedNotes",
+              "location": 280
+            }
+          ],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "SharedNotes",
+              "location": 119
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "SharedNotes",
+              "location": 176
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "SharedNotes",
+              "location": 243
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "SharedNotes",
+              "location": 339
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SharedNotes"
+            }
+          ]
+        },
+        "StudyGroups": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "StudyGroups",
+              "location": 422
+            },
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "StudyGroups",
+              "location": 502
+            }
+          ],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 171
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 190
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 203
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 283
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 290
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 346
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 369
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 414
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "StudyGroups",
+              "location": 497
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "StudyGroups"
+            }
+          ]
+        },
+        "MockExamSession": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 262
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 277
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 316
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 406
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 449
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 524
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MockExamSession",
+              "location": 607
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExamSession"
+            }
+          ]
+        },
+        "AppLayout": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "EnhancedMobileLayout": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "Footer": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Footer",
+              "location": 58
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Footer",
+              "location": 80
+            }
+          ],
+          "passes": []
+        },
+        "LoadingStates": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LoadingStates",
+              "location": 170
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LoadingStates"
+            }
+          ]
+        },
+        "MobileBottomNavigation": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileBottomNavigation",
+              "location": 72
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileBottomNavigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileBottomNavigation"
+            }
+          ]
+        },
+        "MobileLayout": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "MobileNavigation": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileNavigation"
+            }
+          ]
+        },
+        "Navigation": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "Navigation"
+            },
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "Navigation"
+            },
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "Navigation"
+            },
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Navigation"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "Navigation"
+            }
+          ]
+        },
+        "PageTransition": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "Sidebar": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Sidebar",
+              "location": 149
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "Sidebar",
+              "location": 196
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Sidebar"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Sidebar"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Sidebar"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "Sidebar"
+            }
+          ]
+        },
+        "EnhancedFlashCardSystem": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "image-alt",
+              "wcag": "1.1.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedFlashCardSystem"
+            }
+          ]
+        },
+        "EnhancedProgressDashboard": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedProgressDashboard"
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "component": "EnhancedProgressDashboard"
+            }
+          ]
+        },
+        "ExamResults": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ExamResults"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ExamResults"
+            }
+          ]
+        },
+        "FlashCard": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 33
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 54
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 70
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 74
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 83
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "FlashCard",
+              "location": 92
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCard"
+            }
+          ]
+        },
+        "FlashCardLearning": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCardLearning"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCardLearning"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "FlashCardLearning"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "FlashCardLearning"
+            }
+          ]
+        },
+        "GlossaryDialog": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlossaryDialog",
+              "location": 14
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlossaryDialog",
+              "location": 29
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlossaryDialog",
+              "location": 35
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlossaryDialog",
+              "location": 56
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlossaryDialog"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlossaryDialog"
+            }
+          ]
+        },
+        "LearningModal": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 72
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 82
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 93
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 107
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 118
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "LearningModal",
+              "location": 131
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningModal"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningModal"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningModal"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningModal"
+            }
+          ]
+        },
+        "LearningProgressDashboard": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "LearningProgressDashboard"
+            }
+          ]
+        },
+        "MockExam": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MockExam"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MockExam"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MockExam"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MockExam"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MockExam"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MockExam"
+            }
+          ]
+        },
+        "PMPGlossary": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "PMPGlossary",
+              "location": 109
+            }
+          ],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMPGlossary"
+            }
+          ]
+        },
+        "PromptLogDashboard": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PromptLogDashboard"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PromptLogDashboard"
+            }
+          ]
+        },
+        "MentorshipHub": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "MentorshipHub",
+              "location": 235
+            }
+          ],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MentorshipHub"
+            }
+          ]
+        },
+        "MobileFlashCard": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileFlashCard",
+              "location": 154
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileFlashCard",
+              "location": 172
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileFlashCard",
+              "location": 178
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileFlashCard",
+              "location": 197
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileFlashCard",
+              "location": 216
+            }
+          ],
+          "passes": []
+        },
+        "MobileMockExam": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "MobileOptimizedApp": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MobileOptimizedApp"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MobileOptimizedApp"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MobileOptimizedApp"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MobileOptimizedApp"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "MobileOptimizedApp"
+            }
+          ]
+        },
+        "MobilePMBOKMatrix": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 153
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 176
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 259
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 317
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 325
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 342
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobilePMBOKMatrix",
+              "location": 359
+            }
+          ],
+          "passes": []
+        },
+        "MobileProgressDashboard": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileProgressDashboard",
+              "location": 254
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileProgressDashboard",
+              "location": 284
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileProgressDashboard"
+            }
+          ]
+        },
+        "MobileTouchComponents": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MobileTouchComponents",
+              "location": 111
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "MobileTouchComponents",
+              "location": 141
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileTouchComponents"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileTouchComponents"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MobileTouchComponents"
+            }
+          ]
+        },
+        "Home": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "Home"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "Home"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "Home"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "Home"
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "component": "Home"
+            }
+          ]
+        },
+        "PMBOK7PerformanceDomains": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 165
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 221
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 232
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 301
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 318
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 339
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 373
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7PerformanceDomains",
+              "location": 419
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOK7PerformanceDomains"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOK7PerformanceDomains"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOK7PerformanceDomains"
+            }
+          ]
+        },
+        "PMBOK7Principles": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 110
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 151
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 167
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 217
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 234
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 245
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "PMBOK7Principles",
+              "location": 281
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOK7Principles"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOK7Principles"
+            }
+          ]
+        },
+        "PMBOKMatrix": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "PMBOKMatrix",
+              "location": 1055
+            }
+          ],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKMatrix"
+            }
+          ]
+        },
+        "EnhancedPMBOKMatrix": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "EnhancedPMBOKMatrix"
+            }
+          ]
+        },
+        "PWAProvider": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "CommandPalette": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "CommandPalette",
+              "location": 367
+            }
+          ],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CommandPalette"
+            }
+          ]
+        },
+        "CustomizationPanel": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "CustomizationPanel",
+              "location": 71
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "CustomizationPanel",
+              "location": 22
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "CustomizationPanel"
+            }
+          ]
+        },
+        "EnvironmentBanner": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "EnvironmentInfo": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "EnvironmentInfo",
+              "location": 109
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "EnvironmentInfo",
+              "location": 185
+            }
+          ],
+          "passes": []
+        },
+        "GlobalSearch": {
+          "violations": [
+            {
+              "rule": "form-label",
+              "wcag": "1.3.1",
+              "message": "フォーム要素には適切なラベルが必要です",
+              "severity": "violation",
+              "component": "GlobalSearch",
+              "location": 190
+            }
+          ],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlobalSearch",
+              "location": 271
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlobalSearch",
+              "location": 311
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "GlobalSearch",
+              "location": 346
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "GlobalSearch"
+            }
+          ]
+        },
+        "PMBOKVersionSelector": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "PMBOKVersionSelector"
+            }
+          ]
+        },
+        "QuickShortcuts": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "QuickShortcuts",
+              "location": 192
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "QuickShortcuts",
+              "location": 303
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "QuickShortcuts",
+              "location": 31
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "QuickShortcuts"
+            }
+          ]
+        },
+        "SettingsTrigger": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SettingsTrigger"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SettingsTrigger"
+            }
+          ]
+        },
+        "UserSettingsPanel": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 143
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 207
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 268
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 299
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 332
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 339
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 370
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 401
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 413
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 426
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 458
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 469
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "UserSettingsPanel",
+              "location": 495
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "UserSettingsPanel"
+            }
+          ]
+        },
+        "ProjectSimulator": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProjectSimulator"
+            }
+          ]
+        },
+        "badge": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "button": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "card": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "card",
+              "location": 24
+            }
+          ],
+          "passes": []
+        },
+        "checkbox": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "collapsible": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "input": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "label": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "progress": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "radio-group": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "sheet": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "switch": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "tabs": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "toast": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "toaster": {
+          "violations": [],
+          "warnings": [],
+          "passes": []
+        },
+        "EnhancedNetworkGraph": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "EnhancedNetworkGraph",
+              "location": 494
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "EnhancedNetworkGraph"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "EnhancedNetworkGraph"
+            }
+          ]
+        },
+        "ITTOForceGraph": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 647
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 651
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 674
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 680
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 700
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTOForceGraph",
+              "location": 728
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ITTOForceGraph"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ITTOForceGraph"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ITTOForceGraph"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ITTOForceGraph"
+            }
+          ]
+        },
+        "ITTONetworkDiagram": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTONetworkDiagram",
+              "location": 302
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ITTONetworkDiagram",
+              "location": 436
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ITTONetworkDiagram"
+            }
+          ]
+        },
+        "IntegratedView": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "IntegratedView",
+              "location": 85
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "IntegratedView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "IntegratedView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "IntegratedView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "IntegratedView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "IntegratedView"
+            }
+          ]
+        },
+        "KnowledgeAreaHeatmap": {
+          "violations": [],
+          "warnings": [],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "KnowledgeAreaHeatmap"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "KnowledgeAreaHeatmap"
+            }
+          ]
+        },
+        "MindMapView": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "MindMapView",
+              "location": 407
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MindMapView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MindMapView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MindMapView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MindMapView"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "MindMapView"
+            }
+          ]
+        },
+        "ProcessFlowDiagram": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "ProcessFlowDiagram",
+              "location": 213
+            },
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "ProcessFlowDiagram",
+              "location": 218
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProcessFlowDiagram"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProcessFlowDiagram"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProcessFlowDiagram"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "ProcessFlowDiagram"
+            }
+          ]
+        },
+        "ProcessHeatmap": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "ProcessHeatmap",
+              "location": 368
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "ProcessHeatmap"
+            }
+          ]
+        },
+        "SankeyDiagram": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "message": "見出しは階層的に使用する必要があります",
+              "severity": "warning",
+              "component": "SankeyDiagram",
+              "location": 440
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SankeyDiagram"
+            },
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "SankeyDiagram"
+            }
+          ]
+        },
+        "VisualizationHub": {
+          "violations": [],
+          "warnings": [
+            {
+              "rule": "color-only",
+              "wcag": "1.4.1",
+              "message": "色のみで情報を伝達しないようにしてください",
+              "severity": "warning",
+              "component": "VisualizationHub",
+              "location": 35
+            }
+          ],
+          "passes": [
+            {
+              "rule": "button-name",
+              "wcag": "4.1.2",
+              "component": "VisualizationHub"
+            },
+            {
+              "rule": "heading-hierarchy",
+              "wcag": "1.3.1",
+              "component": "VisualizationHub"
+            }
+          ]
+        }
+      }
+    },
+    "contrast": {
+      "color_combinations": [],
+      "contrast_violations": [],
+      "tailwind_colors": {
+        "primary": "#000000",
+        "secondary": "#666666",
+        "background": "#ffffff",
+        "text": "#000000",
+        "custom_colors": []
+      }
+    },
+    "keyboard": {
+      "interactive_elements": 307,
+      "keyboard_accessible": 293,
+      "focus_management": 0,
+      "skip_links": 0
+    },
+    "screen_reader": {
+      "aria_labels": 22,
+      "aria_descriptions": 0,
+      "semantic_elements": 18,
+      "landmark_roles": 4,
+      "live_regions": 0
+    },
+    "japanese": {
+      "font_support": 0.6,
+      "ruby_support": 0,
+      "cultural_adaptation": 0.9999999999999999,
+      "localization": 1
+    }
+  },
+  "violations": [
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "CollaborationHub",
+      "location": 49
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "DiscussionThread",
+      "location": 118
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "DiscussionThread",
+      "location": 229
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "SharedNotes",
+      "location": 255
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "SharedNotes",
+      "location": 280
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "StudyGroups",
+      "location": 422
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "StudyGroups",
+      "location": 502
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "PMPGlossary",
+      "location": 109
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "MentorshipHub",
+      "location": 235
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "PMBOKMatrix",
+      "location": 1055
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "CommandPalette",
+      "location": 367
+    },
+    {
+      "rule": "form-label",
+      "wcag": "1.3.1",
+      "message": "フォーム要素には適切なラベルが必要です",
+      "severity": "violation",
+      "component": "GlobalSearch",
+      "location": 190
+    }
+  ],
+  "warnings": [
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 87
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 130
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 162
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 168
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 190
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 217
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ContextManagerDashboard",
+      "location": 272
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "AuthCallback",
+      "location": 146
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "AuthCallback",
+      "location": 160
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "AuthCallback",
+      "location": 193
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ForgotPasswordForm",
+      "location": 87
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ForgotPasswordForm",
+      "location": 123
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ForgotPasswordForm",
+      "location": 180
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Login",
+      "location": 147
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LoginForm",
+      "location": 91
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ProtectedRoute",
+      "location": 58
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ProtectedRoute",
+      "location": 92
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Register",
+      "location": 199
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "RegisterForm",
+      "location": 157
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "RegisterForm",
+      "location": 175
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ResetPasswordForm",
+      "location": 140
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ResetPasswordForm",
+      "location": 165
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ResetPasswordForm",
+      "location": 196
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ResetPasswordForm",
+      "location": 317
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "DiscussionThread",
+      "location": 105
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "SharedNotes",
+      "location": 119
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "SharedNotes",
+      "location": 176
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "SharedNotes",
+      "location": 243
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "SharedNotes",
+      "location": 339
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 171
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 190
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 203
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 283
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 290
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 346
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 369
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 414
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "StudyGroups",
+      "location": 497
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 262
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 277
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 316
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 406
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 449
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 524
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MockExamSession",
+      "location": 607
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Footer",
+      "location": 58
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Footer",
+      "location": 80
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LoadingStates",
+      "location": 170
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileBottomNavigation",
+      "location": 72
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Sidebar",
+      "location": 149
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "Sidebar",
+      "location": 196
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 33
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 54
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 70
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 74
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 83
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "FlashCard",
+      "location": 92
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlossaryDialog",
+      "location": 14
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlossaryDialog",
+      "location": 29
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlossaryDialog",
+      "location": 35
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlossaryDialog",
+      "location": 56
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 72
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 82
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 93
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 107
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 118
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "LearningModal",
+      "location": 131
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileFlashCard",
+      "location": 154
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileFlashCard",
+      "location": 172
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileFlashCard",
+      "location": 178
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileFlashCard",
+      "location": 197
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileFlashCard",
+      "location": 216
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 153
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 176
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 259
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 317
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 325
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 342
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobilePMBOKMatrix",
+      "location": 359
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileProgressDashboard",
+      "location": 254
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileProgressDashboard",
+      "location": 284
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MobileTouchComponents",
+      "location": 111
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "MobileTouchComponents",
+      "location": 141
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 165
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 221
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 232
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 301
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 318
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 339
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 373
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7PerformanceDomains",
+      "location": 419
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 110
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 151
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 167
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 217
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 234
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 245
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "PMBOK7Principles",
+      "location": 281
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "CustomizationPanel",
+      "location": 71
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "CustomizationPanel",
+      "location": 22
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "EnvironmentInfo",
+      "location": 109
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "EnvironmentInfo",
+      "location": 185
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlobalSearch",
+      "location": 271
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlobalSearch",
+      "location": 311
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "GlobalSearch",
+      "location": 346
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "QuickShortcuts",
+      "location": 192
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "QuickShortcuts",
+      "location": 303
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "QuickShortcuts",
+      "location": 31
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 143
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 207
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 268
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 299
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 332
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 339
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 370
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 401
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 413
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 426
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 458
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 469
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "UserSettingsPanel",
+      "location": 495
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "card",
+      "location": 24
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "EnhancedNetworkGraph",
+      "location": 494
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 647
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 651
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 674
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 680
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 700
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTOForceGraph",
+      "location": 728
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTONetworkDiagram",
+      "location": 302
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ITTONetworkDiagram",
+      "location": 436
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "IntegratedView",
+      "location": 85
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "MindMapView",
+      "location": 407
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "ProcessFlowDiagram",
+      "location": 213
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "ProcessFlowDiagram",
+      "location": 218
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "ProcessHeatmap",
+      "location": 368
+    },
+    {
+      "rule": "heading-hierarchy",
+      "wcag": "1.3.1",
+      "message": "見出しは階層的に使用する必要があります",
+      "severity": "warning",
+      "component": "SankeyDiagram",
+      "location": 440
+    },
+    {
+      "rule": "color-only",
+      "wcag": "1.4.1",
+      "message": "色のみで情報を伝達しないようにしてください",
+      "severity": "warning",
+      "component": "VisualizationHub",
+      "location": 35
+    }
+  ],
+  "recommendations": [
+    {
+      "message": "スキップリンクの追加を推奨",
+      "timestamp": "2025-08-12T09:41:49.880Z"
+    },
+    {
+      "message": "動的コンテンツにaria-liveリージョンの追加",
+      "timestamp": "2025-08-12T09:41:49.883Z"
+    },
+    {
+      "message": "難読漢字や専門用語にルビ（フリガナ）の追加を検討",
+      "timestamp": "2025-08-12T09:41:49.884Z"
+    }
+  ],
+  "remediation_plan": [
+    {
+      "priority": "HIGH",
+      "action": "12件の重大なアクセシビリティ違反を修正",
+      "timeline": "1週間以内"
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "138件の警告事項を改善",
+      "timeline": "2週間以内"
+    },
+    {
+      "priority": "HIGH",
+      "action": "WCAG 2.1 AA完全準拠のための総合改善",
+      "timeline": "1ヶ月以内"
+    }
+  ]
+}

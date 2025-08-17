@@ -1,0 +1,301 @@
+# ====================================================================
+# デプロイメントワークフローテンプレート
+# バージョン: 1.0.0
+# 最終更新: 2025-08-12
+# ====================================================================
+# 目的:
+#   本番環境へのデプロイメントを安全かつ効率的に実行するための
+#   標準テンプレート
+#
+# トリガー:
+#   - mainブランチへのプッシュ
+#   - 手動実行（環境選択可能）
+#
+# 依存関係:
+#   - テストワークフローの成功
+#   - 承認プロセス（本番環境）
+#
+# 成果物:
+#   - デプロイメントレポート
+#   - パフォーマンスメトリクス
+#
+# 実行時間: 約15分
+# コスト見積: $0.05/実行
+# ====================================================================
+
+name: 🚀 本番デプロイメント | Production Deployment
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'デプロイ環境'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip-tests:
+        description: 'テストをスキップ（緊急時のみ）'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+  pages: write
+
+concurrency:
+  group: deploy-${{ github.ref }}-${{ inputs.environment || 'production' }}
+  cancel-in-progress: false  # デプロイは中断しない
+
+env:
+  NODE_VERSION: '18'
+  DEPLOY_TIMEOUT: 900  # 15分
+  HEALTHCHECK_RETRIES: 5
+
+jobs:
+  # ========================================
+  # 事前検証
+  # ========================================
+  pre-deploy-validation:
+    name: 🔍 デプロイ前検証 | Pre-deployment Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should-deploy: ${{ steps.validation.outputs.proceed }}
+      
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 履歴が必要
+          
+      - name: 🔍 変更内容の検証
+        id: validation
+        run: |
+          # クリティカルな変更の検出
+          CRITICAL_CHANGES=$(git diff HEAD~1 --name-only | grep -E "(package-lock\.json|\.env|config/)" || true)
+          
+          if [ -n "$CRITICAL_CHANGES" ]; then
+            echo "::warning::クリティカルな変更を検出しました: $CRITICAL_CHANGES"
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          else
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: 🏷️ バージョンタグの確認
+        run: |
+          # セマンティックバージョニングの確認
+          VERSION=$(node -p "require('./package.json').version")
+          echo "::notice::デプロイバージョン: v${VERSION}"
+          
+  # ========================================
+  # テスト実行（オプション）
+  # ========================================
+  run-tests:
+    name: 🧪 テスト実行 | Run Tests
+    needs: pre-deploy-validation
+    if: |
+      needs.pre-deploy-validation.outputs.should-deploy == 'true' &&
+      !inputs.skip-tests
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      test-suite: 'smoke'
+      coverage-threshold: 80
+    secrets: inherit
+    
+  # ========================================
+  # ビルド
+  # ========================================
+  build:
+    name: 🏗️ ビルド | Build Application
+    needs: [pre-deploy-validation]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 依存関係のキャッシュ復元
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            
+      - name: 📦 依存関係のインストール
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+        
+      - name: 🏗️ プロダクションビルド
+        run: |
+          npm run build
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+          
+      - name: 📊 ビルドサイズの分析
+        run: |
+          # ビルドサイズレポート
+          du -sh dist/* | sort -h
+          
+          # バンドルサイズチェック
+          BUNDLE_SIZE=$(du -sb dist | cut -f1)
+          MAX_SIZE=5242880  # 5MB
+          
+          if [ $BUNDLE_SIZE -gt $MAX_SIZE ]; then
+            echo "::warning::バンドルサイズが制限を超えています: $(($BUNDLE_SIZE / 1024 / 1024))MB"
+          fi
+          
+      - name: 📤 ビルド成果物のアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+          retention-days: 3
+          
+  # ========================================
+  # デプロイメント
+  # ========================================
+  deploy:
+    name: 🚀 デプロイ実行 | Deploy to ${{ inputs.environment || 'production' }}
+    needs: [build, run-tests]
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(env.DEPLOY_TIMEOUT) / 60 }}
+    environment:
+      name: ${{ inputs.environment || 'production' }}
+      url: ${{ steps.deploy.outputs.url }}
+      
+    steps:
+      - name: 📥 コードのチェックアウト
+        uses: actions/checkout@v4
+        
+      - name: 📦 ビルド成果物のダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+          
+      - name: 🚀 GitHub Pagesへのデプロイ
+        id: deploy
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: build-artifacts-${{ github.sha }}
+          
+      - name: 🔍 デプロイメント検証
+        run: |
+          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
+          echo "::notice::デプロイURL: ${DEPLOY_URL}"
+          
+          # ヘルスチェック
+          for i in $(seq 1 ${{ env.HEALTHCHECK_RETRIES }}); do
+            if curl -sSf "${DEPLOY_URL}" > /dev/null; then
+              echo "✅ ヘルスチェック成功"
+              break
+            else
+              echo "⏳ 再試行 ${i}/${HEALTHCHECK_RETRIES}..."
+              sleep 10
+            fi
+          done
+          
+      - name: 📊 Lighthouse監査
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: ${{ steps.deploy.outputs.url }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          
+  # ========================================
+  # デプロイ後処理
+  # ========================================
+  post-deploy:
+    name: 📋 デプロイ後処理 | Post-deployment Tasks
+    needs: deploy
+    if: success()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📊 メトリクス収集
+        run: |
+          cat > deployment-metrics.json <<EOF
+          {
+            "environment": "${{ inputs.environment || 'production' }}",
+            "version": "$(node -p "require('./package.json').version")",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "duration": "${{ job.duration }}",
+            "status": "success",
+            "url": "${{ needs.deploy.outputs.url }}"
+          }
+          EOF
+          
+      - name: 🔔 成功通知
+        if: github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment.id,
+              state: 'success',
+              environment_url: '${{ needs.deploy.outputs.url }}',
+              description: 'デプロイメント成功'
+            });
+            
+      - name: 🏷️ リリースタグの作成
+        if: github.ref == 'refs/heads/main' && inputs.environment == 'production'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
+          
+  # ========================================
+  # ロールバック準備
+  # ========================================
+  prepare-rollback:
+    name: 🔄 ロールバック準備 | Prepare Rollback
+    needs: deploy
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📸 現在の状態を保存
+        run: |
+          # ロールバック用の情報を保存
+          cat > rollback-info.json <<EOF
+          {
+            "previous_sha": "${{ github.event.before }}",
+            "current_sha": "${{ github.sha }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+          
+      - name: 📤 ロールバック情報の保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-info-${{ github.sha }}
+          path: rollback-info.json
+          retention-days: 30

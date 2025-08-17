@@ -150,7 +150,9 @@ class ContextMonitor {
    */
   getCurrentMemoryUsage() {
     const recent = this.metrics.memoryUsage.slice(-5)
-    if (recent.length === 0) {return 0}
+    if (recent.length === 0) {
+      return 0
+    }
 
     return recent.reduce((sum, metric) => sum + metric.usage, 0) / recent.length
   }
@@ -160,7 +162,9 @@ class ContextMonitor {
    */
   getAverageRetrievalTime() {
     const recent = this.metrics.retrievalTimes.slice(-10)
-    if (recent.length === 0) {return 0}
+    if (recent.length === 0) {
+      return 0
+    }
 
     return recent.reduce((sum, time) => sum + time, 0) / recent.length
   }

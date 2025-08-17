@@ -80,9 +80,24 @@ describe('progressService', () => {
         knowledgeAreas: {},
         processGroups: {},
         processes: {
-          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
-          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
-          'p3': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T11:00:00Z' },
+          p1: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:00:00Z',
+          },
+          p2: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:30:00Z',
+          },
+          p3: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T11:00:00Z',
+          },
         },
         studySessions: [
           { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },
@@ -140,8 +155,18 @@ describe('progressService', () => {
         knowledgeAreas: {},
         processGroups: {},
         processes: {
-          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
-          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
+          p1: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:00:00Z',
+          },
+          p2: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:30:00Z',
+          },
         },
         studySessions: [
           { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },
@@ -168,8 +193,18 @@ describe('progressService', () => {
         knowledgeAreas: {},
         processGroups: {},
         processes: {
-          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
-          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
+          p1: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:00:00Z',
+          },
+          p2: {
+            completed: true,
+            understanding: 100,
+            notes: '',
+            lastStudied: '2025-08-08T10:30:00Z',
+          },
         },
         studySessions: [
           { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },

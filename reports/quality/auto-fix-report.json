@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-08-12T10:56:10.553Z",
+  "before": {
+    "pmbok_compliance": 84.21957671957672,
+    "content_quality": 64.66479591836735,
+    "accessibility": 68.46977491961415,
+    "japanese_quality": 90,
+    "learning_effectiveness": 0
+  },
+  "after": {
+    "pmbok_compliance": 84.21957671957672,
+    "content_quality": 64.66479591836735,
+    "accessibility": 68.46977491961415,
+    "japanese_quality": 90,
+    "learning_effectiveness": 0
+  },
+  "improvements": {
+    "pmbok_compliance": {
+      "before": 84.21957671957672,
+      "after": 84.21957671957672,
+      "improvement": 0,
+      "improvementRate": "0.0%"
+    },
+    "content_quality": {
+      "before": 64.66479591836735,
+      "after": 64.66479591836735,
+      "improvement": 0,
+      "improvementRate": "0.0%"
+    },
+    "accessibility": {
+      "before": 68.46977491961415,
+      "after": 68.46977491961415,
+      "improvement": 0,
+      "improvementRate": "0.0%"
+    },
+    "japanese_quality": {
+      "before": 90,
+      "after": 90,
+      "improvement": 0,
+      "improvementRate": "0.0%"
+    },
+    "learning_effectiveness": {
+      "before": 0,
+      "after": 0,
+      "improvement": 0,
+      "improvementRate": "NaN%"
+    }
+  },
+  "stats": {
+    "pmbok": {
+      "fixed": 1,
+      "failed": 0
+    },
+    "content": {
+      "fixed": 1,
+      "failed": 0
+    },
+    "accessibility": {
+      "fixed": 1,
+      "failed": 0
+    },
+    "japanese": {
+      "fixed": 0,
+      "failed": 0
+    },
+    "learning": {
+      "fixed": 1,
+      "failed": 0
+    },
+    "total": {
+      "fixed": 0,
+      "failed": 0
+    }
+  }
+}

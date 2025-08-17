@@ -8,21 +8,23 @@ import { GeoIPService } from '../geoip'
 // import * as fc from 'fast-check' // Currently unused
 
 // Redis モック
+const mockRedisClient = {
+  get: vi.fn(),
+  setex: vi.fn(),
+  del: vi.fn(),
+  keys: vi.fn().mockResolvedValue([]),
+  hmget: vi.fn().mockResolvedValue([null, null, null]),
+  zadd: vi.fn(),
+  expire: vi.fn(),
+  zrevrange: vi.fn().mockResolvedValue([]),
+  zremrangebyscore: vi.fn(),
+  zcard: vi.fn().mockResolvedValue(0),
+  scard: vi.fn().mockResolvedValue(0),
+  eval: vi.fn().mockResolvedValue([0, 0]),
+}
+
 vi.mock('../rateLimiting', () => ({
-  getRedisClient: vi.fn().mockResolvedValue({
-    get: vi.fn(),
-    setex: vi.fn(),
-    del: vi.fn(),
-    keys: vi.fn().mockResolvedValue([]),
-    hmget: vi.fn().mockResolvedValue([null, null, null]),
-    zadd: vi.fn(),
-    expire: vi.fn(),
-    zrevrange: vi.fn().mockResolvedValue([]),
-    zremrangebyscore: vi.fn(),
-    zcard: vi.fn().mockResolvedValue(0),
-    scard: vi.fn().mockResolvedValue(0),
-    eval: vi.fn().mockResolvedValue([0, 0]),
-  }),
+  getRedisClient: vi.fn().mockResolvedValue(mockRedisClient),
 }))
 
 describe('GeoIPService', () => {
@@ -37,9 +39,20 @@ describe('GeoIPService', () => {
 
   beforeEach(() => {
     service = new GeoIPService()
+<<<<<<< HEAD
+    nock.cleanAll()
+    // nockを有効化し、実際のHTTPリクエストを無効化
+    nock.disableNetConnect()
   })
 
   afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect() // テスト終了時にネット接続を復元
+=======
+  })
+
+  afterEach(() => {
+>>>>>>> main
     vi.clearAllMocks()
   })
 

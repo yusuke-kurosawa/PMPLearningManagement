@@ -1,0 +1,405 @@
+# ================================================================
+# ワークフロー名: 01-quality-comprehensive-check.yml
+# 目的: PMBOK準拠、コンテンツ品質、アクセシビリティ、日本語品質の包括的チェック
+# トリガー: プッシュ、PR、定期実行（毎日9時）、手動実行
+# 依存関係: quality-check アクション、report-generator アクション
+# 作成者: Claude Code
+# 最終更新: 2025-08-12
+# ================================================================
+
+name: '🎯 包括的品質チェック / Comprehensive Quality Check'
+
+# ============================================================
+# トリガー設定
+# Workflow triggers configuration
+# ============================================================
+on:
+  push:
+    branches: 
+      - main
+      - develop
+      - 'feature/**'
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'package.json'
+      - '.github/workflows/01-quality-*.yml'
+  
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+  
+  schedule:
+    # 毎日午前9時（JST）に実行 / Run daily at 9:00 AM JST
+    - cron: '0 0 * * *'
+  
+  workflow_dispatch:
+    inputs:
+      check-type:
+        description: 'チェックタイプ / Check type'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - pmbok
+          - content
+          - accessibility
+          - japanese
+      
+      fail-on-error:
+        description: 'エラー時に失敗させる / Fail on error'
+        required: false
+        default: false
+        type: boolean
+      
+      generate-report:
+        description: 'レポート生成 / Generate report'
+        required: false
+        default: true
+        type: boolean
+
+# ============================================================
+# 環境変数
+# Environment variables
+# ============================================================
+env:
+  NODE_VERSION: '18'
+  QUALITY_THRESHOLD: 80
+  CACHE_VERSION: 'v1'
+
+# ============================================================
+# 並行実行制御
+# Concurrency control
+# ============================================================
+concurrency:
+  group: quality-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ============================================================
+# ジョブ定義
+# Jobs definition
+# ============================================================
+jobs:
+  # ============================================================
+  # Job 1: 品質チェック実行
+  # Execute quality checks
+  # ============================================================
+  quality-check:
+    name: '🔍 品質チェック / Quality Check'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    outputs:
+      pmbok-score: ${{ steps.quality.outputs.pmbok-score }}
+      content-score: ${{ steps.quality.outputs.content-score }}
+      accessibility-score: ${{ steps.quality.outputs.accessibility-score }}
+      japanese-score: ${{ steps.quality.outputs.japanese-score }}
+      overall-score: ${{ steps.quality.outputs.overall-score }}
+      status: ${{ steps.evaluate.outputs.status }}
+    
+    steps:
+      # ============================================================
+      # Step 1: リポジトリチェックアウト
+      # Checkout repository
+      # ============================================================
+      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴取得（トレンド分析用）
+      
+      # ============================================================
+      # Step 2: 環境セットアップ
+      # Setup environment
+      # ============================================================
+      - name: '🔧 環境セットアップ / Setup Environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-key: quality-check-${{ env.CACHE_VERSION }}
+          install-dependencies: true
+      
+      # ============================================================
+      # Step 3: 品質チェック実行
+      # Run quality checks
+      # ============================================================
+      - name: '🎯 品質チェック実行 / Run Quality Checks'
+        id: quality
+        uses: ./.github/actions/quality-check
+        with:
+          check-type: ${{ github.event.inputs.check-type || 'all' }}
+          fail-on-error: false  # 後で評価
+          generate-report: true
+          upload-artifact: true
+          threshold: ${{ env.QUALITY_THRESHOLD }}
+      
+      # ============================================================
+      # Step 4: 結果評価
+      # Evaluate results
+      # ============================================================
+      - name: '📊 結果評価 / Evaluate Results'
+        id: evaluate
+        run: |
+          echo "=========================================="
+          echo "📊 品質チェック結果 / Quality Check Results"
+          echo "=========================================="
+          
+          # スコア取得
+          PMBOK="${{ steps.quality.outputs.pmbok-score }}"
+          CONTENT="${{ steps.quality.outputs.content-score }}"
+          ACCESSIBILITY="${{ steps.quality.outputs.accessibility-score }}"
+          JAPANESE="${{ steps.quality.outputs.japanese-score }}"
+          OVERALL="${{ steps.quality.outputs.overall-score }}"
+          THRESHOLD="${{ env.QUALITY_THRESHOLD }}"
+          
+          # ステータス判定
+          if [ "$OVERALL" -ge "$THRESHOLD" ]; then
+            STATUS="success"
+            EMOJI="✅"
+            MESSAGE="品質基準を満たしています"
+          elif [ "$OVERALL" -ge $((THRESHOLD - 10)) ]; then
+            STATUS="warning"
+            EMOJI="⚠️"
+            MESSAGE="品質基準に近づいています"
+          else
+            STATUS="failure"
+            EMOJI="❌"
+            MESSAGE="品質基準を満たしていません"
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "emoji=$EMOJI" >> $GITHUB_OUTPUT
+          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
+          
+          # サマリー出力
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## $EMOJI 品質チェック結果
+          
+          **総合スコア**: ${OVERALL}% / ${THRESHOLD}% (閾値)
+          **ステータス**: $MESSAGE
+          
+          ### 📊 詳細スコア
+          
+          | カテゴリ | スコア | 目標 | 状態 |
+          |---------|--------|------|------|
+          | PMBOK準拠 | ${PMBOK}% | 95% | $([ "$PMBOK" -ge 95 ] && echo "✅" || echo "⚠️") |
+          | コンテンツ品質 | ${CONTENT}% | 90% | $([ "$CONTENT" -ge 90 ] && echo "✅" || echo "⚠️") |
+          | アクセシビリティ | ${ACCESSIBILITY}% | 95% | $([ "$ACCESSIBILITY" -ge 95 ] && echo "✅" || echo "⚠️") |
+          | 日本語品質 | ${JAPANESE}% | 90% | $([ "$JAPANESE" -ge 90 ] && echo "✅" || echo "⚠️") |
+          
+          ### 🔗 関連リンク
+          
+          - [ワークフロー実行](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [コミット](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          EOF
+      
+      # ============================================================
+      # Step 5: PRコメント（PR時のみ）
+      # Add PR comment (PR only)
+      # ============================================================
+      - name: '💬 PRコメント追加 / Add PR Comment'
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const overall = '${{ steps.quality.outputs.overall-score }}';
+            const threshold = '${{ env.QUALITY_THRESHOLD }}';
+            const status = '${{ steps.evaluate.outputs.status }}';
+            const emoji = '${{ steps.evaluate.outputs.emoji }}';
+            
+            const comment = `
+            ## ${emoji} 品質チェック結果
+            
+            **総合スコア**: ${overall}% / ${threshold}%
+            
+            <details>
+            <summary>📊 詳細スコア</summary>
+            
+            | カテゴリ | スコア | 目標 |
+            |---------|--------|------|
+            | PMBOK準拠 | ${{ steps.quality.outputs.pmbok-score }}% | 95% |
+            | コンテンツ品質 | ${{ steps.quality.outputs.content-score }}% | 90% |
+            | アクセシビリティ | ${{ steps.quality.outputs.accessibility-score }}% | 95% |
+            | 日本語品質 | ${{ steps.quality.outputs.japanese-score }}% | 90% |
+            
+            </details>
+            
+            ${status === 'failure' ? '⚠️ **品質基準を満たしていません。改善が必要です。**' : ''}
+            ${status === 'warning' ? '📝 **品質向上の余地があります。**' : ''}
+            ${status === 'success' ? '✅ **品質基準を満たしています！**' : ''}
+            `;
+            
+            // 既存コメントを検索
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('品質チェック結果')
+            );
+            
+            if (botComment) {
+              // 既存コメントを更新
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              // 新規コメントを作成
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  # ============================================================
+  # Job 2: レポート生成
+  # Generate report
+  # ============================================================
+  generate-report:
+    name: '📊 レポート生成 / Generate Report'
+    runs-on: ubuntu-latest
+    needs: quality-check
+    if: always() && (github.event.inputs.generate-report != 'false')
+    timeout-minutes: 15
+    
+    steps:
+      # ============================================================
+      # Step 1: リポジトリチェックアウト
+      # Checkout repository
+      # ============================================================
+      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+        uses: actions/checkout@v4
+      
+      # ============================================================
+      # Step 2: 環境セットアップ
+      # Setup environment
+      # ============================================================
+      - name: '🔧 環境セットアップ / Setup Environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          install-dependencies: false
+      
+      # ============================================================
+      # Step 3: レポート生成
+      # Generate report
+      # ============================================================
+      - name: '📊 レポート生成 / Generate Report'
+        uses: ./.github/actions/report-generator
+        with:
+          report-type: 'quality'
+          output-format: 'all'
+          upload-artifact: true
+          include-trends: true
+          comparison-days: 7
+      
+      # ============================================================
+      # Step 4: 通知送信
+      # Send notification
+      # ============================================================
+      - name: '📢 通知送信 / Send Notification'
+        if: needs.quality-check.outputs.status == 'failure'
+        uses: ./.github/actions/notification
+        with:
+          status: ${{ needs.quality-check.outputs.status }}
+          title: '品質チェック結果'
+          message: |
+            品質スコアが基準を満たしていません。
+            総合スコア: ${{ needs.quality-check.outputs.overall-score }}%
+            PMBOK: ${{ needs.quality-check.outputs.pmbok-score }}%
+            コンテンツ: ${{ needs.quality-check.outputs.content-score }}%
+            アクセシビリティ: ${{ needs.quality-check.outputs.accessibility-score }}%
+            日本語: ${{ needs.quality-check.outputs.japanese-score }}%
+          notification-type: 'none'  # 環境変数で制御
+          create-issue: false
+
+  # ============================================================
+  # Job 3: 自動修正（オプション）
+  # Auto-fix (optional)
+  # ============================================================
+  auto-fix:
+    name: '🔧 自動修正 / Auto Fix'
+    runs-on: ubuntu-latest
+    needs: quality-check
+    if: |
+      always() && 
+      needs.quality-check.outputs.status == 'failure' &&
+      github.event_name == 'pull_request'
+    timeout-minutes: 20
+    
+    steps:
+      # ============================================================
+      # Step 1: リポジトリチェックアウト
+      # Checkout repository
+      # ============================================================
+      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+      
+      # ============================================================
+      # Step 2: 環境セットアップ
+      # Setup environment
+      # ============================================================
+      - name: '🔧 環境セットアップ / Setup Environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      # ============================================================
+      # Step 3: 自動修正実行
+      # Run auto-fix
+      # ============================================================
+      - name: '🔧 自動修正実行 / Run Auto Fix'
+        id: auto-fix
+        run: |
+          echo "🔧 Running auto-fix scripts..."
+          
+          # アクセシビリティ修正
+          if [ -f "scripts/fix-accessibility-violations.js" ]; then
+            echo "♿ Fixing accessibility issues..."
+            node scripts/fix-accessibility-violations.js || true
+          fi
+          
+          # コード整形
+          echo "📝 Formatting code..."
+          npm run format || true
+          
+          # リント修正
+          echo "🔍 Fixing lint issues..."
+          npm run lint:fix || true
+          
+          # 変更確認
+          if git diff --quiet; then
+            echo "No changes made by auto-fix"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes made by auto-fix"
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+      
+      # ============================================================
+      # Step 4: 変更をコミット
+      # Commit changes
+      # ============================================================
+      - name: '📝 変更をコミット / Commit Changes'
+        if: steps.auto-fix.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "🔧 自動修正: 品質問題を修正 / Auto-fix: Fix quality issues"
+          git push

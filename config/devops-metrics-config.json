@@ -3,19 +3,14 @@
     "version": "2024.3.0",
     "description": "World-Class DevOps Metrics Configuration for PMP Learning Management",
     "last_updated": "2024-08-09T00:00:00Z",
-    "
     "dora_four_key_metrics": {
       "deployment_frequency": {
         "target_elite": "multiple_per_day",
-        "target_high": "daily_to_weekly", 
+        "target_high": "daily_to_weekly",
         "target_medium": "weekly_to_monthly",
         "current_threshold": "elite",
         "measurement_window_days": 90,
-        "data_sources": [
-          "github_actions_workflows",
-          "deployment_pipelines",
-          "release_automation"
-        ]
+        "data_sources": ["github_actions_workflows", "deployment_pipelines", "release_automation"]
       },
       "lead_time_for_changes": {
         "target_elite_hours": 24,
@@ -77,19 +72,14 @@
         "deployment_automation": {
           "target_percent": 100,
           "current_status": "achieved",
-          "environments": [
-            "development",
-            "staging", 
-            "production",
-            "multi_cloud"
-          ]
+          "environments": ["development", "staging", "production", "multi_cloud"]
         },
         "infrastructure_as_code": {
           "target_percent": 100,
           "current_status": "achieved",
           "coverage_areas": [
             "ci_cd_pipelines",
-            "container_orchestration", 
+            "container_orchestration",
             "cloud_resources",
             "monitoring_configuration"
           ]
@@ -153,19 +143,14 @@
           "target_score": 85,
           "indicators": [
             "conference_attendance",
-            "certification_achievements", 
+            "certification_achievements",
             "internal_training",
             "innovation_time"
           ]
         },
         "experimentation": {
           "target_score": 80,
-          "measurements": [
-            "poc_projects",
-            "tech_spikes",
-            "ab_testing",
-            "chaos_experiments"
-          ]
+          "measurements": ["poc_projects", "tech_spikes", "ab_testing", "chaos_experiments"]
         },
         "feedback_loops": {
           "target_score": 90,
@@ -281,7 +266,7 @@
       "stakeholder_reports": {
         "executive_summary": "weekly",
         "technical_deep_dive": "daily",
-        "trend_analysis": "monthly", 
+        "trend_analysis": "monthly",
         "benchmark_comparison": "quarterly"
       },
       "visualization_preferences": {
@@ -305,7 +290,7 @@
         "workflows_monitored": "all",
         "metrics_collected": [
           "deployment_frequency",
-          "pr_cycle_time", 
+          "pr_cycle_time",
           "code_review_metrics",
           "issue_resolution_time"
         ]

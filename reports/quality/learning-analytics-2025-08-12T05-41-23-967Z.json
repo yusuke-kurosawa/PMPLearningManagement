@@ -1,0 +1,355 @@
+{
+  "report_meta": {
+    "generated_at": "2025-08-12T05:41:23.966Z",
+    "analyzer_version": "1.0.0",
+    "project": "PMPLearningManagement",
+    "data_period": "模擬データ（実装時は実際の学習データ）"
+  },
+  "executive_summary": {
+    "overall_effectiveness": null,
+    "learning_objectives_achievement": "NaN",
+    "pmp_preparation_readiness": "NaN",
+    "knowledge_retention": "53.2",
+    "learning_efficiency": "31.5",
+    "meets_effectiveness_standards": false
+  },
+  "quality_gates": {
+    "effectiveness_gate": false,
+    "pmp_preparation_gate": false,
+    "retention_gate": false,
+    "satisfaction_gate": true
+  },
+  "detailed_analysis": {
+    "objectives": {
+      "overall_achievement": null,
+      "bloom_taxonomy_levels": {
+        "remembering": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.15,
+          "threshold": 0.8,
+          "meets_standard": false
+        },
+        "understanding": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.2,
+          "threshold": 0.75,
+          "meets_standard": false
+        },
+        "applying": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.25,
+          "threshold": 0.7,
+          "meets_standard": false
+        },
+        "analyzing": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.2,
+          "threshold": 0.65,
+          "meets_standard": false
+        },
+        "evaluating": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.1,
+          "threshold": 0.6,
+          "meets_standard": false
+        },
+        "creating": {
+          "pass_rate": null,
+          "average_score": null,
+          "weight": 0.1,
+          "threshold": 0.55,
+          "meets_standard": false
+        }
+      },
+      "knowledge_area_mastery": {
+        "統合": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "スコープ": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "スケジュール": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "コスト": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "品質": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "資源": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "コミュニケーション": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "リスク": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "調達": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        },
+        "ステークホルダー": {
+          "average_score": null,
+          "mastery_rate": null,
+          "difficulty_rating": null
+        }
+      },
+      "skill_development": {}
+    },
+    "pmp_readiness": {
+      "overall_readiness": null,
+      "readiness_metrics": {
+        "process_mastery": {
+          "average_score": null,
+          "readiness_rate": null,
+          "target": 0.9,
+          "weight": 0.3,
+          "meets_target": false
+        },
+        "itto_comprehension": {
+          "average_score": null,
+          "readiness_rate": null,
+          "target": 0.85,
+          "weight": 0.25,
+          "meets_target": false
+        },
+        "scenario_application": {
+          "average_score": null,
+          "readiness_rate": null,
+          "target": 0.8,
+          "weight": 0.2,
+          "meets_target": false
+        },
+        "time_management": {
+          "average_score": null,
+          "readiness_rate": null,
+          "target": 0.75,
+          "weight": 0.15,
+          "meets_target": false
+        },
+        "knowledge_integration": {
+          "average_score": null,
+          "readiness_rate": null,
+          "target": 0.7,
+          "weight": 0.1,
+          "meets_target": false
+        }
+      },
+      "exam_simulation_performance": {
+        "average_score": 0.7936018651985295,
+        "pass_rate": 0.72,
+        "time_efficiency": 0.7815075351415685,
+        "question_difficulty_analysis": {},
+        "performance_trends": {}
+      },
+      "weak_areas": ["time_management", "knowledge_integration"],
+      "strength_areas": ["process_mastery", "itto_comprehension"]
+    },
+    "retention": {
+      "overall_retention": 0.5315570365909601,
+      "short_term_retention": 0.504979184761412,
+      "medium_term_retention": 0.4252456292727681,
+      "long_term_retention": 0.3455120737841241,
+      "forgetting_curve": {
+        "day_1": {
+          "theoretical": 0.9672161004820059,
+          "actual": 0.5141305241152788,
+          "effectiveness": 0.5315570365909595
+        },
+        "day_7": {
+          "theoretical": 0.7918895663367816,
+          "actual": 0.42093447118927996,
+          "effectiveness": 0.5315570365909599
+        },
+        "day_30": {
+          "theoretical": 0.36787944117144233,
+          "actual": 0.19554890557183022,
+          "effectiveness": 0.5315570365909598
+        },
+        "day_90": {
+          "theoretical": 0.049787068367863944,
+          "actual": 0.026464666522173257,
+          "effectiveness": 0.5315570365909595
+        }
+      },
+      "retention_strategies_effectiveness": {
+        "spaced_repetition": {
+          "effectiveness": 0.85,
+          "usage_rate": 0.6
+        },
+        "active_recall": {
+          "effectiveness": 0.8,
+          "usage_rate": 0.7
+        },
+        "interleaving": {
+          "effectiveness": 0.75,
+          "usage_rate": 0.4
+        },
+        "elaborative_interrogation": {
+          "effectiveness": 0.7,
+          "usage_rate": 0.3
+        },
+        "visual_mnemonics": {
+          "effectiveness": 0.65,
+          "usage_rate": 0.5
+        }
+      }
+    },
+    "efficiency": {
+      "overall_efficiency": 0.3152252783266906,
+      "learning_velocity": 0.03982858659900346,
+      "resource_utilization": 0,
+      "time_to_mastery": 1202.831289695283,
+      "efficiency_by_content_type": {},
+      "optimization_opportunities": [
+        {
+          "type": "time_optimization",
+          "issue": "Extended time to mastery",
+          "recommendation": "Implement adaptive learning paths and personalized content",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "velocity_improvement",
+          "issue": "Slow learning velocity",
+          "recommendation": "Add more interactive elements and immediate feedback",
+          "priority": "HIGH"
+        }
+      ]
+    },
+    "patterns": {
+      "learning_styles_distribution": {
+        "visual": {
+          "count": 0,
+          "percentage": null
+        },
+        "auditory": {
+          "count": 0,
+          "percentage": null
+        },
+        "kinesthetic": {
+          "count": 0,
+          "percentage": null
+        },
+        "reading": {
+          "count": 0,
+          "percentage": null
+        }
+      },
+      "progress_patterns": {
+        "steady": {
+          "count": 37,
+          "percentage": null,
+          "success_rate": 1
+        },
+        "accelerating": {
+          "count": 35,
+          "percentage": null,
+          "success_rate": 1
+        },
+        "plateau": {
+          "count": 19,
+          "percentage": null,
+          "success_rate": 0
+        },
+        "declining": {
+          "count": 9,
+          "percentage": null,
+          "success_rate": 0
+        }
+      },
+      "engagement_patterns": {},
+      "success_factors": {
+        "session_frequency": 1,
+        "session_duration": 0.75,
+        "content_diversity": 0.5961111111111114,
+        "consistent_progress": 0.9273003526546949
+      },
+      "at_risk_indicators": {
+        "low_engagement": 0,
+        "irregular_sessions": 0,
+        "limited_content_usage": 0,
+        "poor_assessment_performance": 0
+      }
+    }
+  },
+  "key_insights": [
+    {
+      "type": "opportunity",
+      "insight": "学習効率の最適化により、学習時間の短縮と成果向上が可能です",
+      "supporting_data": "現在の効率: 31.5%"
+    }
+  ],
+  "improvement_strategies": [
+    {
+      "category": "Knowledge Retention",
+      "priority": "HIGH",
+      "strategy": "Implement spaced repetition and active recall",
+      "actions": [
+        "Enhance flashcard system with adaptive scheduling",
+        "Add periodic review sessions",
+        "Implement progressive difficulty adjustment",
+        "Create knowledge connection mapping"
+      ],
+      "expected_impact": "Improve long-term retention by 25%"
+    },
+    {
+      "category": "Learning Efficiency",
+      "priority": "MEDIUM",
+      "strategy": "Optimize learning pathways and content delivery",
+      "actions": [
+        "Implement adaptive learning algorithms",
+        "Personalize content based on learning styles",
+        "Optimize content that shows low efficiency",
+        "Add progress tracking and goal-setting features"
+      ],
+      "expected_impact": "Reduce time to mastery by 30%"
+    }
+  ],
+  "roi_projection": {
+    "baseline_metrics": {
+      "current_pass_rate": 0.7,
+      "average_study_time": 1500,
+      "dropout_rate": 0.25
+    },
+    "projected_metrics": {
+      "projected_pass_rate": null,
+      "projected_study_time": 2527.162082509964,
+      "projected_dropout_rate": 0.18355537042613
+    },
+    "improvements": {
+      "pass_rate_improvement": "NaN",
+      "time_savings": "-68.5",
+      "dropout_reduction": "26.6"
+    },
+    "annual_value_estimate": {
+      "pass_rate_value": null,
+      "time_savings_value": -856250,
+      "retention_value": 480130,
+      "total_annual_value": null
+    }
+  }
+}

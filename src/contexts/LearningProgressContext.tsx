@@ -96,7 +96,9 @@ export const LearningProgressProvider = ({ children }) => {
   // 知識エリアの進捗計算
   const calculateKnowledgeAreaProgress = (knowledgeAreaId) => {
     const processes = progressService.getProcessesByKnowledgeArea(knowledgeAreaId)
-    if (!processes.length) {return 0}
+    if (!processes.length) {
+      return 0
+    }
 
     const completedCount = processes.filter(
       (p) => progress.processes[p.id]?.status === 'completed'
@@ -108,7 +110,9 @@ export const LearningProgressProvider = ({ children }) => {
   // プロセス群の進捗計算
   const calculateProcessGroupProgress = (processGroupId) => {
     const processes = progressService.getProcessesByProcessGroup(processGroupId)
-    if (!processes.length) {return 0}
+    if (!processes.length) {
+      return 0
+    }
 
     const completedCount = processes.filter(
       (p) => progress.processes[p.id]?.status === 'completed'

@@ -1,0 +1,202 @@
+name: Lighthouse CI - PWA Performance Monitoring
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly Sunday midnight
+  workflow_dispatch:
+
+jobs:
+  lighthouse-audit:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        url:
+          - '/'
+          - '/matrix'
+          - '/network' 
+          - '/visualizations'
+          - '/progress'
+          - '/flashcards'
+          - '/mock-exam'
+          - '/glossary'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Serve application
+        run: |
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 10
+        
+      - name: Wait for server
+        run: |
+          timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000${{ matrix.url }}
+          configPath: ./.lighthouserc.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: lighthouse-results-${{ github.run_id }}-${{ strategy.job-index }}
+          path: .lighthouseci/
+
+  lighthouse-mobile:
+    name: Lighthouse Mobile Audit
+    runs-on: ubuntu-latest
+    needs: lighthouse-audit
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Serve application
+        run: |
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 10
+
+      - name: Run Mobile Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000/
+          configPath: ./.lighthouserc.mobile.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  performance-budget-check:
+    name: Performance Budget Check
+    runs-on: ubuntu-latest
+    needs: [lighthouse-audit, lighthouse-mobile]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download lighthouse results
+        uses: actions/download-artifact@v3
+        with:
+          pattern: lighthouse-results-*
+          merge-multiple: true
+          path: ./lighthouse-results/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install analysis tools
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm install -g lighthouse-batch
+
+      - name: Analyze performance trends
+        run: |
+          node ./scripts/analyze-lighthouse-trends.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check performance budgets
+        run: |
+          node ./scripts/check-performance-budget.js
+        continue-on-error: true
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './lighthouse-results/performance-summary.json';
+            
+            if (fs.existsSync(path)) {
+              const results = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              const comment = `## 🚀 PWA Performance Report
+              
+              ### Overall Scores
+              - **Performance**: ${results.performance}/100 ${results.performance >= 90 ? '✅' : results.performance >= 70 ? '⚠️' : '❌'}
+              - **Accessibility**: ${results.accessibility}/100 ${results.accessibility >= 90 ? '✅' : '⚠️'}
+              - **Best Practices**: ${results.bestPractices}/100 ${results.bestPractices >= 90 ? '✅' : '⚠️'}
+              - **SEO**: ${results.seo}/100 ${results.seo >= 90 ? '✅' : '⚠️'}
+              - **PWA**: ${results.pwa}/100 ${results.pwa >= 90 ? '✅' : '⚠️'}
+
+              ### Core Web Vitals
+              - **LCP**: ${results.lcp}s ${results.lcp <= 2.5 ? '✅' : '❌'}
+              - **FID**: ${results.fid}ms ${results.fid <= 100 ? '✅' : '❌'}
+              - **CLS**: ${results.cls} ${results.cls <= 0.1 ? '✅' : '❌'}
+
+              ### Performance Budget Status
+              - **Bundle Size**: ${results.bundleSize}MB ${results.bundleSizeStatus}
+              - **Load Time**: ${results.loadTime}s ${results.loadTimeStatus}
+              
+              [View detailed report](${results.reportUrl})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  web-vitals-monitoring:
+    name: Real User Monitoring Setup
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Web Vitals monitoring
+        run: |
+          echo "Setting up Real User Monitoring for Core Web Vitals..."
+          # TODO: Integrate with Analytics/RUM service
+          
+      - name: Deploy performance monitoring
+        run: |
+          echo "Deploying performance monitoring configuration..."
+          # TODO: Deploy monitoring configuration

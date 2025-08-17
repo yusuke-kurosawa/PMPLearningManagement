@@ -212,12 +212,12 @@ describe('KeyManagementSystem', () => {
 
       // キーを手動で期限切れに設定
       await keyManager.deprecateKey(key.id)
-      
+
       // Mock the expired key by using revokeKey which sets immediate expiry
       await keyManager.revokeKey(key.id, 'test expiry')
 
       // Wait a bit to ensure expiry
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       await keyManager.performKeyRotation()
 
@@ -315,6 +315,10 @@ describe('KeyManagementSystem', () => {
     it('should warn when production setup is called in non-production', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
+      // 環境変数がtestに設定されていることを確認
+      const originalEnv = process.env.NODE_ENV
+      process.env.NODE_ENV = 'test'
+
       await keyManager.setupProductionKeyStrategy()
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -322,6 +326,7 @@ describe('KeyManagementSystem', () => {
       )
 
       consoleSpy.mockRestore()
+      process.env.NODE_ENV = originalEnv
     })
   })
 

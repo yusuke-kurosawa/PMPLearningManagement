@@ -59,26 +59,26 @@ const MobileBottomNavigation = () => {
       {/* Overlay for overflow menu */}
       {showOverflowMenu && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50"
+          className='fixed inset-0 z-40 bg-black bg-opacity-50'
           onClick={() => setShowOverflowMenu(false)}
         />
       )}
 
       {/* Overflow Menu */}
       {showOverflowMenu && (
-        <div className="animate-slide-up fixed bottom-20 left-4 right-4 z-50 rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-          <div className="p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">その他の機能</h3>
+        <div className='animate-slide-up fixed bottom-20 left-4 right-4 z-50 rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
+          <div className='p-4'>
+            <div className='mb-4 flex items-center justify-between'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>その他の機能</h3>
               <button
                 onClick={() => setShowOverflowMenu(false)}
-                className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label="メニューを閉じる"
+                className='rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'
+                aria-label='メニューを閉じる'
               >
-                <X className="h-5 w-5" />
+                <X className='h-5 w-5' />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className='grid grid-cols-2 gap-3'>
               {overflowItems.map(({ path, label, icon: Icon }) => {
                 const isActive = location.pathname === path
                 return (
@@ -95,8 +95,8 @@ const MobileBottomNavigation = () => {
                       }
                     `}
                   >
-                    <Icon className="h-6 w-6" />
-                    <span className="text-center text-xs font-medium">{label}</span>
+                    <Icon className='h-6 w-6' />
+                    <span className='text-center text-xs font-medium'>{label}</span>
                   </Link>
                 )
               })}
@@ -112,10 +112,10 @@ const MobileBottomNavigation = () => {
           ease-in-out dark:border-gray-700 dark:bg-gray-800
           ${isVisible ? 'translate-y-0' : 'translate-y-full'}
         `}
-        role="navigation"
-        aria-label="モバイルナビゲーション"
+        role='navigation'
+        aria-label='モバイルナビゲーション'
       >
-        <div className="grid h-16 grid-cols-5">
+        <div className='grid h-16 grid-cols-5'>
           {/* Main Navigation Items */}
           {mainNavItems.map(({ path, label, icon: Icon }) => {
             const isActive = location.pathname === path
@@ -134,9 +134,9 @@ const MobileBottomNavigation = () => {
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={`h-5 w-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
-                <span className="text-xs font-medium">{label}</span>
+                <span className='text-xs font-medium'>{label}</span>
                 {isActive && (
-                  <div className="absolute top-0 h-0.5 w-8 rounded-b-full bg-blue-600 dark:bg-blue-400" />
+                  <div className='absolute top-0 h-0.5 w-8 rounded-b-full bg-blue-600 dark:bg-blue-400' />
                 )}
               </Link>
             )
@@ -153,23 +153,23 @@ const MobileBottomNavigation = () => {
                   : 'text-gray-500 dark:text-gray-400'
               }
             `}
-            aria-label="その他のメニュー"
+            aria-label='その他のメニュー'
             aria-expanded={showOverflowMenu}
           >
-            {showOverflowMenu ? <ChevronUp className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            <span className="text-xs font-medium">その他</span>
+            {showOverflowMenu ? <ChevronUp className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
+            <span className='text-xs font-medium'>その他</span>
             {showOverflowMenu && (
-              <div className="absolute top-0 h-0.5 w-8 rounded-b-full bg-blue-600 dark:bg-blue-400" />
+              <div className='absolute top-0 h-0.5 w-8 rounded-b-full bg-blue-600 dark:bg-blue-400' />
             )}
           </button>
         </div>
 
         {/* Safe area padding for devices with home indicator */}
-        <div className="h-safe-area-inset-bottom" />
+        <div className='h-safe-area-inset-bottom' />
       </nav>
 
       {/* Content padding to prevent overlap with bottom nav */}
-      <div className="h-20" />
+      <div className='h-20' />
     </>
   )
 }

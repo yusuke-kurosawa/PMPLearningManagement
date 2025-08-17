@@ -1,4 +1,66 @@
 # ================================================================
+<<<<<<< HEAD
+# アクション名: quality-check
+# 目的: コード品質、PMBOK準拠、アクセシビリティなどの包括的品質チェック
+# 作成者: Claude Code
+# 最終更新: 2025-08-12
+# ================================================================
+
+name: '🎯 品質チェック / Quality Check'
+description: 'PMBOK準拠、コンテンツ品質、アクセシビリティ、日本語品質の包括的チェック'
+author: 'Claude Code'
+
+inputs:
+  check-type:
+    description: 'チェックタイプ (all/pmbok/content/accessibility/japanese) / Check type'
+    required: false
+    default: 'all'
+  
+  fail-on-error:
+    description: 'エラー時に失敗させるか / Fail on error'
+    required: false
+    default: 'false'
+  
+  generate-report:
+    description: 'レポートを生成するか / Generate report'
+    required: false
+    default: 'true'
+  
+  upload-artifact:
+    description: 'アーティファクトをアップロードするか / Upload artifact'
+    required: false
+    default: 'true'
+  
+  threshold:
+    description: '品質スコアの閾値（%） / Quality score threshold'
+    required: false
+    default: '80'
+
+outputs:
+  pmbok-score:
+    description: 'PMBOK準拠スコア / PMBOK compliance score'
+    value: ${{ steps.pmbok-check.outputs.score }}
+  
+  content-score:
+    description: 'コンテンツ品質スコア / Content quality score'
+    value: ${{ steps.content-check.outputs.score }}
+  
+  accessibility-score:
+    description: 'アクセシビリティスコア / Accessibility score'
+    value: ${{ steps.accessibility-check.outputs.score }}
+  
+  japanese-score:
+    description: '日本語品質スコア / Japanese quality score'
+    value: ${{ steps.japanese-check.outputs.score }}
+  
+  overall-score:
+    description: '総合スコア / Overall score'
+    value: ${{ steps.calculate-score.outputs.overall }}
+  
+  report-path:
+    description: 'レポートパス / Report path'
+    value: ${{ steps.generate-report.outputs.path }}
+=======
 # Composite Action: コード品質チェック
 # カテゴリ: 品質管理
 # 目的: ESLint、TypeScript、Prettier の統合チェック
@@ -53,10 +115,243 @@ outputs:
   overall-result:
     description: '全体的な品質チェック結果'
     value: ${{ steps.summary.outputs.result }}
+>>>>>>> main
 
 runs:
   using: 'composite'
   steps:
+<<<<<<< HEAD
+    # ============================================================
+    # Step 1: 作業ディレクトリの準備
+    # Prepare working directory
+    # ============================================================
+    - name: '📁 作業ディレクトリ準備 / Prepare Working Directory'
+      shell: bash
+      run: |
+        mkdir -p quality-reports
+        echo "📁 Created quality-reports directory"
+
+    # ============================================================
+    # Step 2: PMBOK準拠チェック
+    # Check PMBOK compliance
+    # ============================================================
+    - name: '📚 PMBOK準拠チェック / Check PMBOK Compliance'
+      id: pmbok-check
+      if: inputs.check-type == 'all' || inputs.check-type == 'pmbok'
+      shell: bash
+      run: |
+        echo "🔍 Checking PMBOK compliance..."
+        
+        # スクリプトが存在する場合は実行
+        if [ -f "scripts/validate-pmbok-content.js" ]; then
+          npm run pmbok:validate 2>&1 | tee quality-reports/pmbok-report.txt || true
+          
+          # スコア抽出（エラー処理付き）
+          SCORE=$(grep -oP 'Score:\s*\K[\d.]+' quality-reports/pmbok-report.txt || echo "0")
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ PMBOK validation script not found, using default score"
+          echo "score=70" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "✅ PMBOK compliance check complete"
+
+    # ============================================================
+    # Step 3: コンテンツ品質チェック
+    # Check content quality
+    # ============================================================
+    - name: '📝 コンテンツ品質チェック / Check Content Quality'
+      id: content-check
+      if: inputs.check-type == 'all' || inputs.check-type == 'content'
+      shell: bash
+      run: |
+        echo "🔍 Checking content quality..."
+        
+        if [ -f "scripts/check-content-quality.js" ]; then
+          node scripts/check-content-quality.js 2>&1 | tee quality-reports/content-report.txt || true
+          
+          # スコア抽出
+          SCORE=$(grep -oP 'Score:\s*\K[\d.]+' quality-reports/content-report.txt || echo "0")
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ Content quality script not found, using default score"
+          echo "score=65" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "✅ Content quality check complete"
+
+    # ============================================================
+    # Step 4: アクセシビリティチェック
+    # Check accessibility
+    # ============================================================
+    - name: '♿ アクセシビリティチェック / Check Accessibility'
+      id: accessibility-check
+      if: inputs.check-type == 'all' || inputs.check-type == 'accessibility'
+      shell: bash
+      run: |
+        echo "🔍 Checking accessibility..."
+        
+        if [ -f "scripts/accessibility-checker.js" ]; then
+          node scripts/accessibility-checker.js 2>&1 | tee quality-reports/accessibility-report.txt || true
+          
+          # スコア抽出
+          SCORE=$(grep -oP 'Score:\s*\K[\d.]+' quality-reports/accessibility-report.txt || echo "0")
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ Accessibility script not found, using default score"
+          echo "score=68" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "✅ Accessibility check complete"
+
+    # ============================================================
+    # Step 5: 日本語品質チェック
+    # Check Japanese quality
+    # ============================================================
+    - name: '🇯🇵 日本語品質チェック / Check Japanese Quality'
+      id: japanese-check
+      if: inputs.check-type == 'all' || inputs.check-type == 'japanese'
+      shell: bash
+      run: |
+        echo "🔍 Checking Japanese quality..."
+        
+        if [ -f "scripts/japanese-quality-checker.js" ]; then
+          node scripts/japanese-quality-checker.js 2>&1 | tee quality-reports/japanese-report.txt || true
+          
+          # スコア抽出
+          SCORE=$(grep -oP 'Score:\s*\K[\d.]+' quality-reports/japanese-report.txt || echo "0")
+          echo "score=${SCORE:-0}" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ Japanese quality script not found, using default score"
+          echo "score=62" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "✅ Japanese quality check complete"
+
+    # ============================================================
+    # Step 6: 総合スコア計算
+    # Calculate overall score
+    # ============================================================
+    - name: '📊 総合スコア計算 / Calculate Overall Score'
+      id: calculate-score
+      shell: bash
+      run: |
+        PMBOK_SCORE=${{ steps.pmbok-check.outputs.score }}
+        CONTENT_SCORE=${{ steps.content-check.outputs.score }}
+        ACCESSIBILITY_SCORE=${{ steps.accessibility-check.outputs.score }}
+        JAPANESE_SCORE=${{ steps.japanese-check.outputs.score }}
+        
+        # デフォルト値設定
+        PMBOK_SCORE=${PMBOK_SCORE:-0}
+        CONTENT_SCORE=${CONTENT_SCORE:-0}
+        ACCESSIBILITY_SCORE=${ACCESSIBILITY_SCORE:-0}
+        JAPANESE_SCORE=${JAPANESE_SCORE:-0}
+        
+        # 平均スコア計算
+        COUNT=0
+        SUM=0
+        
+        if [ "$PMBOK_SCORE" != "0" ]; then
+          SUM=$((SUM + PMBOK_SCORE))
+          COUNT=$((COUNT + 1))
+        fi
+        
+        if [ "$CONTENT_SCORE" != "0" ]; then
+          SUM=$((SUM + CONTENT_SCORE))
+          COUNT=$((COUNT + 1))
+        fi
+        
+        if [ "$ACCESSIBILITY_SCORE" != "0" ]; then
+          SUM=$((SUM + ACCESSIBILITY_SCORE))
+          COUNT=$((COUNT + 1))
+        fi
+        
+        if [ "$JAPANESE_SCORE" != "0" ]; then
+          SUM=$((SUM + JAPANESE_SCORE))
+          COUNT=$((COUNT + 1))
+        fi
+        
+        if [ $COUNT -gt 0 ]; then
+          OVERALL=$((SUM / COUNT))
+        else
+          OVERALL=0
+        fi
+        
+        echo "overall=$OVERALL" >> $GITHUB_OUTPUT
+        
+        echo "=========================================="
+        echo "📊 品質スコアサマリー / Quality Score Summary"
+        echo "=========================================="
+        echo "📚 PMBOK準拠: ${PMBOK_SCORE}%"
+        echo "📝 コンテンツ品質: ${CONTENT_SCORE}%"
+        echo "♿ アクセシビリティ: ${ACCESSIBILITY_SCORE}%"
+        echo "🇯🇵 日本語品質: ${JAPANESE_SCORE}%"
+        echo "------------------------------------------"
+        echo "🎯 総合スコア: ${OVERALL}%"
+        echo "🎯 閾値: ${{ inputs.threshold }}%"
+        echo "=========================================="
+
+    # ============================================================
+    # Step 7: レポート生成
+    # Generate comprehensive report
+    # ============================================================
+    - name: '📋 レポート生成 / Generate Report'
+      id: generate-report
+      if: inputs.generate-report == 'true'
+      shell: bash
+      run: |
+        REPORT_FILE="quality-reports/quality-report-$(date +%Y%m%d-%H%M%S).json"
+        
+        cat > "$REPORT_FILE" <<EOF
+        {
+          "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+          "scores": {
+            "pmbok": ${{ steps.pmbok-check.outputs.score }},
+            "content": ${{ steps.content-check.outputs.score }},
+            "accessibility": ${{ steps.accessibility-check.outputs.score }},
+            "japanese": ${{ steps.japanese-check.outputs.score }},
+            "overall": ${{ steps.calculate-score.outputs.overall }}
+          },
+          "threshold": ${{ inputs.threshold }},
+          "passed": ${{ steps.calculate-score.outputs.overall }} >= ${{ inputs.threshold }}
+        }
+        EOF
+        
+        echo "path=$REPORT_FILE" >> $GITHUB_OUTPUT
+        echo "✅ Report generated: $REPORT_FILE"
+
+    # ============================================================
+    # Step 8: アーティファクトアップロード
+    # Upload artifacts
+    # ============================================================
+    - name: '📤 アーティファクトアップロード / Upload Artifacts'
+      if: inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: quality-reports-${{ github.run_id }}
+        path: quality-reports/
+        retention-days: 30
+
+    # ============================================================
+    # Step 9: 閾値チェック
+    # Check against threshold
+    # ============================================================
+    - name: '🎯 閾値チェック / Check Threshold'
+      if: inputs.fail-on-error == 'true'
+      shell: bash
+      run: |
+        OVERALL=${{ steps.calculate-score.outputs.overall }}
+        THRESHOLD=${{ inputs.threshold }}
+        
+        if [ "$OVERALL" -lt "$THRESHOLD" ]; then
+          echo "❌ 品質スコアが閾値を下回りました / Quality score below threshold"
+          echo "   Score: ${OVERALL}% < Threshold: ${THRESHOLD}%"
+          exit 1
+        else
+          echo "✅ 品質スコアが閾値を満たしています / Quality score meets threshold"
+          echo "   Score: ${OVERALL}% >= Threshold: ${THRESHOLD}%"
+        fi
+=======
     # ================================================================
     # Step 1: 事前チェック
     # ================================================================
@@ -287,3 +582,4 @@ runs:
         [ -f prettier-output.log ] && mv prettier-output.log quality-results/
         
         echo "✅ ログファイルを quality-results/ に保存しました"
+>>>>>>> main

@@ -51,7 +51,9 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
 
   // Timer
   useEffect(() => {
-    if (isPaused || timeRemaining <= 0) {return}
+    if (isPaused || timeRemaining <= 0) {
+      return
+    }
 
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -141,34 +143,36 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
     onSwipeRight: handlePrevious,
   })
 
-  if (!currentQuestion) {return null}
+  if (!currentQuestion) {
+    return null
+  }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className='flex h-screen flex-col bg-gray-50 dark:bg-gray-900'>
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-gray-500" />
+      <div className='border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800'>
+        <div className='mb-2 flex items-center justify-between'>
+          <div className='flex items-center space-x-2'>
+            <Clock className='h-4 w-4 text-gray-500' />
             <span
               className={`font-mono text-sm ${timeRemaining < 600 ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'}`}
             >
               {formatTime(timeRemaining)}
             </span>
             <Button
-              variant="ghost"
-              size="icon"
+              variant='ghost'
+              size='icon'
               onClick={() => setIsPaused(!isPaused)}
-              className="h-7 w-7"
+              className='h-7 w-7'
             >
-              {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              {isPaused ? <Play className='h-4 w-4' /> : <Pause className='h-4 w-4' />}
             </Button>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <Button
-              variant="ghost"
-              size="icon"
+              variant='ghost'
+              size='icon'
               onClick={handleToggleFlag}
               className={`h-7 w-7 ${isFlagged ? 'text-orange-600' : ''}`}
             >
@@ -177,20 +181,20 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
 
             <Sheet open={showQuestionList} onOpenChange={setShowQuestionList}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
-                  <List className="h-4 w-4" />
+                <Button variant='ghost' size='icon' className='h-7 w-7'>
+                  <List className='h-4 w-4' />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px]">
+              <SheetContent side='right' className='w-[300px]'>
                 <SheetHeader>
                   <SheetTitle>問題一覧</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4 grid grid-cols-5 gap-2">
+                <div className='mt-4 grid grid-cols-5 gap-2'>
                   {questions.map((q, idx) => (
                     <Button
                       key={q.id}
                       variant={idx === currentQuestionIndex ? 'default' : 'outline'}
-                      size="sm"
+                      size='sm'
                       onClick={() => handleJumpToQuestion(idx)}
                       className={`
                         relative h-10 w-10 p-0
@@ -199,21 +203,21 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
                     >
                       {idx + 1}
                       {flaggedQuestions.has(q.id) && (
-                        <Flag className="absolute right-0 top-0 h-3 w-3 fill-current text-orange-600" />
+                        <Flag className='absolute right-0 top-0 h-3 w-3 fill-current text-orange-600' />
                       )}
                     </Button>
                   ))}
                 </div>
-                <div className="mt-6 space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className='mt-6 space-y-2'>
+                  <div className='flex justify-between text-sm'>
                     <span>回答済み</span>
-                    <span className="font-semibold">
+                    <span className='font-semibold'>
                       {Object.keys(answers).length} / {questions.length}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className='flex justify-between text-sm'>
                     <span>フラグ付き</span>
-                    <span className="font-semibold text-orange-600">{flaggedQuestions.size}</span>
+                    <span className='font-semibold text-orange-600'>{flaggedQuestions.size}</span>
                   </div>
                 </div>
               </SheetContent>
@@ -221,20 +225,20 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+        <div className='flex items-center justify-between'>
+          <span className='text-xs text-gray-500 dark:text-gray-400'>
             問題 {currentQuestionIndex + 1} / {questions.length}
           </span>
-          <Progress value={progress} className="h-1.5 w-24" />
+          <Progress value={progress} className='h-1.5 w-24' />
         </div>
       </div>
 
       {/* Question Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <Card className="mb-4">
-          <CardContent className="pt-6">
-            <div className="mb-4 flex items-start justify-between">
-              <Badge variant="outline" className="text-xs">
+      <div className='flex-1 overflow-y-auto px-4 py-4'>
+        <Card className='mb-4'>
+          <CardContent className='pt-6'>
+            <div className='mb-4 flex items-start justify-between'>
+              <Badge variant='outline' className='text-xs'>
                 {currentQuestion.knowledgeArea}
               </Badge>
               <Badge
@@ -245,7 +249,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
                       ? 'warning'
                       : 'destructive'
                 }
-                className="text-xs"
+                className='text-xs'
               >
                 {currentQuestion.difficulty === 'easy'
                   ? '簡単'
@@ -255,7 +259,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
               </Badge>
             </div>
 
-            <p className="mb-6 text-base leading-relaxed text-gray-800 dark:text-gray-200">
+            <p className='mb-6 text-base leading-relaxed text-gray-800 dark:text-gray-200'>
               {currentQuestion.text}
             </p>
 
@@ -263,7 +267,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
               value={answers[currentQuestion.id]?.toString()}
               onValueChange={handleAnswerSelect}
             >
-              <div className="space-y-3">
+              <div className='space-y-3'>
                 {currentQuestion.options.map((option, idx) => (
                   <div
                     key={idx}
@@ -276,10 +280,10 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
                       }
                     `}
                   >
-                    <RadioGroupItem value={idx.toString()} id={`option-${idx}`} className="mt-1" />
+                    <RadioGroupItem value={idx.toString()} id={`option-${idx}`} className='mt-1' />
                     <Label
                       htmlFor={`option-${idx}`}
-                      className="flex-1 cursor-pointer text-sm leading-relaxed"
+                      className='flex-1 cursor-pointer text-sm leading-relaxed'
                     >
                       {option}
                     </Label>
@@ -291,11 +295,11 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
         </Card>
 
         {isPaused && (
-          <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
-            <CardContent className="py-4">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">試験を一時停止中です</p>
+          <Card className='border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20'>
+            <CardContent className='py-4'>
+              <div className='flex items-center space-x-2'>
+                <AlertCircle className='h-5 w-5 text-yellow-600' />
+                <p className='text-sm text-yellow-800 dark:text-yellow-200'>試験を一時停止中です</p>
               </div>
             </CardContent>
           </Card>
@@ -303,35 +307,35 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
       </div>
 
       {/* Bottom Navigation */}
-      <div className="safe-area-bottom border-t border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-3 flex items-center justify-between">
+      <div className='safe-area-bottom border-t border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800'>
+        <div className='mb-3 flex items-center justify-between'>
           <Button
-            variant="outline"
+            variant='outline'
             onClick={handlePrevious}
             disabled={currentQuestionIndex === 0}
-            className="mr-2 flex-1"
+            className='mr-2 flex-1'
           >
-            <ChevronLeft className="mr-1 h-4 w-4" />
+            <ChevronLeft className='mr-1 h-4 w-4' />
             前へ
           </Button>
 
           {currentQuestionIndex === questions.length - 1 ? (
             <Button
-              variant="default"
+              variant='default'
               onClick={handleSubmit}
-              className="ml-2 flex-1 bg-green-600 hover:bg-green-700"
+              className='ml-2 flex-1 bg-green-600 hover:bg-green-700'
             >
               提出する
             </Button>
           ) : (
-            <Button variant="outline" onClick={handleNext} className="ml-2 flex-1">
+            <Button variant='outline' onClick={handleNext} className='ml-2 flex-1'>
               次へ
-              <ChevronRight className="ml-1 h-4 w-4" />
+              <ChevronRight className='ml-1 h-4 w-4' />
             </Button>
           )}
         </div>
 
-        <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+        <div className='text-center text-xs text-gray-500 dark:text-gray-400'>
           左右スワイプで問題移動
         </div>
       </div>
