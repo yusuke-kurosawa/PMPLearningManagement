@@ -15,10 +15,10 @@ export type ErrorLevel = 'low' | 'medium' | 'high' | 'critical'
 /**
  * エラーカテゴリ型
  */
-export type ErrorCategory = 
+export type ErrorCategory =
   | 'validation'
   | 'authentication'
-  | 'authorization' 
+  | 'authorization'
   | 'network'
   | 'server'
   | 'client'
@@ -29,7 +29,7 @@ export type ErrorCategory =
 /**
  * エラーコード型
  */
-export type ErrorCode = 
+export type ErrorCode =
   // 認証・認可関連
   | 'AUTH_REQUIRED'
   | 'AUTH_INVALID_CREDENTIALS'
@@ -38,7 +38,7 @@ export type ErrorCode =
   | 'AUTH_INSUFFICIENT_PERMISSIONS'
   | 'AUTH_ACCOUNT_LOCKED'
   | 'AUTH_SESSION_EXPIRED'
-  
+
   // バリデーション関連
   | 'VALIDATION_REQUIRED_FIELD'
   | 'VALIDATION_INVALID_FORMAT'
@@ -46,35 +46,35 @@ export type ErrorCode =
   | 'VALIDATION_DUPLICATE_VALUE'
   | 'VALIDATION_INVALID_LENGTH'
   | 'VALIDATION_PATTERN_MISMATCH'
-  
+
   // ネットワーク関連
   | 'NETWORK_TIMEOUT'
   | 'NETWORK_CONNECTION_FAILED'
   | 'NETWORK_OFFLINE'
   | 'NETWORK_RATE_LIMITED'
-  
+
   // サーバー関連
   | 'SERVER_INTERNAL_ERROR'
   | 'SERVER_SERVICE_UNAVAILABLE'
   | 'SERVER_MAINTENANCE'
   | 'SERVER_OVERLOADED'
-  
+
   // リソース関連
   | 'RESOURCE_NOT_FOUND'
   | 'RESOURCE_ALREADY_EXISTS'
   | 'RESOURCE_CONFLICT'
   | 'RESOURCE_QUOTA_EXCEEDED'
-  
+
   // ビジネスロジック関連
   | 'BUSINESS_RULE_VIOLATION'
   | 'BUSINESS_INVALID_STATE'
   | 'BUSINESS_OPERATION_NOT_ALLOWED'
-  
+
   // システム関連
   | 'SYSTEM_DATABASE_ERROR'
   | 'SYSTEM_FILE_ERROR'
   | 'SYSTEM_CONFIGURATION_ERROR'
-  
+
   // 外部サービス関連
   | 'EXTERNAL_SERVICE_ERROR'
   | 'EXTERNAL_API_ERROR'
@@ -174,7 +174,7 @@ export type ErrorHandler<T extends BaseAppError = BaseAppError> = (error: T) => 
 /**
  * エラー回復戦略型
  */
-export type ErrorRecoveryStrategy = 
+export type ErrorRecoveryStrategy =
   | 'retry'
   | 'fallback'
   | 'ignore'
@@ -368,9 +368,9 @@ export const isRecoverableError = (error: BaseAppError): boolean => {
     'NETWORK_TIMEOUT',
     'NETWORK_CONNECTION_FAILED',
     'SERVER_OVERLOADED',
-    'EXTERNAL_TIMEOUT'
+    'EXTERNAL_TIMEOUT',
   ]
-  
+
   return recoverableCategories.includes(error.category) || recoverableCodes.includes(error.code)
 }
 

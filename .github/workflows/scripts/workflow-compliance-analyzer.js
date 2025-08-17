@@ -16,20 +16,21 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Compliance rules based on github-actions-rules.md
+// Compliance rules based on updated github-actions-rules.md
 const COMPLIANCE_RULES = {
   naming: {
-    workflowNamePattern: /^[🔒📦🧪📊🤖⚖️🔔🔧] .+$/,
+    workflowNamePattern: /^[🎯📦🧪🔒📊🤖♻️🔧🔄] .+$/,
     fileNamePattern: /^\d{2}-[a-z]+-[a-z-]+\.yml$/,
     categories: {
-      '01': 'deploy',
-      '02': 'test/quality',
+      '00': 'meta',
+      '01': 'ci|core|deploy',
+      '02': 'quality|test|cd|performance',
       '03': 'security',
-      '04': 'monitoring/integration',
-      '05': 'automation/performance',
-      '06': 'compliance',
-      '07': 'notification/self-healing',
-      '08': 'developer'
+      '04': 'monitoring|integration|deployment|security',
+      '05': 'automation|performance',
+      '07': 'self-healing',
+      '08': 'developer',
+      '09': 'reusable'
     }
   },
   structure: {

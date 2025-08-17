@@ -1,14 +1,15 @@
 {
   "summary": {
-    "timestamp": "2025-08-17T09:23:33.534Z",
-    "totalWorkflows": 39,
+    "timestamp": "2025-08-17T11:59:56.169Z",
+    "totalWorkflows": 40,
     "compliantCount": 0,
-    "nonCompliantCount": 39,
+    "nonCompliantCount": 40,
     "complianceRate": "0.00%"
   },
   "compliantWorkflows": [],
   "nonCompliantWorkflows": [
     "00-meta-devops-orchestrator.yml",
+    "00-meta-workflow-compliance.yml",
     "00-meta-workflow-validator.yml",
     "01-ci-balanced.yml",
     "01-ci-build-main.yml",
@@ -84,6 +85,18 @@
         "type": "documentation",
         "severity": "low",
         "message": "Job \"final-status\" missing Japanese name/description"
+      }
+    ],
+    "00-meta-workflow-compliance.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
       }
     ],
     "00-meta-workflow-validator.yml": [

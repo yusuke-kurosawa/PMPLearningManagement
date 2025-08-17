@@ -1,560 +1,563 @@
 /**
- * Comprehensive Type Definitions for PMP Learning Management System
+ * PMPLearningManagement TypeScript型定義統合エクスポート
+ *
+ * このファイルは、プロジェクト全体で使用される型定義を統合し、
+ * 一元的なインポートポイントを提供します。
+ *
+ * 使用例:
+ * ```typescript
+ * import type { User, Process, LearningProgress } from '@/types'
+ * import { isAuthenticated, isProcessCompleted } from '@/types'
+ * ```
  */
 
-// ============================================================================
-// User and Authentication Types
-// ============================================================================
+// ==================== 共通型エクスポート ====================
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  avatar?: string
-  role: UserRole
-  createdAt: Date
-  updatedAt: Date
-  preferences?: UserPreferences
-  progress?: UserProgress
-}
+// 基本型・ユーティリティ型
+export type {
+  // ブランド型
+  ProcessId,
+  UserId,
+  SessionId,
+  Timestamp,
 
-export type UserRole = 'student' | 'instructor' | 'admin'
+  // 基本データ型
+  Required,
+  Partial,
+  Pick,
+  Omit,
 
-export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system'
-  language: 'en' | 'ja' | 'es' | 'fr'
-  notifications: NotificationPreferences
-  studyReminders: boolean
-  autoSave: boolean
-}
+  // 状態管理型
+  AsyncState,
+  Result,
+  Option,
+  Pagination,
+  SortConfig,
+  FilterConfig,
 
-export interface NotificationPreferences {
-  email: boolean
-  push: boolean
-  inApp: boolean
-  studyReminders: boolean
-  achievementAlerts: boolean
-}
+  // メタデータ型
+  EntityMetadata,
+  SoftDeletableMetadata,
 
-export interface AuthState {
-  user: User | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  error: string | null
-}
+  // 数値・計算型
+  Percentage,
+  Score,
+  Duration,
+  Count,
 
-// ============================================================================
-// PMBOK Process Types
-// ============================================================================
+  // ヘルパー型
+  DeepReadonly,
+  NonEmptyArray,
+  ArrayToUnion,
+  ValueOf,
+  Conditional,
+  KeysOf,
 
-export interface PMBOKProcess {
-  id: string
-  name: string
-  processGroup: ProcessGroup
-  knowledgeArea: KnowledgeArea
-  description: string
-  inputs: ITTOItem[]
-  tools: ITTOItem[]
-  outputs: ITTOItem[]
-  version: 6 | 7
-  difficulty: DifficultyLevel
-  estimatedTime: number // in minutes
-  prerequisites?: string[]
-}
+  // 統合型
+  BaseTypes,
+} from './common/base'
 
-export type ProcessGroup =
-  | 'Initiating'
-  | 'Planning'
-  | 'Executing'
-  | 'Monitoring and Controlling'
-  | 'Closing'
+// API関連型
+export type {
+  // HTTP型
+  HttpMethod,
+  HttpStatusCode,
+  ContentType,
 
-export type KnowledgeArea =
-  | 'Integration Management'
-  | 'Scope Management'
-  | 'Schedule Management'
-  | 'Cost Management'
-  | 'Quality Management'
-  | 'Resource Management'
-  | 'Communications Management'
-  | 'Risk Management'
-  | 'Procurement Management'
-  | 'Stakeholder Management'
+  // 要求・応答型
+  ApiRequest,
+  ApiResponse,
+  StandardApiResponse,
+  ApiResponseMeta,
 
-export interface ITTOItem {
-  id: string
-  name: string
-  description: string
-  category: 'input' | 'tool' | 'technique' | 'output'
-  relatedProcesses: string[]
-}
+  // エラー型
+  ApiError,
+  ApiErrorResponse,
+  AuthenticationError,
+  AuthorizationError,
+  ValidationApiError,
 
-export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  // リクエスト種別型
+  ListRequest,
+  ListResponse,
+  DetailRequest,
+  DetailResponse,
+  CreateRequest,
+  CreateResponse,
+  UpdateRequest,
+  UpdateResponse,
+  DeleteRequest,
+  DeleteResponse,
 
-// ============================================================================
-// Learning Progress Types
-// ============================================================================
+  // WebSocket型
+  WebSocketMessage,
+  WebSocketConnectionState,
+  WebSocketConfig,
 
-export interface UserProgress {
-  userId: string
-  overallProgress: number // 0-100
-  processProgress: ProcessProgress[]
-  examScores: ExamScore[]
-  studyTime: StudyTime
-  achievements: Achievement[]
-  lastActivity: Date
-}
+  // ファイル・バッチ型
+  FileUploadRequest,
+  FileUploadResponse,
+  BatchRequest,
+  BatchResponse,
 
-export interface ProcessProgress {
-  processId: string
-  status: 'not-started' | 'in-progress' | 'completed' | 'mastered'
-  completionPercentage: number
-  lastStudied: Date
-  studyCount: number
-  notes?: string
-  bookmarked: boolean
-}
+  // API設定型
+  ApiConfig,
+  QueryOptions,
+  MutationOptions,
 
-export interface ExamScore {
-  examId: string
-  score: number
-  totalQuestions: number
-  correctAnswers: number
-  timeTaken: number // in seconds
-  date: Date
-  knowledgeAreaScores: Record<KnowledgeArea, number>
-}
+  // 統合型
+  ApiTypes,
+} from './common/api'
 
-export interface StudyTime {
-  total: number // in minutes
-  today: number
-  thisWeek: number
-  thisMonth: number
-  byKnowledgeArea: Record<KnowledgeArea, number>
-  byProcessGroup: Record<ProcessGroup, number>
-}
+// UI関連型
+export type {
+  // テーマ型
+  ColorPalette,
+  ThemeColors,
+  ThemeMode,
+  Spacing,
+  Typography,
+  Breakpoints,
+  Theme,
 
-export interface Achievement {
-  id: string
-  name: string
-  description: string
-  icon: string
-  earnedAt: Date
-  category: AchievementCategory
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
-}
+  // ナビゲーション型
+  NavigationItem,
+  NavigationState,
+  BreadcrumbItem,
 
-export type AchievementCategory =
-  | 'study-streak'
-  | 'exam-performance'
-  | 'completion'
-  | 'mastery'
-  | 'collaboration'
-  | 'contribution'
+  // フォーム型
+  InputType,
+  FieldSize,
+  FieldState,
+  FormFieldProps,
+  ValidationMessage,
+  FormState,
 
-// ============================================================================
-// Exam and Question Types
-// ============================================================================
+  // モーダル型
+  ModalSize,
+  ModalPosition,
+  ModalProps,
+  ModalState,
 
-export interface ExamQuestion {
-  id: string
-  question: string
-  options: QuestionOption[]
-  correctAnswer: number
-  explanation: string
-  knowledgeArea: KnowledgeArea
-  processGroup: ProcessGroup
-  difficulty: DifficultyLevel
-  tags: string[]
-  imageUrl?: string
-}
+  // 通知型
+  NotificationType,
+  NotificationPosition,
+  Notification,
+  NotificationState,
 
-export interface QuestionOption {
-  id: number
-  text: string
-  isCorrect: boolean
-}
+  // レイアウト型
+  LayoutType,
+  LayoutConfig,
 
-export interface MockExam {
-  id: string
-  name: string
-  description: string
-  questions: ExamQuestion[]
-  duration: number // in minutes
-  passingScore: number // percentage
-  difficulty: DifficultyLevel
-  version: 6 | 7
-}
+  // データ表示型
+  TableColumn,
+  TableSort,
+  TableState,
 
-// ============================================================================
-// Collaboration Types
-// ============================================================================
+  // インタラクション型
+  ClickHandler,
+  KeyboardHandler,
+  EventHandler,
+  DragDropItem,
+  DragDropHandlers,
 
-export interface StudyGroup {
-  id: string
-  name: string
-  description: string
-  members: GroupMember[]
-  createdBy: string
-  createdAt: Date
-  isPrivate: boolean
-  maxMembers: number
-  tags: string[]
-  activity: GroupActivity[]
-}
+  // 状態表示型
+  LoadingState,
+  EmptyState,
+  ErrorState,
 
-export interface GroupMember {
-  userId: string
-  role: 'owner' | 'moderator' | 'member'
-  joinedAt: Date
-  contribution: number
-}
+  // アニメーション型
+  AnimationConfig,
+  Transition,
 
-export interface GroupActivity {
-  id: string
-  type: 'message' | 'file' | 'quiz' | 'milestone'
-  userId: string
-  content: string
-  timestamp: Date
-  reactions?: Reaction[]
-}
+  // アクセシビリティ型
+  AriaAttributes,
+  FocusManagement,
 
-export interface Reaction {
-  emoji: string
-  userId: string
-}
+  // レスポンシブ型
+  ResponsiveValue,
+  ViewportInfo,
 
-export interface SharedNote {
-  id: string
-  title: string
-  content: string
-  authorId: string
-  collaborators: string[]
-  processId?: string
-  knowledgeArea?: KnowledgeArea
-  tags: string[]
-  isPublic: boolean
-  createdAt: Date
-  updatedAt: Date
-  version: number
-}
+  // 統合型
+  UITypes,
+} from './common/ui'
 
-// ============================================================================
-// Visualization Types
-// ============================================================================
+// エラー関連型
+export type {
+  // 基本エラー型
+  ErrorLevel,
+  ErrorCategory,
+  ErrorCode,
+  BaseAppError,
 
-export interface NetworkNode {
-  id: string
-  label: string
-  type: 'process' | 'input' | 'tool' | 'output'
-  group: ProcessGroup | KnowledgeArea
-  x?: number
-  y?: number
-  color?: string
-  size?: number
-}
+  // 特定エラー型
+  ValidationError,
+  NetworkError,
+  BusinessRuleError,
+  ResourceError,
 
-export interface NetworkLink {
-  source: string
-  target: string
-  type: 'input' | 'output' | 'dependency'
-  strength?: number
-  label?: string
-}
+  // エラーハンドリング型
+  ErrorHandler,
+  ErrorRecoveryStrategy,
+  ErrorRecoveryConfig,
+  ErrorContext,
 
-export interface VisualizationConfig {
-  layout: 'force' | 'circular' | 'hierarchical' | 'radial'
-  theme: 'default' | 'dark' | 'colorful' | 'minimal'
-  showLabels: boolean
-  showLegend: boolean
-  animationSpeed: number
-  nodeSize: 'uniform' | 'byImportance' | 'byConnections'
-}
+  // エラー報告型
+  ErrorReportLevel,
+  ErrorReport,
+  ErrorBreadcrumb,
 
-// ============================================================================
-// AI Coaching Types
-// ============================================================================
+  // UI表示用エラー型
+  UserErrorMessage,
+  UserErrorAction,
+  ErrorBoundaryState,
 
-export interface AICoachingSession {
-  id: string
-  userId: string
-  topic: string
-  messages: ChatMessage[]
-  recommendations: Recommendation[]
-  startedAt: Date
-  endedAt?: Date
-  feedback?: SessionFeedback
-}
+  // エラー統計型
+  ErrorStatistics,
+  ErrorTrend,
+  ErrorHandlingConfig,
 
-export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  metadata?: Record<string, unknown>
-}
+  // 統合型
+  ErrorTypes,
+} from './common/errors'
 
-export interface Recommendation {
-  id: string
-  type: 'study' | 'practice' | 'review' | 'exam'
-  title: string
-  description: string
-  priority: 'low' | 'medium' | 'high'
-  estimatedTime: number
-  relatedProcesses: string[]
-  completed: boolean
-}
+// ==================== PMBOK型エクスポート ====================
 
-export interface SessionFeedback {
-  rating: 1 | 2 | 3 | 4 | 5
-  helpful: boolean
-  comments?: string
-}
+// プロセス関連型
+export type {
+  // 基本プロセス型
+  ProcessGroup,
+  KnowledgeAreaId,
+  KnowledgeArea,
+  ProcessComplexityLevel,
+  ProcessFrequency,
+  ProcessMaturityLevel,
+  Process,
+  DetailedProcess,
 
-// ============================================================================
-// System and Configuration Types
-// ============================================================================
+  // プロセスステップ・メトリック型
+  ProcessStep,
+  ProcessCheckpoint,
+  ProcessMetric,
+  ProcessResource,
 
-export interface SystemConfig {
-  apiUrl: string
-  wsUrl: string
-  analyticsEnabled: boolean
-  maintenanceMode: boolean
-  features: FeatureFlags
-}
+  // プロセス関係性型
+  ProcessRelationshipType,
+  ProcessRelationship,
+  ProcessFlow,
+  ProcessFlowVariation,
 
-export interface FeatureFlags {
-  aiCoaching: boolean
-  collaboration: boolean
-  advancedAnalytics: boolean
-  offlineMode: boolean
-  betaFeatures: boolean
-}
+  // プロセス実行型
+  ProcessExecutionStatus,
+  ProcessExecution,
+  ProcessIssue,
+  ProcessLesson,
 
-export interface PerformanceMetrics {
-  pageLoadTime: number
-  apiResponseTime: number
-  renderTime: number
-  memoryUsage: number
-  errorRate: number
-  timestamp: Date
-}
+  // プロセス分析型
+  ProcessAnalyticsMetrics,
+  ProcessGap,
+  ProcessCapabilityAssessment,
+  ProcessCapabilityArea,
 
-// ============================================================================
-// API Response Types
-// ============================================================================
+  // プロセス学習型
+  ProcessLearningLevel,
+  ProcessLearningObjective,
+  ProcessLearningPath,
 
-export interface ApiResponse<T = unknown> {
-  success: boolean
-  data?: T
-  error?: ApiError
-  metadata?: ResponseMetadata
-}
+  // 統合型
+  ProcessTypes,
+} from './pmbok/process'
 
-export interface ApiError {
-  code: string
-  message: string
-  details?: Record<string, unknown>
-  timestamp: Date
-}
+// ITTO関連型
+export type {
+  // 基本ITTO型
+  ITTOItemType,
+  ITTOItemCategory,
+  ITTOItem,
+  DetailedITTOItem,
 
-export interface ResponseMetadata {
-  page?: number
-  pageSize?: number
-  totalCount?: number
-  totalPages?: number
-  timestamp: Date
-}
+  // ITTOコンポーネント型
+  ITTOItemComponent,
+  ITTOTemplate,
+  ITTOResource,
+  ITTOMetric,
+  ITTOVariation,
 
-export interface PaginatedResponse<T> {
-  items: T[]
-  pagination: {
-    page: number
-    pageSize: number
-    totalCount: number
-    totalPages: number
-    hasNext: boolean
-    hasPrevious: boolean
+  // プロセスITTO型
+  ProcessITTO,
+  ITTOToolTechnique,
+  ITTOVendor,
+  ITTOFlowConnection,
+
+  // ITTO関係性型
+  ITTOMapping,
+  ITTOItemMapping,
+  ITTOTraceability,
+  ITTOTransformation,
+
+  // ITTO品質型
+  ITTOQualityCheck,
+  ITTOQualityCriteria,
+  ITTOCheckpoint,
+
+  // ITTO学習型
+  ITTOLearningObjective,
+  ITTOLearningActivity,
+  ITTOAssessmentMethod,
+
+  // ITTO分析型
+  ITTOUsageAnalytics,
+  ITTOCombination,
+  ITTOEffectiveness,
+  ITTOTrend,
+
+  // 統合型
+  ITTOTypes,
+} from './pmbok/itto'
+
+// ==================== 学習型エクスポート ====================
+
+// 学習進捗型
+export type {
+  // 基本学習型
+  LearningLevel,
+  ProficiencyLevel,
+  LearningStatus,
+  LearningMethod,
+  LearningProgress,
+  DetailedLearningProgress,
+
+  // 学習目標・活動型
+  LearningObjective,
+  LearningMilestone,
+  LearningActivity,
+
+  // 学習スコア型
+  LearningScore,
+  ScoreDetail,
+  LearningAssessment,
+  AssessmentRating,
+
+  // 学習パターン型
+  LearningPattern,
+  LearningStyle,
+  LearningPreferences,
+  ReminderSettings,
+
+  // 学習計画型
+  LearningGoal,
+  GoalMetric,
+  StudyPlan,
+  StudySession,
+  PlanAdjustment,
+
+  // フィードバック型
+  LearningFeedback,
+  LearningNote,
+
+  // 学習統計型
+  LearningStatistics,
+  KnowledgeAreaProgress,
+  ProcessGroupProgress,
+  ProgressTrend,
+  PerformanceTrend,
+
+  // 統合型
+  LearningTypes,
+} from './learning/progress'
+
+// ==================== 認証・ユーザー型エクスポート ====================
+
+// ユーザー・認証型
+export type {
+  // 基本認証型
+  AuthProvider,
+  AuthStatus,
+  UserRole,
+  AccountStatus,
+  AuthenticationMethod,
+
+  // ユーザー型
+  User,
+  UserProfile,
+  PersonalInfo,
+  EducationBackground,
+  Certification,
+  ContactInfo,
+  Address,
+  EmergencyContact,
+
+  // 学習プロファイル型
+  LearningProfile,
+  StudySchedule,
+  TimeSlot,
+  BreakPreference,
+  LearningHistory,
+  Achievement,
+
+  // ユーザー設定型
+  UserPreferences,
+  NotificationPreferences,
+  EmailNotificationSettings,
+  PushNotificationSettings,
+  InAppNotificationSettings,
+  SmsNotificationSettings,
+  PrivacySettings,
+  AccessibilitySettings,
+  IntegrationSettings,
+  IntegrationConfig,
+
+  // セキュリティ型
+  SecuritySettings,
+  TwoFactorAuthSettings,
+  TrustedDevice,
+  LoginSecuritySettings,
+  PasswordPolicy,
+  SessionManagementSettings,
+  DataEncryptionSettings,
+  AuditLogSettings,
+
+  // サブスクリプション型
+  UserSubscription,
+  PaymentMethod,
+  SubscriptionFeature,
+  UsageMetrics,
+  BillingInfo,
+  Invoice,
+
+  // ユーザー統計型
+  UserStatistics,
+
+  // ソーシャル型
+  SocialProfile,
+  Friend,
+  SocialLink,
+  ReputationScore,
+  Contribution,
+
+  // 認証セッション型
+  AuthSession,
+  AuthState,
+
+  // 権限型
+  Permission,
+  PermissionCondition,
+  RolePermissions,
+
+  // 統合型
+  AuthTypes,
+} from './auth/user'
+
+// ==================== 型ガード・ユーティリティ関数エクスポート ====================
+
+// API型ガード
+export { isApiSuccessResponse, isApiErrorResponse } from './common/api'
+
+// エラー型ガード
+export {
+  isValidationError,
+  isAuthenticationError,
+  isNetworkError,
+  isBusinessRuleError,
+  isRecoverableError,
+} from './common/errors'
+
+// プロセス型ガード・ユーティリティ
+export {
+  isCoreProcess,
+  isProcessCompleted,
+  isProcessInProgress,
+  isHighComplexityProcess,
+  filterProcessesByGroup,
+  filterProcessesByKnowledgeArea,
+} from './pmbok/process'
+
+// ITTO型ガード・ユーティリティ
+export {
+  isInputItem,
+  isToolItem,
+  isTechniqueItem,
+  isOutputItem,
+  isReusableItem,
+  isHighComplexityItem,
+  filterITTOByType,
+  filterITTOByCategory,
+} from './pmbok/itto'
+
+// 学習型ガード・ユーティリティ
+export {
+  isLearningCompleted,
+  isLearningMastered,
+  needsReview,
+  isHighScore,
+  filterProgressByStatus,
+  filterProgressByProficiency,
+} from './learning/progress'
+
+// 認証・ユーザー型ガード・ユーティリティ
+export {
+  isAuthenticated,
+  isAdmin,
+  isActiveAccount,
+  hasActiveSubscription,
+  hasPermission,
+} from './auth/user'
+
+// ==================== 型定義統合エクスポート ====================
+
+/**
+ * 全型定義の統合エクスポート型
+ * プロジェクト全体で使用される型の概要を提供
+ */
+export type AllTypes = {
+  // 共通型
+  base: string
+  api: string
+  ui: string
+  errors: string
+
+  // ドメイン固有型
+  pmbok: {
+    process: string
+    itto: string
   }
+  learning: string
+  auth: string
 }
 
-// ============================================================================
-// Form and Validation Types
-// ============================================================================
+/**
+ * TypeScript設定で使用する型定義パス
+ */
+export const TYPE_PATHS = {
+  common: './common/*',
+  pmbok: './pmbok/*',
+  learning: './learning/*',
+  auth: './auth/*',
+  visualization: './visualization/*',
+} as const
 
-export interface FormField {
-  name: string
-  label: string
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea'
-  value: unknown
-  validation?: ValidationRule[]
-  options?: SelectOption[]
-  placeholder?: string
-  disabled?: boolean
-  required?: boolean
-}
+/**
+ * 型定義バージョン情報
+ */
+export const TYPE_VERSION = {
+  major: 1,
+  minor: 0,
+  patch: 0,
+  prerelease: 'beta',
+  build: Date.now(),
+} as const
 
-export interface ValidationRule {
-  type: 'required' | 'email' | 'min' | 'max' | 'pattern' | 'custom'
-  value?: unknown
-  message: string
-  validator?: (value: unknown) => boolean
-}
-
-export interface SelectOption {
-  value: string | number
-  label: string
-  disabled?: boolean
-}
-
-// ============================================================================
-// Event Types
-// ============================================================================
-
-export interface AppEvent {
-  type: string
-  payload?: unknown
-  timestamp: Date
-  userId?: string
-  sessionId?: string
-}
-
-export interface TouchGesture {
-  type: 'tap' | 'swipe' | 'pinch' | 'longPress'
-  direction?: 'up' | 'down' | 'left' | 'right'
-  startX: number
-  startY: number
-  endX: number
-  endY: number
-  duration: number
-  distance: number
-}
-
-// ============================================================================
-// Utility Types
-// ============================================================================
-
-export type Nullable<T> = T | null
-export type Optional<T> = T | undefined
-export type AsyncState<T> = {
-  data: T | null
-  loading: boolean
-  error: Error | null
-}
-
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
-}
-
-export type ValueOf<T> = T[keyof T]
-
-// ============================================================================
-// Component Props Types
-// ============================================================================
-
-export interface BaseComponentProps {
-  className?: string
-  children?: React.ReactNode
-  id?: string
-  'data-testid'?: string
-}
-
-export interface ButtonProps extends BaseComponentProps {
-  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
-  loading?: boolean
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
-  type?: 'button' | 'submit' | 'reset'
-}
-
-export interface ModalProps extends BaseComponentProps {
-  open: boolean
-  onClose: () => void
-  title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-  closable?: boolean
-}
-
-export interface TabsProps extends BaseComponentProps {
-  value: string
-  onValueChange: (value: string) => void
-  orientation?: 'horizontal' | 'vertical'
-}
-
-// ============================================================================
-// Context Types
-// ============================================================================
-
-export interface ThemeContextType {
-  theme: 'light' | 'dark' | 'system'
-  setTheme: (theme: 'light' | 'dark' | 'system') => void
-  isDark: boolean
-}
-
-export interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
-  register: (email: string, password: string, name: string) => Promise<void>
-  updateProfile: (updates: Partial<User>) => Promise<void>
-  isLoading: boolean
-  error: string | null
-}
-
-export interface ProgressContextType {
-  progress: UserProgress | null
-  updateProgress: (processId: string, updates: Partial<ProcessProgress>) => void
-  getProcessProgress: (processId: string) => ProcessProgress | undefined
-  calculateOverallProgress: () => number
-  isLoading: boolean
-}
-
-// ============================================================================
-// Hook Return Types
-// ============================================================================
-
-export interface UseAsyncReturn<T> {
-  data: T | null
-  loading: boolean
-  error: Error | null
-  execute: () => Promise<void>
-  reset: () => void
-}
-
-export interface UseLocalStorageReturn<T> {
-  value: T
-  setValue: (value: T | ((prevValue: T) => T)) => void
-  removeValue: () => void
-}
-
-export interface UseDebounceReturn<T> {
-  debouncedValue: T
-  isDebouncing: boolean
-}
-
-// ============================================================================
-// Service Types
-// ============================================================================
-
-export interface ApiClientConfig {
-  baseURL: string
-  timeout: number
-  retries: number
-  headers?: Record<string, string>
-}
-
-export interface CacheConfig {
-  ttl: number
-  maxSize: number
-  strategy: 'lru' | 'fifo' | 'lifo'
-}
-
-export interface LoggerConfig {
-  level: 'debug' | 'info' | 'warn' | 'error'
-  output: 'console' | 'file' | 'remote'
-  format: 'json' | 'text'
-}
-
-// Export everything as a namespace for convenience
-export * as Types from './index'
+/**
+ * 型定義メタデータ
+ */
+export const TYPE_METADATA = {
+  name: 'PMPLearningManagement Types',
+  description: 'Comprehensive TypeScript type definitions for PMP Learning Management System',
+  author: 'Claude Code',
+  license: 'MIT',
+  repository: 'https://github.com/yusuke-kurosawa/PMPLearningManagement',
+  documentation: 'https://github.com/yusuke-kurosawa/PMPLearningManagement/docs/types',
+  lastUpdated: new Date().toISOString(),
+  totalTypes: 200, // 概算
+  categories: ['common', 'pmbok', 'learning', 'auth', 'ui', 'api', 'errors'],
+} as const

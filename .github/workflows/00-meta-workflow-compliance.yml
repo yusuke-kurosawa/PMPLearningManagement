@@ -50,7 +50,7 @@ jobs:
   # Job 1: ワークフロー発見と構文検証
   # ====================================================================
   workflow-discovery:
-    name: 🔍 検証: ワークフロー発見と構文チェック
+    name: "🔍 検証: ワークフロー発見と構文チェック"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -90,7 +90,7 @@ jobs:
   # Job 2: 命名規則とファイル構造検証
   # ====================================================================
   naming-validation:
-    name: 📝 検証: 命名規則とファイル構造
+    name: "📝 検証: 命名規則とファイル構造"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: workflow-discovery
@@ -142,7 +142,7 @@ jobs:
   # Job 3: セキュリティ設定検証
   # ====================================================================
   security-validation:
-    name: 🔒 検証: セキュリティ設定
+    name: "🔒 検証: セキュリティ設定"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: workflow-discovery
@@ -203,7 +203,7 @@ jobs:
   # Job 4: パフォーマンスとベストプラクティス検証
   # ====================================================================
   performance-validation:
-    name: ⚡ 検証: パフォーマンス設定
+    name: "⚡ 検証: パフォーマンス設定"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: workflow-discovery
@@ -257,7 +257,7 @@ jobs:
   # Job 5: コンプライアンスレポート生成
   # ====================================================================
   compliance-report:
-    name: 📊 レポート: コンプライアンス分析
+    name: "📊 レポート: コンプライアンス分析"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [workflow-discovery, naming-validation, security-validation, performance-validation]
@@ -359,7 +359,7 @@ jobs:
   # Job 6: 最終ステータス
   # ====================================================================
   final-status:
-    name: ✅ 最終: コンプライアンスステータス
+    name: "✅ 最終: コンプライアンスステータス"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [compliance-report]
