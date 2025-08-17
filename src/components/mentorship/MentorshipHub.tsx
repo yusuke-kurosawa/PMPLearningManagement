@@ -25,7 +25,6 @@ import {
   _Languages,
   Building,
 } from 'lucide-react'
-
 const MentorshipHub = () => {
   const [connections] = useState([])
   const [activeTab, setActiveTab] = useState('find-mentor') // find-mentor, my-connections, become-mentor
@@ -48,7 +47,6 @@ const MentorshipHub = () => {
   //   })
   //   const [connections, setConnections] = useState([]) // TODO: Will be used in future
   const [mentorshipRequests, setMentorshipRequests] = useState([])
-
   // Mock mentor data
   const mockMentors = [
     {
@@ -138,15 +136,12 @@ const MentorshipHub = () => {
       sessionTypes: ['テクニカル指導', 'プロダクト戦略', 'キャリア相談'],
     },
   ]
-
   useEffect(() => {
     setMentors(mockMentors)
     setFilteredMentors(mockMentors)
   }, [])
-
   useEffect(() => {
     let filtered = mentors
-
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(
@@ -156,29 +151,23 @@ const MentorshipHub = () => {
           mentor.industry.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
-
     // Category filters
     if (filters.industry) {
       filtered = filtered.filter((mentor) => mentor.industry.includes(filters.industry))
     }
-
     if (filters.experience) {
       const expMap = { junior: [0, 5], mid: [6, 10], senior: [11, 20] }
       const [min, max] = expMap[filters.experience] || [0, 100]
       filtered = filtered.filter((mentor) => mentor.experience >= min && mentor.experience <= max)
     }
-
     if (filters.availability) {
       filtered = filtered.filter((mentor) => mentor.availability === filters.availability)
     }
-
     if (filters.language) {
       filtered = filtered.filter((mentor) => mentor.languages.includes(filters.language))
     }
-
     setFilteredMentors(filtered)
   }, [mentors, searchQuery, filters])
-
   const sendMentorshipRequest = useCallback(
     async (mentorId) => {
       // Mock request sending
@@ -191,15 +180,12 @@ const MentorshipHub = () => {
         timestamp: new Date().toISOString(),
         proposedTime: null,
       }
-
       setMentorshipRequests((prev) => [...prev, newRequest])
-
       // Show success message
       alert('メンタリング申請を送信しました。メンターからの返信をお待ちください。')
     },
     [mentors]
   )
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'available':
@@ -212,7 +198,6 @@ const MentorshipHub = () => {
         return 'text-gray-600 bg-gray-100'
     }
   }
-
   const getCommunicationStyleIcon = (style) => {
     switch (style) {
       case 'practical':
@@ -225,7 +210,6 @@ const MentorshipHub = () => {
         return '💬'
     }
   }
-
   const renderFindMentor = () => (
     <div className="space-y-6">
       {/* Search and Filters */}
@@ -246,7 +230,6 @@ const MentorshipHub = () => {
             フィルター
           </button>
         </div>
-
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
           <select
             value={filters.industry}
@@ -259,7 +242,6 @@ const MentorshipHub = () => {
             <option value="製造業">製造業</option>
             <option value="ヘルスケア">ヘルスケア</option>
           </select>
-
           <select
             value={filters.experience}
             onChange={(e) => setFilters((prev) => ({ ...prev, experience: e.target.value }))}
@@ -270,7 +252,6 @@ const MentorshipHub = () => {
             <option value="mid">6-10年</option>
             <option value="senior">11年以上</option>
           </select>
-
           <select
             value={filters.availability}
             onChange={(e) => setFilters((prev) => ({ ...prev, availability: e.target.value }))}
@@ -282,7 +263,6 @@ const MentorshipHub = () => {
             <option value="evenings">夜間</option>
             <option value="flexible">柔軟</option>
           </select>
-
           <select
             value={filters.language}
             onChange={(e) => setFilters((prev) => ({ ...prev, language: e.target.value }))}
@@ -293,7 +273,6 @@ const MentorshipHub = () => {
             <option value="英語">英語</option>
             <option value="中国語">中国語</option>
           </select>
-
           <button
             onClick={() =>
               setFilters({
@@ -310,7 +289,6 @@ const MentorshipHub = () => {
           </button>
         </div>
       </div>
-
       {/* Mentor Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredMentors.map((mentor) => (
@@ -337,7 +315,6 @@ const MentorshipHub = () => {
                       : 'オフライン'}
                 </div>
               </div>
-
               <div className="mb-4">
                 <div className="mb-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
                   <Building className="mr-1 h-4 w-4" />
@@ -352,7 +329,6 @@ const MentorshipHub = () => {
                   {mentor.location} • {mentor.languages.join(', ')}
                 </div>
               </div>
-
               <div className="mb-4 flex items-center">
                 <div className="mr-4 flex items-center">
                   <Star className="h-4 w-4 fill-current text-yellow-400" />
@@ -368,7 +344,6 @@ const MentorshipHub = () => {
                   <span className="ml-1 text-sm">{mentor.successRate}%成功率</span>
                 </div>
               </div>
-
               <div className="mb-4">
                 <div className="flex flex-wrap gap-1">
                   {mentor.specialties.slice(0, 3).map((specialty, index) => (
@@ -381,11 +356,9 @@ const MentorshipHub = () => {
                   ))}
                 </div>
               </div>
-
               <div className="mb-4 line-clamp-3 text-xs text-gray-600 dark:text-gray-300">
                 {mentor.bio}
               </div>
-
               <div className="mb-4 flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center">
                   <Clock className="mr-1 h-3 w-3" />
@@ -402,7 +375,6 @@ const MentorshipHub = () => {
                   </span>
                 </div>
               </div>
-
               <div className="flex gap-2">
                 <button
                   onClick={() => sendMentorshipRequest(mentor.id)}
@@ -418,7 +390,6 @@ const MentorshipHub = () => {
           </div>
         ))}
       </div>
-
       {filteredMentors.length === 0 && (
         <div className="py-12 text-center">
           <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
@@ -432,14 +403,12 @@ const MentorshipHub = () => {
       )}
     </div>
   )
-
   const renderMyConnections = () => (
     <div className="space-y-6">
       <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
           進行中のメンタリング
         </h2>
-
         {connections.length === 0 ? (
           <div className="py-8 text-center">
             <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
@@ -487,7 +456,6 @@ const MentorshipHub = () => {
           </div>
         )}
       </div>
-
       {/* Mentorship Requests */}
       {mentorshipRequests.length > 0 && (
         <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
@@ -517,7 +485,6 @@ const MentorshipHub = () => {
       )}
     </div>
   )
-
   const renderBecomeMentor = () => (
     <div className="space-y-6">
       <div className="rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 p-8 shadow dark:from-purple-900/20 dark:to-blue-900/20">
@@ -530,7 +497,6 @@ const MentorshipHub = () => {
             あなたの経験とスキルで次世代のPMを育成しましょう
           </p>
         </div>
-
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="text-center">
             <div className="mb-4 rounded-lg bg-white p-4 shadow dark:bg-gray-800">
@@ -560,7 +526,6 @@ const MentorshipHub = () => {
             </div>
           </div>
         </div>
-
         <div className="text-center">
           <button className="rounded-lg bg-purple-600 px-8 py-3 text-lg font-medium text-white hover:bg-purple-700">
             メンター申請する
@@ -568,7 +533,6 @@ const MentorshipHub = () => {
           <p className="mt-2 text-sm text-gray-500">申請から審査完了まで通常3-5営業日</p>
         </div>
       </div>
-
       {/* Requirements */}
       <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">メンター要件</h2>
@@ -619,7 +583,6 @@ const MentorshipHub = () => {
       </div>
     </div>
   )
-
   return (
     <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900">
       <div className="mx-auto max-w-6xl">
@@ -633,7 +596,6 @@ const MentorshipHub = () => {
             経験豊富なプロジェクトマネージャーとのマンツーマン指導で、実践的なスキルと深い洞察を身につけましょう
           </p>
         </div>
-
         {/* Tabs */}
         <div className="mb-6 rounded-lg bg-white shadow-lg dark:bg-gray-800">
           <div className="border-b border-gray-200 dark:border-gray-600">
@@ -678,7 +640,6 @@ const MentorshipHub = () => {
               </button>
             </nav>
           </div>
-
           <div className="p-6">
             {activeTab === 'find-mentor' && renderFindMentor()}
             {activeTab === 'my-connections' && renderMyConnections()}
@@ -689,5 +650,4 @@ const MentorshipHub = () => {
     </div>
   )
 }
-
 export default MentorshipHub

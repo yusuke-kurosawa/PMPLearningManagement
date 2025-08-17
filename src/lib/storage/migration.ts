@@ -533,4 +533,4 @@ export class MigrationService {
   }
 }
 
-export const _migrationService = new MigrationService()
+export const __migrationService = new MigrationService()

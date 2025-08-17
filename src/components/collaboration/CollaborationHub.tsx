@@ -7,6 +7,7 @@ import StudyGroups from './StudyGroups'
 import collaborationService from '../../services/collaborationService'
 
 const CollaborationHub = () => {
+  const [showHistory, setShowHistory] = useState(false);
   const { settings } = useTheme()
   const [activeTab, setActiveTab] = useState('notes')
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '')

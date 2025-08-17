@@ -16,13 +16,21 @@ export const verifyClaudeAIIntegration = (): void => {
 
   // 検証実行
   /* eslint-disable-next-line no-console */
-  console.log('Claude AI Integration Verification:')
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Claude AI Integration Verification:')
+  }
   /* eslint-disable-next-line no-console */
-  console.log('- ESLint errors resolved:', improvements.eslintErrors.after === 0)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('- ESLint errors resolved:', improvements.eslintErrors.after === 0)
+  }
   /* eslint-disable-next-line no-console */
-  console.log('- TypeScript migration:', improvements.typeScriptFiles, 'files')
+  if (process.env.NODE_ENV === 'development') {
+    console.log('- TypeScript migration:', improvements.typeScriptFiles, 'files')
+  }
   /* eslint-disable-next-line no-console */
-  console.log(
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+  }
     '- Workflow optimization:',
     `${improvements.githubWorkflows.before} → ${improvements.githubWorkflows.after}`
   )

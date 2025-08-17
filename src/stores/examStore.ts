@@ -420,7 +420,7 @@ export const useExamStore = create<ExamStore>()(
 // Timer hook for automatic updates
 let timerInterval: NodeJS.Timeout | null = null
 
-export const useExamTimer = () => {
+export const _useExamTimer = () => {
   const updateTimer = useExamStore((state) => state.updateTimer)
   const currentSession = useExamStore((state) => state.currentSession)
 
