@@ -189,7 +189,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const initializePWA = async () => {
     // Check if app is installed
     const isStandalone =
-      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as ExtendedNavigator).standalone ||
       document.referrer.includes('android-app://')
     setPwaCapabilities((prev) => ({
