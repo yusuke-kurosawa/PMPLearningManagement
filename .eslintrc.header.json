@@ -1,0 +1,124 @@
+{
+  "extends": "./.eslintrc.json",
+  "plugins": ["header"],
+  "rules": {
+    "header/header": [
+      "error",
+      "block",
+      [
+        "*",
+        " * ファイル説明: {description}",
+        " * 開発者: {developer}",
+        " * 専門分野: {specialization}",
+        " * 作成日: {created}",
+        " * 最終更新: {updated}",
+        " * 依存関係: {dependencies}",
+        " * セキュリティレベル: {security_level}",
+        " "
+      ],
+      {
+        "template": {
+          "description": "ファイルの目的と機能を簡潔に記述",
+          "developer": "Developer X",
+          "specialization": "担当分野（例：認証システム、UI/UX、データベース）",
+          "created": "YYYY-MM-DD",
+          "updated": "YYYY-MM-DD",
+          "dependencies": "主要な依存ライブラリ（React, TypeScript等）",
+          "security_level": "Low/Medium/High/Critical"
+        }
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/server/auth/**/*"],
+      "rules": {
+        "header/header": [
+          "error",
+          "block",
+          [
+            "*",
+            " * 認証・認可システム実装",
+            " * Developer 1: 包括的認可システム（RBAC）実装",
+            " * セキュリティレベル: Critical",
+            " * 依存関係: Prisma, NextAuth, JWT, bcrypt",
+            " * 最終更新: {updated}",
+            " "
+          ]
+        ]
+      }
+    },
+    {
+      "files": ["src/services/realtime/**/*"],
+      "rules": {
+        "header/header": [
+          "error",
+          "block", 
+          [
+            "*",
+            " * リアルタイム通信機能",
+            " * Developer 2: リアルタイム通信基盤",
+            " * 通信プロトコル: WebSocket/Socket.io",
+            " * パフォーマンス最適化: 有効",
+            " * 最終更新: {updated}",
+            " "
+          ]
+        ]
+      }
+    },
+    {
+      "files": ["src/services/payment/**/*"],
+      "rules": {
+        "header/header": [
+          "error",
+          "block",
+          [
+            "*",
+            " * 決済システム統合",
+            " * Developer 3: 決済・サブスクリプション管理",
+            " * 決済プロバイダー: Stripe",
+            " * セキュリティレベル: Critical",
+            " * 最終更新: {updated}",
+            " "
+          ]
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/pwa/**/*"],
+      "rules": {
+        "header/header": [
+          "error",
+          "block",
+          [
+            "*",
+            " * PWA機能実装",
+            " * Developer 6: PWA & Mobile Developer",
+            " * 機能: Service Worker, Cache API, Push Notifications",
+            " * プラットフォーム: Progressive Web App",
+            " * 最終更新: {updated}",
+            " "
+          ]
+        ]
+      }
+    },
+    {
+      "files": ["src/test/**/*", "**/*.test.*"],
+      "rules": {
+        "header/header": [
+          "error",
+          "block",
+          [
+            "*",
+            " * テストケース実装",
+            " * Developer 8: 品質保証エンジニア",
+            " * テストタイプ: {test_type}",
+            " * 対象: {target}",
+            " * 最終更新: {updated}",
+            " "
+          ]
+        ]
+      }
+    }
+  ]
+}

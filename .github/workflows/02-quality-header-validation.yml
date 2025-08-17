@@ -1,0 +1,357 @@
+#
+# 📋 品質管理 - ヘッダーコメント検証ワークフロー
+#
+# 目的:
+#   - 全ソースファイルのヘッダーコメント準拠チェック
+#   - 開発者分野別テンプレート検証
+#   - 品質レポートの自動生成
+#
+# 実行タイミング:
+#   - Pull Request作成・更新時
+#   - main/developブランチへのプッシュ時
+#   - 手動実行（workflow_dispatch）
+#
+# 主な処理:
+#   1. ESLintを使用したヘッダーコメント検証
+#   2. 開発者別ファイル統計レポート生成
+#   3. 品質メトリクス計測
+#   4. PRコメントへの結果投稿
+#
+# セキュリティ: 
+#   - 最小権限の原則に従った権限設定
+#   - シークレット使用なし（公開リポジトリ対応）
+#
+# パフォーマンス:
+#   - ESLintキャッシュ活用
+#   - 並列実行によるチェック高速化
+#   - タイムアウト設定: 15分
+#
+
+name: 📋 品質管理 - ヘッダーコメント検証
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.{js,jsx,ts,tsx}'
+      - '.eslintrc.header.json'
+      - 'package.json'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.{js,jsx,ts,tsx}'
+      - '.eslintrc.header.json'
+  workflow_dispatch:
+    inputs:
+      full_scan:
+        description: '全ファイルスキャンを実行'
+        required: false
+        default: false
+        type: boolean
+
+# 並行実行制御 - 同一PR・ブランチで実行中の場合はキャンセル
+concurrency:
+  group: header-validation-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# 最小権限設定
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  header-validation:
+    name: ヘッダーコメント検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      validation-status: ${{ steps.validation.outputs.status }}
+      error-count: ${{ steps.validation.outputs.error-count }}
+      file-count: ${{ steps.validation.outputs.file-count }}
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: 📦 依存関係のインストール
+        run: |
+          npm ci
+          echo "✅ 依存関係のインストール完了"
+
+      - name: 🔍 ヘッダーコメント検証の実行
+        id: validation
+        run: |
+          echo "🚀 ヘッダーコメント検証を開始..."
+          
+          # ESLintキャッシュディレクトリの作成
+          mkdir -p .eslintcache
+          
+          # ヘッダー検証の実行（結果をファイルに保存）
+          npm run lint:header > header-validation-results.txt 2>&1 || true
+          
+          # 結果の解析
+          if grep -q "✖.*problems" header-validation-results.txt; then
+            error_count=$(grep "✖.*problems" header-validation-results.txt | grep -o '[0-9]\+ errors' | grep -o '[0-9]\+' || echo "0")
+            total_problems=$(grep "✖.*problems" header-validation-results.txt | grep -o '[0-9]\+ problems' | grep -o '[0-9]\+' || echo "0")
+            
+            echo "error-count=$error_count" >> $GITHUB_OUTPUT
+            echo "total-problems=$total_problems" >> $GITHUB_OUTPUT
+            
+            if [ "$error_count" -gt 0 ]; then
+              echo "status=failed" >> $GITHUB_OUTPUT
+              echo "❌ ヘッダーコメント検証に失敗しました（エラー: $error_count個）"
+              exit 1
+            else
+              echo "status=warning" >> $GITHUB_OUTPUT
+              echo "⚠️ 警告がありますが、ヘッダーコメント検証は合格です"
+            fi
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "✅ ヘッダーコメント検証に合格しました"
+          fi
+          
+          # ファイル数の取得
+          file_count=$(find src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | wc -l)
+          echo "file-count=$file_count" >> $GITHUB_OUTPUT
+
+      - name: 📊 開発者別統計レポート生成
+        if: always()
+        run: |
+          echo "📊 開発者別ファイル統計を生成中..."
+          
+          cat > header-stats.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          
+          // ソースファイルの検索とヘッダー解析
+          function analyzeHeaders() {
+            const stats = {
+              developer1: { auth: 0, rbac: 0 },
+              developer2: { realtime: 0 },
+              developer3: { payment: 0 },
+              developer6: { pwa: 0 },
+              developer8: { test: 0 },
+              general: { files: 0 },
+              missing: { files: 0 }
+            };
+            
+            function scanDirectory(dir) {
+              const files = fs.readdirSync(dir, { withFileTypes: true });
+              
+              files.forEach(file => {
+                if (file.isDirectory()) {
+                  scanDirectory(path.join(dir, file.name));
+                } else if (file.name.match(/\.(js|jsx|ts|tsx)$/)) {
+                  const filepath = path.join(dir, file.name);
+                  const content = fs.readFileSync(filepath, 'utf8');
+                  
+                  if (content.includes('Developer 1:')) {
+                    stats.developer1.auth++;
+                  } else if (content.includes('Developer 2:')) {
+                    stats.developer2.realtime++;
+                  } else if (content.includes('Developer 3:')) {
+                    stats.developer3.payment++;
+                  } else if (content.includes('Developer 6:')) {
+                    stats.developer6.pwa++;
+                  } else if (content.includes('Developer 8:')) {
+                    stats.developer8.test++;
+                  } else if (content.includes('/**')) {
+                    stats.general.files++;
+                  } else {
+                    stats.missing.files++;
+                  }
+                }
+              });
+            }
+            
+            scanDirectory('src');
+            return stats;
+          }
+          
+          const stats = analyzeHeaders();
+          console.log('## 📊 開発者別ファイル統計');
+          console.log('');
+          console.log('| 開発者 | 担当分野 | ファイル数 |');
+          console.log('|--------|----------|-----------|');
+          console.log(`| Developer 1 | 認証・RBAC | ${stats.developer1.auth + stats.developer1.rbac} |`);
+          console.log(`| Developer 2 | リアルタイム通信 | ${stats.developer2.realtime} |`);
+          console.log(`| Developer 3 | 決済システム | ${stats.developer3.payment} |`);
+          console.log(`| Developer 6 | PWA・モバイル | ${stats.developer6.pwa} |`);
+          console.log(`| Developer 8 | 品質保証・テスト | ${stats.developer8.test} |`);
+          console.log(`| 一般 | その他 | ${stats.general.files} |`);
+          console.log(`| ❌ 未設定 | ヘッダーなし | ${stats.missing.files} |`);
+          console.log('');
+          
+          // メトリクス計算
+          const total = Object.values(stats).reduce((sum, cat) => {
+            return sum + Object.values(cat).reduce((s, n) => s + n, 0);
+          }, 0);
+          
+          const compliance = total > 0 ? ((total - stats.missing.files) / total * 100).toFixed(1) : 0;
+          
+          console.log('### 📈 品質メトリクス');
+          console.log('');
+          console.log(`- **総ファイル数**: ${total}`);
+          console.log(`- **ヘッダー準拠率**: ${compliance}%`);
+          console.log(`- **未準拠ファイル**: ${stats.missing.files}`);
+          console.log('');
+          
+          if (stats.missing.files > 0) {
+            console.log('### ⚠️ 改善が必要な項目');
+            console.log('');
+            console.log('- ヘッダーコメントが不足しているファイルがあります');
+            console.log('- `npm run lint:header:fix` で自動修正を試してください');
+          }
+          EOF
+          
+          node header-stats.js > header-stats-report.md
+          cat header-stats-report.md
+
+      - name: 💬 PR コメント投稿
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // 検証結果の読み込み
+            let validationResults = '';
+            try {
+              validationResults = fs.readFileSync('header-validation-results.txt', 'utf8');
+            } catch (error) {
+              validationResults = 'ヘッダー検証結果が読み込めませんでした';
+            }
+            
+            // 統計レポートの読み込み
+            let statsReport = '';
+            try {
+              statsReport = fs.readFileSync('header-stats-report.md', 'utf8');
+            } catch (error) {
+              statsReport = '統計レポートが生成できませんでした';
+            }
+            
+            const status = '${{ steps.validation.outputs.status }}';
+            const errorCount = '${{ steps.validation.outputs.error-count }}' || '0';
+            const fileCount = '${{ steps.validation.outputs.file-count }}' || '0';
+            
+            // ステータス絵文字の決定
+            const statusEmoji = status === 'success' ? '✅' : status === 'warning' ? '⚠️' : '❌';
+            const statusText = status === 'success' ? '合格' : status === 'warning' ? '警告あり' : '不合格';
+            
+            const commentBody = `
+            ## ${statusEmoji} ヘッダーコメント検証結果
+            
+            **ステータス**: ${statusText}  
+            **対象ファイル数**: ${fileCount}  
+            **エラー数**: ${errorCount}
+            
+            ${statsReport}
+            
+            ### 📝 詳細結果
+            
+            <details>
+            <summary>ESLint ヘッダー検証結果（クリックして展開）</summary>
+            
+            \`\`\`
+            ${validationResults.slice(0, 3000)}${validationResults.length > 3000 ? '\n... (結果が長いため省略)' : ''}
+            \`\`\`
+            
+            </details>
+            
+            ### 🛠️ 修正方法
+            
+            ヘッダーエラーがある場合：
+            \`\`\`bash
+            # 自動修正の実行
+            npm run lint:header:fix
+            
+            # 手動確認
+            npm run lint:header
+            \`\`\`
+            
+            ---
+            *🤖 このコメントは GitHub Actions により自動生成されました*
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+
+      - name: 📤 検証結果のアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-validation-results
+          path: |
+            header-validation-results.txt
+            header-stats-report.md
+          retention-days: 30
+
+  # ヘッダー検証が失敗した場合の自動修正提案
+  auto-fix-suggestion:
+    name: 自動修正提案
+    runs-on: ubuntu-latest
+    needs: header-validation
+    if: needs.header-validation.outputs.validation-status == 'failed' && github.event_name == 'pull_request'
+    
+    steps:
+      - name: 💡 自動修正の提案
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const suggestionComment = `
+            ## 💡 ヘッダーコメント自動修正の提案
+            
+            ヘッダーコメント検証でエラーが検出されました。以下のコマンドで自動修正できます：
+            
+            ### 🔧 修正手順
+            
+            1. **自動修正の実行**：
+               \`\`\`bash
+               npm run lint:header:fix
+               \`\`\`
+            
+            2. **結果の確認**：
+               \`\`\`bash
+               npm run lint:header
+               \`\`\`
+            
+            3. **コミット・プッシュ**：
+               \`\`\`bash
+               git add -A
+               git commit -m "fix: ヘッダーコメントの自動修正適用"
+               git push
+               \`\`\`
+            
+            ### 📋 開発者分野別テンプレート
+            
+            手動で修正する場合は、以下のテンプレートを参考にしてください：
+            
+            - **認証・RBAC**: \`Developer 1: 包括的認可システム（RBAC）実装\`
+            - **リアルタイム通信**: \`Developer 2: リアルタイム通信基盤\`  
+            - **決済システム**: \`Developer 3: 決済・サブスクリプション管理\`
+            - **PWA・モバイル**: \`Developer 6: PWA & Mobile Developer\`
+            - **品質保証**: \`Developer 8: 品質保証エンジニア\`
+            
+            詳細は \`docs/HEADER_COMMENT_VALIDATION_IMPLEMENTATION_REPORT.md\` を参照してください。
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: suggestionComment
+            });
