@@ -86,7 +86,7 @@ jobs:
         # 🔗 依存: なし（初期ステップ）
         # 📊 メトリクス: 取得時間は通常10-30秒
         # 🚨 エラーハンドリング: リポジトリアクセス権限エラーの場合は即座に失敗
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 1  # 浅いクローンで高速化
 
@@ -95,7 +95,7 @@ jobs:
         # 🔗 依存: checkout完了後
         # 📊 メトリクス: キャッシュヒット時は30-60秒の短縮効果
         # 🚨 エラーハンドリング: Node.jsバージョン不整合時は自動修正
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -220,14 +220,14 @@ jobs:
         # 🔗 依存: setup-validationジョブ完了
         # 📊 メトリクス: 準備時間30-60秒
         # 🚨 エラーハンドリング: 成果物取得失敗時は即座にリトライ
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: キャッシュされた環境の復元
         # 💡 処理内容: 前ジョブで作成したキャッシュを復元して高速化
         # 🔗 依存: ワークスペース準備完了後
         # 📊 メトリクス: キャッシュヒット率90%以上を目標
         # 🚨 エラーハンドリング: キャッシュ失敗時はセットアップを再実行
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -265,7 +265,7 @@ jobs:
         # 📊 メトリクス: アップロード時間10-30秒
         # 🚨 エラーハンドリング: 保存失敗は警告のみ（次ジョブには影響しない）
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: test-results-${{ matrix.test-type }}
           path: |
@@ -355,7 +355,7 @@ jobs:
         # 📊 メトリクス: 通知送信は5-10秒
         # 🚨 エラーハンドリング: 通知失敗は警告のみ（ワークフロー成功に影響なし）
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const status = '${{ steps.result-summary.outputs.overall-status }}';

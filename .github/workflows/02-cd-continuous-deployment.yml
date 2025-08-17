@@ -99,7 +99,7 @@ jobs:
       # Purpose: Get source code
       # ================
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           token: ${{ github.token }}
@@ -111,7 +111,7 @@ jobs:
       # ================
       - name: "🔍 Check CI Status"
         id: check-ci
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ github.token }}
           script: |
@@ -307,12 +307,12 @@ jobs:
     
     steps:
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ github.token }}
       
       - name: "⚙️ Setup Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: '18'
           cache: 'npm'
@@ -409,7 +409,7 @@ jobs:
       # Purpose: Upload build artifacts
       # ================
       - name: "📤 Upload Build Artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: dist/
@@ -431,7 +431,7 @@ jobs:
     
     steps:
       - name: "📥 Download Build Artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: deployment-build-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: dist/
@@ -754,7 +754,7 @@ jobs:
       # ================
       - name: "🚨 Create Deployment Issue"
         if: needs.deploy-to-environment.result == 'failure' || (needs.post-deployment-tests.result == 'failure' && github.event.inputs.skip_tests != 'true')
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ github.token }}
           script: |
@@ -808,7 +808,7 @@ jobs:
       # Purpose: Upload deployment report
       # ================
       - name: "📤 Upload Deployment Report"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: deployment-report-${{ needs.deployment-gate.outputs.deploy_environment }}-${{ github.run_id }}
           path: deployment-report.md

@@ -113,7 +113,7 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0  # デプロイ履歴確認用
 
@@ -216,7 +216,7 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: 🚀 Node.js環境セットアップ
         uses: ./.github/actions/composite/setup-node-cache
@@ -325,7 +325,7 @@ jobs:
     
     steps:
       - name: 📂 デプロイメント成果物ダウンロード
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: production-build
           path: ./dist
@@ -481,10 +481,10 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: 🚀 Node.js環境セットアップ
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -518,7 +518,7 @@ jobs:
 
       - name: 📤 Lighthouse結果アップロード
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: lighthouse-report
           path: |

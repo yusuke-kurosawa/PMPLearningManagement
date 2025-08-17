@@ -105,7 +105,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: 環境セットアップ
@@ -214,7 +214,7 @@ jobs:
       # ============================================================
       - name: '📤 アーティファクトアップロード / Upload Artifacts'
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: unit-test-results-node-${{ matrix.node-version }}-${{ github.run_id }}
           path: |
@@ -242,7 +242,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: 環境セットアップ
@@ -370,7 +370,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: 環境セットアップ
@@ -491,7 +491,7 @@ jobs:
       # ============================================================
       - name: '📸 スクリーンショット保存 / Save Screenshots'
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: e2e-screenshots-${{ matrix.browser }}-${{ github.run_id }}
           path: test-results/
@@ -526,14 +526,14 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: アーティファクトダウンロード
       # Download artifacts
       # ============================================================
       - name: '📦 アーティファクトダウンロード / Download Artifacts'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           path: test-artifacts/
       
@@ -556,7 +556,7 @@ jobs:
       # ============================================================
       - name: '💬 PRコメント / PR Comment'
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const unitStatus = '${{ needs.unit-tests.outputs.status }}';

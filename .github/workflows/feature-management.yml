@@ -55,7 +55,7 @@ jobs:
       experiment-id: ${{ steps.ab-test.outputs.experiment-id }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup Feature Flag Service
         run: |
@@ -377,7 +377,7 @@ jobs:
           EOF
 
       - name: Upload Feature Management Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: feature-management-config-${{ github.run_number }}
           path: |
@@ -400,7 +400,7 @@ jobs:
       business-value: ${{ steps.business-metrics.outputs.value-score }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
 
@@ -673,7 +673,7 @@ jobs:
           EOF
 
       - name: Upload Value Stream Reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: value-stream-reports-${{ github.run_number }}
           path: |
@@ -690,7 +690,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: End-to-End System Integration Test
         run: |
@@ -825,7 +825,7 @@ jobs:
 
       - name: Upload Integration Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: integration-test-results-${{ github.run_number }}
           path: integration-test-report.md

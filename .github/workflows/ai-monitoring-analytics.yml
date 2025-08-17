@@ -46,7 +46,7 @@ jobs:
       monitoring-config: ${{ steps.config.outputs.config-hash }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Deploy AI Monitoring Models
         id: deploy-ai
@@ -302,7 +302,7 @@ EOF
           echo \"✅ Monitoring infrastructure configured\"
           
       - name: Upload Monitoring Config
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: ai-monitoring-config
           path: |
@@ -629,7 +629,7 @@ EOF
 EOF
           
       - name: Upload Business Intelligence Assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: business-intelligence-complete
           path: |
@@ -896,7 +896,7 @@ EOF
           chmod +x automated-response-system.py
           
       - name: Upload Anomaly Detection System
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: ai-anomaly-system
           path: |
@@ -1150,7 +1150,7 @@ This implementation serves as a blueprint for the future of DevOps monitoring an
 EOF
           
       - name: Upload Complete Analytics Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: world-class-analytics-complete
           path: |

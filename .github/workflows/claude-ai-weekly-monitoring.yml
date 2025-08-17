@@ -28,10 +28,10 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: '18'
           
@@ -358,7 +358,7 @@ jobs:
           echo "report-generation=completed" >> $GITHUB_OUTPUT
           
       - name: Upload Monitoring Assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: claude-ai-weekly-report
           path: |
@@ -489,7 +489,7 @@ jobs:
           echo "🎯 Success metrics dashboard created successfully!"
           
       - name: Upload Dashboard
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: claude-ai-success-dashboard
           path: CLAUDE_AI_SUCCESS_DASHBOARD.md
@@ -548,7 +548,7 @@ jobs:
           echo "🚀 Claude AI monitoring and analytics system is operational!"
           
       - name: Upload Summary
-        uses: actions/upload-artifact@v4  
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3  
         with:
           name: claude-ai-weekly-summary
           path: weekly_summary.md

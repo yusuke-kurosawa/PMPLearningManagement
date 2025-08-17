@@ -68,7 +68,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           
@@ -262,7 +262,7 @@ jobs:
           python dora_metrics_calculator.py >> $GITHUB_OUTPUT
           
       - name: Upload DORA Metrics Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: dora-metrics-report
           path: dora_metrics_report.json
@@ -281,7 +281,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           
@@ -426,7 +426,7 @@ jobs:
           python technical_excellence_assessment.py >> $GITHUB_OUTPUT
           
       - name: Upload Technical Excellence Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: technical-excellence-report
           path: technical_excellence_report.json
@@ -445,7 +445,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           
@@ -623,7 +623,7 @@ jobs:
           python organizational_maturity_assessment.py >> $GITHUB_OUTPUT
           
       - name: Upload Organizational Maturity Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: organizational-maturity-report
           path: organizational_maturity_report.json
@@ -803,7 +803,7 @@ jobs:
           python sustainability_esg_assessment.py >> $GITHUB_OUTPUT
           
       - name: Upload Sustainability ESG Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: sustainability-esg-report
           path: sustainability_esg_report.json
@@ -817,10 +817,10 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Download All Reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           path: reports/
           
@@ -1051,7 +1051,7 @@ jobs:
           python generate_certification.py
           
       - name: Upload World-Class Certification
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: world-class-devops-certification
           path: |
@@ -1061,7 +1061,7 @@ jobs:
           retention-days: 365
           
       - name: Create Certification Issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const fs = require('fs');
@@ -1370,7 +1370,7 @@ jobs:
           python generate_benchmark_analysis.py
           
       - name: Upload Industry Benchmark Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: industry-benchmark-analysis
           path: |
@@ -1420,7 +1420,7 @@ jobs:
           JSON
           
       - name: Create World-Class Achievement Issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const achievementBody = `# 🏆 世界No.1 DevOps実践達成報告
@@ -1486,7 +1486,7 @@ jobs:
             });
             
       - name: Upload World-Class Badge
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: world-class-badge
           path: world_class_badge.json

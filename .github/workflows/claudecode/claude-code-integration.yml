@@ -114,14 +114,14 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧠 ClaudeCodeコンテキスト分析実行
         id: analyze
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             console.log('🤖 ClaudeCodeコンテキスト分析を開始...');
@@ -236,7 +236,7 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -248,7 +248,7 @@ jobs:
           install-dependencies: 'true'
 
       - name: 👁️  ClaudeCodeコードレビュー実行
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             console.log('👁️ ClaudeCodeコードレビューを開始...');
@@ -379,10 +379,10 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: 📋 Issue分析・提案生成
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             console.log('📋 ClaudeCode Issue分析を開始...');
@@ -509,10 +509,10 @@ jobs:
     
     steps:
       - name: 📂 リポジトリチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: 📚 ドキュメント同期チェック
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             console.log('📚 ClaudeCodeドキュメント同期チェックを開始...');

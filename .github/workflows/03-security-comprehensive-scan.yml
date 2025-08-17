@@ -104,7 +104,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: 環境セットアップ
@@ -223,7 +223,7 @@ jobs:
       # Upload report
       # ============================================================
       - name: '📤 レポートアップロード / Upload Report'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: dependency-scan-report-${{ github.run_id }}
           path: |
@@ -249,7 +249,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0  # 全履歴取得（より正確な分析のため）
       
@@ -393,7 +393,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
       
@@ -505,7 +505,7 @@ jobs:
       # Checkout repository
       # ============================================================
       - name: '📥 リポジトリチェックアウト / Checkout Repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       
       # ============================================================
       # Step 2: レポート生成

@@ -110,13 +110,13 @@ jobs:
       # Purpose: Setup repository and build environment
       # ================
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
           token: ${{ github.token }}
       
       - name: "⚙️ Setup Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: '18'
           cache: 'npm'
@@ -443,12 +443,12 @@ jobs:
     
     steps:
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ github.token }}
       
       - name: "⚙️ Setup Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: '18'
           cache: 'npm'
@@ -568,12 +568,12 @@ jobs:
     
     steps:
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ github.token }}
       
       - name: "⚙️ Setup Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: '18'
           cache: 'npm'
@@ -804,7 +804,7 @@ jobs:
       # ================
       - name: "🚨 Create Performance Issue"
         if: needs.performance-baseline.outputs.needs_optimization == 'true' && (needs.performance-baseline.outputs.lighthouse_performance < 60 || needs.performance-baseline.outputs.bundle_size_mb > 2)
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ github.token }}
           script: |
@@ -861,7 +861,7 @@ jobs:
       # Purpose: Save performance reports as artifacts
       # ================
       - name: "📦 Upload Performance Reports"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: performance-report-${{ github.run_id }}
           path: |

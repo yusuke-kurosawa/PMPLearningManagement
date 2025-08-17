@@ -52,7 +52,7 @@ jobs:
       baseline-established: ${{ steps.baseline.outputs.status }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Establish Test Baseline
         id: baseline
@@ -112,10 +112,10 @@ jobs:
     needs: pre-integration-checks
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -241,7 +241,7 @@ jobs:
     needs: pre-integration-checks
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
@@ -336,7 +336,7 @@ jobs:
     needs: pre-integration-checks
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Test Prometheus Configuration
         run: |
@@ -460,7 +460,7 @@ jobs:
     needs: pre-integration-checks
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Test Zero Trust Security Integration
         run: |
@@ -534,7 +534,7 @@ jobs:
     needs: pre-integration-checks
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Test Feature Flag System Integration
         run: |
@@ -589,10 +589,10 @@ jobs:
     if: ${{ contains(github.event.inputs.test_suite, 'performance') || contains(github.event.inputs.test_suite, 'full') }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -668,7 +668,7 @@ jobs:
     if: always()
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Collect Integration Test Results
         run: |
@@ -767,7 +767,7 @@ jobs:
           echo "Integration issues detected - review logs for details" >> integration-status.txt
 
       - name: Upload Integration Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: phase5-6-integration-results-${{ github.run_number }}
           path: |

@@ -76,7 +76,7 @@ jobs:
       
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Setup project
         uses: ./.github/actions/setup-project
@@ -479,7 +479,7 @@ jobs:
           echo "✅ Test environment configuration created"
 
       - name: Upload test data artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: test-data-setup-${{ env.TEST_DATA_VERSION }}
           path: |
@@ -496,7 +496,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Setup project
         uses: ./.github/actions/setup-project
@@ -506,7 +506,7 @@ jobs:
           
       - name: Download test data
         if: needs.test-data-setup.result == 'success'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: test-data-setup-${{ env.TEST_DATA_VERSION }}
           path: ./
@@ -660,7 +660,7 @@ jobs:
           
       - name: Upload validation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: test-data-validation-report
           path: test-data-validation-report.json
@@ -680,7 +680,7 @@ jobs:
         
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Setup automated environment
         run: |
@@ -762,7 +762,7 @@ jobs:
           fi
           
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
           
@@ -796,7 +796,7 @@ jobs:
           npm run typecheck > /dev/null 2>&1 && echo "✅ TypeCheck command works" || echo "❌ TypeCheck command failed"
           
       - name: Upload setup scripts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: setup-scripts-${{ matrix.os }}-node${{ matrix.node-version }}
           path: setup-dev-environment*
@@ -810,7 +810,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         
       - name: Create test data backup
         if: inputs.action == 'backup' || github.event_name == 'schedule'
@@ -852,7 +852,7 @@ jobs:
           
       - name: Upload backup
         if: inputs.action == 'backup' || github.event_name == 'schedule'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: test-data-backup-$(date +%Y%m%d)
           path: backups/test-data-backup-*.tar.gz
@@ -942,7 +942,7 @@ jobs:
           EOF
           
       - name: Upload summary report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: test-data-management-report
           path: test-data-management-report.md

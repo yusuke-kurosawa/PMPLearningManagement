@@ -59,7 +59,7 @@ jobs:
       audit-id: ${{ steps.generate-audit-id.outputs.id }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
 
@@ -255,7 +255,7 @@ jobs:
           mv *-report.json audit-evidence/${{ steps.generate-audit-id.outputs.id }}/soc2/ 2>/dev/null || true
 
       - name: Upload SOC 2 Audit Evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: soc2-audit-evidence-${{ steps.generate-audit-id.outputs.id }}
           path: audit-evidence/
@@ -271,7 +271,7 @@ jobs:
       gdpr-status: ${{ steps.gdpr-check.outputs.status }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: GDPR Article 25 - Data Protection by Design
         run: |
@@ -421,7 +421,7 @@ jobs:
           mv gdpr_*.md audit-evidence/${{ needs.soc2-controls-audit.outputs.audit-id }}/gdpr/
 
       - name: Upload GDPR Audit Evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: gdpr-audit-evidence-${{ needs.soc2-controls-audit.outputs.audit-id }}
           path: audit-evidence/
@@ -434,7 +434,7 @@ jobs:
     if: always()
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Data Flow Analysis
         run: |
@@ -645,7 +645,7 @@ jobs:
           EOF
 
       - name: Upload Final Compliance Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: final-compliance-report-${{ needs.soc2-controls-audit.outputs.audit-id }}
           path: final_compliance_report.md
