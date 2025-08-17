@@ -1,44 +1,11 @@
-<<<<<<< HEAD
-# ============================================================
-# Reusable Action: Node.js Setup
-# Purpose: 標準化されたNode.js環境のセットアップ
-# Author: Claude Code
-# Last Modified: 2025-08-12
-# ============================================================
-
-name: 'Setup Node.js Environment'
-description: 'Node.js環境を標準設定でセットアップします'
-
-inputs:
-  node-version:
-    description: 'Node.jsのバージョン'
-    required: false
-    default: '18'
-  cache-dependency-path:
-    description: 'キャッシュ用の依存関係ファイルパス'
-    required: false
-    default: 'package-lock.json'
-  install-dependencies:
-    description: '依存関係を自動インストールするか'
-    required: false
-    default: 'true'
-
-outputs:
-  node-version:
-    description: 'インストールされたNode.jsのバージョン'
-    value: ${{ steps.setup.outputs.node-version }}
-  cache-hit:
-    description: 'キャッシュがヒットしたか'
-    value: ${{ steps.setup.outputs.cache-hit }}
-=======
 # ================================================================
 # Composite Action: Node.js環境セットアップ
 # カテゴリ: 共通処理
 # 目的: Node.js環境とパッケージの統一セットアップ
 # 再利用性: 全CI/CDワークフローで共通利用
 # 作成者: DevOps自動化システム
-# 最終更新: 2025-08-14
-# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# 最終更新: 2025-08-17
+# Issue: #80 - GitHub Actions完全準拠化
 # ================================================================
 
 name: '🏗️ Node.js環境セットアップ'
@@ -77,57 +44,19 @@ outputs:
   npm-version:
     description: 'npmバージョン'
     value: ${{ steps.get-versions.outputs.npm-version }}
->>>>>>> main
 
 runs:
   using: 'composite'
   steps:
-<<<<<<< HEAD
-    # ------------------------------------------------------------
-    # Node.js環境のセットアップ
-    # ------------------------------------------------------------
-    - name: Setup Node.js
-      id: setup
-=======
     # ================================================================
     # Step 1: Node.jsセットアップ
     # ================================================================
     - name: 🏗️ Setup Node.js ${{ inputs.node-version }}
       id: setup-node
->>>>>>> main
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'npm'
-<<<<<<< HEAD
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
-
-    # ------------------------------------------------------------
-    # バージョン情報の出力
-    # ------------------------------------------------------------
-    - name: Display versions
-      shell: bash
-      run: |
-        echo "Node.js version: $(node --version)"
-        echo "npm version: $(npm --version)"
-        echo "node-version=$(node --version)" >> $GITHUB_OUTPUT
-
-    # ------------------------------------------------------------
-    # 依存関係のインストール（オプション）
-    # ------------------------------------------------------------
-    - name: Install dependencies
-      if: inputs.install-dependencies == 'true'
-      shell: bash
-      run: |
-        if [ -f "package-lock.json" ]; then
-          echo "Installing dependencies with npm ci..."
-          npm ci --prefer-offline --no-audit
-        elif [ -f "package.json" ]; then
-          echo "Installing dependencies with npm install..."
-          npm install --no-audit
-        else
-          echo "No package.json found, skipping dependency installation"
-=======
         cache-dependency-path: package-lock.json
     
     # ================================================================
@@ -242,5 +171,4 @@ runs:
           echo "  ✅ キャッシュからの復元が成功しました"
         else
           echo "  📦 新しいキャッシュが作成されました"
->>>>>>> main
         fi
