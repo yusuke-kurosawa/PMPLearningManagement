@@ -27,7 +27,7 @@ prisma.$use(async (params, next) => {
 })
 
 // Helper functions for common database operations
-export const _db = {
+export const __db = {
   // Transaction helper
   async transaction<_T>(fn: (tx: PrismaClient) => Promise<_T>): Promise<_T> {
     return await prisma.$transaction(async (tx) => {

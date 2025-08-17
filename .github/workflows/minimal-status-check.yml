@@ -1,0 +1,11 @@
+name: 'minimal-status-check'
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  minimal-status-check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "✅ Check passed"

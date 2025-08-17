@@ -54,7 +54,9 @@ export function measurePerformance<T>(func: () => T, label: string = 'Performanc
 
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
-    console.log(`${label}: ${end - start} milliseconds`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`${label}: ${end - start} milliseconds`)
+    }
   }
 
   return result
