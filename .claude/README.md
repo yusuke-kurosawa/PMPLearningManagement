@@ -1,85 +1,89 @@
-# .claude ディレクトリ
+# Claude Memory Bank
 
-このディレクトリは、Claude Code (claude.ai/code) がプロジェクトコンテキストを効率的に管理するための専用ディレクトリです。
+This directory serves as Claude Code's memory bank for efficient project context management. It contains essential information and quick references with links to comprehensive documentation in `docs/`.
 
-## 目的
+## Purpose
 
-- プロジェクトの最新状態をClaudeが即座に把握できるようにする
-- 重要な決定事項や技術的詳細を集約する
-- 開発チームが参照しやすいドキュメント構造を提供する
-- コンテキストの一貫性と最新性を保証する
+- **Memory Bank**: Essential context for Claude to understand project state immediately
+- **Quick References**: Fast access to key information with links to full documentation
+- **Navigation Hub**: Efficient navigation to comprehensive documentation in `docs/`
+- **Context Preservation**: Maintains project context while avoiding documentation duplication
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 .claude/
-├── context/                    # プロジェクトコンテキスト
-│   ├── project-map.md         # プロジェクト全体の構造マップ
-│   ├── architecture-summary.md # アーキテクチャの要約
-│   ├── current-status.md      # 現在の開発ステータス
-│   ├── key-decisions.md       # 主要な技術的決定事項
-│   ├── project-summary.md     # プロジェクトサマリー（自動生成）
-│   ├── todo-list.md          # TODOリスト（自動抽出）
-│   └── recent-changes.md      # 最近の変更履歴（自動生成）
+├── context/                    # Essential project context
+│   ├── architecture-summary.md # Architecture overview
+│   ├── current-status.md      # Current development status
+│   ├── quick-navigation.md    # Navigation shortcuts
+│   ├── project-summary.md     # Project summary (auto-generated)
+│   ├── todo-list.md          # TODO list (auto-extracted)
+│   └── recent-changes.md      # Recent changes (auto-generated)
 │
-├── quick-ref/                  # クイックリファレンス
-│   ├── commands.md            # よく使うコマンド一覧
-│   └── file-locations.md      # 重要ファイルの配置
+├── quick-ref/                  # Quick references with links
+│   ├── commands.md            # Essential commands → docs/development/
+│   ├── file-locations.md      # Key file locations → docs/development/
+│   └── github-actions.md      # GitHub Actions → docs/development/
 │
-├── prompts/                    # プロンプトテンプレート
-│   ├── code-review.md         # コードレビュー用テンプレート
-│   ├── architecture-review.md # アーキテクチャレビュー用
-│   └── testing-guidelines.md  # テストガイドライン
+├── prompts/                    # Minimal prompt templates
+│   ├── README.md              # Links to full development guides
+│   ├── code-review-template.md # Brief template → docs/development/
+│   └── architecture-review-template.md # Brief template → docs/development/
 │
-├── scripts/                    # 自動化スクリプト
-│   └── sync-context.sh        # コンテキスト同期スクリプト
+├── agents/                     # Agent overview
+│   └── README.md              # Agent overview → docs/development/agent-definitions/
 │
-└── templates/                  # 各種テンプレート（将来用）
+├── rules/                      # Essential rules
+│   └── documentation-rules.md # Documentation organization rules
+│
+└── scripts/                    # Automation scripts
+    └── sync-context.sh        # Context synchronization
 ```
 
-## 使い方
+## Full Documentation
 
-### 1. コンテキストの確認
+**Primary Documentation**: All comprehensive guides are in [`docs/`](../docs/)
+- [Development Documentation](../docs/development/) - Complete development guides
+- [Organization Guides](../docs/organization/) - Documentation structure guides
 
-Claudeに質問する前に、以下のファイルを参照してプロジェクトの状態を把握：
+## Usage
 
-- **初めての場合**: `context/project-map.md`から開始
-- **アーキテクチャについて**: `context/architecture-summary.md`を参照
-- **現在の状況**: `context/current-status.md`で最新状態を確認
-- **技術的決定**: `context/key-decisions.md`で過去の決定を確認
+### 1. Quick Start Navigation
 
-### 2. クイックリファレンス
+**Essential shortcuts**: [`context/quick-navigation.md`](context/quick-navigation.md)
 
-よく使う情報への素早いアクセス：
+- **Current project status**: [`context/current-status.md`](context/current-status.md)
+- **Architecture overview**: [`context/architecture-summary.md`](context/architecture-summary.md)
+- **Quick commands**: [`quick-ref/commands.md`](quick-ref/commands.md)
+- **File locations**: [`quick-ref/file-locations.md`](quick-ref/file-locations.md)
 
-- **コマンド**: `quick-ref/commands.md`
-- **ファイル配置**: `quick-ref/file-locations.md`
+### 2. Development Workflow
 
-### 3. プロンプトテンプレート
+**Quick references** (with links to full documentation):
 
-Claudeへの質問時に使用：
+- **Commands**: [`quick-ref/commands.md`](quick-ref/commands.md) → [Full Guide](../docs/development/commands-reference.md)
+- **File Locations**: [`quick-ref/file-locations.md`](quick-ref/file-locations.md) → [Full Guide](../docs/development/file-locations-reference.md)
+- **GitHub Actions**: [`quick-ref/github-actions.md`](quick-ref/github-actions.md) → [Full Guide](../docs/development/github-actions-reference.md)
+
+### 3. Templates and Guides
+
+**Quick templates** (with links to comprehensive guides):
+
+- **Code Review**: [`prompts/code-review-template.md`](prompts/code-review-template.md) → [Full Guide](../docs/development/code-review-guide.md)
+- **Architecture Review**: [`prompts/architecture-review-template.md`](prompts/architecture-review-template.md) → [Full Guide](../docs/development/architecture-review-guide.md)
+- **All Development Guides**: [docs/development/](../docs/development/)
+
+### 4. Context Synchronization
+
+Keep project context up to date:
 
 ```bash
-# コードレビューを依頼する場合
-cat .claude/prompts/code-review.md
-
-# アーキテクチャレビューを依頼する場合
-cat .claude/prompts/architecture-review.md
-
-# テスト作成を依頼する場合
-cat .claude/prompts/testing-guidelines.md
-```
-
-### 4. コンテキストの同期
-
-プロジェクトの最新状態を反映：
-
-```bash
-# コンテキストを同期
+# Sync context
 ./.claude/scripts/sync-context.sh
 
-# package.jsonに追加してnpmコマンドとして実行
-npm run sync-context
+# Or use npm scripts
+npm run context:update
 ```
 
 ## 自動更新

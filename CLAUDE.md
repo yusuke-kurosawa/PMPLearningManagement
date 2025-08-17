@@ -2,8 +2,9 @@
 
 このファイルは、Claude Code (claude.ai/code) がこのリポジトリのコードを扱う際のガイダンスを提供します。
 
-> **コンテキスト管理**: このプロジェクトは`.claude/`ディレクトリに詳細なコンテキスト情報を保持しています。  
-> 最新の実装状況は[.claude/context/implementation-status.md](.claude/context/implementation-status.md)を参照してください。
+> **コンテキスト管理**: このプロジェクトは`.claude/`ディレクトリを**メモリバンク**として使用し、`docs/`ディレクトリに包括的なドキュメントを保持しています。  
+> **クイックアクセス**: [.claude/context/quick-navigation.md](.claude/context/quick-navigation.md)  
+> **完全ドキュメント**: [docs/](docs/) ディレクトリ
 
 ## プロジェクト概要
 
@@ -20,13 +21,17 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 
 ### クイックナビゲーション
 
-- [現在のステータス](.claude/context/current-status.md)
-- [実装状況](.claude/context/implementation-status.md)
-- [アーキテクチャサマリー](.claude/context/architecture-summary.md)
-- [主要な決定事項](.claude/context/key-decisions.md)
-- [IDD実装ガイド](docs/IDD_IMPLEMENTATION_STATUS.md)
-- [コマンドリファレンス](.claude/quick-ref/commands.md)
-- [ファイルロケーション](.claude/quick-ref/file-locations.md)
+#### 📋 メモリバンク（すぐにアクセス）
+- [ナビゲーションガイド](.claude/context/quick-navigation.md) - 効率的なナビゲーション
+- [現在のステータス](.claude/context/current-status.md) - プロジェクト現状
+- [アーキテクチャサマリー](.claude/context/architecture-summary.md) - システム概要
+- [コマンドリファレンス](.claude/quick-ref/commands.md) - 基本コマンド
+- [ファイルロケーション](.claude/quick-ref/file-locations.md) - 重要ファイル
+
+#### 📚 完全ドキュメント（詳細情報）
+- [開発ドキュメント](docs/development/) - 開発ガイドと参考資料
+- [IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md) - IDD実装詳細
+- [ドキュメント構成ガイド](docs/organization/NAVIGATION_GUIDE.md) - ドキュメント案内
 
 ## 主な実装済み機能
 
