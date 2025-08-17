@@ -7,7 +7,7 @@ import StudyGroups from './StudyGroups'
 import collaborationService from '../../services/collaborationService'
 
 const CollaborationHub = () => {
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(false)
   const { settings } = useTheme()
   const [activeTab, setActiveTab] = useState('notes')
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '')
@@ -37,27 +37,27 @@ const CollaborationHub = () => {
     <div className={`min-h-screen ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
       {/* ユーザー名設定プロンプト */}
       {showUsernamePrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4'>
           <div
             className={`w-full max-w-md rounded-lg p-6 ${
               settings.darkMode ? 'bg-gray-800' : 'bg-white'
             }`}
           >
-            <h3 className="mb-4 text-xl font-semibold">ユーザー名を設定</h3>
+            <h3 className='mb-4 text-xl font-semibold'>ユーザー名を設定</h3>
             <p className={`mb-4 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               コラボレーション機能を使用するには、ユーザー名を設定してください。
             </p>
-            <label htmlFor="username-input" className="sr-only">
+            <label htmlFor='username-input' className='sr-only'>
               ユーザー名
             </label>
             <input
-              id="username-input"
-              type="text"
+              id='username-input'
+              type='text'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSetUsername()}
-              placeholder="ユーザー名を入力"
-              aria-label="ユーザー名を入力してください"
+              placeholder='ユーザー名を入力'
+              aria-label='ユーザー名を入力してください'
               className={`w-full rounded-lg border px-3 py-2 ${
                 settings.darkMode
                   ? 'border-gray-600 bg-gray-700 text-white'
@@ -81,19 +81,19 @@ const CollaborationHub = () => {
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-6">
+      <div className='container mx-auto px-4 py-6'>
         {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">コラボレーションハブ</h1>
+        <div className='mb-8'>
+          <h1 className='mb-2 text-3xl font-bold'>コラボレーションハブ</h1>
           <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             他の学習者と知識を共有し、一緒に学習を進めましょう
           </p>
           {username && (
             <p className={`mt-2 text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              ログイン中: <span className="font-medium">{username}</span>
+              ログイン中: <span className='font-medium'>{username}</span>
               <button
                 onClick={() => setShowUsernamePrompt(true)}
-                className="ml-2 text-blue-600 hover:underline"
+                className='ml-2 text-blue-600 hover:underline'
               >
                 変更
               </button>
@@ -102,7 +102,7 @@ const CollaborationHub = () => {
         </div>
 
         {/* タブナビゲーション */}
-        <div className="mb-6 flex flex-wrap gap-2 border-b dark:border-gray-700">
+        <div className='mb-6 flex flex-wrap gap-2 border-b dark:border-gray-700'>
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -117,7 +117,7 @@ const CollaborationHub = () => {
                       : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className='h-4 w-4' />
                 {tab.label}
               </button>
             )
@@ -130,11 +130,11 @@ const CollaborationHub = () => {
 
           {activeTab === 'discussions' && (
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <h2 className="mb-4 text-xl font-semibold">全体ディスカッション</h2>
+              <h2 className='mb-4 text-xl font-semibold'>全体ディスカッション</h2>
               <DiscussionThread
-                targetId="global"
-                targetType="global"
-                title="PMP学習に関する質問・議論"
+                targetId='global'
+                targetType='global'
+                title='PMP学習に関する質問・議論'
               />
             </div>
           )}
@@ -142,14 +142,14 @@ const CollaborationHub = () => {
           {activeTab === 'groups' && <StudyGroups />}
 
           {activeTab === 'dashboard' && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
               {/* 人気のノート */}
               <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <TrendingUp className="h-5 w-5 text-yellow-500" />
+                <h3 className='mb-4 flex items-center gap-2 text-lg font-semibold'>
+                  <TrendingUp className='h-5 w-5 text-yellow-500' />
                   人気のノート
                 </h3>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {popularNotes.length > 0 ? (
                     popularNotes.map((note) => (
                       <div
@@ -160,7 +160,7 @@ const CollaborationHub = () => {
                             : 'border-gray-200 hover:bg-gray-50'
                         } cursor-pointer transition-colors`}
                       >
-                        <h4 className="mb-1 font-medium">{note.title}</h4>
+                        <h4 className='mb-1 font-medium'>{note.title}</h4>
                         <p
                           className={`text-sm ${
                             settings.darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -182,11 +182,11 @@ const CollaborationHub = () => {
 
               {/* 最新のディスカッション */}
               <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <MessageSquare className="h-5 w-5 text-blue-500" />
+                <h3 className='mb-4 flex items-center gap-2 text-lg font-semibold'>
+                  <MessageSquare className='h-5 w-5 text-blue-500' />
                   最新のディスカッション
                 </h3>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {recentDiscussions.length > 0 ? (
                     recentDiscussions.map((comment) => (
                       <div
@@ -225,11 +225,11 @@ const CollaborationHub = () => {
 
               {/* アクティブなグループ */}
               <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                  <Users className="h-5 w-5 text-green-500" />
+                <h3 className='mb-4 flex items-center gap-2 text-lg font-semibold'>
+                  <Users className='h-5 w-5 text-green-500' />
                   アクティブなグループ
                 </h3>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {activeGroups.length > 0 ? (
                     activeGroups.map((group) => (
                       <div
@@ -238,7 +238,7 @@ const CollaborationHub = () => {
                           settings.darkMode ? 'border-gray-700' : 'border-gray-200'
                         }`}
                       >
-                        <h4 className="mb-1 font-medium">{group.name}</h4>
+                        <h4 className='mb-1 font-medium'>{group.name}</h4>
                         <p
                           className={`text-sm ${
                             settings.darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -264,8 +264,8 @@ const CollaborationHub = () => {
         {/* クイックアクション */}
         {activeTab === 'dashboard' && (
           <div className={`mt-8 rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="mb-4 text-lg font-semibold">クイックアクション</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <h3 className='mb-4 text-lg font-semibold'>クイックアクション</h3>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
               <button
                 onClick={() => setActiveTab('notes')}
                 className={`rounded-lg border p-4 text-left transition-colors ${
@@ -274,8 +274,8 @@ const CollaborationHub = () => {
                     : 'border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                <FileText className="mb-2 h-6 w-6 text-blue-600" />
-                <h4 className="mb-1 font-medium">ノートを作成</h4>
+                <FileText className='mb-2 h-6 w-6 text-blue-600' />
+                <h4 className='mb-1 font-medium'>ノートを作成</h4>
                 <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   学習内容をまとめて共有
                 </p>
@@ -289,8 +289,8 @@ const CollaborationHub = () => {
                     : 'border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                <MessageSquare className="mb-2 h-6 w-6 text-green-600" />
-                <h4 className="mb-1 font-medium">質問する</h4>
+                <MessageSquare className='mb-2 h-6 w-6 text-green-600' />
+                <h4 className='mb-1 font-medium'>質問する</h4>
                 <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   わからないことを質問
                 </p>
@@ -304,8 +304,8 @@ const CollaborationHub = () => {
                     : 'border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                <Users className="mb-2 h-6 w-6 text-purple-600" />
-                <h4 className="mb-1 font-medium">グループに参加</h4>
+                <Users className='mb-2 h-6 w-6 text-purple-600' />
+                <h4 className='mb-1 font-medium'>グループに参加</h4>
                 <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   仲間と一緒に学習
                 </p>

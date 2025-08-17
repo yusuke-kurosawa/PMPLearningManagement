@@ -110,21 +110,21 @@ function App() {
                   <PageTransition>
                     <Suspense fallback={<LoadingSpinner />}>
                       <Routes>
-                        <Route path="/" element={<Home />} />
+                        <Route path='/' element={<Home />} />
                         <Route
-                          path="/matrix"
+                          path='/matrix'
                           element={
-                            <div className="p-2 md:p-4">
+                            <div className='p-2 md:p-4'>
                               <PMBOKMatrix />
                             </div>
                           }
                         />
-                        <Route path="/network" element={<ITTOForceGraph />} />
-                        <Route path="/integrated" element={<IntegratedView />} />
-                        <Route path="/glossary" element={<PMPGlossary />} />
-                        <Route path="/visualizations" element={<VisualizationHub />} />
+                        <Route path='/network' element={<ITTOForceGraph />} />
+                        <Route path='/integrated' element={<IntegratedView />} />
+                        <Route path='/glossary' element={<PMPGlossary />} />
+                        <Route path='/visualizations' element={<VisualizationHub />} />
                         <Route
-                          path="/progress"
+                          path='/progress'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -134,9 +134,9 @@ function App() {
                             </ProtectedRoute>
                           }
                         />
-                        <Route path="/flashcards" element={<FlashCardLearning />} />
+                        <Route path='/flashcards' element={<FlashCardLearning />} />
                         <Route
-                          path="/mock-exam"
+                          path='/mock-exam'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -147,7 +147,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/exam-results"
+                          path='/exam-results'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -158,7 +158,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/collaboration"
+                          path='/collaboration'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -169,7 +169,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/data-management"
+                          path='/data-management'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -179,9 +179,9 @@ function App() {
                             </ProtectedRoute>
                           }
                         />
-                        <Route path="/pmbok-versions" element={<PMBOKVersionSelector />} />
+                        <Route path='/pmbok-versions' element={<PMBOKVersionSelector />} />
                         <Route
-                          path="/ai-coaching"
+                          path='/ai-coaching'
                           element={
                             <ProtectedRoute requireAuth={true}>
                               <AICoachingDashboard />
@@ -189,7 +189,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/project-simulator"
+                          path='/project-simulator'
                           element={
                             <ProtectedRoute requireAuth={true}>
                               <ProjectSimulator />
@@ -197,7 +197,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/mentorship"
+                          path='/mentorship'
                           element={
                             <ProtectedRoute
                               requireAuth={true}
@@ -210,7 +210,7 @@ function App() {
 
                         {/* Authentication Routes */}
                         <Route
-                          path="/auth"
+                          path='/auth'
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <AuthPage />
@@ -218,7 +218,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/auth/callback"
+                          path='/auth/callback'
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <AuthCallback />
@@ -226,7 +226,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/auth/reset-password"
+                          path='/auth/reset-password'
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <ResetPasswordForm />
@@ -234,7 +234,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/profile"
+                          path='/profile'
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <UserProfile />
@@ -242,7 +242,7 @@ function App() {
                           }
                         />
                         <Route
-                          path="/pwa-dashboard"
+                          path='/pwa-dashboard'
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <ProtectedRoute
@@ -263,19 +263,19 @@ function App() {
                 <AppLayout>
                   <PageTransition>
                     <Routes>
-                      <Route path="/" element={<Home />} />
+                      <Route path='/' element={<Home />} />
                       <Route
-                        path="/matrix"
+                        path='/matrix'
                         element={
                           <Suspense fallback={<MatrixLoading />}>
-                            <div className="p-2 md:p-4">
+                            <div className='p-2 md:p-4'>
                               <PMBOKMatrix />
                             </div>
                           </Suspense>
                         }
                       />
                       <Route
-                        path="/network"
+                        path='/network'
                         element={
                           <Suspense fallback={<NetworkLoading />}>
                             <ITTOForceGraph />
@@ -283,7 +283,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/integrated"
+                        path='/integrated'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <IntegratedView />
@@ -291,7 +291,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/glossary"
+                        path='/glossary'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <PMPGlossary />
@@ -299,7 +299,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/visualizations"
+                        path='/visualizations'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <VisualizationHub />
@@ -307,7 +307,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/progress"
+                        path='/progress'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute
@@ -320,7 +320,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/flashcards"
+                        path='/flashcards'
                         element={
                           <Suspense fallback={<FlashcardLoading />}>
                             <FlashCardLearning />
@@ -328,7 +328,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/mock-exam"
+                        path='/mock-exam'
                         element={
                           <Suspense fallback={<ExamLoading />}>
                             <ProtectedRoute
@@ -341,7 +341,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/exam-results"
+                        path='/exam-results'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute
@@ -354,7 +354,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/collaboration"
+                        path='/collaboration'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute
@@ -367,7 +367,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/data-management"
+                        path='/data-management'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute
@@ -380,7 +380,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/pmbok-versions"
+                        path='/pmbok-versions'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <PMBOKVersionSelector />
@@ -388,7 +388,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/ai-coaching"
+                        path='/ai-coaching'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute requireAuth={true}>
@@ -398,7 +398,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/project-simulator"
+                        path='/project-simulator'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute requireAuth={true}>
@@ -408,7 +408,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/mentorship"
+                        path='/mentorship'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute
@@ -423,7 +423,7 @@ function App() {
 
                       {/* Authentication Routes */}
                       <Route
-                        path="/auth"
+                        path='/auth'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <AuthPage />
@@ -431,7 +431,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/auth/callback"
+                        path='/auth/callback'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <AuthCallback />
@@ -439,7 +439,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/auth/reset-password"
+                        path='/auth/reset-password'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ResetPasswordForm />
@@ -447,7 +447,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/profile"
+                        path='/profile'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <UserProfile />
@@ -455,7 +455,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/pwa-dashboard"
+                        path='/pwa-dashboard'
                         element={
                           <Suspense fallback={<LoadingSpinner />}>
                             <ProtectedRoute

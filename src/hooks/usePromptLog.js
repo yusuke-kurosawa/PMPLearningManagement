@@ -28,7 +28,9 @@ export const usePromptLog = (options = {}) => {
    */
   const logPrompt = useCallback(
     async (prompt, additionalData = {}) => {
-      if (!config.autoLog) return null
+      if (!config.autoLog) {
+        return null
+      }
 
       try {
         const promptId = await promptLogService.logPrompt({
@@ -69,7 +71,9 @@ export const usePromptLog = (options = {}) => {
    */
   const logResponse = useCallback(
     async (response, additionalData = {}) => {
-      if (!config.autoLog || !promptIdRef.current) return null
+      if (!config.autoLog || !promptIdRef.current) {
+        return null
+      }
 
       try {
         const responseId = await promptLogService.logResponse(promptIdRef.current, {
@@ -110,7 +114,9 @@ export const usePromptLog = (options = {}) => {
    */
   const logInteraction = useCallback(
     async (action, data = {}) => {
-      if (!config.autoLog) return null
+      if (!config.autoLog) {
+        return null
+      }
 
       try {
         return await promptLogService.logInteraction({
@@ -133,7 +139,9 @@ export const usePromptLog = (options = {}) => {
    */
   const logError = useCallback(
     async (error, context = {}) => {
-      if (!config.autoLog) return null
+      if (!config.autoLog) {
+        return null
+      }
 
       try {
         return await promptLogService.logResponse(promptIdRef.current, {

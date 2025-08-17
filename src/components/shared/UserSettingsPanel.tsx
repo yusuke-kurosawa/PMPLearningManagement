@@ -126,37 +126,39 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
     }
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
-    <div className="fixed inset-0 z-[150] overflow-y-auto">
+    <div className='fixed inset-0 z-[150] overflow-y-auto'>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className='fixed inset-0 bg-black/50 backdrop-blur-sm' onClick={onClose} />
 
       {/* Settings panel */}
-      <div className="relative flex min-h-screen items-center justify-center p-4">
-        <div className="relative w-full max-w-4xl rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+      <div className='relative flex min-h-screen items-center justify-center p-4'>
+        <div className='relative w-full max-w-4xl rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
           {/* Header */}
-          <div className="flex items-center justify-between border-b p-6 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <Settings className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className='flex items-center justify-between border-b p-6 dark:border-gray-700'>
+            <div className='flex items-center gap-3'>
+              <Settings className='h-6 w-6 text-gray-600 dark:text-gray-400' />
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
                 設定とカスタマイズ
               </h2>
             </div>
-            <div className="flex items-center gap-3">
+            <div className='flex items-center gap-3'>
               {hasChanges && (
-                <div className="flex gap-2">
+                <div className='flex gap-2'>
                   <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-600"
+                    className='flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-600'
                   >
-                    <Save className="h-4 w-4" />
+                    <Save className='h-4 w-4' />
                     保存
                   </button>
                   <button
                     onClick={() => setLocalSettings(settings)}
-                    className="px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                    className='px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                   >
                     キャンセル
                   </button>
@@ -164,17 +166,17 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
               )}
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                className='p-2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200'
               >
                 ×
               </button>
             </div>
           </div>
 
-          <div className="flex">
+          <div className='flex'>
             {/* Sidebar tabs */}
-            <div className="w-64 border-r p-6 dark:border-gray-700">
-              <nav className="space-y-2">
+            <div className='w-64 border-r p-6 dark:border-gray-700'>
+              <nav className='space-y-2'>
                 {tabs.map((tab) => {
                   const Icon = tab.icon
                   const isActive = activeTab === tab.id
@@ -191,7 +193,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                         }
                       `}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className='h-5 w-5' />
                       {tab.label}
                     </button>
                   )
@@ -200,18 +202,18 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
             </div>
 
             {/* Content area */}
-            <div className="flex-1 p-6">
+            <div className='flex-1 p-6'>
               {/* Appearance Settings */}
               {activeTab === 'appearance' && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">外観設定</h3>
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>外観設定</h3>
 
                   {/* Theme */}
                   <div>
-                    <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                       テーマ
                     </label>
-                    <div className="flex gap-3">
+                    <div className='flex gap-3'>
                       <button
                         onClick={() => setLocalSettings({ ...localSettings, darkMode: false })}
                         className={`
@@ -223,7 +225,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                           }
                         `}
                       >
-                        <Sun className="h-5 w-5" />
+                        <Sun className='h-5 w-5' />
                         ライト
                       </button>
                       <button
@@ -237,7 +239,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                           }
                         `}
                       >
-                        <Moon className="h-5 w-5" />
+                        <Moon className='h-5 w-5' />
                         ダーク
                       </button>
                     </div>
@@ -245,7 +247,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
                   {/* Font Size */}
                   <div>
-                    <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                       フォントサイズ
                     </label>
                     <select
@@ -253,22 +255,22 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                       onChange={(e) =>
                         setLocalSettings({ ...localSettings, fontSize: e.target.value })
                       }
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
                     >
-                      <option value="small">小</option>
-                      <option value="medium">中</option>
-                      <option value="large">大</option>
-                      <option value="xl">特大</option>
+                      <option value='small'>小</option>
+                      <option value='medium'>中</option>
+                      <option value='large'>大</option>
+                      <option value='xl'>特大</option>
                     </select>
                   </div>
 
                   {/* Compact Mode */}
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                      <h4 className='text-sm font-medium text-gray-900 dark:text-white'>
                         コンパクトモード
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>
                         より多くの情報を表示します
                       </p>
                     </div>
@@ -294,12 +296,12 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                   </div>
 
                   {/* Animations */}
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                      <h4 className='text-sm font-medium text-gray-900 dark:text-white'>
                         アニメーション
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>
                         画面遷移やエフェクトを有効にします
                       </p>
                     </div>
@@ -328,18 +330,18 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
               {/* Accessibility Settings */}
               {activeTab === 'accessibility' && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
                     アクセシビリティ
                   </h3>
 
                   {/* High Contrast */}
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                      <h4 className='text-sm font-medium text-gray-900 dark:text-white'>
                         高コントラストモード
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>
                         視認性を向上させます
                       </p>
                     </div>
@@ -365,10 +367,10 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                   </div>
 
                   {/* Sound Effects */}
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">効果音</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <h4 className='text-sm font-medium text-gray-900 dark:text-white'>効果音</h4>
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>
                         操作時の音声フィードバック
                       </p>
                     </div>
@@ -397,50 +399,50 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
               {/* Data Management */}
               {activeTab === 'data' && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
                     データ管理
                   </h3>
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                     {/* Export Data */}
                     <button
                       onClick={handleExport}
-                      className="flex items-center gap-3 rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                      className='flex items-center gap-3 rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
                     >
-                      <Download className="h-5 w-5 text-blue-500" />
-                      <div className="text-left">
-                        <h4 className="font-medium text-gray-900 dark:text-white">
+                      <Download className='h-5 w-5 text-blue-500' />
+                      <div className='text-left'>
+                        <h4 className='font-medium text-gray-900 dark:text-white'>
                           データをエクスポート
                         </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className='text-sm text-gray-500 dark:text-gray-400'>
                           学習データをJSONファイルで保存
                         </p>
                       </div>
                     </button>
 
                     {/* Import Data */}
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
-                      <Upload className="h-5 w-5 text-green-500" />
-                      <div className="text-left">
-                        <h4 className="font-medium text-gray-900 dark:text-white">
+                    <label className='flex cursor-pointer items-center gap-3 rounded-lg border border-gray-300 p-4 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'>
+                      <Upload className='h-5 w-5 text-green-500' />
+                      <div className='text-left'>
+                        <h4 className='font-medium text-gray-900 dark:text-white'>
                           データをインポート
                         </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className='text-sm text-gray-500 dark:text-gray-400'>
                           以前のデータを復元
                         </p>
                       </div>
                       <input
-                        type="file"
-                        accept=".json"
+                        type='file'
+                        accept='.json'
                         onChange={handleImport}
-                        className="hidden"
+                        className='hidden'
                       />
                     </label>
                   </div>
 
                   {/* Reset Data */}
-                  <div className="border-t pt-4 dark:border-gray-700">
+                  <div className='border-t pt-4 dark:border-gray-700'>
                     <button
                       onClick={() => {
                         if (
@@ -451,12 +453,12 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                           alert('データがリセットされました。')
                         }
                       }}
-                      className="flex items-center gap-3 rounded-lg border border-red-300 p-4 text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                      className='flex items-center gap-3 rounded-lg border border-red-300 p-4 text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20'
                     >
-                      <RotateCcw className="h-5 w-5" />
-                      <div className="text-left">
-                        <h4 className="font-medium">すべてのデータをリセット</h4>
-                        <p className="text-sm opacity-75">学習進捗、設定、カスタマイズを初期化</p>
+                      <RotateCcw className='h-5 w-5' />
+                      <div className='text-left'>
+                        <h4 className='font-medium'>すべてのデータをリセット</h4>
+                        <p className='text-sm opacity-75'>学習進捗、設定、カスタマイズを初期化</p>
                       </div>
                     </button>
                   </div>
@@ -465,14 +467,14 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
               {/* Personalization */}
               {activeTab === 'personalization' && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
                     パーソナライズ設定
                   </h3>
 
                   {/* Default View */}
                   <div>
-                    <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                       デフォルト表示
                     </label>
                     <select
@@ -480,22 +482,22 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
                       onChange={(e) =>
                         setLocalSettings({ ...localSettings, defaultView: e.target.value })
                       }
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
                     >
-                      <option value="matrix">PMBOKマトリックス</option>
-                      <option value="network">ネットワーク図</option>
-                      <option value="visualizations">データ視覚化</option>
-                      <option value="dashboard">学習ダッシュボード</option>
+                      <option value='matrix'>PMBOKマトリックス</option>
+                      <option value='network'>ネットワーク図</option>
+                      <option value='visualizations'>データ視覚化</option>
+                      <option value='dashboard'>学習ダッシュボード</option>
                     </select>
                   </div>
 
                   {/* Auto Save */}
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                      <h4 className='text-sm font-medium text-gray-900 dark:text-white'>
                         自動保存
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className='text-sm text-gray-500 dark:text-gray-400'>
                         学習進捗を自動的に保存します
                       </p>
                     </div>
@@ -522,20 +524,20 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className='flex items-center justify-between border-t bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900'>
+            <div className='text-sm text-gray-500 dark:text-gray-400'>
               設定は自動的に保存されます
             </div>
-            <div className="flex gap-3">
+            <div className='flex gap-3'>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 text-sm text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                className='px-4 py-2 text-sm text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
               >
                 デフォルトに戻す
               </button>
               <button
                 onClick={onClose}
-                className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                className='rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               >
                 閉じる
               </button>

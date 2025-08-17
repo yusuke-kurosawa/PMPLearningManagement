@@ -8,13 +8,7 @@ import {
   sankeyCenter,
   sankeyJustify,
 } from 'd3-sankey'
-import {
-  Download,
-  AlignLeft,
-  AlignRight,
-  AlignCenter,
-  AlignJustify,
-} from 'lucide-react'
+import { Download, AlignLeft, AlignRight, AlignCenter, AlignJustify } from 'lucide-react'
 
 const SankeyDiagram = ({ data }) => {
   const svgRef = useRef(null)
@@ -100,7 +94,9 @@ const SankeyDiagram = ({ data }) => {
 
   // サンキーデータの準備
   const sankeyData = useMemo(() => {
-    if (!data) {return null}
+    if (!data) {
+      return null
+    }
 
     // ノードの作成（プロセス群とプロセス）
     const nodes = []
@@ -198,7 +194,9 @@ const SankeyDiagram = ({ data }) => {
 
   // サンキーダイアグラムの描画
   useEffect(() => {
-    if (!sankeyData || !svgRef.current) {return}
+    if (!sankeyData || !svgRef.current) {
+      return
+    }
 
     const theme = themes[selectedTheme]
     const margin = { top: 40, right: 150, bottom: 40, left: 150 }
@@ -352,15 +350,15 @@ const SankeyDiagram = ({ data }) => {
   }
 
   return (
-    <div ref={containerRef} className="relative h-full w-full bg-gray-50">
+    <div ref={containerRef} className='relative h-full w-full bg-gray-50'>
       {/* コントロールパネル */}
-      <div className="absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg">
+      <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">カラーテーマ</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>カラーテーマ</label>
           <select
             value={selectedTheme}
             onChange={(e) => setSelectedTheme(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
+            className='w-full rounded-md border border-gray-300 px-3 py-2'
           >
             {Object.entries(themes).map(([key, theme]) => (
               <option key={key} value={key}>
@@ -371,8 +369,8 @@ const SankeyDiagram = ({ data }) => {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">ノード配置</label>
-          <div className="grid grid-cols-2 gap-2">
+          <label className='mb-2 block text-sm font-medium text-gray-700'>ノード配置</label>
+          <div className='grid grid-cols-2 gap-2'>
             {Object.entries(alignments).map(([key, alignment]) => {
               const Icon = alignment.icon
               return (
@@ -385,8 +383,8 @@ const SankeyDiagram = ({ data }) => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{alignment.name}</span>
+                  <Icon className='h-4 w-4' />
+                  <span className='text-sm'>{alignment.name}</span>
                 </button>
               )
             })}
@@ -394,55 +392,55 @@ const SankeyDiagram = ({ data }) => {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className='mb-2 block text-sm font-medium text-gray-700'>
             ノード幅: {nodeWidth}px
           </label>
           <input
-            type="range"
-            min="5"
-            max="30"
+            type='range'
+            min='5'
+            max='30'
             value={nodeWidth}
             onChange={(e) => setNodeWidth(Number(e.target.value))}
-            className="w-full"
+            className='w-full'
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className='mb-2 block text-sm font-medium text-gray-700'>
             ノード間隔: {nodePadding}px
           </label>
           <input
-            type="range"
-            min="5"
-            max="30"
+            type='range'
+            min='5'
+            max='30'
             value={nodePadding}
             onChange={(e) => setNodePadding(Number(e.target.value))}
-            className="w-full"
+            className='w-full'
           />
         </div>
 
         <button
           onClick={exportSVG}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700"
+          className='flex w-full items-center justify-center gap-2 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700'
         >
-          <Download className="h-4 w-4" />
+          <Download className='h-4 w-4' />
           SVGエクスポート
         </button>
       </div>
 
       {/* ホバー情報 */}
       {(hoveredNode || hoveredLink) && (
-        <div className="absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg">
+        <div className='absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg'>
           {hoveredNode && (
             <>
-              <h3 className="font-semibold text-gray-900">{hoveredNode.name}</h3>
+              <h3 className='font-semibold text-gray-900'>{hoveredNode.name}</h3>
               {hoveredNode.type === 'process' && (
                 <>
-                  <p className="text-sm text-gray-600">プロセス群: {hoveredNode.group}</p>
-                  <p className="text-sm text-gray-600">知識エリア: {hoveredNode.area}</p>
+                  <p className='text-sm text-gray-600'>プロセス群: {hoveredNode.group}</p>
+                  <p className='text-sm text-gray-600'>知識エリア: {hoveredNode.area}</p>
                 </>
               )}
-              <p className="text-sm text-gray-600">
+              <p className='text-sm text-gray-600'>
                 タイプ:{' '}
                 {hoveredNode.type === 'processGroup'
                   ? 'プロセス群'
@@ -454,7 +452,7 @@ const SankeyDiagram = ({ data }) => {
           )}
           {hoveredLink && (
             <>
-              <p className="text-sm text-gray-600">
+              <p className='text-sm text-gray-600'>
                 接続:{' '}
                 {hoveredLink.type === 'group-to-process'
                   ? 'プロセス群 → プロセス'
@@ -470,7 +468,7 @@ const SankeyDiagram = ({ data }) => {
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
-        className="h-full w-full"
+        className='h-full w-full'
       />
     </div>
   )

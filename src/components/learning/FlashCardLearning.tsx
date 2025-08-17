@@ -201,7 +201,9 @@ const FlashCardLearning = () => {
 
   const getAccuracy = () => {
     const total = sessionStats.correctAnswers + sessionStats.incorrectAnswers
-    if (total === 0) {return 0}
+    if (total === 0) {
+      return 0
+    }
     return Math.round((sessionStats.correctAnswers / total) * 100)
   }
 
@@ -223,17 +225,17 @@ const FlashCardLearning = () => {
 
   if (filteredProcesses.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="mx-auto max-w-4xl">
+      <div className='min-h-screen bg-gray-50 p-4'>
+        <div className='mx-auto max-w-4xl'>
           <button
             onClick={() => navigate(-1)}
-            className="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className='mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900'
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className='h-4 w-4' />
             戻る
           </button>
-          <div className="rounded-lg bg-white p-8 text-center shadow-lg">
-            <p className="text-gray-600">選択した条件に該当するカードがありません。</p>
+          <div className='rounded-lg bg-white p-8 text-center shadow-lg'>
+            <p className='text-gray-600'>選択した条件に該当するカードがありません。</p>
           </div>
         </div>
       </div>
@@ -241,57 +243,57 @@ const FlashCardLearning = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="mx-auto max-w-4xl">
+    <div className='min-h-screen bg-gray-50 p-4'>
+      <div className='mx-auto max-w-4xl'>
         {/* ヘッダー */}
-        <div className="mb-6">
+        <div className='mb-6'>
           <button
             onClick={() => navigate(-1)}
-            className="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className='mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900'
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className='h-4 w-4' />
             戻る
           </button>
 
-          <div className="rounded-lg bg-white p-6 shadow-lg">
-            <div className="mb-4 flex items-center justify-between">
-              <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
-                <Brain className="h-6 w-6 text-blue-600" />
+          <div className='rounded-lg bg-white p-6 shadow-lg'>
+            <div className='mb-4 flex items-center justify-between'>
+              <h1 className='flex items-center gap-2 text-2xl font-bold text-gray-900'>
+                <Brain className='h-6 w-6 text-blue-600' />
                 フラッシュカード学習
               </h1>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
+              <div className='flex items-center gap-4 text-sm'>
+                <div className='flex items-center gap-2'>
+                  <Trophy className='h-4 w-4 text-yellow-500' />
                   <span>正解率: {getAccuracy()}%</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
+                <div className='flex items-center gap-2'>
+                  <TrendingUp className='h-4 w-4 text-green-500' />
                   <span>
                     {sessionStats.correctAnswers} /{' '}
                     {sessionStats.correctAnswers + sessionStats.incorrectAnswers}
                   </span>
                 </div>
-                <span className="text-gray-600">{getSessionDuration()}</span>
+                <span className='text-gray-600'>{getSessionDuration()}</span>
                 <button
                   onClick={handleEndSession}
-                  className="flex items-center gap-1 rounded-lg bg-gray-600 px-3 py-1 text-sm text-white transition-colors hover:bg-gray-700"
+                  className='flex items-center gap-1 rounded-lg bg-gray-600 px-3 py-1 text-sm text-white transition-colors hover:bg-gray-700'
                 >
-                  <Save className="h-3 w-3" />
+                  <Save className='h-3 w-3' />
                   終了
                 </button>
               </div>
             </div>
 
             {/* フィルターコントロール */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">知識エリア</label>
+                <label className='mb-1 block text-sm font-medium text-gray-700'>知識エリア</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value="all">すべて</option>
+                  <option value='all'>すべて</option>
                   {Object.entries(processCategories).map(([id, name]) => (
                     <option key={id} value={id}>
                       {name}
@@ -301,13 +303,13 @@ const FlashCardLearning = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">プロセス群</label>
+                <label className='mb-1 block text-sm font-medium text-gray-700'>プロセス群</label>
                 <select
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value="all">すべて</option>
+                  <option value='all'>すべて</option>
                   {Object.entries(processGroups).map(([id, name]) => (
                     <option key={id} value={id}>
                       {name}
@@ -317,15 +319,15 @@ const FlashCardLearning = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">学習モード</label>
+                <label className='mb-1 block text-sm font-medium text-gray-700'>学習モード</label>
                 <select
                   value={studyMode}
                   onChange={(e) => setStudyMode(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
-                  <option value="sequential">順番に学習</option>
-                  <option value="random">ランダム</option>
-                  <option value="spaced">間隔反復学習</option>
+                  <option value='sequential'>順番に学習</option>
+                  <option value='random'>ランダム</option>
+                  <option value='spaced'>間隔反復学習</option>
                 </select>
               </div>
             </div>
@@ -333,7 +335,7 @@ const FlashCardLearning = () => {
         </div>
 
         {/* フラッシュカード */}
-        <div className="card-flip-container">
+        <div className='card-flip-container'>
           {filteredProcesses.length > 0 && (
             <FlashCard
               process={filteredProcesses[currentCardIndex]}

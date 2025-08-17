@@ -318,7 +318,9 @@ const ITTOForceGraph = React.memo(() => {
 
   // Memoized filtered data
   const { filteredNodes, filteredLinks } = useMemo(() => {
-    if (!graphData) {return { filteredNodes: [], filteredLinks: [] }}
+    if (!graphData) {
+      return { filteredNodes: [], filteredLinks: [] }
+    }
 
     let nodes = [...graphData.nodes]
     let links = [...graphData.links]
@@ -360,7 +362,9 @@ const ITTOForceGraph = React.memo(() => {
   }, [graphData, selectedFilters])
 
   useEffect(() => {
-    if (!graphData || isLoading) {return}
+    if (!graphData || isLoading) {
+      return
+    }
 
     const width = dimensions.width
     const height = dimensions.height
@@ -561,7 +565,9 @@ const ITTOForceGraph = React.memo(() => {
     // Drag functions with touch support
     function drag(simulation) {
       function dragstarted(event, d) {
-        if (!event.active) {simulation.alphaTarget(0.3).restart()}
+        if (!event.active) {
+          simulation.alphaTarget(0.3).restart()
+        }
         d.fx = d.x
         d.fy = d.y
       }
@@ -572,7 +578,9 @@ const ITTOForceGraph = React.memo(() => {
       }
 
       function dragended(event, d) {
-        if (!event.active) {simulation.alphaTarget(0)}
+        if (!event.active) {
+          simulation.alphaTarget(0)
+        }
         d.fx = null
         d.fy = null
       }
@@ -621,15 +629,15 @@ const ITTOForceGraph = React.memo(() => {
   }, [])
 
   return (
-    <div className="relative flex h-screen w-full">
+    <div className='relative flex h-screen w-full'>
       {/* Mobile Menu Button */}
       {isMobile && (
         <button
           onClick={togglePanel}
-          className="absolute left-4 top-4 z-20 rounded-lg bg-white p-2 shadow-lg"
-          aria-label="メニュー切り替え"
+          className='absolute left-4 top-4 z-20 rounded-lg bg-white p-2 shadow-lg'
+          aria-label='メニュー切り替え'
         >
-          {isPanelOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isPanelOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
         </button>
       )}
 
@@ -643,79 +651,79 @@ const ITTOForceGraph = React.memo(() => {
             : 'w-80'
         } overflow-y-auto bg-white shadow-lg`}
       >
-        <div className="p-4 md:p-6">
-          <h2 className="mb-4 text-lg font-bold md:text-xl">PMBOK ITTOフォースグラフ</h2>
+        <div className='p-4 md:p-6'>
+          <h2 className='mb-4 text-lg font-bold md:text-xl'>PMBOK ITTOフォースグラフ</h2>
 
           {/* Legend */}
-          <div className="mb-4 md:mb-6">
-            <h3 className="mb-2 text-sm font-semibold md:text-base">凡例</h3>
-            <div className="space-y-1 text-xs md:space-y-2 md:text-sm">
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 flex-shrink-0 rounded-full bg-blue-500 md:h-6 md:w-6"></div>
+          <div className='mb-4 md:mb-6'>
+            <h3 className='mb-2 text-sm font-semibold md:text-base'>凡例</h3>
+            <div className='space-y-1 text-xs md:space-y-2 md:text-sm'>
+              <div className='flex items-center gap-2'>
+                <div className='h-4 w-4 flex-shrink-0 rounded-full bg-blue-500 md:h-6 md:w-6'></div>
                 <span>プロセス（知識エリア別）</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 flex-shrink-0 rotate-45 transform bg-blue-500 md:h-6 md:w-6"></div>
+              <div className='flex items-center gap-2'>
+                <div className='h-4 w-4 flex-shrink-0 rotate-45 transform bg-blue-500 md:h-6 md:w-6'></div>
                 <span>インプット</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 flex-shrink-0 bg-green-500 md:h-6 md:w-6"></div>
+              <div className='flex items-center gap-2'>
+                <div className='h-4 w-4 flex-shrink-0 bg-green-500 md:h-6 md:w-6'></div>
                 <span>ツールと技法</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="h-0 w-0 flex-shrink-0 border-b-[14px] border-l-[8px] border-r-[8px] border-b-amber-500 border-l-transparent border-r-transparent md:border-b-[20px] md:border-l-[12px] md:border-r-[12px]"></div>
+              <div className='flex items-center gap-2'>
+                <div className='h-0 w-0 flex-shrink-0 border-b-[14px] border-l-[8px] border-r-[8px] border-b-amber-500 border-l-transparent border-r-transparent md:border-b-[20px] md:border-l-[12px] md:border-r-[12px]'></div>
                 <span>アウトプット</span>
               </div>
             </div>
           </div>
 
           {/* Filters */}
-          <div className="mb-4 md:mb-6">
-            <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold md:text-base">
-              <Filter className="h-3 w-3 md:h-4 md:w-4" />
+          <div className='mb-4 md:mb-6'>
+            <h3 className='mb-2 flex items-center gap-2 text-sm font-semibold md:text-base'>
+              <Filter className='h-3 w-3 md:h-4 md:w-4' />
               フィルター
             </h3>
 
-            <div className="mb-3 md:mb-4">
-              <h4 className="mb-2 text-xs font-medium md:text-sm">プロセス群</h4>
-              <div className="space-y-1">
+            <div className='mb-3 md:mb-4'>
+              <h4 className='mb-2 text-xs font-medium md:text-sm'>プロセス群</h4>
+              <div className='space-y-1'>
                 {processGroups.map((group) => (
                   <label
                     key={group}
-                    className="flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm"
+                    className='flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm'
                   >
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={selectedFilters.processGroups.includes(group)}
                       onChange={() => handleFilterChange('processGroups', group)}
-                      className="h-3 w-3 rounded md:h-4 md:w-4"
+                      className='h-3 w-3 rounded md:h-4 md:w-4'
                     />
-                    <span className="truncate">{group}</span>
+                    <span className='truncate'>{group}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <h4 className="mb-2 text-xs font-medium md:text-sm">知識エリア</h4>
-              <div className="space-y-1">
+              <h4 className='mb-2 text-xs font-medium md:text-sm'>知識エリア</h4>
+              <div className='space-y-1'>
                 {knowledgeAreas.map((area) => (
                   <label
                     key={area}
-                    className="flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm"
+                    className='flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm'
                   >
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={selectedFilters.knowledgeAreas.includes(area)}
                       onChange={() => handleFilterChange('knowledgeAreas', area)}
-                      className="h-3 w-3 rounded md:h-4 md:w-4"
+                      className='h-3 w-3 rounded md:h-4 md:w-4'
                     />
-                    <div className="flex items-center gap-1 md:gap-2">
+                    <div className='flex items-center gap-1 md:gap-2'>
                       <div
-                        className="h-2 w-2 flex-shrink-0 rounded-full md:h-3 md:w-3"
+                        className='h-2 w-2 flex-shrink-0 rounded-full md:h-3 md:w-3'
                         style={{ backgroundColor: knowledgeAreaColors[area] }}
                       ></div>
-                      <span className="truncate">{area}</span>
+                      <span className='truncate'>{area}</span>
                     </div>
                   </label>
                 ))}
@@ -724,32 +732,32 @@ const ITTOForceGraph = React.memo(() => {
           </div>
 
           {/* Zoom Controls */}
-          <div className="border-t pt-3 md:pt-4">
-            <h3 className="mb-2 text-sm font-semibold md:text-base">コントロール</h3>
-            <div className="flex flex-wrap gap-2">
+          <div className='border-t pt-3 md:pt-4'>
+            <h3 className='mb-2 text-sm font-semibold md:text-base'>コントロール</h3>
+            <div className='flex flex-wrap gap-2'>
               <button
                 onClick={() => window.zoomIn && window.zoomIn()}
-                className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm"
+                className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm'
               >
-                <ZoomIn className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden md:inline">拡大</span>
+                <ZoomIn className='h-3 w-3 md:h-4 md:w-4' />
+                <span className='hidden md:inline'>拡大</span>
               </button>
               <button
                 onClick={() => window.zoomOut && window.zoomOut()}
-                className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm"
+                className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm'
               >
-                <ZoomOut className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden md:inline">縮小</span>
+                <ZoomOut className='h-3 w-3 md:h-4 md:w-4' />
+                <span className='hidden md:inline'>縮小</span>
               </button>
               <button
                 onClick={() => window.resetZoom && window.resetZoom()}
-                className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm"
+                className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 md:px-3 md:text-sm'
               >
-                <RotateCcw className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden md:inline">リセット</span>
+                <RotateCcw className='h-3 w-3 md:h-4 md:w-4' />
+                <span className='hidden md:inline'>リセット</span>
               </button>
             </div>
-            <p className="mt-2 text-xs text-gray-600">
+            <p className='mt-2 text-xs text-gray-600'>
               • ノードを{isMobile ? 'タッチ' : 'クリック'}してフォーカス
               <br />
               • ノードをドラッグして位置変更
@@ -761,16 +769,16 @@ const ITTOForceGraph = React.memo(() => {
       </div>
 
       {/* Graph Container */}
-      <div ref={containerRef} className="relative flex-1 bg-gray-50">
+      <div ref={containerRef} className='relative flex-1 bg-gray-50'>
         {isLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
-              <p className="mt-4 text-gray-600">ITTO ビジュアライゼーションを読み込み中...</p>
+          <div className='absolute inset-0 flex items-center justify-center'>
+            <div className='text-center'>
+              <div className='inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500'></div>
+              <p className='mt-4 text-gray-600'>ITTO ビジュアライゼーションを読み込み中...</p>
             </div>
           </div>
         ) : (
-          <svg ref={svgRef} className="h-full w-full"></svg>
+          <svg ref={svgRef} className='h-full w-full'></svg>
         )}
       </div>
 

@@ -67,7 +67,9 @@ export const authHelpers = {
       data: { user },
       error,
     } = await supabase.auth.getUser()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return user
   },
 
@@ -77,14 +79,18 @@ export const authHelpers = {
       data: { session },
       error,
     } = await supabase.auth.getSession()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return session
   },
 
   // Sign out
   signOut: async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
   },
 
   // Refresh session
@@ -93,7 +99,9 @@ export const authHelpers = {
       data: { session },
       error,
     } = await supabase.auth.refreshSession()
-    if (error) {throw error}
+    if (error) {
+      throw error
+    }
     return session
   },
 
@@ -148,7 +156,9 @@ export const sessionManager = {
   // Start session monitoring
   startSessionMonitoring: (callback) => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (callback) {callback(event, session)}
+      if (callback) {
+        callback(event, session)
+      }
 
       // Handle different auth events
       switch (event) {
@@ -194,7 +204,9 @@ export const sessionManager = {
   isSessionExpired: async () => {
     try {
       const session = await authHelpers.getCurrentSession()
-      if (!session) {return true}
+      if (!session) {
+        return true
+      }
 
       const expiresAt = session.expires_at
       const now = Math.floor(Date.now() / 1000)

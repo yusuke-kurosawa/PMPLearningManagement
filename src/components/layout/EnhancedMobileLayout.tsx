@@ -22,7 +22,9 @@ const EnhancedMobileLayout = ({ children }) => {
   }
 
   const handleTouchMove = (e) => {
-    if (window.scrollY > 0 || startY === 0) {return}
+    if (window.scrollY > 0 || startY === 0) {
+      return
+    }
 
     const currentY = e.touches[0].clientY
     const diff = currentY - startY
@@ -83,7 +85,9 @@ const EnhancedMobileLayout = ({ children }) => {
   }
 
   const handleSwipeEnd = (e) => {
-    if (!swipeStart) {return}
+    if (!swipeStart) {
+      return
+    }
 
     const swipeEnd = {
       x: e.changedTouches[0].clientX,
@@ -143,22 +147,24 @@ const EnhancedMobileLayout = ({ children }) => {
 
   // Render pull-to-refresh indicator
   const renderPullToRefreshIndicator = () => {
-    if (pullDistance === 0) {return null}
+    if (pullDistance === 0) {
+      return null
+    }
 
     const progress = Math.min(pullDistance / PULL_THRESHOLD, 1)
     const rotation = progress * 360
 
     return (
       <div
-        className="fixed left-0 right-0 top-0 z-50 flex justify-center transition-all duration-200"
+        className='fixed left-0 right-0 top-0 z-50 flex justify-center transition-all duration-200'
         style={{
           transform: `translateY(${Math.min(pullDistance - 60, 0)}px)`,
           opacity: pullDistance > 10 ? 1 : 0,
         }}
       >
-        <div className="mt-safe-area-inset-top rounded-full bg-white p-3 shadow-lg dark:bg-gray-800">
+        <div className='mt-safe-area-inset-top rounded-full bg-white p-3 shadow-lg dark:bg-gray-800'>
           {isRefreshing ? (
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+            <div className='h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent' />
           ) : (
             <div
               className={`h-6 w-6 transition-all duration-200 ${
@@ -166,10 +172,10 @@ const EnhancedMobileLayout = ({ children }) => {
               }`}
               style={{ transform: `rotate(${rotation}deg)` }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <polyline points="1 20 1 14 7 14"></polyline>
-                <path d="m20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+              <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                <polyline points='23 4 23 10 17 10'></polyline>
+                <polyline points='1 20 1 14 7 14'></polyline>
+                <path d='m20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15'></path>
               </svg>
             </div>
           )}
@@ -181,7 +187,7 @@ const EnhancedMobileLayout = ({ children }) => {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-gray-50 dark:bg-gray-900"
+      className='min-h-screen bg-gray-50 dark:bg-gray-900'
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -190,11 +196,11 @@ const EnhancedMobileLayout = ({ children }) => {
       {renderPullToRefreshIndicator()}
 
       {/* Top safe area */}
-      <div className="h-safe-area-inset-top bg-white dark:bg-gray-800" />
+      <div className='h-safe-area-inset-top bg-white dark:bg-gray-800' />
 
       {/* Main content with swipe gestures */}
       <main
-        className="pb-safe-area-inset-bottom"
+        className='pb-safe-area-inset-bottom'
         onTouchStart={handleSwipeStart}
         onTouchEnd={(e) => {
           handleSwipeEnd(e)
@@ -208,9 +214,9 @@ const EnhancedMobileLayout = ({ children }) => {
       <MobileBottomNavigation />
 
       {/* Swipe indicator overlay */}
-      <div className="pointer-events-none fixed bottom-4 left-4 right-4">
-        <div className="text-center text-xs text-gray-400 dark:text-gray-500">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm dark:bg-gray-800">
+      <div className='pointer-events-none fixed bottom-4 left-4 right-4'>
+        <div className='text-center text-xs text-gray-400 dark:text-gray-500'>
+          <div className='inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm dark:bg-gray-800'>
             <span>← スワイプで戻る</span>
             <span>•</span>
             <span>ダブルタップで上部へ</span>

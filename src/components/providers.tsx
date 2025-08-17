@@ -10,8 +10,12 @@ import { api } from '@/lib/trpc/client'
 import superjson from 'superjson'
 
 function getBaseUrl() {
-  if (typeof window !== 'undefined') {return ''}
-  if (process.env.VERCEL_URL) {return `https://${process.env.VERCEL_URL}`}
+  if (typeof window !== 'undefined') {
+    return ''
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
   return `http://localhost:${process.env.PORT ?? 3000}`
 }
 
@@ -49,8 +53,8 @@ export function Providers({ children }: { children: ReactNode }) {
       <api.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
+            attribute='class'
+            defaultTheme='system'
             enableSystem
             disableTransitionOnChange
           >

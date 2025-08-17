@@ -95,10 +95,15 @@ const CommandPalette: React.FC = () => {
 
   // Detect mode from query prefix
   useEffect(() => {
-    if (query.startsWith('= ')) {setMode('calculate')}
-    else if (query.startsWith('> ')) {setMode('navigate')}
-    else if (query.startsWith('# ')) {setMode('settings')}
-    else {setMode('search')}
+    if (query.startsWith('= ')) {
+      setMode('calculate')
+    } else if (query.startsWith('> ')) {
+      setMode('navigate')
+    } else if (query.startsWith('# ')) {
+      setMode('settings')
+    } else {
+      setMode('search')
+    }
   }, [query])
 
   // Navigation commands
@@ -246,7 +251,9 @@ const CommandPalette: React.FC = () => {
   const calculateExpression = (expr) => {
     try {
       const cleanExpr = expr.replace('= ', '').trim()
-      if (!cleanExpr) {return ''}
+      if (!cleanExpr) {
+        return ''
+      }
 
       // Basic math operations only for security
       const allowedChars = /^[0-9+\-*/.() ]+$/
@@ -291,7 +298,9 @@ const CommandPalette: React.FC = () => {
         // search mode
         const allCommands = [...quickActions, ...navigationCommands, ...settingsCommands]
 
-        if (!searchTerm) {return allCommands.slice(0, 8)}
+        if (!searchTerm) {
+          return allCommands.slice(0, 8)
+        }
 
         return allCommands.filter(
           (cmd) =>
@@ -346,72 +355,74 @@ const CommandPalette: React.FC = () => {
 
   const modeInfo = getModeInfo()
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
-    <div className="fixed inset-0 z-[200] overflow-y-auto">
+    <div className='fixed inset-0 z-[200] overflow-y-auto'>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className='fixed inset-0 bg-black/50 backdrop-blur-sm'
         onClick={() => setIsOpen(false)}
       />
 
       {/* _Command palette */}
-      <div className="relative flex min-h-screen items-start justify-center px-4 pt-20">
-        <div className="relative w-full max-w-2xl rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+      <div className='relative flex min-h-screen items-start justify-center px-4 pt-20'>
+        <div className='relative w-full max-w-2xl rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
           {/* Header */}
-          <div className="border-b px-4 py-3 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <modeInfo.icon className="h-5 w-5 text-gray-400" />
-              <div className="flex-1">
+          <div className='border-b px-4 py-3 dark:border-gray-700'>
+            <div className='flex items-center gap-3'>
+              <modeInfo.icon className='h-5 w-5 text-gray-400' />
+              <div className='flex-1'>
                 <input
-                  aria-label="Input field"
-                  id="input-1754995293948-366"
+                  aria-label='Input field'
+                  id='input-1754995293948-366'
                   ref={inputRef}
-                  type="text"
+                  type='text'
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={modeInfo.placeholder}
-                  className="w-full bg-transparent text-lg text-gray-900 placeholder-gray-500 focus:outline-none dark:text-white dark:placeholder-gray-400"
+                  className='w-full bg-transparent text-lg text-gray-900 placeholder-gray-500 focus:outline-none dark:text-white dark:placeholder-gray-400'
                 />
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <kbd className="rounded bg-gray-100 px-2 py-1 dark:bg-gray-700">Esc</kbd>
+              <div className='flex items-center gap-2 text-xs text-gray-500'>
+                <kbd className='rounded bg-gray-100 px-2 py-1 dark:bg-gray-700'>Esc</kbd>
               </div>
             </div>
           </div>
 
           {/* Mode indicators */}
-          <div className="border-b bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
-            <div className="flex items-center gap-4 text-xs">
+          <div className='border-b bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-900'>
+            <div className='flex items-center gap-4 text-xs'>
               <span
                 className={`flex items-center gap-1 ${mode === 'search' ? 'text-blue-500' : 'text-gray-500'}`}
               >
-                <Search className="h-3 w-3" /> 検索
+                <Search className='h-3 w-3' /> 検索
               </span>
               <span
                 className={`flex items-center gap-1 ${mode === 'navigate' ? 'text-blue-500' : 'text-gray-500'}`}
               >
-                <ArrowRight className="h-3 w-3" /> ナビ
+                <ArrowRight className='h-3 w-3' /> ナビ
               </span>
               <span
                 className={`flex items-center gap-1 ${mode === 'calculate' ? 'text-blue-500' : 'text-gray-500'}`}
               >
-                <Calculator className="h-3 w-3" /> =計算
+                <Calculator className='h-3 w-3' /> =計算
               </span>
               <span
                 className={`flex items-center gap-1 ${mode === 'settings' ? 'text-blue-500' : 'text-gray-500'}`}
               >
-                <Settings className="h-3 w-3" /> #設定
+                <Settings className='h-3 w-3' /> #設定
               </span>
             </div>
           </div>
 
           {/* Results */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className='max-h-96 overflow-y-auto'>
             {results.length > 0 ? (
-              <div className="py-2">
+              <div className='py-2'>
                 {results.map((result, index) => {
                   const Icon = result.icon
                   const isSelected = index === selectedIndex
@@ -436,47 +447,47 @@ const CommandPalette: React.FC = () => {
                         }
                       `}
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className='h-4 w-4' />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-gray-900 dark:text-white">
+                      <div className='min-w-0 flex-1'>
+                        <div className='font-medium text-gray-900 dark:text-white'>
                           {result.label}
                         </div>
                         {result.description && (
-                          <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+                          <div className='truncate text-sm text-gray-500 dark:text-gray-400'>
                             {result.description}
                           </div>
                         )}
                       </div>
-                      {!result.isResult && <ChevronRight className="h-4 w-4 text-gray-400" />}
+                      {!result.isResult && <ChevronRight className='h-4 w-4 text-gray-400' />}
                     </button>
                   )
                 })}
               </div>
             ) : (
-              <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
                 {mode === 'calculate' ? '計算式を入力してください' : '結果が見つかりません'}
               </div>
             )}
           </div>
 
           {/* Footer with shortcuts */}
-          <div className="border-t bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <kbd className="rounded border bg-white px-1.5 py-0.5 dark:bg-gray-800">↑↓</kbd>
+          <div className='border-t bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900'>
+            <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400'>
+              <div className='flex items-center gap-4'>
+                <span className='flex items-center gap-1'>
+                  <kbd className='rounded border bg-white px-1.5 py-0.5 dark:bg-gray-800'>↑↓</kbd>
                   移動
                 </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="rounded border bg-white px-1.5 py-0.5 dark:bg-gray-800">
+                <span className='flex items-center gap-1'>
+                  <kbd className='rounded border bg-white px-1.5 py-0.5 dark:bg-gray-800'>
                     Enter
                   </kbd>
                   選択
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Keyboard className="h-3 w-3" />
+              <div className='flex items-center gap-2'>
+                <Keyboard className='h-3 w-3' />
                 <span>コマンドパレット</span>
               </div>
             </div>

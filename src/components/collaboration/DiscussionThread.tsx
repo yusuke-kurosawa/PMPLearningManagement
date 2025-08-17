@@ -35,7 +35,9 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
   // コメントの投稿
   const handlePostComment = () => {
-    if (!newComment.trim()) {return}
+    if (!newComment.trim()) {
+      return
+    }
 
     collaborationService.addComment({
       targetId,
@@ -50,7 +52,9 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
   // 返信の投稿
   const handlePostReply = (commentId) => {
-    if (!newReply.trim()) {return}
+    if (!newReply.trim()) {
+      return
+    }
 
     collaborationService.addReply(commentId, {
       content: newReply,
@@ -102,8 +106,8 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
   return (
     <div className={`rounded-lg p-4 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-        <MessageSquare className="h-5 w-5" />
+      <h3 className='mb-4 flex items-center gap-2 text-lg font-semibold'>
+        <MessageSquare className='h-5 w-5' />
         {title}
         <span
           className={`text-sm font-normal ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}
@@ -113,16 +117,16 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
       </h3>
 
       {/* コメント入力欄 */}
-      <div className="mb-6">
-        <div className="flex gap-2">
+      <div className='mb-6'>
+        <div className='flex gap-2'>
           <input
-            aria-label="Input field"
-            id="input-1754995293935-117"
-            type="text"
+            aria-label='Input field'
+            id='input-1754995293935-117'
+            type='text'
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handlePostComment()}
-            placeholder="コメントを入力..."
+            placeholder='コメントを入力...'
             className={`flex-1 rounded-lg border px-3 py-2 ${
               settings.darkMode
                 ? 'border-gray-600 bg-gray-700 text-white'
@@ -140,14 +144,14 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
                   : 'bg-gray-200 text-gray-400'
             }`}
           >
-            <Send className="h-4 w-4" />
+            <Send className='h-4 w-4' />
             投稿
           </button>
         </div>
       </div>
 
       {/* コメント一覧 */}
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {comments.map((comment) => (
           <div
             key={comment.id}
@@ -156,17 +160,17 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
             }`}
           >
             {/* コメントヘッダー */}
-            <div className="mb-2 flex items-start justify-between">
-              <div className="flex items-center gap-3">
+            <div className='mb-2 flex items-start justify-between'>
+              <div className='flex items-center gap-3'>
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full ${
                     settings.darkMode ? 'bg-gray-700' : 'bg-gray-200'
                   }`}
                 >
-                  <User className="h-4 w-4" />
+                  <User className='h-4 w-4' />
                 </div>
                 <div>
-                  <div className="font-medium">{comment.author}</div>
+                  <div className='font-medium'>{comment.author}</div>
                   <div
                     className={`text-xs ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}
                   >
@@ -191,14 +195,14 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
             </p>
 
             {/* 返信ボタン */}
-            <div className="flex items-center gap-4">
+            <div className='flex items-center gap-4'>
               <button
                 onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
                 className={`flex items-center gap-1 text-sm hover:text-blue-600 ${
                   settings.darkMode ? 'text-gray-400' : 'text-gray-600'
                 }`}
               >
-                <Reply className="h-3 w-3" />
+                <Reply className='h-3 w-3' />
                 返信
               </button>
 
@@ -211,12 +215,12 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
                 >
                   {expandedComments.has(comment.id) ? (
                     <>
-                      <ChevronUp className="h-3 w-3" />
+                      <ChevronUp className='h-3 w-3' />
                       返信を隠す ({comment.replies.length})
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="h-3 w-3" />
+                      <ChevronDown className='h-3 w-3' />
                       返信を表示 ({comment.replies.length})
                     </>
                   )}
@@ -226,16 +230,16 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
             {/* 返信入力欄 */}
             {replyTo === comment.id && (
-              <div className="ml-11 mt-3">
-                <div className="flex gap-2">
+              <div className='ml-11 mt-3'>
+                <div className='flex gap-2'>
                   <input
-                    aria-label="Input field"
-                    id="input-1754995293936-228"
-                    type="text"
+                    aria-label='Input field'
+                    id='input-1754995293936-228'
+                    type='text'
                     value={newReply}
                     onChange={(e) => setNewReply(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handlePostReply(comment.id)}
-                    placeholder="返信を入力..."
+                    placeholder='返信を入力...'
                     className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
                       settings.darkMode
                         ? 'border-gray-600 bg-gray-700 text-white'
@@ -261,21 +265,21 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
             {/* 返信一覧 */}
             {expandedComments.has(comment.id) && comment.replies.length > 0 && (
-              <div className="ml-11 mt-3 space-y-3">
+              <div className='ml-11 mt-3 space-y-3'>
                 {comment.replies.map((reply) => (
                   <div
                     key={reply.id}
                     className={`rounded-lg p-3 ${settings.darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}
                   >
-                    <div className="mb-1 flex items-center gap-2">
+                    <div className='mb-1 flex items-center gap-2'>
                       <div
                         className={`flex h-6 w-6 items-center justify-center rounded-full ${
                           settings.darkMode ? 'bg-gray-600' : 'bg-gray-300'
                         }`}
                       >
-                        <User className="h-3 w-3" />
+                        <User className='h-3 w-3' />
                       </div>
-                      <span className="text-sm font-medium">{reply.author}</span>
+                      <span className='text-sm font-medium'>{reply.author}</span>
                       <span
                         className={`text-xs ${
                           settings.darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -301,8 +305,8 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
 
       {/* コメントがない場合 */}
       {comments.length === 0 && (
-        <div className="py-8 text-center">
-          <MessageSquare className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+        <div className='py-8 text-center'>
+          <MessageSquare className='mx-auto mb-3 h-12 w-12 text-gray-400' />
           <p className={`${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             まだコメントがありません
           </p>

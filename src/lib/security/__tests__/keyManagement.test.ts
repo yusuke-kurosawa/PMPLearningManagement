@@ -212,12 +212,12 @@ describe('KeyManagementSystem', () => {
 
       // キーを手動で期限切れに設定
       await keyManager.deprecateKey(key.id)
-      
+
       // Mock the expired key by using revokeKey which sets immediate expiry
       await keyManager.revokeKey(key.id, 'test expiry')
 
       // Wait a bit to ensure expiry
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       await keyManager.performKeyRotation()
 

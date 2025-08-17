@@ -84,10 +84,10 @@ const PMBOKMatrix = memo(() => {
                 e.stopPropagation()
                 setSelectedGlossaryTerm(termData)
               }}
-              className="group inline-flex items-center font-medium text-blue-600 underline hover:text-blue-800"
+              className='group inline-flex items-center font-medium text-blue-600 underline hover:text-blue-800'
             >
               {term}
-              <Info className="ml-0.5 h-3 w-3 opacity-60 group-hover:opacity-100" />
+              <Info className='ml-0.5 h-3 w-3 opacity-60 group-hover:opacity-100' />
             </button>
           )
 
@@ -992,7 +992,9 @@ const PMBOKMatrix = memo(() => {
   }, [])
 
   const filteredProcesses = useMemo(() => {
-    if (!searchQuery) {return processes}
+    if (!searchQuery) {
+      return processes
+    }
 
     const filtered = {}
     const query = searchQuery.toLowerCase()
@@ -1015,13 +1017,17 @@ const PMBOKMatrix = memo(() => {
 
   const getProcessCount = (areaId) => {
     const areaProcesses = filteredProcesses[areaId]
-    if (!areaProcesses) {return 0}
+    if (!areaProcesses) {
+      return 0
+    }
     return Object.values(areaProcesses).reduce((sum, group) => sum + group.length, 0)
   }
 
   const getAreaProgress = (areaId) => {
     const areaProcesses = processes[areaId]
-    if (!areaProcesses || !progress?.processes) {return { completed: 0, total: 0, percentage: 0 }}
+    if (!areaProcesses || !progress?.processes) {
+      return { completed: 0, total: 0, percentage: 0 }
+    }
 
     let completed = 0
     let total = 0
@@ -1044,88 +1050,90 @@ const PMBOKMatrix = memo(() => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-2 sm:p-4 md:p-6">
-      <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-        <div className="border-b p-4 sm:p-6">
-          <h1 className="mb-3 text-lg font-bold text-gray-800 sm:mb-4 sm:text-xl md:text-2xl">
+    <div className='mx-auto w-full max-w-7xl p-2 sm:p-4 md:p-6'>
+      <div className='overflow-hidden rounded-lg bg-white shadow-lg'>
+        <div className='border-b p-4 sm:p-6'>
+          <h1 className='mb-3 text-lg font-bold text-gray-800 sm:mb-4 sm:text-xl md:text-2xl'>
             PMBOK 第6版 - プロセス・マトリックス (49プロセス)
           </h1>
 
-          <div className="relative">
+          <div className='relative'>
             <input
-              aria-label="Input field"
-              id="input-1754995293946-1054"
-              type="text"
-              placeholder="プロセスを検索..."
-              className="w-full rounded-lg border px-3 py-2 pl-9 pr-10 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4 sm:pl-10 sm:text-base"
+              aria-label='Input field'
+              id='input-1754995293946-1054'
+              type='text'
+              placeholder='プロセスを検索...'
+              className='w-full rounded-lg border px-3 py-2 pl-9 pr-10 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4 sm:pl-10 sm:text-base'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 sm:left-3 sm:h-5 sm:w-5" />
+            <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 sm:left-3 sm:h-5 sm:w-5' />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-2.5 text-gray-400 transition-colors hover:text-gray-600 sm:right-3"
+                className='absolute right-2.5 top-2.5 text-gray-400 transition-colors hover:text-gray-600 sm:right-3'
               >
-                <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                <X className='h-4 w-4 sm:h-5 sm:w-5' />
               </button>
             )}
           </div>
         </div>
 
-        <div className="custom-scrollbar overflow-x-auto">
-          <table className="w-full min-w-[550px] sm:min-w-[700px] md:min-w-[900px]">
-            <thead className="sticky top-0 z-10 border-b bg-gray-50">
+        <div className='custom-scrollbar overflow-x-auto'>
+          <table className='w-full min-w-[550px] sm:min-w-[700px] md:min-w-[900px]'>
+            <thead className='sticky top-0 z-10 border-b bg-gray-50'>
               <tr>
-                <th className="w-32 px-1 py-2 text-left text-[9px] font-medium uppercase tracking-tight text-gray-500 sm:w-48 sm:px-3 sm:py-3 sm:text-xs sm:tracking-wider md:w-60 md:px-4">
-                  <div className="truncate">知識エリア</div>
+                <th className='w-32 px-1 py-2 text-left text-[9px] font-medium uppercase tracking-tight text-gray-500 sm:w-48 sm:px-3 sm:py-3 sm:text-xs sm:tracking-wider md:w-60 md:px-4'>
+                  <div className='truncate'>知識エリア</div>
                 </th>
                 {processGroups.map((group) => (
                   <th
                     key={group}
-                    className="px-0.5 py-2 text-center text-[9px] font-medium uppercase tracking-tighter text-gray-500 sm:px-2 sm:py-3 sm:text-xs md:px-4"
+                    className='px-0.5 py-2 text-center text-[9px] font-medium uppercase tracking-tighter text-gray-500 sm:px-2 sm:py-3 sm:text-xs md:px-4'
                   >
-                    <div className="hidden sm:block">{group}</div>
-                    <div className="sm:hidden">{processGroupsShort[group]}</div>
+                    <div className='hidden sm:block'>{group}</div>
+                    <div className='sm:hidden'>{processGroupsShort[group]}</div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className='divide-y divide-gray-200 bg-white'>
               {knowledgeAreas.map((area) => {
                 const isExpanded = expandedAreas.has(area.id)
                 const processCount = getProcessCount(area.id)
                 const hasFilteredProcesses = processCount > 0
                 const areaProgress = getAreaProgress(area.id)
 
-                if (!hasFilteredProcesses && searchQuery) {return null}
+                if (!hasFilteredProcesses && searchQuery) {
+                  return null
+                }
 
                 return (
                   <React.Fragment key={area.id}>
-                    <tr className="transition-colors hover:bg-gray-50">
-                      <td className="px-1 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4">
+                    <tr className='transition-colors hover:bg-gray-50'>
+                      <td className='px-1 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4'>
                         <button
                           onClick={() => toggleArea(area.id)}
-                          className="flex w-full items-center space-x-1 text-left"
+                          className='flex w-full items-center space-x-1 text-left'
                           disabled={loading}
                         >
                           {loading ? (
-                            <Loader2 className="h-3 w-3 flex-shrink-0 animate-spin text-gray-500 sm:h-4 sm:w-4" />
+                            <Loader2 className='h-3 w-3 flex-shrink-0 animate-spin text-gray-500 sm:h-4 sm:w-4' />
                           ) : isExpanded ? (
-                            <ChevronDown className="h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4" />
+                            <ChevronDown className='h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4' />
                           ) : (
-                            <ChevronRight className="h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4" />
+                            <ChevronRight className='h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4' />
                           )}
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="block truncate text-[11px] font-medium text-gray-900 sm:text-sm md:text-base">
-                                <span className="sm:hidden">
+                          <div className='min-w-0 flex-1'>
+                            <div className='flex items-center justify-between'>
+                              <span className='block truncate text-[11px] font-medium text-gray-900 sm:text-sm md:text-base'>
+                                <span className='sm:hidden'>
                                   {area.name
                                     .replace('プロジェクト・', '')
                                     .replace('プロジェクト', '')
                                     .replace('マネジメント', '')}
                                 </span>
-                                <span className="hidden sm:inline">{area.name}</span>
+                                <span className='hidden sm:inline'>{area.name}</span>
                               </span>
                               {areaProgress.percentage > 0 && (
                                 <span
@@ -1141,13 +1149,13 @@ const PMBOKMatrix = memo(() => {
                                 </span>
                               )}
                             </div>
-                            <div className="mt-1 flex items-center gap-2">
-                              <span className="text-[10px] text-gray-500 sm:text-xs">
+                            <div className='mt-1 flex items-center gap-2'>
+                              <span className='text-[10px] text-gray-500 sm:text-xs'>
                                 ({processCount})
                               </span>
                               {areaProgress.completed > 0 && (
-                                <div className="flex items-center gap-1">
-                                  <div className="h-1.5 w-16 rounded-full bg-gray-200">
+                                <div className='flex items-center gap-1'>
+                                  <div className='h-1.5 w-16 rounded-full bg-gray-200'>
                                     <div
                                       className={`h-1.5 rounded-full transition-all duration-500 ${
                                         areaProgress.percentage === 100
@@ -1159,7 +1167,7 @@ const PMBOKMatrix = memo(() => {
                                       style={{ width: `${areaProgress.percentage}%` }}
                                     />
                                   </div>
-                                  <span className="text-[10px] text-gray-500">
+                                  <span className='text-[10px] text-gray-500'>
                                     {areaProgress.completed}/{areaProgress.total}
                                   </span>
                                 </div>
@@ -1173,10 +1181,10 @@ const PMBOKMatrix = memo(() => {
                         return (
                           <td
                             key={group}
-                            className="px-0.5 py-3 text-center sm:px-2 sm:py-4 md:px-4"
+                            className='px-0.5 py-3 text-center sm:px-2 sm:py-4 md:px-4'
                           >
                             {groupProcesses.length > 0 && (
-                              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-800 sm:h-7 sm:w-7 sm:text-xs md:h-8 md:w-8 md:text-sm">
+                              <span className='inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-800 sm:h-7 sm:w-7 sm:text-xs md:h-8 md:w-8 md:text-sm'>
                                 {groupProcesses.length}
                               </span>
                             )}
@@ -1186,15 +1194,17 @@ const PMBOKMatrix = memo(() => {
                     </tr>
                     {isExpanded && filteredProcesses[area.id] && (
                       <tr>
-                        <td colSpan={6} className="bg-gray-50 px-3 py-3 sm:px-6 sm:py-4">
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+                        <td colSpan={6} className='bg-gray-50 px-3 py-3 sm:px-6 sm:py-4'>
+                          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3'>
                             {processGroups.map((group) => {
                               const groupProcesses = filteredProcesses[area.id][group]
-                              if (!groupProcesses || groupProcesses.length === 0) {return null}
+                              if (!groupProcesses || groupProcesses.length === 0) {
+                                return null
+                              }
 
                               return (
-                                <div key={group} className="space-y-1.5 sm:space-y-2">
-                                  <h4 className="sticky top-0 bg-gray-50 py-1 text-xs font-semibold text-gray-700 sm:text-sm">
+                                <div key={group} className='space-y-1.5 sm:space-y-2'>
+                                  <h4 className='sticky top-0 bg-gray-50 py-1 text-xs font-semibold text-gray-700 sm:text-sm'>
                                     {group}
                                   </h4>
                                   {groupProcesses.map((process, index) => {
@@ -1204,7 +1214,7 @@ const PMBOKMatrix = memo(() => {
                                     const understanding = processProgress?.understanding || 0
 
                                     return (
-                                      <div key={process} className="flex items-center gap-1">
+                                      <div key={process} className='flex items-center gap-1'>
                                         <button
                                           onClick={() => handleProcessClick(process)}
                                           disabled={loading}
@@ -1216,15 +1226,15 @@ const PMBOKMatrix = memo(() => {
                                                 : 'bg-white hover:border-blue-300 hover:bg-blue-50'
                                           }`}
                                         >
-                                          <div className="flex items-center justify-between">
-                                            <span className="flex items-center gap-1">
+                                          <div className='flex items-center justify-between'>
+                                            <span className='flex items-center gap-1'>
                                               {isCompleted && (
-                                                <CheckCircle2 className="h-3 w-3 flex-shrink-0 text-green-600" />
+                                                <CheckCircle2 className='h-3 w-3 flex-shrink-0 text-green-600' />
                                               )}
                                               {process}
                                             </span>
                                             {understanding > 0 && (
-                                              <span className="ml-2 text-[10px] text-gray-500">
+                                              <span className='ml-2 text-[10px] text-gray-500'>
                                                 {understanding}%
                                               </span>
                                             )}
@@ -1241,10 +1251,10 @@ const PMBOKMatrix = memo(() => {
                                             })
                                             setLearningModalOpen(true)
                                           }}
-                                          className="rounded p-1.5 text-blue-600 transition-colors hover:bg-blue-50"
-                                          title="学習する"
+                                          className='rounded p-1.5 text-blue-600 transition-colors hover:bg-blue-50'
+                                          title='学習する'
                                         >
-                                          <BookOpen className="h-3.5 w-3.5" />
+                                          <BookOpen className='h-3.5 w-3.5' />
                                         </button>
                                       </div>
                                     )
@@ -1260,7 +1270,9 @@ const PMBOKMatrix = memo(() => {
                             (() => {
                               // 選択されたプロセスが現在の知識エリアに属しているかチェック
                               const currentAreaProcesses = processes[area.id]
-                              if (!currentAreaProcesses) {return false}
+                              if (!currentAreaProcesses) {
+                                return false
+                              }
 
                               const isInCurrentArea = Object.values(currentAreaProcesses).some(
                                 (groupProcesses) =>
@@ -1269,9 +1281,9 @@ const PMBOKMatrix = memo(() => {
 
                               return isInCurrentArea
                             })() && (
-                              <div className="mt-4 border-t pt-4">
-                                <div className="mb-3 flex items-start justify-between">
-                                  <h3 className="text-sm font-bold text-gray-800 sm:text-base">
+                              <div className='mt-4 border-t pt-4'>
+                                <div className='mb-3 flex items-start justify-between'>
+                                  <h3 className='text-sm font-bold text-gray-800 sm:text-base'>
                                     {selectedProcess}
                                   </h3>
                                   <button
@@ -1279,62 +1291,62 @@ const PMBOKMatrix = memo(() => {
                                       e.stopPropagation()
                                       setSelectedProcess(null)
                                     }}
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className='text-gray-400 hover:text-gray-600'
                                   >
-                                    <X className="h-4 w-4" />
+                                    <X className='h-4 w-4' />
                                   </button>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                                  <div className="rounded-lg bg-blue-50 p-3">
-                                    <h4 className="mb-2 flex items-center text-xs font-semibold text-blue-800 sm:text-sm">
-                                      <ChevronRight className="mr-1 h-4 w-4" />
+                                <div className='grid grid-cols-1 gap-3 lg:grid-cols-3'>
+                                  <div className='rounded-lg bg-blue-50 p-3'>
+                                    <h4 className='mb-2 flex items-center text-xs font-semibold text-blue-800 sm:text-sm'>
+                                      <ChevronRight className='mr-1 h-4 w-4' />
                                       インプット
                                     </h4>
-                                    <ul className="space-y-1">
+                                    <ul className='space-y-1'>
                                       {processDetails[selectedProcess].inputs.map((input, idx) => (
                                         <li
                                           key={idx}
-                                          className="flex items-start text-xs text-gray-700 sm:text-sm"
+                                          className='flex items-start text-xs text-gray-700 sm:text-sm'
                                         >
-                                          <span className="mr-1 text-blue-600">•</span>
+                                          <span className='mr-1 text-blue-600'>•</span>
                                           <span>{renderTextWithLinks(input)}</span>
                                         </li>
                                       ))}
                                     </ul>
                                   </div>
 
-                                  <div className="rounded-lg bg-green-50 p-3">
-                                    <h4 className="mb-2 flex items-center text-xs font-semibold text-green-800 sm:text-sm">
-                                      <ChevronRight className="mr-1 h-4 w-4" />
+                                  <div className='rounded-lg bg-green-50 p-3'>
+                                    <h4 className='mb-2 flex items-center text-xs font-semibold text-green-800 sm:text-sm'>
+                                      <ChevronRight className='mr-1 h-4 w-4' />
                                       ツールと技法
                                     </h4>
-                                    <ul className="space-y-1">
+                                    <ul className='space-y-1'>
                                       {processDetails[selectedProcess].tools.map((tool, idx) => (
                                         <li
                                           key={idx}
-                                          className="flex items-start text-xs text-gray-700 sm:text-sm"
+                                          className='flex items-start text-xs text-gray-700 sm:text-sm'
                                         >
-                                          <span className="mr-1 text-green-600">•</span>
+                                          <span className='mr-1 text-green-600'>•</span>
                                           <span>{renderTextWithLinks(tool)}</span>
                                         </li>
                                       ))}
                                     </ul>
                                   </div>
 
-                                  <div className="rounded-lg bg-amber-50 p-3">
-                                    <h4 className="mb-2 flex items-center text-xs font-semibold text-amber-800 sm:text-sm">
-                                      <ChevronRight className="mr-1 h-4 w-4" />
+                                  <div className='rounded-lg bg-amber-50 p-3'>
+                                    <h4 className='mb-2 flex items-center text-xs font-semibold text-amber-800 sm:text-sm'>
+                                      <ChevronRight className='mr-1 h-4 w-4' />
                                       アウトプット
                                     </h4>
-                                    <ul className="space-y-1">
+                                    <ul className='space-y-1'>
                                       {processDetails[selectedProcess].outputs.map(
                                         (output, idx) => (
                                           <li
                                             key={idx}
-                                            className="flex items-start text-xs text-gray-700 sm:text-sm"
+                                            className='flex items-start text-xs text-gray-700 sm:text-sm'
                                           >
-                                            <span className="mr-1 text-amber-600">•</span>
+                                            <span className='mr-1 text-amber-600'>•</span>
                                             <span>{renderTextWithLinks(output)}</span>
                                           </li>
                                         )

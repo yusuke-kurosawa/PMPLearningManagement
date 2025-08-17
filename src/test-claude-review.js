@@ -1,7 +1,7 @@
 // Test file for Claude AI review
 export function testFunction(a, b) {
   // This function needs improvement
-  var result = a + b
+  const result = a + b
   console.log(result)
   return result
 }

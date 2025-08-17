@@ -89,7 +89,9 @@ class ServiceWorkerManager {
 
   handleUpdateFound() {
     const newWorker = this.registration.installing
-    if (!newWorker) return
+    if (!newWorker) {
+      return
+    }
 
     newWorker.addEventListener('statechange', () => {
       if (newWorker.state === 'installed') {
@@ -162,7 +164,9 @@ class ServiceWorkerManager {
   }
 
   async checkForUpdate() {
-    if (!this.registration) return
+    if (!this.registration) {
+      return
+    }
 
     try {
       await this.registration.update()

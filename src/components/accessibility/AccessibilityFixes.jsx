@@ -23,14 +23,14 @@ export const AccessibleInput = ({
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
 
   return (
-    <div className="form-group">
+    <div className='form-group'>
       <label
         htmlFor={inputId}
         className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
         {required && (
-          <span className="ml-1 text-red-500" aria-label="必須">
+          <span className='ml-1 text-red-500' aria-label='必須'>
             *
           </span>
         )}
@@ -70,14 +70,14 @@ export const AccessibleTextarea = ({
   const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`
 
   return (
-    <div className="form-group">
+    <div className='form-group'>
       <label
         htmlFor={textareaId}
         className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
         {required && (
-          <span className="ml-1 text-red-500" aria-label="必須">
+          <span className='ml-1 text-red-500' aria-label='必須'>
             *
           </span>
         )}
@@ -116,14 +116,14 @@ export const AccessibleSelect = ({
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`
 
   return (
-    <div className="form-group">
+    <div className='form-group'>
       <label
         htmlFor={selectId}
         className={`mb-2 block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
       >
         {label}
         {required && (
-          <span className="ml-1 text-red-500" aria-label="必須">
+          <span className='ml-1 text-red-500' aria-label='必須'>
             *
           </span>
         )}
@@ -151,7 +151,7 @@ export const AccessibleSelect = ({
 /**
  * スクリーンリーダー専用テキスト
  */
-export const ScreenReaderOnly = ({ children }) => <span className="sr-only">{children}</span>
+export const ScreenReaderOnly = ({ children }) => <span className='sr-only'>{children}</span>
 
 /**
  * スキップリンクコンポーネント
@@ -159,7 +159,7 @@ export const ScreenReaderOnly = ({ children }) => <span className="sr-only">{chi
 export const SkipLink = ({ href = '#main-content', text = 'メインコンテンツへスキップ' }) => (
   <a
     href={href}
-    className="absolute left-0 top-0 z-50 -translate-y-full rounded-md bg-blue-600 px-4 py-2 text-white focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    className='absolute left-0 top-0 z-50 -translate-y-full rounded-md bg-blue-600 px-4 py-2 text-white focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-400'
   >
     {text}
   </a>
@@ -175,11 +175,11 @@ export const AriaLiveRegion = ({
   relevant = 'additions text',
 }) => (
   <div
-    role="status"
+    role='status'
     aria-live={politeness}
     aria-atomic={atomic}
     aria-relevant={relevant}
-    className="sr-only"
+    className='sr-only'
   >
     {message}
   </div>
@@ -191,8 +191,8 @@ export const AriaLiveRegion = ({
 export const FormError = ({ id, message, visible = false }) => (
   <span
     id={id}
-    role="alert"
-    aria-live="polite"
+    role='alert'
+    aria-live='polite'
     className={`mt-1 text-sm text-red-600 ${visible ? 'block' : 'hidden'}`}
   >
     {message}
@@ -203,9 +203,9 @@ export const FormError = ({ id, message, visible = false }) => (
  * アクセシブルなローディング状態
  */
 export const AccessibleLoading = ({ text = '読み込み中...' }) => (
-  <div className="flex items-center justify-center p-4">
-    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
-    <span className="sr-only">{text}</span>
+  <div className='flex items-center justify-center p-4'>
+    <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600' />
+    <span className='sr-only'>{text}</span>
   </div>
 )
 
@@ -214,7 +214,9 @@ export const AccessibleLoading = ({ text = '読み込み中...' }) => (
  */
 export const useFocusTrap = (ref) => {
   React.useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
 
     const focusableElements = ref.current.querySelectorAll(
       'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select'
@@ -224,7 +226,9 @@ export const useFocusTrap = (ref) => {
     const lastFocusable = focusableElements[focusableElements.length - 1]
 
     const handleTabKey = (e) => {
-      if (e.key !== 'Tab') return
+      if (e.key !== 'Tab') {
+        return
+      }
 
       if (e.shiftKey) {
         if (document.activeElement === firstFocusable) {

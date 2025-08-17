@@ -53,42 +53,44 @@ export function MobileNavigation() {
   const { theme, setTheme } = useTheme()
 
   const isActive = (href: string) => {
-    if (href === '/') {return pathname === href}
+    if (href === '/') {
+      return pathname === href
+    }
     return pathname.startsWith(href)
   }
 
   return (
     <>
       {/* Top Navigation Bar for Mobile */}
-      <header className="fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:hidden">
-        <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <Brain className="h-6 w-6 text-blue-600" />
-            <span className="text-lg font-bold">PMP学習</span>
+      <header className='fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:hidden'>
+        <div className='flex h-14 items-center justify-between px-4'>
+          <Link href='/' className='flex items-center space-x-2'>
+            <Brain className='h-6 w-6 text-blue-600' />
+            <span className='text-lg font-bold'>PMP学習</span>
           </Link>
 
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <Button
-              variant="ghost"
-              size="icon"
+              variant='ghost'
+              size='icon'
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-9 w-9"
+              className='h-9 w-9'
             >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === 'dark' ? <Sun className='h-5 w-5' /> : <Moon className='h-5 w-5' />}
             </Button>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Menu className="h-5 w-5" />
+                <Button variant='ghost' size='icon' className='h-9 w-9'>
+                  <Menu className='h-5 w-5' />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+              <SheetContent side='right' className='w-[280px] sm:w-[320px]'>
                 <SheetHeader>
                   <SheetTitle>メニュー</SheetTitle>
                 </SheetHeader>
 
-                <nav className="mt-6 space-y-1">
+                <nav className='mt-6 space-y-1'>
                   {mainNavItems.map((item) => (
                     <Link
                       key={item.href}
@@ -104,10 +106,10 @@ export function MobileNavigation() {
                         }
                       `}
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="flex-1">{item.label}</span>
+                      <item.icon className='h-5 w-5' />
+                      <span className='flex-1'>{item.label}</span>
                       {item.badge && (
-                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
+                        <span className='rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600'>
                           {item.badge}
                         </span>
                       )}
@@ -115,21 +117,21 @@ export function MobileNavigation() {
                   ))}
                 </nav>
 
-                <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
+                <div className='mt-6 border-t border-gray-200 pt-6 dark:border-gray-700'>
                   <Link
-                    href="/settings"
+                    href='/settings'
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className='flex items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                   >
-                    <Settings className="h-5 w-5" />
+                    <Settings className='h-5 w-5' />
                     <span>設定</span>
                   </Link>
                   <Link
-                    href="/profile"
+                    href='/profile'
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className='flex items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                   >
-                    <User className="h-5 w-5" />
+                    <User className='h-5 w-5' />
                     <span>プロフィール</span>
                   </Link>
                   <button
@@ -137,9 +139,9 @@ export function MobileNavigation() {
                       // Handle logout
                       setIsOpen(false)
                     }}
-                    className="flex w-full items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className='flex w-full items-center space-x-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                   >
-                    <LogOut className="h-5 w-5" />
+                    <LogOut className='h-5 w-5' />
                     <span>ログアウト</span>
                   </button>
                 </div>
@@ -150,8 +152,8 @@ export function MobileNavigation() {
       </header>
 
       {/* Bottom Navigation Bar for Mobile */}
-      <nav className="safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:hidden">
-        <div className="flex h-16 items-center justify-around">
+      <nav className='safe-area-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:hidden'>
+        <div className='flex h-16 items-center justify-around'>
           {bottomNavItems.map((item) => (
             <Link
               key={item.href}
@@ -166,8 +168,8 @@ export function MobileNavigation() {
                 }
               `}
             >
-              <item.icon className="mb-1 h-5 w-5" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <item.icon className='mb-1 h-5 w-5' />
+              <span className='text-xs font-medium'>{item.label}</span>
             </Link>
           ))}
         </div>

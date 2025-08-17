@@ -48,7 +48,7 @@ export const handlers = [
   http.get('https://api.ipgeolocation.io/ipgeo', ({ request }) => {
     const url = new URL(request.url)
     const ip = url.searchParams.get('ip')
-    
+
     if (ip === '203.0.113.1') {
       return HttpResponse.json({
         ip: '203.0.113.1',
@@ -59,16 +59,16 @@ export const handlers = [
         latitude: '35.6895',
         longitude: '139.6917',
         time_zone: {
-          name: 'Asia/Tokyo'
+          name: 'Asia/Tokyo',
         },
         isp: 'Example ISP',
         organization: 'Example Org',
         security: {
-          threat_score: 10
-        }
+          threat_score: 10,
+        },
       })
     }
-    
+
     if (ip === '8.8.8.8') {
       return HttpResponse.json({
         ip: '8.8.8.8',
@@ -79,7 +79,7 @@ export const handlers = [
         latitude: '37.7749',
         longitude: '-122.4194',
         time_zone: {
-          name: 'America/Los_Angeles'
+          name: 'America/Los_Angeles',
         },
         isp: 'Example ISP',
         organization: 'Example Org',
@@ -88,11 +88,11 @@ export const handlers = [
           is_vpn: true,
           is_tor: false,
           is_hosting: false,
-          threat_score: 0
-        }
+          threat_score: 0,
+        },
       })
     }
-    
+
     return HttpResponse.json({
       ip: ip || 'unknown',
       country_name: 'Test Country',
@@ -102,13 +102,13 @@ export const handlers = [
       latitude: '0',
       longitude: '0',
       time_zone: {
-        name: 'UTC'
+        name: 'UTC',
       },
       isp: 'Test ISP',
       organization: 'Test Org',
       security: {
-        threat_score: 0
-      }
+        threat_score: 0,
+      },
     })
   }),
 
@@ -117,23 +117,25 @@ export const handlers = [
     return HttpResponse.json({
       country: {
         iso_code: 'JP',
-        names: { en: 'Japan' }
+        names: { en: 'Japan' },
       },
-      subdivisions: [{
-        iso_code: '13',
-        names: { en: 'Tokyo' }
-      }],
+      subdivisions: [
+        {
+          iso_code: '13',
+          names: { en: 'Tokyo' },
+        },
+      ],
       city: {
-        names: { en: 'Tokyo' }
+        names: { en: 'Tokyo' },
       },
       location: {
         latitude: 35.6895,
         longitude: 139.6917,
-        time_zone: 'Asia/Tokyo'
+        time_zone: 'Asia/Tokyo',
       },
       traits: {
-        ip_address: ip
-      }
+        ip_address: ip,
+      },
     })
   }),
   // Internal API endpoints

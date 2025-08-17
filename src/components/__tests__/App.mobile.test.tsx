@@ -8,8 +8,8 @@ expect.extend(toHaveNoViolations)
 // Mock the mobile components
 vi.mock('../mobile/MobileOptimizedApp', () => ({
   default: ({ children }) => (
-    <div data-testid="mobile-app">
-      <div data-testid="mobile-header">Mobile Header</div>
+    <div data-testid='mobile-app'>
+      <div data-testid='mobile-header'>Mobile Header</div>
       {children}
     </div>
   ),
@@ -17,11 +17,11 @@ vi.mock('../mobile/MobileOptimizedApp', () => ({
 
 // Mock other heavy components
 vi.mock('../layout/Navigation', () => ({
-  default: () => <nav data-testid="desktop-navigation">Desktop Navigation</nav>,
+  default: () => <nav data-testid='desktop-navigation'>Desktop Navigation</nav>,
 }))
 
 vi.mock('../shared/CustomizationPanel', () => ({
-  default: () => <div data-testid="customization-panel">Customization Panel</div>,
+  default: () => <div data-testid='customization-panel'>Customization Panel</div>,
 }))
 
 // Mock intersection observer

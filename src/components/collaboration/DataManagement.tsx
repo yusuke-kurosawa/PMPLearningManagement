@@ -89,7 +89,9 @@ const DataManagement = () => {
   // ファイル選択処理
   const handleFileSelect = async (event) => {
     const file = event.target.files[0]
-    if (!file) {return}
+    if (!file) {
+      return
+    }
 
     setImportFile(file)
     setMessage(null)
@@ -134,7 +136,9 @@ const DataManagement = () => {
 
   // インポート実行
   const handleImport = async () => {
-    if (!importPreview) {return}
+    if (!importPreview) {
+      return
+    }
 
     setLoading(true)
     setMessage(null)
@@ -229,10 +233,10 @@ const DataManagement = () => {
 
   return (
     <div className={`min-h-screen ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
-      <div className="container mx-auto px-4 py-6">
+      <div className='container mx-auto px-4 py-6'>
         {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">データ管理</h1>
+        <div className='mb-8'>
+          <h1 className='mb-2 text-3xl font-bold'>データ管理</h1>
           <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             学習データのエクスポート、インポート、管理を行います
           </p>
@@ -248,16 +252,16 @@ const DataManagement = () => {
             }`}
           >
             {message.type === 'success' ? (
-              <CheckCircle className="mt-0.5 h-5 w-5" />
+              <CheckCircle className='mt-0.5 h-5 w-5' />
             ) : (
-              <AlertCircle className="mt-0.5 h-5 w-5" />
+              <AlertCircle className='mt-0.5 h-5 w-5' />
             )}
             <span>{message.text}</span>
           </div>
         )}
 
         {/* タブナビゲーション */}
-        <div className="mb-6 flex gap-4 border-b dark:border-gray-700">
+        <div className='mb-6 flex gap-4 border-b dark:border-gray-700'>
           <button
             onClick={() => setActiveTab('export')}
             className={`px-1 pb-3 font-medium transition-colors ${
@@ -268,7 +272,7 @@ const DataManagement = () => {
                   : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Download className="mr-2 inline h-4 w-4" />
+            <Download className='mr-2 inline h-4 w-4' />
             エクスポート
           </button>
           <button
@@ -281,7 +285,7 @@ const DataManagement = () => {
                   : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Upload className="mr-2 inline h-4 w-4" />
+            <Upload className='mr-2 inline h-4 w-4' />
             インポート
           </button>
           <button
@@ -294,22 +298,22 @@ const DataManagement = () => {
                   : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Database className="mr-2 inline h-4 w-4" />
+            <Database className='mr-2 inline h-4 w-4' />
             データ管理
           </button>
         </div>
 
         {/* エクスポートタブ */}
         {activeTab === 'export' && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
             {/* 完全バックアップ */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/20">
-                  <FileJson className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className='mb-4 flex items-center gap-3'>
+                <div className='rounded-lg bg-blue-100 p-3 dark:bg-blue-900/20'>
+                  <FileJson className='h-6 w-6 text-blue-600 dark:text-blue-400' />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">完全バックアップ</h3>
+                  <h3 className='text-lg font-semibold'>完全バックアップ</h3>
                   <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     すべてのデータをJSON形式でエクスポート
                   </p>
@@ -318,12 +322,12 @@ const DataManagement = () => {
               <button
                 onClick={() => handleExport('json-all')}
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50'
               >
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Download className='h-4 w-4' />
                 )}
                 すべてをエクスポート
               </button>
@@ -331,21 +335,21 @@ const DataManagement = () => {
 
             {/* 選択的エクスポート */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/20">
-                  <FileJson className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className='mb-4 flex items-center gap-3'>
+                <div className='rounded-lg bg-green-100 p-3 dark:bg-green-900/20'>
+                  <FileJson className='h-6 w-6 text-green-600 dark:text-green-400' />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">選択的エクスポート</h3>
+                  <h3 className='text-lg font-semibold'>選択的エクスポート</h3>
                   <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     必要なデータのみを選択してエクスポート
                   </p>
                 </div>
               </div>
-              <div className="mb-4 space-y-3">
-                <label className="flex items-center gap-2">
+              <div className='mb-4 space-y-3'>
+                <label className='flex items-center gap-2'>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={exportOptions.progress}
                     onChange={(e) =>
                       setExportOptions({
@@ -353,14 +357,14 @@ const DataManagement = () => {
                         progress: e.target.checked,
                       })
                     }
-                    className="rounded"
+                    className='rounded'
                   />
-                  <TrendingUp className="h-4 w-4" />
+                  <TrendingUp className='h-4 w-4' />
                   学習進捗データ
                 </label>
-                <label className="flex items-center gap-2">
+                <label className='flex items-center gap-2'>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={exportOptions.settings}
                     onChange={(e) =>
                       setExportOptions({
@@ -368,14 +372,14 @@ const DataManagement = () => {
                         settings: e.target.checked,
                       })
                     }
-                    className="rounded"
+                    className='rounded'
                   />
-                  <Settings className="h-4 w-4" />
+                  <Settings className='h-4 w-4' />
                   カスタマイズ設定
                 </label>
-                <label className="flex items-center gap-2">
+                <label className='flex items-center gap-2'>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={exportOptions.collaboration}
                     onChange={(e) =>
                       setExportOptions({
@@ -383,9 +387,9 @@ const DataManagement = () => {
                         collaboration: e.target.checked,
                       })
                     }
-                    className="rounded"
+                    className='rounded'
                   />
-                  <Users className="h-4 w-4" />
+                  <Users className='h-4 w-4' />
                   コラボレーションデータ
                 </label>
               </div>
@@ -397,12 +401,12 @@ const DataManagement = () => {
                     !exportOptions.settings &&
                     !exportOptions.collaboration)
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50'
               >
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Download className='h-4 w-4' />
                 )}
                 選択したデータをエクスポート
               </button>
@@ -410,12 +414,12 @@ const DataManagement = () => {
 
             {/* CSV進捗データ */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900/20">
-                  <FileSpreadsheet className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className='mb-4 flex items-center gap-3'>
+                <div className='rounded-lg bg-purple-100 p-3 dark:bg-purple-900/20'>
+                  <FileSpreadsheet className='h-6 w-6 text-purple-600 dark:text-purple-400' />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">進捗データ（CSV）</h3>
+                  <h3 className='text-lg font-semibold'>進捗データ（CSV）</h3>
                   <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     Excelなどで分析可能な形式でエクスポート
                   </p>
@@ -424,12 +428,12 @@ const DataManagement = () => {
               <button
                 onClick={() => handleExport('csv')}
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50'
               >
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Download className='h-4 w-4' />
                 )}
                 CSV形式でエクスポート
               </button>
@@ -437,12 +441,12 @@ const DataManagement = () => {
 
             {/* 学習レポート */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-lg bg-amber-100 p-3 dark:bg-amber-900/20">
-                  <FileText className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              <div className='mb-4 flex items-center gap-3'>
+                <div className='rounded-lg bg-amber-100 p-3 dark:bg-amber-900/20'>
+                  <FileText className='h-6 w-6 text-amber-600 dark:text-amber-400' />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">学習レポート</h3>
+                  <h3 className='text-lg font-semibold'>学習レポート</h3>
                   <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     読みやすいテキスト形式のレポート
                   </p>
@@ -451,12 +455,12 @@ const DataManagement = () => {
               <button
                 onClick={() => handleExport('report')}
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-700 disabled:opacity-50"
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-700 disabled:opacity-50'
               >
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Download className='h-4 w-4' />
                 )}
                 レポートを生成
               </button>
@@ -471,16 +475,16 @@ const DataManagement = () => {
             <div
               className={`mb-6 rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}
             >
-              <h3 className="mb-4 text-lg font-semibold">ファイルを選択</h3>
-              <div className="space-y-4">
+              <h3 className='mb-4 text-lg font-semibold'>ファイルを選択</h3>
+              <div className='space-y-4'>
                 <input
                   ref={fileInputRef}
-                  type="file"
-                  accept=".json,.csv"
+                  type='file'
+                  accept='.json,.csv'
                   onChange={handleFileSelect}
-                  className="hidden"
+                  className='hidden'
                 />
-                <div className="flex items-center gap-4">
+                <div className='flex items-center gap-4'>
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className={`rounded-lg border-2 border-dashed px-4 py-2 ${
@@ -489,7 +493,7 @@ const DataManagement = () => {
                         : 'border-gray-300 hover:border-gray-400'
                     } transition-colors hover:bg-gray-50 dark:hover:bg-gray-700`}
                   >
-                    <Upload className="mr-2 inline h-5 w-5" />
+                    <Upload className='mr-2 inline h-5 w-5' />
                     ファイルを選択
                   </button>
                   {importFile && (
@@ -511,13 +515,13 @@ const DataManagement = () => {
               <div
                 className={`mb-6 rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}
               >
-                <h3 className="mb-4 text-lg font-semibold">検証結果</h3>
+                <h3 className='mb-4 text-lg font-semibold'>検証結果</h3>
                 {validationResult.errors.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="mb-2 font-medium text-red-600 dark:text-red-400">エラー</h4>
-                    <ul className="list-inside list-disc space-y-1">
+                  <div className='mb-4'>
+                    <h4 className='mb-2 font-medium text-red-600 dark:text-red-400'>エラー</h4>
+                    <ul className='list-inside list-disc space-y-1'>
                       {validationResult.errors.map((error, index) => (
-                        <li key={index} className="text-sm text-red-600 dark:text-red-400">
+                        <li key={index} className='text-sm text-red-600 dark:text-red-400'>
                           {error}
                         </li>
                       ))}
@@ -526,10 +530,10 @@ const DataManagement = () => {
                 )}
                 {validationResult.warnings.length > 0 && (
                   <div>
-                    <h4 className="mb-2 font-medium text-amber-600 dark:text-amber-400">警告</h4>
-                    <ul className="list-inside list-disc space-y-1">
+                    <h4 className='mb-2 font-medium text-amber-600 dark:text-amber-400'>警告</h4>
+                    <ul className='list-inside list-disc space-y-1'>
                       {validationResult.warnings.map((warning, index) => (
-                        <li key={index} className="text-sm text-amber-600 dark:text-amber-400">
+                        <li key={index} className='text-sm text-amber-600 dark:text-amber-400'>
                           {warning}
                         </li>
                       ))}
@@ -537,8 +541,8 @@ const DataManagement = () => {
                   </div>
                 )}
                 {validationResult.valid && validationResult.warnings.length === 0 && (
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <CheckCircle className="h-5 w-5" />
+                  <div className='flex items-center gap-2 text-green-600 dark:text-green-400'>
+                    <CheckCircle className='h-5 w-5' />
                     <span>検証に成功しました</span>
                   </div>
                 )}
@@ -550,7 +554,7 @@ const DataManagement = () => {
               <div
                 className={`mb-6 rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}
               >
-                <h3 className="mb-4 text-lg font-semibold">インポートプレビュー</h3>
+                <h3 className='mb-4 text-lg font-semibold'>インポートプレビュー</h3>
 
                 {importPreview.type === 'csv' ? (
                   <div>
@@ -559,11 +563,11 @@ const DataManagement = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className='space-y-3'>
                     {importPreview.metadata.hasProgress && (
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4" />
+                      <div className='flex items-center justify-between'>
+                        <span className='flex items-center gap-2'>
+                          <TrendingUp className='h-4 w-4' />
                           学習進捗データ
                         </span>
                         <span
@@ -577,18 +581,18 @@ const DataManagement = () => {
                       </div>
                     )}
                     {importPreview.metadata.hasSettings && (
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <Settings className="h-4 w-4" />
+                      <div className='flex items-center justify-between'>
+                        <span className='flex items-center gap-2'>
+                          <Settings className='h-4 w-4' />
                           カスタマイズ設定
                         </span>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className='h-4 w-4 text-green-500' />
                       </div>
                     )}
                     {importPreview.metadata.hasCollaboration && (
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
+                      <div className='flex items-center justify-between'>
+                        <span className='flex items-center gap-2'>
+                          <Users className='h-4 w-4' />
                           コラボレーションデータ
                         </span>
                         <span
@@ -603,23 +607,23 @@ const DataManagement = () => {
                       </div>
                     )}
                     {importPreview.metadata.hasSearchHistory && (
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <Search className="h-4 w-4" />
+                      <div className='flex items-center justify-between'>
+                        <span className='flex items-center gap-2'>
+                          <Search className='h-4 w-4' />
                           検索履歴
                         </span>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className='h-4 w-4 text-green-500' />
                       </div>
                     )}
                   </div>
                 )}
 
                 {/* インポートオプション */}
-                <div className="mt-6 border-t pt-6 dark:border-gray-700">
-                  <h4 className="mb-3 font-medium">インポートオプション</h4>
-                  <label className="flex items-center gap-2">
+                <div className='mt-6 border-t pt-6 dark:border-gray-700'>
+                  <h4 className='mb-3 font-medium'>インポートオプション</h4>
+                  <label className='flex items-center gap-2'>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={importOptions.merge}
                       onChange={(e) =>
                         setImportOptions({
@@ -627,7 +631,7 @@ const DataManagement = () => {
                           merge: e.target.checked,
                         })
                       }
-                      className="rounded"
+                      className='rounded'
                     />
                     <span>既存データとマージする（上書きしない）</span>
                   </label>
@@ -637,23 +641,23 @@ const DataManagement = () => {
                         settings.darkMode ? 'text-gray-400' : 'text-gray-600'
                       }`}
                     >
-                      <Info className="mr-1 inline h-4 w-4" />
+                      <Info className='mr-1 inline h-4 w-4' />
                       既存のデータを保持し、新しいデータのみを追加します
                     </p>
                   )}
                 </div>
 
                 {/* インポートボタン */}
-                <div className="mt-6 flex gap-3">
+                <div className='mt-6 flex gap-3'>
                   <button
                     onClick={handleImport}
                     disabled={loading || (validationResult && !validationResult.valid)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                    className='flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50'
                   >
                     {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className='h-4 w-4 animate-spin' />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <Upload className='h-4 w-4' />
                     )}
                     インポート実行
                   </button>
@@ -682,23 +686,23 @@ const DataManagement = () => {
 
         {/* データ管理タブ */}
         {activeTab === 'manage' && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
             {/* データリセット */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <h3 className="mb-4 text-lg font-semibold">データリセット</h3>
-              <div className="space-y-3">
+              <h3 className='mb-4 text-lg font-semibold'>データリセット</h3>
+              <div className='space-y-3'>
                 <button
                   onClick={() => handleResetData('progress')}
                   className={`w-full rounded-lg border px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
                     settings.darkMode ? 'border-gray-700' : 'border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
+                  <div className='flex items-center justify-between'>
+                    <span className='flex items-center gap-2'>
+                      <TrendingUp className='h-4 w-4' />
                       学習進捗をリセット
                     </span>
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className='h-4 w-4 text-red-500' />
                   </div>
                 </button>
                 <button
@@ -707,12 +711,12 @@ const DataManagement = () => {
                     settings.darkMode ? 'border-gray-700' : 'border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
+                  <div className='flex items-center justify-between'>
+                    <span className='flex items-center gap-2'>
+                      <Users className='h-4 w-4' />
                       コラボレーションデータを削除
                     </span>
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className='h-4 w-4 text-red-500' />
                   </div>
                 </button>
                 <button
@@ -721,20 +725,20 @@ const DataManagement = () => {
                     settings.darkMode ? 'border-gray-700' : 'border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
+                  <div className='flex items-center justify-between'>
+                    <span className='flex items-center gap-2'>
+                      <Settings className='h-4 w-4' />
                       設定を初期値に戻す
                     </span>
-                    <RefreshCw className="h-4 w-4 text-amber-500" />
+                    <RefreshCw className='h-4 w-4 text-amber-500' />
                   </div>
                 </button>
                 <button
                   onClick={() => handleResetData('all')}
-                  className="mt-4 w-full rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  className='mt-4 w-full rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700'
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <Trash2 className="h-4 w-4" />
+                  <div className='flex items-center justify-center gap-2'>
+                    <Trash2 className='h-4 w-4' />
                     すべてのデータを削除
                   </div>
                 </button>
@@ -743,16 +747,16 @@ const DataManagement = () => {
 
             {/* ストレージ使用状況 */}
             <div className={`rounded-lg p-6 ${settings.darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <h3 className="mb-4 text-lg font-semibold">ストレージ使用状況</h3>
-              <div className="space-y-4">
+              <h3 className='mb-4 text-lg font-semibold'>ストレージ使用状況</h3>
+              <div className='space-y-4'>
                 <div>
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className='mb-2 flex items-center justify-between'>
                     <span
                       className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-600'}`}
                     >
                       LocalStorage使用量
                     </span>
-                    <span className="text-sm font-medium">
+                    <span className='text-sm font-medium'>
                       {(() => {
                         let totalSize = 0
                         for (const key in localStorage) {
@@ -762,9 +766,9 @@ const DataManagement = () => {
                       })()}
                     </span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div className='h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700'>
                     <div
-                      className="h-2 rounded-full bg-blue-600"
+                      className='h-2 rounded-full bg-blue-600'
                       style={{
                         width: `${Math.min(
                           (() => {
@@ -787,7 +791,7 @@ const DataManagement = () => {
                   }`}
                 >
                   <p>
-                    <Info className="mr-1 inline h-4 w-4" />
+                    <Info className='mr-1 inline h-4 w-4' />
                     ブラウザのLocalStorageは通常5MBまで保存可能です
                   </p>
                   <p>定期的にバックアップを取ることをお勧めします</p>

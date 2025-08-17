@@ -109,7 +109,9 @@ export class QueryOptimizer {
     start?: Date,
     end?: Date
   ): Record<string, unknown> | undefined {
-    if (!start && !end) {return undefined}
+    if (!start && !end) {
+      return undefined
+    }
 
     const filter: Record<string, unknown> = {}
 
@@ -427,7 +429,9 @@ export class QueryCache {
     const key = this.generateKey(query)
     const cached = this.cache.get(key)
 
-    if (!cached) {return null}
+    if (!cached) {
+      return null
+    }
 
     // TTL チェック
     if (Date.now() > cached.timestamp + cached.ttl) {

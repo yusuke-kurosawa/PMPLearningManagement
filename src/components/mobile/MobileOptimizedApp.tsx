@@ -251,7 +251,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }
   const registerTouchGestures = () => {
-    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) {return}
+    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) {
+      return
+    }
     const element = appRef.current
 
     const handleTouchMove = (_e: TouchEvent) => {
@@ -299,7 +301,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   //     }
   //   }
   const handleTouchEnd = (e: TouchEvent) => {
-    if (!touchStart) {return}
+    if (!touchStart) {
+      return
+    }
 
     // Clear long press timeout
     if (touchTimeoutRef.current) {
@@ -438,7 +442,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }
   const handleInstallApp = async () => {
-    if (!installPromptEvent) {return}
+    if (!installPromptEvent) {
+      return
+    }
 
     try {
       const result = await installPromptEvent.prompt()
@@ -506,109 +512,112 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       <SkipLinks />
 
       {/* Mobile Header */}
-      <header id="navigation" className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
-        <div className="flex items-center justify-between px-4 py-3">
+      <header
+        id='navigation'
+        className='sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden'
+      >
+        <div className='flex items-center justify-between px-4 py-3'>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Menu className="h-5 w-5" />
+              <Button variant='ghost' size='sm'>
+                <Menu className='h-5 w-5' />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <div className="space-y-6">
+            <SheetContent side='left' className='w-80'>
+              <div className='space-y-6'>
                 {/* User Profile Section */}
-                <div className="border-b pb-4">
-                  <h2 className="text-lg font-semibold">PMP Learning</h2>
-                  <p className="text-sm text-gray-600">Mobile Study App</p>
+                <div className='border-b pb-4'>
+                  <h2 className='text-lg font-semibold'>PMP Learning</h2>
+                  <p className='text-sm text-gray-600'>Mobile Study App</p>
                   {/* PWA Status Indicators */}
-                  <div className="mt-3 flex items-center gap-2">
+                  <div className='mt-3 flex items-center gap-2'>
                     <Badge
                       variant={pwaCapabilities.isOnline ? 'default' : 'destructive'}
-                      className="flex items-center gap-1"
+                      className='flex items-center gap-1'
                     >
                       {pwaCapabilities.isOnline ? (
-                        <Wifi className="h-3 w-3" />
+                        <Wifi className='h-3 w-3' />
                       ) : (
-                        <WifiOff className="h-3 w-3" />
+                        <WifiOff className='h-3 w-3' />
                       )}
                       {pwaCapabilities.isOnline ? 'Online' : 'Offline'}
                     </Badge>
                     {pwaCapabilities.isInstalled && (
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Smartphone className="h-3 w-3" />
+                      <Badge variant='secondary' className='flex items-center gap-1'>
+                        <Smartphone className='h-3 w-3' />
                         Installed
                       </Badge>
                     )}
                   </div>
                 </div>
                 {/* Navigation Menu */}
-                <nav className="space-y-2">
+                <nav className='space-y-2'>
                   {navigation.map((item) => (
                     <Button
                       key={item.id}
                       variant={location.pathname === item.href ? 'secondary' : 'ghost'}
-                      className="w-full justify-start"
+                      className='w-full justify-start'
                       onClick={() => {
                         navigate(item.href)
                         setIsMobileMenuOpen(false)
                       }}
                     >
-                      <item.icon className="mr-3 h-4 w-4" />
+                      <item.icon className='mr-3 h-4 w-4' />
                       {item.label}
                     </Button>
                   ))}
                 </nav>
                 {/* PWA Actions */}
-                <div className="space-y-3 border-t pt-4">
+                <div className='space-y-3 border-t pt-4'>
                   {pwaCapabilities.canInstall && (
-                    <Button variant="outline" className="w-full" onClick={handleInstallApp}>
-                      <Download className="mr-2 h-4 w-4" />
+                    <Button variant='outline' className='w-full' onClick={handleInstallApp}>
+                      <Download className='mr-2 h-4 w-4' />
                       Install App
                     </Button>
                   )}
-                  <Button variant="outline" className="w-full" onClick={handleShareApp}>
-                    <Share className="mr-2 h-4 w-4" />
+                  <Button variant='outline' className='w-full' onClick={handleShareApp}>
+                    <Share className='mr-2 h-4 w-4' />
                     Share App
                   </Button>
                 </div>
                 {/* Quick _Settings */}
-                <div className="space-y-3 border-t pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">Dark Mode</span>
+                <div className='space-y-3 border-t pt-4'>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-sm text-gray-700'>Dark Mode</span>
                     <Switch checked={isDarkMode} onCheckedChange={setIsDarkMode} />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">Notifications</span>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-sm text-gray-700'>Notifications</span>
                     <Switch checked={notificationsEnabled} onCheckedChange={toggleNotifications} />
                   </div>
                 </div>
                 {/* Device Info */}
-                <div className="border-t pt-4">
-                  <h4 className="mb-3 text-sm font-medium text-gray-700">Device Info</h4>
-                  <div className="space-y-2 text-xs text-gray-600">
-                    <div className="flex items-center justify-between">
+                <div className='border-t pt-4'>
+                  <h4 className='mb-3 text-sm font-medium text-gray-700'>Device Info</h4>
+                  <div className='space-y-2 text-xs text-gray-600'>
+                    <div className='flex items-center justify-between'>
                       <span>Screen:</span>
                       <span>
                         {deviceInfo.screenWidth} × {deviceInfo.screenHeight}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className='flex items-center justify-between'>
                       <span>Orientation:</span>
-                      <span className="capitalize">{deviceInfo.orientation}</span>
+                      <span className='capitalize'>{deviceInfo.orientation}</span>
                     </div>
                     {deviceInfo.battery && (
-                      <div className="flex items-center justify-between">
+                      <div className='flex items-center justify-between'>
                         <span>Battery:</span>
-                        <div className="flex items-center gap-1">
-                          <Battery className="h-3 w-3" />
+                        <div className='flex items-center gap-1'>
+                          <Battery className='h-3 w-3' />
                           <span>{deviceInfo.battery.level}%</span>
                         </div>
                       </div>
                     )}
                     {deviceInfo.network && (
-                      <div className="flex items-center justify-between">
+                      <div className='flex items-center justify-between'>
                         <span>Network:</span>
-                        <span className="uppercase">{deviceInfo.network.effectiveType}</span>
+                        <span className='uppercase'>{deviceInfo.network.effectiveType}</span>
                       </div>
                     )}
                   </div>
@@ -616,43 +625,45 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               </div>
             </SheetContent>
           </Sheet>
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold">PMP Learning</h1>
+          <div className='flex items-center gap-3'>
+            <h1 className='text-lg font-semibold'>PMP Learning</h1>
             {!pwaCapabilities.isOnline && (
-              <Badge variant="destructive" className="text-xs">
-                <WifiOff className="mr-1 h-3 w-3" />
+              <Badge variant='destructive' className='text-xs'>
+                <WifiOff className='mr-1 h-3 w-3' />
                 Offline
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             {pwaCapabilities.canInstall && (
-              <Button variant="ghost" size="sm" onClick={handleInstallApp}>
-                <Download className="h-4 w-4" />
+              <Button variant='ghost' size='sm' onClick={handleInstallApp}>
+                <Download className='h-4 w-4' />
               </Button>
             )}
-            <Button variant="ghost" size="sm">
-              <Bell className="h-4 w-4" />
+            <Button variant='ghost' size='sm'>
+              <Bell className='h-4 w-4' />
             </Button>
           </div>
         </div>
       </header>
       {/* Main Content */}
-      <main id="main-content" className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
+      <main id='main-content' className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>
+        {children}
+      </main>
       {/* Mobile Bottom Navigation */}
       {deviceInfo.isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">
-          <div className="flex items-center justify-around py-2">
+        <nav className='fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white'>
+          <div className='flex items-center justify-around py-2'>
             {navigation.slice(0, 4).map((item) => (
               <Button
                 key={item.id}
                 variant={location.pathname === item.href ? 'secondary' : 'ghost'}
-                size="sm"
-                className="flex flex-col items-center gap-1 py-2"
+                size='sm'
+                className='flex flex-col items-center gap-1 py-2'
                 onClick={() => navigate(item.href)}
               >
-                <item.icon className="h-4 w-4" />
-                <span className="text-xs">{item.label}</span>
+                <item.icon className='h-4 w-4' />
+                <span className='text-xs'>{item.label}</span>
               </Button>
             ))}
           </div>
@@ -662,30 +673,30 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       {/* This would be triggered by service worker */}
       {/* Offline Indicator */}
       {offlineMode && (
-        <div className="fixed left-0 right-0 top-0 z-50 bg-yellow-500 py-2 text-center text-white">
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <WifiOff className="h-4 w-4" />
+        <div className='fixed left-0 right-0 top-0 z-50 bg-yellow-500 py-2 text-center text-white'>
+          <div className='flex items-center justify-center gap-2 text-sm'>
+            <WifiOff className='h-4 w-4' />
             You&apos;re offline - changes will sync when connection is restored
           </div>
         </div>
       )}
       {/* Install Prompt Banner */}
       {pwaCapabilities.canInstall && !pwaCapabilities.isInstalled && (
-        <div className="fixed bottom-16 left-4 right-4 z-40 rounded-lg bg-blue-600 p-4 text-white shadow-lg md:bottom-4 md:left-auto md:right-4 md:w-80">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="mb-1 text-sm font-semibold">Install PMP Learning App</h3>
-              <p className="mb-3 text-xs opacity-90">
+        <div className='fixed bottom-16 left-4 right-4 z-40 rounded-lg bg-blue-600 p-4 text-white shadow-lg md:bottom-4 md:left-auto md:right-4 md:w-80'>
+          <div className='flex items-start justify-between'>
+            <div className='flex-1'>
+              <h3 className='mb-1 text-sm font-semibold'>Install PMP Learning App</h3>
+              <p className='mb-3 text-xs opacity-90'>
                 Get quick access and offline functionality by installing our app
               </p>
-              <div className="flex gap-2">
-                <Button size="sm" variant="secondary" onClick={handleInstallApp}>
+              <div className='flex gap-2'>
+                <Button size='sm' variant='secondary' onClick={handleInstallApp}>
                   Install
                 </Button>
                 <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-white hover:text-white"
+                  size='sm'
+                  variant='ghost'
+                  className='text-white hover:text-white'
                   onClick={() => setPwaCapabilities((prev) => ({ ...prev, canInstall: false }))}
                 >
                   Later
@@ -693,21 +704,21 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               </div>
             </div>
             <Button
-              variant="ghost"
-              size="sm"
-              className="p-1 text-white hover:text-white"
+              variant='ghost'
+              size='sm'
+              className='p-1 text-white hover:text-white'
               onClick={() => setPwaCapabilities((prev) => ({ ...prev, canInstall: false }))}
             >
-              <X className="h-4 w-4" />
+              <X className='h-4 w-4' />
             </Button>
           </div>
         </div>
       )}
       {/* Debug Info (Development Only) */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="fixed right-4 top-20 z-50 max-w-xs rounded-lg bg-black bg-opacity-80 p-3 text-xs text-white">
-          <h4 className="mb-2 font-semibold">Debug Info</h4>
-          <div className="space-y-1">
+        <div className='fixed right-4 top-20 z-50 max-w-xs rounded-lg bg-black bg-opacity-80 p-3 text-xs text-white'>
+          <h4 className='mb-2 font-semibold'>Debug Info</h4>
+          <div className='space-y-1'>
             <div>PWA: {pwaCapabilities.isInstalled ? 'Installed' : 'Not Installed'}</div>
             <div>Online: {pwaCapabilities.isOnline ? 'Yes' : 'No'}</div>
             <div>Touch: {pwaCapabilities.supportsTouchGestures ? 'Yes' : 'No'}</div>

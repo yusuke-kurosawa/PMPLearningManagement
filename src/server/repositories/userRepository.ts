@@ -478,8 +478,12 @@ export class UserRepository {
         ]
       }
 
-      if (filters.role) {where.role = filters.role}
-      if (filters.subscriptionPlan) {where.subscriptionPlan = filters.subscriptionPlan}
+      if (filters.role) {
+        where.role = filters.role
+      }
+      if (filters.subscriptionPlan) {
+        where.subscriptionPlan = filters.subscriptionPlan
+      }
       if (filters.emailVerified !== undefined) {
         where.emailVerified = filters.emailVerified ? { not: null } : null
       }

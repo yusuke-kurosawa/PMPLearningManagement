@@ -99,7 +99,9 @@ const VisualizationHub = () => {
   ]
 
   const handleViewChange = (viewId) => {
-    if (viewId === selectedView) {return}
+    if (viewId === selectedView) {
+      return
+    }
 
     setIsTransitioning(true)
     setTimeout(() => {
@@ -227,25 +229,25 @@ const VisualizationHub = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className='flex h-screen flex-col bg-gray-50'>
       {/* ビジュアライゼーション選択バー */}
-      <div className="border-b bg-white shadow-lg">
-        <div className="mx-auto max-w-7xl px-4 py-4">
-          <div className="mb-4 flex items-center justify-between">
+      <div className='border-b bg-white shadow-lg'>
+        <div className='mx-auto max-w-7xl px-4 py-4'>
+          <div className='mb-4 flex items-center justify-between'>
             <div>
-              <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-                <Sparkles className="h-6 w-6 text-yellow-500" />
+              <h1 className='flex items-center gap-2 text-2xl font-bold text-gray-800'>
+                <Sparkles className='h-6 w-6 text-yellow-500' />
                 ビジュアライゼーションハブ
               </h1>
-              <p className="mt-1 text-sm text-gray-600">様々な視点からPMBOKプロセスを理解する</p>
+              <p className='mt-1 text-sm text-gray-600'>様々な視点からPMBOKプロセスを理解する</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <ArrowUpDown className="h-4 w-4" />
+            <div className='flex items-center gap-2 text-sm text-gray-500'>
+              <ArrowUpDown className='h-4 w-4' />
               表示を切り替えてください
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
+          <div className='grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8'>
             {visualizations.map((viz) => {
               const Icon = viz.icon
               const isActive = selectedView === viz.id
@@ -261,15 +263,15 @@ const VisualizationHub = () => {
                   `}
                 >
                   {viz.isNew && (
-                    <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-2 py-1 text-xs text-white">
+                    <span className='absolute -right-2 -top-2 rounded-full bg-red-500 px-2 py-1 text-xs text-white'>
                       NEW
                     </span>
                   )}
 
-                  <div className="flex flex-col items-center gap-2 text-center">
+                  <div className='flex flex-col items-center gap-2 text-center'>
                     <Icon className={`h-8 w-8 ${isActive ? 'text-white' : ''}`} />
                     <div>
-                      <div className="text-sm font-semibold">{viz.name}</div>
+                      <div className='text-sm font-semibold'>{viz.name}</div>
                       <div
                         className={`text-xs ${isActive ? 'text-white/80' : 'opacity-70'} hidden lg:block`}
                       >
@@ -285,7 +287,7 @@ const VisualizationHub = () => {
       </div>
 
       {/* ビジュアライゼーションコンテンツ */}
-      <div className="relative flex-1 overflow-hidden">
+      <div className='relative flex-1 overflow-hidden'>
         <div
           className={`
             absolute inset-0 transition-all duration-300
@@ -295,10 +297,10 @@ const VisualizationHub = () => {
           {CurrentVisualization && (
             <Suspense
               fallback={
-                <div className="flex h-full items-center justify-center">
-                  <div className="text-center">
-                    <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
-                    <p className="text-gray-600">ビジュアライゼーションを読み込み中...</p>
+                <div className='flex h-full items-center justify-center'>
+                  <div className='text-center'>
+                    <div className='mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600'></div>
+                    <p className='text-gray-600'>ビジュアライゼーションを読み込み中...</p>
                   </div>
                 </div>
               }

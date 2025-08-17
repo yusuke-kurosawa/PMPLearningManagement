@@ -15,7 +15,7 @@ import jwt from 'jsonwebtoken'
 // NextRequest のモック
 class MockHeaders {
   private data: Map<string, string> = new Map()
-  
+
   constructor(init?: Record<string, string>) {
     if (init) {
       Object.entries(init).forEach(([key, value]) => {
@@ -23,11 +23,11 @@ class MockHeaders {
       })
     }
   }
-  
+
   get(name: string): string | null {
     return this.data.get(name.toLowerCase()) || null
   }
-  
+
   set(name: string, value: string): void {
     this.data.set(name.toLowerCase(), value)
   }
@@ -36,7 +36,7 @@ class MockHeaders {
 class NextRequest {
   url: string
   headers: MockHeaders
-  
+
   constructor(url: string, init?: { headers?: Record<string, string> }) {
     this.url = url
     this.headers = new MockHeaders(init?.headers)
@@ -87,7 +87,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || '')
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -110,7 +110,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || '')
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -153,7 +153,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || '')
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -175,7 +175,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'malicious-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || '')
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -206,7 +206,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || '')
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {

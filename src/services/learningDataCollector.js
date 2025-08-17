@@ -555,7 +555,9 @@ class LearningDataCollector {
    * 平均セッション時間の計算
    */
   calculateAverageSessionDuration() {
-    if (this.data.sessions.length === 0) return 0
+    if (this.data.sessions.length === 0) {
+      return 0
+    }
 
     const totalDuration = this.data.sessions.reduce(
       (total, session) => total + (session.duration || 0),
@@ -613,10 +615,18 @@ class LearningDataCollector {
    * トレンドの解釈
    */
   interpretTrend(slope) {
-    if (slope > 1) return '素晴らしい上昇傾向です！'
-    if (slope > 0.5) return '良い改善が見られます。'
-    if (slope > -0.5) return '安定した学習を続けています。'
-    if (slope > -1) return '少し停滞気味です。学習方法を見直しましょう。'
+    if (slope > 1) {
+      return '素晴らしい上昇傾向です！'
+    }
+    if (slope > 0.5) {
+      return '良い改善が見られます。'
+    }
+    if (slope > -0.5) {
+      return '安定した学習を続けています。'
+    }
+    if (slope > -1) {
+      return '少し停滞気味です。学習方法を見直しましょう。'
+    }
     return '改善が必要です。サポートが必要な場合はお知らせください。'
   }
 

@@ -271,14 +271,22 @@ const PWAOptimizationDashboard = () => {
   }
 
   const getScoreColor = (score) => {
-    if (score >= 90) return 'text-green-600'
-    if (score >= 70) return 'text-yellow-600'
+    if (score >= 90) {
+      return 'text-green-600'
+    }
+    if (score >= 70) {
+      return 'text-yellow-600'
+    }
     return 'text-red-600'
   }
 
   const getScoreBackground = (score) => {
-    if (score >= 90) return 'bg-green-100'
-    if (score >= 70) return 'bg-yellow-100'
+    if (score >= 90) {
+      return 'bg-green-100'
+    }
+    if (score >= 70) {
+      return 'bg-yellow-100'
+    }
     return 'bg-red-100'
   }
 
@@ -300,30 +308,32 @@ const PWAOptimizationDashboard = () => {
   }
 
   const formatTime = (ms) => {
-    if (ms < 1000) return `${Math.round(ms)}ms`
+    if (ms < 1000) {
+      return `${Math.round(ms)}ms`
+    }
     return `${(ms / 1000).toFixed(1)}s`
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-7xl">
+    <div className='min-h-screen bg-gray-50 p-6'>
+      <div className='mx-auto max-w-7xl'>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className='mb-8'>
+          <div className='flex items-center justify-between'>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">PWA Performance Dashboard</h1>
-              <p className="mt-1 text-gray-600">Real-time monitoring and optimization insights</p>
+              <h1 className='text-3xl font-bold text-gray-900'>PWA Performance Dashboard</h1>
+              <p className='mt-1 text-gray-600'>Real-time monitoring and optimization insights</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-4'>
+              <div className='flex items-center space-x-2'>
                 <div
                   className={`h-3 w-3 rounded-full ${isMonitoring ? 'bg-green-500' : 'bg-gray-400'}`}
                 />
-                <span className="text-sm text-gray-600">
+                <span className='text-sm text-gray-600'>
                   {isMonitoring ? 'Monitoring' : 'Stopped'}
                 </span>
               </div>
-              <Button variant="outline" onClick={() => updateMetrics()}>
+              <Button variant='outline' onClick={() => updateMetrics()}>
                 Refresh
               </Button>
             </div>
@@ -332,12 +342,12 @@ const PWAOptimizationDashboard = () => {
 
         {/* Alerts */}
         {alerts.length > 0 && (
-          <Card className="mb-6">
+          <Card className='mb-6'>
             <CardHeader>
-              <CardTitle className="text-lg">Performance Alerts</CardTitle>
+              <CardTitle className='text-lg'>Performance Alerts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className='space-y-3'>
                 {alerts.slice(0, 3).map((alert) => (
                   <div
                     key={alert.id}
@@ -347,9 +357,9 @@ const PWAOptimizationDashboard = () => {
                         : 'border-yellow-400 bg-yellow-50'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{alert.message}</p>
-                      <span className="text-xs text-gray-500">
+                    <div className='flex items-center justify-between'>
+                      <p className='text-sm font-medium'>{alert.message}</p>
+                      <span className='text-xs text-gray-500'>
                         {new Date(alert.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
@@ -360,24 +370,24 @@ const PWAOptimizationDashboard = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue='overview' className='space-y-6'>
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="lighthouse">Lighthouse</TabsTrigger>
-            <TabsTrigger value="vitals">Core Web Vitals</TabsTrigger>
-            <TabsTrigger value="bundle">Bundle Analysis</TabsTrigger>
-            <TabsTrigger value="optimizations">Optimizations</TabsTrigger>
+            <TabsTrigger value='overview'>Overview</TabsTrigger>
+            <TabsTrigger value='lighthouse'>Lighthouse</TabsTrigger>
+            <TabsTrigger value='vitals'>Core Web Vitals</TabsTrigger>
+            <TabsTrigger value='bundle'>Bundle Analysis</TabsTrigger>
+            <TabsTrigger value='optimizations'>Optimizations</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value='overview' className='space-y-6'>
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className='p-6'>
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <p className="text-sm text-gray-600">Performance Score</p>
+                      <p className='text-sm text-gray-600'>Performance Score</p>
                       <p
                         className={`text-2xl font-bold ${getScoreColor(metrics.lighthouse.performance)}`}
                       >
@@ -394,47 +404,47 @@ const PWAOptimizationDashboard = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className='p-6'>
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <p className="text-sm text-gray-600">LCP</p>
+                      <p className='text-sm text-gray-600'>LCP</p>
                       <p
                         className={`text-2xl font-bold ${metrics.coreWebVitals.lcp <= 2500 ? 'text-green-600' : 'text-red-600'}`}
                       >
                         {formatTime(metrics.coreWebVitals.lcp)}
                       </p>
                     </div>
-                    <div className="rounded-full bg-blue-100 p-3">🎯</div>
+                    <div className='rounded-full bg-blue-100 p-3'>🎯</div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className='p-6'>
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <p className="text-sm text-gray-600">Bundle Size</p>
+                      <p className='text-sm text-gray-600'>Bundle Size</p>
                       <p
                         className={`text-2xl font-bold ${metrics.bundleSize.total <= 2 ? 'text-green-600' : 'text-yellow-600'}`}
                       >
                         {formatBytes(metrics.bundleSize.total)}
                       </p>
                     </div>
-                    <div className="rounded-full bg-purple-100 p-3">📦</div>
+                    <div className='rounded-full bg-purple-100 p-3'>📦</div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className='p-6'>
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <p className="text-sm text-gray-600">Cache Hit Rate</p>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className='text-sm text-gray-600'>Cache Hit Rate</p>
+                      <p className='text-2xl font-bold text-green-600'>
                         {Math.round(metrics.serviceWorker.cacheHitRatio)}%
                       </p>
                     </div>
-                    <div className="rounded-full bg-green-100 p-3">💾</div>
+                    <div className='rounded-full bg-green-100 p-3'>💾</div>
                   </div>
                 </CardContent>
               </Card>
@@ -446,29 +456,29 @@ const PWAOptimizationDashboard = () => {
                 <CardTitle>Performance Trends</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex h-64 items-center justify-center rounded-lg bg-gray-100">
-                  <p className="text-gray-500">Performance chart would be rendered here</p>
+                <div className='flex h-64 items-center justify-center rounded-lg bg-gray-100'>
+                  <p className='text-gray-500'>Performance chart would be rendered here</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Lighthouse Tab */}
-          <TabsContent value="lighthouse" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <TabsContent value='lighthouse' className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
               {Object.entries(metrics.lighthouse).map(([key, score]) => (
                 <Card key={key}>
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold capitalize">
+                  <CardContent className='p-6'>
+                    <div className='mb-4 flex items-center justify-between'>
+                      <h3 className='text-lg font-semibold capitalize'>
                         {key.replace(/([A-Z])/g, ' $1')}
                       </h3>
                       <span className={`text-2xl font-bold ${getScoreColor(score)}`}>
                         {Math.round(score)}
                       </span>
                     </div>
-                    <Progress value={score} className="h-2" />
-                    <p className="mt-2 text-sm text-gray-600">
+                    <Progress value={score} className='h-2' />
+                    <p className='mt-2 text-sm text-gray-600'>
                       {score >= 90 ? 'Excellent' : score >= 70 ? 'Good' : 'Needs Improvement'}
                     </p>
                   </CardContent>
@@ -478,24 +488,24 @@ const PWAOptimizationDashboard = () => {
           </TabsContent>
 
           {/* Core Web Vitals Tab */}
-          <TabsContent value="vitals" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <TabsContent value='vitals' className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
               <Card>
                 <CardHeader>
                   <CardTitle>Largest Contentful Paint (LCP)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center">
+                  <div className='text-center'>
                     <p
                       className={`mb-2 text-3xl font-bold ${metrics.coreWebVitals.lcp <= 2500 ? 'text-green-600' : 'text-red-600'}`}
                     >
                       {formatTime(metrics.coreWebVitals.lcp)}
                     </p>
-                    <p className="text-sm text-gray-600">Target: ≤ 2.5s</p>
-                    <div className="mt-4">
+                    <p className='text-sm text-gray-600'>Target: ≤ 2.5s</p>
+                    <div className='mt-4'>
                       <Progress
                         value={Math.min((metrics.coreWebVitals.lcp / 2500) * 100, 100)}
-                        className="h-2"
+                        className='h-2'
                       />
                     </div>
                   </div>
@@ -507,17 +517,17 @@ const PWAOptimizationDashboard = () => {
                   <CardTitle>First Input Delay (FID)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center">
+                  <div className='text-center'>
                     <p
                       className={`mb-2 text-3xl font-bold ${metrics.coreWebVitals.fid <= 100 ? 'text-green-600' : 'text-red-600'}`}
                     >
                       {formatTime(metrics.coreWebVitals.fid)}
                     </p>
-                    <p className="text-sm text-gray-600">Target: ≤ 100ms</p>
-                    <div className="mt-4">
+                    <p className='text-sm text-gray-600'>Target: ≤ 100ms</p>
+                    <div className='mt-4'>
                       <Progress
                         value={Math.min((metrics.coreWebVitals.fid / 100) * 100, 100)}
-                        className="h-2"
+                        className='h-2'
                       />
                     </div>
                   </div>
@@ -529,17 +539,17 @@ const PWAOptimizationDashboard = () => {
                   <CardTitle>Cumulative Layout Shift (CLS)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center">
+                  <div className='text-center'>
                     <p
                       className={`mb-2 text-3xl font-bold ${metrics.coreWebVitals.cls <= 0.1 ? 'text-green-600' : 'text-red-600'}`}
                     >
                       {metrics.coreWebVitals.cls.toFixed(3)}
                     </p>
-                    <p className="text-sm text-gray-600">Target: ≤ 0.1</p>
-                    <div className="mt-4">
+                    <p className='text-sm text-gray-600'>Target: ≤ 0.1</p>
+                    <div className='mt-4'>
                       <Progress
                         value={Math.min((metrics.coreWebVitals.cls / 0.1) * 100, 100)}
-                        className="h-2"
+                        className='h-2'
                       />
                     </div>
                   </div>
@@ -549,27 +559,27 @@ const PWAOptimizationDashboard = () => {
           </TabsContent>
 
           {/* Bundle Analysis Tab */}
-          <TabsContent value="bundle" className="space-y-6">
+          <TabsContent value='bundle' className='space-y-6'>
             <Card>
               <CardHeader>
                 <CardTitle>Bundle Size Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className='space-y-4'>
                   {Object.entries(metrics.bundleSize).map(([type, size]) => (
-                    <div key={type} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <span className="font-medium capitalize">{type}</span>
-                        <Badge variant="outline">{formatBytes(size)}</Badge>
+                    <div key={type} className='flex items-center justify-between'>
+                      <div className='flex items-center space-x-3'>
+                        <span className='font-medium capitalize'>{type}</span>
+                        <Badge variant='outline'>{formatBytes(size)}</Badge>
                       </div>
-                      <div className="w-32">
+                      <div className='w-32'>
                         <Progress
                           value={
                             type === 'total'
                               ? (size / 3) * 100
                               : (size / metrics.bundleSize.total) * 100
                           }
-                          className="h-2"
+                          className='h-2'
                         />
                       </div>
                     </div>
@@ -583,20 +593,20 @@ const PWAOptimizationDashboard = () => {
                 <CardTitle>Network Information</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className='grid grid-cols-3 gap-4'>
                   <div>
-                    <p className="text-sm text-gray-600">Connection Type</p>
-                    <p className="text-lg font-semibold uppercase">
+                    <p className='text-sm text-gray-600'>Connection Type</p>
+                    <p className='text-lg font-semibold uppercase'>
                       {metrics.networkInfo.effectiveType}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Downlink</p>
-                    <p className="text-lg font-semibold">{metrics.networkInfo.downlink} Mbps</p>
+                    <p className='text-sm text-gray-600'>Downlink</p>
+                    <p className='text-lg font-semibold'>{metrics.networkInfo.downlink} Mbps</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">RTT</p>
-                    <p className="text-lg font-semibold">{metrics.networkInfo.rtt}ms</p>
+                    <p className='text-sm text-gray-600'>RTT</p>
+                    <p className='text-lg font-semibold'>{metrics.networkInfo.rtt}ms</p>
                   </div>
                 </div>
               </CardContent>
@@ -604,26 +614,26 @@ const PWAOptimizationDashboard = () => {
           </TabsContent>
 
           {/* Optimizations Tab */}
-          <TabsContent value="optimizations" className="space-y-6">
-            <div className="space-y-4">
+          <TabsContent value='optimizations' className='space-y-6'>
+            <div className='space-y-4'>
               {optimizations.map((opt) => (
                 <Card key={opt.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-center space-x-3">
-                          <h3 className="text-lg font-semibold">{opt.title}</h3>
+                  <CardContent className='p-6'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex-1'>
+                        <div className='mb-2 flex items-center space-x-3'>
+                          <h3 className='text-lg font-semibold'>{opt.title}</h3>
                           <Badge variant={getStatusBadgeVariant(opt.status)}>
                             {opt.status.replace('-', ' ')}
                           </Badge>
-                          <Badge variant="outline">{opt.impact} Impact</Badge>
+                          <Badge variant='outline'>{opt.impact} Impact</Badge>
                         </div>
-                        <p className="mb-2 text-gray-600">{opt.description}</p>
-                        <p className="text-sm font-medium text-green-600">
+                        <p className='mb-2 text-gray-600'>{opt.description}</p>
+                        <p className='text-sm font-medium text-green-600'>
                           Potential Savings: {opt.savings}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant='outline' size='sm'>
                         {opt.status === 'completed' ? 'Review' : 'Implement'}
                       </Button>
                     </div>

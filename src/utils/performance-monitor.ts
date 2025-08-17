@@ -20,7 +20,9 @@ class PerformanceMonitor {
    * Web Vitalsの監視開始
    */
   startMonitoring(): void {
-    if (typeof window === 'undefined') {return}
+    if (typeof window === 'undefined') {
+      return
+    }
 
     // First Contentful Paint
     this.observePaint()
@@ -147,7 +149,9 @@ class PerformanceMonitor {
    */
   private measureTTFB(): void {
     try {
-      const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+      const navigationEntry = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming
       if (navigationEntry) {
         this.metrics.TTFB = Math.round(navigationEntry.responseStart - navigationEntry.fetchStart)
         this.reportMetric('TTFB', this.metrics.TTFB)
@@ -193,7 +197,7 @@ class PerformanceMonitor {
         const memory = (performance as any).memory
         const usedMemoryMB = Math.round(memory.usedJSHeapSize / 1024 / 1024)
         const totalMemoryMB = Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
-        
+
         if (usedMemoryMB > totalMemoryMB * 0.8) {
           console.warn(`High memory usage: ${usedMemoryMB}MB / ${totalMemoryMB}MB`)
         }
@@ -206,11 +210,11 @@ class PerformanceMonitor {
    */
   private monitorBundleSize(): void {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-    const jsResources = resources.filter(r => r.name.endsWith('.js'))
-    
+    const jsResources = resources.filter((r) => r.name.endsWith('.js'))
+
     const totalSize = jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0)
-    const totalSizeMB = Math.round(totalSize / 1024 / 1024 * 100) / 100
-    
+    const totalSizeMB = Math.round((totalSize / 1024 / 1024) * 100) / 100
+
     if (totalSizeMB > 1) {
       console.warn(`Large bundle size detected: ${totalSizeMB}MB`)
     }
@@ -222,7 +226,7 @@ class PerformanceMonitor {
   private reportMetric(name: string, value: number): void {
     // Google Analytics等への送信
     if (typeof window !== 'undefined' && 'gtag' in window) {
-      (window as any).gtag('event', name, {
+      ;(window as any).gtag('event', name, {
         value: Math.round(value),
         metric_value: value,
         metric_delta: value,
@@ -250,10 +254,16 @@ class PerformanceMonitor {
     }
 
     const threshold = thresholds[metric]
-    if (!threshold) {return 'unknown'}
+    if (!threshold) {
+      return 'unknown'
+    }
 
-    if (value <= threshold.good) {return 'good'}
-    if (value <= threshold.needs_improvement) {return 'needs improvement'}
+    if (value <= threshold.good) {
+      return 'good'
+    }
+    if (value <= threshold.needs_improvement) {
+      return 'needs improvement'
+    }
     return 'poor'
   }
 
@@ -268,7 +278,7 @@ class PerformanceMonitor {
    * 監視を停止
    */
   stopMonitoring(): void {
-    this.observers.forEach(observer => observer.disconnect())
+    this.observers.forEach((observer) => observer.disconnect())
     this.observers.clear()
   }
 }

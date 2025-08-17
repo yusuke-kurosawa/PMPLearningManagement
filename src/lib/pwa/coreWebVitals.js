@@ -22,7 +22,9 @@ class CoreWebVitalsOptimizer {
   }
 
   initializeTracking() {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {
+      return
+    }
 
     console.log('🚀 Core Web Vitals optimization system initialized')
 
@@ -99,7 +101,9 @@ class CoreWebVitalsOptimizer {
 
   analyzeMetric(metricName, value) {
     const thresholds = this.thresholds[metricName]
-    if (!thresholds) return
+    if (!thresholds) {
+      return
+    }
 
     let status = 'poor'
     if (value <= thresholds.good) {
@@ -393,7 +397,9 @@ class CoreWebVitalsOptimizer {
     if ('LayoutShift' in window) {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.hadRecentInput) continue
+          if (entry.hadRecentInput) {
+            continue
+          }
 
           console.warn(`Layout shift detected: ${entry.value}`)
           this.fixLayoutShift(entry)
@@ -559,10 +565,16 @@ class CoreWebVitalsOptimizer {
 
   getMetricRating(metricName, value) {
     const thresholds = this.thresholds[metricName]
-    if (!thresholds) return 'unknown'
+    if (!thresholds) {
+      return 'unknown'
+    }
 
-    if (value <= thresholds.good) return 'good'
-    if (value <= thresholds.needsImprovement) return 'needs-improvement'
+    if (value <= thresholds.good) {
+      return 'good'
+    }
+    if (value <= thresholds.needsImprovement) {
+      return 'needs-improvement'
+    }
     return 'poor'
   }
 

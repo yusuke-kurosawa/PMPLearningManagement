@@ -176,7 +176,9 @@ const EnhancedProgressDashboard: React.FC = () => {
           acc[process.knowledgeArea] = { total: 0, mastered: 0, studyTime: 0 }
         }
         acc[process.knowledgeArea].total += 1
-        if (process.masteryLevel === 'mastered') {acc[process.knowledgeArea].mastered += 1}
+        if (process.masteryLevel === 'mastered') {
+          acc[process.knowledgeArea].mastered += 1
+        }
         acc[process.knowledgeArea].studyTime += process.studyTime
         return acc
       },
@@ -200,64 +202,64 @@ const EnhancedProgressDashboard: React.FC = () => {
     .slice(0, 3)
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <Card className="w-96">
-          <CardContent className="p-6 text-center">
-            <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-600" />
-            <h3 className="mb-2 text-lg font-semibold">Loading Progress</h3>
-            <p className="text-gray-600">Fetching your learning data...</p>
+      <div className='flex min-h-screen items-center justify-center bg-gray-50'>
+        <Card className='w-96'>
+          <CardContent className='p-6 text-center'>
+            <RefreshCw className='mx-auto mb-4 h-8 w-8 animate-spin text-blue-600' />
+            <h3 className='mb-2 text-lg font-semibold'>Loading Progress</h3>
+            <p className='text-gray-600'>Fetching your learning data...</p>
           </CardContent>
         </Card>
       </div>
     )
   }
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="mx-auto max-w-7xl">
+    <div className='min-h-screen bg-gray-50 p-4'>
+      <div className='mx-auto max-w-7xl'>
         {/* Header */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
+        <div className='mb-8'>
+          <div className='mb-4 flex items-center justify-between'>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Learning Progress Dashboard</h1>
-              <p className="text-gray-600">Track your PMP certification journey</p>
+              <h1 className='text-3xl font-bold text-gray-900'>Learning Progress Dashboard</h1>
+              <p className='text-gray-600'>Track your PMP certification journey</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={syncWithServer}>
-                <RefreshCw className="mr-2 h-4 w-4" />
+            <div className='flex items-center gap-2'>
+              <Button variant='outline' size='sm' onClick={syncWithServer}>
+                <RefreshCw className='mr-2 h-4 w-4' />
                 Sync
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={handleExportProgress}
                 disabled={isExporting}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className='mr-2 h-4 w-4' />
                 Export
               </Button>
             </div>
           </div>
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <span className="text-red-800">{error}</span>
+            <div className='mb-4 rounded-lg border border-red-200 bg-red-50 p-4'>
+              <div className='flex items-center gap-2'>
+                <AlertCircle className='h-4 w-4 text-red-600' />
+                <span className='text-red-800'>{error}</span>
               </div>
             </div>
           )}
         </div>
         {/* Key Metrics Cards */}
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className='mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
           {/* Total Study Time */}
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="rounded-full bg-blue-100 p-3">
-                  <Clock className="h-6 w-6 text-blue-600" />
+            <CardContent className='p-6'>
+              <div className='flex items-center gap-4'>
+                <div className='rounded-full bg-blue-100 p-3'>
+                  <Clock className='h-6 w-6 text-blue-600' />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Study Time</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className='text-sm font-medium text-gray-600'>Total Study Time</p>
+                  <p className='text-2xl font-bold text-gray-900'>
                     {Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m
                   </p>
                 </div>
@@ -266,49 +268,49 @@ const EnhancedProgressDashboard: React.FC = () => {
           </Card>
           {/* Overall Progress */}
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="rounded-full bg-green-100 p-3">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
+            <CardContent className='p-6'>
+              <div className='flex items-center gap-4'>
+                <div className='rounded-full bg-green-100 p-3'>
+                  <TrendingUp className='h-6 w-6 text-green-600' />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Overall Progress</p>
-                  <p className="text-2xl font-bold text-gray-900">{overallProgress}%</p>
-                  <Progress value={overallProgress} className="mt-2" />
+                <div className='flex-1'>
+                  <p className='text-sm font-medium text-gray-600'>Overall Progress</p>
+                  <p className='text-2xl font-bold text-gray-900'>{overallProgress}%</p>
+                  <Progress value={overallProgress} className='mt-2' />
                 </div>
               </div>
             </CardContent>
           </Card>
           {/* Study Streak */}
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="rounded-full bg-orange-100 p-3">
-                  <Flame className="h-6 w-6 text-orange-600" />
+            <CardContent className='p-6'>
+              <div className='flex items-center gap-4'>
+                <div className='rounded-full bg-orange-100 p-3'>
+                  <Flame className='h-6 w-6 text-orange-600' />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Current Streak</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className='text-sm font-medium text-gray-600'>Current Streak</p>
+                  <p className='text-2xl font-bold text-gray-900'>
                     {studyStreak.currentStreak} days
                   </p>
-                  <p className="text-xs text-gray-500">Best: {studyStreak.longestStreak} days</p>
+                  <p className='text-xs text-gray-500'>Best: {studyStreak.longestStreak} days</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           {/* Achievements */}
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="rounded-full bg-purple-100 p-3">
-                  <Trophy className="h-6 w-6 text-purple-600" />
+            <CardContent className='p-6'>
+              <div className='flex items-center gap-4'>
+                <div className='rounded-full bg-purple-100 p-3'>
+                  <Trophy className='h-6 w-6 text-purple-600' />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Achievements</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className='text-sm font-medium text-gray-600'>Achievements</p>
+                  <p className='text-2xl font-bold text-gray-900'>
                     {achievements.filter((a) => a.isUnlocked).length}
                   </p>
-                  <p className="text-xs text-gray-500">of {achievements.length} unlocked</p>
+                  <p className='text-xs text-gray-500'>of {achievements.length} unlocked</p>
                 </div>
               </div>
             </CardContent>
@@ -319,28 +321,28 @@ const EnhancedProgressDashboard: React.FC = () => {
           onValueChange={(value) =>
             setActiveView(value as 'overview' | 'analytics' | 'goals' | 'achievements')
           }
-          className="space-y-6"
+          className='space-y-6'
         >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="goals">Goals</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsList className='grid w-full grid-cols-4'>
+            <TabsTrigger value='overview'>Overview</TabsTrigger>
+            <TabsTrigger value='analytics'>Analytics</TabsTrigger>
+            <TabsTrigger value='goals'>Goals</TabsTrigger>
+            <TabsTrigger value='achievements'>Achievements</TabsTrigger>
           </TabsList>
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <TabsContent value='overview' className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
               {/* Weekly Progress Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle>Weekly Study Progress</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width='100%' height={300}>
                     <AreaChart data={weeklyProgress}>
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray='3 3' />
                       <XAxis
-                        dataKey="date"
+                        dataKey='date'
                         tickFormatter={(value) => format(new Date(value), 'MMM dd')}
                       />
                       <YAxis />
@@ -352,10 +354,10 @@ const EnhancedProgressDashboard: React.FC = () => {
                         ]}
                       />
                       <Area
-                        type="monotone"
-                        dataKey="studyTime"
-                        stroke="#3b82f6"
-                        fill="#93c5fd"
+                        type='monotone'
+                        dataKey='studyTime'
+                        stroke='#3b82f6'
+                        fill='#93c5fd'
                         fillOpacity={0.6}
                       />
                     </AreaChart>
@@ -368,16 +370,16 @@ const EnhancedProgressDashboard: React.FC = () => {
                   <CardTitle>Process Mastery Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width='100%' height={300}>
                     <PieChart>
                       <Pie
                         data={masteryChartData}
-                        cx="50%"
-                        cy="50%"
+                        cx='50%'
+                        cy='50%'
                         innerRadius={60}
                         outerRadius={120}
                         paddingAngle={5}
-                        dataKey="value"
+                        dataKey='value'
                       >
                         {masteryChartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -386,14 +388,14 @@ const EnhancedProgressDashboard: React.FC = () => {
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className='mt-4 flex flex-wrap gap-2'>
                     {masteryChartData.map((entry, index) => (
-                      <div key={index} className="flex items-center gap-2">
+                      <div key={index} className='flex items-center gap-2'>
                         <div
-                          className="h-3 w-3 rounded-full"
+                          className='h-3 w-3 rounded-full'
                           style={{ backgroundColor: entry.color }}
                         />
-                        <span className="text-xs text-gray-600">
+                        <span className='text-xs text-gray-600'>
                           {entry.name} ({entry.value})
                         </span>
                       </div>
@@ -402,32 +404,32 @@ const EnhancedProgressDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
               {/* Weak Areas */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-yellow-600" />
+                  <CardTitle className='flex items-center gap-2'>
+                    <AlertCircle className='h-5 w-5 text-yellow-600' />
                     Areas to Improve
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className='space-y-3'>
                   {weakAreas.length > 0 ? (
                     weakAreas.map((process) => (
-                      <div key={process.processId} className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="truncate text-sm font-medium text-gray-900">
+                      <div key={process.processId} className='flex items-center justify-between'>
+                        <div className='flex-1'>
+                          <p className='truncate text-sm font-medium text-gray-900'>
                             {process.processName}
                           </p>
-                          <p className="text-xs text-gray-500">{process.knowledgeArea}</p>
+                          <p className='text-xs text-gray-500'>{process.knowledgeArea}</p>
                         </div>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant='outline' className='text-xs'>
                           {process.confidenceScore}%
                         </Badge>
                       </div>
                     ))
                   ) : (
-                    <p className="py-4 text-center text-gray-500">
+                    <p className='py-4 text-center text-gray-500'>
                       Great job! No weak areas identified.
                     </p>
                   )}
@@ -436,28 +438,28 @@ const EnhancedProgressDashboard: React.FC = () => {
               {/* Strong Areas */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-green-600" />
+                  <CardTitle className='flex items-center gap-2'>
+                    <Star className='h-5 w-5 text-green-600' />
                     Strong Areas
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className='space-y-3'>
                   {strongAreas.length > 0 ? (
                     strongAreas.map((process) => (
-                      <div key={process.processId} className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="truncate text-sm font-medium text-gray-900">
+                      <div key={process.processId} className='flex items-center justify-between'>
+                        <div className='flex-1'>
+                          <p className='truncate text-sm font-medium text-gray-900'>
                             {process.processName}
                           </p>
-                          <p className="text-xs text-gray-500">{process.knowledgeArea}</p>
+                          <p className='text-xs text-gray-500'>{process.knowledgeArea}</p>
                         </div>
-                        <Badge variant="default" className="bg-green-600 text-xs">
+                        <Badge variant='default' className='bg-green-600 text-xs'>
                           {process.confidenceScore}%
                         </Badge>
                       </div>
                     ))
                   ) : (
-                    <p className="py-4 text-center text-gray-500">
+                    <p className='py-4 text-center text-gray-500'>
                       Keep studying to build strong areas!
                     </p>
                   )}
@@ -466,21 +468,21 @@ const EnhancedProgressDashboard: React.FC = () => {
               {/* Recommendations */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-blue-600" />
+                  <CardTitle className='flex items-center gap-2'>
+                    <Brain className='h-5 w-5 text-blue-600' />
                     Recommendations
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className='space-y-3'>
                   {recommendations.length > 0 ? (
                     recommendations.map((recommendation, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
-                        <p className="text-sm text-gray-700">{recommendation}</p>
+                      <div key={index} className='flex items-start gap-3'>
+                        <Zap className='mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600' />
+                        <p className='text-sm text-gray-700'>{recommendation}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="py-4 text-center text-gray-500">
+                    <p className='py-4 text-center text-gray-500'>
                       No specific recommendations at this time.
                     </p>
                   )}
@@ -489,24 +491,24 @@ const EnhancedProgressDashboard: React.FC = () => {
             </div>
           </TabsContent>
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <TabsContent value='analytics' className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
               {/* Monthly Study Trends */}
               <Card>
                 <CardHeader>
                   <CardTitle>Monthly Study Trends</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width='100%' height={300}>
                     <LineChart data={monthlyTrends.studyTime}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
+                      <CartesianGrid strokeDasharray='3 3' />
+                      <XAxis dataKey='month' />
                       <YAxis />
                       <Tooltip formatter={(value: number) => [`${value} minutes`, 'Study Time']} />
                       <Line
-                        type="monotone"
-                        dataKey="minutes"
-                        stroke="#3b82f6"
+                        type='monotone'
+                        dataKey='minutes'
+                        stroke='#3b82f6'
                         strokeWidth={2}
                         dot={{ fill: '#3b82f6' }}
                       />
@@ -520,16 +522,16 @@ const EnhancedProgressDashboard: React.FC = () => {
                   <CardTitle>Knowledge Area Mastery</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width='100%' height={300}>
                     <RadarChart data={knowledgeAreaData}>
                       <PolarGrid />
-                      <PolarAngleAxis dataKey="area" tick={{ fontSize: 12 }} />
+                      <PolarAngleAxis dataKey='area' tick={{ fontSize: 12 }} />
                       <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
                       <Radar
-                        name="Mastery %"
-                        dataKey="mastery"
-                        stroke="#3b82f6"
-                        fill="#3b82f6"
+                        name='Mastery %'
+                        dataKey='mastery'
+                        stroke='#3b82f6'
+                        fill='#3b82f6'
                         fillOpacity={0.3}
                       />
                     </RadarChart>
@@ -543,16 +545,16 @@ const EnhancedProgressDashboard: React.FC = () => {
                 <CardTitle>Detailed Process Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className='overflow-x-auto'>
+                  <table className='w-full text-sm'>
                     <thead>
-                      <tr className="border-b">
-                        <th className="p-2 text-left">Process</th>
-                        <th className="p-2 text-left">Knowledge Area</th>
-                        <th className="p-2 text-left">Mastery Level</th>
-                        <th className="p-2 text-left">Study Time</th>
-                        <th className="p-2 text-left">Confidence</th>
-                        <th className="p-2 text-left">Last Studied</th>
+                      <tr className='border-b'>
+                        <th className='p-2 text-left'>Process</th>
+                        <th className='p-2 text-left'>Knowledge Area</th>
+                        <th className='p-2 text-left'>Mastery Level</th>
+                        <th className='p-2 text-left'>Study Time</th>
+                        <th className='p-2 text-left'>Confidence</th>
+                        <th className='p-2 text-left'>Last Studied</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -560,10 +562,10 @@ const EnhancedProgressDashboard: React.FC = () => {
                         .sort((a, b) => b.studyTime - a.studyTime)
                         .slice(0, 10)
                         .map((process) => (
-                          <tr key={process.processId} className="border-b">
-                            <td className="p-2 font-medium">{process.processName}</td>
-                            <td className="p-2 text-gray-600">{process.knowledgeArea}</td>
-                            <td className="p-2">
+                          <tr key={process.processId} className='border-b'>
+                            <td className='p-2 font-medium'>{process.processName}</td>
+                            <td className='p-2 text-gray-600'>{process.knowledgeArea}</td>
+                            <td className='p-2'>
                               <Badge
                                 variant={
                                   process.masteryLevel === 'mastered'
@@ -572,19 +574,19 @@ const EnhancedProgressDashboard: React.FC = () => {
                                       ? 'secondary'
                                       : 'outline'
                                 }
-                                className="capitalize"
+                                className='capitalize'
                               >
                                 {process.masteryLevel.replace('_', ' ')}
                               </Badge>
                             </td>
-                            <td className="p-2">{process.studyTime}m</td>
-                            <td className="p-2">
-                              <div className="flex items-center gap-2">
-                                <Progress value={process.confidenceScore} className="h-2 w-16" />
-                                <span className="text-xs">{process.confidenceScore}%</span>
+                            <td className='p-2'>{process.studyTime}m</td>
+                            <td className='p-2'>
+                              <div className='flex items-center gap-2'>
+                                <Progress value={process.confidenceScore} className='h-2 w-16' />
+                                <span className='text-xs'>{process.confidenceScore}%</span>
                               </div>
                             </td>
-                            <td className="p-2 text-gray-500">
+                            <td className='p-2 text-gray-500'>
                               {process.lastStudied
                                 ? format(process.lastStudied, 'MMM dd')
                                 : 'Never'}
@@ -598,9 +600,9 @@ const EnhancedProgressDashboard: React.FC = () => {
             </Card>
           </TabsContent>
           {/* Goals Tab */}
-          <TabsContent value="goals" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Learning Goals</h2>
+          <TabsContent value='goals' className='space-y-6'>
+            <div className='flex items-center justify-between'>
+              <h2 className='text-xl font-semibold'>Learning Goals</h2>
               <Button
                 onClick={() =>
                   handleCreateGoal({
@@ -612,23 +614,23 @@ const EnhancedProgressDashboard: React.FC = () => {
                   })
                 }
               >
-                <Target className="mr-2 h-4 w-4" />
+                <Target className='mr-2 h-4 w-4' />
                 Create Goal
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {activeGoals.map((goal) => (
                 <Card key={goal.id}>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-600" />
+                    <CardTitle className='flex items-center gap-2'>
+                      <Target className='h-5 w-5 text-blue-600' />
                       {goal.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="mb-4 text-sm text-gray-600">{goal.description}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                    <p className='mb-4 text-sm text-gray-600'>{goal.description}</p>
+                    <div className='space-y-2'>
+                      <div className='flex justify-between text-sm'>
                         <span>Progress</span>
                         <span>
                           {goal.currentValue} / {goal.targetValue}
@@ -636,7 +638,7 @@ const EnhancedProgressDashboard: React.FC = () => {
                       </div>
                       <Progress value={(goal.currentValue / goal.targetValue) * 100} />
                       {goal.targetDate && (
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className='mt-2 text-xs text-gray-500'>
                           Due: {format(goal.targetDate, 'MMM dd, yyyy')}
                         </p>
                       )}
@@ -648,29 +650,29 @@ const EnhancedProgressDashboard: React.FC = () => {
             {/* Completed Goals */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CardTitle className='flex items-center gap-2'>
+                  <CheckCircle2 className='h-5 w-5 text-green-600' />
                   Completed Goals
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {goals
                     .filter((g) => g.isCompleted)
                     .slice(0, 5)
                     .map((goal) => (
-                      <div key={goal.id} className="flex items-center justify-between">
+                      <div key={goal.id} className='flex items-center justify-between'>
                         <div>
-                          <p className="font-medium text-gray-900">{goal.title}</p>
-                          <p className="text-sm text-gray-500">{goal.description}</p>
+                          <p className='font-medium text-gray-900'>{goal.title}</p>
+                          <p className='text-sm text-gray-500'>{goal.description}</p>
                         </div>
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge variant='default' className='bg-green-600'>
                           Completed
                         </Badge>
                       </div>
                     ))}
                   {goals.filter((g) => g.isCompleted).length === 0 && (
-                    <p className="py-4 text-center text-gray-500">
+                    <p className='py-4 text-center text-gray-500'>
                       No completed goals yet. Keep working towards your targets!
                     </p>
                   )}
@@ -679,30 +681,30 @@ const EnhancedProgressDashboard: React.FC = () => {
             </Card>
           </TabsContent>
           {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <TabsContent value='achievements' className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {/* Recent Achievements */}
-              <Card className="md:col-span-2 lg:col-span-3">
+              <Card className='md:col-span-2 lg:col-span-3'>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-yellow-600" />
+                  <CardTitle className='flex items-center gap-2'>
+                    <Award className='h-5 w-5 text-yellow-600' />
                     Recent Achievements
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
                     {recentAchievements.length > 0 ? (
                       recentAchievements.map((achievement) => (
                         <div
                           key={achievement.id}
-                          className="rounded-lg border border-yellow-200 bg-gradient-to-r from-yellow-50 to-yellow-100 p-4"
+                          className='rounded-lg border border-yellow-200 bg-gradient-to-r from-yellow-50 to-yellow-100 p-4'
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="text-2xl">{achievement.icon}</div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
-                              <p className="text-sm text-gray-600">{achievement.description}</p>
-                              <p className="mt-1 text-xs text-gray-500">
+                          <div className='flex items-center gap-3'>
+                            <div className='text-2xl'>{achievement.icon}</div>
+                            <div className='flex-1'>
+                              <h4 className='font-semibold text-gray-900'>{achievement.title}</h4>
+                              <p className='text-sm text-gray-600'>{achievement.description}</p>
+                              <p className='mt-1 text-xs text-gray-500'>
                                 {achievement.unlockedAt &&
                                   format(achievement.unlockedAt, 'MMM dd, yyyy')}
                               </p>
@@ -711,9 +713,9 @@ const EnhancedProgressDashboard: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="col-span-full py-8 text-center">
-                        <Trophy className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                        <p className="text-gray-500">No recent achievements. Keep studying!</p>
+                      <div className='col-span-full py-8 text-center'>
+                        <Trophy className='mx-auto mb-4 h-12 w-12 text-gray-400' />
+                        <p className='text-gray-500'>No recent achievements. Keep studying!</p>
                       </div>
                     )}
                   </div>
@@ -729,10 +731,10 @@ const EnhancedProgressDashboard: React.FC = () => {
                       : 'border-gray-200 bg-gray-50 opacity-60'
                   }`}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-3xl opacity-80">{achievement.icon}</div>
-                      <div className="flex-1">
+                  <CardContent className='p-4'>
+                    <div className='flex items-start gap-3'>
+                      <div className='text-3xl opacity-80'>{achievement.icon}</div>
+                      <div className='flex-1'>
                         <h4
                           className={`font-semibold ${
                             achievement.isUnlocked ? 'text-yellow-900' : 'text-gray-600'
@@ -748,16 +750,16 @@ const EnhancedProgressDashboard: React.FC = () => {
                           {achievement.description}
                         </p>
                         {!achievement.isUnlocked && (
-                          <div className="mt-2">
-                            <div className="mb-1 flex justify-between text-xs text-gray-500">
+                          <div className='mt-2'>
+                            <div className='mb-1 flex justify-between text-xs text-gray-500'>
                               <span>Progress</span>
                               <span>{achievement.progress.toFixed(0)}%</span>
                             </div>
-                            <Progress value={achievement.progress} className="h-1" />
+                            <Progress value={achievement.progress} className='h-1' />
                           </div>
                         )}
                         {achievement.isUnlocked && achievement.unlockedAt && (
-                          <p className="mt-1 text-xs text-yellow-600">
+                          <p className='mt-1 text-xs text-yellow-600'>
                             Unlocked {format(achievement.unlockedAt, 'MMM dd, yyyy')}
                           </p>
                         )}

@@ -3,11 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, Github, Chrome } from 'lucide-react'
 import { motion } from 'framer-motion'
-<<<<<<< HEAD:src/components/auth/Login.jsx
-=======
 import { logger } from '../../services/logger'
 // import toast from 'react-hot-toast' // TODO: Implement toast notifications
->>>>>>> main:src/components/auth/Login.tsx
 
 const Login: React.FC = () => {
   const navigate = useNavigate()

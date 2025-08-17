@@ -29,7 +29,9 @@ const MindMapView = ({ data }) => {
 
   // マインドマップデータの準備
   const mindMapData = useMemo(() => {
-    if (!data) {return null}
+    if (!data) {
+      return null
+    }
 
     // ルートノード（PMBOK）
     const root = {
@@ -128,7 +130,9 @@ const MindMapView = ({ data }) => {
 
   // マインドマップの描画
   useEffect(() => {
-    if (!mindMapData || !svgRef.current) {return}
+    if (!mindMapData || !svgRef.current) {
+      return
+    }
 
     const width = dimensions.width
     const height = dimensions.height
@@ -245,21 +249,39 @@ const MindMapView = ({ data }) => {
     node
       .append('circle')
       .attr('r', (d) => {
-        if (d.depth === 0) {return 30}
-        if (d.depth === 1) {return 20}
-        if (d.depth === 2) {return 15}
-        if (d.depth === 3) {return 10}
+        if (d.depth === 0) {
+          return 30
+        }
+        if (d.depth === 1) {
+          return 20
+        }
+        if (d.depth === 2) {
+          return 15
+        }
+        if (d.depth === 3) {
+          return 10
+        }
         return 5
       })
       .attr('fill', (d) => {
-        if (d.depth === 0) {return '#6366f1'}
-        if (d.depth === 1) {return colorScale(d.data.area)}
-        if (d.depth === 2) {return processGroupColors[d.data.group] || '#94a3b8'}
-        if (d.depth === 3) {return '#e5e7eb'}
+        if (d.depth === 0) {
+          return '#6366f1'
+        }
+        if (d.depth === 1) {
+          return colorScale(d.data.area)
+        }
+        if (d.depth === 2) {
+          return processGroupColors[d.data.group] || '#94a3b8'
+        }
+        if (d.depth === 3) {
+          return '#e5e7eb'
+        }
         return '#f3f4f6'
       })
       .attr('stroke', (d) => {
-        if (d.children || d._children) {return '#333'}
+        if (d.children || d._children) {
+          return '#333'
+        }
         return 'none'
       })
       .attr('stroke-width', 2)
@@ -293,9 +315,15 @@ const MindMapView = ({ data }) => {
       .attr('text-anchor', (d) => (d.x < Math.PI === !d.children ? 'start' : 'end'))
       .attr('transform', (d) => (d.x >= Math.PI ? 'rotate(180)' : null))
       .attr('font-size', (d) => {
-        if (d.depth === 0) {return '16px'}
-        if (d.depth === 1) {return '14px'}
-        if (d.depth === 2) {return '12px'}
+        if (d.depth === 0) {
+          return '16px'
+        }
+        if (d.depth === 1) {
+          return '14px'
+        }
+        if (d.depth === 2) {
+          return '12px'
+        }
         return '10px'
       })
       .attr('font-weight', (d) => (d.depth <= 1 ? 'bold' : 'normal'))
@@ -357,45 +385,45 @@ const MindMapView = ({ data }) => {
       className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : 'h-full w-full'}`}
     >
       {/* コントロールパネル */}
-      <div className="absolute right-4 top-4 space-y-2 rounded-lg bg-white p-4 shadow-lg">
-        <div className="flex gap-2">
+      <div className='absolute right-4 top-4 space-y-2 rounded-lg bg-white p-4 shadow-lg'>
+        <div className='flex gap-2'>
           <button
             onClick={() => window.zoomIn && window.zoomIn()}
-            className="rounded-md bg-gray-100 p-2 hover:bg-gray-200"
-            title="拡大"
+            className='rounded-md bg-gray-100 p-2 hover:bg-gray-200'
+            title='拡大'
           >
-            <ZoomIn className="h-4 w-4" />
+            <ZoomIn className='h-4 w-4' />
           </button>
           <button
             onClick={() => window.zoomOut && window.zoomOut()}
-            className="rounded-md bg-gray-100 p-2 hover:bg-gray-200"
-            title="縮小"
+            className='rounded-md bg-gray-100 p-2 hover:bg-gray-200'
+            title='縮小'
           >
-            <ZoomOut className="h-4 w-4" />
+            <ZoomOut className='h-4 w-4' />
           </button>
           <button
             onClick={() => window.resetZoom && window.resetZoom()}
-            className="rounded-md bg-gray-100 p-2 hover:bg-gray-200"
-            title="リセット"
+            className='rounded-md bg-gray-100 p-2 hover:bg-gray-200'
+            title='リセット'
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className='h-4 w-4' />
           </button>
           <button
             onClick={toggleFullscreen}
-            className="rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700"
+            className='rounded-md bg-blue-600 p-2 text-white hover:bg-blue-700'
             title={isFullscreen ? '通常表示' : 'フルスクリーン'}
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? <Minimize2 className='h-4 w-4' /> : <Maximize2 className='h-4 w-4' />}
           </button>
           <button
             onClick={exportSVG}
-            className="rounded-md bg-green-600 p-2 text-white hover:bg-green-700"
-            title="エクスポート"
+            className='rounded-md bg-green-600 p-2 text-white hover:bg-green-700'
+            title='エクスポート'
           >
-            <Download className="h-4 w-4" />
+            <Download className='h-4 w-4' />
           </button>
         </div>
-        <p className="mt-2 text-xs text-gray-600">
+        <p className='mt-2 text-xs text-gray-600'>
           • ノードをクリックして展開/折りたたみ
           <br />• ドラッグでパン、スクロールでズーム
         </p>
@@ -403,16 +431,16 @@ const MindMapView = ({ data }) => {
 
       {/* 選択ノード情報 */}
       {selectedNode && (
-        <div className="absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="font-semibold text-gray-900">{selectedNode.name}</h3>
+        <div className='absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg'>
+          <h3 className='font-semibold text-gray-900'>{selectedNode.name}</h3>
           {selectedNode.area && (
-            <p className="text-sm text-gray-600">知識エリア: {selectedNode.area}</p>
+            <p className='text-sm text-gray-600'>知識エリア: {selectedNode.area}</p>
           )}
           {selectedNode.group && (
-            <p className="text-sm text-gray-600">プロセス群: {selectedNode.group}</p>
+            <p className='text-sm text-gray-600'>プロセス群: {selectedNode.group}</p>
           )}
           {selectedNode.type && (
-            <p className="text-sm text-gray-600">タイプ: {selectedNode.type}</p>
+            <p className='text-sm text-gray-600'>タイプ: {selectedNode.type}</p>
           )}
         </div>
       )}
@@ -422,7 +450,7 @@ const MindMapView = ({ data }) => {
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
-        className="h-full w-full"
+        className='h-full w-full'
         style={{ background: '#f9fafb' }}
       />
     </div>

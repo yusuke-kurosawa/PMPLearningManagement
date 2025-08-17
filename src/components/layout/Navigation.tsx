@@ -45,7 +45,7 @@ const Navigation = () => {
     signOut,
     loading,
   } = useAuth()
-  
+
   const profileButtonRef = React.useRef(null)
   const profileMenuRef = React.useRef(null)
 
@@ -111,7 +111,7 @@ const Navigation = () => {
   ]
 
   const breadcrumbs = generateBreadcrumbs(location.pathname)
-  
+
   // Handle keyboard navigation for dropdowns
   React.useEffect(() => {
     const handleKeyDown = (event) => {
@@ -125,18 +125,18 @@ const Navigation = () => {
         }
       }
     }
-    
+
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setIsProfileOpen(false)
       }
     }
-    
+
     if (isProfileOpen || isMobileMenuOpen) {
       document.addEventListener('keydown', handleKeyDown)
       document.addEventListener('mousedown', handleClickOutside)
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('mousedown', handleClickOutside)
@@ -146,26 +146,26 @@ const Navigation = () => {
   return (
     <>
       <nav
-        id="navigation"
-        className="sticky top-0 z-50 bg-white shadow-lg transition-colors dark:bg-gray-800"
-        role="navigation"
-        aria-label="メインナビゲーション"
+        id='navigation'
+        className='sticky top-0 z-50 bg-white shadow-lg transition-colors dark:bg-gray-800'
+        role='navigation'
+        aria-label='メインナビゲーション'
       >
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500">
-                  <Home className="h-5 w-5 text-white" />
+        <div className='mx-auto max-w-7xl px-4'>
+          <div className='flex h-16 items-center justify-between'>
+            <div className='flex items-center'>
+              <Link to='/' className='flex items-center gap-2 transition-opacity hover:opacity-80'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500'>
+                  <Home className='h-5 w-5 text-white' />
                 </div>
-                <h1 className="text-lg font-bold text-gray-800 dark:text-white md:text-xl">
+                <h1 className='text-lg font-bold text-gray-800 dark:text-white md:text-xl'>
                   PMBOK学習システム
                 </h1>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden items-center space-x-1 md:flex">
+            <div className='hidden items-center space-x-1 md:flex'>
               {/* Global Search */}
               <GlobalSearch />
               {navItems.map(({ path, label, icon: Icon, isNew }) => {
@@ -183,10 +183,10 @@ const Navigation = () => {
                     }
                   `}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className='h-4 w-4' />
                     {label}
                     {isNew && (
-                      <span className="absolute -right-1 -top-1 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white">
+                      <span className='absolute -right-1 -top-1 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
                         NEW
                       </span>
                     )}
@@ -195,10 +195,10 @@ const Navigation = () => {
               })}
 
               {/* Authentication & User Profile */}
-              <div className="flex items-center gap-2">
+              <div className='flex items-center gap-2'>
                 {isAuthenticated ? (
                   /* Authenticated User Menu */
-                  <div className="relative">
+                  <div className='relative'>
                     <button
                       ref={profileButtonRef}
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -208,59 +208,59 @@ const Navigation = () => {
                           setIsProfileOpen(true)
                         }
                       }}
-                      className="ml-2 flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      aria-label="ユーザーメニュー"
+                      className='ml-2 flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700'
+                      aria-label='ユーザーメニュー'
                       aria-expanded={isProfileOpen}
-                      aria-haspopup="true"
+                      aria-haspopup='true'
                       disabled={loading}
                     >
                       {userAvatar ? (
                         <img
                           src={userAvatar}
-                          alt="Profile"
-                          className="h-8 w-8 rounded-full object-cover"
+                          alt='Profile'
+                          className='h-8 w-8 rounded-full object-cover'
                         />
                       ) : (
-                        <User className="h-5 w-5" />
+                        <User className='h-5 w-5' />
                       )}
-                      <span className="hidden text-sm font-medium lg:block">{userName}</span>
+                      <span className='hidden text-sm font-medium lg:block'>{userName}</span>
                       {(isAdmin || isInstructor) && (
                         <Shield
-                          className="h-4 w-4 text-blue-500"
-                          title="管理者・インストラクター"
+                          className='h-4 w-4 text-blue-500'
+                          title='管理者・インストラクター'
                         />
                       )}
                     </button>
 
                     {isProfileOpen && (
-                      <div 
+                      <div
                         ref={profileMenuRef}
-                        className="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
-                        role="menu"
-                        aria-orientation="vertical"
+                        className='absolute right-0 z-50 mt-2 w-64 rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'
+                        role='menu'
+                        aria-orientation='vertical'
                         tabIndex={-1}
                       >
-                        <div className="border-b p-4 dark:border-gray-700">
-                          <div className="flex items-center gap-3">
+                        <div className='border-b p-4 dark:border-gray-700'>
+                          <div className='flex items-center gap-3'>
                             {userAvatar ? (
                               <img
                                 src={userAvatar}
-                                alt="Profile"
-                                className="h-10 w-10 rounded-full object-cover"
+                                alt='Profile'
+                                className='h-10 w-10 rounded-full object-cover'
                               />
                             ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
-                                <User className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                              <div className='flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600'>
+                                <User className='h-6 w-6 text-gray-600 dark:text-gray-300' />
                               </div>
                             )}
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">
+                              <p className='font-medium text-gray-900 dark:text-white'>
                                 {userName}
                               </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                              <p className='text-sm text-gray-500 dark:text-gray-400'>
                                 {user?.email}
                               </p>
-                              <p className="text-xs text-blue-600 dark:text-blue-400">
+                              <p className='text-xs text-blue-600 dark:text-blue-400'>
                                 {role === 'admin'
                                   ? '管理者'
                                   : role === 'instructor'
@@ -271,14 +271,14 @@ const Navigation = () => {
                           </div>
                         </div>
 
-                        <div className="py-2">
+                        <div className='py-2'>
                           <Link
-                            to="/profile"
+                            to='/profile'
                             onClick={() => setIsProfileOpen(false)}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-                            role="menuitem"
+                            className='flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700'
+                            role='menuitem'
                           >
-                            <User className="h-4 w-4" />
+                            <User className='h-4 w-4' />
                             プロフィール設定
                           </Link>
 
@@ -287,32 +287,32 @@ const Navigation = () => {
                               toggleDarkMode()
                               setIsProfileOpen(false)
                             }}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-                            role="menuitem"
+                            className='flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700'
+                            role='menuitem'
                           >
                             {settings.darkMode ? (
-                              <Sun className="h-4 w-4" />
+                              <Sun className='h-4 w-4' />
                             ) : (
-                              <Moon className="h-4 w-4" />
+                              <Moon className='h-4 w-4' />
                             )}
                             {settings.darkMode ? 'ライトモード' : 'ダークモード'}
                           </button>
 
                           <div onClick={() => setIsProfileOpen(false)}>
-                            <SettingsTrigger className="w-full justify-start text-left" />
+                            <SettingsTrigger className='w-full justify-start text-left' />
                           </div>
 
-                          <div className="mt-2 border-t pt-2 dark:border-gray-700">
+                          <div className='mt-2 border-t pt-2 dark:border-gray-700'>
                             <button
                               onClick={async () => {
                                 setIsProfileOpen(false)
                                 await signOut()
                               }}
                               disabled={loading}
-                              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 focus:outline-none focus:bg-red-50 dark:focus:bg-red-900/20"
-                              role="menuitem"
+                              className='flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 focus:bg-red-50 focus:outline-none dark:text-red-400 dark:hover:bg-red-900/20 dark:focus:bg-red-900/20'
+                              role='menuitem'
                             >
-                              <LogOut className="h-4 w-4" />
+                              <LogOut className='h-4 w-4' />
                               {loading ? 'サインアウト中...' : 'サインアウト'}
                             </button>
                           </div>
@@ -322,33 +322,33 @@ const Navigation = () => {
                   </div>
                 ) : (
                   /* Sign In / Sign Up Buttons */
-                  <div className="flex items-center gap-2">
+                  <div className='flex items-center gap-2'>
                     <Link
-                      to="/auth?mode=login"
-                      className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      to='/auth?mode=login'
+                      className='flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700'
                     >
-                      <LogIn className="h-4 w-4" />
+                      <LogIn className='h-4 w-4' />
                       サインイン
                     </Link>
                     <Link
-                      to="/auth?mode=register"
-                      className="flex items-center gap-2 rounded-md bg-blue-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      to='/auth?mode=register'
+                      className='flex items-center gap-2 rounded-md bg-blue-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700'
                     >
-                      <UserPlus className="h-4 w-4" />
+                      <UserPlus className='h-4 w-4' />
                       新規登録
                     </Link>
 
                     <button
                       onClick={toggleDarkMode}
-                      className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className='rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700'
                       aria-label={
                         settings.darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'
                       }
                     >
                       {settings.darkMode ? (
-                        <Sun className="h-5 w-5" />
+                        <Sun className='h-5 w-5' />
                       ) : (
-                        <Moon className="h-5 w-5" />
+                        <Moon className='h-5 w-5' />
                       )}
                     </button>
                   </div>
@@ -357,41 +357,41 @@ const Navigation = () => {
             </div>
 
             {/* Mobile menu button and controls */}
-            <div className="flex items-center gap-2 md:hidden">
+            <div className='flex items-center gap-2 md:hidden'>
               {/* Mobile Global Search */}
               <GlobalSearch />
 
               {/* Mobile Auth Status */}
               {isAuthenticated && (
-                <div className="flex items-center gap-1">
+                <div className='flex items-center gap-1'>
                   {userAvatar ? (
                     <img
                       src={userAvatar}
-                      alt="Profile"
-                      className="h-6 w-6 rounded-full object-cover"
+                      alt='Profile'
+                      className='h-6 w-6 rounded-full object-cover'
                     />
                   ) : (
-                    <User className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                    <User className='h-5 w-5 text-gray-700 dark:text-gray-300' />
                   )}
-                  {(isAdmin || isInstructor) && <Shield className="h-4 w-4 text-blue-500" />}
+                  {(isAdmin || isInstructor) && <Shield className='h-4 w-4 text-blue-500' />}
                 </div>
               )}
 
               <button
                 onClick={toggleDarkMode}
-                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className='rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700'
                 aria-label={settings.darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
               >
-                {settings.darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {settings.darkMode ? <Sun className='h-5 w-5' /> : <Moon className='h-5 w-5' />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className='rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700'
                 aria-label={isMobileMenuOpen ? 'メニューを閉じる' : 'メニューを開く'}
                 aria-expanded={isMobileMenuOpen}
-                aria-controls="mobile-menu"
+                aria-controls='mobile-menu'
               >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isMobileMenuOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
               </button>
             </div>
           </div>
@@ -399,10 +399,10 @@ const Navigation = () => {
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
             <div
-              id="mobile-menu"
-              className="animate-slide-in border-t bg-white py-2 dark:border-gray-700 dark:bg-gray-800 md:hidden"
-              role="menu"
-              aria-label="モバイルメニュー"
+              id='mobile-menu'
+              className='animate-slide-in border-t bg-white py-2 dark:border-gray-700 dark:bg-gray-800 md:hidden'
+              role='menu'
+              aria-label='モバイルメニュー'
             >
               {/* Main Navigation Items */}
               {navItems.map(({ path, label, icon: Icon, isNew }) => {
@@ -420,13 +420,13 @@ const Navigation = () => {
                         : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                     }
                   `}
-                    role="menuitem"
+                    role='menuitem'
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className='h-4 w-4' />
                     {label}
                     {isNew && (
-                      <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white">
+                      <span className='ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
                         NEW
                       </span>
                     )}
@@ -435,28 +435,28 @@ const Navigation = () => {
               })}
 
               {/* Authentication Section */}
-              <div className="mt-2 border-t pt-2 dark:border-gray-700">
+              <div className='mt-2 border-t pt-2 dark:border-gray-700'>
                 {isAuthenticated ? (
                   /* Authenticated User Options */
                   <>
-                    <div className="border-b px-4 py-2 dark:border-gray-700">
-                      <div className="flex items-center gap-3">
+                    <div className='border-b px-4 py-2 dark:border-gray-700'>
+                      <div className='flex items-center gap-3'>
                         {userAvatar ? (
                           <img
                             src={userAvatar}
-                            alt="Profile"
-                            className="h-8 w-8 rounded-full object-cover"
+                            alt='Profile'
+                            className='h-8 w-8 rounded-full object-cover'
                           />
                         ) : (
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
-                            <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                          <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600'>
+                            <User className='h-5 w-5 text-gray-600 dark:text-gray-300' />
                           </div>
                         )}
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className='text-sm font-medium text-gray-900 dark:text-white'>
                             {userName}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className='text-xs text-gray-500 dark:text-gray-400'>
                             {role === 'admin'
                               ? '管理者'
                               : role === 'instructor'
@@ -468,12 +468,12 @@ const Navigation = () => {
                     </div>
 
                     <Link
-                      to="/profile"
+                      to='/profile'
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      role="menuitem"
+                      className='flex items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      role='menuitem'
                     >
-                      <User className="h-4 w-4" />
+                      <User className='h-4 w-4' />
                       プロフィール設定
                     </Link>
 
@@ -483,10 +483,10 @@ const Navigation = () => {
                         await signOut()
                       }}
                       disabled={loading}
-                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                      role="menuitem"
+                      className='flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+                      role='menuitem'
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className='h-4 w-4' />
                       {loading ? 'サインアウト中...' : 'サインアウト'}
                     </button>
                   </>
@@ -494,22 +494,22 @@ const Navigation = () => {
                   /* Guest User Options */
                   <>
                     <Link
-                      to="/auth?mode=login"
+                      to='/auth?mode=login'
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                      role="menuitem"
+                      className='flex items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      role='menuitem'
                     >
-                      <LogIn className="h-4 w-4" />
+                      <LogIn className='h-4 w-4' />
                       サインイン
                     </Link>
 
                     <Link
-                      to="/auth?mode=register"
+                      to='/auth?mode=register'
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="mx-4 flex items-center gap-2 rounded-md bg-blue-500 px-4 py-3 text-sm text-white transition-colors hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-                      role="menuitem"
+                      className='mx-4 flex items-center gap-2 rounded-md bg-blue-500 px-4 py-3 text-sm text-white transition-colors hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                      role='menuitem'
                     >
-                      <UserPlus className="h-4 w-4" />
+                      <UserPlus className='h-4 w-4' />
                       新規登録
                     </Link>
                   </>
@@ -523,24 +523,24 @@ const Navigation = () => {
       {/* Breadcrumb Navigation */}
       {breadcrumbs.length > 1 && (
         <nav
-          className="border-b bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
-          aria-label="パンくずナビゲーション"
+          className='border-b bg-gray-50 dark:border-gray-700 dark:bg-gray-900'
+          aria-label='パンくずナビゲーション'
         >
-          <div className="mx-auto max-w-7xl px-4">
-            <ol className="flex items-center py-3 text-sm">
+          <div className='mx-auto max-w-7xl px-4'>
+            <ol className='flex items-center py-3 text-sm'>
               {breadcrumbs.map((crumb, index) => (
-                <li key={crumb.path} className="flex items-center">
+                <li key={crumb.path} className='flex items-center'>
                   {index > 0 && (
-                    <ChevronRight className="mx-2 h-4 w-4 text-gray-400" aria-hidden="true" />
+                    <ChevronRight className='mx-2 h-4 w-4 text-gray-400' aria-hidden='true' />
                   )}
                   {index === breadcrumbs.length - 1 ? (
-                    <span className="font-medium text-gray-900 dark:text-white" aria-current="page">
+                    <span className='font-medium text-gray-900 dark:text-white' aria-current='page'>
                       {crumb.label}
                     </span>
                   ) : (
                     <Link
                       to={crumb.path}
-                      className="text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      className='text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
                     >
                       {crumb.label}
                     </Link>

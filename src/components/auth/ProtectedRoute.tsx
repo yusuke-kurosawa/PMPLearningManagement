@@ -31,15 +31,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className='flex min-h-screen items-center justify-center bg-gray-50'>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="text-center"
+          className='text-center'
         >
-          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className='mx-auto mb-4 h-12 w-12 animate-spin text-blue-600' />
+          <p className='text-gray-600'>Loading...</p>
         </motion.div>
       </div>
     )
@@ -58,24 +58,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className='flex min-h-screen items-center justify-center bg-gray-50'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md px-4"
+          className='w-full max-w-md px-4'
         >
-          <div className="rounded-lg bg-white p-8 text-center shadow-lg">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-              <Lock className="h-8 w-8 text-red-600" />
+          <div className='rounded-lg bg-white p-8 text-center shadow-lg'>
+            <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100'>
+              <Lock className='h-8 w-8 text-red-600' />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900">Access Denied</h2>
-            <p className="mb-6 text-gray-600">
+            <h2 className='mb-2 text-2xl font-bold text-gray-900'>Access Denied</h2>
+            <p className='mb-6 text-gray-600'>
               You don&apos;t have permission to access this page. Required role: {requiredRole}
             </p>
             <button
               onClick={() => window.history.back()}
-              className="rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700"
+              className='rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700'
             >
               Go Back
             </button>
@@ -92,31 +92,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className='flex min-h-screen items-center justify-center bg-gray-50'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md px-4"
+          className='w-full max-w-md px-4'
         >
-          <div className="rounded-lg bg-white p-8 text-center shadow-lg">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
-              <AlertCircle className="h-8 w-8 text-yellow-600" />
+          <div className='rounded-lg bg-white p-8 text-center shadow-lg'>
+            <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100'>
+              <AlertCircle className='h-8 w-8 text-yellow-600' />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900">Insufficient Permissions</h2>
-            <p className="mb-6 text-gray-600">
+            <h2 className='mb-2 text-2xl font-bold text-gray-900'>Insufficient Permissions</h2>
+            <p className='mb-6 text-gray-600'>
               You need additional permissions to access this feature.
             </p>
-            <div className="space-y-3">
+            <div className='space-y-3'>
               <button
                 onClick={() => window.history.back()}
-                className="w-full rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700"
+                className='w-full rounded-lg bg-blue-600 px-6 py-2 text-white transition duration-150 hover:bg-blue-700'
               >
                 Go Back
               </button>
               <button
                 onClick={() => (window.location.href = '/profile/permissions')}
-                className="w-full rounded-lg bg-gray-200 px-6 py-2 text-gray-700 transition duration-150 hover:bg-gray-300"
+                className='w-full rounded-lg bg-gray-200 px-6 py-2 text-gray-700 transition duration-150 hover:bg-gray-300'
               >
                 Request Access
               </button>
@@ -151,19 +151,19 @@ interface RoleRouteProps {
 
 // Role-specific route components
 export const AdminRoute: React.FC<RoleRouteProps> = ({ children, ...props }) => (
-  <ProtectedRoute requiredRole="admin" {...props}>
+  <ProtectedRoute requiredRole='admin' {...props}>
     {children}
   </ProtectedRoute>
 )
 
 export const InstructorRoute: React.FC<RoleRouteProps> = ({ children, ...props }) => (
-  <ProtectedRoute requiredRole="instructor" {...props}>
+  <ProtectedRoute requiredRole='instructor' {...props}>
     {children}
   </ProtectedRoute>
 )
 
 export const StudentRoute: React.FC<RoleRouteProps> = ({ children, ...props }) => (
-  <ProtectedRoute requiredRole="student" {...props}>
+  <ProtectedRoute requiredRole='student' {...props}>
     {children}
   </ProtectedRoute>
 )

@@ -396,7 +396,9 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.smembers(`tag:${tag}`)
 
-      if (keys.length === 0) {return 0}
+      if (keys.length === 0) {
+        return 0
+      }
 
       const pipeline = redis.pipeline()
       keys.forEach((key) => pipeline.del(key))
@@ -422,7 +424,9 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.keys(pattern)
 
-      if (keys.length === 0) {return 0}
+      if (keys.length === 0) {
+        return 0
+      }
 
       await redis.del(...keys)
       this.stats.deletes += keys.length

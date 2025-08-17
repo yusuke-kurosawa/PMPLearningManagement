@@ -142,43 +142,43 @@ const AuthCallback: React.FC = () => {
     switch (status) {
       case 'success':
         return (
-          <div className="text-center">
-            <div className="mb-4">
-              <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+          <div className='text-center'>
+            <div className='mb-4'>
+              <CheckCircle className='mx-auto h-16 w-16 text-green-500' />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Success!</h2>
-            <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{message}</p>
-            <div className="flex justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+            <h2 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>Success!</h2>
+            <p className='mb-6 text-sm text-gray-600 dark:text-gray-400'>{message}</p>
+            <div className='flex justify-center'>
+              <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-primary'></div>
             </div>
           </div>
         )
 
       case 'error':
         return (
-          <div className="text-center">
-            <div className="mb-4">
-              <AlertCircle className="mx-auto h-16 w-16 text-red-500" />
+          <div className='text-center'>
+            <div className='mb-4'>
+              <AlertCircle className='mx-auto h-16 w-16 text-red-500' />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
               Authentication Failed
             </h2>
-            <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{message}</p>
+            <p className='mb-6 text-sm text-gray-600 dark:text-gray-400'>{message}</p>
 
             {error && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">Error: {error}</p>
+              <div className='mb-6 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20'>
+                <p className='text-sm text-red-600 dark:text-red-400'>Error: {error}</p>
               </div>
             )}
 
-            <div className="space-y-3">
-              <Button onClick={() => navigate('/#/auth?mode=login')} className="w-full">
+            <div className='space-y-3'>
+              <Button onClick={() => navigate('/#/auth?mode=login')} className='w-full'>
                 Back to Sign In
               </Button>
 
               <button
                 onClick={() => window.location.reload()}
-                className="w-full text-sm text-gray-600 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                className='w-full text-sm text-gray-600 underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               >
                 Try Again
               </button>
@@ -189,12 +189,12 @@ const AuthCallback: React.FC = () => {
       case 'processing':
       default:
         return (
-          <div className="text-center">
-            <div className="mb-4">
-              <Loader2 className="mx-auto h-16 w-16 animate-spin text-primary" />
+          <div className='text-center'>
+            <div className='mb-4'>
+              <Loader2 className='mx-auto h-16 w-16 animate-spin text-primary' />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Processing...</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <h2 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>Processing...</h2>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
               Please wait while we complete your authentication.
             </p>
           </div>
@@ -203,8 +203,8 @@ const AuthCallback: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Card className="mx-auto w-full max-w-md p-6">{renderContent()}</Card>
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
+      <Card className='mx-auto w-full max-w-md p-6'>{renderContent()}</Card>
     </div>
   )
 }

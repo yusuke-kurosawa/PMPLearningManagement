@@ -183,7 +183,9 @@ class PromptLogService {
    * Flush queued logs to storage
    */
   async flush() {
-    if (this.isProcessing || this.queue.length === 0) return
+    if (this.isProcessing || this.queue.length === 0) {
+      return
+    }
 
     this.isProcessing = true
     const logsToProcess = [...this.queue]
@@ -367,7 +369,9 @@ class PromptLogService {
    * Sanitize content for privacy
    */
   sanitizeContent(content) {
-    if (!this.config.privacyMode) return content
+    if (!this.config.privacyMode) {
+      return content
+    }
 
     // Remove PII patterns
     const patterns = [
@@ -471,12 +475,24 @@ class PromptLogService {
    * Check if log matches filters
    */
   matchesFilters(log, filters) {
-    if (filters.userId && log.userId !== filters.userId) return false
-    if (filters.type && log.type !== filters.type) return false
-    if (filters.status && log.status !== filters.status) return false
-    if (filters.tags && !filters.tags.some((tag) => log.metadata?.tags?.includes(tag))) return false
-    if (filters.startTime && log.timestamp < filters.startTime) return false
-    if (filters.endTime && log.timestamp > filters.endTime) return false
+    if (filters.userId && log.userId !== filters.userId) {
+      return false
+    }
+    if (filters.type && log.type !== filters.type) {
+      return false
+    }
+    if (filters.status && log.status !== filters.status) {
+      return false
+    }
+    if (filters.tags && !filters.tags.some((tag) => log.metadata?.tags?.includes(tag))) {
+      return false
+    }
+    if (filters.startTime && log.timestamp < filters.startTime) {
+      return false
+    }
+    if (filters.endTime && log.timestamp > filters.endTime) {
+      return false
+    }
 
     return true
   }
@@ -529,7 +545,9 @@ class PromptLogService {
    */
   calculateAverageResponseTime(logs) {
     const responses = logs.filter((l) => l.type === 'response' && l.metrics?.latency)
-    if (responses.length === 0) return 0
+    if (responses.length === 0) {
+      return 0
+    }
 
     const totalLatency = responses.reduce((sum, r) => sum + r.metrics.latency, 0)
     return totalLatency / responses.length
@@ -540,7 +558,9 @@ class PromptLogService {
    */
   calculateAverageTokenUsage(logs) {
     const responses = logs.filter((l) => l.type === 'response' && l.metadata?.totalTokens)
-    if (responses.length === 0) return 0
+    if (responses.length === 0) {
+      return 0
+    }
 
     const totalTokens = responses.reduce((sum, r) => sum + r.metadata.totalTokens, 0)
     return totalTokens / responses.length
@@ -551,7 +571,9 @@ class PromptLogService {
    */
   calculateErrorRate(logs) {
     const responses = logs.filter((l) => l.type === 'response')
-    if (responses.length === 0) return 0
+    if (responses.length === 0) {
+      return 0
+    }
 
     const errors = responses.filter((r) => r.status === 'error' || r.error)
     return (errors.length / responses.length) * 100
@@ -595,15 +617,21 @@ class PromptLogService {
         }
       }
 
-      if (log.type === 'prompt') userActivity[userId].promptCount++
+      if (log.type === 'prompt') {
+        userActivity[userId].promptCount++
+      }
       if (log.type === 'response') {
         userActivity[userId].responseCount++
         if (log.metadata?.totalTokens) {
           userActivity[userId].totalTokens += log.metadata.totalTokens
         }
-        if (log.status === 'error') userActivity[userId].errors++
+        if (log.status === 'error') {
+          userActivity[userId].errors++
+        }
       }
-      if (log.type === 'interaction') userActivity[userId].interactionCount++
+      if (log.type === 'interaction') {
+        userActivity[userId].interactionCount++
+      }
     })
 
     return userActivity
@@ -659,7 +687,9 @@ class PromptLogService {
    * Convert logs to CSV format
    */
   convertToCSV(logs) {
-    if (logs.length === 0) return ''
+    if (logs.length === 0) {
+      return ''
+    }
 
     const headers = [
       'ID',

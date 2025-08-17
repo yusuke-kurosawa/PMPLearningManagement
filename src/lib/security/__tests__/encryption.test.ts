@@ -166,7 +166,7 @@ describe('データ暗号化システム', () => {
 
       const hash1 = hashing.hashSensitiveData(data, true)
       // 1ミリ秒待機して異なるタイムスタンプを確保
-      await new Promise(resolve => setTimeout(resolve, 1))
+      await new Promise((resolve) => setTimeout(resolve, 1))
       const hash2 = hashing.hashSensitiveData(data, true)
 
       expect(hash1).not.toBe(hash2)
@@ -257,11 +257,11 @@ describe('データ暗号化システム', () => {
       }
 
       const encryptionResult = encryption.encrypt(JSON.stringify(tokenData), true)
-      
+
       // 同じインスタンスで復号化してデータを確認
       const decryptedData = encryption.decrypt(encryptionResult)
       const parsedData = JSON.parse(decryptedData)
-      
+
       expect(parsedData.payload).toEqual(payload)
     })
 
@@ -438,11 +438,11 @@ describe('データ暗号化システム', () => {
       delete process.env.ENCRYPTION_MASTER_KEY
       delete process.env.HASH_PEPPER
       delete process.env.APP_SECRET
-      
+
       // NODE_ENVをproductionに設定してエラーを発生させる
       const originalNodeEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'production'
-      
+
       try {
         expect(() => new SymmetricEncryption()).toThrow('暗号化設定エラー')
       } finally {

@@ -18,7 +18,7 @@ export const mockThemeContext = {
 }
 
 export const MockThemeProvider = ({ children }) => {
-  return <div data-testid="mock-theme-provider">{children}</div>
+  return <div data-testid='mock-theme-provider'>{children}</div>
 }
 
 // Mock useTheme hook

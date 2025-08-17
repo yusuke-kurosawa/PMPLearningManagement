@@ -33,7 +33,7 @@ const AppLayout = ({ children }) => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 transition-colors dark:bg-gray-900">
+    <div className='min-h-screen bg-gray-50 transition-colors dark:bg-gray-900'>
       {/* Skip Links for Accessibility */}
       <SkipLinks />
 
@@ -43,23 +43,23 @@ const AppLayout = ({ children }) => {
       {/* Navigation Header */}
       <Navigation />
 
-      <div className="flex">
+      <div className='flex'>
         {/* Sidebar - Only show on desktop */}
         {showSidebar && <Sidebar />}
 
         {/* Main Content Area */}
         <main
-          id="main-content"
+          id='main-content'
           className={`
             flex-1 transition-all duration-300
             ${showSidebar ? (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64') : 'ml-0'}
           `}
-          role="main"
+          role='main'
         >
-          <div className="min-h-[calc(100vh-4rem)]">
+          <div className='min-h-[calc(100vh-4rem)]'>
             {/* Quick Shortcuts - Show on home page or as floating widget */}
-            <div className="p-4">
-              <QuickShortcuts className="mb-6" />
+            <div className='p-4'>
+              <QuickShortcuts className='mb-6' />
             </div>
 
             {children}
@@ -71,7 +71,7 @@ const AppLayout = ({ children }) => {
       </div>
 
       {/* Floating Settings Trigger */}
-      <SettingsTrigger variant="floating" />
+      <SettingsTrigger variant='floating' />
     </div>
   )
 }

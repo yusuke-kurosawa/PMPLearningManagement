@@ -111,7 +111,9 @@ const KnowledgeAreaHeatmap = React.memo(() => {
 
   // D3.jsでの描画
   useEffect(() => {
-    if (!svgRef.current) {return}
+    if (!svgRef.current) {
+      return
+    }
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -324,16 +326,16 @@ const KnowledgeAreaHeatmap = React.memo(() => {
   }, [dimensions, heatmapData, selectedMetric])
 
   return (
-    <div className="flex h-screen w-full flex-col bg-gray-50">
+    <div className='flex h-screen w-full flex-col bg-gray-50'>
       {/* ヘッダー */}
-      <div className="border-b bg-white p-4 shadow-sm">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
+      <div className='border-b bg-white p-4 shadow-sm'>
+        <div className='mx-auto max-w-7xl'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-6'>
               {/* メトリクス選択 */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">表示指標:</label>
-                <div className="flex gap-2">
+              <div className='flex items-center gap-2'>
+                <label className='text-sm font-medium text-gray-700'>表示指標:</label>
+                <div className='flex gap-2'>
                   {metrics.map((metric) => (
                     <button
                       key={metric.id}
@@ -352,13 +354,15 @@ const KnowledgeAreaHeatmap = React.memo(() => {
             </div>
 
             <button
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+              className='flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900'
               onClick={() => {
                 const term = glossaryService.getTermByName('ヒートマップ')
-                if (term) {setSelectedGlossaryTerm(term)}
+                if (term) {
+                  setSelectedGlossaryTerm(term)
+                }
               }}
             >
-              <Info className="h-4 w-4" />
+              <Info className='h-4 w-4' />
               ヒートマップとは？
             </button>
           </div>
@@ -366,22 +370,22 @@ const KnowledgeAreaHeatmap = React.memo(() => {
       </div>
 
       {/* メインコンテンツ */}
-      <div ref={containerRef} className="relative flex-1">
-        <svg ref={svgRef} className="h-full w-full" />
+      <div ref={containerRef} className='relative flex-1'>
+        <svg ref={svgRef} className='h-full w-full' />
 
         {/* ツールチップ */}
         {hoveredCell && (
           <div
-            className="pointer-events-none absolute z-10 rounded-lg bg-gray-900 p-3 text-white shadow-lg"
+            className='pointer-events-none absolute z-10 rounded-lg bg-gray-900 p-3 text-white shadow-lg'
             style={{
               left: `${dimensions.width * 0.17 + hoveredCell.x + 50}px`,
               top: `${dimensions.height * 0.15 + hoveredCell.y - 10}px`,
               transform: 'translate(-50%, -100%)',
             }}
           >
-            <div className="text-sm font-semibold">{hoveredCell.areaName}</div>
-            <div className="text-xs opacity-90">{hoveredCell.group}</div>
-            <div className="mt-1 text-lg font-bold">{hoveredCell.value}</div>
+            <div className='text-sm font-semibold'>{hoveredCell.areaName}</div>
+            <div className='text-xs opacity-90'>{hoveredCell.group}</div>
+            <div className='mt-1 text-lg font-bold'>{hoveredCell.value}</div>
           </div>
         )}
       </div>

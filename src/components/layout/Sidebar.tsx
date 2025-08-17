@@ -115,7 +115,9 @@ const Sidebar = () => {
   const getItemByPath = (path) => {
     for (const section of Object.values(menuSections)) {
       const item = section.items.find((item) => item.path === path)
-      if (item) {return item}
+      if (item) {
+        return item
+      }
     }
     return null
   }
@@ -126,32 +128,34 @@ const Sidebar = () => {
         fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] border-r bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800
         ${isCollapsed ? 'w-16' : 'w-64'}
       `}
-      role="navigation"
-      aria-label="サイドナビゲーション"
+      role='navigation'
+      aria-label='サイドナビゲーション'
     >
       {/* Toggle Button */}
-      <div className="flex justify-end border-b p-2 dark:border-gray-700">
+      <div className='flex justify-end border-b p-2 dark:border-gray-700'>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+          className='rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'
           aria-label={isCollapsed ? 'サイドバーを展開' : 'サイドバーを折りたたむ'}
         >
-          {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          {isCollapsed ? <PanelLeft className='h-5 w-5' /> : <PanelLeftClose className='h-5 w-5' />}
         </button>
       </div>
 
-      <div className="h-full overflow-y-auto pb-16">
+      <div className='h-full overflow-y-auto pb-16'>
         {/* Favorites Section */}
         {!isCollapsed && favorites.length > 0 && (
-          <div className="border-b p-4 dark:border-gray-700">
-            <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <Star className="h-3 w-3" />
+          <div className='border-b p-4 dark:border-gray-700'>
+            <h3 className='mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+              <Star className='h-3 w-3' />
               お気に入り
             </h3>
-            <div className="space-y-1">
+            <div className='space-y-1'>
               {favorites.map((path) => {
                 const item = getItemByPath(path)
-                if (!item) {return null}
+                if (!item) {
+                  return null
+                }
                 const isActive = location.pathname === path
                 const Icon = item.icon
                 return (
@@ -168,18 +172,18 @@ const Sidebar = () => {
                     `}
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Icon className='h-4 w-4 flex-shrink-0' />
+                    <span className='truncate'>{item.label}</span>
                     <button
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                         toggleFavorite(path)
                       }}
-                      className="ml-auto opacity-60 hover:opacity-100"
-                      aria-label="お気に入りから削除"
+                      className='ml-auto opacity-60 hover:opacity-100'
+                      aria-label='お気に入りから削除'
                     >
-                      <Star className="h-3 w-3 fill-current" />
+                      <Star className='h-3 w-3 fill-current' />
                     </button>
                   </Link>
                 )
@@ -190,15 +194,17 @@ const Sidebar = () => {
 
         {/* Recent Pages */}
         {!isCollapsed && recentPages.length > 0 && (
-          <div className="border-b p-4 dark:border-gray-700">
-            <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <Clock className="h-3 w-3" />
+          <div className='border-b p-4 dark:border-gray-700'>
+            <h3 className='mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+              <Clock className='h-3 w-3' />
               最近のページ
             </h3>
-            <div className="space-y-1">
+            <div className='space-y-1'>
               {recentPages.slice(0, 5).map((path) => {
                 const item = getItemByPath(path)
-                if (!item) {return null}
+                if (!item) {
+                  return null
+                }
                 const isActive = location.pathname === path
                 const Icon = item.icon
                 return (
@@ -214,8 +220,8 @@ const Sidebar = () => {
                       }
                     `}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Icon className='h-4 w-4 flex-shrink-0' />
+                    <span className='truncate'>{item.label}</span>
                   </Link>
                 )
               })}
@@ -224,13 +230,13 @@ const Sidebar = () => {
         )}
 
         {/* Main Navigation Sections */}
-        <div className="p-4">
+        <div className='p-4'>
           {Object.entries(menuSections).map(([sectionKey, section]) => {
             const isExpanded = expandedSections.includes(sectionKey) || isCollapsed
             const SectionIcon = section.icon
 
             return (
-              <div key={sectionKey} className="mb-6">
+              <div key={sectionKey} className='mb-6'>
                 {/* Section Header */}
                 <button
                   onClick={() => !isCollapsed && toggleSection(sectionKey)}
@@ -246,14 +252,14 @@ const Sidebar = () => {
                   aria-expanded={isExpanded}
                   disabled={isCollapsed}
                 >
-                  <div className="flex items-center gap-3">
-                    <SectionIcon className="h-5 w-5 flex-shrink-0" />
+                  <div className='flex items-center gap-3'>
+                    <SectionIcon className='h-5 w-5 flex-shrink-0' />
                     {!isCollapsed && <span>{section.label}</span>}
                   </div>
                   {!isCollapsed && (
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
+                      aria-hidden='true'
                     />
                   )}
                 </button>
@@ -267,7 +273,7 @@ const Sidebar = () => {
                       const isFavorite = favorites.includes(item.path)
 
                       return (
-                        <div key={item.path} className="group relative">
+                        <div key={item.path} className='group relative'>
                           <Link
                             to={item.path}
                             className={`
@@ -282,12 +288,12 @@ const Sidebar = () => {
                             aria-current={isActive ? 'page' : undefined}
                             title={isCollapsed ? item.label : undefined}
                           >
-                            <ItemIcon className="h-4 w-4 flex-shrink-0" />
+                            <ItemIcon className='h-4 w-4 flex-shrink-0' />
                             {!isCollapsed && (
                               <>
-                                <span className="flex-1 truncate">{item.label}</span>
+                                <span className='flex-1 truncate'>{item.label}</span>
                                 {item.isNew && (
-                                  <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white">
+                                  <span className='rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
                                     NEW
                                   </span>
                                 )}

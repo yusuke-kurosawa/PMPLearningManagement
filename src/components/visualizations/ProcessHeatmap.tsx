@@ -16,7 +16,9 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '複雑度',
       description: 'ITTOの数に基づくプロセスの複雑さ',
       calculate: (process) => {
-        if (!data) {return 0}
+        if (!data) {
+          return 0
+        }
         const links = data.links.filter(
           (l) =>
             l.source === process.id ||
@@ -31,7 +33,9 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '学習進捗',
       description: '各プロセスの学習完了度',
       calculate: (process) => {
-        if (!progressData) {return 0}
+        if (!progressData) {
+          return 0
+        }
         const progress = progressData[process.id]
         return progress ? progress.understandingLevel : 0
       },
@@ -40,7 +44,9 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '接続性',
       description: '他のプロセスとの関連度',
       calculate: (process) => {
-        if (!data) {return 0}
+        if (!data) {
+          return 0
+        }
         const connectedProcesses = new Set()
         data.links.forEach((link) => {
           if (link.source === process.id || link.source.id === process.id) {
@@ -103,7 +109,9 @@ const ProcessHeatmap = ({ data, progressData }) => {
 
   // ヒートマップデータの準備
   const heatmapData = useMemo(() => {
-    if (!data) {return null}
+    if (!data) {
+      return null
+    }
 
     const processes = data.nodes.filter((n) => n.type === 'process')
     const knowledgeAreas = [
@@ -149,7 +157,9 @@ const ProcessHeatmap = ({ data, progressData }) => {
 
   // ヒートマップの描画
   useEffect(() => {
-    if (!heatmapData || !svgRef.current) {return}
+    if (!heatmapData || !svgRef.current) {
+      return
+    }
 
     const margin = { top: 120, right: 200, bottom: 60, left: 200 }
     const width = dimensions.width - margin.left - margin.right
@@ -321,15 +331,15 @@ const ProcessHeatmap = ({ data, progressData }) => {
   }
 
   return (
-    <div ref={containerRef} className="relative h-full w-full bg-gray-50">
+    <div ref={containerRef} className='relative h-full w-full bg-gray-50'>
       {/* コントロールパネル */}
-      <div className="absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg">
+      <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">表示メトリクス</label>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>表示メトリクス</label>
           <select
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
+            className='w-full rounded-md border border-gray-300 px-3 py-2'
           >
             {Object.entries(metrics).map(([key, metric]) => (
               <option key={key} value={key}>
@@ -337,43 +347,43 @@ const ProcessHeatmap = ({ data, progressData }) => {
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-gray-600">{metrics[selectedMetric].description}</p>
+          <p className='mt-1 text-xs text-gray-600'>{metrics[selectedMetric].description}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <input
-            type="checkbox"
-            id="showLegend"
+            type='checkbox'
+            id='showLegend'
             checked={showLegend}
             onChange={(e) => setShowLegend(e.target.checked)}
-            className="rounded"
+            className='rounded'
           />
-          <label htmlFor="showLegend" className="text-sm text-gray-700">
+          <label htmlFor='showLegend' className='text-sm text-gray-700'>
             凡例を表示
           </label>
         </div>
 
         <button
           onClick={exportSVG}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700"
+          className='flex w-full items-center justify-center gap-2 rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700'
         >
-          <Download className="h-4 w-4" />
+          <Download className='h-4 w-4' />
           SVGエクスポート
         </button>
       </div>
 
       {/* ホバー情報 */}
       {hoveredCell && (
-        <div className="absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg">
-          <h3 className="font-semibold text-gray-900">{hoveredCell.process.name}</h3>
-          <p className="text-sm text-gray-600">知識エリア: {hoveredCell.area}マネジメント</p>
-          <p className="text-sm text-gray-600">プロセス群: {hoveredCell.group}</p>
-          <div className="mt-2 border-t pt-2">
-            <p className="text-sm font-semibold">
+        <div className='absolute bottom-4 left-4 max-w-sm rounded-lg bg-white p-4 shadow-lg'>
+          <h3 className='font-semibold text-gray-900'>{hoveredCell.process.name}</h3>
+          <p className='text-sm text-gray-600'>知識エリア: {hoveredCell.area}マネジメント</p>
+          <p className='text-sm text-gray-600'>プロセス群: {hoveredCell.group}</p>
+          <div className='mt-2 border-t pt-2'>
+            <p className='text-sm font-semibold'>
               {metrics[selectedMetric].name}: {hoveredCell.value.toFixed(1)}
             </p>
             {selectedMetric === 'progress' && (
-              <p className="text-sm text-gray-600">
+              <p className='text-sm text-gray-600'>
                 理解度: {(hoveredCell.value * 10).toFixed(0)}%
               </p>
             )}
@@ -386,7 +396,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
-        className="h-full w-full"
+        className='h-full w-full'
       />
     </div>
   )
