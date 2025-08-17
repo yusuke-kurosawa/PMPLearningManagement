@@ -76,8 +76,10 @@ class PerformanceMonitor {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries()
         const lastEntry = entries[entries.length - 1]
-        this.metrics.LCP = Math.round(lastEntry.startTime)
-        this.reportMetric('LCP', this.metrics.LCP)
+        if (lastEntry) {
+          this.metrics.LCP = Math.round(lastEntry.startTime)
+          this.reportMetric('LCP', this.metrics.LCP)
+        }
       })
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
