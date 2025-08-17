@@ -179,7 +179,7 @@ async function handleApiRequest(request: Request): Promise<Response> {
     }
 
     throw new Error(`Network response not ok: ${networkResponse.status}`)
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: Network failed for API request, trying cache')
     }
@@ -237,7 +237,7 @@ async function syncProgressData() {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: Progress data synced successfully')
     }
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.error('Service Worker: Failed to sync progress data:', error)
     }
@@ -261,7 +261,7 @@ async function syncExamResults() {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: Exam results synced successfully')
     }
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.error('Service Worker: Failed to sync exam results:', error)
     }
@@ -285,7 +285,7 @@ async function syncFlashcardProgress() {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: Flashcard progress synced successfully')
     }
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.error('Service Worker: Failed to sync flashcard progress:', error)
     }
@@ -365,7 +365,7 @@ self.addEventListener('push', (event: ExtendableMessageEvent) => {
       const data = event.data.json()
       options.body = data.message || options.body
       options.data = data
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.error('Service Worker: Error parsing push data:', error)
       }
@@ -429,7 +429,7 @@ async function cacheUrls(urls: string[]) {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: URLs cached successfully')
     }
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.error('Service Worker: Failed to cache URLs:', error)
     }
@@ -454,7 +454,7 @@ async function syncContent() {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Service Worker: Periodic sync completed')
     }
-  } catch (error) {
+  } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
       logger.error('Service Worker: Periodic sync failed:', error)
     }

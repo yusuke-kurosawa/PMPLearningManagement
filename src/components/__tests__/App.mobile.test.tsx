@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import App from '../../App'
 
@@ -95,11 +94,7 @@ describe('App Mobile Detection and Routing', () => {
         writable: true,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -125,11 +120,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 5,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -149,11 +140,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 0,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('desktop-navigation')).toBeInTheDocument()
@@ -175,11 +162,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 412,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -200,11 +183,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 768,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -227,11 +206,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 0,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Initially should be desktop
       await waitFor(() => {
@@ -282,11 +257,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 5,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Initially should be mobile
       await waitFor(() => {
@@ -331,11 +302,7 @@ describe('App Mobile Detection and Routing', () => {
         writable: true,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       fireEvent(window, new Event('orientationchange'))
 
@@ -355,22 +322,23 @@ describe('App Mobile Detection and Routing', () => {
       })
 
       // No touch support
-      Object.defineProperty(window, 'ontouchstart', {
-        value: undefined,
-        writable: true,
-        configurable: true,
-      })
+      try {
+        Object.defineProperty(window, 'ontouchstart', {
+          value: undefined,
+          writable: true,
+          configurable: true,
+        })
+      } catch {
+        // プロパティが既に定義されている場合は無視
+        window.ontouchstart = undefined
+      }
       Object.defineProperty(navigator, 'maxTouchPoints', {
         writable: true,
         configurable: true,
         value: 0,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Should still work
       expect(screen.getByText('読み込み中...')).toBeInTheDocument()
@@ -394,11 +362,7 @@ describe('App Mobile Detection and Routing', () => {
         value: 10,
       })
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -408,11 +372,7 @@ describe('App Mobile Detection and Routing', () => {
 
   describe('Performance', () => {
     it('should load components lazily', async () => {
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Loading spinner should appear initially
       expect(screen.getByText('読み込み中...')).toBeInTheDocument()
@@ -435,11 +395,7 @@ describe('App Mobile Detection and Routing', () => {
     })
 
     it('should debounce resize events', async () => {
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Fire multiple resize events
       for (let i = 0; i < 10; i++) {
@@ -502,11 +458,7 @@ describe('App Mobile Detection and Routing', () => {
     it('should handle component loading errors gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      )
+      render(<App />)
 
       // Should not crash the app
       expect(screen.getByText('読み込み中...')).toBeInTheDocument()

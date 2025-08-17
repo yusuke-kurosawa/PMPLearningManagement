@@ -1,0 +1,209 @@
+{
+  "eslintConfig": {
+    "plugins": ["header"],
+    "rules": {
+      "header/header": [
+        "error",
+        "block",
+        {
+          "pattern": "\\*\\s+@file\\s+.+\n\\s*\\*\\s+@description\\s+.+\n\\s*\\*\\s+@developer\\s+Developer\\s+\\d+:\\s+.+\n\\s*\\*\\s+@agent\\s+.+\n\\s*\\*\\s+@lastModified\\s+\\d{4}-\\d{2}-\\d{2}",
+          "template": "/**\n * @file ${file}\n * @description ${description}\n * @developer ${developer}\n * @agent ${agent}\n * @lastModified ${date}\n */",
+          "style": {
+            "minLines": 6,
+            "maxLines": 10
+          }
+        }
+      ]
+    }
+  },
+  "headerTemplates": {
+    "typescript": {
+      "defaultTemplate": "/**\n * @file ${relativePath}\n * @description ${componentDescription}\n * @developer ${developerInfo}\n * @agent ${agentInfo}\n * @lastModified ${currentDate}\n */",
+      "requiredFields": [
+        "@file",
+        "@description", 
+        "@developer",
+        "@agent",
+        "@lastModified"
+      ],
+      "optionalFields": [
+        "@module",
+        "@dependencies",
+        "@exports",
+        "@performance",
+        "@security"
+      ]
+    }
+  },
+  "developerAgentMapping": {
+    "Developer 1": {
+      "name": "認証・認可システム（RBAC）",
+      "agent": "backend-developer",
+      "paths": [
+        "src/components/auth/**/*.{ts,tsx}",
+        "src/server/auth/**/*.ts",
+        "src/lib/auth/**/*.ts"
+      ],
+      "template": "/**\n * @file ${file}\n * @description 認証・認可システム実装\n * @developer Developer 1: 認証・認可システム（RBAC）\n * @agent backend-developer\n * @lastModified ${date}\n * @security Critical - 認証フロー\n */"
+    },
+    "Developer 2": {
+      "name": "API・マイクロサービス",
+      "agent": "microservices-architect",
+      "paths": [
+        "src/server/services/**/*.ts",
+        "src/server/routers/**/*.ts",
+        "src/lib/trpc/**/*.ts"
+      ],
+      "template": "/**\n * @file ${file}\n * @description API・マイクロサービス実装\n * @developer Developer 2: API・マイクロサービス\n * @agent microservices-architect\n * @lastModified ${date}\n * @performance Optimized for scalability\n */"
+    },
+    "Developer 3": {
+      "name": "決済・サブスクリプション管理",
+      "agent": "backend-developer",
+      "paths": [
+        "src/server/webhooks/**/*.ts",
+        "**/*stripe*.ts",
+        "**/*payment*.ts",
+        "**/*subscription*.ts"
+      ],
+      "template": "/**\n * @file ${file}\n * @description 決済システム統合\n * @developer Developer 3: 決済・サブスクリプション管理\n * @agent backend-developer\n * @lastModified ${date}\n * @security Critical - PCI DSS準拠\n */"
+    },
+    "Developer 4": {
+      "name": "UI/UX・ビジュアライゼーション",
+      "agent": "frontend-developer",
+      "paths": [
+        "src/components/visualizations/**/*.{ts,tsx}",
+        "src/components/shared/**/*.{ts,tsx}",
+        "src/components/ui/**/*.{ts,tsx}"
+      ],
+      "template": "/**\n * @file ${file}\n * @description UI/UXコンポーネント実装\n * @developer Developer 4: UI/UX・ビジュアライゼーション\n * @agent frontend-developer\n * @lastModified ${date}\n * @performance Lazy-loaded component\n */"
+    },
+    "Developer 5": {
+      "name": "データベース・パフォーマンス最適化",
+      "agent": "database-admin",
+      "paths": [
+        "src/lib/db/**/*.ts",
+        "src/server/repositories/**/*.ts",
+        "prisma/**/*.{ts,prisma}",
+        "migrations/**/*.sql"
+      ],
+      "template": "/**\n * @file ${file}\n * @description データベース層実装\n * @developer Developer 5: データベース・パフォーマンス最適化\n * @agent database-admin\n * @lastModified ${date}\n * @performance Connection pooling enabled\n */"
+    },
+    "Developer 6": {
+      "name": "PWA & Mobile Developer",
+      "agent": "mobile-app-developer",
+      "paths": [
+        "src/lib/pwa/**/*.ts",
+        "src/components/mobile/**/*.{ts,tsx}",
+        "src/components/PWAManager.tsx",
+        "public/sw.js",
+        "public/manifest.json"
+      ],
+      "template": "/**\n * @file ${file}\n * @description PWA・モバイル機能実装\n * @developer Developer 6: PWA & Mobile Developer\n * @agent mobile-app-developer\n * @lastModified ${date}\n * @performance Service Worker optimized\n */"
+    },
+    "Developer 7": {
+      "name": "セキュリティ・DevOps・インフラ",
+      "agent": "devops-engineer",
+      "paths": [
+        "src/lib/security/**/*.ts",
+        "src/lib/monitoring/**/*.ts",
+        "src/server/monitoring/**/*.ts",
+        ".github/workflows/**/*.yml",
+        "scripts/**/*.{js,sh}"
+      ],
+      "template": "/**\n * @file ${file}\n * @description セキュリティ・監視システム実装\n * @developer Developer 7: セキュリティ・DevOps・インフラ\n * @agent devops-engineer\n * @lastModified ${date}\n * @security Production-ready\n */"
+    },
+    "Developer 8": {
+      "name": "品質保証エンジニア",
+      "agent": "qa-expert",
+      "paths": [
+        "src/test/**/*.{ts,tsx}",
+        "**/*.test.{ts,tsx}",
+        "**/*.spec.{ts,tsx}",
+        "src/components/__tests__/**/*.{ts,tsx}",
+        "e2e/**/*.{ts,js}"
+      ],
+      "template": "/**\n * @file ${file}\n * @description テストケース実装\n * @developer Developer 8: 品質保証エンジニア\n * @agent qa-expert\n * @lastModified ${date}\n * @module Test Suite\n */"
+    },
+    "Developer 9": {
+      "name": "フロントエンドサービス・状態管理",
+      "agent": "frontend-developer",
+      "paths": [
+        "src/services/**/*.ts",
+        "src/contexts/**/*.{ts,tsx}",
+        "src/hooks/**/*.ts",
+        "src/stores/**/*.ts"
+      ],
+      "template": "/**\n * @file ${file}\n * @description フロントエンドサービス層実装\n * @developer Developer 9: フロントエンドサービス・状態管理\n * @agent frontend-developer\n * @lastModified ${date}\n * @module State Management\n */"
+    },
+    "Developer 10": {
+      "name": "学習・教育システム",
+      "agent": "frontend-developer",
+      "paths": [
+        "src/components/learning/**/*.{ts,tsx}",
+        "src/components/exam/**/*.{ts,tsx}",
+        "src/components/coaching/**/*.{ts,tsx}",
+        "src/components/mentorship/**/*.{ts,tsx}"
+      ],
+      "template": "/**\n * @file ${file}\n * @description 学習管理システム実装\n * @developer Developer 10: 学習・教育システム\n * @agent frontend-developer\n * @lastModified ${date}\n * @module Learning Management\n */"
+    }
+  },
+  "fileTypeRules": {
+    "components": {
+      "pattern": "**/*.tsx",
+      "requiredFields": ["@file", "@description", "@developer", "@agent", "@lastModified"],
+      "additionalFields": ["@exports", "@dependencies"]
+    },
+    "services": {
+      "pattern": "**/*.ts",
+      "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"],
+      "requiredFields": ["@file", "@description", "@developer", "@agent", "@lastModified"],
+      "additionalFields": ["@module", "@performance"]
+    },
+    "tests": {
+      "pattern": "**/*.{test,spec}.{ts,tsx}",
+      "requiredFields": ["@file", "@description", "@developer", "@agent", "@lastModified"],
+      "additionalFields": ["@module"]
+    },
+    "types": {
+      "pattern": "**/*.d.ts",
+      "requiredFields": ["@file", "@description", "@developer", "@agent", "@lastModified"],
+      "additionalFields": ["@exports"]
+    },
+    "config": {
+      "pattern": "*.config.{ts,mjs}",
+      "requiredFields": ["@file", "@description", "@developer", "@agent", "@lastModified"],
+      "additionalFields": []
+    }
+  },
+  "globalSettings": {
+    "enabled": true,
+    "enforceOnCommit": true,
+    "autoFix": true,
+    "dateFormat": "YYYY-MM-DD",
+    "encoding": "utf-8",
+    "lineEnding": "lf",
+    "excludePaths": [
+      "node_modules/**",
+      "dist/**",
+      "coverage/**",
+      ".git/**",
+      "*.min.{ts,js}",
+      "public/sw.js"
+    ]
+  },
+  "simplifiedRules": {
+    "description": "TypeScript専用のシンプルで管理しやすいヘッダールール",
+    "benefits": [
+      "JavaScript用ルールの完全削除",
+      "TypeScript専用の最適化",
+      "ファイル種別ごとの明確なルール",
+      "Developer-Agent マッピングの維持",
+      "自動修正機能の強化"
+    ],
+    "migrationNotes": [
+      "全222ファイルがTypeScriptのため、JS用ルールは不要",
+      "ファイル種別は5つに簡素化（components, services, tests, types, config）",
+      "各開発者の専門分野は維持しつつ、TypeScript向けに最適化"
+    ]
+  }
+}

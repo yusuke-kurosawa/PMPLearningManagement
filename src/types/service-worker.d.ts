@@ -108,7 +108,7 @@ interface GetNotificationOptions {
 }
 
 // Extend Window interface for Service Worker properties
-interface Window {
+interface _Window {
   ServiceWorkerRegistration?: {
     prototype: ServiceWorkerRegistration;
     new(): ServiceWorkerRegistration;
@@ -116,7 +116,7 @@ interface Window {
 }
 
 // Extend Navigator interface
-interface Navigator {
+interface _Navigator {
   serviceWorker?: ServiceWorkerContainer;
 }
 

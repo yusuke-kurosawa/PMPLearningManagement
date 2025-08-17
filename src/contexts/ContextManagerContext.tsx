@@ -3,15 +3,29 @@
  * Provides context management services throughout the React application
  */
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react'
 import contextManager from '../services/contextManager.js'
 import contextMonitor from '../services/contextMonitor.js'
 import performanceOptimizer from '../services/performanceOptimizer.js'
+import type {
+  ContextManagerAPI,
+  ContextStats,
+  MonitoringData,
+  PerformanceMetrics,
+  StoreOptions,
+  ContextMonitoringReturn,
+  ContextStorageReturn,
+  PerformanceOptimizerReturn
+} from '../types/context'
 
-const ContextManagerContext = createContext(null)
+const ContextManagerContext = createContext<ContextManagerAPI | null>(null)
 
-export const ContextManagerProvider = ({ children }) => {
-  const [contextStats, setContextStats] = useState({
+interface ContextManagerProviderProps {
+  children: ReactNode;
+}
+
+export const ContextManagerProvider: React.FC<ContextManagerProviderProps> = ({ children }) => {
+  const [contextStats, setContextStats] = useState<ContextStats>({
     totalEntries: 0,
     totalSizeKB: 0,
     cacheHitRate: 0.85,
@@ -19,14 +33,14 @@ export const ContextManagerProvider = ({ children }) => {
     compressionRatio: 0,
   })
 
-  const [monitoringData, setMonitoringData] = useState({
+  const [monitoringData, setMonitoringData] = useState<MonitoringData>({
     status: 'healthy',
     policy: 'normal',
     metrics: {},
     lastCleanup: Date.now(),
   })
 
-  const [performanceMetrics, setPerformanceMetrics] = useState({
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
     memory: { usedMB: 0, totalMB: 0, limitMB: 0 },
     cache: { lazyLoadCacheSize: 0 },
   })
@@ -49,10 +63,10 @@ export const ContextManagerProvider = ({ children }) => {
   }, [])
 
   // Context management API
-  const contextAPI = useMemo(
+  const contextAPI = useMemo<ContextManagerAPI>(
     () => ({
       // Storage operations
-      store: (key, data, options) => {
+      store: (key: string, data: any, options?: StoreOptions) => {
         const start = performance.now()
         const result = contextManager.store(key, data, options)
         const duration = performance.now() - start
@@ -61,7 +75,7 @@ export const ContextManagerProvider = ({ children }) => {
         return result
       },
 
-      retrieve: (key) => {
+      retrieve: (key: string) => {
         const start = performance.now()
         try {
           const result = contextManager.retrieve(key)
@@ -80,7 +94,7 @@ export const ContextManagerProvider = ({ children }) => {
         return await contextManager.cleanup()
       },
 
-      archive: async (maxAge) => {
+      archive: async (maxAge: number) => {
         return await contextManager.archiveOldData(maxAge)
       },
 
@@ -89,28 +103,28 @@ export const ContextManagerProvider = ({ children }) => {
       },
 
       // Performance operations
-      optimizeComponent: (Component, options) => {
+      optimizeComponent: (Component: React.ComponentType, options?: any) => {
         return performanceOptimizer.optimizeComponent(Component, options)
       },
 
-      lazyLoad: async (componentKey, loader) => {
+      lazyLoad: async (componentKey: string, loader: () => Promise<any>) => {
         return await performanceOptimizer.lazyLoadComponent(componentKey, loader)
       },
 
-      observeForLazyLoading: (element, loadHandler) => {
+      observeForLazyLoading: (element: Element, loadHandler: () => void) => {
         return performanceOptimizer.observeForLazyLoading(element, loadHandler)
       },
 
-      debounce: (func, wait) => {
+      debounce: <T extends (...args: any[]) => any>(func: T, wait: number) => {
         return performanceOptimizer.debounce(func, wait)
       },
 
-      throttle: (func, limit) => {
+      throttle: <T extends (...args: any[]) => any>(func: T, limit: number) => {
         return performanceOptimizer.throttle(func, limit)
       },
 
       // Monitoring operations
-      setRotationPolicy: (policy) => {
+      setRotationPolicy: (policy: 'normal' | 'aggressive' | 'conservative') => {
         contextMonitor.setRotationPolicy(policy)
       },
 
@@ -132,7 +146,7 @@ export const ContextManagerProvider = ({ children }) => {
 }
 
 // Custom hook to use context manager
-export const useContextManager = () => {
+export const useContextManager = (): ContextManagerAPI => {
   const context = useContext(ContextManagerContext)
 
   if (!context) {
@@ -143,7 +157,7 @@ export const useContextManager = () => {
 }
 
 // Hook for performance optimization
-export const usePerformanceOptimizer = () => {
+export const usePerformanceOptimizer = (): PerformanceOptimizerReturn => {
   const { optimizeComponent, lazyLoad, observeForLazyLoading, debounce, throttle } =
     useContextManager()
 
@@ -157,7 +171,7 @@ export const usePerformanceOptimizer = () => {
 }
 
 // Hook for context storage
-export const useContextStorage = () => {
+export const useContextStorage = (): ContextStorageReturn => {
   const { store, retrieve, cleanup, archive, clear } = useContextManager()
 
   return {
@@ -170,7 +184,7 @@ export const useContextStorage = () => {
 }
 
 // Hook for monitoring
-export const useContextMonitoring = () => {
+export const useContextMonitoring = (): ContextMonitoringReturn => {
   const { setRotationPolicy, getDiagnostics, getStats, getMonitoringData, getPerformanceMetrics } =
     useContextManager()
 
@@ -192,7 +206,7 @@ export const useContextMonitoring = () => {
 }
 
 // HOC for automatic performance optimization
-export const withPerformanceOptimization = (Component, options = {}) => {
+export const withPerformanceOptimization = <P extends object>(Component: React.ComponentType<P>, options = {}) => {
   const OptimizedComponent = React.memo(Component)
 
   OptimizedComponent.displayName = `Optimized(${Component.displayName || Component.name})`

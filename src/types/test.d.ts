@@ -32,7 +32,7 @@ interface Touch {
   force?: number
 }
 
-interface TouchList {
+interface _TouchList {
   length: number
   item(index: number): Touch | null
   [index: number]: Touch
