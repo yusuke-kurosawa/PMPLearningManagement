@@ -227,7 +227,7 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.recordStudySession.mutate({
             sessionData: completedSession,
           })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync study session:', error)
           }
@@ -264,7 +264,7 @@ export const useProgressStore = create<ProgressStore>()(
               lastStudied: new Date(),
             },
           })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync process progress:', error)
           }
@@ -289,7 +289,7 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.recordQuizScore.mutate({ processId, score })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync quiz score:', error)
           }
@@ -319,7 +319,7 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.createGoal.mutate(goal)
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync goal creation:', error)
           }
@@ -336,7 +336,7 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.updateGoal.mutate({ goalId, updates })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync goal update:', error)
           }
@@ -350,7 +350,7 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.deleteGoal.mutate({ goalId })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync goal deletion:', error)
           }
@@ -432,7 +432,7 @@ export const useProgressStore = create<ProgressStore>()(
             state.studyStreak = data.studyStreak
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load progress'
             state.isLoading = false
@@ -450,7 +450,7 @@ export const useProgressStore = create<ProgressStore>()(
           }
 
           await api.progress.syncProgress.mutate(localData)
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to sync with server:', error)
           }

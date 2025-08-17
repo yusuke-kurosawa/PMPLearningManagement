@@ -8,7 +8,7 @@ import { CSRFProtection } from '../csrf'
 import * as fc from 'fast-check'
 
 // Crypto モック
-vi.mock('crypto', () => ({
+const cryptoMock = {
   randomBytes: vi.fn().mockImplementation((size: number) => ({
     toString: vi.fn().mockReturnValue('a'.repeat(size * 2)),
   })),
@@ -17,6 +17,11 @@ vi.mock('crypto', () => ({
     digest: vi.fn().mockReturnValue('mocked-hmac-signature'),
   })),
   timingSafeEqual: vi.fn().mockImplementation((a: Buffer, b: Buffer) => a.equals(b)),
+}
+
+vi.mock('crypto', () => ({
+  default: cryptoMock,
+  ...cryptoMock,
 }))
 
 // Redis モック

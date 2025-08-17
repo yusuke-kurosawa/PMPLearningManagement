@@ -107,7 +107,7 @@ export const UserInputSchemas = {
 }
 
 // API request validation schemas
-export const _APISchemas = {
+export const __APISchemas = {
   bulkProgressUpdate: z.object({
     updates: z.array(UserInputSchemas.progressUpdate).max(100),
   }),

@@ -25,11 +25,17 @@ describe('DevOps Foundation Integration Test', () => {
     expect('Advanced Analytics').toBeDefined()
 
     // 統合成功
-    console.log('✅ DevOps Foundation - All 4 Phases Integrated Successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ DevOps Foundation - All 4 Phases Integrated Successfully')
+    }
     console.log('📊 Expected Benefits:')
-    console.log('- Deploy Time: 78% reduction')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('- Deploy Time: 78% reduction')
+    }
     console.log('- Quality Check: 73% faster')
-    console.log('- Cost Savings: $25,000+/year')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('- Cost Savings: $25,000+/year')
+    }
     console.log('- Automation Rate: 95%')
   })
 
@@ -44,7 +50,9 @@ describe('DevOps Foundation Integration Test', () => {
 
     workflows.forEach((workflow) => {
       expect(workflow).toBeTruthy()
-      console.log(`✅ ${workflow} - Ready`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`✅ ${workflow} - Ready`)
+      }
     })
   })
 
@@ -61,7 +69,9 @@ describe('DevOps Foundation Integration Test', () => {
     expect(metrics.githubActionsCost.savings).toBeGreaterThan(30)
     expect(metrics.automationRate).toBeGreaterThan(90)
 
-    console.log('🎯 All ROI targets achieved!')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 All ROI targets achieved!')
+    }
   })
 })
 

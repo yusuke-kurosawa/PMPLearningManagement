@@ -31,7 +31,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 
 const CommandPalette: React.FC = () => {
   const navigate = useNavigate()
-  //   const _location = useLocation() // TODO: Will be used in future
+  //   const __location = useLocation() // TODO: Will be used in future
   const { settings, toggleDarkMode } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')

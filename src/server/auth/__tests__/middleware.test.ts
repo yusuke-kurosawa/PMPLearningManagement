@@ -4,7 +4,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { NextRequest } from 'next/server'
 import {
   validateJWT,
   generateSecureToken,
@@ -13,15 +12,63 @@ import {
 } from '../middleware'
 import jwt from 'jsonwebtoken'
 
+// NextRequest のモック
+class MockHeaders {
+  private data: Map<string, string> = new Map()
+  
+  constructor(init?: Record<string, string>) {
+    if (init) {
+      Object.entries(init).forEach(([key, value]) => {
+        this.data.set(key.toLowerCase(), value)
+      })
+    }
+  }
+  
+  get(name: string): string | null {
+    return this.data.get(name.toLowerCase()) || null
+  }
+  
+  set(name: string, value: string): void {
+    this.data.set(name.toLowerCase(), value)
+  }
+}
+
+class NextRequest {
+  url: string
+  headers: MockHeaders
+  
+  constructor(url: string, init?: { headers?: Record<string, string> }) {
+    this.url = url
+    this.headers = new MockHeaders(init?.headers)
+  }
+}
+
 // モック設定
 vi.mock('next-auth/jwt', () => ({
   getToken: vi.fn(),
+  encode: vi.fn(),
+  decode: vi.fn(),
 }))
 
 vi.mock('rate-limiter-flexible', () => ({
   RateLimiterMemory: vi.fn().mockImplementation(() => ({
     consume: vi.fn().mockResolvedValue(null),
+    penalty: vi.fn().mockResolvedValue(null),
+    reward: vi.fn().mockResolvedValue(null),
+    block: vi.fn().mockResolvedValue(null),
+    delete: vi.fn().mockResolvedValue(null),
   })),
+}))
+
+vi.mock('jsonwebtoken', () => ({
+  default: {
+    sign: vi.fn((_payload, _secret) => 'mocked.jwt.token'),
+    verify: vi.fn((_token, _secret) => ({ sub: 'user123' })),
+    decode: vi.fn((_token) => ({ sub: 'user123' })),
+  },
+  sign: vi.fn((_payload, _secret) => 'mocked.jwt.token'),
+  verify: vi.fn((_token, _secret) => ({ sub: 'user123' })),
+  decode: vi.fn((_token) => ({ sub: 'user123' })),
 }))
 
 describe('JWT検証ミドルウェア', () => {
@@ -191,7 +238,7 @@ describe('JWT検証ミドルウェア', () => {
   })
 
   describe('verifyHMACSignature', () => {
-    it('正しいHMAC署名を検証する', () => {
+    it('正しいHMAC署名を検証する', async () => {
       const secret = 'webhook-secret-key'
       const payload = '{"event":"user.created","data":{"id":"user123"}}'
       const crypto = await import('crypto')
@@ -212,7 +259,7 @@ describe('JWT検証ミドルウェア', () => {
       expect(result).toBe(false)
     })
 
-    it('異なるペイロードに対する署名を拒否する', () => {
+    it('異なるペイロードに対する署名を拒否する', async () => {
       const secret = 'webhook-secret-key'
       const originalPayload = '{"event":"user.created","data":{"id":"user123"}}'
       const modifiedPayload = '{"event":"user.deleted","data":{"id":"user123"}}'

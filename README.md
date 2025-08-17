@@ -392,3 +392,4 @@ chore: 雑務 #901
 [![IDD Compliance](https://img.shields.io/badge/IDD%20Compliance-66%25-yellow)](https://yusuke-kurosawa.github.io/PMPLearningManagement/idd-dashboard/)
 
 View our real-time IDD compliance metrics: [Dashboard](https://yusuke-kurosawa.github.io/PMPLearningManagement/idd-dashboard/)
+# Empty commit to trigger CI

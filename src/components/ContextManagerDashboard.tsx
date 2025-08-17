@@ -218,8 +218,8 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
             <div className="space-y-4">
               {/* Rotation Policy */}
               <div>
-                <div className="mb-2 block text-sm font-medium">Rotation Policy</div>
-                <div className="flex space-x-2">
+                <label className="mb-2 block text-sm font-medium" htmlFor="rotation-policy">Rotation Policy</label>
+                <div className="flex space-x-2" id="rotation-policy" role="group" aria-labelledby="rotation-policy">
                   {['aggressive', 'normal', 'conservative'].map((policy) => (
                     <button
                       key={policy}

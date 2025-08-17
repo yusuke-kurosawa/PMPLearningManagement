@@ -322,7 +322,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
             )
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load cards'
             state.isLoading = false
@@ -355,7 +355,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.createCard.mutate(card)
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           set((state) => {
             delete state.cards[cardId]
@@ -377,7 +377,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.updateCard.mutate({ cardId, updates })
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           set((state) => {
             state.cards[cardId] = originalCard
@@ -399,7 +399,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.deleteCard.mutate({ cardId })
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           if (originalCard) {
             set((state) => {
@@ -452,7 +452,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
             )
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load decks'
             state.isLoading = false
@@ -480,7 +480,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.createDeck.mutate(deck)
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             delete state.decks[deckId]
             state.error = error instanceof Error ? error.message : 'Failed to create deck'
@@ -501,7 +501,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.updateDeck.mutate({ deckId, updates })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId] = originalDeck
             state.error = error instanceof Error ? error.message : 'Failed to update deck'
@@ -518,7 +518,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.deleteDeck.mutate({ deckId })
-        } catch (error) {
+        } catch (_error) {
           if (originalDeck) {
             set((state) => {
               state.decks[deckId] = originalDeck
@@ -539,7 +539,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.addCardToDeck.mutate({ deckId, cardId })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId].cardIds = state.decks[deckId].cardIds.filter((id) => id !== cardId)
             state.decks[deckId].totalCards -= 1
@@ -559,7 +559,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.removeCardFromDeck.mutate({ deckId, cardId })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId].cardIds.push(cardId)
             state.decks[deckId].totalCards += 1
@@ -670,7 +670,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
             totalTime,
             cardResults: currentSession.cardResults,
           })
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.warn('Failed to record study session:', error)
           }

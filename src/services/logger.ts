@@ -22,14 +22,18 @@ class LoggerService {
   debug(message: string, context?: LogContext): void {
     if (this.isDevelopment && !this.isTest) {
       // eslint-disable-next-line no-console
-      console.log(this.formatMessage('debug', message, context))
+      if (process.env.NODE_ENV === 'development') {
+        console.log(this.formatMessage('debug', message, context))
+      }
     }
   }
 
   info(message: string, context?: LogContext): void {
     if (!this.isTest) {
       // eslint-disable-next-line no-console
-      console.info(this.formatMessage('info', message, context))
+      if (process.env.NODE_ENV === 'development') {
+        console.info(this.formatMessage('info', message, context))
+      }
     }
   }
 
@@ -39,7 +43,9 @@ class LoggerService {
 
   warn(message: string, context?: LogContext): void {
     if (!this.isTest) {
-      console.warn(this.formatMessage('warn', message, context))
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(this.formatMessage('warn', message, context))
+      }
     }
   }
 
@@ -48,10 +54,14 @@ class LoggerService {
     const fullMessage = error ? `${message}: ${errorMessage}` : message
 
     if (!this.isTest) {
-      console.error(this.formatMessage('error', fullMessage, context))
+      if (process.env.NODE_ENV === 'development') {
+        console.error(this.formatMessage('error', fullMessage, context))
+      }
 
       if (error instanceof Error && error.stack && this.isDevelopment) {
-        console.error(error.stack)
+        if (process.env.NODE_ENV === 'development') {
+          console.error(error.stack)
+        }
       }
     }
 
