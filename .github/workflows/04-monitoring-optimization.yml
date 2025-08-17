@@ -1,0 +1,167 @@
+# ====================================================================
+# 📊 監視・統合 - Image Optimization Pipeline
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#
+# 主な処理:
+#   1. 📌 処理: Optimize Images
+#   2. 📋 監査: Image Quality Audit
+#   3. ⚡ 最適化: CDN and Delivery Optimization
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F4CA 監視・統合 - Image Optimization Pipeline"
+'on':
+  push:
+    paths:
+      - public/**/*.png
+      - public/**/*.jpg
+      - public/**/*.jpeg
+      - src/**/*.png
+      - src/**/*.jpg
+      - src/**/*.jpeg
+  pull_request:
+    paths:
+      - public/**/*.png
+      - public/**/*.jpg
+      - public/**/*.jpeg
+      - src/**/*.png
+      - src/**/*.jpg
+      - src/**/*.jpeg
+  workflow_dispatch: null
+jobs:
+  optimize-images:
+    name: "\U0001F4CC 処理: Optimize Images"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install image optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick webp libjpeg-turbo-progs optipng
+          npm install -g imagemin-cli @squoosh/cli
+      - name: Install dependencies
+        run: npm ci
+      - name: Detect changed images
+        id: changed-images
+        run: |
+          echo "Detecting changed image files..."
+          git diff --name-only HEAD~1 HEAD | grep -E '\.(png|jpg|jpeg)$' > changed_images.txt || echo "No images changed"
+          if [ -s changed_images.txt ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changed images:"
+            cat changed_images.txt
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Optimize PNG images
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F5BC️ Optimizing PNG images...\"\nnode ./scripts/optimize-images.js --type=png --input=changed_images.txt\n"
+      - name: Optimize JPEG images
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F5BC️ Optimizing JPEG images...\"\nnode ./scripts/optimize-images.js --type=jpeg --input=changed_images.txt\n"
+      - name: Generate WebP variants
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F680 Generating WebP variants...\"\nnode ./scripts/generate-webp.js --input=changed_images.txt\n"
+      - name: Generate AVIF variants
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: |
+          echo "⚡ Generating AVIF variants..."
+          node ./scripts/generate-avif.js --input=changed_images.txt
+      - name: Generate responsive image sizes
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F4F1 Generating responsive image sizes...\"\nnode ./scripts/generate-responsive-images.js --input=changed_images.txt\n"
+      - name: Update image metadata
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F4CA Updating image metadata...\"\nnode ./scripts/update-image-metadata.js\n"
+      - name: Generate optimization report
+        if: steps.changed-images.outputs.has_changes == 'true'
+        run: "echo \"\U0001F4CB Generating optimization report...\"\nnode ./scripts/generate-image-report.js\n"
+      - name: Upload optimized images
+        if: steps.changed-images.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'optimized-images-${{ github.run_id }}'
+          path: |
+            ./public/**/*.webp
+            ./public/**/*.avif
+            ./image-optimization-report.json
+      - name: Comment PR with optimization results
+        if: github.event_name == 'pull_request' && steps.changed-images.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: "const fs = require('fs');\nconst reportPath = './image-optimization-report.json';\n\nif (fs.existsSync(reportPath)) {\n  const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));\n  \n  const comment = `## \U0001F5BC️ Image Optimization Report\n  \n  ### Summary\n  - **Images Processed**: ${report.processedCount}\n  - **Total Size Reduction**: ${report.totalSizeReduction}\n  - **Compression Ratio**: ${report.compressionRatio}\n  - **WebP Generated**: ${report.webpCount}\n  - **AVIF Generated**: ${report.avifCount}\n  \n  ### Size Breakdown\n  | Format | Original Size | Optimized Size | Savings |\n  |--------|---------------|----------------|---------|\n  ${report.formatBreakdown.map(item => \n    `| ${item.format} | ${item.originalSize} | ${item.optimizedSize} | ${item.savings} |`\n  ).join('\\\\n')}\n  \n  ### Responsive Images Generated\n  ${report.responsiveImages.map(img => \n    `- **${img.name}**: ${img.variants.join(', ')}`\n  ).join('\\\\n')}\n  \n  ### Performance Impact\n  - **Estimated Load Time Improvement**: ${report.loadTimeImprovement}\n  - **Bandwidth Savings**: ${report.bandwidthSavings}\n  - **Core Web Vitals Impact**: ${report.coreWebVitalsImpact}\n  \n  ${report.recommendations.length > 0 ? `\n  ### Recommendations\n  ${report.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\\\\n')}\n  ` : ''}\n  `;\n  \n  github.rest.issues.createComment({\n    issue_number: context.issue.number,\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    body: comment\n  });\n}\n"
+      - name: Commit optimized images
+        if: github.ref == 'refs/heads/main' && steps.changed-images.outputs.has_changes == 'true'
+        run: "git config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\ngit add public/**/*.webp public/**/*.avif\nif git diff --staged --quiet; then\n  echo \"No changes to commit\"\nelse\n  git commit -m \"chore: optimize images and generate modern formats\n\n  \U0001F916 Generated with Claude Code\n  Co-Authored-By: Claude <noreply@anthropic.com>\"\n  git push\nfi\n"
+    timeout-minutes: 30
+  image-audit:
+    name: "\U0001F4CB 監査: Image Quality Audit"
+    runs-on: ubuntu-latest
+    needs: optimize-images
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Audit image quality
+        run: "echo \"\U0001F50D Auditing image quality...\"\nnode ./scripts/audit-image-quality.js\n"
+      - name: Check image accessibility
+        run: |
+          echo "♿ Checking image accessibility..."
+          node ./scripts/check-image-accessibility.js
+      - name: Validate image formats
+        run: |
+          echo "✅ Validating image formats..."
+          node ./scripts/validate-image-formats.js
+      - name: Generate accessibility report
+        run: "echo \"\U0001F4CB Generating accessibility report...\"\nnode ./scripts/generate-accessibility-report.js\n"
+    timeout-minutes: 30
+  cdn-optimization:
+    name: '⚡ 最適化: CDN and Delivery Optimization'
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - optimize-images
+      - image-audit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup image CDN configuration
+        run: "echo \"\U0001F310 Setting up CDN configuration...\"\nnode ./scripts/setup-image-cdn.js\n"
+      - name: Generate responsive image manifests
+        run: "echo \"\U0001F4F1 Generating responsive image manifests...\"\nnode ./scripts/generate-responsive-manifest.js\n"
+      - name: Update service worker cache
+        run: "echo \"\U0001F504 Updating service worker with new images...\"\nnode ./scripts/update-sw-image-cache.js\n"
+      - name: Deploy to CDN
+        run: "echo \"\U0001F680 Deploying optimized images...\"\n# This would deploy to your CDN service\necho \"CDN deployment would happen here\"\n"
+    timeout-minutes: 30
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

@@ -39,7 +39,9 @@ const Login: React.FC = () => {
   // Clear errors on unmount
   useEffect(() => {
     return () => {
-      if (clearError) {clearError()}
+      if (clearError) {
+        clearError()
+      }
     }
   }, [clearError])
 
@@ -132,26 +134,26 @@ const Login: React.FC = () => {
   }, [])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md space-y-8"
+        className='w-full max-w-md space-y-8'
       >
-        <div className="rounded-2xl bg-white p-8 shadow-xl">
+        <div className='rounded-2xl bg-white p-8 shadow-xl'>
           {/* Header */}
-          <div className="text-center">
+          <div className='text-center'>
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600"
+              className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600'
             >
-              <Lock className="h-8 w-8 text-white" />
+              <Lock className='h-8 w-8 text-white' />
             </motion.div>
-            <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome Back</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className='mt-6 text-3xl font-extrabold text-gray-900'>Welcome Back</h1>
+            <p className='mt-2 text-sm text-gray-600'>
               Sign in to continue your PMP learning journey
             </p>
           </div>
@@ -161,99 +163,99 @@ const Login: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="mt-4 flex items-start rounded-lg border border-red-200 bg-red-50 p-4"
+              className='mt-4 flex items-start rounded-lg border border-red-200 bg-red-50 p-4'
             >
-              <AlertCircle className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
-              <div className="text-sm text-red-700">{authError}</div>
+              <AlertCircle className='mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-red-400' />
+              <div className='text-sm text-red-700'>{authError}</div>
             </motion.div>
           )}
 
           {/* Login Form */}
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+          <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
+            <div className='space-y-4'>
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
                   Email Address
                 </label>
-                <div className="relative mt-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                <div className='relative mt-1'>
+                  <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+                    <Mail className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
+                    id='email'
+                    name='email'
+                    type='email'
+                    autoComplete='email'
                     required
                     value={formData.email}
                     onChange={handleChange}
                     className={`block w-full appearance-none border py-2 pl-10 pr-3 ${
                       errors.email ? 'border-red-300' : 'border-gray-300'
                     } rounded-lg transition duration-150 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                    placeholder="you@example.com"
+                    placeholder='you@example.com'
                   />
                 </div>
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                {errors.email && <p className='mt-1 text-sm text-red-600'>{errors.email}</p>}
               </div>
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
                   Password
                 </label>
-                <div className="relative mt-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                <div className='relative mt-1'>
+                  <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+                    <Lock className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
-                    id="password"
-                    name="password"
+                    id='password'
+                    name='password'
                     type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
+                    autoComplete='current-password'
                     required
                     value={formData.password}
                     onChange={handleChange}
                     className={`block w-full appearance-none border py-2 pl-10 pr-10 ${
                       errors.password ? 'border-red-300' : 'border-gray-300'
                     } rounded-lg transition duration-150 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                    placeholder="Enter your password"
+                    placeholder='Enter your password'
                   />
                   <button
-                    type="button"
+                    type='button'
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    className='absolute inset-y-0 right-0 flex items-center pr-3'
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className='h-5 w-5 text-gray-400 hover:text-gray-600' />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className='h-5 w-5 text-gray-400 hover:text-gray-600' />
                     )}
                   </button>
                 </div>
-                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                {errors.password && <p className='mt-1 text-sm text-red-600'>{errors.password}</p>}
               </div>
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center'>
                 <input
-                  id="rememberMe"
-                  name="rememberMe"
-                  type="checkbox"
+                  id='rememberMe'
+                  name='rememberMe'
+                  type='checkbox'
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                 />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor='rememberMe' className='ml-2 block text-sm text-gray-700'>
                   Remember me
                 </label>
               </div>
 
               <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 transition duration-150 hover:text-blue-500"
+                to='/forgot-password'
+                className='text-sm text-blue-600 transition duration-150 hover:text-blue-500'
               >
                 Forgot password?
               </Link>
@@ -261,13 +263,13 @@ const Login: React.FC = () => {
 
             {/* Submit Button */}
             <button
-              type="submit"
+              type='submit'
               disabled={loading || authLoading}
-              className="flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition duration-150 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className='flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition duration-150 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
             >
               {loading || authLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className='mr-2 h-5 w-5 animate-spin' />
                   Signing in...
                 </>
               ) : (
@@ -276,55 +278,55 @@ const Login: React.FC = () => {
             </button>
 
             {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+            <div className='relative'>
+              <div className='absolute inset-0 flex items-center'>
+                <div className='w-full border-t border-gray-300'></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+              <div className='relative flex justify-center text-sm'>
+                <span className='bg-white px-2 text-gray-500'>Or continue with</span>
               </div>
             </div>
 
             {/* OAuth Buttons */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className='grid grid-cols-3 gap-3'>
               <button
-                type="button"
+                type='button'
                 onClick={() => handleOAuthLogin('google')}
                 disabled={loading || authLoading}
-                className="inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className='inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
               >
-                <Chrome className="h-5 w-5" />
+                <Chrome className='h-5 w-5' />
               </button>
 
               <button
-                type="button"
+                type='button'
                 onClick={() => handleOAuthLogin('github')}
                 disabled={loading || authLoading}
-                className="inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className='inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
               >
-                <Github className="h-5 w-5" />
+                <Github className='h-5 w-5' />
               </button>
 
               <button
-                type="button"
+                type='button'
                 onClick={() => handleOAuthLogin('microsoft')}
                 disabled={loading || authLoading}
-                className="inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className='inline-flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-sm transition duration-150 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.4 11.4H2.6V2.6h8.8v8.8zm10 0h-8.8V2.6h8.8v8.8zM11.4 21.4H2.6v-8.8h8.8v8.8zm10 0h-8.8v-8.8h8.8v8.8z" />
+                <svg className='h-5 w-5' viewBox='0 0 24 24' fill='currentColor'>
+                  <path d='M11.4 11.4H2.6V2.6h8.8v8.8zm10 0h-8.8V2.6h8.8v8.8zM11.4 21.4H2.6v-8.8h8.8v8.8zm10 0h-8.8v-8.8h8.8v8.8z' />
                 </svg>
               </button>
             </div>
           </form>
 
           {/* Sign Up Link */}
-          <div className="mt-6 text-center">
-            <span className="text-sm text-gray-600">
+          <div className='mt-6 text-center'>
+            <span className='text-sm text-gray-600'>
               Don&apos;t have an account?{' '}
               <Link
-                to="/register"
-                className="font-medium text-blue-600 transition duration-150 hover:text-blue-500"
+                to='/register'
+                className='font-medium text-blue-600 transition duration-150 hover:text-blue-500'
               >
                 Sign up
               </Link>
@@ -333,13 +335,13 @@ const Login: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center text-xs text-gray-500">
+        <div className='text-center text-xs text-gray-500'>
           By signing in, you agree to our{' '}
-          <Link to="/terms" className="text-blue-600 hover:text-blue-500">
+          <Link to='/terms' className='text-blue-600 hover:text-blue-500'>
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
+          <Link to='/privacy' className='text-blue-600 hover:text-blue-500'>
             Privacy Policy
           </Link>
         </div>

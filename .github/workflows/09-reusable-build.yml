@@ -1,0 +1,133 @@
+# ====================================================================
+# 🏗️ Reusable - Build
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - 他ワークフローからの呼び出し
+#
+# 主な処理:
+#   1. 🏗️ ビルド処理
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F3D7️ Reusable - Build"
+'on':
+  workflow_call:
+    inputs:
+      build-mode:
+        description: ビルドモード (development|production|optimized)
+        required: false
+        type: string
+        default: production
+      node-version:
+        description: Node.jsのバージョン
+        required: false
+        type: string
+        default: '18'
+      upload-artifact:
+        description: ビルド成果物をアップロードするか
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      build-size:
+        description: ビルドサイズ
+        value: '${{ jobs.build.outputs.size }}'
+      build-time:
+        description: ビルド時間（秒）
+        value: '${{ jobs.build.outputs.time }}'
+jobs:
+  build:
+    name: "\U0001F3D7️ ビルド処理"
+    runs-on: ubuntu-latest
+    outputs:
+      size: '${{ steps.measure.outputs.size }}'
+      time: '${{ steps.measure.outputs.time }}'
+    steps:
+      - name: "\U0001F4E5 ソースコード取得"
+        uses: actions/checkout@v4
+      - name: "\U0001F527 Node.js ${{ inputs.node-version }}セットアップ"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ inputs.node-version }}'
+          cache: npm
+      - name: "\U0001F4E6 依存関係インストール"
+        run: npm ci
+      - name: "\U0001F3D7️ ビルド実行 (${{ inputs.build-mode }})"
+        id: build
+        run: |
+          START_TIME=$(date +%s)
+
+          # ビルドモードに応じてコマンドを選択
+          case "${{ inputs.build-mode }}" in
+            "development")
+              npm run build:dev || npm run build
+              ;;
+            "optimized")
+              npm run build:optimized || npm run build
+              ;;
+            *)
+              npm run build
+              ;;
+          esac
+
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "Build completed in ${BUILD_TIME} seconds"
+        env:
+          NODE_ENV: '${{ inputs.build-mode == ''development'' && ''development'' || ''production'' }}'
+      - name: "\U0001F4CF ビルドサイズ測定"
+        id: measure
+        run: |
+          # ビルドサイズを測定
+          if [ -d "dist" ]; then
+            SIZE=$(du -sh dist | cut -f1)
+            echo "size=${SIZE}" >> $GITHUB_OUTPUT
+            echo "Build size: ${SIZE}"
+            
+            # 詳細情報を表示
+            echo "=== Build Details ==="
+            find dist -name "*.js" -o -name "*.css" | head -10 | xargs ls -lh
+          else
+            echo "size=N/A" >> $GITHUB_OUTPUT
+          fi
+
+          # ビルド時間を記録
+          echo "time=${BUILD_TIME:-0}" >> $GITHUB_OUTPUT
+      - name: "\U0001F4CA バンドル分析"
+        run: |
+          echo "=== Bundle Analysis ==="
+          if [ -f "dist/stats.json" ]; then
+            echo "Bundle stats available"
+          fi
+
+          # JavaScriptファイルの合計サイズ
+          JS_SIZE=$(find dist -name "*.js" -exec du -ch {} + 2>/dev/null | grep total$ | cut -f1)
+          echo "Total JS size: ${JS_SIZE:-0}"
+
+          # CSSファイルの合計サイズ
+          CSS_SIZE=$(find dist -name "*.css" -exec du -ch {} + 2>/dev/null | grep total$ | cut -f1)
+          echo "Total CSS size: ${CSS_SIZE:-0}"
+        continue-on-error: true
+      - name: "\U0001F4BE ビルド成果物アップロード"
+        if: inputs.upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'build-${{ inputs.build-mode }}'
+          path: dist/
+          retention-days: 7
+      - name: ✅ ビルド品質チェック
+        run: "# 必須ファイルの存在確認\necho \"=== Build Quality Check ===\"\n\n# index.htmlの存在確認\nif [ ! -f \"dist/index.html\" ]; then\n  echo \"❌ Error: index.html not found\"\n  exit 1\nfi\n\n# アセットファイルの確認\nJS_COUNT=$(find dist -name \"*.js\" | wc -l)\nCSS_COUNT=$(find dist -name \"*.css\" | wc -l)\n\necho \"✅ index.html found\"\necho \"\U0001F4E6 JavaScript files: ${JS_COUNT}\"\necho \"\U0001F3A8 CSS files: ${CSS_COUNT}\"\n\nif [ \"$JS_COUNT\" -eq 0 ]; then\n  echo \"⚠️ Warning: No JavaScript files found\"\nfi\n"
+    timeout-minutes: 30
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

@@ -1,0 +1,283 @@
+# ====================================================================
+# 📊 監視・統合 - Performance Budget Enforcement
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. ✔️ 検証: Validate Performance Budget
+#   2. 🧪 テスト: Route-Specific Performance Tests
+#   3. 🧪 テスト: Mobile Performance Budget
+#   4. 📌 処理: Third-Party Performance Impact
+#   5. ⚡ パフォーマンス: Performance Regression Detection
+#   6. 🔧 セットアップ: Setup Continuous Monitoring
+#   7. ⚡ パフォーマンス: Create Performance Issue
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F4CA 監視・統合 - Performance Budget Enforcement"
+'on':
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: 0 6 * * *
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to test
+        required: false
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      strict_mode:
+        description: Enable strict enforcement
+        required: false
+        default: false
+        type: boolean
+env:
+  ENVIRONMENT: '${{ github.event.inputs.environment || ''staging'' }}'
+  STRICT_MODE: '${{ github.event.inputs.strict_mode || ''false'' }}'
+jobs:
+  budget-validation:
+    name: '✔️ 検証: Validate Performance Budget'
+    runs-on: ubuntu-latest
+    outputs:
+      has-violations: '${{ steps.budget-check.outputs.has-violations }}'
+      severity: '${{ steps.budget-check.outputs.severity }}'
+      report-url: '${{ steps.budget-check.outputs.report-url }}'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          GENERATE_SOURCEMAP: false
+      - name: Install performance testing tools
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm install -g bundlesize webpack-bundle-analyzer
+      - name: Start preview server
+        run: |
+          npm run preview &
+          sleep 10
+          curl -f http://localhost:3000 || (echo "Server failed to start" && exit 1)
+      - name: Run Lighthouse performance audit
+        run: "echo \"\U0001F50D Running Lighthouse performance audit...\"\nlhci autorun --config=.lighthouserc.js\n"
+      - name: Analyze bundle sizes
+        run: "echo \"\U0001F4E6 Analyzing bundle sizes...\"\nnode ./scripts/check-bundle-size.js --budget=./performance-budget.json\n"
+      - name: Run custom performance tests
+        run: |
+          echo "⚡ Running custom performance tests..."
+          node ./scripts/run-performance-tests.js
+      - name: Check performance budget compliance
+        id: budget-check
+        run: "echo \"\U0001F4B0 Checking performance budget compliance...\"\nnode ./scripts/check-performance-budget.js --environment=${{ env.ENVIRONMENT }} --strict=${{ env.STRICT_MODE }}\n\n# Set outputs based on results\nif [ -f \"./budget-violations.json\" ]; then\n  violations=$(cat ./budget-violations.json | jq '.violations | length')\n  severity=$(cat ./budget-violations.json | jq -r '.severity')\n  \n  if [ \"$violations\" -gt \"0\" ]; then\n    echo \"has-violations=true\" >> $GITHUB_OUTPUT\n    echo \"severity=$severity\" >> $GITHUB_OUTPUT\n  else\n    echo \"has-violations=false\" >> $GITHUB_OUTPUT\n    echo \"severity=none\" >> $GITHUB_OUTPUT\n  fi\nelse\n  echo \"has-violations=false\" >> $GITHUB_OUTPUT\n  echo \"severity=none\" >> $GITHUB_OUTPUT\nfi\n\necho \"report-url=https://performance-budget-report.example.com\" >> $GITHUB_OUTPUT\n"
+      - name: Generate detailed performance report
+        if: always()
+        run: "echo \"\U0001F4CA Generating detailed performance report...\"\nnode ./scripts/generate-performance-report.js --output=./performance-report.json\n"
+      - name: Upload performance artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: 'performance-budget-results-${{ github.run_id }}'
+          path: |
+            ./performance-report.json
+            ./budget-violations.json
+            ./lighthouse-results/
+            ./bundle-analysis/
+      - name: Comment PR with budget results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: "const fs = require('fs');\n\nlet comment = '## \U0001F4B0 Performance Budget Report\\n\\n';\n\n// Check for violations\nif (fs.existsSync('./budget-violations.json')) {\n  const violations = JSON.parse(fs.readFileSync('./budget-violations.json', 'utf8'));\n  \n  if (violations.violations.length > 0) {\n    comment += `### ⚠️ Budget Violations Found (${violations.severity})\\n\\n`;\n    comment += '| Metric | Current | Budget | Status |\\n';\n    comment += '|--------|---------|--------|---------|\\n';\n    \n    violations.violations.forEach(violation => {\n      const status = violation.severity === 'error' ? '❌' : '⚠️';\n      comment += `| ${violation.metric} | ${violation.current} | ${violation.limit} | ${status} |\\n`;\n    });\n    \n    comment += '\\n';\n  } else {\n    comment += '### ✅ All Performance Budgets Compliant\\n\\n';\n  }\n}\n\n// Add performance summary\nif (fs.existsSync('./performance-report.json')) {\n  const report = JSON.parse(fs.readFileSync('./performance-report.json', 'utf8'));\n  \n  comment += '### Performance Summary\\n';\n  comment += `- **Lighthouse Performance**: ${report.lighthouse.performance}/100\\n`;\n  comment += `- **Core Web Vitals**: LCP ${report.coreWebVitals.lcp}ms, FID ${report.coreWebVitals.fid}ms, CLS ${report.coreWebVitals.cls}\\n`;\n  comment += `- **Bundle Size**: ${report.bundleSize.total} (${report.bundleSize.change})\\n`;\n  comment += `- **Load Time**: ${report.loadTime}s\\n\\n`;\n  \n  if (report.recommendations.length > 0) {\n    comment += '### Recommendations\\n';\n    report.recommendations.slice(0, 5).forEach((rec, i) => {\n      comment += `${i + 1}. ${rec}\\n`;\n    });\n  }\n}\n\ncomment += '\\n[View detailed report](${{ steps.budget-check.outputs.report-url }})\\n';\n\ngithub.rest.issues.createComment({\n  issue_number: context.issue.number,\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  body: comment\n});\n"
+      - name: Fail build if budget violated in strict mode
+        if: steps.budget-check.outputs.has-violations == 'true' && steps.budget-check.outputs.severity == 'error' && env.STRICT_MODE == 'true'
+        run: |
+          echo "❌ Performance budget violated in strict mode!"
+          exit 1
+    timeout-minutes: 30
+  route-specific-tests:
+    name: "\U0001F9EA テスト: Route-Specific Performance Tests"
+    runs-on: ubuntu-latest
+    needs: budget-validation
+    if: always()
+    strategy:
+      matrix:
+        route:
+          - /
+          - /matrix
+          - /flashcards
+          - /mock-exam
+          - /visualizations
+          - /progress
+          - /glossary
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Start preview server
+        run: |
+          npm run preview &
+          sleep 10
+      - name: Test route performance
+        run: "echo \"\U0001F50D Testing route: ${{ matrix.route }}\"\nlighthouse \"http://localhost:3000/PMPLearningManagement/#${{ matrix.route }}\" \\\n  --only-categories=performance \\\n  --output=json \\\n  --output-path=\"./lighthouse-${{ matrix.route }}.json\" \\\n  --chrome-flags=\"--headless --no-sandbox\"\n"
+      - name: Check route-specific budgets
+        run: "echo \"\U0001F4B0 Checking route-specific budget for ${{ matrix.route }}\"\nnode ./scripts/check-route-budget.js --route=\"${{ matrix.route }}\" --report=\"./lighthouse-${{ matrix.route }}.json\"\n"
+      - name: Upload route results
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'route-performance-${{ matrix.route }}-${{ github.run_id }}'
+          path: './lighthouse-${{ matrix.route }}.json'
+    timeout-minutes: 30
+  mobile-performance-test:
+    name: "\U0001F9EA テスト: Mobile Performance Budget"
+    runs-on: ubuntu-latest
+    needs: budget-validation
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Start preview server
+        run: |
+          npm run preview &
+          sleep 10
+      - name: Run mobile Lighthouse audit
+        run: "echo \"\U0001F4F1 Running mobile performance audit...\"\nlighthouse \"http://localhost:3000/PMPLearningManagement/\" \\\n  --preset=mobile \\\n  --output=json \\\n  --output-path=\"./lighthouse-mobile.json\" \\\n  --chrome-flags=\"--headless --no-sandbox\"\n"
+      - name: Check mobile performance budgets
+        run: "echo \"\U0001F4B0 Checking mobile performance budgets...\"\nnode ./scripts/check-mobile-budget.js --report=\"./lighthouse-mobile.json\"\n"
+      - name: Upload mobile results
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'mobile-performance-${{ github.run_id }}'
+          path: ./lighthouse-mobile.json
+    timeout-minutes: 30
+  third-party-budget:
+    name: "\U0001F4CC 処理: Third-Party Performance Impact"
+    runs-on: ubuntu-latest
+    needs: budget-validation
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Analyze third-party impact
+        run: "echo \"\U0001F50D Analyzing third-party script impact...\"\nnode ./scripts/analyze-third-party-impact.js\n"
+      - name: Check third-party budgets
+        run: "echo \"\U0001F4B0 Checking third-party performance budgets...\"\nnode ./scripts/check-third-party-budget.js\n"
+    timeout-minutes: 30
+  performance-regression-check:
+    name: '⚡ パフォーマンス: Performance Regression Detection'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs:
+      - budget-validation
+      - route-specific-tests
+      - mobile-performance-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          pattern: '*-performance-*'
+          merge-multiple: true
+          path: ./performance-results/
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Check for performance regressions
+        run: "echo \"\U0001F4C9 Checking for performance regressions...\"\nnode ./scripts/detect-performance-regression.js --results=./performance-results/\n"
+      - name: Create regression report
+        if: always()
+        run: "echo \"\U0001F4CA Creating performance regression report...\"\nnode ./scripts/create-regression-report.js\n"
+    timeout-minutes: 30
+  budget-monitoring-setup:
+    name: "\U0001F527 セットアップ: Setup Continuous Monitoring"
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - budget-validation
+      - route-specific-tests
+      - mobile-performance-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup performance monitoring
+        run: "echo \"\U0001F4CA Setting up continuous performance monitoring...\"\n# This would integrate with monitoring services like:\n# - Lighthouse CI server\n# - SpeedCurve\n# - Calibre\n# - WebPageTest\necho \"Monitoring setup complete\"\n"
+      - name: Schedule performance reports
+        run: "echo \"\U0001F4C5 Scheduling performance reports...\"\n# This would set up scheduled reports and alerts\necho \"Scheduling complete\"\n"
+    timeout-minutes: 30
+  create-performance-issue:
+    name: '⚡ パフォーマンス: Create Performance Issue'
+    runs-on: ubuntu-latest
+    if: needs.budget-validation.outputs.has-violations == 'true' && needs.budget-validation.outputs.severity == 'error' && github.ref == 'refs/heads/main'
+    needs:
+      - budget-validation
+      - route-specific-tests
+      - mobile-performance-test
+      - performance-regression-check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create performance issue
+        uses: actions/github-script@v7
+        with:
+          script: "const title = '\U0001F6A8 Performance Budget Violations Detected';\nconst body = `## Performance Budget Violations\n\nPerformance budget violations have been detected in the main branch.\n\n### Details\n- **Severity**: ${{ needs.budget-validation.outputs.severity }}\n- **Environment**: ${{ env.ENVIRONMENT }}\n- **Date**: ${new Date().toISOString()}\n\n### Actions Required\n- [ ] Review performance report\n- [ ] Identify root cause\n- [ ] Implement optimizations\n- [ ] Verify fixes\n\n### Resources\n- [Performance Report](${{ needs.budget-validation.outputs.report-url }})\n- [Performance Budget Configuration](./performance-budget.json)\n- [Optimization Guide](./docs/performance-optimization.md)\n\n**Auto-generated by Performance Budget Workflow**\n`;\n\n// Check if issue already exists\nconst existingIssues = await github.rest.issues.listForRepo({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  labels: 'performance,budget-violation',\n  state: 'open'\n});\n\nif (existingIssues.data.length === 0) {\n  await github.rest.issues.create({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    title: title,\n    body: body,\n    labels: ['performance', 'budget-violation', 'priority-high'],\n    assignees: []\n  });\n  \n  console.log('Performance issue created');\n} else {\n  console.log('Performance issue already exists');\n}\n"
+    timeout-minutes: 30
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

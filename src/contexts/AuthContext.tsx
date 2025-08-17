@@ -377,7 +377,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: updates,
       })
 
-      if (error) {throw error}
+      if (error) {
+        throw error
+      }
 
       setUser(data.user)
       toast.success('Profile updated successfully')
@@ -419,7 +421,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshSession: async () => {
       try {
         const { data, error } = await supabase.auth.refreshSession()
-        if (error) {throw error}
+        if (error) {
+          throw error
+        }
         if (data.session) {
           setSession(data.session)
         }
@@ -460,8 +464,8 @@ export const withAuth = (Component, requiredRole = null) => {
 
     if (loading) {
       return (
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <div className='flex min-h-screen items-center justify-center'>
+          <div className='h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600'></div>
         </div>
       )
     }

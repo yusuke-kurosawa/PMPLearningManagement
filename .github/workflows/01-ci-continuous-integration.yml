@@ -1,162 +1,98 @@
-# ================================================================
-# Workflow: 01-ci-continuous-integration  
-# Purpose: 継続的インテグレーションパイプライン（コード品質・テスト・ビルド）
-#          Continuous Integration pipeline with code quality, testing, and build
-# Trigger: Push, Pull Request, Scheduled
-# Dependencies: Node.js, npm, testing frameworks
-# Author: Claude Code Actions
-# Version: 1.0.0
-# Last Updated: 2025-08-12
-# ================================================================
+# ====================================================================
+# 🔄 [CI] Continuous Integration / 継続的インテグレーション
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#
+# 主な処理:
+#   1. 🔧 セットアップ: ⚙️ [Setup] Environment & Validation
+#   2. ✅ 品質: ✨ [Quality] Code Analysis
+#   3. 🧪 テスト: 🧪 [Test] Comprehensive Testing
+#   4. 🏗️ ビルド: 🏗️ [Build] Application Build
+#   5. 📊 サマリー: 📋 [Summary] CI Results
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: "🔄 [CI] Continuous Integration / 継続的インテグレーション"
-
-# --------------------------------
-# 📋 Permissions / 権限設定
-# --------------------------------
+name: "\U0001F504 [CI] Continuous Integration / 継続的インテグレーション"
 permissions:
   contents: read
   pull-requests: write
   checks: write
-
-# --------------------------------
-# 🎯 Triggers / トリガー
-# --------------------------------
-on:
-  # プッシュ時 / On push
+'on':
   push:
-    branches: [main, develop, 'feature/**', 'hotfix/**']
+    branches:
+      - main
+      - develop
+      - feature/**
+      - hotfix/**
     paths-ignore:
       - '**.md'
-      - 'docs/**'
-      - '.github/workflows/**'
-  
-  # プルリクエスト時 / On pull requests
+      - docs/**
+      - .github/workflows/**
   pull_request:
-    branches: [main, develop]
-    types: [opened, synchronize, reopened]
-  
-  # 手動実行 / Manual execution
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
   workflow_dispatch:
     inputs:
       test_mode:
-        description: 'Test execution mode / テスト実行モード'
+        description: Test execution mode / テスト実行モード
         required: true
-        default: 'full'
+        default: full
         type: choice
         options:
-          - 'quick'
-          - 'full'
-          - 'coverage'
-          - 'mutation'
-      
+          - quick
+          - full
+          - coverage
+          - mutation
       skip_build:
-        description: 'Skip build step / ビルドスキップ'
+        description: Skip build step / ビルドスキップ
         required: false
         default: false
         type: boolean
-
-# --------------------------------
-# 🌍 Environment / 環境設定
-# --------------------------------
 env:
   NODE_VERSION: '18'
   CI: true
   COVERAGE_THRESHOLD: 80
-  BUILD_TIMEOUT: 600  # 10 minutes
-
-# --------------------------------
-# 🔧 Jobs / ジョブ定義
-# --------------------------------
+  BUILD_TIMEOUT: 600
 jobs:
   setup-and-validate:
-    # ================================
-    # Job: setup-and-validate
-    # Description: 環境セットアップと基本検証
-    #              Environment setup and basic validation
-    # Dependencies: Node.js, npm
-    # Timeout: 10分
-    # ================================
-    name: "⚙️ [Setup] Environment & Validation"
+    name: "\U0001F527 セットアップ: ⚙️ [Setup] Environment & Validation"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
     outputs:
-      cache-hit: ${{ steps.cache-deps.outputs.cache-hit }}
-      node-version: ${{ steps.setup-node.outputs.node-version }}
-      has-tests: ${{ steps.detect-tests.outputs.has-tests }}
-      package-changes: ${{ steps.detect-changes.outputs.package-changes }}
-    
+      cache-hit: '${{ steps.cache-deps.outputs.cache-hit }}'
+      node-version: '${{ steps.setup-node.outputs.node-version }}'
+      has-tests: '${{ steps.detect-tests.outputs.has-tests }}'
+      package-changes: '${{ steps.detect-changes.outputs.package-changes }}'
     steps:
-      # ================
-      # Repository Checkout
-      # 目的: ソースコード取得
-      # Purpose: Get source code
-      # ================
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # 変更検出のため
-          token: ${{ github.token }}
-      
-      # ================
-      # Node.js Environment Setup  
-      # 目的: Node.js環境のセットアップ
-      # Purpose: Setup Node.js environment
-      # ================
-      - name: "⚙️ Setup Node.js"
+          fetch-depth: 2
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         id: setup-node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
           registry-url: 'https://registry.npmjs.org'
-      
-      # ================
-      # Package Configuration Validation
-      # 目的: package.json設定の検証
-      # Purpose: Validate package.json configuration
-      # ================
-      - name: "📋 Validate Package Configuration"
-        run: |
-          echo "📋 Validating package.json configuration..."
-          
-          # package.json存在確認
-          if [[ ! -f "package.json" ]]; then
-            echo "❌ package.json not found"
-            exit 1
-          fi
-          
-          # 必須スクリプトの確認
-          required_scripts=("build" "test" "lint")
-          missing_scripts=()
-          
-          for script in "${required_scripts[@]}"; do
-            if ! jq -e ".scripts[\"$script\"]" package.json >/dev/null 2>&1; then
-              missing_scripts+=("$script")
-              echo "⚠️ Missing required script: $script"
-            else
-              echo "✅ Script found: $script"
-            fi
-          done
-          
-          # エンジンバージョンチェック
-          if jq -e '.engines.node' package.json >/dev/null 2>&1; then
-            engine_version=$(jq -r '.engines.node' package.json)
-            echo "📊 Node.js engine requirement: $engine_version"
-          else
-            echo "⚠️ No Node.js engine version specified"
-          fi
-          
-          echo "missing_scripts=${missing_scripts[*]}" >> $GITHUB_OUTPUT
+      - name: "\U0001F4CB Validate Package Configuration"
+        run: "echo \"\U0001F4CB Validating package.json configuration...\"\n\n# package.json存在確認\nif [[ ! -f \"package.json\" ]]; then\n  echo \"❌ package.json not found\"\n  exit 1\nfi\n\n# 必須スクリプトの確認\nrequired_scripts=(\"build\" \"test\" \"lint\")\nmissing_scripts=()\n\nfor script in \"${required_scripts[@]}\"; do\n  if ! jq -e \".scripts[\\\"$script\\\"]\" package.json >/dev/null 2>&1; then\n    missing_scripts+=(\"$script\")\n    echo \"⚠️ Missing required script: $script\"\n  else\n    echo \"✅ Script found: $script\"\n  fi\ndone\n\n# エンジンバージョンチェック\nif jq -e '.engines.node' package.json >/dev/null 2>&1; then\n  engine_version=$(jq -r '.engines.node' package.json)\n  echo \"\U0001F4CA Node.js engine requirement: $engine_version\"\nelse\n  echo \"⚠️ No Node.js engine version specified\"\nfi\n\necho \"missing_scripts=${missing_scripts[*]}\" >> $GITHUB_OUTPUT\n"
         id: validate-package
-      
-      # ================
-      # Dependency Cache
-      # 目的: 依存関係のキャッシュ管理
-      # Purpose: Manage dependency cache
-      # ================
-      - name: "💾 Cache Dependencies"
+      - name: "\U0001F4BE Cache Dependencies"
         id: cache-deps
         uses: actions/cache@v4
         with:
@@ -164,551 +100,173 @@ jobs:
             node_modules
             ~/.npm
             ~/.cache
-          key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          key: 'deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles(''package-lock.json'') }}'
           restore-keys: |
             deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-
             deps-${{ runner.os }}-
-      
-      # ================
-      # Install Dependencies
-      # 目的: 依存関係のインストール
-      # Purpose: Install dependencies
-      # ================
-      - name: "📦 Install Dependencies"
+      - name: "\U0001F4E6 Install Dependencies"
         if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          echo "📦 Installing dependencies..."
-          
-          # package-lock.json存在確認
-          if [[ -f "package-lock.json" ]]; then
-            echo "🔒 Using npm ci for reproducible builds"
-            npm ci --prefer-offline --no-audit
-          else
-            echo "📦 Using npm install (no lockfile found)"
-            npm install --prefer-offline --no-audit
-          fi
-          
-          # インストール結果の確認
-          echo "📊 Dependency installation summary:"
-          npm list --depth=0 || true
+        run: "echo \"\U0001F4E6 Installing dependencies...\"\n\n# package-lock.json存在確認\nif [[ -f \"package-lock.json\" ]]; then\n  echo \"\U0001F512 Using npm ci for reproducible builds\"\n  npm ci --prefer-offline --no-audit\nelse\n  echo \"\U0001F4E6 Using npm install (no lockfile found)\"\n  npm install --prefer-offline --no-audit\nfi\n\n# インストール結果の確認\necho \"\U0001F4CA Dependency installation summary:\"\nnpm list --depth=0 || true\n"
         id: install-deps
-      
-      # ================
-      # Project Structure Detection
-      # 目的: プロジェクト構造の検出
-      # Purpose: Detect project structure
-      # ================
-      - name: "🔍 Detect Project Structure"
+      - name: "\U0001F50D Detect Project Structure"
         id: detect-tests
-        run: |
-          echo "🔍 Detecting project structure and capabilities..."
-          
-          # テストファイルの検出
-          test_files=$(find . -name "*.test.js" -o -name "*.test.ts" -o -name "*.spec.js" -o -name "*.spec.ts" 2>/dev/null | wc -l)
-          has_vitest=$(test -f "vitest.config.ts" -o -f "vitest.config.js" && echo "true" || echo "false")
-          has_jest=$(jq -e '.devDependencies.jest // .dependencies.jest' package.json >/dev/null 2>&1 && echo "true" || echo "false")
-          has_playwright=$(test -f "playwright.config.ts" && echo "true" || echo "false")
-          
-          echo "📊 Test configuration detected:"
-          echo "   Test files: $test_files"
-          echo "   Vitest: $has_vitest"
-          echo "   Jest: $has_jest"
-          echo "   Playwright: $has_playwright"
-          
-          has_tests=$([ "$test_files" -gt 0 ] && echo "true" || echo "false")
-          echo "has-tests=$has_tests" >> $GITHUB_OUTPUT
-          echo "vitest=$has_vitest" >> $GITHUB_OUTPUT
-          echo "jest=$has_jest" >> $GITHUB_OUTPUT
-          echo "playwright=$has_playwright" >> $GITHUB_OUTPUT
-          
-          # ビルド設定の検出
-          has_vite=$(test -f "vite.config.ts" -o -f "vite.config.js" -o -f "vite.config.mjs" && echo "true" || echo "false")
-          has_webpack=$(test -f "webpack.config.js" && echo "true" || echo "false")
-          
-          echo "📊 Build configuration:"
-          echo "   Vite: $has_vite"
-          echo "   Webpack: $has_webpack"
-          
-          echo "vite=$has_vite" >> $GITHUB_OUTPUT
-          echo "webpack=$has_webpack" >> $GITHUB_OUTPUT
-      
-      # ================
-      # Change Detection
-      # 目的: 変更ファイルの検出
-      # Purpose: Detect file changes
-      # ================
-      - name: "📊 Detect Changes"
+        run: "echo \"\U0001F50D Detecting project structure and capabilities...\"\n\n# テストファイルの検出\ntest_files=$(find . -name \"*.test.js\" -o -name \"*.test.ts\" -o -name \"*.spec.js\" -o -name \"*.spec.ts\" 2>/dev/null | wc -l)\nhas_vitest=$(test -f \"vitest.config.ts\" -o -f \"vitest.config.js\" && echo \"true\" || echo \"false\")\nhas_jest=$(jq -e '.devDependencies.jest // .dependencies.jest' package.json >/dev/null 2>&1 && echo \"true\" || echo \"false\")\nhas_playwright=$(test -f \"playwright.config.ts\" && echo \"true\" || echo \"false\")\n\necho \"\U0001F4CA Test configuration detected:\"\necho \"   Test files: $test_files\"\necho \"   Vitest: $has_vitest\"\necho \"   Jest: $has_jest\"\necho \"   Playwright: $has_playwright\"\n\nhas_tests=$([ \"$test_files\" -gt 0 ] && echo \"true\" || echo \"false\")\necho \"has-tests=$has_tests\" >> $GITHUB_OUTPUT\necho \"vitest=$has_vitest\" >> $GITHUB_OUTPUT\necho \"jest=$has_jest\" >> $GITHUB_OUTPUT\necho \"playwright=$has_playwright\" >> $GITHUB_OUTPUT\n\n# ビルド設定の検出\nhas_vite=$(test -f \"vite.config.ts\" -o -f \"vite.config.js\" -o -f \"vite.config.mjs\" && echo \"true\" || echo \"false\")\nhas_webpack=$(test -f \"webpack.config.js\" && echo \"true\" || echo \"false\")\n\necho \"\U0001F4CA Build configuration:\"\necho \"   Vite: $has_vite\"\necho \"   Webpack: $has_webpack\"\n\necho \"vite=$has_vite\" >> $GITHUB_OUTPUT\necho \"webpack=$has_webpack\" >> $GITHUB_OUTPUT\n"
+      - name: "\U0001F4CA Detect Changes"
         id: detect-changes
-        run: |
-          echo "📊 Detecting file changes..."
-          
-          # package.jsonの変更確認
-          package_changes="false"
-          if git diff HEAD~1 --name-only | grep -E "(package\.json|package-lock\.json)" >/dev/null 2>&1; then
-            package_changes="true"
-            echo "📦 Package configuration changes detected"
-          fi
-          
-          # ソースコードの変更確認
-          src_changes="false"
-          if git diff HEAD~1 --name-only | grep -E "^src/" >/dev/null 2>&1; then
-            src_changes="true"
-            echo "💻 Source code changes detected"
-          fi
-          
-          echo "package-changes=$package_changes" >> $GITHUB_OUTPUT
-          echo "src-changes=$src_changes" >> $GITHUB_OUTPUT
-
+        run: "echo \"\U0001F4CA Detecting file changes...\"\n\n# package.jsonの変更確認\npackage_changes=\"false\"\nif git diff HEAD~1 --name-only | grep -E \"(package\\.json|package-lock\\.json)\" >/dev/null 2>&1; then\n  package_changes=\"true\"\n  echo \"\U0001F4E6 Package configuration changes detected\"\nfi\n\n# ソースコードの変更確認\nsrc_changes=\"false\"\nif git diff HEAD~1 --name-only | grep -E \"^src/\" >/dev/null 2>&1; then\n  src_changes=\"true\"\n  echo \"\U0001F4BB Source code changes detected\"\nfi\n\necho \"package-changes=$package_changes\" >> $GITHUB_OUTPUT\necho \"src-changes=$src_changes\" >> $GITHUB_OUTPUT\n"
   code-quality:
-    # ================================
-    # Job: code-quality
-    # Description: コード品質チェック（リント・フォーマット）
-    #              Code quality check (lint, format)
-    # Dependencies: setup-and-validate
-    # Timeout: 15分
-    # ================================
-    name: "✨ [Quality] Code Analysis"
+    name: '✅ 品質: ✨ [Quality] Code Analysis'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: setup-and-validate
-    
     steps:
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: "📦 Restore Dependencies"
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Restore Dependencies"
         uses: actions/cache@v4
         with:
           path: |
             node_modules
             ~/.npm
-          key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          key: 'deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles(''package-lock.json'') }}'
           restore-keys: |
             deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-
-      
-      - name: "📦 Install Dependencies"
+      - name: "\U0001F4E6 Install Dependencies"
         if: needs.setup-and-validate.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit
-      
-      # ================
-      # ESLint Code Analysis
-      # 目的: ESLint によるコード分析
-      # Purpose: Code analysis with ESLint
-      # ================
-      - name: "🔍 ESLint Analysis"
-        run: |
-          echo "🔍 Running ESLint analysis..."
-          
-          # ESLint実行（エラーがあっても継続）
-          npm run lint -- --format json --output-file eslint-results.json || true
-          npm run lint || true
-          
-          # 結果の分析
-          if [[ -f "eslint-results.json" ]]; then
-            error_count=$(jq '[.[] | .errorCount] | add // 0' eslint-results.json)
-            warning_count=$(jq '[.[] | .warningCount] | add // 0' eslint-results.json)
-            fixable_count=$(jq '[.[] | .fixableErrorCount + .fixableWarningCount] | add // 0' eslint-results.json)
-            
-            echo "📊 ESLint Results:"
-            echo "   Errors: $error_count"
-            echo "   Warnings: $warning_count"  
-            echo "   Auto-fixable: $fixable_count"
-            
-            # 結果をアーティファクト用に保存
-            cat > code-quality-summary.json << EOF
-          {
-            "eslint": {
-              "errors": $error_count,
-              "warnings": $warning_count,
-              "fixable": $fixable_count
-            }
-          }
-          EOF
-          
-            # エラーが多すぎる場合は失敗
-            if [[ $error_count -gt 50 ]]; then
-              echo "❌ Too many ESLint errors ($error_count > 50)"
-              exit 1
-            fi
-          else
-            echo "⚠️ ESLint results not generated"
-          fi
+      - name: "\U0001F50D ESLint Analysis"
+        run: "echo \"\U0001F50D Running ESLint analysis...\"\n\n# ESLint実行（エラーがあっても継続）\nnpm run lint -- --format json --output-file eslint-results.json || true\nnpm run lint || true\n\n# 結果の分析\nif [[ -f \"eslint-results.json\" ]]; then\n  error_count=$(jq '[.[] | .errorCount] | add // 0' eslint-results.json)\n  warning_count=$(jq '[.[] | .warningCount] | add // 0' eslint-results.json)\n  fixable_count=$(jq '[.[] | .fixableErrorCount + .fixableWarningCount] | add // 0' eslint-results.json)\n  \n  echo \"\U0001F4CA ESLint Results:\"\n  echo \"   Errors: $error_count\"\n  echo \"   Warnings: $warning_count\"  \n  echo \"   Auto-fixable: $fixable_count\"\n  \n  # 結果をアーティファクト用に保存\n  cat > code-quality-summary.json << EOF\n{\n  \"eslint\": {\n    \"errors\": $error_count,\n    \"warnings\": $warning_count,\n    \"fixable\": $fixable_count\n  }\n}\nEOF\n\n  # エラーが多すぎる場合は失敗\n  if [[ $error_count -gt 50 ]]; then\n    echo \"❌ Too many ESLint errors ($error_count > 50)\"\n    exit 1\n  fi\nelse\n  echo \"⚠️ ESLint results not generated\"\nfi\n"
         id: eslint
-      
-      # ================
-      # TypeScript Type Check
-      # 目的: TypeScript 型チェック
-      # Purpose: TypeScript type checking
-      # ================
-      - name: "🔍 TypeScript Type Check"
-        run: |
-          echo "🔍 Running TypeScript type check..."
-          
-          # TypeScript設定の確認
-          if [[ -f "tsconfig.json" ]]; then
-            echo "📋 TypeScript configuration found"
-            
-            # 型チェック実行
-            npx tsc --noEmit --pretty || {
-              echo "❌ TypeScript type check failed"
-              echo "typescript_errors=true" >> $GITHUB_OUTPUT
-            }
-            
-            echo "✅ TypeScript type check completed"
-          else
-            echo "ℹ️ No TypeScript configuration found"
-          fi
+      - name: "\U0001F50D TypeScript Type Check"
+        run: "echo \"\U0001F50D Running TypeScript type check...\"\n\n# TypeScript設定の確認\nif [[ -f \"tsconfig.json\" ]]; then\n  echo \"\U0001F4CB TypeScript configuration found\"\n  \n  # 型チェック実行\n  npx tsc --noEmit --pretty || {\n    echo \"❌ TypeScript type check failed\"\n    echo \"typescript_errors=true\" >> $GITHUB_OUTPUT\n  }\n  \n  echo \"✅ TypeScript type check completed\"\nelse\n  echo \"ℹ️ No TypeScript configuration found\"\nfi\n"
         id: typescript
-      
-      # ================
-      # Code Formatting Check
-      # 目的: コードフォーマットの確認
-      # Purpose: Code formatting check
-      # ================
-      - name: "🎨 Code Formatting Check"
-        run: |
-          echo "🎨 Checking code formatting..."
-          
-          # Prettier実行（チェックモード）
-          if jq -e '.devDependencies.prettier // .dependencies.prettier' package.json >/dev/null 2>&1; then
-            echo "🎨 Running Prettier format check..."
-            npx prettier --check src/ || {
-              echo "❌ Code formatting issues found"
-              echo "Run 'npm run format' to fix formatting"
-              echo "format_issues=true" >> $GITHUB_OUTPUT
-            }
-          else
-            echo "ℹ️ Prettier not configured"
-          fi
-          
-          echo "✅ Format check completed"
+      - name: "\U0001F3A8 Code Formatting Check"
+        run: "echo \"\U0001F3A8 Checking code formatting...\"\n\n# Prettier実行（チェックモード）\nif jq -e '.devDependencies.prettier // .dependencies.prettier' package.json >/dev/null 2>&1; then\n  echo \"\U0001F3A8 Running Prettier format check...\"\n  npx prettier --check src/ || {\n    echo \"❌ Code formatting issues found\"\n    echo \"Run 'npm run format' to fix formatting\"\n    echo \"format_issues=true\" >> $GITHUB_OUTPUT\n  }\nelse\n  echo \"ℹ️ Prettier not configured\"\nfi\n\necho \"✅ Format check completed\"\n"
         id: formatting
-
   test-execution:
-    # ================================
-    # Job: test-execution  
-    # Description: テスト実行（単体・統合・E2E）
-    #              Test execution (unit, integration, E2E)
-    # Dependencies: setup-and-validate
-    # Timeout: 25分
-    # ================================
-    name: "🧪 [Test] Comprehensive Testing"
+    name: "\U0001F9EA テスト: \U0001F9EA [Test] Comprehensive Testing"
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: setup-and-validate
     if: needs.setup-and-validate.outputs.has-tests == 'true'
-    
     strategy:
       fail-fast: false
       matrix:
-        test-type: [unit, integration]
-    
+        test-type:
+          - unit
+          - integration
     steps:
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: "📦 Restore Dependencies"
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Restore Dependencies"
         uses: actions/cache@v4
         with:
           path: |
             node_modules
             ~/.npm
-          key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
-      
-      - name: "📦 Install Dependencies"
+          key: 'deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles(''package-lock.json'') }}'
+      - name: "\U0001F4E6 Install Dependencies"
         if: needs.setup-and-validate.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit
-      
-      # ================
-      # Unit Tests Execution
-      # 目的: 単体テストの実行
-      # Purpose: Execute unit tests
-      # ================
-      - name: "🧪 Unit Tests"
+      - name: "\U0001F9EA Unit Tests"
         if: matrix.test-type == 'unit'
-        run: |
-          echo "🧪 Running unit tests..."
-          
-          # テスト環境設定
-          export NODE_ENV=test
-          
-          # Vitest実行
-          if [[ "${{ needs.setup-and-validate.outputs.vitest }}" == "true" ]]; then
-            echo "🧪 Running tests with Vitest..."
-            npm run test -- --reporter=verbose --reporter=json --outputFile=test-results.json || true
-          # Jest実行  
-          elif [[ "${{ needs.setup-and-validate.outputs.jest }}" == "true" ]]; then
-            echo "🧪 Running tests with Jest..."
-            npm run test -- --json --outputFile=test-results.json || true
-          else
-            echo "🧪 Running generic test command..."
-            npm run test || true
-          fi
-          
-          # テスト結果の分析
-          if [[ -f "test-results.json" ]]; then
-            # Vitest結果の処理
-            if jq -e '.testResults' test-results.json >/dev/null 2>&1; then
-              passed=$(jq -r '.numPassedTests // 0' test-results.json)
-              failed=$(jq -r '.numFailedTests // 0' test-results.json)
-              total=$(jq -r '.numTotalTests // 0' test-results.json)
-            # Jest結果の処理
-            else
-              passed=$(jq -r '.success // false' test-results.json)
-              failed=0
-              total=1
-            fi
-            
-            echo "📊 Test Results:"
-            echo "   Passed: $passed"
-            echo "   Failed: $failed" 
-            echo "   Total: $total"
-            
-            # 失敗が多すぎる場合
-            if [[ $failed -gt 0 ]]; then
-              echo "❌ Some tests failed ($failed failures)"
-              exit 1
-            fi
-          else
-            echo "⚠️ Test results not found - checking exit code only"
-          fi
+        run: "echo \"\U0001F9EA Running unit tests...\"\n\n# テスト環境設定\nexport NODE_ENV=test\n\n# Vitest実行\nif [[ \"${{ needs.setup-and-validate.outputs.vitest }}\" == \"true\" ]]; then\n  echo \"\U0001F9EA Running tests with Vitest...\"\n  npm run test -- --reporter=verbose --reporter=json --outputFile=test-results.json || true\n# Jest実行  \nelif [[ \"${{ needs.setup-and-validate.outputs.jest }}\" == \"true\" ]]; then\n  echo \"\U0001F9EA Running tests with Jest...\"\n  npm run test -- --json --outputFile=test-results.json || true\nelse\n  echo \"\U0001F9EA Running generic test command...\"\n  npm run test || true\nfi\n\n# テスト結果の分析\nif [[ -f \"test-results.json\" ]]; then\n  # Vitest結果の処理\n  if jq -e '.testResults' test-results.json >/dev/null 2>&1; then\n    passed=$(jq -r '.numPassedTests // 0' test-results.json)\n    failed=$(jq -r '.numFailedTests // 0' test-results.json)\n    total=$(jq -r '.numTotalTests // 0' test-results.json)\n  # Jest結果の処理\n  else\n    passed=$(jq -r '.success // false' test-results.json)\n    failed=0\n    total=1\n  fi\n  \n  echo \"\U0001F4CA Test Results:\"\n  echo \"   Passed: $passed\"\n  echo \"   Failed: $failed\" \n  echo \"   Total: $total\"\n  \n  # 失敗が多すぎる場合\n  if [[ $failed -gt 0 ]]; then\n    echo \"❌ Some tests failed ($failed failures)\"\n    exit 1\n  fi\nelse\n  echo \"⚠️ Test results not found - checking exit code only\"\nfi\n"
         id: unit-tests
-      
-      # ================
-      # Integration Tests
-      # 目的: 統合テストの実行
-      # Purpose: Execute integration tests
-      # ================
-      - name: "🔗 Integration Tests"
+      - name: "\U0001F517 Integration Tests"
         if: matrix.test-type == 'integration'
-        run: |
-          echo "🔗 Running integration tests..."
-          
-          # 統合テスト用の環境設定
-          export NODE_ENV=test
-          export CI=true
-          
-          # 統合テスト実行
-          if npm run test:integration 2>/dev/null; then
-            echo "✅ Integration tests passed"
-          else
-            echo "ℹ️ No integration test script found - running generic tests"
-            npm run test || true
-          fi
+        run: "echo \"\U0001F517 Running integration tests...\"\n\n# 統合テスト用の環境設定\nexport NODE_ENV=test\nexport CI=true\n\n# 統合テスト実行\nif npm run test:integration 2>/dev/null; then\n  echo \"✅ Integration tests passed\"\nelse\n  echo \"ℹ️ No integration test script found - running generic tests\"\n  npm run test || true\nfi\n"
         id: integration-tests
-
   build-validation:
-    # ================================
-    # Job: build-validation
-    # Description: ビルドプロセスの検証
-    #              Build process validation
-    # Dependencies: setup-and-validate, code-quality
-    # Timeout: 15分
-    # ================================
-    name: "🏗️ [Build] Application Build"
+    name: "\U0001F3D7️ ビルド: \U0001F3D7️ [Build] Application Build"
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [setup-and-validate, code-quality]
+    needs:
+      - setup-and-validate
+      - code-quality
     if: github.event.inputs.skip_build != 'true'
-    
     steps:
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: "📦 Restore Dependencies"
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Restore Dependencies"
         uses: actions/cache@v4
         with:
           path: |
             node_modules
             ~/.npm
-          key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
-      
-      - name: "📦 Install Dependencies"
+          key: 'deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles(''package-lock.json'') }}'
+      - name: "\U0001F4E6 Install Dependencies"
         if: needs.setup-and-validate.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit
-      
-      # ================
-      # Production Build
-      # 目的: プロダクションビルドの実行
-      # Purpose: Execute production build
-      # ================
-      - name: "🏗️ Production Build"
-        run: |
-          echo "🏗️ Building application for production..."
-          
-          # ビルド実行
-          NODE_ENV=production npm run build
-          
-          # ビルド結果の確認
-          if [[ -d "dist" ]]; then
-            echo "📊 Build output analysis:"
-            ls -la dist/
-            
-            # ファイルサイズ分析
-            total_size=$(du -sh dist/ | cut -f1)
-            echo "📦 Total build size: $total_size"
-            
-            # 大きなファイルの特定
-            echo "📋 Largest files:"
-            find dist/ -type f -size +100k -exec ls -lh {} \; | head -5
-            
-            # 必要なファイルの存在確認
-            if [[ -f "dist/index.html" ]]; then
-              echo "✅ index.html found"
-            else
-              echo "⚠️ index.html not found in build output"
-            fi
-          else
-            echo "❌ Build directory not found"
-            exit 1
-          fi
+      - name: "\U0001F3D7️ Production Build"
+        run: "echo \"\U0001F3D7️ Building application for production...\"\n\n# ビルド実行\nNODE_ENV=production npm run build\n\n# ビルド結果の確認\nif [[ -d \"dist\" ]]; then\n  echo \"\U0001F4CA Build output analysis:\"\n  ls -la dist/\n  \n  # ファイルサイズ分析\n  total_size=$(du -sh dist/ | cut -f1)\n  echo \"\U0001F4E6 Total build size: $total_size\"\n  \n  # 大きなファイルの特定\n  echo \"\U0001F4CB Largest files:\"\n  find dist/ -type f -size +100k -exec ls -lh {} \\; | head -5\n  \n  # 必要なファイルの存在確認\n  if [[ -f \"dist/index.html\" ]]; then\n    echo \"✅ index.html found\"\n  else\n    echo \"⚠️ index.html not found in build output\"\n  fi\nelse\n  echo \"❌ Build directory not found\"\n  exit 1\nfi\n"
         id: build
-      
-      # ================
-      # Build Artifact Upload
-      # 目的: ビルドアーティファクトのアップロード
-      # Purpose: Upload build artifacts
-      # ================
-      - name: "📦 Upload Build Artifacts"
+      - name: "\U0001F4E6 Upload Build Artifacts"
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          name: 'build-artifacts-${{ github.run_id }}'
           path: |
             dist/
             build/
           retention-days: 7
-
-  # ================================
-  # Job: ci-summary
-  # Description: CI実行結果のサマリー
-  #              CI execution results summary
-  # Dependencies: All CI jobs
-  # Timeout: 10分
-  # ================================
   ci-summary:
-    name: "📋 [Summary] CI Results"
+    name: "\U0001F4CA サマリー: \U0001F4CB [Summary] CI Results"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [setup-and-validate, code-quality, test-execution, build-validation]
+    needs:
+      - setup-and-validate
+      - code-quality
+      - test-execution
+      - build-validation
     if: always()
-    
     steps:
-      - name: "📋 Generate CI Summary"
-        run: |
-          echo "📋 Generating CI execution summary..."
-          
-          cat > ci-summary.md << EOF
-          # 🔄 Continuous Integration Summary
-          
-          ## 📊 Execution Overview / 実行概要
-          
-          - **Trigger**: ${{ github.event_name }}
-          - **Branch**: ${{ github.ref_name }}
-          - **Commit**: ${{ github.sha }}
-          - **Actor**: ${{ github.actor }}
-          - **Execution Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          
-          ## 🎯 Job Results / ジョブ結果
-          
-          | Job | Status | Duration |
-          |-----|--------|----------|
-          | **Setup & Validation** | ${{ needs.setup-and-validate.result }} | ⏱️ |
-          | **Code Quality** | ${{ needs.code-quality.result }} | ⏱️ |
-          | **Test Execution** | ${{ needs.test-execution.result }} | ⏱️ |
-          | **Build Validation** | ${{ needs.build-validation.result }} | ⏱️ |
-          
-          ## 📈 Quality Metrics / 品質指標
-          
-          - **Dependencies Cache**: ${{ needs.setup-and-validate.outputs.cache-hit == 'true' && '✅ Hit' || '❌ Miss' }}
-          - **Test Coverage**: Available in artifacts
-          - **Build Size**: Available in build job logs
-          - **Code Quality**: See ESLint results
-          
-          ## 🎯 Next Steps / 次のステップ
-          
-          EOF
-          
-          # 結果に応じた推奨アクション
-          if [[ "${{ needs.code-quality.result }}" == "failure" ]]; then
-            echo "1. **Fix Code Quality Issues**: Review ESLint errors and warnings" >> ci-summary.md
-          fi
-          
-          if [[ "${{ needs.test-execution.result }}" == "failure" ]]; then
-            echo "2. **Fix Test Failures**: Review failed test cases" >> ci-summary.md
-          fi
-          
-          if [[ "${{ needs.build-validation.result }}" == "failure" ]]; then
-            echo "3. **Fix Build Issues**: Review build errors and configuration" >> ci-summary.md
-          fi
-          
-          # すべて成功の場合
-          if [[ "${{ needs.setup-and-validate.result }}" == "success" && "${{ needs.code-quality.result }}" == "success" && "${{ needs.test-execution.result }}" == "success" && "${{ needs.build-validation.result }}" == "success" ]]; then
-            echo "✅ **All checks passed** - Ready for deployment!" >> ci-summary.md
-          fi
-          
-          echo "" >> ci-summary.md
-          echo "---" >> ci-summary.md
-          echo "*Generated by Continuous Integration Pipeline*" >> ci-summary.md
-          
-          echo "✅ CI summary generated"
-      
-      # ================
-      # Post CI Summary Comment
-      # 目的: PRにCIサマリーコメント投稿
-      # Purpose: Post CI summary comment to PR
-      # ================
-      - name: "💬 Post CI Summary"
+      - name: "\U0001F4CB Generate CI Summary"
+        run: "echo \"\U0001F4CB Generating CI execution summary...\"\n\ncat > ci-summary.md << EOF\n# \U0001F504 Continuous Integration Summary\n\n## \U0001F4CA Execution Overview / 実行概要\n\n- **Trigger**: ${{ github.event_name }}\n- **Branch**: ${{ github.ref_name }}\n- **Commit**: ${{ github.sha }}\n- **Actor**: ${{ github.actor }}\n- **Execution Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')\n\n## \U0001F3AF Job Results / ジョブ結果\n\n| Job | Status | Duration |\n|-----|--------|----------|\n| **Setup & Validation** | ${{ needs.setup-and-validate.result }} | ⏱️ |\n| **Code Quality** | ${{ needs.code-quality.result }} | ⏱️ |\n| **Test Execution** | ${{ needs.test-execution.result }} | ⏱️ |\n| **Build Validation** | ${{ needs.build-validation.result }} | ⏱️ |\n\n## \U0001F4C8 Quality Metrics / 品質指標\n\n- **Dependencies Cache**: ${{ needs.setup-and-validate.outputs.cache-hit == 'true' && '✅ Hit' || '❌ Miss' }}\n- **Test Coverage**: Available in artifacts\n- **Build Size**: Available in build job logs\n- **Code Quality**: See ESLint results\n\n## \U0001F3AF Next Steps / 次のステップ\n\nEOF\n\n# 結果に応じた推奨アクション\nif [[ \"${{ needs.code-quality.result }}\" == \"failure\" ]]; then\n  echo \"1. **Fix Code Quality Issues**: Review ESLint errors and warnings\" >> ci-summary.md\nfi\n\nif [[ \"${{ needs.test-execution.result }}\" == \"failure\" ]]; then\n  echo \"2. **Fix Test Failures**: Review failed test cases\" >> ci-summary.md\nfi\n\nif [[ \"${{ needs.build-validation.result }}\" == \"failure\" ]]; then\n  echo \"3. **Fix Build Issues**: Review build errors and configuration\" >> ci-summary.md\nfi\n\n# すべて成功の場合\nif [[ \"${{ needs.setup-and-validate.result }}\" == \"success\" && \"${{ needs.code-quality.result }}\" == \"success\" && \"${{ needs.test-execution.result }}\" == \"success\" && \"${{ needs.build-validation.result }}\" == \"success\" ]]; then\n  echo \"✅ **All checks passed** - Ready for deployment!\" >> ci-summary.md\nfi\n\necho \"\" >> ci-summary.md\necho \"---\" >> ci-summary.md\necho \"*Generated by Continuous Integration Pipeline*\" >> ci-summary.md\n\necho \"✅ CI summary generated\"\n"
+      - name: "\U0001F4AC Post CI Summary"
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          github-token: ${{ github.token }}
+          github-token: '${{ github.token }}'
           script: |
             const fs = require('fs');
             const summary = fs.readFileSync('ci-summary.md', 'utf8');
-            
+
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: summary
             });
-      
-      # ================
-      # Upload CI Results
-      # 目的: CI結果のアーティファクト保存
-      # Purpose: Save CI results as artifacts
-      # ================
-      - name: "📦 Upload CI Results"
+      - name: "\U0001F4E6 Upload CI Results"
         uses: actions/upload-artifact@v4
         with:
-          name: ci-results-${{ github.run_id }}
+          name: 'ci-results-${{ github.run_id }}'
           path: |
             ci-summary.md
             eslint-results.json
             test-results.json
             code-quality-summary.json
           retention-days: 30
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

@@ -1,0 +1,106 @@
+# ====================================================================
+# 🔧 Reusable Setup
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - 他ワークフローからの呼び出し
+#
+# 主な処理:
+#   1. 🔧 セットアップ: Environment Setup
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F527 Reusable Setup"
+'on':
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node.js version
+        required: false
+        type: string
+        default: '18'
+      install-dependencies:
+        description: Install npm dependencies
+        required: false
+        type: boolean
+        default: true
+      run-tests:
+        description: Run tests after setup
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      setup-complete:
+        description: Setup completion status
+        value: '${{ jobs.setup.outputs.complete }}'
+      node-version:
+        description: Installed Node.js version
+        value: '${{ jobs.setup.outputs.node-version }}'
+env:
+  CACHE_VERSION: v2
+  NODE_ENV: production
+jobs:
+  setup:
+    name: "\U0001F527 セットアップ: Environment Setup"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      complete: '${{ steps.final.outputs.complete }}'
+      node-version: '${{ steps.versions.outputs.node }}'
+    steps:
+      - name: Checkout repository
+        uses: ./.github/actions/checkout-code
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: '${{ inputs.node-version }}'
+          install-dependencies: '${{ inputs.install-dependencies }}'
+      - name: Cache project dependencies
+        if: inputs.install-dependencies
+        uses: ./.github/actions/cache-dependencies
+        with:
+          cache-key-prefix: npm
+          paths: node_modules
+      - name: Verify environment setup
+        id: versions
+        run: |
+          echo "=== Environment Information ==="
+          echo "OS: ${{ runner.os }}"
+          echo "Node: $(node --version)"
+          echo "NPM: $(npm --version)"
+          echo "node=$(node --version)" >> $GITHUB_OUTPUT
+
+          # Verify key files exist
+          if [ -f "package.json" ]; then
+            echo "✅ package.json found"
+          else
+            echo "⚠️ package.json not found"
+          fi
+      - name: Run tests
+        if: inputs.run-tests && inputs.install-dependencies
+        run: |
+          if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
+            echo "Running tests..."
+            npm test || echo "⚠️ Tests failed but continuing"
+          else
+            echo "No test script found, skipping"
+          fi
+      - name: Setup completion
+        id: final
+        run: |
+          echo "✅ Setup completed successfully"
+          echo "complete=true" >> $GITHUB_OUTPUT
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

@@ -1,0 +1,178 @@
+# ====================================================================
+# 📦 CI/CD - Lighthouse CI   PWA Performance Monitoring
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. 📋 監査: Lighthouse Audit
+#   2. 📌 処理: Lighthouse Mobile Audit
+#   3. ⚡ パフォーマンス: Performance Budget Check
+#   4. 📊 監視: Real User Monitoring Setup
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F4E6 CI/CD - Lighthouse CI   PWA Performance Monitoring"
+'on':
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: 0 0 * * 0
+  workflow_dispatch: null
+jobs:
+  lighthouse-audit:
+    name: "\U0001F4CB 監査: Lighthouse Audit"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        url:
+          - /
+          - /matrix
+          - /network
+          - /visualizations
+          - /progress
+          - /flashcards
+          - /mock-exam
+          - /glossary
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Serve application
+        run: |
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 10
+      - name: Wait for server
+        run: |
+          timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000${{ matrix.url }}
+          configPath: ./.lighthouserc.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: '${{ secrets.LHCI_GITHUB_APP_TOKEN }}'
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: 'lighthouse-results-${{ github.run_id }}-${{ strategy.job-index }}'
+          path: .lighthouseci/
+    timeout-minutes: 30
+  lighthouse-mobile:
+    name: "\U0001F4CC 処理: Lighthouse Mobile Audit"
+    runs-on: ubuntu-latest
+    needs: lighthouse-audit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Serve application
+        run: |
+          npm install -g serve
+          serve -s dist -l 3000 &
+          sleep 10
+      - name: Run Mobile Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000/
+          configPath: ./.lighthouserc.mobile.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+    timeout-minutes: 30
+  performance-budget-check:
+    name: '⚡ パフォーマンス: Performance Budget Check'
+    runs-on: ubuntu-latest
+    needs:
+      - lighthouse-audit
+      - lighthouse-mobile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download lighthouse results
+        uses: actions/download-artifact@v3
+        with:
+          pattern: lighthouse-results-*
+          merge-multiple: true
+          path: ./lighthouse-results/
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install analysis tools
+        run: |
+          npm install -g @lhci/cli lighthouse
+          npm install -g lighthouse-batch
+      - name: Analyze performance trends
+        run: |
+          node ./scripts/analyze-lighthouse-trends.js
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Check performance budgets
+        run: |
+          node ./scripts/check-performance-budget.js
+        continue-on-error: true
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: "const fs = require('fs');\nconst path = './lighthouse-results/performance-summary.json';\n\nif (fs.existsSync(path)) {\n  const results = JSON.parse(fs.readFileSync(path, 'utf8'));\n  \n  const comment = `## \U0001F680 PWA Performance Report\n  \n  ### Overall Scores\n  - **Performance**: ${results.performance}/100 ${results.performance >= 90 ? '✅' : results.performance >= 70 ? '⚠️' : '❌'}\n  - **Accessibility**: ${results.accessibility}/100 ${results.accessibility >= 90 ? '✅' : '⚠️'}\n  - **Best Practices**: ${results.bestPractices}/100 ${results.bestPractices >= 90 ? '✅' : '⚠️'}\n  - **SEO**: ${results.seo}/100 ${results.seo >= 90 ? '✅' : '⚠️'}\n  - **PWA**: ${results.pwa}/100 ${results.pwa >= 90 ? '✅' : '⚠️'}\n\n  ### Core Web Vitals\n  - **LCP**: ${results.lcp}s ${results.lcp <= 2.5 ? '✅' : '❌'}\n  - **FID**: ${results.fid}ms ${results.fid <= 100 ? '✅' : '❌'}\n  - **CLS**: ${results.cls} ${results.cls <= 0.1 ? '✅' : '❌'}\n\n  ### Performance Budget Status\n  - **Bundle Size**: ${results.bundleSize}MB ${results.bundleSizeStatus}\n  - **Load Time**: ${results.loadTime}s ${results.loadTimeStatus}\n  \n  [View detailed report](${results.reportUrl})\n  `;\n  \n  github.rest.issues.createComment({\n    issue_number: context.issue.number,\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    body: comment\n  });\n}\n"
+    timeout-minutes: 30
+  web-vitals-monitoring:
+    name: "\U0001F4CA 監視: Real User Monitoring Setup"
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Web Vitals monitoring
+        run: |
+          echo "Setting up Real User Monitoring for Core Web Vitals..."
+          # TODO: Integrate with Analytics/RUM service
+      - name: Deploy performance monitoring
+        run: |
+          echo "Deploying performance monitoring configuration..."
+          # TODO: Deploy monitoring configuration
+    timeout-minutes: 30
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

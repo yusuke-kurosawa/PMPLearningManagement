@@ -1,0 +1,272 @@
+# ====================================================================
+# 🚀 CD - Production Deployment Pipeline
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - 手動実行
+#   - スケジュール実行
+#
+# 主な処理:
+#   1. 🔧 セットアップ: 🔧 Deployment Environment Setup
+#   2. 🏗️ ビルド: 🏗️ Production Build & Validation
+#   3. 🚀 デプロイ: ⚡ Pre-Deployment Performance Validation
+#   4. 🚀 デプロイ: 🌐 GitHub Pages Deployment
+#   5. 🚀 デプロイ: ✅ Post-Deployment Validation
+#   6. 🚀 デプロイ: 📊 Deployment Report Generation
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F680 CD - Production Deployment Pipeline"
+'on':
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - .github/ISSUE_TEMPLATE/**
+      - docs/**
+  workflow_dispatch:
+    inputs:
+      deployment-strategy:
+        description: Deployment strategy
+        required: true
+        type: choice
+        options:
+          - standard
+          - blue-green
+          - canary
+        default: standard
+      performance-validation:
+        description: Enable performance validation
+        required: false
+        type: boolean
+        default: true
+      pwa-optimization:
+        description: Enable PWA optimization
+        required: false
+        type: boolean
+        default: true
+      skip-health-check:
+        description: Skip post-deployment health check
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    - cron: 0 6 * * 1
+env:
+  NODE_VERSION: '18'
+  DEPLOYMENT_STRATEGY: '${{ inputs.deployment-strategy || ''standard'' }}'
+  PERFORMANCE_VALIDATION: '${{ inputs.performance-validation || ''true'' }}'
+  PWA_OPTIMIZATION: '${{ inputs.pwa-optimization || ''true'' }}'
+  SKIP_HEALTH_CHECK: '${{ inputs.skip-health-check || ''false'' }}'
+  SITE_URL: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
+  CACHE_VERSION: v2
+  GENERATE_SOURCEMAP: false
+  NODE_ENV: production
+  SKIP_ENV_VALIDATION: true
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: 'cd-production-${{ github.ref }}'
+  cancel-in-progress: false
+jobs:
+  deployment-setup:
+    name: "\U0001F527 セットアップ: \U0001F527 Deployment Environment Setup"
+    uses: ./.github/workflows/templates/devops-workflow-template.yml
+    with:
+      workflow-category: cd
+      environment: production
+      node-version: '18'
+      enable-caching: true
+      enable-notifications: true
+      parallel-jobs: 3
+    secrets:
+      CLAUDE_API_KEY: '${{ secrets.CLAUDE_API_KEY }}'
+      SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+    timeout-minutes: 30
+  production-build:
+    name: "\U0001F3D7️ ビルド: \U0001F3D7️ Production Build & Validation"
+    runs-on: ubuntu-latest
+    needs:
+      - deployment-setup
+    timeout-minutes: 15
+    outputs:
+      build-size: '${{ steps.build-analysis.outputs.build-size }}'
+      bundle-hash: '${{ steps.build-analysis.outputs.bundle-hash }}'
+      pwa-ready: '${{ steps.pwa-validation.outputs.pwa-ready }}'
+    steps:
+      - name: "\U0001F4E5 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
+        run: "echo \"\U0001F4E6 Installing production dependencies...\"\nnpm ci --prefer-offline\necho \"✅ Dependencies installed successfully\"\n"
+      - name: "\U0001F50D Pre-Build Quality Checks"
+        run: "echo \"\U0001F50D Running essential quality checks...\"\n\n# ESLint check\nnpm run lint || {\n  echo \"❌ ESLint failed - cannot proceed with deployment\"\n  exit 1\n}\n\n# TypeScript check (if available)\nif npm run typecheck 2>/dev/null; then\n  echo \"✅ TypeScript validation passed\"\nelse\n  echo \"ℹ️ TypeScript check not available, skipping\"\nfi\n\n# Security audit\nnpm audit --audit-level=high || {\n  echo \"⚠️ High-severity vulnerabilities detected\"\n  echo \"Continuing with deployment but review required\"\n}\n\necho \"✅ Pre-build quality checks completed\"\n"
+      - name: "\U0001F3D7️ Optimized Production Build"
+        run: "echo \"\U0001F3D7️ Building optimized production bundle...\"\n\n# Set production environment variables\nexport NODE_ENV=production\nexport GENERATE_SOURCEMAP=false\nexport SKIP_ENV_VALIDATION=true\nexport VITE_BUILD_TIMESTAMP=$(date -Iseconds)\nexport VITE_COMMIT_SHA=${{ github.sha }}\nexport VITE_BUILD_NUMBER=${{ github.run_number }}\n\n# Run optimized build\nnpm run build:optimized || npm run build\n\necho \"✅ Production build completed\"\n"
+      - name: "\U0001F4CA Build Analysis & Optimization"
+        id: build-analysis
+        run: "echo \"\U0001F4CA Analyzing build output...\"\n\nif [ ! -d \"dist\" ]; then\n  echo \"❌ Build output directory not found\"\n  exit 1\nfi\n\n# Calculate build metrics\nbuild_size=$(du -sh dist | cut -f1)\ntotal_files=$(find dist -type f | wc -l)\n\n# Generate bundle hash for cache busting\nbundle_hash=$(find dist -name \"*.js\" -exec cat {} \\; | sha256sum | cut -d' ' -f1 | head -c 12)\n\n# Analyze bundle composition\nif [ -d \"dist/assets\" ]; then\n  js_size=$(find dist/assets -name \"*.js\" -exec du -ch {} + 2>/dev/null | tail -1 | cut -f1 || echo \"0\")\n  css_size=$(find dist/assets -name \"*.css\" -exec du -ch {} + 2>/dev/null | tail -1 | cut -f1 || echo \"0\")\n  \n  echo \"\U0001F4CA Build Metrics:\"\n  echo \"  Total Size: $build_size\"\n  echo \"  Files: $total_files\"  \n  echo \"  JavaScript: $js_size\"\n  echo \"  CSS: $css_size\"\n  echo \"  Bundle Hash: $bundle_hash\"\nfi\n\n# Output for next stages\necho \"build-size=$build_size\" >> $GITHUB_OUTPUT\necho \"bundle-hash=$bundle_hash\" >> $GITHUB_OUTPUT\n\n# Performance budget validation\nbuild_size_mb=$(du -sm dist | cut -f1)\nif [ \"$build_size_mb\" -gt 10 ]; then\n  echo \"⚠️ Build size exceeds 10MB ($build_size_mb MB)\"\n  echo \"Consider implementing code splitting and optimization\"\nelse\n  echo \"✅ Build size within acceptable limits\"\nfi\n"
+      - name: "\U0001F4F1 PWA Configuration Validation"
+        id: pwa-validation
+        if: env.PWA_OPTIMIZATION == 'true'
+        run: "echo \"\U0001F4F1 Validating PWA configuration...\"\n\npwa_ready=true\n\n# Check PWA manifest\nif [ -f \"dist/manifest.json\" ]; then\n  echo \"✅ PWA manifest found\"\n  \n  # Validate manifest content\n  if jq -e '.name and .short_name and .start_url and .display' dist/manifest.json > /dev/null 2>&1; then\n    echo \"✅ PWA manifest is valid\"\n  else\n    echo \"⚠️ PWA manifest missing required fields\"\n    pwa_ready=false\n  fi\nelse\n  echo \"⚠️ PWA manifest not found\"\n  pwa_ready=false\nfi\n\n# Check service worker\nif [ -f \"dist/sw.js\" ] || find dist -name \"*.js\" -exec grep -l \"serviceWorker\" {} \\; | head -1 > /dev/null; then\n  echo \"✅ Service worker configuration found\"\nelse\n  echo \"⚠️ Service worker not detected\"\n  pwa_ready=false\nfi\n\n# Check PWA icons\nif find dist -name \"*.png\" -o -name \"*.ico\" | grep -E \"(icon|apple)\" | head -1 > /dev/null; then\n  echo \"✅ PWA icons found\"\nelse\n  echo \"⚠️ PWA icons not found\"\n  pwa_ready=false\nfi\n\necho \"pwa-ready=$pwa_ready\" >> $GITHUB_OUTPUT\n\nif [ \"$pwa_ready\" = \"true\" ]; then\n  echo \"✅ PWA validation passed - ready for app store deployment\"\nelse\n  echo \"⚠️ PWA validation issues found - review configuration\"\nfi\n"
+      - name: "\U0001F512 Security Headers Configuration"
+        run: "echo \"\U0001F512 Configuring security headers...\"\n\n# Create security headers file for GitHub Pages\ncat > dist/_headers << 'EOF'\n/*\n  X-Frame-Options: DENY\n  X-Content-Type-Options: nosniff\n  X-XSS-Protection: 1; mode=block\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload\nEOF\n\n# Add CSP if not already present in HTML\nif ! grep -r \"Content-Security-Policy\" dist/ > /dev/null 2>&1; then\n  echo \"Adding Content Security Policy...\"\n  # This would typically be added via meta tags in the HTML\nfi\n\necho \"✅ Security headers configured\"\n"
+      - name: "\U0001F4E4 Upload Production Build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'production-build-${{ github.run_number }}'
+          path: |
+            dist/
+            !dist/**/*.map
+          retention-days: 7
+          compression-level: 9
+  pre-deployment-validation:
+    name: "\U0001F680 デプロイ: ⚡ Pre-Deployment Performance Validation"
+    runs-on: ubuntu-latest
+    needs:
+      - deployment-setup
+      - production-build
+    if: env.PERFORMANCE_VALIDATION == 'true'
+    outputs:
+      validation-status: '${{ steps.validation.outputs.status }}'
+    steps:
+      - name: "\U0001F4E5 Checkout Repository"
+        uses: actions/checkout@v4
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+      - name: "\U0001F4E5 Download Production Build"
+        uses: actions/download-artifact@v4
+        with:
+          name: 'production-build-${{ github.run_number }}'
+          path: dist/
+      - name: "\U0001F680 Start Local Server for Testing"
+        id: server
+        run: "echo \"\U0001F680 Starting local server for performance validation...\"\n\n# Install and start serve\nnpm install -g serve\nserve -s dist -p 3000 &\nSERVER_PID=$!\necho \"SERVER_PID=$SERVER_PID\" >> $GITHUB_ENV\n\n# Wait for server to start\nsleep 5\n\n# Verify server is running\nif curl -f http://localhost:3000 > /dev/null 2>&1; then\n  echo \"✅ Local server started successfully\"\nelse\n  echo \"❌ Failed to start local server\"\n  exit 1\nfi\n"
+      - name: "\U0001F3EE Lighthouse Pre-Deployment Audit"
+        run: "echo \"\U0001F3EE Running Lighthouse pre-deployment audit...\"\n\n# Install Lighthouse CI\nnpm install -g @lhci/cli@latest\n\n# Create Lighthouse configuration\ncat > .lighthouserc.json << EOF\n{\n  \"ci\": {\n    \"collect\": {\n      \"url\": [\"http://localhost:3000\"],\n      \"numberOfRuns\": 3,\n      \"settings\": {\n        \"chromeFlags\": [\"--no-sandbox\", \"--headless\", \"--disable-gpu\"],\n        \"preset\": \"desktop\"\n      }\n    },\n    \"assert\": {\n      \"assertions\": {\n        \"categories:performance\": [\"warn\", {\"minScore\": 0.8}],\n        \"categories:accessibility\": [\"warn\", {\"minScore\": 0.9}],\n        \"categories:best-practices\": [\"warn\", {\"minScore\": 0.8}],\n        \"categories:seo\": [\"warn\", {\"minScore\": 0.8}]\n      }\n    },\n    \"upload\": {\n      \"target\": \"filesystem\",\n      \"outputDir\": \"./lighthouse-results\"\n    }\n  }\n}\nEOF\n\n# Run Lighthouse audit\nlhci collect --config=.lighthouserc.json || echo \"Lighthouse collection completed with warnings\"\n\n# Parse results\nif [ -d \"lighthouse-results\" ]; then\n  latest_report=$(ls -t lighthouse-results/*.json | head -1)\n  if [ -n \"$latest_report\" ]; then\n    perf_score=$(jq -r '.categories.performance.score * 100' \"$latest_report\" 2>/dev/null || echo \"0\")\n    echo \"\U0001F4CA Performance Score: ${perf_score}/100\"\n    \n    if [ \"$(echo \"$perf_score >= 70\" | bc -l 2>/dev/null || echo \"0\")\" = \"1\" ]; then\n      echo \"✅ Performance validation passed\"\n    else\n      echo \"⚠️ Performance below target (${perf_score}/100 < 70)\"\n    fi\n  fi\nfi\n"
+      - name: "\U0001F4CA Bundle Size Validation"
+        id: validation
+        run: "echo \"\U0001F4CA Validating bundle size and performance...\"\n\nbuild_size=\"${{ needs.production-build.outputs.build-size }}\"\npwa_ready=\"${{ needs.production-build.outputs.pwa-ready }}\"\n\nvalidation_status=\"passed\"\n\necho \"\U0001F4CB Pre-Deployment Validation Summary:\"\necho \"  Build Size: $build_size\"\necho \"  PWA Ready: $pwa_ready\"\necho \"  Bundle Hash: ${{ needs.production-build.outputs.bundle-hash }}\"\n\n# Check if validation passes minimum requirements\nif [ \"$pwa_ready\" != \"true\" ] && [ \"${{ env.PWA_OPTIMIZATION }}\" = \"true\" ]; then\n  echo \"⚠️ PWA validation failed but continuing with deployment\"\n  validation_status=\"warning\"\nfi\n\necho \"status=$validation_status\" >> $GITHUB_OUTPUT\necho \"✅ Pre-deployment validation completed: $validation_status\"\n"
+      - name: "\U0001F9F9 Cleanup Local Server"
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID 2>/dev/null || true
+          fi
+    timeout-minutes: 30
+  github-pages-deployment:
+    name: "\U0001F680 デプロイ: \U0001F310 GitHub Pages Deployment"
+    runs-on: ubuntu-latest
+    needs:
+      - deployment-setup
+      - production-build
+      - pre-deployment-validation
+    if: always() && (needs.pre-deployment-validation.result == 'success' || needs.pre-deployment-validation.result == 'skipped')
+    environment:
+      name: github-pages
+      url: '${{ steps.deployment.outputs.page_url }}'
+    outputs:
+      deployment-url: '${{ steps.deployment.outputs.page_url }}'
+      deployment-time: '${{ steps.timing.outputs.deployment-time }}'
+    steps:
+      - name: ⏱️ Start Deployment Timing
+        id: start-time
+        run: echo "start-time=$(date +%s)" >> $GITHUB_OUTPUT
+      - name: "\U0001F4E5 Checkout Repository"
+        uses: actions/checkout@v4
+      - name: "\U0001F4E5 Download Production Build"
+        uses: actions/download-artifact@v4
+        with:
+          name: 'production-build-${{ github.run_number }}'
+          path: dist/
+      - name: "\U0001F527 Prepare GitHub Pages Deployment"
+        run: "echo \"\U0001F527 Preparing optimized deployment for GitHub Pages...\"\n\n# Create deployment directory\nmkdir -p out\n\n# Copy optimized build\ncp -r dist/* out/\n\n# Ensure GitHub Pages compatibility\ntouch out/.nojekyll\n\n# Create/verify 404.html for SPA routing\nif [ ! -f \"out/404.html\" ]; then\n  cp out/index.html out/404.html\n  echo \"✅ SPA routing fallback created\"\nfi\n\n# Verify essential files\necho \"\U0001F4CB Deployment Verification:\"\n\nrequired_files=(\"index.html\" \"404.html\" \".nojekyll\")\nfor file in \"${required_files[@]}\"; do\n  if [ -f \"out/$file\" ]; then\n    echo \"  ✅ $file\"\n  else\n    echo \"  ❌ $file missing\"\n    exit 1\n  fi\ndone\n\n# PWA files verification\nif [ \"${{ env.PWA_OPTIMIZATION }}\" = \"true\" ]; then\n  pwa_files=(\"manifest.json\")\n  for file in \"${pwa_files[@]}\"; do\n    if [ -f \"out/$file\" ]; then\n      echo \"  ✅ PWA: $file\"\n    else\n      echo \"  ⚠️ PWA: $file missing\"\n    fi\n  done\nfi\n\n# Generate deployment manifest\ncat > out/deployment-info.json << EOF\n{\n  \"deployment_id\": \"${{ github.run_number }}\",\n  \"commit_sha\": \"${{ github.sha }}\",\n  \"branch\": \"${{ github.ref_name }}\",\n  \"timestamp\": \"$(date -Iseconds)\",\n  \"build_size\": \"${{ needs.production-build.outputs.build-size }}\",\n  \"bundle_hash\": \"${{ needs.production-build.outputs.bundle-hash }}\",\n  \"pwa_ready\": ${{ needs.production-build.outputs.pwa-ready }},\n  \"deployment_strategy\": \"${{ env.DEPLOYMENT_STRATEGY }}\",\n  \"environment\": \"production\"\n}\nEOF\n\necho \"\U0001F4E6 Final deployment size: $(du -sh out)\"\necho \"\U0001F4C1 Total files: $(find out -type f | wc -l)\"\n"
+      - name: "\U0001F527 Configure Pages"
+        uses: actions/configure-pages@v4
+      - name: "\U0001F4E4 Upload to Pages"
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+      - name: "\U0001F680 Deploy to GitHub Pages"
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: ⏱️ Calculate Deployment Time
+        id: timing
+        run: |
+          start_time="${{ steps.start-time.outputs.start-time }}"
+          end_time="$(date +%s)"
+          deployment_time=$((end_time - start_time))
+          echo "deployment-time=${deployment_time}" >> $GITHUB_OUTPUT
+          echo "⏱️ Deployment completed in ${deployment_time} seconds"
+    timeout-minutes: 30
+  post-deployment-validation:
+    name: "\U0001F680 デプロイ: ✅ Post-Deployment Validation"
+    runs-on: ubuntu-latest
+    needs:
+      - github-pages-deployment
+    if: env.SKIP_HEALTH_CHECK != 'true' && needs.github-pages-deployment.result == 'success'
+    timeout-minutes: 10
+    outputs:
+      health-status: '${{ steps.health-check.outputs.status }}'
+      lighthouse-score: '${{ steps.lighthouse.outputs.performance-score }}'
+    steps:
+      - name: ⏳ Wait for Deployment Propagation
+        run: |
+          echo "⏳ Waiting for deployment to propagate..."
+          sleep 60  # Wait for GitHub Pages CDN to update
+      - name: "\U0001F50D Comprehensive Health Check"
+        id: health-check
+        run: "echo \"\U0001F50D Running comprehensive post-deployment health check...\"\n\nsite_url=\"${{ needs.github-pages-deployment.outputs.deployment-url }}\"\necho \"Testing site: $site_url\"\n\nhealth_status=\"healthy\"\n\n# Basic connectivity test\necho \"\U0001F4E1 Testing basic connectivity...\"\nhttp_code=$(curl -s -o /dev/null -w \"%{http_code}\" \"$site_url\" || echo \"000\")\n\nif [ \"$http_code\" = \"200\" ]; then\n  echo \"  ✅ Site accessible (HTTP $http_code)\"\nelse\n  echo \"  ❌ Site not accessible (HTTP $http_code)\"\n  health_status=\"unhealthy\"\nfi\n\n# Content validation\necho \"\U0001F50D Testing content delivery...\"\ncontent=$(curl -s \"$site_url\" || echo \"\")\n\nif echo \"$content\" | grep -q \"<title>.*PMP.*Learning\" > /dev/null 2>&1; then\n  echo \"  ✅ Page title present\"\nelse\n  echo \"  ⚠️ Expected page title not found\"\nfi\n\nif echo \"$content\" | grep -q \"viewport\" > /dev/null 2>&1; then\n  echo \"  ✅ Mobile viewport meta tag present\"\nelse\n  echo \"  ⚠️ Mobile viewport meta tag missing\"\nfi\n\n# PWA validation\nif [ \"${{ env.PWA_OPTIMIZATION }}\" = \"true\" ]; then\n  echo \"\U0001F4F1 Testing PWA components...\"\n  \n  manifest_code=$(curl -s -o /dev/null -w \"%{http_code}\" \"${site_url}manifest.json\" || echo \"000\")\n  if [ \"$manifest_code\" = \"200\" ]; then\n    echo \"  ✅ PWA manifest accessible\"\n  else\n    echo \"  ⚠️ PWA manifest not accessible (HTTP $manifest_code)\"\n  fi\n  \n  # Test service worker registration\n  if echo \"$content\" | grep -q \"serviceWorker\" > /dev/null 2>&1; then\n    echo \"  ✅ Service worker registration found\"\n  else\n    echo \"  ⚠️ Service worker registration not detected\"\n  fi\nfi\n\n# Performance test\necho \"⚡ Testing load performance...\"\nload_time=$(curl -w \"%{time_total}\" -s -o /dev/null \"$site_url\" || echo \"0\")\nload_time_ms=$(echo \"$load_time * 1000\" | bc -l 2>/dev/null || echo \"0\")\n\nif [ \"$(echo \"$load_time < 3.0\" | bc -l 2>/dev/null || echo \"0\")\" = \"1\" ]; then\n  echo \"  ✅ Load time acceptable: ${load_time}s\"\nelse\n  echo \"  ⚠️ Load time high: ${load_time}s\"\nfi\n\necho \"status=$health_status\" >> $GITHUB_OUTPUT\necho \"\U0001F3C1 Health check completed: $health_status\"\n"
+      - name: "\U0001F3EE Post-Deployment Lighthouse Audit"
+        id: lighthouse
+        if: env.PERFORMANCE_VALIDATION == 'true'
+        run: "echo \"\U0001F3EE Running post-deployment Lighthouse audit...\"\n\n# Install Lighthouse CI\nnpm install -g @lhci/cli@latest\n\nsite_url=\"${{ needs.github-pages-deployment.outputs.deployment-url }}\"\n\n# Create Lighthouse configuration\ncat > .lighthouserc.json << EOF\n{\n  \"ci\": {\n    \"collect\": {\n      \"url\": [\"$site_url\"],\n      \"numberOfRuns\": 2,\n      \"settings\": {\n        \"chromeFlags\": [\"--no-sandbox\", \"--headless\", \"--disable-gpu\"],\n        \"preset\": \"desktop\"\n      }\n    },\n    \"upload\": {\n      \"target\": \"filesystem\",\n      \"outputDir\": \"./lighthouse-results\"\n    }\n  }\n}\nEOF\n\n# Run Lighthouse audit\nlhci collect --config=.lighthouserc.json || echo \"Lighthouse audit completed with warnings\"\n\n# Parse and report results\nif [ -d \"lighthouse-results\" ]; then\n  latest_report=$(ls -t lighthouse-results/*.json | head -1)\n  if [ -n \"$latest_report\" ]; then\n    perf_score=$(jq -r '.categories.performance.score * 100' \"$latest_report\" 2>/dev/null || echo \"0\")\n    accessibility_score=$(jq -r '.categories.accessibility.score * 100' \"$latest_report\" 2>/dev/null || echo \"0\")\n    best_practices_score=$(jq -r '.categories[\"best-practices\"].score * 100' \"$latest_report\" 2>/dev/null || echo \"0\")\n    seo_score=$(jq -r '.categories.seo.score * 100' \"$latest_report\" 2>/dev/null || echo \"0\")\n    \n    echo \"\U0001F4CA Lighthouse Scores:\"\n    echo \"  Performance: ${perf_score}/100\"\n    echo \"  Accessibility: ${accessibility_score}/100\"\n    echo \"  Best Practices: ${best_practices_score}/100\"\n    echo \"  SEO: ${seo_score}/100\"\n    \n    echo \"performance-score=${perf_score}\" >> $GITHUB_OUTPUT\n  fi\nfi\n"
+  deployment-report:
+    name: "\U0001F680 デプロイ: \U0001F4CA Deployment Report Generation"
+    runs-on: ubuntu-latest
+    needs:
+      - deployment-setup
+      - production-build
+      - github-pages-deployment
+      - post-deployment-validation
+    if: always()
+    steps:
+      - name: "\U0001F4E5 Checkout Repository"
+        uses: actions/checkout@v4
+      - name: "\U0001F4CA Generate Comprehensive Deployment Report"
+        run: "echo \"\U0001F4CA Generating comprehensive deployment report...\"\n\n# Collect deployment metrics\ndeployment_url=\"${{ needs.github-pages-deployment.outputs.deployment-url || env.SITE_URL }}\"\ndeployment_time=\"${{ needs.github-pages-deployment.outputs.deployment-time || 'N/A' }}\"\nbuild_size=\"${{ needs.production-build.outputs.build-size }}\"\npwa_ready=\"${{ needs.production-build.outputs.pwa-ready }}\"\nhealth_status=\"${{ needs.post-deployment-validation.outputs.health-status || 'skipped' }}\"\nlighthouse_score=\"${{ needs.post-deployment-validation.outputs.lighthouse-score || 'N/A' }}\"\n\n# Create comprehensive report\ncat > deployment-report.md << EOF\n# \U0001F680 Production Deployment Report\n\n**Deployment Date**: $(date -Iseconds)  \n**Deployment ID**: ${{ github.run_number }}  \n**Commit**: ${{ github.sha }}  \n**Branch**: ${{ github.ref_name }}  \n**Triggered By**: ${{ github.actor }}  \n\n## \U0001F4CA Deployment Summary\n\n| Metric | Value | Status |\n|--------|--------|--------|\n| Deployment URL | [${deployment_url}](${deployment_url}) | $([[ \"${{ needs.github-pages-deployment.result }}\" == \"success\" ]] && echo \"✅ LIVE\" || echo \"❌ FAILED\") |\n| Deployment Time | ${deployment_time}s | $([[ \"$deployment_time\" != \"N/A\" && \"$deployment_time\" -le 300 ]] && echo \"✅ GOOD\" || echo \"⚠️ REVIEW\") |\n| Build Size | ${build_size} | $([[ \"$build_size\" ]] && echo \"ℹ️ INFO\" || echo \"N/A\") |\n| PWA Ready | ${pwa_ready} | $([[ \"$pwa_ready\" == \"true\" ]] && echo \"✅ YES\" || echo \"⚠️ PARTIAL\") |\n| Health Status | ${health_status} | $([[ \"$health_status\" == \"healthy\" ]] && echo \"✅ HEALTHY\" || echo \"⚠️ CHECK\") |\n| Lighthouse Score | ${lighthouse_score}/100 | $([[ \"$lighthouse_score\" != \"N/A\" && $(echo \"$lighthouse_score >= 70\" | bc -l 2>/dev/null) == \"1\" ]] && echo \"✅ GOOD\" || echo \"ℹ️ INFO\") |\n\n## \U0001F3AF Deployment Results\n\n### ✅ Successful Components\nEOF\n\n# Add successful components\nif [[ \"${{ needs.deployment-setup.result }}\" == \"success\" ]]; then\n  echo \"- ✅ **Environment Setup**: DevOps pipeline initialized\" >> deployment-report.md\nfi\n\nif [[ \"${{ needs.production-build.result }}\" == \"success\" ]]; then\n  echo \"- ✅ **Production Build**: Optimized bundle generated ($build_size)\" >> deployment-report.md\nfi\n\nif [[ \"${{ needs.github-pages-deployment.result }}\" == \"success\" ]]; then\n  echo \"- ✅ **GitHub Pages Deploy**: Site deployed successfully\" >> deployment-report.md\nfi\n\nif [[ \"$health_status\" == \"healthy\" ]]; then\n  echo \"- ✅ **Health Check**: All systems operational\" >> deployment-report.md\nfi\n\n# Add warnings/issues if any\ncat >> deployment-report.md << EOF\n\n### ⚠️ Items for Review\nEOF\n\nif [[ \"$pwa_ready\" != \"true\" ]] && [[ \"${{ env.PWA_OPTIMIZATION }}\" == \"true\" ]]; then\n  echo \"- ⚠️ **PWA Configuration**: Some PWA features not fully configured\" >> deployment-report.md\nfi\n\nif [[ \"$lighthouse_score\" != \"N/A\" && $(echo \"$lighthouse_score < 70\" | bc -l 2>/dev/null) == \"1\" ]]; then\n  echo \"- ⚠️ **Performance**: Lighthouse score below target ($lighthouse_score/100)\" >> deployment-report.md\nfi\n\nif [[ \"$health_status\" == \"unhealthy\" ]]; then\n  echo \"- ⚠️ **Health Check**: Post-deployment validation issues detected\" >> deployment-report.md\nfi\n\ncat >> deployment-report.md << EOF\n\n## \U0001F4C8 Technical Details\n\n### Build Information\n- **Strategy**: ${{ env.DEPLOYMENT_STRATEGY }}\n- **Bundle Hash**: ${{ needs.production-build.outputs.bundle-hash }}\n- **Node Version**: ${{ env.NODE_VERSION }}\n- **Cache Version**: ${{ env.CACHE_VERSION }}\n\n### Performance Metrics\n- **Build Time**: $(echo \"${{ needs.deployment-setup.outputs.execution-time || 'N/A' }}s\")\n- **Deployment Time**: ${deployment_time}s\n- **Total Pipeline Time**: $(($(echo \"${{ needs.deployment-setup.outputs.execution-time || '0' }}\") + $(echo \"$deployment_time\" | sed 's/[^0-9]//g')))s\n\n### PWA Features\n- **Manifest**: $([[ \"$pwa_ready\" == \"true\" ]] && echo \"✅ Configured\" || echo \"⚠️ Needs Review\")\n- **Service Worker**: $([[ \"$pwa_ready\" == \"true\" ]] && echo \"✅ Active\" || echo \"⚠️ Check Config\")\n- **Offline Support**: $([[ \"$pwa_ready\" == \"true\" ]] && echo \"✅ Enabled\" || echo \"⚠️ Limited\")\n\n## \U0001F517 Quick Links\n\n- **\U0001F310 Live Site**: [${deployment_url}](${deployment_url})\n- **\U0001F4CA Workflow Run**: [${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n- **\U0001F4E6 Build Artifacts**: [Download](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)\n\n## \U0001F4CB Next Steps\n\n1. **Verify deployment**: Visit the live site and test key functionality\n2. **Monitor performance**: Check real-user metrics and Core Web Vitals\n3. **Update documentation**: Reflect any deployment changes\n4. **Plan improvements**: Address any warnings or performance issues\n\n---\n*Generated by CD Production Pipeline v2.0.0*\nEOF\n\ncat deployment-report.md\n"
+      - name: "\U0001F3AF Deployment Status Summary"
+        run: "echo \"\U0001F3AF Final Deployment Status:\"\n\noverall_status=\"SUCCESS\"\n\n# Check critical components\nif [[ \"${{ needs.github-pages-deployment.result }}\" != \"success\" ]]; then\n  overall_status=\"FAILED\"\n  echo \"❌ Deployment FAILED - GitHub Pages deployment unsuccessful\"\nelif [[ \"${{ needs.production-build.result }}\" != \"success\" ]]; then\n  overall_status=\"FAILED\"\n  echo \"❌ Deployment FAILED - Production build unsuccessful\"\nelif [[ \"${{ needs.post-deployment-validation.outputs.health-status }}\" == \"unhealthy\" ]]; then\n  overall_status=\"WARNING\"\n  echo \"⚠️ Deployment SUCCESS with WARNINGS - Health check issues\"\nelse\n  echo \"✅ Deployment SUCCESSFUL - All systems operational\"\nfi\n\necho \"\U0001F4CA Overall Status: $overall_status\"\n\n# Set exit code for failure cases\nif [[ \"$overall_status\" == \"FAILED\" ]]; then\n  exit 1\nfi\n"
+      - name: "\U0001F4E4 Upload Deployment Report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'deployment-report-${{ github.run_number }}'
+          path: deployment-report.md
+          retention-days: 90
+      - name: "\U0001F4AC Create Deployment Success Issue (If Requested)"
+        if: success() && github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: "const title = `\U0001F680 Production Deployment Successful - v${{ github.run_number }}`;\nconst body = `\n## \U0001F389 Deployment Complete\n\n**Deployment URL**: ${{ needs.github-pages-deployment.outputs.deployment-url || env.SITE_URL }}\n**Build Size**: ${{ needs.production-build.outputs.build-size }}\n**Deployment Time**: ${{ needs.github-pages-deployment.outputs.deployment-time || 'N/A' }}s\n**PWA Ready**: ${{ needs.production-build.outputs.pwa-ready }}\n\n### \U0001F4CA Performance\n- Lighthouse Score: ${{ needs.post-deployment-validation.outputs.lighthouse-score || 'N/A' }}/100\n- Health Status: ${{ needs.post-deployment-validation.outputs.health-status || 'N/A' }}\n\n### \U0001F517 Resources\n- [Live Site](${{ needs.github-pages-deployment.outputs.deployment-url || env.SITE_URL }})\n- [Deployment Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n---\n*Auto-generated by CD Production Pipeline*\n`;\n\ngithub.rest.issues.create({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  title: title,\n  body: body,\n  labels: ['deployment', 'production', 'success', 'auto-generated']\n});\n"
+    timeout-minutes: 30

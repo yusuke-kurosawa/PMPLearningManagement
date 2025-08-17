@@ -1,0 +1,740 @@
+{
+  "summary": {
+    "timestamp": "2025-08-17T09:23:33.534Z",
+    "totalWorkflows": 39,
+    "compliantCount": 0,
+    "nonCompliantCount": 39,
+    "complianceRate": "0.00%"
+  },
+  "compliantWorkflows": [],
+  "nonCompliantWorkflows": [
+    "00-meta-devops-orchestrator.yml",
+    "00-meta-workflow-validator.yml",
+    "01-ci-balanced.yml",
+    "01-ci-build-main.yml",
+    "01-ci-continuous-integration.yml",
+    "01-ci-lighthouse.yml",
+    "01-core-ci-cd.yml",
+    "01-core-status-check.yml",
+    "01-deploy-cd--production.yml",
+    "01-deploy-workflow.yml",
+    "01-quality-comprehensive-check.yml",
+    "02-cd-continuous-deployment.yml",
+    "02-performance-optimization.yml",
+    "02-quality-content--assurance.yml",
+    "02-quality-header-validation.yml",
+    "02-quality-idd-compliance.yml",
+    "02-quality-idd-metrics.yml",
+    "02-quality-test.yml",
+    "02-test-reusable--runner.yml",
+    "02-test-reusable-s.yml",
+    "03-security-comprehensive-scan.yml",
+    "03-security-scan-comprehensive.yml",
+    "03-security-scan.yml",
+    "04-deployment-production.yml",
+    "04-integration-ai-claude.yml",
+    "04-integration-full-test.yml",
+    "04-monitoring-analysis.yml",
+    "04-monitoring-optimization.yml",
+    "04-monitoring-ormance-budget.yml",
+    "04-monitoring-perf--comprehensive.yml",
+    "04-security-devsecops.yml",
+    "05-automation-logger.yml",
+    "05-automation-weekly--summary.yml",
+    "05-performance-monitoring.yml",
+    "07-self-healing-system.yml",
+    "08-developer-devops-documentation.yml",
+    "09-reusable-build.yml",
+    "09-reusable-node-setup.yml",
+    "09-reusable-setup.yml"
+  ],
+  "detailedIssues": {
+    "00-meta-devops-orchestrator.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"orchestration-planning\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"ci-pipeline-execution\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"ai-integration-execution\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"execution-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"notification-and-alerts\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"final-status\" missing Japanese name/description"
+      }
+    ],
+    "00-meta-workflow-validator.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"workflow-discovery\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"syntax-validation\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"meta-validation-summary\" missing Japanese name/description"
+      }
+    ],
+    "01-ci-balanced.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      }
+    ],
+    "01-ci-build-main.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"change-detection\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"quality-checks\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"quality-gate\" missing Japanese name/description"
+      }
+    ],
+    "01-ci-continuous-integration.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"code-quality\" missing Japanese name/description"
+      }
+    ],
+    "01-ci-lighthouse.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"lighthouse-audit\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"lighthouse-mobile\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"web-vitals-monitoring\" missing Japanese name/description"
+      }
+    ],
+    "01-core-ci-cd.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "01-core-status-check.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "01-deploy-cd--production.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      }
+    ],
+    "01-deploy-workflow.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"pwa-validation\" missing Japanese name/description"
+      }
+    ],
+    "01-quality-comprehensive-check.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"auto-fix\" missing Japanese name/description"
+      }
+    ],
+    "02-cd-continuous-deployment.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      }
+    ],
+    "02-performance-optimization.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"lighthouse-ci\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"image-optimization\" missing Japanese name/description"
+      }
+    ],
+    "02-quality-content--assurance.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"learning-analytics\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"notify-slack\" missing Japanese name/description"
+      }
+    ],
+    "02-quality-header-validation.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"auto-fix-suggestion\" missing Japanese name/description"
+      }
+    ],
+    "02-quality-idd-compliance.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"validate-issue\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"validate-pr\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"validate-commits\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"notify-violations\" missing Japanese name/description"
+      }
+    ],
+    "02-quality-idd-metrics.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"collect-metrics\" missing Japanese name/description"
+      }
+    ],
+    "02-quality-test.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"quality-gates\" missing Japanese name/description"
+      }
+    ],
+    "02-test-reusable--runner.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "02-test-reusable-s.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "03-security-comprehensive-scan.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "security",
+        "severity": "high",
+        "message": "Unpinned action versions detected (use tags or commit SHA)"
+      }
+    ],
+    "03-security-scan-comprehensive.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"compliance-validation\" missing Japanese name/description"
+      },
+      {
+        "type": "security",
+        "severity": "high",
+        "message": "Unpinned action versions detected (use tags or commit SHA)"
+      }
+    ],
+    "03-security-scan.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"dependency-audit\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"codeql-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "security",
+        "severity": "high",
+        "message": "Unpinned action versions detected (use tags or commit SHA)"
+      }
+    ],
+    "04-deployment-production.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "04-integration-ai-claude.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"code-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"claude-code-review\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"auto-fix-suggestions\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"pr-comment-generation\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"issue-auto-processing\" missing Japanese name/description"
+      }
+    ],
+    "04-integration-full-test.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      }
+    ],
+    "04-monitoring-analysis.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"bundle-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"treeshaking-optimization\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"code-splitting-analysis\" missing Japanese name/description"
+      }
+    ],
+    "04-monitoring-optimization.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"optimize-images\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"image-audit\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"cdn-optimization\" missing Japanese name/description"
+      }
+    ],
+    "04-monitoring-ormance-budget.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"budget-validation\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"third-party-budget\" missing Japanese name/description"
+      }
+    ],
+    "04-monitoring-perf--comprehensive.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"bundle-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"real-user-monitoring\" missing Japanese name/description"
+      }
+    ],
+    "04-security-devsecops.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"sast-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"dast-analysis\" missing Japanese name/description"
+      }
+    ],
+    "05-automation-logger.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"create-issue\" missing Japanese name/description"
+      }
+    ],
+    "05-automation-weekly--summary.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "05-performance-monitoring.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"core-web-vitals\" missing Japanese name/description"
+      }
+    ],
+    "07-self-healing-system.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"health-assessment\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"auto-healing\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"emergency-response\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"healing-summary\" missing Japanese name/description"
+      }
+    ],
+    "08-developer-devops-documentation.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"workflow-analysis\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"architecture-diagrams\" missing Japanese name/description"
+      },
+      {
+        "type": "documentation",
+        "severity": "low",
+        "message": "Job \"documentation-integration\" missing Japanese name/description"
+      }
+    ],
+    "09-reusable-build.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "09-reusable-node-setup.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ],
+    "09-reusable-setup.yml": [
+      {
+        "type": "naming",
+        "severity": "medium",
+        "message": "Workflow name missing emoji prefix or Japanese description"
+      },
+      {
+        "type": "structure",
+        "severity": "low",
+        "message": "Missing workflow_dispatch trigger for manual execution"
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": 2,
+      "action": "Address high-severity naming and security issues",
+      "count": 3
+    },
+    {
+      "priority": 3,
+      "action": "Implement automated workflow generation/refactoring tool",
+      "details": "High number of non-compliant workflows detected"
+    },
+    {
+      "priority": 4,
+      "action": "Add workflow validation to pre-commit hooks",
+      "details": "Prevent non-compliant workflows from being committed"
+    }
+  ],
+  "nextSteps": [
+    "1. Fix critical and high-severity issues first",
+    "2. Apply naming convention refactoring",
+    "3. Add missing documentation headers",
+    "4. Implement performance optimizations",
+    "5. Set up continuous compliance monitoring"
+  ]
+}

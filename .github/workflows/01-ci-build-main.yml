@@ -1,0 +1,334 @@
+# ====================================================================
+# 🚀 CI - Main Build Pipeline
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#
+# 主な処理:
+#   1. 🔧 セットアップ: 🔧 Setup & Change Detection
+#   2. 📌 処理: 📊 Intelligent Change Detection
+#   3. ✅ 品質: 🎯 Quality Assurance Matrix
+#   4. 🧪 テスト: 🧪 Test Execution Matrix
+#   5. 🏗️ ビルド: 📦 Build & Package
+#   6. ✅ 品質: 🚪 Quality Gate Enforcement
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F680 CI - Main Build Pipeline"
+'on':
+  push:
+    branches:
+      - main
+      - develop
+      - test/**
+      - feature/**
+    paths-ignore:
+      - '**.md'
+      - .github/ISSUE_TEMPLATE/**
+      - docs/**
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+        default: development
+      parallel-execution:
+        description: Enable parallel job execution
+        required: false
+        type: boolean
+        default: true
+      quality-gate-level:
+        description: Quality gate enforcement level
+        required: false
+        type: choice
+        options:
+          - strict
+          - moderate
+          - lenient
+        default: moderate
+      force-full-test:
+        description: Force full test suite execution
+        required: false
+        type: boolean
+        default: false
+env:
+  NODE_VERSION: '18'
+  ENVIRONMENT: '${{ inputs.environment || ''development'' }}'
+  PARALLEL_JOBS: '${{ inputs.parallel-execution && ''4'' || ''1'' }}'
+  QUALITY_LEVEL: '${{ inputs.quality-gate-level || ''moderate'' }}'
+  CI: true
+  FORCE_COLOR: 1
+  NODE_OPTIONS: '--max-old-space-size=6144'
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+  HUSKY: 0
+  DISABLE_ESLINT_PLUGIN: false
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+  checks: write
+  pull-requests: write
+  id-token: write
+concurrency:
+  group: 'ci-build-${{ github.ref }}-${{ github.event_name }}'
+  cancel-in-progress: '${{ github.event_name == ''pull_request'' }}'
+jobs:
+  setup-and-detect:
+    name: "\U0001F527 セットアップ: \U0001F527 Setup & Change Detection"
+    uses: ./.github/workflows/templates/devops-workflow-template.yml
+    with:
+      workflow-category: ci
+      environment: '${{ inputs.environment || ''development'' }}'
+      node-version: '18'
+      enable-caching: true
+      enable-notifications: false
+      parallel-jobs: 4
+    secrets:
+      CLAUDE_API_KEY: '${{ secrets.CLAUDE_API_KEY }}'
+    timeout-minutes: 30
+  change-detection:
+    name: "\U0001F4CC 処理: \U0001F4CA Intelligent Change Detection"
+    runs-on: ubuntu-latest
+    needs:
+      - setup-and-detect
+    outputs:
+      has-code-changes: '${{ steps.changes.outputs.code }}'
+      has-test-changes: '${{ steps.changes.outputs.tests }}'
+      has-config-changes: '${{ steps.changes.outputs.config }}'
+      has-docs-changes: '${{ steps.changes.outputs.docs }}'
+      affected-areas: '${{ steps.analysis.outputs.areas }}'
+      test-strategy: '${{ steps.strategy.outputs.strategy }}'
+    steps:
+      - name: "\U0001F4E5 Checkout for Analysis"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "\U0001F50D Detect Changed Files"
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'public/**'
+            tests:
+              - '**/*.test.js'
+              - '**/*.test.jsx'
+              - '**/*.spec.js'
+              - 'tests/**'
+            config:
+              - 'package.json'
+              - 'vite.config.js'
+              - 'tailwind.config.js'
+              - '*.config.js'
+            docs:
+              - '**.md'
+              - 'docs/**'
+      - name: "\U0001F4C8 Impact Analysis"
+        id: analysis
+        run: "echo \"\U0001F50D Analyzing change impact...\"\naffected_areas=\"\"\n\nif [ \"${{ steps.changes.outputs.code }}\" == \"true\" ]; then\n  affected_areas=\"${affected_areas},frontend\"\nfi\nif [ \"${{ steps.changes.outputs.tests }}\" == \"true\" ]; then\n  affected_areas=\"${affected_areas},testing\"\nfi\nif [ \"${{ steps.changes.outputs.config }}\" == \"true\" ]; then\n  affected_areas=\"${affected_areas},build\"\nfi\n\naffected_areas=\"${affected_areas#,}\"  # Remove leading comma\necho \"areas=${affected_areas}\" >> $GITHUB_OUTPUT\necho \"\U0001F4CA Affected areas: ${affected_areas}\"\n"
+      - name: "\U0001F3AF Test Strategy Selection"
+        id: strategy
+        run: "if [ \"${{ inputs.force-full-test }}\" == \"true\" ]; then\n  strategy=\"full\"\nelif [ \"${{ steps.changes.outputs.code }}\" == \"true\" ] && [ \"${{ steps.changes.outputs.tests }}\" == \"true\" ]; then\n  strategy=\"comprehensive\"\nelif [ \"${{ steps.changes.outputs.code }}\" == \"true\" ]; then\n  strategy=\"focused\"\nelse\n  strategy=\"minimal\"\nfi\n\necho \"strategy=${strategy}\" >> $GITHUB_OUTPUT\necho \"\U0001F3AF Test strategy: ${strategy}\"\n"
+    timeout-minutes: 30
+  quality-checks:
+    name: "✅ 品質: \U0001F3AF Quality Assurance Matrix"
+    runs-on: ubuntu-latest
+    needs:
+      - setup-and-detect
+      - change-detection
+    if: needs.change-detection.outputs.has-code-changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        check-type:
+          - lint
+          - type-check
+          - security
+          - format
+    steps:
+      - name: "\U0001F4E5 Checkout"
+        uses: actions/checkout@v4
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
+        run: npm ci --prefer-offline
+      - name: "\U0001F50D ESLint Analysis"
+        if: matrix.check-type == 'lint'
+        run: "echo \"\U0001F50D Running ESLint with detailed reporting...\"\nnpm run lint -- --format=json --output-file=eslint-report.json || true\nnpm run lint -- --format=stylish\n\nif [ -f eslint-report.json ]; then\n  echo \"\U0001F4CA ESLint Summary:\"\n  jq -r '.[] | select(.errorCount > 0 or .warningCount > 0) | \"❌ \\(.filePath): \\(.errorCount) errors, \\(.warningCount) warnings\"' eslint-report.json || true\nfi\n"
+      - name: "\U0001F3D7️ TypeScript Type Check"
+        if: matrix.check-type == 'type-check'
+        run: "if [ -f tsconfig.json ]; then\n  echo \"\U0001F3D7️ Running TypeScript type checking...\"\n  npx tsc --noEmit --skipLibCheck\nelse\n  echo \"ℹ️ No tsconfig.json found, skipping type check\"\nfi\n"
+      - name: "\U0001F512 Security Audit"
+        if: matrix.check-type == 'security'
+        run: "echo \"\U0001F512 Running security audit...\"\nnpm audit --audit-level=high --json > security-audit.json || true\n\nif [ -f security-audit.json ]; then\n  vulnerabilities=$(jq -r '.metadata.vulnerabilities | keys[] as $k | \"\\($k): \\(.[$k])\"' security-audit.json 2>/dev/null || echo \"0 vulnerabilities\")\n  echo \"\U0001F512 Security Summary: $vulnerabilities\"\nfi\n"
+      - name: "\U0001F485 Code Formatting"
+        if: matrix.check-type == 'format'
+        run: "echo \"\U0001F485 Checking code formatting...\"\nnpm run format:check || {\n  echo \"❌ Code formatting issues detected\"\n  echo \"\U0001F4A1 Run 'npm run format' to fix formatting\"\n  exit 1\n}\n"
+      - name: "\U0001F4CA Upload Quality Reports"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'quality-report-${{ matrix.check-type }}-${{ github.run_number }}'
+          path: |
+            eslint-report.json
+            security-audit.json
+          retention-days: 7
+    timeout-minutes: 30
+  test-execution:
+    name: "\U0001F9EA テスト: \U0001F9EA Test Execution Matrix"
+    runs-on: ubuntu-latest
+    needs:
+      - setup-and-detect
+      - change-detection
+    if: needs.change-detection.outputs.has-code-changes == 'true' || needs.change-detection.outputs.has-test-changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type:
+          - unit
+          - integration
+          - e2e
+        include:
+          - test-type: unit
+            command: test
+            timeout: 10
+          - test-type: integration
+            command: 'test:integration'
+            timeout: 15
+          - test-type: e2e
+            command: 'test:e2e'
+            timeout: 20
+    timeout-minutes: '${{ matrix.timeout }}'
+    steps:
+      - name: "\U0001F4E5 Checkout"
+        uses: actions/checkout@v4
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
+        run: npm ci --prefer-offline
+      - name: "\U0001F9EA Execute ${{ matrix.test-type }} Tests"
+        run: "echo \"\U0001F9EA Running ${{ matrix.test-type }} tests...\"\n\n# Test strategy based on change detection\nstrategy=\"${{ needs.change-detection.outputs.test-strategy }}\"\necho \"\U0001F4CA Test strategy: $strategy\"\n\nif [ \"$strategy\" == \"minimal\" ] && [ \"${{ matrix.test-type }}\" == \"e2e\" ]; then\n  echo \"⏭️ Skipping E2E tests for minimal changes\"\n  exit 0\nfi\n\nnpm run ${{ matrix.command }} -- --reporter=json --outputFile=test-results-${{ matrix.test-type }}.json || test_exit_code=$?\nnpm run ${{ matrix.command }}\n\nexit ${test_exit_code:-0}\n"
+      - name: "\U0001F4CA Test Results Analysis"
+        if: always()
+        run: "if [ -f test-results-${{ matrix.test-type }}.json ]; then\n  echo \"\U0001F4CA ${{ matrix.test-type }} Test Summary:\"\n  jq -r '\"✅ Passed: \\(.stats.passes) | ❌ Failed: \\(.stats.failures) | ⏭️  Skipped: \\(.stats.pending) | ⏱️  Duration: \\(.stats.duration)ms\"' test-results-${{ matrix.test-type }}.json || true\nfi\n"
+      - name: "\U0001F4E4 Upload Test Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'test-results-${{ matrix.test-type }}-${{ github.run_number }}'
+          path: |
+            test-results-${{ matrix.test-type }}.json
+            coverage/
+          retention-days: 30
+  build-and-package:
+    name: "\U0001F3D7️ ビルド: \U0001F4E6 Build & Package"
+    runs-on: ubuntu-latest
+    needs:
+      - setup-and-detect
+      - change-detection
+      - quality-checks
+    if: always() && (needs.quality-checks.result == 'success' || needs.change-detection.outputs.has-code-changes != 'true')
+    outputs:
+      build-size: '${{ steps.analysis.outputs.build-size }}'
+      bundle-size: '${{ steps.analysis.outputs.bundle-size }}'
+      build-time: '${{ steps.timing.outputs.duration }}'
+    steps:
+      - name: ⏱️ Start Build Timing
+        id: start-time
+        run: echo "start-time=$(date +%s)" >> $GITHUB_OUTPUT
+      - name: "\U0001F4E5 Checkout"
+        uses: actions/checkout@v4
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
+        run: npm ci --prefer-offline
+      - name: "\U0001F3D7️ Production Build"
+        env:
+          NODE_ENV: production
+          VITE_BUILD_TIMESTAMP: '${{ github.run_number }}'
+          VITE_COMMIT_SHA: '${{ github.sha }}'
+        run: "echo \"\U0001F3D7️ Building production artifacts...\"\nnpm run build\n\necho \"✅ Build completed successfully\"\nls -la dist/\n"
+      - name: "\U0001F4CA Build Analysis"
+        id: analysis
+        run: "if [ -d dist ]; then\n  build_size=$(du -sh dist | cut -f1)\n  \n  # Find main bundle file\n  main_bundle=$(find dist -name \"*.js\" -type f | head -1)\n  if [ -n \"$main_bundle\" ]; then\n    bundle_size=$(stat -c%s \"$main_bundle\" | numfmt --to=iec-i --suffix=B)\n  else\n    bundle_size=\"unknown\"\n  fi\n  \n  echo \"build-size=${build_size}\" >> $GITHUB_OUTPUT\n  echo \"bundle-size=${bundle_size}\" >> $GITHUB_OUTPUT\n  \n  echo \"\U0001F4CA Build Analysis:\"\n  echo \"  Total Size: ${build_size}\"\n  echo \"  Main Bundle: ${bundle_size}\"\n  \n  # Generate build manifest\n  cat > dist/build-manifest.json << EOF\n{\n  \"build_number\": \"${{ github.run_number }}\",\n  \"commit_sha\": \"${{ github.sha }}\",\n  \"branch\": \"${{ github.ref_name }}\",\n  \"timestamp\": \"$(date -Iseconds)\",\n  \"environment\": \"${{ env.ENVIRONMENT }}\",\n  \"build_size\": \"${build_size}\",\n  \"bundle_size\": \"${bundle_size}\"\n}\nEOF\n  \nelse\n  echo \"❌ Build directory not found\"\n  exit 1\nfi\n"
+      - name: ⏱️ Calculate Build Time
+        id: timing
+        run: |
+          start_time="${{ steps.start-time.outputs.start-time }}"
+          end_time="$(date +%s)"
+          duration=$((end_time - start_time))
+          echo "duration=${duration}" >> $GITHUB_OUTPUT
+          echo "⏱️ Build completed in ${duration} seconds"
+      - name: "\U0001F4E4 Upload Build Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'build-artifacts-${{ github.run_number }}'
+          path: |
+            dist/
+            !dist/**/*.map
+          retention-days: 30
+          compression-level: 9
+    timeout-minutes: 30
+  quality-gate:
+    name: "✅ 品質: \U0001F6AA Quality Gate Enforcement"
+    runs-on: ubuntu-latest
+    needs:
+      - setup-and-detect
+      - change-detection
+      - quality-checks
+      - test-execution
+      - build-and-package
+    if: always()
+    steps:
+      - name: "\U0001F4CA Collect Results"
+        id: collect
+        run: "echo \"\U0001F4CA Collecting pipeline results...\"\n\n# Job status collection\nsetup_status=\"${{ needs.setup-and-detect.result }}\"\nquality_status=\"${{ needs.quality-checks.result }}\"\ntest_status=\"${{ needs.test-execution.result }}\"\nbuild_status=\"${{ needs.build-and-package.result }}\"\n\necho \"\U0001F50D Pipeline Status Summary:\"\necho \"  Setup: ${setup_status}\"\necho \"  Quality Checks: ${quality_status}\"\necho \"  Test Execution: ${test_status}\"\necho \"  Build & Package: ${build_status}\"\n\n# Quality gate logic based on level\nquality_level=\"${{ env.QUALITY_LEVEL }}\"\necho \"\U0001F6AA Quality Gate Level: ${quality_level}\"\n\ncase \"${quality_level}\" in\n  \"strict\")\n    if [[ \"${quality_status}\" != \"success\" || \"${test_status}\" != \"success\" || \"${build_status}\" != \"success\" ]]; then\n      echo \"gate_result=failed\" >> $GITHUB_OUTPUT\n      echo \"❌ STRICT: All stages must pass\"\n    else\n      echo \"gate_result=passed\" >> $GITHUB_OUTPUT\n      echo \"✅ STRICT: All quality gates passed\"\n    fi\n    ;;\n  \"moderate\")\n    if [[ \"${build_status}\" != \"success\" ]]; then\n      echo \"gate_result=failed\" >> $GITHUB_OUTPUT\n      echo \"❌ MODERATE: Build must succeed\"\n    elif [[ \"${quality_status}\" == \"failure\" && \"${test_status}\" == \"failure\" ]]; then\n      echo \"gate_result=failed\" >> $GITHUB_OUTPUT\n      echo \"❌ MODERATE: Both quality and tests cannot fail\"\n    else\n      echo \"gate_result=passed\" >> $GITHUB_OUTPUT\n      echo \"✅ MODERATE: Quality gate conditions met\"\n    fi\n    ;;\n  \"lenient\")\n    if [[ \"${build_status}\" == \"success\" ]]; then\n      echo \"gate_result=passed\" >> $GITHUB_OUTPUT\n      echo \"✅ LENIENT: Build succeeded, allowing through\"\n    else\n      echo \"gate_result=failed\" >> $GITHUB_OUTPUT\n      echo \"❌ LENIENT: Build failed, cannot proceed\"\n    fi\n    ;;\nesac\n"
+      - name: "\U0001F4C8 Generate Pipeline Report"
+        run: "cat > pipeline-report.md << EOF\n# \U0001F680 CI Pipeline Report\n\n## \U0001F4CA Pipeline Summary\n- **Run Number**: ${{ github.run_number }}\n- **Commit**: ${{ github.sha }}\n- **Branch**: ${{ github.ref_name }}\n- **Environment**: ${{ env.ENVIRONMENT }}\n- **Quality Level**: ${{ env.QUALITY_LEVEL }}\n- **Triggered By**: ${{ github.actor }}\n\n## \U0001F3AF Results\n| Stage | Status | Duration |\n|-------|--------|----------|\n| Setup | ${{ needs.setup-and-detect.result }} | ${{ needs.setup-and-detect.outputs.execution-time }}s |\n| Quality Checks | ${{ needs.quality-checks.result }} | - |\n| Test Execution | ${{ needs.test-execution.result }} | - |\n| Build & Package | ${{ needs.build-and-package.result }} | ${{ needs.build-and-package.outputs.build-time }}s |\n\n## \U0001F4E6 Build Metrics  \n- **Build Size**: ${{ needs.build-and-package.outputs.build-size }}\n- **Bundle Size**: ${{ needs.build-and-package.outputs.bundle-size }}\n\n## \U0001F6AA Quality Gate\n**Result**: ${{ steps.collect.outputs.gate_result }}\n\n---\n*Generated by DevOps CI Pipeline v2.0.0*\nEOF\n\ncat pipeline-report.md\n"
+      - name: "\U0001F6AA Quality Gate Decision"
+        run: |
+          if [ "${{ steps.collect.outputs.gate_result }}" == "failed" ]; then
+            echo "❌ Quality Gate FAILED - Pipeline rejected"
+            exit 1
+          else
+            echo "✅ Quality Gate PASSED - Pipeline approved"
+          fi
+      - name: "\U0001F4E4 Upload Pipeline Report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'pipeline-report-${{ github.run_number }}'
+          path: pipeline-report.md
+          retention-days: 90
+    timeout-minutes: 30

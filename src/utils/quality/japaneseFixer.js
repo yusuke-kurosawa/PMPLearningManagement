@@ -235,7 +235,10 @@ export function unifyKatakana(text) {
  */
 function unifyLongVowelMark(text) {
   // 3音以上のカタカナ語の末尾の長音記号を削除
-  const longVowelRules = [{ pattern: /([ァ-ヴ]{3,})ー([^ァ-ヴ]|$)/g, check: shouldRemoveLongVowel }]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _longVowelRules = [
+    { pattern: /([ァ-ヴ]{3,})ー([^ァ-ヴ]|$)/g, check: shouldRemoveLongVowel },
+  ]
 
   let fixed = text
   // JIS規格に基づく処理

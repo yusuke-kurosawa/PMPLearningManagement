@@ -13,9 +13,11 @@
 - **Recent Changes**: [recent-changes.md](recent-changes.md)
 
 ### Templates & Guides
-- **Code Review**: [.claude/prompts/code-review-template.md](../prompts/code-review-template.md) → [Full Guide](../../docs/development/code-review-guide.md)
-- **Architecture Review**: [.claude/prompts/architecture-review-template.md](../prompts/architecture-review-template.md) → [Full Guide](../../docs/development/architecture-review-guide.md)
-- **Agent Definitions**: [.claude/agents/README.md](../agents/README.md) → [Full Definitions](../../docs/development/agent-definitions/)
+- **Code Review**: [Code Review Template](../prompts/code-review-template.md) → [Full Guide](../../docs/development/code-review-guide.md)
+- **Architecture Review**: [Architecture Template](../prompts/architecture-review-template.md) → [Full Guide](../../docs/development/architecture-review-guide.md)
+- **Agent Definitions**: [Agent Overview](../agents/README.md) → [Full Definitions](../../docs/development/agent-definitions/)
+- **Policies**: [Policy Overview](../policies/README.md) → [Full Policies](../../docs/policies/)
+- **Prompts**: [Prompt Templates](../prompts/README.md) → [Full Prompts](../../docs/prompts/)
 
 ## Documentation Hub
 
@@ -36,9 +38,9 @@
 3. [File Locations](../quick-ref/file-locations.md) - Find files quickly
 
 ### Code Review Process
-1. [Code Review Template](../prompts/code-review-template.md) - Quick template
-2. [Code Review Guide](../../docs/development/code-review-guide.md) - Full process
-3. [Architecture Review](../../docs/development/architecture-review-guide.md) - If architectural changes
+1. [Quick Template](../prompts/code-review-template.md) - Fast checklist
+2. [Full Guide](../../docs/development/code-review-guide.md) - Complete process
+3. [Architecture Guide](../../docs/development/architecture-review-guide.md) - For architectural changes
 
 ### IDD Workflow
 1. [Commands](../quick-ref/commands.md) - `npm run idd:check`
