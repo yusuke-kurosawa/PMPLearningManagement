@@ -6,9 +6,10 @@
 import Redis from 'ioredis'
 import { z } from 'zod'
 import { getRedisClient } from './rateLimiting'
+import { logger } from '../../services/logger'
 
 // GeoIP レスポンススキーマ
-const GeoLocationSchema = z.object({
+const _GeoLocationSchema = z.object({
   ip: z.string().ip(),
   country: z.string(),
   countryCode: z.string().length(2),
@@ -27,7 +28,7 @@ const GeoLocationSchema = z.object({
   threat: z.number().min(0).max(100).default(0),
 })
 
-export type GeoLocation = z.infer<typeof GeoLocationSchema>
+export type GeoLocation = z.infer<typeof _GeoLocationSchema>
 
 // 地理制限設定
 export interface GeoRestrictionConfig {
@@ -153,7 +154,9 @@ export class GeoIPService {
       await this.cacheLocation(ip, fallbackData)
       return fallbackData
     } catch (error) {
-      console.error('GeoIP lookup error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('GeoIP lookup error:', error)
+      }
       return null
     }
   }
@@ -202,7 +205,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data),
       }
     } catch (error) {
-      console.error('IP-API fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('IP-API fetch error:', error)
+      }
       return null
     }
   }
@@ -246,7 +251,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data.security),
       }
     } catch (error) {
-      console.error('IPGeolocation fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('IPGeolocation fetch error:', error)
+      }
       return null
     }
   }
@@ -293,7 +300,9 @@ export class GeoIPService {
         threat: this.calculateThreatScore(data.traits),
       }
     } catch (error) {
-      console.error('MaxMind fetch error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('MaxMind fetch error:', error)
+      }
       return null
     }
   }
@@ -304,7 +313,7 @@ export class GeoIPService {
   private async getCachedLocation(ip: string): Promise<GeoLocation | null> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return null
+      if (!this.redis) {return null}
 
       const cacheKey = `${this.cachePrefix}:${ip}`
       const cached = await this.redis.get(cacheKey)
@@ -315,7 +324,9 @@ export class GeoIPService {
 
       return null
     } catch (error) {
-      console.error('Cache retrieval error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache retrieval error:', error)
+      }
       return null
     }
   }
@@ -326,28 +337,30 @@ export class GeoIPService {
   private async cacheLocation(ip: string, location: GeoLocation): Promise<void> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       const cacheKey = `${this.cachePrefix}:${ip}`
       await this.redis.setex(cacheKey, this.cacheTTL, JSON.stringify(location))
     } catch (error) {
-      console.error('Cache storage error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache storage error:', error)
+      }
     }
   }
 
   /**
    * 脅威スコア計算
    */
-  private calculateThreatScore(securityData: any): number {
+  private calculateThreatScore(securityData: unknown): number {
     let score = 0
 
-    if (securityData?.is_proxy || securityData?.proxy) score += 30
-    if (securityData?.is_vpn || securityData?.vpn) score += 20
-    if (securityData?.is_tor || securityData?.tor) score += 50
-    if (securityData?.is_hosting || securityData?.hosting) score += 15
-    if (securityData?.is_anonymous_proxy) score += 40
-    if (securityData?.threat_level === 'high') score += 60
-    if (securityData?.threat_level === 'medium') score += 30
+    if (securityData?.is_proxy || securityData?.proxy) {score += 30}
+    if (securityData?.is_vpn || securityData?.vpn) {score += 20}
+    if (securityData?.is_tor || securityData?.tor) {score += 50}
+    if (securityData?.is_hosting || securityData?.hosting) {score += 15}
+    if (securityData?.is_anonymous_proxy) {score += 40}
+    if (securityData?.threat_level === 'high') {score += 60}
+    if (securityData?.threat_level === 'medium') {score += 30}
 
     return Math.min(100, score)
   }
@@ -366,10 +379,10 @@ export class GeoIPService {
    * プライベートIP判定
    */
   private isPrivateIP(ip: string): boolean {
-    if (ip === '127.0.0.1' || ip === '::1') return true
-    if (ip.startsWith('192.168.')) return true
-    if (ip.startsWith('10.')) return true
-    if (ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) return true
+    if (ip === '127.0.0.1' || ip === '::1') {return true}
+    if (ip.startsWith('192.168.')) {return true}
+    if (ip.startsWith('10.')) {return true}
+    if (ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {return true}
     return false
   }
 
@@ -472,7 +485,9 @@ export class GeoIPService {
 
       return { allowed: true, location }
     } catch (error) {
-      console.error('Geo restriction check error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Geo restriction check error:', error)
+      }
       return {
         allowed: false,
         reason: 'Geo restriction check failed',
@@ -591,7 +606,9 @@ export class GeoIPService {
           recommendations.length > 0 ? recommendations : ['Continue normal monitoring'],
       }
     } catch (error) {
-      console.error('Anomaly detection error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Anomaly detection error:', error)
+      }
       return {
         isAnomalous: true,
         confidence: 60,
@@ -610,7 +627,7 @@ export class GeoIPService {
     timeWindow: number
   ): Promise<Array<GeoLocation & { timestamp: number }>> {
     try {
-      if (!this.redis) return []
+      if (!this.redis) {return []}
 
       const key = `user_location_history:${userId}`
       const cutoff = Date.now() - timeWindow
@@ -630,7 +647,9 @@ export class GeoIPService {
 
       return history
     } catch (error) {
-      console.error('Location history retrieval error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Location history retrieval error:', error)
+      }
       return []
     }
   }
@@ -643,7 +662,7 @@ export class GeoIPService {
     location: GeoLocation & { timestamp: number }
   ): Promise<void> {
     try {
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       const key = `user_location_history:${userId}`
       const locationData = JSON.stringify(location)
@@ -651,7 +670,9 @@ export class GeoIPService {
       await this.redis.zadd(key, location.timestamp, locationData)
       await this.redis.expire(key, 30 * 24 * 60 * 60) // 30日間保持
     } catch (error) {
-      console.error('Location history save error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Location history save error:', error)
+      }
     }
   }
 
@@ -756,7 +777,9 @@ export class GeoIPService {
         proxyDetection: { proxy: 0, vpn: 0, tor: 0 }, // 実装略
       }
     } catch (error) {
-      console.error('Geo stats error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Geo stats error:', error)
+      }
       return {
         totalRequests: 0,
         uniqueCountries: 0,
@@ -773,7 +796,7 @@ export class GeoIPService {
   async clearCache(ip?: string): Promise<void> {
     try {
       await this.initializeRedis()
-      if (!this.redis) return
+      if (!this.redis) {return}
 
       if (ip) {
         const cacheKey = `${this.cachePrefix}:${ip}`
@@ -786,7 +809,9 @@ export class GeoIPService {
         }
       }
     } catch (error) {
-      console.error('Cache clear error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache clear error:', error)
+      }
     }
   }
 }

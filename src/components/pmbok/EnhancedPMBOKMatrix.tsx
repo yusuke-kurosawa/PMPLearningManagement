@@ -4,27 +4,28 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
+import { logger } from '../../services/logger'
 import {
   Search,
-  Filter,
+  _Filter,
   BookOpen,
   ChevronDown,
   ChevronUp,
   Star,
-  StarOff,
+  _StarOff,
   Eye,
   ExternalLink,
   Download,
   Settings,
-  RotateCcw,
+  _RotateCcw,
   Bookmark,
   BookmarkCheck,
   Lightbulb,
   ArrowRight,
   Clock,
-  Users,
-  TrendingUp,
-  Info,
+  _Users,
+  _TrendingUp,
+  _Info,
   CheckCircle,
   AlertCircle,
   RefreshCw,
@@ -113,16 +114,17 @@ const PROCESS_GROUPS = [
   'Closing',
 ]
 
-const PMBOK7_PERFORMANCE_DOMAINS = [
-  'Stakeholders',
-  'Team',
-  'Development Approach and Life Cycle',
-  'Planning',
-  'Project Work',
-  'Delivery',
-  'Measurement',
-  'Uncertainty',
-]
+// TODO: Will be used in future
+// const PMBOK7_PERFORMANCE_DOMAINS = [
+//   'Stakeholders',
+//   'Team',
+//   'Development Approach and Life Cycle',
+//   'Planning',
+//   'Project Work',
+//   'Delivery',
+//   'Measurement',
+//   'Uncertainty',
+// ]
 
 const EnhancedPMBOKMatrix: React.FC = () => {
   const { toast } = useToast()
@@ -138,7 +140,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
   const [selectedKnowledgeArea, setSelectedKnowledgeArea] = useState<string>('all')
   const [selectedProcessGroup, setSelectedProcessGroup] = useState<string>('all')
   const [selectedVersion, setSelectedVersion] = useState<6 | 7 | 'both'>(7)
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
+  //   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all') // TODO: Will be used in future
   const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
   const [showOnlyUnstudied, setShowOnlyUnstudied] = useState(false)
 
@@ -192,7 +194,9 @@ const EnhancedPMBOKMatrix: React.FC = () => {
 
       setUserProgress(progressMap)
     } catch (error) {
-      console.error('Failed to load user progress:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to load user progress:', error)
+      }
     }
   }
 
@@ -212,7 +216,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
           process.outputs.some((output) => output.name.toLowerCase().includes(query)) ||
           process.toolsAndTechniques.some((tool) => tool.name.toLowerCase().includes(query))
 
-        if (!matchesSearch) return false
+        if (!matchesSearch) {return false}
       }
 
       // Knowledge area filter
@@ -549,7 +553,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   {/* Version Toggle */}
                   <Select
                     value={selectedVersion.toString()}
-                    onValueChange={(value) => setSelectedVersion(value as any)}
+                    onValueChange={(value) => setSelectedVersion(value as 6 | 7 | 'both')}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -561,7 +565,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     </SelectContent>
                   </Select>
 
-                  {/* Knowledge Area Filter */}
+                  {/* Knowledge Area _Filter */}
                   <Select value={selectedKnowledgeArea} onValueChange={setSelectedKnowledgeArea}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Knowledge Area" />
@@ -576,7 +580,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                     </SelectContent>
                   </Select>
 
-                  {/* Process Group Filter */}
+                  {/* Process Group _Filter */}
                   <Select value={selectedProcessGroup} onValueChange={setSelectedProcessGroup}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Process Group" />
@@ -592,7 +596,10 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                   </Select>
 
                   {/* View Mode */}
-                  <Select value={viewMode} onValueChange={setViewMode as any}>
+                  <Select
+                    value={viewMode}
+                    onValueChange={(value) => setViewMode(value as 'matrix' | 'list' | 'cards')}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
@@ -1198,7 +1205,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                           {selectedProcess.relatedProcesses.map((relatedId) => {
                             const relatedProcess = processes.find((p) => p.id === relatedId)
-                            if (!relatedProcess) return null
+                            if (!relatedProcess) {return null}
 
                             return (
                               <div
@@ -1240,7 +1247,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
                         <div className="rounded border border-blue-200 bg-blue-50 p-4">
                           <h4 className="mb-2 font-medium text-blue-900">📚 Study Focus Areas</h4>
                           <ul className="space-y-1 text-sm text-blue-800">
-                            <li>• Understand the process purpose and when it's performed</li>
+                            <li>• Understand the process purpose and when it&apos;s performed</li>
                             <li>• Memorize key inputs, tools & techniques, and outputs</li>
                             <li>• Know the relationships with other processes</li>
                             <li>• Practice with sample scenarios and questions</li>

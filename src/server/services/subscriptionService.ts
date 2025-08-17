@@ -7,9 +7,10 @@
 import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { SubscriptionPlan, PaymentStatus } from '@prisma/client'
+import { SubscriptionPlan } from '@prisma/client'
 import { StripeService, SUBSCRIPTION_PLANS } from './stripeService'
-import { createPermissionChecker } from '@/server/auth/rbac'
+import { logger } from '../../services/logger'
+// import { createPermissionChecker } from '@/server/auth/rbac' // TODO: Will be used in future
 
 // サブスクリプション情報型定義
 export interface SubscriptionInfo {
@@ -125,7 +126,9 @@ export class SubscriptionService {
         throw error
       }
 
-      console.error('サブスクリプション情報取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('サブスクリプション情報取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプション情報の取得中にエラーが発生しました',
@@ -137,7 +140,7 @@ export class SubscriptionService {
   static async changePlan(
     userId: string,
     options: PlanChangeOptions
-  ): Promise<{ success: boolean; message: string; subscription?: any }> {
+  ): Promise<{ success: boolean; message: string; subscription?: unknown }> {
     try {
       const currentUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -190,7 +193,9 @@ export class SubscriptionService {
         throw error
       }
 
-      console.error('プラン変更エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プラン変更エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'プランの変更中にエラーが発生しました',
@@ -229,7 +234,9 @@ export class SubscriptionService {
           : '期間終了後にフリープランにダウングレードされます',
       }
     } catch (error) {
-      console.error('フリープランダウングレードエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('フリープランダウングレードエラー:', error)
+      }
       throw error
     }
   }
@@ -252,7 +259,9 @@ export class SubscriptionService {
         clientSecret: result.clientSecret,
       }
     } catch (error) {
-      console.error('フリープランアップグレードエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('フリープランアップグレードエラー:', error)
+      }
       throw error
     }
   }
@@ -325,7 +334,9 @@ export class SubscriptionService {
         throw error
       }
 
-      console.error('使用量計算エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('使用量計算エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '使用量の計算中にエラーが発生しました',
@@ -352,7 +363,7 @@ export class SubscriptionService {
       const usage = await this.calculateUsage(userId)
 
       switch (action) {
-        case 'exam_attempt':
+        case 'exam_attempt': {
           if (limits.examAttemptsPerMonth === null) {
             return { allowed: true } // 無制限
           }
@@ -363,8 +374,9 @@ export class SubscriptionService {
             reason: examRemaining <= 0 ? '今月の模擬試験上限に達しています' : undefined,
             remaining: examRemaining,
           }
+        }
 
-        case 'ai_query':
+        case 'ai_query': {
           if (limits.aiQueriesPerMonth === null) {
             return { allowed: true } // 無制限
           }
@@ -375,20 +387,24 @@ export class SubscriptionService {
             reason: aiRemaining <= 0 ? '今月のAI質問上限に達しています' : undefined,
             remaining: aiRemaining,
           }
+        }
 
-        case 'data_export':
+        case 'data_export': {
           if (limits.dataExportsPerMonth === null) {
             return { allowed: true } // 無制限
           }
 
           // データエクスポート回数は別途追跡が必要（実装に応じて調整）
           return { allowed: true }
+        }
 
         default:
           return { allowed: false, reason: '不明なアクション' }
       }
     } catch (error) {
-      console.error('使用量制限チェックエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('使用量制限チェックエラー:', error)
+      }
       return { allowed: false, reason: 'システムエラーが発生しました' }
     }
   }
@@ -412,7 +428,9 @@ export class SubscriptionService {
         },
       })
     } catch (error) {
-      console.error('フリープラン制限適用エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('フリープラン制限適用エラー:', error)
+      }
       // エラーログは記録するが、処理は継続
     }
   }
@@ -437,7 +455,9 @@ export class SubscriptionService {
       // データベースに同期
       await StripeService.syncSubscriptionToDatabase(stripeSubscription, userId)
     } catch (error) {
-      console.error('サブスクリプション同期エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('サブスクリプション同期エラー:', error)
+      }
       // 同期エラーは記録するが、例外を投げない
     }
   }
@@ -450,7 +470,7 @@ export class SubscriptionService {
     Array<{
       id: string
       action: string
-      details: any
+      details: unknown
       createdAt: Date
     }>
   > {
@@ -481,7 +501,9 @@ export class SubscriptionService {
         createdAt: activity.createdAt,
       }))
     } catch (error) {
-      console.error('サブスクリプション履歴取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('サブスクリプション履歴取得エラー:', error)
+      }
       return []
     }
   }
@@ -548,7 +570,9 @@ export class SubscriptionService {
         throw error
       }
 
-      console.error('サブスクリプション再開エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('サブスクリプション再開エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'サブスクリプションの再開中にエラーが発生しました',
@@ -560,7 +584,7 @@ export class SubscriptionService {
   private static async recordSubscriptionActivity(
     userId: string,
     action: string,
-    details: any
+    details: unknown
   ): Promise<void> {
     try {
       await prisma.userActivity.create({
@@ -571,7 +595,9 @@ export class SubscriptionService {
         },
       })
     } catch (error) {
-      console.error('アクティビティログ記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('アクティビティログ記録エラー:', error)
+      }
       // ログ記録エラーは処理を妨げない
     }
   }
@@ -604,15 +630,19 @@ export class SubscriptionService {
         try {
           await this.syncSubscriptionStatus(subscription.userId)
           processed++
-        } catch (error) {
-          console.error(`期限切れサブスクリプション処理エラー (${subscription.userId}):`, error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.error(`期限切れサブスクリプション処理エラー (${subscription.userId}):`, error)
+          }
           errors++
         }
       }
 
       return { processed, errors }
     } catch (error) {
-      console.error('期限切れサブスクリプション一括処理エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('期限切れサブスクリプション一括処理エラー:', error)
+      }
       return { processed: 0, errors: 1 }
     }
   }

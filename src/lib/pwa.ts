@@ -1,3 +1,10 @@
+import { logger } from '../services/logger'
+
+// 型定義の追加
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean
+}
+
 // PWA utilities and service worker management
 
 export interface PWAInstallPrompt {
@@ -50,7 +57,7 @@ class PWAManager {
     // Check if app is installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
+      (window.navigator as NavigatorWithStandalone).standalone === true
     ) {
       this.isInstalled = true
     }
@@ -61,7 +68,9 @@ class PWAManager {
       try {
         this.registration = await navigator.serviceWorker.register('/sw.js')
 
-        console.log('Service Worker registered successfully:', this.registration)
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Service Worker registered successfully:', this.registration)
+        }
 
         // Handle updates
         this.registration.addEventListener('updatefound', () => {
@@ -78,7 +87,9 @@ class PWAManager {
 
         return this.registration
       } catch (error) {
-        console.error('Service Worker registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Service Worker registration failed:', error)
+        }
         return null
       }
     }
@@ -102,7 +113,9 @@ class PWAManager {
 
       return false
     } catch (error) {
-      console.error('Error installing PWA:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Error installing PWA:', error)
+      }
       return false
     }
   }
@@ -146,7 +159,9 @@ class PWAManager {
 
       return subscription
     } catch (error) {
-      console.error('Error subscribing to notifications:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Error subscribing to notifications:', error)
+      }
       return null
     }
   }
@@ -172,19 +187,21 @@ class PWAManager {
   }
 
   // Offline storage management
-  async cacheUserData(key: string, data: any): Promise<void> {
+  async cacheUserData(key: string, data: unknown): Promise<void> {
     if ('caches' in window) {
       try {
         const cache = await caches.open('user-data')
         const response = new Response(JSON.stringify(data))
         await cache.put(key, response)
       } catch (error) {
-        console.error('Error caching user data:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Error caching user data:', error)
+        }
       }
     }
   }
 
-  async getCachedUserData(key: string): Promise<any | null> {
+  async getCachedUserData(key: string): Promise<unknown | null> {
     if ('caches' in window) {
       try {
         const cache = await caches.open('user-data')
@@ -193,14 +210,16 @@ class PWAManager {
           return await response.json()
         }
       } catch (error) {
-        console.error('Error retrieving cached data:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Error retrieving cached data:', error)
+        }
       }
     }
     return null
   }
 
   // Background sync
-  async syncWhenOnline(tag: string, data?: any): Promise<void> {
+  async syncWhenOnline(tag: string, data?: unknown): Promise<void> {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready
@@ -212,7 +231,9 @@ class PWAManager {
 
         await registration.sync.register(tag)
       } catch (error) {
-        console.error('Background sync registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Background sync registration failed:', error)
+        }
       }
     }
   }
@@ -237,7 +258,7 @@ export const isAndroid = (): boolean => {
 export const isStandalone = (): boolean => {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as NavigatorWithStandalone).standalone === true
   )
 }
 

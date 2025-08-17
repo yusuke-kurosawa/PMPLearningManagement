@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useTouchGestures, useHapticFeedback } from '@/hooks/useTouchGestures'
+import { useHapticFeedback } from '@/hooks/useTouchGestures'
 
 interface Process {
   id: string
@@ -221,7 +221,7 @@ export function MobilePMBOKMatrix({ processes, onProcessSelect }: MobilePMBOKMat
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
         {knowledgeAreas.map((area) => {
           const areaProcesses = groupedProcesses[area] || []
-          if (areaProcesses.length === 0) return null
+          if (areaProcesses.length === 0) {return null}
 
           return (
             <Card key={area}>

@@ -3,16 +3,16 @@
  * Developer 5: Redisキャッシング戦略・ミドルウェア・無効化ロジック実装のテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest'
 import {
   RedisCacheManager,
   createCacheMiddleware,
   SpecializedCacheHelpers,
   CacheKeyStrategy,
   type CacheEntry,
-  type CacheStats,
+  type CacheConfig as _CacheConfig
 } from '../redisCache'
-import { AdvancedCacheManager, PMPCacheStrategies, CacheStrategy } from '../cacheStrategies'
+import { AdvancedCacheManager, PMPCacheStrategies } from '../cacheStrategies'
 
 // Redis モック設定
 const mockRedis = {
@@ -331,7 +331,7 @@ describe('Redis キャッシングシステム', () => {
 
   describe('createCacheMiddleware', () => {
     let cacheManager: RedisCacheManager
-    let cacheMiddleware: any
+    let cacheMiddleware: unknown
 
     beforeEach(() => {
       cacheManager = new RedisCacheManager()
@@ -385,7 +385,7 @@ describe('Redis キャッシングシステム', () => {
 
     it('スキップ条件がある場合は適切にスキップする', async () => {
       const middleware = cacheMiddleware(CacheKeyStrategy.USER_DATA, 'user789', {
-        skipCache: (req: any) => req.bypassCache === true,
+        skipCache: (req: unknown) => req.bypassCache === true,
       })
 
       const mockHandler = vi.fn().mockResolvedValue({ id: '789', name: 'Bypassed User' })
@@ -404,9 +404,9 @@ describe('Redis キャッシングシステム', () => {
 
       const middleware = cacheMiddleware(
         CacheKeyStrategy.USER_DATA,
-        (req: any) => `user_${req.userId}`,
+        (req: unknown) => `user_${req.userId}`,
         {
-          generateKey: (req: any) => ({ role: req.userRole }),
+          generateKey: (req: unknown) => ({ role: req.userRole }),
         }
       )
 
@@ -688,8 +688,8 @@ describe('Redis キャッシングシステム', () => {
         'multi_layer',
         dataFetcher,
         [
-          { name: 'hot', ttl: 60, condition: (data: any) => data.items.length > 10 },
-          { name: 'warm', ttl: 300, condition: (data: any) => data.items.length > 0 },
+          { name: 'hot', ttl: 60, condition: (data: unknown) => data.items.length > 10 },
+          { name: 'warm', ttl: 300, condition: (data: unknown) => data.items.length > 0 },
           { name: 'cold', ttl: 3600 },
         ]
       )

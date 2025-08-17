@@ -4,12 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '../../services/logger'
 import {
   slidingWindowLimiter,
   ddosProtection,
   type RateLimitConfig,
 } from '@/lib/security/rateLimiting'
-import { z } from 'zod'
+// import { z } from 'zod' // TODO: Will be used in future
 
 // レート制限設定の種類
 export enum RateLimitType {
@@ -71,7 +72,8 @@ const defaultKeyGenerator = (req: NextRequest): string => {
 }
 
 // User-Agent解析
-const parseUserAgent = (
+const __parseUserAgent = (
+  // TODO: Will be used in future
   userAgent: string | null
 ): {
   isMobile: boolean
@@ -226,7 +228,9 @@ export function withRateLimit(options: RateLimitOptions) {
 
       return response
     } catch (error) {
-      console.error('Rate limiting middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Rate limiting middleware error:', error)
+      }
       // エラー時はリクエストを通す
       return handler(request)
     }
@@ -242,7 +246,9 @@ export const withAuthRateLimit = withRateLimit({
   type: RateLimitType.STRICT,
   enableDDoSProtection: true,
   onLimitReached: (req, identifier) => {
-    console.log(`Auth rate limit reached for ${identifier} at ${req.nextUrl.pathname}`)
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`Auth rate limit reached for ${identifier} at ${req.nextUrl.pathname}`)
+    }
   },
 })
 

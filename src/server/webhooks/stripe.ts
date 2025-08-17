@@ -9,6 +9,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/db'
 import { StripeService } from '@/server/services/stripeService'
 import { SubscriptionPlan } from '@prisma/client'
+import { logger } from '@/utils/logger'
 
 // Stripe WebHookイベント型定義
 type StripeWebHookEvent =
@@ -44,28 +45,28 @@ export async function handleStripeWebHook(req: NextRequest): Promise<NextRespons
     const signature = req.headers.get('stripe-signature')
 
     if (!signature) {
-      console.error('Stripe署名ヘッダーが見つかりません')
+      logger.error('Stripe署名ヘッダーが見つかりません')
       return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
     }
 
     // WebHook署名検証
     const event = StripeService.verifyWebhookSignature(body, signature)
 
-    console.log(`Stripe WebHookイベント受信: ${event.type} (${event.id})`)
+    logger.info(`Stripe WebHookイベント受信: ${event.type} (${event.id})`)
 
     // イベントタイプに応じた処理
     const handler = eventHandlers[event.type as StripeWebHookEvent]
 
     if (handler) {
       await handler(event)
-      console.log(`WebHookイベント処理完了: ${event.type}`)
+      logger.info(`WebHookイベント処理完了: ${event.type}`)
     } else {
-      console.log(`未処理のWebHookイベント: ${event.type}`)
+      logger.info(`未処理のWebHookイベント: ${event.type}`)
     }
 
     return NextResponse.json({ received: true }, { status: 200 })
   } catch (error) {
-    console.error('Stripe WebHook処理エラー:', error)
+    logger.error('Stripe WebHook処理エラー:', error)
 
     return NextResponse.json({ error: 'WebHook processing failed' }, { status: 400 })
   }
@@ -77,7 +78,7 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
   const userId = subscription.metadata.userId
 
   if (!userId) {
-    console.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
+    logger.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
     return
   }
 
@@ -101,9 +102,9 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`サブスクリプション作成完了: ${subscription.id} (User: ${userId})`)
+    logger.info(`サブスクリプション作成完了: ${subscription.id} (User: ${userId})`)
   } catch (error) {
-    console.error('サブスクリプション作成処理エラー:', error)
+    logger.error('サブスクリプション作成処理エラー:', error)
     throw error
   }
 }
@@ -114,7 +115,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
   const userId = subscription.metadata.userId
 
   if (!userId) {
-    console.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
+    logger.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
     return
   }
 
@@ -139,7 +140,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
         },
       })
 
-      console.log(
+      logger.info(
         `サブスクリプションステータス変更: ${subscription.id} (${previousAttributes.status} → ${subscription.status})`
       )
     }
@@ -158,7 +159,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
         },
       })
 
-      console.log(`サブスクリプションプラン変更: ${subscription.id}`)
+      logger.info(`サブスクリプションプラン変更: ${subscription.id}`)
     }
 
     // キャンセル予定が設定された場合
@@ -174,7 +175,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
         },
       })
 
-      console.log(`サブスクリプションキャンセル予定: ${subscription.id}`)
+      logger.info(`サブスクリプションキャンセル予定: ${subscription.id}`)
     }
 
     // キャンセル予定が取り消された場合
@@ -189,10 +190,10 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
         },
       })
 
-      console.log(`サブスクリプションキャンセル取り消し: ${subscription.id}`)
+      logger.info(`サブスクリプションキャンセル取り消し: ${subscription.id}`)
     }
   } catch (error) {
-    console.error('サブスクリプション更新処理エラー:', error)
+    logger.error('サブスクリプション更新処理エラー:', error)
     throw error
   }
 }
@@ -203,7 +204,7 @@ async function handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
   const userId = subscription.metadata.userId
 
   if (!userId) {
-    console.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
+    logger.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
     return
   }
 
@@ -233,9 +234,9 @@ async function handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`サブスクリプション削除完了: ${subscription.id} (User: ${userId})`)
+    logger.info(`サブスクリプション削除完了: ${subscription.id} (User: ${userId})`)
   } catch (error) {
-    console.error('サブスクリプション削除処理エラー:', error)
+    logger.error('サブスクリプション削除処理エラー:', error)
     throw error
   }
 }
@@ -245,7 +246,7 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
   const invoice = event.data.object as Stripe.Invoice
 
   if (!invoice.subscription) {
-    console.log('サブスクリプション以外の支払い成功:', invoice.id)
+    logger.info('サブスクリプション以外の支払い成功:', invoice.id)
     return
   }
 
@@ -259,7 +260,7 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
     }
 
     if (!userId) {
-      console.error('請求書に関連するユーザーIDが見つかりません:', invoice.id)
+      logger.error('請求書に関連するユーザーIDが見つかりません:', invoice.id)
       return
     }
 
@@ -291,11 +292,11 @@ async function handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(
+    logger.info(
       `支払い成功: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_paid} ${invoice.currency})`
     )
   } catch (error) {
-    console.error('支払い成功処理エラー:', error)
+    logger.error('支払い成功処理エラー:', error)
     throw error
   }
 }
@@ -305,7 +306,7 @@ async function handlePaymentFailed(event: Stripe.Event): Promise<void> {
   const invoice = event.data.object as Stripe.Invoice
 
   if (!invoice.subscription) {
-    console.log('サブスクリプション以外の支払い失敗:', invoice.id)
+    logger.info('サブスクリプション以外の支払い失敗:', invoice.id)
     return
   }
 
@@ -319,7 +320,7 @@ async function handlePaymentFailed(event: Stripe.Event): Promise<void> {
     }
 
     if (!userId) {
-      console.error('請求書に関連するユーザーIDが見つかりません:', invoice.id)
+      logger.error('請求書に関連するユーザーIDが見つかりません:', invoice.id)
       return
     }
 
@@ -353,11 +354,11 @@ async function handlePaymentFailed(event: Stripe.Event): Promise<void> {
     // 支払い失敗通知メール送信（実装に応じて）
     // await sendPaymentFailedEmail(userId, invoice)
 
-    console.log(
+    logger.info(
       `支払い失敗: ${invoice.id} (User: ${userId}, Amount: ${invoice.amount_due} ${invoice.currency})`
     )
   } catch (error) {
-    console.error('支払い失敗処理エラー:', error)
+    logger.error('支払い失敗処理エラー:', error)
     throw error
   }
 }
@@ -368,7 +369,7 @@ async function handleTrialWillEnd(event: Stripe.Event): Promise<void> {
   const userId = subscription.metadata.userId
 
   if (!userId) {
-    console.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
+    logger.error('サブスクリプションにユーザーIDが見つかりません:', subscription.id)
     return
   }
 
@@ -388,9 +389,9 @@ async function handleTrialWillEnd(event: Stripe.Event): Promise<void> {
     // トライアル終了予告メール送信（実装に応じて）
     // await sendTrialEndingEmail(userId, subscription)
 
-    console.log(`トライアル終了予告: ${subscription.id} (User: ${userId})`)
+    logger.info(`トライアル終了予告: ${subscription.id} (User: ${userId})`)
   } catch (error) {
-    console.error('トライアル終了予告処理エラー:', error)
+    logger.error('トライアル終了予告処理エラー:', error)
     throw error
   }
 }
@@ -409,7 +410,7 @@ async function handlePaymentMethodAttached(event: Stripe.Event): Promise<void> {
     }
 
     if (!userId) {
-      console.log('支払い方法に関連するユーザーIDが見つかりません:', paymentMethod.id)
+      logger.info('支払い方法に関連するユーザーIDが見つかりません:', paymentMethod.id)
       return
     }
 
@@ -427,9 +428,9 @@ async function handlePaymentMethodAttached(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`支払い方法追加: ${paymentMethod.id} (User: ${userId})`)
+    logger.info(`支払い方法追加: ${paymentMethod.id} (User: ${userId})`)
   } catch (error) {
-    console.error('支払い方法追加処理エラー:', error)
+    logger.error('支払い方法追加処理エラー:', error)
     throw error
   }
 }
@@ -440,7 +441,7 @@ async function handlePaymentIntentSucceeded(event: Stripe.Event): Promise<void> 
   const userId = paymentIntent.metadata?.userId
 
   if (!userId) {
-    console.log('PaymentIntentにユーザーIDが見つかりません:', paymentIntent.id)
+    logger.info('PaymentIntentにユーザーIDが見つかりません:', paymentIntent.id)
     return
   }
 
@@ -471,9 +472,9 @@ async function handlePaymentIntentSucceeded(event: Stripe.Event): Promise<void> 
       },
     })
 
-    console.log(`PaymentIntent成功: ${paymentIntent.id} (User: ${userId})`)
+    logger.info(`PaymentIntent成功: ${paymentIntent.id} (User: ${userId})`)
   } catch (error) {
-    console.error('PaymentIntent成功処理エラー:', error)
+    logger.error('PaymentIntent成功処理エラー:', error)
     throw error
   }
 }
@@ -484,7 +485,7 @@ async function handlePaymentIntentFailed(event: Stripe.Event): Promise<void> {
   const userId = paymentIntent.metadata?.userId
 
   if (!userId) {
-    console.log('PaymentIntentにユーザーIDが見つかりません:', paymentIntent.id)
+    logger.info('PaymentIntentにユーザーIDが見つかりません:', paymentIntent.id)
     return
   }
 
@@ -516,9 +517,9 @@ async function handlePaymentIntentFailed(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`PaymentIntent失敗: ${paymentIntent.id} (User: ${userId})`)
+    logger.info(`PaymentIntent失敗: ${paymentIntent.id} (User: ${userId})`)
   } catch (error) {
-    console.error('PaymentIntent失敗処理エラー:', error)
+    logger.error('PaymentIntent失敗処理エラー:', error)
     throw error
   }
 }
@@ -529,7 +530,7 @@ async function handleSetupIntentSucceeded(event: Stripe.Event): Promise<void> {
   const userId = setupIntent.metadata?.userId
 
   if (!userId) {
-    console.log('SetupIntentにユーザーIDが見つかりません:', setupIntent.id)
+    logger.info('SetupIntentにユーザーIDが見つかりません:', setupIntent.id)
     return
   }
 
@@ -546,9 +547,9 @@ async function handleSetupIntentSucceeded(event: Stripe.Event): Promise<void> {
       },
     })
 
-    console.log(`SetupIntent成功: ${setupIntent.id} (User: ${userId})`)
+    logger.info(`SetupIntent成功: ${setupIntent.id} (User: ${userId})`)
   } catch (error) {
-    console.error('SetupIntent成功処理エラー:', error)
+    logger.error('SetupIntent成功処理エラー:', error)
     throw error
   }
 }
@@ -569,10 +570,10 @@ export async function retryWebHookEvent(
 
     await handler(event)
 
-    console.log(`WebHookイベント再処理完了: ${event.type} (${eventId})`)
+    logger.info(`WebHookイベント再処理完了: ${event.type} (${eventId})`)
     return { success: true }
   } catch (error) {
-    console.error('WebHookイベント再処理エラー:', error)
+    logger.error('WebHookイベント再処理エラー:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -615,7 +616,7 @@ export async function getWebHookLogs(limit: number = 50): Promise<
       processedAt: activity.createdAt,
     }))
   } catch (error) {
-    console.error('WebHookログ取得エラー:', error)
+    logger.error('WebHookログ取得エラー:', error)
     return []
   }
 }

@@ -4,12 +4,38 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { logger } from '../../services/logger'
 import {
   getInstallPromptManager,
-  PWAInstallPromptManager,
+  _PWAInstallPromptManager,
   InstallPromptState,
 } from '../../lib/pwa/installPrompt'
 import { useToast } from '../../hooks/use-toast'
+
+// Navigator network connection type definition
+interface NetworkConnection {
+  effectiveType: '2g' | '3g' | '4g' | 'slow-2g'
+  downlink: number
+  saveData: boolean
+  addEventListener(type: string, listener: EventListener): void
+  removeEventListener(type: string, listener: EventListener): void
+}
+
+// Extended Navigator interface with experimental APIs
+interface ExtendedNavigator extends Navigator {
+  connection?: NetworkConnection
+  getBattery?: () => Promise<BatteryManager>
+}
+
+// Battery Manager interface
+interface BatteryManager {
+  charging: boolean
+  chargingTime: number
+  dischargingTime: number
+  level: number
+  addEventListener(type: string, listener: EventListener): void
+  removeEventListener(type: string, listener: EventListener): void
+}
 
 interface PWAContextType {
   // Install state
@@ -52,7 +78,7 @@ interface PWAContextType {
   releaseWakeLock: () => void
   getStorageUsage: () => Promise<StorageEstimate | null>
   registerForPush: () => Promise<PushSubscription | null>
-  syncWhenOnline: (data: any, endpoint: string) => void
+  syncWhenOnline: (data: unknown, endpoint: string) => void
 }
 
 interface PWAProviderProps {
@@ -92,7 +118,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   const [serviceWorkerReg, setServiceWorkerReg] = useState<ServiceWorkerRegistration | null>(null)
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null)
   const [offlineQueue, setOfflineQueue] = useState<
-    Array<{ data: any; endpoint: string; timestamp: number }>
+    Array<{ data: unknown; endpoint: string; timestamp: number }>
   >([])
 
   // Default config
@@ -158,9 +184,13 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           setupPeriodicSync(registration)
         }
 
-        console.log('PWA: Service Worker registered successfully')
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('PWA: Service Worker registered successfully')
+        }
       } catch (error) {
-        console.error('PWA: Service Worker registration failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('PWA: Service Worker registration failed:', error)
+        }
       }
     }
 
@@ -189,7 +219,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
     // Connection change (mobile)
     if ('connection' in navigator) {
-      ;(navigator as any).connection.addEventListener('change', updateNetworkInfo)
+      const extendedNavigator = navigator as ExtendedNavigator
+      extendedNavigator.connection?.addEventListener('change', updateNetworkInfo)
     }
 
     // Visibility change for wake lock management
@@ -201,7 +232,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     window.removeEventListener('offline', handleOffline)
 
     if ('connection' in navigator) {
-      ;(navigator as any).connection.removeEventListener('change', updateNetworkInfo)
+      const extendedNavigator = navigator as ExtendedNavigator
+      extendedNavigator.connection?.removeEventListener('change', updateNetworkInfo)
     }
 
     document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -256,15 +288,20 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   const setupPeriodicSync = async (registration: ServiceWorkerRegistration) => {
     try {
       // Request permission for periodic background sync
-      const status = await navigator.permissions.query({ name: 'periodic-background-sync' as any })
+      const status = await navigator.permissions.query({
+        name: 'periodic-background-sync' as PermissionName,
+      })
 
       if (status.state === 'granted' && 'periodicSync' in registration) {
-        await (registration as any).periodicSync.register('content-sync', {
+        const extendedRegistration = registration as ExtendedServiceWorkerRegistration
+        await extendedRegistration.periodicSync?.register('content-sync', {
           minInterval: defaultConfig.syncInterval,
         })
       }
-    } catch (error) {
-      console.log('PWA: Periodic background sync not supported or permission denied')
+    } catch (_error) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('PWA: Periodic background sync not supported or permission denied')
+      }
     }
   }
 
@@ -299,7 +336,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
   const updateNetworkInfo = () => {
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
+      const extendedNavigator = navigator as ExtendedNavigator
+      const connection = extendedNavigator.connection
       setConnectionType(connection.effectiveType || 'unknown')
       setSaveData(connection.saveData || false)
     }
@@ -312,7 +350,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
         setOfflineQueue(JSON.parse(stored))
       }
     } catch (error) {
-      console.error('PWA: Failed to load offline queue:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to load offline queue:', error)
+      }
     }
   }
 
@@ -320,12 +360,14 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     try {
       localStorage.setItem('pwa-offline-queue', JSON.stringify(queue))
     } catch (error) {
-      console.error('PWA: Failed to save offline queue:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to save offline queue:', error)
+      }
     }
   }
 
   const processOfflineQueue = async () => {
-    if (offlineQueue.length === 0) return
+    if (offlineQueue.length === 0) {return}
 
     const processedItems: number[] = []
 
@@ -343,7 +385,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
         processedItems.push(i)
       } catch (error) {
-        console.error('PWA: Failed to sync offline item:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('PWA: Failed to sync offline item:', error)
+        }
         // Keep items that failed to sync
       }
     }
@@ -371,7 +415,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const updateApp = async (): Promise<void> => {
-    if (!serviceWorkerReg) return
+    if (!serviceWorkerReg) {return}
 
     setIsUpdating(true)
 
@@ -395,7 +439,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
         window.location.reload()
       }
     } catch (error) {
-      console.error('PWA: Failed to update app:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to update app:', error)
+      }
       toast({
         title: 'Update Failed',
         description: 'Please refresh the page manually to get the latest version.',
@@ -407,13 +453,15 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const requestNotificationPermission = async (): Promise<boolean> => {
-    if (!capabilities.hasNotifications) return false
+    if (!capabilities.hasNotifications) {return false}
 
     try {
       const permission = await Notification.requestPermission()
       return permission === 'granted'
     } catch (error) {
-      console.error('PWA: Failed to request notification permission:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to request notification permission:', error)
+      }
       return false
     }
   }
@@ -428,7 +476,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           description: 'App link copied to clipboard',
         })
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     }
@@ -444,7 +492,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
       return true
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
-        console.error('PWA: Share failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('PWA: Share failed:', error)
+        }
       }
       return false
     }
@@ -457,20 +507,27 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const requestWakeLock = async (): Promise<void> => {
-    if (!capabilities.hasWakeLock || wakeLock) return
+    if (!capabilities.hasWakeLock || wakeLock) {return}
 
     try {
-      const lock = await (navigator as any).wakeLock.request('screen')
+      const extendedNavigator = navigator as ExtendedNavigator
+      const lock = await extendedNavigator.wakeLock?.request('screen')
       setWakeLock(lock)
 
       lock.addEventListener('release', () => {
         setWakeLock(null)
-        console.log('PWA: Wake lock released')
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('PWA: Wake lock released')
+        }
       })
 
-      console.log('PWA: Wake lock acquired')
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('PWA: Wake lock acquired')
+      }
     } catch (error) {
-      console.error('PWA: Failed to acquire wake lock:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to acquire wake lock:', error)
+      }
     }
   }
 
@@ -482,18 +539,20 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const getStorageUsage = async (): Promise<StorageEstimate | null> => {
-    if (!capabilities.hasStorageQuota) return null
+    if (!capabilities.hasStorageQuota) {return null}
 
     try {
       return await navigator.storage.estimate()
     } catch (error) {
-      console.error('PWA: Failed to get storage usage:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to get storage usage:', error)
+      }
       return null
     }
   }
 
   const registerForPush = async (): Promise<PushSubscription | null> => {
-    if (!capabilities.hasPushNotifications || !serviceWorkerReg) return null
+    if (!capabilities.hasPushNotifications || !serviceWorkerReg) {return null}
 
     try {
       const subscription = await serviceWorkerReg.pushManager.subscribe({
@@ -512,12 +571,14 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
 
       return subscription
     } catch (error) {
-      console.error('PWA: Failed to register for push notifications:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('PWA: Failed to register for push notifications:', error)
+      }
       return null
     }
   }
 
-  const syncWhenOnline = (data: any, endpoint: string): void => {
+  const syncWhenOnline = (data: unknown, endpoint: string): void => {
     if (isOnline) {
       // Try to sync immediately
       fetch(endpoint, {
@@ -536,7 +597,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     }
   }
 
-  const addToOfflineQueue = (data: any, endpoint: string) => {
+  const addToOfflineQueue = (data: unknown, endpoint: string) => {
     const newQueue = [
       ...offlineQueue,
       {

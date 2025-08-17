@@ -17,7 +17,7 @@ const PaginationSchema = z.object({
 export type PaginationOptions = z.infer<typeof PaginationSchema>
 
 // ページネーション結果
-export interface PaginatedResult<T> {
+export interface PaginatedResult<_T> {
   data: T[]
   pagination: {
     page: number
@@ -56,14 +56,14 @@ export class QueryOptimizer {
   /**
    * ページネーション付きクエリの構築
    */
-  static buildPaginatedQuery<T>(
+  static buildPaginatedQuery<_T>(
     options: PaginationOptions,
-    baseQuery: any = {}
+    baseQuery: unknown = {}
   ): {
     skip: number
     take: number
-    orderBy: any
-    where: any
+    orderBy: unknown
+    where: unknown
   } {
     const { page, limit, sortBy, sortOrder } = PaginationSchema.parse(options)
     const skip = (page - 1) * limit
@@ -108,10 +108,10 @@ export class QueryOptimizer {
     field: string,
     start?: Date,
     end?: Date
-  ): Record<string, any> | undefined {
-    if (!start && !end) return undefined
+  ): Record<string, unknown> | undefined {
+    if (!start && !end) {return undefined}
 
-    const filter: Record<string, any> = {}
+    const filter: Record<string, unknown> = {}
 
     if (start && end) {
       filter[field] = {
@@ -134,8 +134,8 @@ export class QueryOptimizer {
   /**
    * 複合フィルター条件の構築
    */
-  static buildComplexFilter(conditions: FilterConditions): Record<string, any> {
-    const where: Record<string, any> = {}
+  static buildComplexFilter(conditions: FilterConditions): Record<string, unknown> {
+    const where: Record<string, unknown> = {}
 
     // 日付範囲フィルター
     if (conditions.dateRange) {
@@ -189,7 +189,7 @@ export class QueryOptimizer {
       masteryLevel?: { min?: number; max?: number }
     }
   ) {
-    const where: any = { userId }
+    const where: unknown = { userId }
 
     if (filters) {
       if (filters.knowledgeAreas && filters.knowledgeAreas.length > 0) {
@@ -210,7 +210,7 @@ export class QueryOptimizer {
       }
 
       if (filters.masteryLevel) {
-        const masteryFilter: any = {}
+        const masteryFilter: unknown = {}
         if (filters.masteryLevel.min !== undefined) {
           masteryFilter.gte = filters.masteryLevel.min
         }
@@ -252,7 +252,7 @@ export class QueryOptimizer {
       dateRange?: { start?: Date; end?: Date }
     }
   ) {
-    const where: any = {}
+    const where: unknown = {}
 
     if (userId) {
       where.userId = userId
@@ -264,7 +264,7 @@ export class QueryOptimizer {
       }
 
       if (filters.scoreRange) {
-        const scoreFilter: any = {}
+        const scoreFilter: unknown = {}
         if (filters.scoreRange.min !== undefined) {
           scoreFilter.gte = filters.scoreRange.min
         }
@@ -366,7 +366,7 @@ export class QueryOptimizer {
   /**
    * バッチ処理用最適化クエリ
    */
-  static buildBatchQuery<T>(
+  static buildBatchQuery<_T>(
     batchSize: number = 1000,
     lastId?: string
   ): {
@@ -374,7 +374,7 @@ export class QueryOptimizer {
     cursor?: { id: string }
     orderBy: { id: 'asc' }
   } {
-    const query: any = {
+    const query: unknown = {
       take: batchSize,
       orderBy: { id: 'asc' as const },
     }
@@ -410,7 +410,7 @@ export class QueryOptimizer {
  * クエリキャッシュマネージャー
  */
 export class QueryCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   private defaultTTL = 5 * 60 * 1000 // 5分
 
   /**
@@ -423,11 +423,11 @@ export class QueryCache {
   /**
    * キャッシュからデータを取得
    */
-  get<T>(query: object): T | null {
+  get<_T>(query: object): T | null {
     const key = this.generateKey(query)
     const cached = this.cache.get(key)
 
-    if (!cached) return null
+    if (!cached) {return null}
 
     // TTL チェック
     if (Date.now() > cached.timestamp + cached.ttl) {
@@ -441,7 +441,7 @@ export class QueryCache {
   /**
    * データをキャッシュに保存
    */
-  set<T>(query: object, data: T, ttl?: number): void {
+  set<_T>(query: object, data: T, ttl?: number): void {
     const key = this.generateKey(query)
     this.cache.set(key, {
       data,
@@ -518,7 +518,7 @@ export class IndexOptimizer {
    */
   static suggestIndexes(
     tableName: string,
-    whereConditions: Record<string, any>,
+    whereConditions: Record<string, unknown>,
     orderBy?: Record<string, 'asc' | 'desc'>
   ): string[] {
     const suggestions: string[] = []

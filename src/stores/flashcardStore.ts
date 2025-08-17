@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { api } from '../lib/api/client'
+import { logger } from '../services/logger'
 
 export interface FlashCard {
   id: string
@@ -321,7 +322,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
             )
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load cards'
             state.isLoading = false
@@ -354,7 +355,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.createCard.mutate(card)
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           set((state) => {
             delete state.cards[cardId]
@@ -368,7 +369,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       updateCard: async (cardId: string, updates: Partial<FlashCard>) => {
         const originalCard = get().cards[cardId]
-        if (!originalCard) return
+        if (!originalCard) {return}
 
         set((state) => {
           state.cards[cardId] = { ...state.cards[cardId], ...updates, updatedAt: new Date() }
@@ -376,7 +377,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.updateCard.mutate({ cardId, updates })
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           set((state) => {
             state.cards[cardId] = originalCard
@@ -398,7 +399,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.deleteCard.mutate({ cardId })
-        } catch (error) {
+        } catch (_error) {
           // Rollback on error
           if (originalCard) {
             set((state) => {
@@ -411,7 +412,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       duplicateCard: async (cardId: string) => {
         const originalCard = get().cards[cardId]
-        if (!originalCard) throw new Error('Card not found')
+        if (!originalCard) {throw new Error('Card not found')}
 
         const newCardId = await get().createCard({
           ...originalCard,
@@ -451,7 +452,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
             )
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load decks'
             state.isLoading = false
@@ -479,7 +480,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.createDeck.mutate(deck)
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             delete state.decks[deckId]
             state.error = error instanceof Error ? error.message : 'Failed to create deck'
@@ -492,7 +493,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       updateDeck: async (deckId: string, updates: Partial<FlashCardDeck>) => {
         const originalDeck = get().decks[deckId]
-        if (!originalDeck) return
+        if (!originalDeck) {return}
 
         set((state) => {
           state.decks[deckId] = { ...state.decks[deckId], ...updates, updatedAt: new Date() }
@@ -500,7 +501,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.updateDeck.mutate({ deckId, updates })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId] = originalDeck
             state.error = error instanceof Error ? error.message : 'Failed to update deck'
@@ -517,7 +518,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.deleteDeck.mutate({ deckId })
-        } catch (error) {
+        } catch (_error) {
           if (originalDeck) {
             set((state) => {
               state.decks[deckId] = originalDeck
@@ -529,7 +530,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       addCardToDeck: async (deckId: string, cardId: string) => {
         const deck = get().decks[deckId]
-        if (!deck || deck.cardIds.includes(cardId)) return
+        if (!deck || deck.cardIds.includes(cardId)) {return}
 
         set((state) => {
           state.decks[deckId].cardIds.push(cardId)
@@ -538,7 +539,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.addCardToDeck.mutate({ deckId, cardId })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId].cardIds = state.decks[deckId].cardIds.filter((id) => id !== cardId)
             state.decks[deckId].totalCards -= 1
@@ -549,7 +550,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       removeCardFromDeck: async (deckId: string, cardId: string) => {
         const deck = get().decks[deckId]
-        if (!deck || !deck.cardIds.includes(cardId)) return
+        if (!deck || !deck.cardIds.includes(cardId)) {return}
 
         set((state) => {
           state.decks[deckId].cardIds = state.decks[deckId].cardIds.filter((id) => id !== cardId)
@@ -558,7 +559,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
         try {
           await api.flashcards.removeCardFromDeck.mutate({ deckId, cardId })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.decks[deckId].cardIds.push(cardId)
             state.decks[deckId].totalCards += 1
@@ -569,7 +570,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       startStudySession: async (deckId: string, filters) => {
         const deck = get().decks[deckId]
-        if (!deck) throw new Error('Deck not found')
+        if (!deck) {throw new Error('Deck not found')}
 
         // Apply filters to get cards for study
         const allDeckCards = deck.cardIds.map((id) => get().cards[id]).filter(Boolean)
@@ -638,7 +639,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       endStudySession: async () => {
         const currentSession = get().studySessions[0]
-        if (!currentSession || currentSession.endTime) return
+        if (!currentSession || currentSession.endTime) {return}
 
         const endTime = new Date()
         const totalTime = Math.floor(
@@ -669,8 +670,10 @@ export const useFlashCardStore = create<FlashCardStore>()(
             totalTime,
             cardResults: currentSession.cardResults,
           })
-        } catch (error) {
-          console.warn('Failed to record study session:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to record study session:', error)
+          }
         }
       },
 
@@ -710,7 +713,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       rateCard: async (difficulty: 1 | 2 | 3 | 4 | 5, responseTime: number) => {
         const currentCard = get().getCurrentCard()
-        if (!currentCard) return
+        if (!currentCard) {return}
 
         const quality = difficulty - 1 // Convert to 0-4 scale for spaced repetition
         const isCorrect = difficulty >= 3
@@ -737,7 +740,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
               timestamp: new Date(),
             })
             state.studySessions[0].cardsStudied += 1
-            if (isCorrect) state.studySessions[0].correctAnswers += 1
+            if (isCorrect) {state.studySessions[0].correctAnswers += 1}
           }
         })
 
@@ -747,7 +750,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       updateSpacedRepetition: (cardId: string, quality: number, responseTime: number) => {
         const card = get().cards[cardId]
-        if (!card) return
+        if (!card) {return}
 
         const { easeFactor, interval, repetitions, nextReviewDate } = calculateSpacedRepetition(
           card.easeFactor,
@@ -789,7 +792,9 @@ export const useFlashCardStore = create<FlashCardStore>()(
             quality,
           })
           .catch((error) => {
-            console.warn('Failed to sync spaced repetition data:', error)
+            if (process.env.NODE_ENV === 'development') {
+              logger.warn('Failed to sync spaced repetition data:', error)
+            }
           })
       },
 
@@ -932,7 +937,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
 
       exportDeck: (deckId: string) => {
         const deck = get().decks[deckId]
-        if (!deck) throw new Error('Deck not found')
+        if (!deck) {throw new Error('Deck not found')}
 
         const cards = deck.cardIds.map((id) => get().cards[id]).filter(Boolean)
 
@@ -993,7 +998,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
 
           return newDeckId
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid deck data format')
         }
       },
@@ -1024,31 +1029,31 @@ export const useFlashCardStore = create<FlashCardStore>()(
           })
 
           await api.flashcards.importAllData.mutate(importData)
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid data format')
         }
       },
 
       shareCard: async (cardId: string) => {
         const card = get().cards[cardId]
-        if (!card) throw new Error('Card not found')
+        if (!card) {throw new Error('Card not found')}
 
         try {
           const shareUrl = await api.flashcards.shareCard.mutate({ cardId })
           return shareUrl
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Failed to share card')
         }
       },
 
       shareDeck: async (deckId: string) => {
         const deck = get().decks[deckId]
-        if (!deck) throw new Error('Deck not found')
+        if (!deck) {throw new Error('Deck not found')}
 
         try {
           const shareUrl = await api.flashcards.shareDeck.mutate({ deckId })
           return shareUrl
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Failed to share deck')
         }
       },
@@ -1081,7 +1086,7 @@ export const useFlashCardStore = create<FlashCardStore>()(
         }
 
         if (filters.tags && filters.tags.length > 0) {
-          cards = cards.filter((card) => filters.tags!.some((tag) => card.tags.includes(tag)))
+          cards = cards.filter((card) => filters?.tags.some((tag) => card.tags.includes(tag)))
         }
 
         if (filters.dueOnly) {

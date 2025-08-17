@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertTriangle, Settings, Eye, Globe } from 'lucide-react'
+import { AlertTriangle, Settings, Eye } from 'lucide-react'
 
 interface EnvironmentBannerProps {
   className?: string

@@ -1,0 +1,388 @@
+# 究極のCI/CDパイプライン - PMPLearningManagement
+# 完全自動化DevOps基盤
+name: 🚀 Ultimate CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'test/**']
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: '0 2 * * 1' # 毎週月曜日の2時に実行
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+# 同時実行制御
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8'
+  CACHE_VERSION: 'v1'
+
+jobs:
+  # ========================================
+  # 1. 品質チェック (Quality Gate)
+  # ========================================
+  quality-gate:
+    name: 🛡️ Quality Gate
+    runs-on: ubuntu-latest
+    outputs:
+      lint-status: ${{ steps.lint.outcome }}
+      test-status: ${{ steps.test.outcome }}
+      build-status: ${{ steps.build.outcome }}
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm run postinstall --if-present
+
+      - name: 🔍 ESLint Check
+        id: lint
+        run: |
+          echo "::group::ESLint Analysis"
+          npm run lint -- --format json --output-file eslint-report.json || true
+          npm run lint -- --format stylish
+          echo "::endgroup::"
+          
+          # エラー数をカウント
+          ERROR_COUNT=$(npx eslint src --ext .js,.jsx,.ts,.tsx --format compact | grep " error " | wc -l || echo "0")
+          WARNING_COUNT=$(npx eslint src --ext .js,.jsx,.ts,.tsx --format compact | grep " warning " | wc -l || echo "0")
+          
+          echo "errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNING_COUNT" >> $GITHUB_OUTPUT
+          
+          # Quality Gateチェック
+          if [ "$ERROR_COUNT" -gt "0" ]; then
+            echo "❌ ESLint Quality Gate Failed: $ERROR_COUNT errors found"
+            exit 1
+          fi
+          
+          echo "✅ ESLint Quality Gate Passed: $WARNING_COUNT warnings"
+
+      - name: 🧪 Unit Tests
+        id: test
+        run: |
+          echo "::group::Unit Test Execution"
+          npm run test:unit -- --coverage --reporters=default --reporters=json --outputFile=test-results.json || true
+          echo "::endgroup::"
+
+      - name: 🏗️ Build Check
+        id: build
+        run: |
+          echo "::group::Production Build"
+          npm run build
+          echo "::endgroup::"
+
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: |
+            eslint-report.json
+            test-results.json
+            coverage/
+
+  # ========================================
+  # 2. セキュリティスキャン
+  # ========================================
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Security Audit
+        run: |
+          npm audit --audit-level=moderate || true
+          npx better-npm-audit audit
+
+      - name: 🛡️ SAST Scan
+        uses: github/super-linter@v5
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_JSX: true
+          VALIDATE_TSX: true
+
+      - name: 🔐 Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+
+  # ========================================
+  # 3. パフォーマンステスト
+  # ========================================
+  performance-test:
+    name: ⚡ Performance Test
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 🎯 Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './.lighthouserc.js'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: 📊 Bundle Size Check
+        run: |
+          npm run analyze:bundle
+          npx bundlesize --config bundlesize.config.json
+
+  # ========================================
+  # 4. E2Eテスト
+  # ========================================
+  e2e-test:
+    name: 🎭 E2E Test
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: 🎭 Run E2E Tests
+        run: |
+          npm run test:e2e -- --project=${{ matrix.browser }}
+
+      - name: 📊 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+
+  # ========================================
+  # 5. コード品質分析
+  # ========================================
+  code-quality:
+    name: 📈 Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: 📊 Code Climate
+        uses: paambaati/codeclimate-action@v5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_ID }}
+        with:
+          coverageCommand: npm run test:coverage
+          coverageLocations: ${{github.workspace}}/coverage/lcov.info:lcov
+
+  # ========================================
+  # 6. デプロイメント
+  # ========================================
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan, performance-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://yusuke-kurosawa.github.io/PMPLearningManagement/
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+
+      - name: 🔔 Deployment Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Deployment to production completed!'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+
+  # ========================================
+  # 7. リリースノート生成
+  # ========================================
+  release-notes:
+    name: 📝 Generate Release Notes
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📝 Generate Changelog
+        uses: TriPSs/conventional-changelog-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: 'CHANGELOG.md'
+          preset: 'angular'
+          tag-prefix: 'v'
+          release-count: 0
+
+      - name: 🏷️ Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+
+  # ========================================
+  # 8. メトリクス収集
+  # ========================================
+  metrics:
+    name: 📊 Collect Metrics
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan, performance-test, code-quality]
+    if: always()
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📊 Collect & Store Metrics
+        run: |
+          echo "## 📊 CI/CD Metrics Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏃 Pipeline Execution" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered By**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Quality Gates" >> $GITHUB_STEP_SUMMARY
+          echo "- **Lint Status**: ${{ needs.quality-gate.outputs.lint-status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Status**: ${{ needs.quality-gate.outputs.test-status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status**: ${{ needs.quality-gate.outputs.build-status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Trends" >> $GITHUB_STEP_SUMMARY
+          echo "- View detailed metrics in [SonarCloud Dashboard](https://sonarcloud.io)" >> $GITHUB_STEP_SUMMARY
+          echo "- View performance trends in [Lighthouse CI](https://lhci.example.com)" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # 9. 自動修正システム
+  # ========================================
+  auto-fix:
+    name: 🔧 Auto Fix Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && failure()
+    needs: quality-gate
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔧 Auto Fix Linting Issues
+        run: |
+          npm run lint:fix
+          npm run format
+
+      - name: 📤 Commit & Push Fixes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: '🔧 Auto-fix: ESLint and Prettier corrections'
+          add: '.'
+          default_author: github_actions
+
+# ワークフロー完了通知
+workflow-notification:
+  name: 📢 Workflow Notification
+  runs-on: ubuntu-latest
+  needs: [deploy, metrics]
+  if: always()
+  steps:
+    - name: 📊 Generate Summary
+      run: |
+        echo "## 🎉 CI/CD Pipeline Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "All quality gates, tests, and deployments have been processed." >> $GITHUB_STEP_SUMMARY

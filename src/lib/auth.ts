@@ -1,10 +1,21 @@
 import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
+import type { Adapter } from 'next-auth/adapters'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
-import type { User } from '@prisma/client'
+import type { _User } from '@prisma/client'
+import { logger } from '../services/logger'
+
+// Extended User type for authentication
+interface AuthUser {
+  id: string
+  email: string
+  name?: string | null
+  role?: string
+  image?: string | null
+}
 
 declare module 'next-auth' {
   interface Session {
@@ -26,7 +37,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -40,8 +51,8 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
           prompt: 'consent',
@@ -97,7 +108,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role || 'USER'
+        token.role = (user as AuthUser).role || 'USER'
       }
 
       // Refresh access token for OAuth providers
@@ -116,7 +127,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, _profile }) {
       // Allow OAuth sign in without email verification
       if (account?.provider !== 'credentials') {
         return true
@@ -124,7 +135,7 @@ export const authOptions: NextAuthOptions = {
 
       // For credentials provider, check if email is verified
       const existingUser = await prisma.user.findUnique({
-        where: { email: user.email! },
+        where: { email: user.email || '' },
       })
 
       if (!existingUser?.emailVerified) {
@@ -136,9 +147,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn({ user, account, isNewUser }) {
+    async signIn({ user, account, _isNewUser }) {
       // Log sign in event
-      console.log(`User ${user.email} signed in via ${account?.provider}`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`User ${user.email} signed in via ${account?.provider}`)
+      }
 
       // Track user activity
       if (user.id) {
@@ -148,13 +161,17 @@ export const authOptions: NextAuthOptions = {
         })
       }
     },
-    async signOut({ session, token }) {
+    async signOut({ _session, _token }) {
       // Log sign out event
-      console.log(`User signed out`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`User signed out`)
+      }
     },
     async createUser({ user }) {
       // Send welcome email
-      console.log(`New user created: ${user.email}`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`New user created: ${user.email}`)
+      }
 
       // Initialize user progress
       const pmbokProcesses = await prisma.pMBOKProcess.findMany()

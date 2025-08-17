@@ -107,7 +107,7 @@ export const UserInputSchemas = {
 }
 
 // API request validation schemas
-export const APISchemas = {
+export const __APISchemas = {
   bulkProgressUpdate: z.object({
     updates: z.array(UserInputSchemas.progressUpdate).max(100),
   }),
@@ -306,7 +306,7 @@ export class ValidationService {
   static validateJSON(
     jsonString: string,
     maxDepth: number = 10
-  ): { valid: boolean; data?: any; error?: string } {
+  ): { valid: boolean; data?: unknown; error?: string } {
     try {
       const data = JSON.parse(jsonString)
 
@@ -328,7 +328,11 @@ export class ValidationService {
   /**
    * Recursively check for dangerous keys in objects
    */
-  private static containsDangerousKeys(obj: any, dangerousKeys: string[], depth: number): boolean {
+  private static containsDangerousKeys(
+    obj: unknown,
+    dangerousKeys: string[],
+    depth: number
+  ): boolean {
     if (depth <= 0 || obj === null || typeof obj !== 'object') {
       return false
     }

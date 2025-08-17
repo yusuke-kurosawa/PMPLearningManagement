@@ -3,7 +3,8 @@
  * Developer 3: Flashcard System Developer Implementation
  */
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
+import { logger } from '../../services/logger'
 import {
   BookOpen,
   Brain,
@@ -11,41 +12,28 @@ import {
   Edit3,
   Trash2,
   Play,
-  Pause,
-  RotateCcw,
-  Share2,
   Download,
-  Upload,
-  Filter,
   Search,
   Eye,
-  EyeOff,
-  Volume2,
-  VolumeX,
   Settings,
   BarChart3,
   Trophy,
-  Target,
   Clock,
-  CheckCircle,
   XCircle,
   SkipForward,
-  Shuffle,
   ArrowLeft,
   ArrowRight,
   Flag,
   Star,
-  TrendingUp,
   Calendar,
   Zap,
-  Award,
   RefreshCw,
 } from 'lucide-react'
 import {
   useFlashCardStore,
-  type FlashCard,
-  type FlashCardDeck,
-  type StudySession,
+  // type FlashCard,
+  // type FlashCardDeck,
+  // type _StudySession,
 } from '../../stores/flashcardStore'
 import { useToast } from '../../hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
@@ -82,7 +70,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
   // Store state and actions
   const {
     decks,
-    cards,
+    // cards, // Will be used when deck display is implemented
     currentDeck,
     currentCards,
     currentCardIndex,
@@ -95,10 +83,10 @@ const EnhancedFlashCardSystem: React.FC = () => {
     loadDecks,
     loadCards,
     createCard,
-    updateCard,
-    deleteCard,
+    // updateCard, // Will be used for card editing
+    // deleteCard, // Will be used for card deletion
     createDeck,
-    updateDeck,
+    // updateDeck, // Will be used for deck management
     deleteDeck,
     startStudySession,
     endStudySession,
@@ -113,10 +101,10 @@ const EnhancedFlashCardSystem: React.FC = () => {
     getCurrentCard,
     hasNextCard,
     hasPreviousCard,
-    searchCards,
+    // searchCards, // Will be used for card search
     exportDeck,
-    importDeck,
-    updateStudySettings,
+    // importDeck, // Will be used for deck import
+    // updateStudySettings, // Will be used for settings management
   } = useFlashCardStore()
 
   // Local state
@@ -124,10 +112,10 @@ const EnhancedFlashCardSystem: React.FC = () => {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [showCreateCardDialog, setShowCreateCardDialog] = useState(false)
-  const [showCreateDeckDialog, setShowCreateDeckDialog] = useState(false)
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  //   const [showCreateDeckDialog] = useState(false) // setShowCreateDeckDialog will be used in UI // TODO: Will be used in future
+  //   const [showSettingsDialog, setShowSettingsDialog] = useState(false) // TODO: Will be used in future
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
-  const [studyStartTime, setStudyStartTime] = useState<Date | null>(null)
+  //   const [studyStartTime, setStudyStartTime] = useState<Date | null>(null) // TODO: Will be used in future
   const [cardResponseStartTime, setCardResponseStartTime] = useState<Date | null>(null)
   const [autoRevealTimer, setAutoRevealTimer] = useState<NodeJS.Timeout | null>(null)
 
@@ -171,7 +159,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
       setAutoRevealTimer(timer)
 
       return () => {
-        if (timer) clearTimeout(timer)
+        if (timer) {clearTimeout(timer)}
       }
     }
   }, [
@@ -279,7 +267,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
     }
   }
 
-  const handleCreateDeck = async () => {
+  const __handleCreateDeck = async () => {
     try {
       await createDeck({
         name: newDeck.name,
@@ -302,7 +290,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
         tags: '',
         isPublic: false,
       })
-      setShowCreateDeckDialog(false)
+      // setShowCreateDeckDialog(false) // TODO: Will be used when dialog is implemented
 
       toast({
         title: 'Deck Created',
@@ -347,12 +335,14 @@ const EnhancedFlashCardSystem: React.FC = () => {
         description: `Studied ${sessionStats.studied} cards with ${((sessionStats.correct / sessionStats.studied) * 100).toFixed(1)}% accuracy`,
       })
     } catch (error) {
-      console.error('Failed to end session:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to end session:', error)
+      }
     }
   }
 
   const handleRateCard = async (difficulty: 1 | 2 | 3 | 4 | 5) => {
-    if (!cardResponseStartTime) return
+    if (!cardResponseStartTime) {return}
 
     const responseTime = Date.now() - cardResponseStartTime.getTime()
 
@@ -364,7 +354,9 @@ const EnhancedFlashCardSystem: React.FC = () => {
         setAutoRevealTimer(null)
       }
     } catch (error) {
-      console.error('Failed to rate card:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to rate card:', error)
+      }
     }
   }
 
@@ -403,7 +395,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
         title: 'Deck Exported',
         description: 'Your deck has been exported successfully.',
       })
-    } catch (error) {
+    } catch (__error) {
       toast({
         title: 'Export Failed',
         description: 'Failed to export deck.',
@@ -537,7 +529,13 @@ const EnhancedFlashCardSystem: React.FC = () => {
           </div>
         </div>
 
-        <Tabs value={activeView} onValueChange={setActiveView as any} className="space-y-6">
+        <Tabs
+          value={activeView}
+          onValueChange={(value) =>
+            setActiveView(value as 'decks' | 'study' | 'create' | 'statistics')
+          }
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="decks">Decks</TabsTrigger>
             <TabsTrigger value="study" disabled={!isStudying}>
@@ -577,7 +575,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredDecks.map((deck) => {
                 const dueCards = getDueCards(deck.id)
-                const deckStats = getStudyStatistics(deck.id, 7)
+                //                 const deckStats = getStudyStatistics(deck.id, 7) // TODO: Will be used in future
 
                 return (
                   <Card key={deck.id} className="transition-shadow hover:shadow-lg">
@@ -958,7 +956,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
                       </label>
                       <Select
                         value={newCard.type}
-                        onValueChange={(value: any) => setNewCard({ ...newCard, type: value })}
+                        onValueChange={(value: unknown) => setNewCard({ ...newCard, type: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -979,7 +977,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
                       </label>
                       <Select
                         value={newCard.difficulty}
-                        onValueChange={(value: any) =>
+                        onValueChange={(value: unknown) =>
                           setNewCard({ ...newCard, difficulty: value })
                         }
                       >

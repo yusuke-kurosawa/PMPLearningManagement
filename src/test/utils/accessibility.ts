@@ -1,147 +1,222 @@
-import { configureAxe } from 'jest-axe'
+import { axe, toHaveNoViolations } from 'jest-axe'
+import { expect } from 'vitest'
 
-// Configure axe for our specific needs
-const axe = configureAxe({
+// Extend expect with jest-axe matchers
+expect.extend(toHaveNoViolations)
+
+// Default axe configuration for our app
+const defaultAxeConfig = {
   rules: {
-    // Disable some rules for SPA testing
-    region: { enabled: false },
-    'landmark-one-main': { enabled: false },
-    // Color contrast - we'll test this separately
+    // Enable color contrast checking
     'color-contrast': { enabled: true },
-    // Focus management
+    // Enable keyboard navigation checking
+    keyboard: { enabled: true },
+    // Enable focus management checking
     'focus-order-semantics': { enabled: true },
-    // ARIA
-    'aria-allowed-attr': { enabled: true },
-    'aria-required-attr': { enabled: true },
-    'aria-valid-attr-value': { enabled: true },
-    // Headings
-    'heading-order': { enabled: true },
-    // Images
+    // Enable semantic structure checking
+    'landmark-one-main': { enabled: true },
+    'page-has-heading-one': { enabled: true },
+    // Enable image alt text checking
     'image-alt': { enabled: true },
-    // Forms
+    // Enable form label checking
     label: { enabled: true },
-    // Links
-    'link-name': { enabled: true },
-    'link-in-text-block': { enabled: false }, // Often false positive with buttons
-    // Interactive elements
-    'interactive-supports-focus': { enabled: true },
-    'click-events-have-key-events': { enabled: true },
+    // Disable rules that might not apply to our SPA
+    region: { enabled: false },
   },
-})
+  tags: ['wcag2a', 'wcag2aa', 'wcag21aa', 'best-practice'],
+}
 
+/**
+ * Check accessibility violations for a given element
+ * @param element - The DOM element to check
+ * @param config - Optional axe configuration
+ */
 export const checkA11y = async (
-  container: HTMLElement | Document = document.body,
-  options?: any
-) => {
-  const results = await axe(container, options)
+  element: Element | Document = document.body,
+  config = defaultAxeConfig
+): Promise<void> => {
+  const results = await axe(element, config)
+  expect(results).toHaveNoViolations()
+}
 
-  if (results.violations.length > 0) {
-    const violationMessages = results.violations.map((violation) => {
-      const targets = violation.nodes.map((node) => node.target.join(' ')).join(', ')
-      return `${violation.id}: ${violation.description} (${violation.help}) - Elements: ${targets}`
-    })
+/**
+ * Check accessibility with custom rules
+ * @param element - The DOM element to check
+ * @param rules - Custom rules configuration
+ */
+export const checkA11yWithRules = async (
+  element: Element | Document,
+  rules: Record<string, { enabled: boolean }>
+): Promise<void> => {
+  const config = {
+    ...defaultAxeConfig,
+    rules: { ...defaultAxeConfig.rules, ...rules },
+  }
+  await checkA11y(element, config)
+}
 
-    throw new Error(`Accessibility violations found:\n${violationMessages.join('\n')}`)
+/**
+ * Check only color contrast violations
+ * @param element - The DOM element to check
+ */
+export const checkColorContrast = async (element: Element | Document): Promise<void> => {
+  await checkA11yWithRules(element, {
+    'color-contrast': { enabled: true },
+    'color-contrast-enhanced': { enabled: true },
+  })
+}
+
+/**
+ * Check only keyboard accessibility
+ * @param element - The DOM element to check
+ */
+export const checkKeyboardA11y = async (element: Element | Document): Promise<void> => {
+  await checkA11yWithRules(element, {
+    keyboard: { enabled: true },
+    'focus-order-semantics': { enabled: true },
+    'focusable-content': { enabled: true },
+  })
+}
+
+/**
+ * Check only semantic structure
+ * @param element - The DOM element to check
+ */
+export const checkSemanticStructure = async (element: Element | Document): Promise<void> => {
+  await checkA11yWithRules(element, {
+    'landmark-one-main': { enabled: true },
+    'page-has-heading-one': { enabled: true },
+    'heading-order': { enabled: true },
+    list: { enabled: true },
+  })
+}
+
+/**
+ * Check form accessibility
+ * @param element - The DOM element to check
+ */
+export const checkFormA11y = async (element: Element | Document): Promise<void> => {
+  await checkA11yWithRules(element, {
+    label: { enabled: true },
+    'label-title-only': { enabled: true },
+    'form-field-multiple-labels': { enabled: true },
+    'required-attr': { enabled: true },
+    'aria-required-attr': { enabled: true },
+  })
+}
+
+/**
+ * Custom matcher to check if element has accessible name
+ * @param element - The element to check
+ */
+export const hasAccessibleName = (element: Element): boolean => {
+  return (
+    element.getAttribute('aria-label') !== null ||
+    element.getAttribute('aria-labelledby') !== null ||
+    element.textContent?.trim() !== '' ||
+    (element as HTMLInputElement).labels?.length > 0
+  )
+}
+
+/**
+ * Custom matcher to check if element is focusable
+ * @param element - The element to check
+ */
+export const isFocusable = (element: Element): boolean => {
+  const focusableElements = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'textarea:not([disabled])',
+    'select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+    '[contenteditable="true"]',
+  ]
+
+  return focusableElements.some((selector) => element.matches(selector))
+}
+
+/**
+ * Get all focusable elements within a container
+ * @param container - The container element
+ */
+export const getFocusableElements = (container: Element): Element[] => {
+  const focusableSelectors = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'textarea:not([disabled])',
+    'select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+    '[contenteditable="true"]',
+  ].join(', ')
+
+  return Array.from(container.querySelectorAll(focusableSelectors))
+}
+
+/**
+ * Check if elements have proper tab order
+ * @param elements - Array of elements to check
+ */
+export const checkTabOrder = (elements: Element[]): boolean => {
+  const tabIndices = elements.map((el) => {
+    const tabIndex = el.getAttribute('tabindex')
+    return tabIndex ? parseInt(tabIndex, 10) : 0
+  })
+
+  // Check if tab order is sequential
+  for (let i = 1; i < tabIndices.length; i++) {
+    if (tabIndices[i] < tabIndices[i - 1] && tabIndices[i] !== 0) {
+      return false
+    }
   }
 
-  return results
+  return true
 }
 
-// Test specific accessibility patterns
-export const testKeyboardNavigation = async (element: HTMLElement) => {
-  // Test Tab navigation
-  const focusableElements = element.querySelectorAll(
-    'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
-  )
+/**
+ * Test helper to simulate keyboard navigation
+ * @param element - Starting element
+ * @param key - Key to press ('Tab', 'Shift+Tab', 'Enter', 'Space', etc.)
+ */
+export const simulateKeyPress = (element: Element, key: string): void => {
+  const keyboardEvent = new KeyboardEvent('keydown', {
+    key,
+    shiftKey: key.includes('Shift'),
+    bubbles: true,
+  })
 
-  if (focusableElements.length === 0) {
-    return // No focusable elements
-  }
+  element.dispatchEvent(keyboardEvent)
+}
 
-  // Test that all interactive elements can receive focus
-  focusableElements.forEach((el, index) => {
-    const htmlEl = el as HTMLElement
-    if (htmlEl.tabIndex < 0 && !htmlEl.hasAttribute('disabled')) {
-      throw new Error(`Element ${el.tagName} at index ${index} cannot receive keyboard focus`)
+/**
+ * Test helper to check skip links functionality
+ * @param container - Container element
+ */
+export const checkSkipLinks = async (container: Element): Promise<void> => {
+  const skipLinks = container.querySelectorAll('a[href^="#"]')
+
+  skipLinks.forEach((link) => {
+    const href = link.getAttribute('href')
+    if (href && href.startsWith('#')) {
+      const targetId = href.substring(1)
+      const target = container.querySelector(`#${targetId}`)
+      expect(target).toBeInTheDocument()
     }
   })
 }
 
-export const testAriaLabels = (container: HTMLElement) => {
-  // Check buttons without accessible names
-  const buttons = container.querySelectorAll('button:not([aria-label]):not([aria-labelledby])')
-  buttons.forEach((button, index) => {
-    if (!button.textContent?.trim()) {
-      throw new Error(`Button at index ${index} has no accessible name`)
-    }
-  })
-
-  // Check inputs without labels
-  const inputs = container.querySelectorAll('input:not([aria-label]):not([aria-labelledby])')
-  inputs.forEach((input, index) => {
-    const id = input.getAttribute('id')
-    if (!id || !container.querySelector(`label[for="${id}"]`)) {
-      throw new Error(`Input at index ${index} has no associated label`)
-    }
-  })
-}
-
-export const testColorContrast = async (container: HTMLElement) => {
-  // This would typically use a color contrast checking library
-  // For now, we'll do basic checks
-  const elementsWithBackgroundColor = container.querySelectorAll(
-    '[style*="background-color"], [style*="color"]'
-  )
-
-  // Basic check - ensure we don't have common problematic combinations
-  elementsWithBackgroundColor.forEach((el) => {
-    const style = (el as HTMLElement).style
-    const bgColor = style.backgroundColor
-    const color = style.color
-
-    // Check for some obviously problematic combinations
-    if (
-      (bgColor === 'white' && color === 'lightgray') ||
-      (bgColor === 'gray' && color === 'darkgray')
-    ) {
-      throw new Error(`Poor color contrast detected on element: ${el.tagName}`)
-    }
-  })
-}
-
-// Utility to test specific ARIA patterns
-export const testAriaPatterns = {
-  disclosure: (element: HTMLElement) => {
-    const trigger = element.querySelector('[aria-expanded]')
-    const content = element.querySelector('[aria-hidden]')
-
-    if (trigger && content) {
-      const expanded = trigger.getAttribute('aria-expanded') === 'true'
-      const hidden = content.getAttribute('aria-hidden') === 'true'
-
-      if (expanded === hidden) {
-        throw new Error('Disclosure pattern: aria-expanded and aria-hidden states are inconsistent')
-      }
-    }
-  },
-
-  tabpanel: (element: HTMLElement) => {
-    const tabs = element.querySelectorAll('[role="tab"]')
-    const panels = element.querySelectorAll('[role="tabpanel"]')
-
-    if (tabs.length !== panels.length) {
-      throw new Error(
-        `Tab pattern: Number of tabs (${tabs.length}) doesn't match panels (${panels.length})`
-      )
-    }
-
-    tabs.forEach((tab, index) => {
-      const controls = tab.getAttribute('aria-controls')
-      const panel = panels[index]
-
-      if (!controls || !panel || panel.id !== controls) {
-        throw new Error(`Tab pattern: Tab ${index} doesn't properly control its panel`)
-      }
-    })
-  },
+export default {
+  checkA11y,
+  checkA11yWithRules,
+  checkColorContrast,
+  checkKeyboardA11y,
+  checkSemanticStructure,
+  checkFormA11y,
+  hasAccessibleName,
+  isFocusable,
+  getFocusableElements,
+  checkTabOrder,
+  simulateKeyPress,
+  checkSkipLinks,
 }

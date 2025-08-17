@@ -7,6 +7,8 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { api } from '../lib/api/client'
+import type { UnknownObject } from '../types/common'
+import { logger } from '../services/logger'
 
 export interface ProcessProgress {
   processId: string
@@ -49,7 +51,7 @@ export interface Achievement {
   description: string
   icon: string
   type: 'study_time' | 'mastery' | 'consistency' | 'exam_score' | 'special'
-  criteria: Record<string, any>
+  criteria: UnknownObject
   unlockedAt?: Date
   isUnlocked: boolean
   progress: number // 0-100
@@ -162,7 +164,7 @@ export const useProgressStore = create<ProgressStore>()(
           startTime: new Date(),
           duration: 0,
           focus,
-          activities: [activity as any],
+          activities: [activity as StudySession['activities'][0]],
           effectiveness: 'medium',
         }
 
@@ -173,7 +175,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       endStudySession: async (effectiveness = 'medium', notes) => {
         const currentSession = get().currentSession
-        if (!currentSession) return
+        if (!currentSession) {return}
 
         const endTime = new Date()
         const duration = Math.round(
@@ -225,8 +227,10 @@ export const useProgressStore = create<ProgressStore>()(
           await api.progress.recordStudySession.mutate({
             sessionData: completedSession,
           })
-        } catch (error) {
-          console.warn('Failed to sync study session:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync study session:', error)
+          }
         }
       },
 
@@ -260,14 +264,16 @@ export const useProgressStore = create<ProgressStore>()(
               lastStudied: new Date(),
             },
           })
-        } catch (error) {
-          console.warn('Failed to sync process progress:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync process progress:', error)
+          }
         }
       },
 
       recordQuizScore: async (processId: string, score: number) => {
         set((state) => {
-          if (!state.processProgress[processId]) return
+          if (!state.processProgress[processId]) {return}
 
           state.processProgress[processId].quizScores.push(score)
           // Keep only last 10 scores
@@ -283,8 +289,10 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.recordQuizScore.mutate({ processId, score })
-        } catch (error) {
-          console.warn('Failed to sync quiz score:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync quiz score:', error)
+          }
         }
       },
 
@@ -311,8 +319,10 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.createGoal.mutate(goal)
-        } catch (error) {
-          console.warn('Failed to sync goal creation:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync goal creation:', error)
+          }
         }
       },
 
@@ -326,8 +336,10 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.updateGoal.mutate({ goalId, updates })
-        } catch (error) {
-          console.warn('Failed to sync goal update:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync goal update:', error)
+          }
         }
       },
 
@@ -338,8 +350,10 @@ export const useProgressStore = create<ProgressStore>()(
 
         try {
           await api.progress.deleteGoal.mutate({ goalId })
-        } catch (error) {
-          console.warn('Failed to sync goal deletion:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync goal deletion:', error)
+          }
         }
       },
 
@@ -383,7 +397,7 @@ export const useProgressStore = create<ProgressStore>()(
                 title: check.title,
                 description: check.description,
                 icon: '🏆',
-                type: check.type as any,
+                type: check.type as Achievement['type'],
                 criteria: check.criteria,
                 progress: Math.min(100, (check.current / check.threshold) * 100),
                 isUnlocked: check.current >= check.threshold,
@@ -418,7 +432,7 @@ export const useProgressStore = create<ProgressStore>()(
             state.studyStreak = data.studyStreak
             state.isLoading = false
           })
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to load progress'
             state.isLoading = false
@@ -436,8 +450,10 @@ export const useProgressStore = create<ProgressStore>()(
           }
 
           await api.progress.syncProgress.mutate(localData)
-        } catch (error) {
-          console.warn('Failed to sync with server:', error)
+        } catch (_error) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Failed to sync with server:', error)
+          }
         }
       },
 
@@ -559,7 +575,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       getOverallProgress: () => {
         const processes = Object.values(get().processProgress)
-        if (processes.length === 0) return 0
+        if (processes.length === 0) {return 0}
 
         const masteryLevels = {
           not_started: 0,
@@ -647,7 +663,7 @@ export const useProgressStore = create<ProgressStore>()(
 
           // Sync with server
           await get().syncWithServer()
-        } catch (error) {
+        } catch (_error) {
           set((state) => {
             state.error = 'Failed to import progress data'
           })

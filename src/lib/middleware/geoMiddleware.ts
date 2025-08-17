@@ -6,6 +6,18 @@
 import { Request, Response, NextFunction } from 'express'
 import { geoIPService, GeoRestrictionConfig } from '../security/geoip'
 import { ddosProtection } from '../security/rateLimiting'
+import { logger } from '../../services/logger'
+
+// 型定義の追加
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string
+    role: string
+  }
+  session?: {
+    userId: string
+  }
+}
 
 // リクエスト拡張
 declare module 'express' {
@@ -66,7 +78,9 @@ export function geoLocationMiddleware() {
 
       next()
     } catch (error) {
-      console.error('GeoLocation middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('GeoLocation middleware error:', error)
+      }
       // エラーが発生してもリクエストは続行
       next()
     }
@@ -92,7 +106,9 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
 
       if (!restrictionResult.allowed) {
         // 制限された場合のログ記録
-        console.warn(`Geo-restricted access blocked: ${clientIP} - ${restrictionResult.reason}`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`Geo-restricted access blocked: ${clientIP} - ${restrictionResult.reason}`)
+        }
 
         return res.status(403).json({
           error: 'Access denied',
@@ -104,7 +120,9 @@ export function geoRestrictionMiddleware(config: GeoRestrictionConfig) {
 
       next()
     } catch (error) {
-      console.error('Geo restriction middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Geo restriction middleware error:', error)
+      }
 
       // エラー時は安全側に倒す（本番環境での設定による）
       if (process.env.GEO_RESTRICTION_FAIL_SECURE === 'true') {
@@ -127,7 +145,8 @@ export function anomalyDetectionMiddleware() {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // 認証済みユーザーのみチェック
-      const userId = (req as any).user?.id || (req as any).session?.userId
+      const userId =
+        (req as AuthenticatedRequest).user?.id || (req as AuthenticatedRequest).session?.userId
       if (!userId) {
         return next()
       }
@@ -139,11 +158,13 @@ export function anomalyDetectionMiddleware() {
 
       if (anomalyResult.isAnomalous && anomalyResult.confidence > 80) {
         // 高信頼度の異常パターンを検知
-        console.warn(`Anomalous access pattern detected: User ${userId}, IP ${clientIP}`, {
-          confidence: anomalyResult.confidence,
-          riskScore: anomalyResult.riskScore,
-          reasons: anomalyResult.reasons,
-        })
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`Anomalous access pattern detected: User ${userId}, IP ${clientIP}`, {
+            confidence: anomalyResult.confidence,
+            riskScore: anomalyResult.riskScore,
+            reasons: anomalyResult.reasons,
+          })
+        }
 
         // 高リスクの場合はアクセスを制限
         if (anomalyResult.riskScore > 80) {
@@ -169,7 +190,9 @@ export function anomalyDetectionMiddleware() {
 
       next()
     } catch (error) {
-      console.error('Anomaly detection middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Anomaly detection middleware error:', error)
+      }
       next()
     }
   }
@@ -183,18 +206,18 @@ export function geoEnhancedDDoSMiddleware() {
     try {
       const clientIP = getClientIP(req)
       const userAgent = req.get('User-Agent')
-      const userId = (req as any).user?.id
+      const userId = (req as AuthenticatedRequest).user?.id
 
       // 地理情報を考慮したDDoS保護
       const geoLocation = req.geoLocation
       if (geoLocation) {
         // 高脅威地域からのアクセスは厳しく制限
-        let baseLimit = 100 // 基本制限（1分間）
+        let _baseLimit = 100 // 基本制限（1分間）
 
-        if (geoLocation.threat > 70) baseLimit = 20
-        else if (geoLocation.threat > 50) baseLimit = 50
-        else if (geoLocation.proxy || geoLocation.vpn) baseLimit = 30
-        else if (geoLocation.hosting) baseLimit = 40
+        if (geoLocation.threat > 70) {_baseLimit = 20}
+        else if (geoLocation.threat > 50) {_baseLimit = 50}
+        else if (geoLocation.proxy || geoLocation.vpn) {_baseLimit = 30}
+        else if (geoLocation.hosting) {_baseLimit = 40}
 
         // カスタム制限設定でDDoS保護をチェック
         const protection = await ddosProtection.checkProtection(clientIP, userAgent, userId)
@@ -225,7 +248,9 @@ export function geoEnhancedDDoSMiddleware() {
 
       next()
     } catch (error) {
-      console.error('Geo-enhanced DDoS middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Geo-enhanced DDoS middleware error:', error)
+      }
       next()
     }
   }
@@ -248,7 +273,9 @@ export function countryAccessMiddleware(allowedCountries: string[]) {
     }
 
     if (!allowedCountries.includes(geoLocation.countryCode)) {
-      console.warn(`Country access denied: ${geoLocation.countryCode} not in allowed list`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn(`Country access denied: ${geoLocation.countryCode} not in allowed list`)
+      }
 
       return res.status(403).json({
         error: 'Access denied',
@@ -270,7 +297,9 @@ export function proxyDetectionMiddleware(blockProxies = true, blockVPN = false) 
 
     if (geoLocation) {
       if (blockProxies && geoLocation.proxy) {
-        console.warn(`Proxy access blocked: ${geoLocation.ip}`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`Proxy access blocked: ${geoLocation.ip}`)
+        }
         return res.status(403).json({
           error: 'Proxy access denied',
           message: 'Access through proxy servers is not allowed',
@@ -279,7 +308,9 @@ export function proxyDetectionMiddleware(blockProxies = true, blockVPN = false) 
       }
 
       if (blockVPN && geoLocation.vpn) {
-        console.warn(`VPN access blocked: ${geoLocation.ip}`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`VPN access blocked: ${geoLocation.ip}`)
+        }
         return res.status(403).json({
           error: 'VPN access denied',
           message: 'Access through VPN is not allowed',
@@ -288,7 +319,9 @@ export function proxyDetectionMiddleware(blockProxies = true, blockVPN = false) 
       }
 
       if (geoLocation.tor) {
-        console.warn(`Tor access blocked: ${geoLocation.ip}`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`Tor access blocked: ${geoLocation.ip}`)
+        }
         return res.status(403).json({
           error: 'Tor access denied',
           message: 'Access through Tor network is not allowed',
@@ -305,10 +338,10 @@ export function proxyDetectionMiddleware(blockProxies = true, blockVPN = false) 
  * GeoIPステータス情報ミドルウェア（管理者用）
  */
 export function geoStatusMiddleware() {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, _next: NextFunction) => {
     try {
       // 管理者権限チェック（実装は認証システムによる）
-      const isAdmin = (req as any).user?.role === 'admin'
+      const isAdmin = (req as AuthenticatedRequest).user?.role === 'admin'
       if (!isAdmin) {
         return res.status(403).json({ error: 'Admin access required' })
       }
@@ -320,7 +353,9 @@ export function geoStatusMiddleware() {
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Geo status middleware error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Geo status middleware error:', error)
+      }
       res.status(500).json({ error: 'Failed to retrieve geo statistics' })
     }
   }

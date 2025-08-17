@@ -129,14 +129,14 @@ interface ExamStore {
   reset: () => void
 }
 
-const DEFAULT_EXAM_SETTINGS: ExamSettings = {
-  questionsCount: 180,
-  timeLimit: 230, // 230 minutes
-  practiceMode: false,
-  showExplanations: false,
-  randomizeQuestions: true,
-  randomizeOptions: true,
-}
+// const DEFAULT_EXAM_SETTINGS: ExamSettings = { // TODO: Will be used in future
+//   questionsCount: 180,
+//   timeLimit: 230, // 230 minutes;
+//   practiceMode: false,
+//   showExplanations: false,
+//   randomizeQuestions: true,
+//   randomizeOptions: true,
+// }
 
 export const useExamStore = create<ExamStore>()(
   persist(
@@ -369,11 +369,11 @@ export const useExamStore = create<ExamStore>()(
 
       getQuestionsByDomain: () => {
         const session = get().currentSession
-        if (!session) return {}
+        if (!session) {return {}}
 
         return session.questions.reduce(
           (acc, question) => {
-            if (!acc[question.domain]) acc[question.domain] = []
+            if (!acc[question.domain]) {acc[question.domain] = []}
             acc[question.domain].push(question)
             return acc
           },
@@ -383,19 +383,19 @@ export const useExamStore = create<ExamStore>()(
 
       getCurrentQuestion: () => {
         const session = get().currentSession
-        if (!session) return null
+        if (!session) {return null}
         return session.questions[session.currentQuestionIndex] || null
       },
 
       canNavigateNext: () => {
         const session = get().currentSession
-        if (!session) return false
+        if (!session) {return false}
         return session.currentQuestionIndex < session.questions.length - 1
       },
 
       canNavigatePrevious: () => {
         const session = get().currentSession
-        if (!session) return false
+        if (!session) {return false}
         return session.currentQuestionIndex > 0
       },
 
@@ -420,7 +420,7 @@ export const useExamStore = create<ExamStore>()(
 // Timer hook for automatic updates
 let timerInterval: NodeJS.Timeout | null = null
 
-export const useExamTimer = () => {
+export const _useExamTimer = () => {
   const updateTimer = useExamStore((state) => state.updateTimer)
   const currentSession = useExamStore((state) => state.currentSession)
 

@@ -1,0 +1,229 @@
+# ================================================================
+# ワークフロー: Claude AI PR Review Enhanced
+# カテゴリ: AI支援
+# 目的: Claude AIによる高度なプルリクエスト自動レビュー
+# トリガー: pull_request (opened, synchronize)
+# 依存関係: Claude API, git diff analysis
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# ================================================================
+
+name: '🤖 Claude AI PR Review Enhanced'
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    # 大きなPRを除外してコスト最適化
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/workflows/docs/**'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  # ================================================================
+  # Stage 1: Claude AIによるコードレビュー
+  # ================================================================
+  ai-code-review:
+    name: 🧠 Claude AI Code Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # タイムアウト設定
+    # PRサイズによる条件実行（20ファイル以下）
+    if: github.event.pull_request.changed_files <= 20
+    
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📊 PR差分の最適化取得
+        id: diff
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Get changed files for filtering
+          git diff --name-only "origin/$BASE_REF...HEAD" > changed_files.txt
+          
+          # Filter relevant files (exclude docs, configs)
+          grep -E '\.(js|jsx|ts|tsx|json|css)$' changed_files.txt > relevant_files.txt || true
+          
+          # Get focused diff only for relevant files
+          if [ -s relevant_files.txt ]; then
+            git diff "origin/$BASE_REF...HEAD" -- $(cat relevant_files.txt | tr '\n' ' ') > pr_diff.txt
+            # Limit diff size more intelligently
+            head -c 8000 pr_diff.txt > limited_diff.txt
+          else
+            echo "No relevant code files changed" > limited_diff.txt
+          fi
+          
+          # Save diff for analysis
+          DIFF_CONTENT=$(cat limited_diff.txt)
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIFF_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        
+        # PRメタデータも保存
+        echo "files_changed=$(wc -l < changed_files.txt)" >> $GITHUB_OUTPUT
+        echo "relevant_files=$(wc -l < relevant_files.txt)" >> $GITHUB_OUTPUT
+
+      - name: 🤖 Claude APIによる高度レビュー分析
+        id: review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          DIFF: ${{ steps.diff.outputs.diff }}
+          FILES_CHANGED: ${{ steps.diff.outputs.files_changed }}
+          RELEVANT_FILES: ${{ steps.diff.outputs.relevant_files }}
+        run: |
+          # Skip if no relevant changes
+          if [ "$RELEVANT_FILES" = "0" ]; then
+            echo "review=スキップ: 関連するコードファイルの変更がありません。" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Enhanced prompt for better analysis
+          PROMPT="PMPLearningManagement React/D3.js PR Review\n\nTitle: $PR_TITLE\nDescription: $PR_BODY\nChanged Files: $FILES_CHANGED\nReview Target: $RELEVANT_FILES\n\nCode Changes:\n$DIFF\n\nReview Points:\n1. Summary of changes\n2. Code quality (React/JS practices)\n3. Performance impact\n4. Security considerations\n5. Testing requirements\n6. Improvement suggestions\n\nPlease respond in Japanese concisely."
+          
+          # API呼び出しとリトライ機能
+          for attempt in 1 2 3; do
+            echo "API call attempt: $attempt"
+            
+            RESPONSE=$(timeout 60 curl -s -X POST https://api.anthropic.com/v1/messages \
+              -H "Content-Type: application/json" \
+              -H "x-api-key: $ANTHROPIC_API_KEY" \
+              -H "anthropic-version: 2023-06-01" \
+              --max-time 60 \
+              -d "{
+                \"model\": \"claude-3-sonnet-20240229\",
+                \"max_tokens\": 2048,
+                \"messages\": [
+                  {
+                    \"role\": \"user\",
+                    \"content\": \"$PROMPT\"
+                  }
+                ]
+              }")
+            
+            # レスポンスの検証
+            if [ $? -eq 0 ] && echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null 2>&1; then
+              CLAUDE_REVIEW=$(echo "$RESPONSE" | jq -r '.content[0].text')
+              echo "API call successful"
+              break
+            else
+              echo "API call failed, attempt $attempt"
+              if [ $attempt -eq 3 ]; then
+                # フォールバック: 基本的なレビューコメント
+                CLAUDE_REVIEW="⚠️ Claude APIが利用できませんでした。手動でのレビューをお願いします。\\n\\n変更概要:\\n- $FILES_CHANGED ファイルが変更されました\\n- PR: $PR_TITLE\\n\\n確認項目:\\n- コード品質\\n- テストカバレッジ\\n- ドキュメント更新の必要性"
+              else
+                sleep $((attempt * 2))  # 指数バックオフ
+              fi
+            fi
+          done
+          
+          echo "review<<EOF" >> $GITHUB_OUTPUT
+          echo "$CLAUDE_REVIEW" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 💬 レビューコメントの投稿
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const review = `${{ steps.review.outputs.review }}`;
+            const filesChanged = ${{ steps.diff.outputs.files_changed }};
+            const relevantFiles = ${{ steps.diff.outputs.relevant_files }};
+            
+            // スキップ条件のチェック
+            if (review.includes('スキップ:')) {
+              console.log('Review skipped for documentation-only changes');
+              return;
+            }
+            
+            const timestamp = new Date().toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'});
+            
+            const comment = \`
+            ## 🤖 Claude AI Enhanced Code Review
+            
+            **分析情報:**
+            - 📁 変更ファイル数: \${filesChanged}
+            - 🎯 レビュー対象: \${relevantFiles} ファイル
+            - 📅 実行時刻: \${timestamp}
+            
+            **レビュー結果:**
+            \${review}
+            
+            ---
+            
+            ### 📋 次のステップ
+            - [ ] コードレビュー内容を確認
+            - [ ] 必要に応じてテスト実行
+            - [ ] セキュリティ影響の検証
+            - [ ] ドキュメント更新の確認
+            
+            *🤖 これはClaude AIによる自動レビューです。提案内容は参考として、最終的な判断は開発者が行ってください。*
+            
+            <details>
+            <summary>🔧 レビュー詳細設定</summary>
+            
+            - モデル: Claude-3-Sonnet
+            - タイムアウト: 60秒
+            - リトライ: 3回まで
+            - 分析対象: JS/JSX/TS/TSX/JSON/CSSファイル
+            </details>
+            \`;
+            
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+              
+              console.log('Review comment posted successfully');
+            } catch (error) {
+              console.error('Failed to post review comment:', error);
+              // GitHub APIエラーでもワークフロー自体は成功とする
+            }
+
+  # ================================================================
+  # Stage 2: 大きなPRの警告
+  # ================================================================
+  pr-size-check:
+    name: 📏 PR Size Validation
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.changed_files > 20
+    
+    steps:
+      - name: ⚠️ PRサイズ警告の投稿
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = \`
+            ## ⚠️ 大きなPRの検出
+            
+            このPRは**\${{ github.event.pull_request.changed_files }}個のファイル**を変更しており、レビューが困難になる可能性があります。
+            
+            **推奨事項:**
+            - 可能であれば、機能別に小さなPRに分割
+            - 変更の背景と影響範囲を明確に記述
+            - 重要な変更点をハイライト
+            
+            **自動レビュー:** 大きなPRのため、Claude AIレビューはスキップされました。
+            
+            *📝 小さなPR（20ファイル以下）にすることで、より詳細な自動レビューを受けることができます。*
+            \`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

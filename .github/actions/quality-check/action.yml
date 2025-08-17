@@ -1,4 +1,5 @@
 # ================================================================
+<<<<<<< HEAD
 # アクション名: quality-check
 # 目的: コード品質、PMBOK準拠、アクセシビリティなどの包括的品質チェック
 # 作成者: Claude Code
@@ -59,10 +60,67 @@ outputs:
   report-path:
     description: 'レポートパス / Report path'
     value: ${{ steps.generate-report.outputs.path }}
+=======
+# Composite Action: コード品質チェック
+# カテゴリ: 品質管理
+# 目的: ESLint、TypeScript、Prettier の統合チェック
+# 再利用性: CI/CD パイプラインで共通利用
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# ================================================================
+
+name: '🔍 コード品質チェック'
+description: 'ESLint、TypeScript、Prettierの統合品質チェック'
+
+inputs:
+  run-eslint:
+    description: 'ESLintの実行フラグ'
+    required: false
+    default: 'true'
+  
+  run-typescript:
+    description: 'TypeScript チェックの実行フラグ'
+    required: false
+    default: 'true'
+  
+  run-prettier:
+    description: 'Prettier チェックの実行フラグ'
+    required: false
+    default: 'true'
+  
+  eslint-max-warnings:
+    description: 'ESLint の最大警告数'
+    required: false
+    default: '0'
+  
+  fail-on-error:
+    description: 'エラー時に失敗させるかどうか'
+    required: false
+    default: 'true'
+
+outputs:
+  eslint-result:
+    description: 'ESLint実行結果'
+    value: ${{ steps.eslint-check.outputs.result }}
+  
+  typescript-result:
+    description: 'TypeScript実行結果'
+    value: ${{ steps.typescript-check.outputs.result }}
+  
+  prettier-result:
+    description: 'Prettier実行結果'
+    value: ${{ steps.prettier-check.outputs.result }}
+  
+  overall-result:
+    description: '全体的な品質チェック結果'
+    value: ${{ steps.summary.outputs.result }}
+>>>>>>> main
 
 runs:
   using: 'composite'
   steps:
+<<<<<<< HEAD
     # ============================================================
     # Step 1: 作業ディレクトリの準備
     # Prepare working directory
@@ -293,3 +351,235 @@ runs:
           echo "✅ 品質スコアが閾値を満たしています / Quality score meets threshold"
           echo "   Score: ${OVERALL}% >= Threshold: ${THRESHOLD}%"
         fi
+=======
+    # ================================================================
+    # Step 1: 事前チェック
+    # ================================================================
+    - name: 🔍 Pre-check validation
+      shell: bash
+      run: |
+        echo "🔍 品質チェック事前検証..."
+        
+        # 設定ファイルの存在確認
+        CONFIG_FILES=()
+        
+        if [ "${{ inputs.run-eslint }}" = "true" ]; then
+          if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ] || [ -f "eslint.config.js" ]; then
+            echo "  ✅ ESLint設定ファイルが見つかりました"
+            CONFIG_FILES+=("ESLint")
+          else
+            echo "  ⚠️ ESLint設定ファイルが見つかりません"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-typescript }}" = "true" ]; then
+          if [ -f "tsconfig.json" ]; then
+            echo "  ✅ TypeScript設定ファイルが見つかりました"
+            CONFIG_FILES+=("TypeScript")
+          else
+            echo "  ⚠️ tsconfig.json が見つかりません"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-prettier }}" = "true" ]; then
+          if [ -f ".prettierrc" ] || [ -f ".prettierrc.json" ] || [ -f "prettier.config.js" ]; then
+            echo "  ✅ Prettier設定ファイルが見つかりました"
+            CONFIG_FILES+=("Prettier")
+          else
+            echo "  ℹ️ Prettier設定ファイルが見つかりません（デフォルト設定を使用）"
+          fi
+        fi
+        
+        echo "📊 実行予定チェック: ${CONFIG_FILES[*]:-なし}"
+    
+    # ================================================================
+    # Step 2: ESLint チェック
+    # ================================================================
+    - name: 🧹 ESLint check
+      id: eslint-check
+      if: inputs.run-eslint == 'true'
+      shell: bash
+      run: |
+        echo "🧹 ESLint 実行中..."
+        
+        # ESLint の実行
+        if npm run lint 2>&1 | tee eslint-output.log; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "✅ ESLint チェック: 成功"
+          
+          # 警告数のカウント
+          WARNING_COUNT=$(grep -c "warning" eslint-output.log || true)
+          echo "📊 警告数: $WARNING_COUNT"
+          
+          if [ "$WARNING_COUNT" -gt "${{ inputs.eslint-max-warnings }}" ]; then
+            echo "⚠️ 警告数が上限（${{ inputs.eslint-max-warnings }}）を超えています: $WARNING_COUNT"
+            if [ "${{ inputs.fail-on-error }}" = "true" ]; then
+              echo "result=failed" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          fi
+        else
+          echo "result=failed" >> $GITHUB_OUTPUT
+          echo "❌ ESLint チェック: 失敗"
+          
+          # エラーの詳細表示
+          echo "📄 ESLint エラー詳細:"
+          cat eslint-output.log
+          
+          if [ "${{ inputs.fail-on-error }}" = "true" ]; then
+            exit 1
+          fi
+        fi
+    
+    # ================================================================
+    # Step 3: TypeScript チェック
+    # ================================================================
+    - name: 🔍 TypeScript check
+      id: typescript-check
+      if: inputs.run-typescript == 'true'
+      shell: bash
+      run: |
+        echo "🔍 TypeScript チェック実行中..."
+        
+        # TypeScript チェックの実行
+        if npm run type-check 2>&1 | tee typescript-output.log || npm run typecheck 2>&1 | tee typescript-output.log; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "✅ TypeScript チェック: 成功"
+        else
+          # 直接 tsc を試行
+          if npx tsc --noEmit 2>&1 | tee typescript-output.log; then
+            echo "result=success" >> $GITHUB_OUTPUT
+            echo "✅ TypeScript チェック: 成功（tsc直接実行）"
+          else
+            echo "result=failed" >> $GITHUB_OUTPUT
+            echo "❌ TypeScript チェック: 失敗"
+            
+            # エラーの詳細表示
+            echo "📄 TypeScript エラー詳細:"
+            cat typescript-output.log
+            
+            if [ "${{ inputs.fail-on-error }}" = "true" ]; then
+              exit 1
+            fi
+          fi
+        fi
+    
+    # ================================================================
+    # Step 4: Prettier チェック
+    # ================================================================
+    - name: 💎 Prettier check
+      id: prettier-check
+      if: inputs.run-prettier == 'true'
+      shell: bash
+      run: |
+        echo "💎 Prettier チェック実行中..."
+        
+        # Prettier チェックの実行
+        if npm run format:check 2>&1 | tee prettier-output.log; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "✅ Prettier チェック: 成功"
+        else
+          # 直接 prettier を試行
+          if npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}" 2>&1 | tee prettier-output.log; then
+            echo "result=success" >> $GITHUB_OUTPUT
+            echo "✅ Prettier チェック: 成功（prettier直接実行）"
+          else
+            echo "result=failed" >> $GITHUB_OUTPUT
+            echo "❌ Prettier チェック: 失敗"
+            
+            # エラーの詳細表示
+            echo "📄 Prettier エラー詳細:"
+            cat prettier-output.log
+            
+            if [ "${{ inputs.fail-on-error }}" = "true" ]; then
+              exit 1
+            fi
+          fi
+        fi
+    
+    # ================================================================
+    # Step 5: 結果サマリー
+    # ================================================================
+    - name: 📊 Quality check summary
+      id: summary
+      shell: bash
+      run: |
+        echo "📊 品質チェック結果サマリー:"
+        
+        ESLINT_RESULT="${{ steps.eslint-check.outputs.result }}"
+        TYPESCRIPT_RESULT="${{ steps.typescript-check.outputs.result }}"
+        PRETTIER_RESULT="${{ steps.prettier-check.outputs.result }}"
+        
+        # 結果の表示
+        if [ "${{ inputs.run-eslint }}" = "true" ]; then
+          if [ "$ESLINT_RESULT" = "success" ]; then
+            echo "  ✅ ESLint: 成功"
+          else
+            echo "  ❌ ESLint: 失敗"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-typescript }}" = "true" ]; then
+          if [ "$TYPESCRIPT_RESULT" = "success" ]; then
+            echo "  ✅ TypeScript: 成功"
+          else
+            echo "  ❌ TypeScript: 失敗"
+          fi
+        fi
+        
+        if [ "${{ inputs.run-prettier }}" = "true" ]; then
+          if [ "$PRETTIER_RESULT" = "success" ]; then
+            echo "  ✅ Prettier: 成功"
+          else
+            echo "  ❌ Prettier: 失敗"
+          fi
+        fi
+        
+        # 全体的な結果判定
+        ALL_SUCCESS=true
+        
+        if [ "${{ inputs.run-eslint }}" = "true" ] && [ "$ESLINT_RESULT" != "success" ]; then
+          ALL_SUCCESS=false
+        fi
+        
+        if [ "${{ inputs.run-typescript }}" = "true" ] && [ "$TYPESCRIPT_RESULT" != "success" ]; then
+          ALL_SUCCESS=false
+        fi
+        
+        if [ "${{ inputs.run-prettier }}" = "true" ] && [ "$PRETTIER_RESULT" != "success" ]; then
+          ALL_SUCCESS=false
+        fi
+        
+        if [ "$ALL_SUCCESS" = "true" ]; then
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "🎉 全ての品質チェックが成功しました！"
+        else
+          echo "result=failed" >> $GITHUB_OUTPUT
+          echo "⚠️ 一部の品質チェックが失敗しました"
+        fi
+        
+        # アーティファクト用の結果ファイル作成
+        mkdir -p quality-results
+        echo "ESLint: $ESLINT_RESULT" > quality-results/summary.txt
+        echo "TypeScript: $TYPESCRIPT_RESULT" >> quality-results/summary.txt  
+        echo "Prettier: $PRETTIER_RESULT" >> quality-results/summary.txt
+        echo "Overall: $([ "$ALL_SUCCESS" = "true" ] && echo "success" || echo "failed")" >> quality-results/summary.txt
+    
+    # ================================================================
+    # Step 6: ログファイルのクリーンアップ
+    # ================================================================
+    - name: 🧹 Cleanup log files
+      if: always()
+      shell: bash
+      run: |
+        echo "🧹 ログファイルのクリーンアップ..."
+        
+        # ログファイルを結果ディレクトリに移動
+        mkdir -p quality-results
+        
+        [ -f eslint-output.log ] && mv eslint-output.log quality-results/
+        [ -f typescript-output.log ] && mv typescript-output.log quality-results/
+        [ -f prettier-output.log ] && mv prettier-output.log quality-results/
+        
+        echo "✅ ログファイルを quality-results/ に保存しました"
+>>>>>>> main

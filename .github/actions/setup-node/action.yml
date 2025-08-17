@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ============================================================
 # Reusable Action: Node.js Setup
 # Purpose: 標準化されたNode.js環境のセットアップ
@@ -29,19 +30,76 @@ outputs:
   cache-hit:
     description: 'キャッシュがヒットしたか'
     value: ${{ steps.setup.outputs.cache-hit }}
+=======
+# ================================================================
+# Composite Action: Node.js環境セットアップ
+# カテゴリ: 共通処理
+# 目的: Node.js環境とパッケージの統一セットアップ
+# 再利用性: 全CI/CDワークフローで共通利用
+# 作成者: DevOps自動化システム
+# 最終更新: 2025-08-14
+# Issue: #88 - ESLint警告ゼロ達成とTypeScript完全移行
+# ================================================================
+
+name: '🏗️ Node.js環境セットアップ'
+description: 'Node.jsのセットアップとパッケージインストールを実行'
+
+inputs:
+  node-version:
+    description: 'Node.jsバージョン'
+    required: false
+    default: '18'
+  
+  cache-key-suffix:
+    description: 'キャッシュキーのサフィックス'
+    required: false
+    default: 'default'
+  
+  install-deps:
+    description: '依存関係のインストール実行フラグ'
+    required: false
+    default: 'true'
+  
+  production-only:
+    description: 'プロダクション依存関係のみインストール'
+    required: false
+    default: 'false'
+
+outputs:
+  node-version:
+    description: 'インストールされたNode.jsバージョン'
+    value: ${{ steps.setup-node.outputs.node-version }}
+  
+  cache-hit:
+    description: 'キャッシュヒットの状態'
+    value: ${{ steps.setup-node.outputs.cache-hit }}
+  
+  npm-version:
+    description: 'npmバージョン'
+    value: ${{ steps.get-versions.outputs.npm-version }}
+>>>>>>> main
 
 runs:
   using: 'composite'
   steps:
+<<<<<<< HEAD
     # ------------------------------------------------------------
     # Node.js環境のセットアップ
     # ------------------------------------------------------------
     - name: Setup Node.js
       id: setup
+=======
+    # ================================================================
+    # Step 1: Node.jsセットアップ
+    # ================================================================
+    - name: 🏗️ Setup Node.js ${{ inputs.node-version }}
+      id: setup-node
+>>>>>>> main
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'npm'
+<<<<<<< HEAD
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
     # ------------------------------------------------------------
@@ -69,4 +127,120 @@ runs:
           npm install --no-audit
         else
           echo "No package.json found, skipping dependency installation"
+=======
+        cache-dependency-path: package-lock.json
+    
+    # ================================================================
+    # Step 2: バージョン情報取得
+    # ================================================================
+    - name: 📋 Get versions
+      id: get-versions
+      shell: bash
+      run: |
+        echo "node-version=$(node --version)" >> $GITHUB_OUTPUT
+        echo "npm-version=$(npm --version)" >> $GITHUB_OUTPUT
+        echo "📊 環境情報:"
+        echo "  Node.js: $(node --version)"
+        echo "  npm: $(npm --version)"
+        echo "  Working directory: $(pwd)"
+        echo "  Platform: ${{ runner.os }}"
+    
+    # ================================================================
+    # Step 3: package.json検証
+    # ================================================================
+    - name: 📦 Validate package.json
+      shell: bash
+      run: |
+        if [ ! -f "package.json" ]; then
+          echo "❌ package.json が見つかりません"
+          exit 1
+        fi
+        
+        if [ ! -f "package-lock.json" ]; then
+          echo "⚠️ package-lock.json が見つかりません"
+          echo "npm installでロックファイルを生成します"
+        fi
+        
+        echo "✅ package.json 検証完了"
+        
+        # package.jsonの基本情報表示
+        if command -v jq &> /dev/null; then
+          echo "📊 プロジェクト情報:"
+          jq -r '. | "  名前: \(.name // "N/A")"' package.json
+          jq -r '. | "  バージョン: \(.version // "N/A")"' package.json
+          jq -r '. | "  説明: \(.description // "N/A")"' package.json
+        fi
+    
+    # ================================================================
+    # Step 4: 依存関係インストール
+    # ================================================================
+    - name: 📦 Install dependencies
+      if: inputs.install-deps == 'true'
+      shell: bash
+      run: |
+        echo "📦 依存関係インストール開始..."
+        
+        # npm cache の状態確認
+        echo "🔍 npm cache 状態:"
+        npm cache verify
+        
+        # インストール実行
+        if [ "${{ inputs.production-only }}" = "true" ]; then
+          echo "🏭 プロダクション依存関係のみインストール..."
+          npm ci --production --no-audit --prefer-offline
+        else
+          echo "🛠️ 全ての依存関係をインストール..."
+          npm ci --no-audit --prefer-offline
+        fi
+        
+        echo "✅ 依存関係インストール完了"
+    
+    # ================================================================
+    # Step 5: インストール後検証
+    # ================================================================
+    - name: ✅ Post-install validation
+      if: inputs.install-deps == 'true'
+      shell: bash
+      run: |
+        echo "🔍 インストール後検証..."
+        
+        # node_modules の確認
+        if [ -d "node_modules" ]; then
+          echo "✅ node_modules ディレクトリが存在します"
+          
+          # 主要パッケージの確認
+          PACKAGES=("react" "vite" "typescript" "eslint")
+          for package in "${PACKAGES[@]}"; do
+            if [ -d "node_modules/$package" ]; then
+              echo "  ✅ $package インストール済み"
+            else
+              echo "  ❓ $package が見つかりません（オプション依存関係の可能性）"
+            fi
+          done
+        else
+          echo "❌ node_modules ディレクトリが見つかりません"
+          exit 1
+        fi
+        
+        # npm list で依存関係ツリーの確認（エラーがあっても続行）
+        echo "📋 依存関係ツリー確認:"
+        npm list --depth=0 || echo "⚠️ 依存関係に問題がある可能性がありますが、続行します"
+        
+        echo "✅ インストール後検証完了"
+    
+    # ================================================================
+    # Step 6: キャッシュサマリー
+    # ================================================================
+    - name: 📊 Cache summary
+      shell: bash
+      run: |
+        echo "📊 キャッシュサマリー:"
+        echo "  キャッシュキー: node-${{ inputs.node-version }}-${{ inputs.cache-key-suffix }}"
+        echo "  キャッシュヒット: ${{ steps.setup-node.outputs.cache-hit }}"
+        
+        if [ "${{ steps.setup-node.outputs.cache-hit }}" = "true" ]; then
+          echo "  ✅ キャッシュからの復元が成功しました"
+        else
+          echo "  📦 新しいキャッシュが作成されました"
+>>>>>>> main
         fi

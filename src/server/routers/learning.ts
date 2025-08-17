@@ -12,9 +12,14 @@ import {
   studySessionSchema,
   learningGoalSchema,
 } from '@/server/services/learningService'
-import { ProgressService, progressFilterSchema } from '@/server/services/progressService'
+import { ProgressService } from '@/server/services/progressService'
 import { createPermissionChecker, Permission } from '@/server/auth/rbac'
 import { prisma } from '@/lib/db'
+// import type { KnowledgeArea, ProcessGroup } from '@/types'
+
+// Score types for exam results
+type KnowledgeAreaScores = Record<string, number>
+type ProcessGroupScores = Record<string, number>
 
 // 入力検証スキーマ
 const learningProgressQuerySchema = z.object({
@@ -268,7 +273,7 @@ export const learningRouter = createTRPCRouter({
         confirmReset: z.boolean().refine((val) => val === true, '進捗リセットの確認が必要です'),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       await LearningService.resetProgress(ctx.session.user.id)
 
       await prisma.userActivity.create({
@@ -421,15 +426,19 @@ export const learningRouter = createTRPCRouter({
     const progress = knowledgeAreas.map((area) => {
       const areaSessions = sessions.filter((s) => s.knowledgeArea === area)
       const areaExams = examResults.filter(
-        (e) => e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
+        (e) =>
+          e.knowledgeAreaScores &&
+          (e.knowledgeAreaScores as KnowledgeAreaScores)[area] !== undefined
       )
 
       const completedSessions = areaSessions.filter((s) => s.completed)
       const totalStudyTime = areaSessions.reduce((sum, s) => sum + s.duration, 0)
       const averageScore =
         areaExams.length > 0
-          ? areaExams.reduce((sum, e) => sum + ((e.knowledgeAreaScores as any)[area] || 0), 0) /
-            areaExams.length
+          ? areaExams.reduce(
+              (sum, e) => sum + ((e.knowledgeAreaScores as KnowledgeAreaScores)[area] || 0),
+              0
+            ) / areaExams.length
           : 0
 
       return {
@@ -471,15 +480,18 @@ export const learningRouter = createTRPCRouter({
     const progress = processGroups.map((group) => {
       const groupSessions = sessions.filter((s) => s.processGroup === group)
       const groupExams = examResults.filter(
-        (e) => e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
+        (e) =>
+          e.processGroupScores && (e.processGroupScores as ProcessGroupScores)[group] !== undefined
       )
 
       const completedSessions = groupSessions.filter((s) => s.completed)
       const totalStudyTime = groupSessions.reduce((sum, s) => sum + s.duration, 0)
       const averageScore =
         groupExams.length > 0
-          ? groupExams.reduce((sum, e) => sum + ((e.processGroupScores as any)[group] || 0), 0) /
-            groupExams.length
+          ? groupExams.reduce(
+              (sum, e) => sum + ((e.processGroupScores as ProcessGroupScores)[group] || 0),
+              0
+            ) / groupExams.length
           : 0
 
       return {

@@ -2,6 +2,7 @@ import { ValidationService } from './validation'
 import { randomBytes, createHmac, timingSafeEqual } from 'crypto'
 import Redis from 'ioredis'
 import { getRedisClient } from './rateLimiting'
+import { logger } from '../../services/logger'
 
 export interface CSRFToken {
   token: string
@@ -59,7 +60,9 @@ export class CSRFProtection {
     try {
       this.redis = await getRedisClient()
     } catch (error) {
-      console.warn('CSRF: Redis not available, using in-memory storage:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('CSRF: Redis not available, using in-memory storage:', error)
+      }
     }
   }
 
@@ -100,7 +103,9 @@ export class CSRFProtection {
 
       return tokenValue
     } catch (error) {
-      console.error('CSRF token generation error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('CSRF token generation error:', error)
+      }
       throw new Error('Failed to generate CSRF token')
     }
   }
@@ -219,7 +224,9 @@ export class CSRFProtection {
       result.valid = true
       return result
     } catch (error) {
-      console.error('CSRF token validation error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('CSRF token validation error:', error)
+      }
       result.error = 'Validation system error'
       result.riskScore = 60
       result.recommendations.push('System error during validation')
@@ -309,7 +316,7 @@ export class CSRFProtection {
    */
   async setDoubleSubmitCookie(
     tokenValue: string,
-    response?: any,
+    response?: unknown,
     options: {
       secure?: boolean
       sameSite?: 'strict' | 'lax' | 'none'
@@ -358,7 +365,7 @@ export class CSRFProtection {
   /**
    * Serialize cookie options
    */
-  private serializeCookieOptions(options: any): string {
+  private serializeCookieOptions(options: unknown): string {
     const parts: string[] = []
 
     Object.entries(options).forEach(([key, value]) => {
@@ -377,7 +384,7 @@ export class CSRFProtection {
   /**
    * Get CSRF token from cookie (enhanced for double submit)
    */
-  getTokenFromCookie(request?: any): { cookieToken?: string; headerToken?: string } | null {
+  getTokenFromCookie(request?: unknown): { cookieToken?: string; headerToken?: string } | null {
     const getCookieValue = (name: string): string | null => {
       if (request && request.cookies) {
         // Server-side
@@ -472,7 +479,7 @@ export class CSRFProtection {
    * Enhanced middleware with comprehensive protection
    */
   middleware() {
-    return async (req: any, res: any, next: any) => {
+    return async (req: unknown, res: unknown, next: unknown) => {
       try {
         // Enhanced CSRF token generation
         req.generateCSRFToken = async (userId?: string, sessionId?: string) => {
@@ -509,13 +516,15 @@ export class CSRFProtection {
         )
 
         if (!validation.valid) {
-          console.warn('CSRF validation failed:', {
-            ip: req.ip,
-            userAgent: req.get('User-Agent'),
-            userId: req.user?.id,
-            error: validation.error,
-            riskScore: validation.riskScore,
-          })
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('CSRF validation failed:', {
+              ip: req.ip,
+              userAgent: req.get('User-Agent'),
+              userId: req.user?.id,
+              error: validation.error,
+              riskScore: validation.riskScore,
+            })
+          }
 
           return res.status(403).json({
             error: 'CSRF validation failed',
@@ -528,17 +537,21 @@ export class CSRFProtection {
 
         // Log high-risk validations
         if (validation.riskScore && validation.riskScore > 40) {
-          console.warn('High-risk CSRF validation:', {
-            ip: req.ip,
-            userId: req.user?.id,
-            riskScore: validation.riskScore,
-            recommendations: validation.recommendations,
-          })
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('High-risk CSRF validation:', {
+              ip: req.ip,
+              userId: req.user?.id,
+              riskScore: validation.riskScore,
+              recommendations: validation.recommendations,
+            })
+          }
         }
 
         next()
       } catch (error) {
-        console.error('CSRF middleware error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('CSRF middleware error:', error)
+        }
         return res.status(500).json({
           error: 'CSRF system error',
           message: 'Internal security system error',
@@ -552,7 +565,7 @@ export class CSRFProtection {
    * Enhanced request validation
    */
   private async validateEnhancedRequest(
-    request: any,
+    request: unknown,
     userId?: string,
     sessionId?: string,
     fingerprint?: string
@@ -614,7 +627,7 @@ export class CSRFProtection {
   /**
    * Generate device/request fingerprint
    */
-  private generateFingerprint(request: any): string {
+  private generateFingerprint(request: unknown): string {
     const components = [
       request.get('User-Agent') || '',
       request.get('Accept-Language') || '',
@@ -641,7 +654,7 @@ export class CSRFProtection {
   /**
    * Verify form submission token
    */
-  verifyFormToken(formData: { [key: string]: any }, userId?: string): boolean {
+  verifyFormToken(formData: { [key: string]: unknown }, userId?: string): boolean {
     const token = formData.csrf_token || formData._token
     return this.validateToken(token, userId)
   }
@@ -720,7 +733,7 @@ export class CSRFProtection {
    * Rotate active tokens for security
    */
   private async rotateActiveTokens(): Promise<void> {
-    if (!this.redis) return
+    if (!this.redis) {return}
 
     try {
       // Get all active user token keys
@@ -745,14 +758,18 @@ export class CSRFProtection {
             const graceKey = `csrf:grace:${oldToken}`
             await this.redis.setex(graceKey, 300, newToken) // 5 minutes grace
 
-            console.info(
-              `Token rotated for user ${userId}: ${oldToken.substring(0, 8)}... -> ${newToken.substring(0, 8)}...`
-            )
+            if (process.env.NODE_ENV === 'development') {
+              logger.info(
+                `Token rotated for user ${userId}: ${oldToken.substring(0, 8)}... -> ${newToken.substring(0, 8)}...`
+              )
+            }
           }
         }
       }
     } catch (error) {
-      console.error('Token rotation error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Token rotation error:', error)
+      }
     }
   }
 

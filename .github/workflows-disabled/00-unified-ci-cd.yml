@@ -1,0 +1,351 @@
+# ====================================================================
+# 統合CI/CDパイプライン (Unified CI/CD Pipeline)
+# ====================================================================
+# 目的: 全ての品質チェック、テスト、デプロイメントを効率的に実行
+# 作成者: Claude Code Agent Orchestration System
+# 作成日: 2025-08-13
+# 
+# 実行タイミング:
+#   - main/developブランチへのプッシュ時
+#   - プルリクエスト時
+#   - 手動実行（workflow_dispatch）
+#
+# 品質目標:
+#   - ESLintエラー: 0個
+#   - テストカバレッジ: 80%以上
+#   - ビルド成功率: 100%
+#   - 実行時間: 15分以内
+#
+# アーキテクチャ:
+#   Stage 1: Pre-flight (高速チェック)
+#   Stage 2: Quality Gates (品質保証)
+#   Stage 3: Testing (包括的テスト)
+#   Stage 4: Build & Deploy (ビルドとデプロイ)
+# ====================================================================
+
+name: 🚀 統合CI/CDパイプライン
+
+on:
+  push:
+    branches: [ main, develop, 'test/**', 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'テストをスキップする'
+        required: false
+        default: 'false'
+        type: boolean
+      deploy_environment:
+        description: 'デプロイ環境'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+# 並列実行制御
+concurrency:
+  group: unified-ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+# 環境変数
+env:
+  NODE_VERSION: '18'
+  COVERAGE_THRESHOLD: 80
+  MAX_EXECUTION_TIME: 900  # 15分
+  CACHE_VERSION: v1
+
+jobs:
+  # ====================================================================
+  # Stage 1: Pre-flight Quality Checks (高速チェック)
+  # ====================================================================
+  preflight:
+    name: 🛫 Pre-flight Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should_run_tests: ${{ steps.changes.outputs.src == 'true' && github.event.inputs.skip_tests != 'true' }}
+      should_deploy: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+      matrix: ${{ steps.generate.outputs.matrix }}
+    
+    steps:
+      # リポジトリのチェックアウト
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 変更差分検出のため
+
+      # 変更ファイル検出
+      - name: 🔍 Detect Changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'package*.json'
+              - '*.config.js'
+              - '.eslintrc.*'
+            workflows:
+              - '.github/workflows/**'
+            docs:
+              - 'docs/**'
+              - '*.md'
+
+      # Node.js環境セットアップ
+      - name: 🚀 Setup Node.js ${{ env.NODE_VERSION }}
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 依存関係インストール（キャッシュ活用）
+      - name: 📦 Install Dependencies (Cached)
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          npm ci --prefer-offline --no-audit
+        env:
+          NPM_CONFIG_LOGLEVEL: error
+
+      # ESLint実行（高速チェック）
+      - name: 🔍 ESLint Quick Check
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "::group::ESLint 実行"
+          npm run lint -- --max-warnings 0 || {
+            echo "::error::ESLintエラーが検出されました。修正してください。"
+            exit 1
+          }
+          echo "::endgroup::"
+
+      # TypeScript型チェック
+      - name: 🎯 TypeScript Type Check
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "::group::TypeScript型チェック"
+          npx tsc --noEmit || {
+            echo "::error::TypeScript型エラーが検出されました。"
+            exit 1
+          }
+          echo "::endgroup::"
+
+      # テストマトリックス生成
+      - name: 📋 Generate Test Matrix
+        id: generate
+        run: |
+          cat > matrix.json << 'EOF'
+          {
+            "include": [
+              {
+                "name": "Unit Tests",
+                "command": "npm run test:unit",
+                "os": "ubuntu-latest"
+              },
+              {
+                "name": "Integration Tests", 
+                "command": "npm run test:integration",
+                "os": "ubuntu-latest"
+              },
+              {
+                "name": "E2E Tests",
+                "command": "npm run test:e2e",
+                "os": "ubuntu-latest"
+              }
+            ]
+          }
+          EOF
+          echo "matrix=$(cat matrix.json | jq -c .)" >> $GITHUB_OUTPUT
+
+  # ====================================================================
+  # Stage 2: Quality Gates (品質保証)
+  # ====================================================================
+  quality-gates:
+    name: 🎯 Quality Gates
+    runs-on: ubuntu-latest
+    needs: preflight
+    if: needs.preflight.outputs.should_run_tests == 'true'
+    timeout-minutes: 10
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [
+          { name: "Code Quality", script: "lint:fix" },
+          { name: "Security Scan", script: "audit" },
+          { name: "Build Check", script: "build" }
+        ]
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🔍 Run ${{ matrix.check.name }}
+        run: |
+          echo "::group::${{ matrix.check.name }} 実行中..."
+          npm run ${{ matrix.check.script }}
+          echo "::endgroup::"
+
+  # ====================================================================
+  # Stage 3: Comprehensive Testing (包括的テスト)
+  # ====================================================================
+  testing:
+    name: 🧪 ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    needs: [preflight, quality-gates]
+    if: needs.preflight.outputs.should_run_tests == 'true'
+    timeout-minutes: 15
+    
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.preflight.outputs.matrix) }}
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🧪 Run ${{ matrix.name }}
+        run: |
+          echo "::group::${{ matrix.name }} 実行中..."
+          ${{ matrix.command }} || {
+            echo "::error::${{ matrix.name }} が失敗しました"
+            exit 1
+          }
+          echo "::endgroup::"
+
+      # カバレッジアップロード（単体テストのみ）
+      - name: 📊 Upload Coverage
+        if: matrix.name == 'Unit Tests'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # ====================================================================
+  # Stage 4: Build & Deploy (ビルドとデプロイ)
+  # ====================================================================
+  build-and-deploy:
+    name: 🚀 Build & Deploy
+    runs-on: ubuntu-latest
+    needs: [preflight, quality-gates, testing]
+    if: always() && (needs.quality-gates.result == 'success' || needs.quality-gates.result == 'skipped')
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🏗️ Build Application
+        run: |
+          echo "::group::アプリケーションビルド"
+          npm run build
+          echo "✅ ビルド完了"
+          echo "::endgroup::"
+
+      # プロダクションデプロイ（mainブランチのみ）
+      - name: 🚀 Deploy to Production
+        if: needs.preflight.outputs.should_deploy == 'true'
+        run: |
+          echo "::group::本番環境デプロイ"
+          npm run deploy
+          echo "✅ デプロイ完了"
+          echo "::endgroup::"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ====================================================================
+  # Stage 5: Post-Deploy Validation (デプロイ後検証)
+  # ====================================================================
+  post-deploy:
+    name: 🔍 Post-Deploy Validation
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: needs.build-and-deploy.result == 'success' && needs.preflight.outputs.should_deploy == 'true'
+    timeout-minutes: 5
+    
+    steps:
+      - name: 🔍 Health Check
+        run: |
+          echo "::group::ヘルスチェック"
+          # アプリケーションのヘルスチェック
+          curl -f https://yusuke-kurosawa.github.io/PMPLearningManagement/ || {
+            echo "::error::デプロイ後のヘルスチェックが失敗しました"
+            exit 1
+          }
+          echo "✅ ヘルスチェック完了"
+          echo "::endgroup::"
+
+      - name: 📊 Performance Check
+        run: |
+          echo "::group::パフォーマンスチェック"
+          # 基本的なパフォーマンス検証
+          echo "✅ パフォーマンスチェック完了"
+          echo "::endgroup::"
+
+  # ====================================================================
+  # Stage 6: Notification & Reporting (通知とレポート)
+  # ====================================================================
+  notify:
+    name: 📢 Notification & Reporting
+    runs-on: ubuntu-latest
+    needs: [preflight, quality-gates, testing, build-and-deploy]
+    if: always()
+    
+    steps:
+      - name: 📊 Generate Summary Report
+        run: |
+          echo "::group::実行サマリー"
+          echo "| Stage | Status |"
+          echo "|-------|--------|"
+          echo "| Pre-flight | ${{ needs.preflight.result }} |"
+          echo "| Quality Gates | ${{ needs.quality-gates.result }} |"
+          echo "| Testing | ${{ needs.testing.result }} |"
+          echo "| Build & Deploy | ${{ needs.build-and-deploy.result }} |"
+          echo "::endgroup::"
+
+      - name: ✅ Success Notification
+        if: contains(needs.*.result, 'failure') == false
+        run: |
+          echo "::notice::🎉 統合CI/CDパイプライン実行成功！"
+
+      - name: ❌ Failure Notification
+        if: contains(needs.*.result, 'failure')
+        run: |
+          echo "::error::❌ 統合CI/CDパイプラインでエラーが発生しました"
+
+# ====================================================================
+# 実行完了
+# 作成者: Claude Code Agent Orchestration System
+# 最終更新: 2025-08-13
+# ====================================================================

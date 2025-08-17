@@ -62,9 +62,13 @@ export default defineConfig({
   
   // Development server configuration
   server: {
-    port: 3000,
+    port: 5173,
     open: true,
-    host: true
+    host: true,
+    cors: true,
+    hmr: {
+      overlay: false
+    }
   },
   
   // Preview server (for testing production build)
@@ -110,7 +114,22 @@ export default defineConfig({
       'd3',
       'd3-sankey',
       'lucide-react',
-      'framer-motion'
-    ]
+      'framer-motion',
+      'zustand',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-progress',
+      'react-hook-form',
+      'zod'
+    ],
+    exclude: ['@stryker-mutator/core']
+  },
+
+  // Performance optimizations
+  esbuild: {
+    target: 'es2020',
+    treeShaking: true,
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true
   }
 })

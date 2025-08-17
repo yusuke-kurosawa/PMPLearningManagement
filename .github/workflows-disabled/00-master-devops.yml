@@ -1,0 +1,316 @@
+name: Master DevOps Pipeline
+
+on:
+  push:
+    branches: [main, develop, test/*]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '18'
+  CACHE_VERSION: v1
+
+jobs:
+  # ===============================
+  # Stage 1: Code Quality Gate
+  # ===============================
+  quality-gate:
+    name: Code Quality Gate
+    runs-on: ubuntu-latest
+    outputs:
+      quality-score: ${{ steps.analyze.outputs.score }}
+      lint-errors: ${{ steps.lint.outputs.errors }}
+      test-coverage: ${{ steps.test.outputs.coverage }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: ESLint Check
+        id: lint
+        continue-on-error: true
+        run: |
+          npm run lint -- --format json > eslint-report.json || true
+          errors=$(cat eslint-report.json | jq '[.[] | .errorCount] | add')
+          warnings=$(cat eslint-report.json | jq '[.[] | .warningCount] | add')
+          echo "errors=$errors" >> $GITHUB_OUTPUT
+          echo "warnings=$warnings" >> $GITHUB_OUTPUT
+          echo "### 📋 ESLint Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Errors**: $errors" >> $GITHUB_STEP_SUMMARY
+          echo "- **Warnings**: $warnings" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Run Tests with Coverage
+        id: test
+        run: |
+          npm run test:coverage || true
+          coverage=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "coverage=$coverage" >> $GITHUB_OUTPUT
+          echo "### 🧪 Test Coverage: ${coverage}%" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Code Quality Analysis
+        id: analyze
+        run: |
+          # Calculate quality score
+          lint_score=$((100 - ${{ steps.lint.outputs.errors }} * 2 - ${{ steps.lint.outputs.warnings }} / 10))
+          coverage_score=${{ steps.test.outputs.coverage }}
+          quality_score=$(( (lint_score + coverage_score) / 2 ))
+          echo "score=$quality_score" >> $GITHUB_OUTPUT
+          echo "### 🎯 Quality Score: ${quality_score}/100" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Quality Gate Check
+        if: steps.analyze.outputs.score < 70
+        run: |
+          echo "❌ Quality gate failed. Score: ${{ steps.analyze.outputs.score }}/100"
+          exit 1
+
+  # ===============================
+  # Stage 2: Security Scanning
+  # ===============================
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Security Audit
+        run: |
+          npm audit --json > audit-report.json || true
+          vulnerabilities=$(cat audit-report.json | jq '.metadata.vulnerabilities | to_entries | map(select(.value > 0)) | length')
+          echo "### 🔒 Security Audit" >> $GITHUB_STEP_SUMMARY
+          echo "Found $vulnerabilities vulnerability categories" >> $GITHUB_STEP_SUMMARY
+      
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'PMPLearningManagement'
+          path: '.'
+          format: 'HTML'
+      
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            audit-report.json
+            reports/
+
+  # ===============================
+  # Stage 3: Build & Optimize
+  # ===============================
+  build-optimize:
+    name: Build & Optimize
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: Build Application
+        run: |
+          npm run build
+          echo "### 📦 Build Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle Size**: $(du -sh dist | cut -f1)" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Optimize Images
+        run: |
+          npm run optimize:images || echo "No image optimization script"
+      
+      - name: Bundle Analysis
+        run: |
+          npm run analyze:bundle || echo "No bundle analysis script"
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+
+  # ===============================
+  # Stage 4: Performance Testing
+  # ===============================
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: build-optimize
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+      
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: '.lighthouserc.js'
+          uploadArtifacts: true
+      
+      - name: Performance Budget Check
+        run: |
+          echo "### ⚡ Performance Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "Checking performance budgets..." >> $GITHUB_STEP_SUMMARY
+
+  # ===============================
+  # Stage 5: Deployment
+  # ===============================
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: ubuntu-latest
+    needs: [build-optimize, performance-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+      
+      - name: Deploy to GitHub Pages
+        if: github.event.inputs.environment != 'production'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+      
+      - name: Deploy to Production
+        if: github.event.inputs.environment == 'production'
+        run: |
+          echo "🚀 Deploying to production..."
+          # Production deployment logic here
+
+  # ===============================
+  # Stage 6: Post-Deployment
+  # ===============================
+  post-deploy:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    
+    steps:
+      - name: Health Check
+        run: |
+          echo "### ✅ Deployment Health Check" >> $GITHUB_STEP_SUMMARY
+          # Add health check logic
+      
+      - name: Smoke Tests
+        run: |
+          echo "### 🔥 Smoke Tests" >> $GITHUB_STEP_SUMMARY
+          # Add smoke test logic
+      
+      - name: Notify Success
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Deployment successful!'
+            })
+
+  # ===============================
+  # Monitoring & Reporting
+  # ===============================
+  report:
+    name: Generate DevOps Report
+    runs-on: ubuntu-latest
+    needs: [quality-gate, security-scan, build-optimize, performance-test]
+    if: always()
+    
+    steps:
+      - name: Generate Comprehensive Report
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          ## 📊 DevOps Pipeline Report
+          
+          ### Pipeline Status
+          - **Quality Gate**: ${{ needs.quality-gate.result }}
+          - **Security Scan**: ${{ needs.security-scan.result }}
+          - **Build**: ${{ needs.build-optimize.result }}
+          - **Performance**: ${{ needs.performance-test.result }}
+          
+          ### Metrics
+          - **Quality Score**: ${{ needs.quality-gate.outputs.quality-score }}/100
+          - **ESLint Errors**: ${{ needs.quality-gate.outputs.lint-errors }}
+          - **Test Coverage**: ${{ needs.quality-gate.outputs.test-coverage }}%
+          
+          ### Next Steps
+          1. Review any failed stages
+          2. Address security vulnerabilities
+          3. Optimize performance metrics
+          EOF
+      
+      - name: Create Issue for Failures
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `DevOps Pipeline Failure - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## Pipeline Failure Report
+            
+            **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Branch**: ${{ github.ref_name }}
+            **Commit**: ${{ github.sha }}
+            
+            ### Failed Stages
+            - Quality Gate: ${{ needs.quality-gate.result }}
+            - Security Scan: ${{ needs.security-scan.result }}
+            - Build: ${{ needs.build-optimize.result }}
+            - Performance: ${{ needs.performance-test.result }}
+            
+            Please investigate and fix the issues.
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'ci/cd', 'high-priority']
+            });

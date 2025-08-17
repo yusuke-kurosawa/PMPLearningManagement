@@ -1,101 +1,195 @@
 import React, { ReactElement } from 'react'
-import { render, RenderOptions, RenderResult } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { render, RenderOptions } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import ThemeContext from '../../contexts/ThemeContext'
+import AuthContext, { AuthContextType } from '../../contexts/AuthContext'
+import { UserRoles } from '../../services/authService'
 import { vi } from 'vitest'
 
-// Mock contexts
-const MockThemeProvider = ({ children }: { children: React.ReactNode }) => (
-  <div data-testid="theme-provider">{children}</div>
-)
+// Mock theme context value
+const mockThemeContext = {
+  isDarkMode: false,
+  toggleTheme: vi.fn(),
+  setTheme: vi.fn(),
+}
 
-const MockProgressProvider = ({ children }: { children: React.ReactNode }) => (
-  <div data-testid="progress-provider">{children}</div>
-)
+// Mock settings context (for Navigation component)
+// const mockSettings = {
+//   darkMode: false,
+//   toggleDarkMode: vi.fn(),
+//   language: 'ja',
+//   setLanguage: vi.fn(),
+// }
 
-// All the providers
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <BrowserRouter>
-      <MockThemeProvider>
-        <MockProgressProvider>{children}</MockProgressProvider>
-      </MockThemeProvider>
-    </BrowserRouter>
+// Create a mock settings context provider
+const _MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
+  // Use a simple Context.Provider since we're mocking
+  return React.createElement(
+    'div',
+    { 'data-testid': 'mock-settings-provider' },
+    children
   )
 }
 
-// Custom render function
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult => {
-  return render(ui, { wrapper: AllTheProviders, ...options })
+// Mock auth context value
+const mockAuthContext: AuthContextType = {
+  user: null,
+  session: null,
+  role: UserRoles.GUEST,
+  permissions: [],
+  loading: false,
+  authError: null,
+  isAuthenticated: false,
+  signIn: vi.fn(),
+  signUp: vi.fn(),
+  signInWithOAuth: vi.fn(),
+  signOut: vi.fn(),
+  resetPassword: vi.fn(),
+  updatePassword: vi.fn(),
+  updateProfile: vi.fn(),
+  hasPermission: vi.fn(),
+  hasRole: vi.fn(),
+  clearError: vi.fn(),
 }
 
-// Create a mock user event instance
-export const createMockUserEvent = () => ({
-  click: vi.fn(),
-  type: vi.fn(),
-  clear: vi.fn(),
-  selectOptions: vi.fn(),
-  deselectOptions: vi.fn(),
-  tab: vi.fn(),
-  hover: vi.fn(),
-  unhover: vi.fn(),
-  upload: vi.fn(),
-  keyboard: vi.fn(),
-})
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  themeContext?: Partial<typeof mockThemeContext>
+  authContext?: Partial<AuthContextType>
+  initialEntries?: string[]
+}
 
-// Mock data generators
-export const mockProgressData = () => ({
-  knowledgeAreas: {
-    integration: { totalProcesses: 7, completedProcesses: 3, completionRate: 43 },
-    scope: { totalProcesses: 6, completedProcesses: 6, completionRate: 100 },
-    schedule: { totalProcesses: 6, completedProcesses: 2, completionRate: 33 },
-    cost: { totalProcesses: 4, completedProcesses: 1, completionRate: 25 },
-    quality: { totalProcesses: 3, completedProcesses: 0, completionRate: 0 },
-    resource: { totalProcesses: 6, completedProcesses: 4, completionRate: 67 },
-    communications: { totalProcesses: 3, completedProcesses: 2, completionRate: 67 },
-    risk: { totalProcesses: 7, completedProcesses: 5, completionRate: 71 },
-    procurement: { totalProcesses: 3, completedProcesses: 1, completionRate: 33 },
-    stakeholder: { totalProcesses: 4, completedProcesses: 2, completionRate: 50 },
-  },
-  processGroups: {
-    initiating: { totalProcesses: 2, completedProcesses: 1, completionRate: 50 },
-    planning: { totalProcesses: 24, completedProcesses: 12, completionRate: 50 },
-    executing: { totalProcesses: 10, completedProcesses: 5, completionRate: 50 },
-    monitoring: { totalProcesses: 12, completedProcesses: 6, completionRate: 50 },
-    closing: { totalProcesses: 1, completedProcesses: 1, completionRate: 100 },
-  },
-  totalStudyTime: 3600, // seconds
-  lastStudyDate: new Date().toISOString(),
-  completedProcesses: 26,
-  totalProcesses: 49,
-})
+const _AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <MemoryRouter initialEntries={['/']}>
+      <ThemeContext.Provider value={mockThemeContext}>
+        <AuthContext.Provider value={mockAuthContext}>{children}</AuthContext.Provider>
+      </ThemeContext.Provider>
+    </MemoryRouter>
+  )
+}
 
-export const mockExamQuestion = () => ({
-  id: 1,
-  question: 'Which process group contains the most processes?',
-  options: ['Initiating', 'Planning', 'Executing', 'Monitoring and Controlling'],
-  correctAnswer: 1, // Planning
-  explanation:
-    'Planning process group contains 24 out of 49 processes, making it the largest process group.',
-  knowledgeArea: 'integration',
-  difficulty: 'medium',
-  tags: ['process-groups', 'planning'],
-})
+const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
+  const { themeContext, authContext, initialEntries = ['/'], ...renderOptions } = options
 
-// Utility functions for testing
-export const waitForElementToBeRemoved = async (element: HTMLElement) => {
-  return new Promise((resolve) => {
-    const observer = new MutationObserver(() => {
-      if (!document.contains(element)) {
-        observer.disconnect()
-        resolve(void 0)
-      }
-    })
-    observer.observe(document.body, { childList: true, subtree: true })
-  })
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const mergedThemeContext = { ...mockThemeContext, ...themeContext }
+    const mergedAuthContext = { ...mockAuthContext, ...authContext }
+
+    return (
+      <MemoryRouter initialEntries={initialEntries}>
+        <ThemeContext.Provider value={mergedThemeContext}>
+          <AuthContext.Provider value={mergedAuthContext}>{children}</AuthContext.Provider>
+        </ThemeContext.Provider>
+      </MemoryRouter>
+    )
+  }
+
+  return render(ui, { wrapper: Wrapper, ...renderOptions })
 }
 
 // Re-export everything
 export * from '@testing-library/react'
-
-// Override render method
 export { customRender as render }
+
+// Mock implementations for common test utilities
+export const mockNavigate = vi.fn()
+export const mockLocation = {
+  pathname: '/',
+  search: '',
+  hash: '',
+  state: null,
+  key: 'default',
+}
+
+// Helper function to create test data
+export const createTestUser = (overrides: Record<string, unknown> = {}) => ({
+  id: '123',
+  email: 'test@example.com',
+  name: 'Test User',
+  created_at: new Date().toISOString(),
+  ...overrides,
+})
+
+// Helper function to wait for async operations
+export const waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+// Mock window methods commonly used in tests
+export const mockWindowMethods = () => {
+  Object.defineProperty(window, 'scrollTo', {
+    value: vi.fn(),
+    writable: true,
+  })
+
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
+// Mock localStorage
+export const mockLocalStorage = () => {
+  const storage: { [key: string]: string } = {}
+
+  return {
+    getItem: vi.fn((key: string) => storage[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      storage[key] = value
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete storage[key]
+    }),
+    clear: vi.fn(() => {
+      Object.keys(storage).forEach((key) => delete storage[key])
+    }),
+    length: Object.keys(storage).length,
+    key: vi.fn((index: number) => Object.keys(storage)[index] || null),
+  }
+}
+
+// Helper to create proper Touch objects for testing
+export const createMockTouch = (overrides: Partial<Touch> = {}): Touch => ({
+  identifier: 0,
+  target: document.body,
+  screenX: 0,
+  screenY: 0,
+  clientX: 0,
+  clientY: 0,
+  pageX: 0,
+  pageY: 0,
+  radiusX: 0,
+  radiusY: 0,
+  rotationAngle: 0,
+  force: 0,
+  ...overrides,
+})
+
+// Helper to create proper TouchEvent for testing
+export const createMockTouchEvent = (
+  type: string,
+  touchData: Array<Partial<Touch>> = []
+): TouchEvent => {
+  const touches = touchData.map(createMockTouch)
+
+  const touchList = {
+    length: touches.length,
+    item: (index: number) => touches[index] || null,
+    ...touches.reduce((acc, touch, index) => ({ ...acc, [index]: touch }), {}),
+  } as TouchList
+
+  return new TouchEvent(type, {
+    touches: type === 'touchend' ? ([] as unknown as TouchList) : touchList,
+    targetTouches: type === 'touchend' ? ([] as unknown as TouchList) : touchList,
+    changedTouches: touchList,
+    bubbles: true,
+    cancelable: true,
+  }) as TouchEvent
+}

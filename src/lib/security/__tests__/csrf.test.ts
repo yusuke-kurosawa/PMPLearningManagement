@@ -8,7 +8,7 @@ import { CSRFProtection } from '../csrf'
 import * as fc from 'fast-check'
 
 // Crypto モック
-vi.mock('crypto', () => ({
+const cryptoMock = {
   randomBytes: vi.fn().mockImplementation((size: number) => ({
     toString: vi.fn().mockReturnValue('a'.repeat(size * 2)),
   })),
@@ -17,6 +17,11 @@ vi.mock('crypto', () => ({
     digest: vi.fn().mockReturnValue('mocked-hmac-signature'),
   })),
   timingSafeEqual: vi.fn().mockImplementation((a: Buffer, b: Buffer) => a.equals(b)),
+}
+
+vi.mock('crypto', () => ({
+  default: cryptoMock,
+  ...cryptoMock,
 }))
 
 // Redis モック
@@ -334,7 +339,10 @@ describe('Enhanced CSRF Protection', () => {
     })
 
     it('should clean up expired tokens', async () => {
-      const cleanupSpy = vi.spyOn(csrf as any, 'cleanupExpiredTokens')
+      const cleanupSpy = vi.spyOn(
+        csrf as unknown as { cleanupExpiredTokens: () => void },
+        'cleanupExpiredTokens'
+      )
 
       await csrf.generateToken()
 
@@ -342,7 +350,10 @@ describe('Enhanced CSRF Protection', () => {
     })
 
     it('should handle token rotation', async () => {
-      const rotateSpy = vi.spyOn(csrf as any, 'rotateActiveTokens')
+      const rotateSpy = vi.spyOn(
+        csrf as unknown as { rotateActiveTokens: () => Promise<void> },
+        'rotateActiveTokens'
+      )
 
       // Manually trigger rotation for testing
       await csrf['rotateActiveTokens']()

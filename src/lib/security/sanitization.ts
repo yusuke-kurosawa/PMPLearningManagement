@@ -20,7 +20,7 @@ export interface SanitizationResult {
 export class DataSanitizer {
   private static readonly SQL_INJECTION_PATTERNS = [
     /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/gi,
-    /(\-\-|\;|\||&)/g,
+    /(--|;|\||&)/g,
     /(\/\*.*?\*\/)/g,
     /(\bOR\b.*?=.*?=|\bAND\b.*?=.*?=)/gi,
     /('.*?'|".*?")/g,
@@ -215,17 +215,17 @@ export class DataSanitizer {
    * Sanitize object properties recursively
    */
   static sanitizeObject(
-    obj: any,
+    obj: unknown,
     options: SanitizationOptions = {}
   ): {
-    sanitized: any
+    sanitized: unknown
     warnings: string[]
     modified: boolean
   } {
     const warnings: string[] = []
     let modified = false
 
-    const sanitizeValue = (value: any, key?: string): any => {
+    const sanitizeValue = (value: unknown, key?: string): unknown => {
       if (typeof value === 'string') {
         const result = this.sanitizeText(value, options)
         if (result.modified) {
@@ -240,7 +240,7 @@ export class DataSanitizer {
       }
 
       if (value && typeof value === 'object' && value.constructor === Object) {
-        const sanitizedObj: any = {}
+        const sanitizedObj: unknown = {}
         for (const [objKey, objValue] of Object.entries(value)) {
           // Check for dangerous keys
           if (objKey === '__proto__' || objKey === 'constructor' || objKey === 'prototype') {
@@ -342,7 +342,7 @@ export class DataSanitizer {
     sanitized = sanitized.replace(/[<>:"|?*]/g, '_')
 
     // Remove leading/trailing dots and spaces
-    sanitized = sanitized.replace(/^[\.\s]+|[\.\s]+$/g, '')
+    sanitized = sanitized.replace(/^[.\s]+|[.\s]+$/g, '')
 
     // Ensure filename is not empty
     if (sanitized.length === 0) {
@@ -402,9 +402,9 @@ export class DataSanitizer {
    */
   static createFormDataSanitizer(options: SanitizationOptions = {}) {
     return (formData: {
-      [key: string]: any
+      [key: string]: unknown
     }): {
-      sanitized: { [key: string]: any }
+      sanitized: { [key: string]: unknown }
       warnings: string[]
     } => {
       const result = this.sanitizeObject(formData, options)

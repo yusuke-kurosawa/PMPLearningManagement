@@ -7,7 +7,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
-import { z } from 'zod'
+import { logger } from '../../services/logger'
+// import { z } from 'zod' // TODO: Will be used in future
 import { UserRole } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
@@ -85,7 +86,7 @@ const adminRoutes = ['/admin', '/api/admin']
 const premiumRoutes = ['/api/ai', '/api/analytics/advanced', '/collaboration/advanced']
 
 // 認証不要なルートの定義
-const publicRoutes = ['/', '/auth', '/pmbok', '/glossary', '/api/health', '/api/auth']
+// const publicRoutes = ['/', '/auth', '/pmbok', '/glossary', '/api/health', '/api/auth'] // TODO: Will be used in future
 
 // ルートマッチング関数
 const matchRoute = (pathname: string, routes: string[]): boolean => {
@@ -108,7 +109,7 @@ const checkRateLimit = async (
 
     await rateLimiter.consume(ip)
     return { success: true }
-  } catch (rejRes: any) {
+  } catch (rejRes: Error) {
     const resetTime = new Date(Date.now() + rejRes.msBeforeNext)
     return { success: false, resetTime }
   }
@@ -258,7 +259,9 @@ export async function authMiddleware(request: NextRequest) {
 
     return setSecurityHeaders(response)
   } catch (error) {
-    console.error('認証ミドルウェアエラー:', error)
+    if (process.env.NODE_ENV === 'development') {
+      logger.error('認証ミドルウェアエラー:', error)
+    }
 
     const response = NextResponse.json(
       {
@@ -285,14 +288,14 @@ export const verifyCSRFToken = (token: string, sessionToken: string): boolean =>
 
 // API エンドポイント用認証デコレータ
 export const withAuth = (
-  handler: (req: NextRequest, context: any) => Promise<NextResponse>,
+  handler: (req: NextRequest, context: unknown) => Promise<NextResponse>,
   options: {
     requireAuth?: boolean
     requireAdmin?: boolean
     requirePremium?: boolean
   } = {}
 ) => {
-  return async (req: NextRequest, context: any) => {
+  return async (req: NextRequest, context: unknown) => {
     const token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET,
@@ -362,7 +365,7 @@ export const config = {
 interface JWTValidation {
   isValid: boolean
   reason?: string
-  decoded?: any
+  decoded?: unknown
 }
 
 export const validateJWT = async (request: NextRequest): Promise<JWTValidation> => {
@@ -431,7 +434,9 @@ export const validateJWT = async (request: NextRequest): Promise<JWTValidation> 
       return { isValid: false, reason: 'Token not active yet' }
     }
 
-    console.error('JWT validation error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      logger.error('JWT validation error:', error)
+    }
     return { isValid: false, reason: 'Token validation failed' }
   }
 }

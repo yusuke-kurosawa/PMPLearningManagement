@@ -14,6 +14,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { UserRole, SubscriptionPlan } from '@prisma/client'
 import type { DefaultSession } from 'next-auth'
+import { logger } from '../../services/logger'
 
 // NextAuth型拡張
 declare module 'next-auth' {
@@ -57,7 +58,7 @@ const credentialsSchema = z.object({
 })
 
 // パスワードハッシュ化ユーティリティ
-export const hashPassword = async (password: string): Promise<string> => {
+export const __hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 12
   return await bcrypt.hash(password, saltRounds)
 }
@@ -117,13 +118,13 @@ const createUserWithDefaults = async (userData: {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as unknown as NextAuthOptions['adapter'],
 
   providers: [
     // Google OAuth Provider
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
           prompt: 'consent',
@@ -135,8 +136,8 @@ export const authOptions: NextAuthOptions = {
 
     // GitHub OAuth Provider
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
     }),
 
     // Email/Password Credentials Provider
@@ -200,7 +201,9 @@ export const authOptions: NextAuthOptions = {
             profileComplete: user.profileComplete,
           }
         } catch (error) {
-          console.error('認証エラー:', error)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('認証エラー:', error)
+          }
           return null
         }
       },
@@ -226,18 +229,18 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account }) {
       try {
         // OAuth プロバイダーの場合、既存ユーザーをチェック
         if (account?.provider !== 'credentials') {
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
+            where: { email: user?.email },
           })
 
           // 新規ユーザーの場合、デフォルト設定で作成
           if (!existingUser) {
             await createUserWithDefaults({
-              email: user.email!,
+              email: user?.email,
               name: user.name,
               image: user.image,
             })
@@ -246,12 +249,14 @@ export const authOptions: NextAuthOptions = {
 
         return true
       } catch (error) {
-        console.error('サインインエラー:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('サインインエラー:', error)
+        }
         return false
       }
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       // 初回ログイン時
       if (user) {
         token.role = user.role
@@ -279,7 +284,9 @@ export const authOptions: NextAuthOptions = {
             token.profileComplete = dbUser.profileComplete
           }
         } catch (error) {
-          console.error('JWT更新エラー:', error)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('JWT更新エラー:', error)
+          }
         }
       }
 
@@ -288,7 +295,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.sub!
+        session.user.id = token?.sub
         session.user.role = token.role
         session.user.subscriptionPlan = token.subscriptionPlan
         session.user.subscriptionActive = token.subscriptionActive
@@ -300,7 +307,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn({ user, account, isNewUser }) {
       // ログイン記録
       await prisma.userActivity.create({
         data: {
@@ -314,7 +321,9 @@ export const authOptions: NextAuthOptions = {
         },
       })
 
-      console.log(`ユーザーサインイン: ${user.email} (${account?.provider})`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`ユーザーサインイン: ${user.email} (${account?.provider})`)
+      }
     },
 
     async signOut({ session, token }) {
@@ -330,12 +339,16 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
-        console.log(`ユーザーサインアウト: ${session?.user?.email}`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug(`ユーザーサインアウト: ${session?.user?.email}`)
+        }
       }
     },
 
     async createUser({ user }) {
-      console.log(`新規ユーザー作成: ${user.email}`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`新規ユーザー作成: ${user.email}`)
+      }
     },
   },
 
@@ -343,27 +356,32 @@ export const authOptions: NextAuthOptions = {
 
   logger: {
     error(code, metadata) {
-      console.error(`NextAuth Error [${code}]:`, metadata)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`NextAuth Error [${code}]:`, metadata)
+      }
     },
     warn(code) {
-      console.warn(`NextAuth Warning [${code}]`)
-    },
-    debug(code, metadata) {
       if (process.env.NODE_ENV === 'development') {
-        console.debug(`NextAuth Debug [${code}]:`, metadata)
+        logger.warn(`NextAuth Warning [${code}]`)
+      }
+    },
+    debug(_code, _metadata) {
+      if (process.env.NODE_ENV === 'development') {
+        // デバッグ情報は開発環境でのみログ出力
+        logger.debug(`NextAuth Debug [${_code}]:`, _metadata)
       }
     },
   },
 }
 
 // サーバーサイド認証ヘルパー
-export const getServerAuthSession = async (req: any, res: any) => {
-  // サーバーサイドでの認証状態取得
-  // 実装は使用するフレームワークによって異なる
-}
+// export const __getServerAuthSession = async (req: unknown, res: unknown) => { // TODO: Will be used in future
+//   // サーバーサイドでの認証状態取得
+//   // 実装は使用するフレームワークによって異なる
+// }
 
 // 認証状態検証ヘルパー
-export const requireAuth = (session: any) => {
+export const requireAuth = (session: unknown) => {
   if (!session?.user) {
     throw new Error('認証が必要です')
   }
@@ -371,7 +389,7 @@ export const requireAuth = (session: any) => {
 }
 
 // 管理者権限検証ヘルパー
-export const requireAdmin = (session: any) => {
+export const __requireAdmin = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.role !== UserRole.ADMIN) {
     throw new Error('管理者権限が必要です')
@@ -380,7 +398,7 @@ export const requireAdmin = (session: any) => {
 }
 
 // プレミアム権限検証ヘルパー
-export const requirePremium = (session: any) => {
+export const __requirePremium = (session: unknown) => {
   const user = requireAuth(session).user
   if (user.subscriptionPlan === SubscriptionPlan.FREE || !user.subscriptionActive) {
     throw new Error('プレミアムプランが必要です')

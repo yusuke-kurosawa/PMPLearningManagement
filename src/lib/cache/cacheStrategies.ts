@@ -5,6 +5,8 @@
 
 import { RedisCacheManager, CacheKeyStrategy } from './redisCache'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
+import type { Redis } from 'ioredis'
 
 // キャッシング戦略の定義
 export enum CacheStrategy {
@@ -56,7 +58,7 @@ export class AdvancedCacheManager {
   private cacheManager: RedisCacheManager
   private dependencyGraph: Map<string, Set<string>> = new Map()
   private refreshQueue: Set<string> = new Set()
-  private refreshCallbacks: Map<string, () => Promise<any>> = new Map()
+  private refreshCallbacks: Map<string, () => Promise<unknown>> = new Map()
 
   constructor(cacheManager: RedisCacheManager) {
     this.cacheManager = cacheManager
@@ -105,7 +107,9 @@ export class AdvancedCacheManager {
         timestamp: startTime,
       }
     } catch (error) {
-      console.error('Cache-Aside error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache-Aside error:', error)
+      }
       return {
         data: null,
         hit: false,
@@ -140,7 +144,9 @@ export class AdvancedCacheManager {
       // 依存関係の無効化
       await this.invalidateDependencies(identifier)
     } catch (error) {
-      console.error('Write-Through error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Write-Through error:', error)
+      }
       // エラー時はキャッシュを削除して整合性を保つ
       await this.cacheManager.delete(keyStrategy, identifier)
       throw error
@@ -179,13 +185,17 @@ export class AdvancedCacheManager {
             })
           }
         } catch (error) {
-          console.error('Write-Behind persist error:', error)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('Write-Behind persist error:', error)
+          }
           // 失敗時はキャッシュも無効化
           await this.cacheManager.delete(keyStrategy, identifier)
         }
       })
     } catch (error) {
-      console.error('Write-Behind error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Write-Behind error:', error)
+      }
       throw error
     }
   }
@@ -205,7 +215,9 @@ export class AdvancedCacheManager {
     try {
       // キャッシュエントリの詳細情報を取得
       const cacheKey = `${keyStrategy}:${identifier}`
-      const redis = await (this.cacheManager as any).getRedis()
+      const redis = await (
+        this.cacheManager as RedisCacheManager & { getRedis(): Promise<Redis> }
+      ).getRedis()
       const ttl = await redis.ttl(cacheKey)
       const cachedData = await this.cacheManager.get<T>(keyStrategy, identifier)
 
@@ -247,7 +259,9 @@ export class AdvancedCacheManager {
         refreshed: true,
       }
     } catch (error) {
-      console.error('Smart cache error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Smart cache error:', error)
+      }
 
       // エラー時は古いデータの返却を試行
       const staleData = await this.getStaleData<T>(keyStrategy, identifier, fullConfig.maxStale)
@@ -276,7 +290,7 @@ export class AdvancedCacheManager {
     if (!this.dependencyGraph.has(parentKey)) {
       this.dependencyGraph.set(parentKey, new Set())
     }
-    this.dependencyGraph.get(parentKey)!.add(childKey)
+    this.dependencyGraph.get(parentKey)?.add(childKey)
   }
 
   /**
@@ -284,7 +298,7 @@ export class AdvancedCacheManager {
    */
   private async invalidateDependencies(key: string): Promise<void> {
     const dependencies = this.dependencyGraph.get(key)
-    if (!dependencies) return
+    if (!dependencies) {return}
 
     const invalidationTasks = Array.from(dependencies).map((depKey) => {
       // 依存キーの形式: "strategy:identifier"
@@ -293,7 +307,9 @@ export class AdvancedCacheManager {
     })
 
     await Promise.allSettled(invalidationTasks)
-    console.log(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`Invalidated ${dependencies.size} dependencies for key: ${key}`)
+    }
   }
 
   /**
@@ -308,7 +324,7 @@ export class AdvancedCacheManager {
     const refreshKey = `${keyStrategy}:${identifier}`
 
     // 既にリフレッシュがスケジュールされている場合はスキップ
-    if (this.refreshQueue.has(refreshKey)) return
+    if (this.refreshQueue.has(refreshKey)) {return}
 
     this.refreshQueue.add(refreshKey)
     this.refreshCallbacks.set(refreshKey, async () => {
@@ -321,7 +337,9 @@ export class AdvancedCacheManager {
           })
         }
       } catch (error) {
-        console.error('Background refresh failed:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Background refresh failed:', error)
+        }
       } finally {
         this.refreshQueue.delete(refreshKey)
         this.refreshCallbacks.delete(refreshKey)
@@ -339,7 +357,9 @@ export class AdvancedCacheManager {
   ): Promise<T | null> {
     try {
       // Redisから期限切れでも取得を試行
-      const redis = await (this.cacheManager as any).getRedis()
+      const redis = await (
+        this.cacheManager as RedisCacheManager & { getRedis(): Promise<Redis> }
+      ).getRedis()
       const cacheKey = `${keyStrategy}:${identifier}`
       const result = await redis.get(cacheKey)
 
@@ -354,7 +374,9 @@ export class AdvancedCacheManager {
 
       return null
     } catch (error) {
-      console.error('Get stale data error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Get stale data error:', error)
+      }
       return null
     }
   }
@@ -365,9 +387,11 @@ export class AdvancedCacheManager {
   private startBackgroundRefresh(): void {
     setInterval(async () => {
       const refreshTasks = Array.from(this.refreshCallbacks.values())
-      if (refreshTasks.length === 0) return
+      if (refreshTasks.length === 0) {return}
 
-      console.log(`Processing ${refreshTasks.length} background refresh tasks`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`Processing ${refreshTasks.length} background refresh tasks`)
+      }
 
       // 並列数を制限してリフレッシュを実行
       const concurrencyLimit = 5
@@ -385,7 +409,7 @@ export class AdvancedCacheManager {
     warmupConfigs: Array<{
       keyStrategy: CacheKeyStrategy
       identifier: string
-      dataFetcher: () => Promise<any>
+      dataFetcher: () => Promise<unknown>
       config?: Partial<CacheStrategyConfig>
     }>
   ): Promise<number> {
@@ -394,15 +418,19 @@ export class AdvancedCacheManager {
       async ({ keyStrategy, identifier, dataFetcher, config }) => {
         try {
           const result = await this.cacheAside(keyStrategy, identifier, dataFetcher, config)
-          if (!result.hit) warmedUp++
+          if (!result.hit) {warmedUp++}
         } catch (error) {
-          console.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error(`Cache warmup failed for ${keyStrategy}:${identifier}:`, error)
+          }
         }
       }
     )
 
     await Promise.allSettled(warmupTasks)
-    console.log(`Cache warmup completed: ${warmedUp} entries loaded`)
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`Cache warmup completed: ${warmedUp} entries loaded`)
+    }
     return warmedUp
   }
 
@@ -410,7 +438,7 @@ export class AdvancedCacheManager {
    * キャッシュ分析とレポート
    */
   async generateCacheReport(): Promise<{
-    stats: any
+    stats: unknown
     topKeys: Array<{ key: string; hitCount: number }>
     recommendations: string[]
   }> {
@@ -501,7 +529,7 @@ export class PMPCacheStrategies {
   /**
    * ユーザーダッシュボードデータ用キャッシング
    */
-  async cacheUserDashboard(userId: string, dataFetcher: () => Promise<any>) {
+  async cacheUserDashboard(userId: string, dataFetcher: () => Promise<unknown>) {
     return this.advancedCache.smartCache(
       CacheKeyStrategy.USER_DATA,
       `dashboard:${userId}`,
@@ -519,7 +547,7 @@ export class PMPCacheStrategies {
   /**
    * PMBOK プロセス情報用キャッシング
    */
-  async cachePMBOKProcesses(dataFetcher: () => Promise<any>) {
+  async cachePMBOKProcesses(dataFetcher: () => Promise<unknown>) {
     return this.advancedCache.cacheAside(
       CacheKeyStrategy.PMBOK_DATA,
       'all_processes',
@@ -535,14 +563,18 @@ export class PMPCacheStrategies {
   /**
    * 試験問題用キャッシング（階層化）
    */
-  async cacheExamQuestions(examType: string, difficulty: string, dataFetcher: () => Promise<any>) {
+  async cacheExamQuestions(
+    examType: string,
+    difficulty: string,
+    dataFetcher: () => Promise<unknown>
+  ) {
     return this.advancedCache.multiLayerCache(
       CacheKeyStrategy.EXAM_DATA,
       `questions:${examType}:${difficulty}`,
       dataFetcher,
       [
-        { name: 'hot', ttl: 300, condition: (data: any) => data.length > 10 },
-        { name: 'warm', ttl: 1800, condition: (data: any) => data.length > 0 },
+        { name: 'hot', ttl: 300, condition: (data: unknown) => data.length > 10 },
+        { name: 'warm', ttl: 1800, condition: (data: unknown) => data.length > 0 },
         { name: 'cold', ttl: 7200 }, // すべてのデータ
       ]
     )
@@ -553,8 +585,8 @@ export class PMPCacheStrategies {
    */
   async updateLearningStats(
     userId: string,
-    stats: any,
-    dataPersister: (stats: any) => Promise<void>
+    stats: unknown,
+    dataPersister: (stats: unknown) => Promise<void>
   ) {
     await this.advancedCache.writeBehind(
       CacheKeyStrategy.ANALYTICS_DATA,
@@ -574,8 +606,8 @@ export class PMPCacheStrategies {
    */
   async updateUserSession(
     userId: string,
-    sessionData: any,
-    dataPersister: (data: any) => Promise<void>
+    sessionData: unknown,
+    dataPersister: (data: unknown) => Promise<void>
   ) {
     await this.advancedCache.writeThrough(
       CacheKeyStrategy.SESSION_DATA,

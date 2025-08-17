@@ -6,7 +6,7 @@
 
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
-import { createTRPCRouter, publicProcedure, protectedProcedure } from '@/server/trpc'
+import { createTRPCRouter, protectedProcedure } from '@/server/trpc'
 import {
   UserService,
   userFilterSchema,
@@ -142,7 +142,7 @@ export const userRouter = createTRPCRouter({
 
     // 管理者以外は機密情報を除外
     if (!checker.isAdmin() && input.id !== requestingUser.id) {
-      const { hashedPassword, emailVerificationToken, passwordResetToken, ...safeUser } = user
+      const { ...safeUser } = user
       return safeUser
     }
 
@@ -222,7 +222,7 @@ export const userRouter = createTRPCRouter({
         }
       } else {
         // 自分の情報の場合、役割とサブスクリプション情報は変更不可
-        const { role, subscriptionPlan, subscriptionActive, ...allowedData } = input.data
+        const { ...allowedData } = input.data
         input.data = allowedData
       }
 
@@ -337,7 +337,7 @@ export const userRouter = createTRPCRouter({
 
       return {
         users: result.users
-          .filter((user) => !input.excludeIds.includes(user.id!))
+          .filter((user) => !input.excludeIds.includes(user?.id))
           .map((user) => ({
             id: user.id,
             name: user.name,

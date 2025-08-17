@@ -5,6 +5,7 @@
 
 import Redis from 'ioredis'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // キャッシュ設定スキーマ
 const CacheConfigSchema = z.object({
@@ -19,7 +20,7 @@ const CacheConfigSchema = z.object({
 export type CacheConfig = z.infer<typeof CacheConfigSchema>
 
 // キャッシュエントリの型
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   data: T
   timestamp: number
   ttl: number
@@ -90,11 +91,15 @@ export class RedisCacheManager {
       })
 
       this.redis.on('connect', () => {
-        console.log('Redis cache connection established')
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Redis cache connection established')
+        }
       })
 
       this.redis.on('error', (error) => {
-        console.error('Redis cache error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Redis cache error:', error)
+        }
       })
 
       // 接続テスト
@@ -109,7 +114,7 @@ export class RedisCacheManager {
   private generateKey(
     strategy: CacheKeyStrategy,
     identifier: string,
-    additionalParams?: Record<string, any>
+    additionalParams?: Record<string, unknown>
   ): string {
     let key = `${strategy}:${identifier}`
 
@@ -128,7 +133,7 @@ export class RedisCacheManager {
    * データの圧縮
    */
   private compress(data: string): Buffer {
-    const zlib = require('zlib')
+    import zlib from 'zlib'
     return zlib.gzipSync(Buffer.from(data))
   }
 
@@ -136,7 +141,7 @@ export class RedisCacheManager {
    * データの展開
    */
   private decompress(data: Buffer): string {
-    const zlib = require('zlib')
+    import zlib from 'zlib'
     return zlib.gunzipSync(data).toString()
   }
 
@@ -151,7 +156,7 @@ export class RedisCacheManager {
       ttl?: number
       tags?: string[]
       version?: string
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<void> {
     const startTime = Date.now()
@@ -192,7 +197,9 @@ export class RedisCacheManager {
       this.stats.sets++
       this.updateResponseTime(Date.now() - startTime)
     } catch (error) {
-      console.error('Cache set error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache set error:', error)
+      }
       throw error
     }
   }
@@ -204,7 +211,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifier: string,
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
       acceptedVersions?: string[]
     }
   ): Promise<T | null> {
@@ -248,7 +255,9 @@ export class RedisCacheManager {
 
       return entry.data
     } catch (error) {
-      console.error('Cache get error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache get error:', error)
+      }
       this.stats.misses++
       return null
     }
@@ -261,7 +270,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifier: string,
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<boolean> {
     try {
@@ -277,7 +286,9 @@ export class RedisCacheManager {
 
       return false
     } catch (error) {
-      console.error('Cache delete error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache delete error:', error)
+      }
       return false
     }
   }
@@ -289,7 +300,7 @@ export class RedisCacheManager {
     strategy: CacheKeyStrategy,
     identifiers: string[],
     options?: {
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<Map<string, T>> {
     const results = new Map<string, T>()
@@ -305,11 +316,13 @@ export class RedisCacheManager {
       for (let i = 0; i < identifiers.length; i++) {
         if (values[i]) {
           try {
-            const entry: CacheEntry<T> = JSON.parse(values[i]!)
+            const entry: CacheEntry<T> = JSON.parse(values[i] || '{}')
             results.set(identifiers[i], entry.data)
             this.stats.hits++
           } catch (error) {
-            console.warn(`Failed to parse cached data for ${identifiers[i]}:`, error)
+            if (process.env.NODE_ENV === 'development') {
+              logger.warn(`Failed to parse cached data for ${identifiers[i]}:`, error)
+            }
             this.stats.misses++
           }
         } else {
@@ -317,7 +330,9 @@ export class RedisCacheManager {
         }
       }
     } catch (error) {
-      console.error('Cache mget error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache mget error:', error)
+      }
     }
 
     return results
@@ -333,7 +348,7 @@ export class RedisCacheManager {
       ttl?: number
       tags?: string[]
       version?: string
-      additionalParams?: Record<string, any>
+      additionalParams?: Record<string, unknown>
     }
   ): Promise<void> {
     try {
@@ -366,7 +381,9 @@ export class RedisCacheManager {
       await pipeline.exec()
       this.stats.sets += dataMap.size
     } catch (error) {
-      console.error('Cache mset error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache mset error:', error)
+      }
       throw error
     }
   }
@@ -379,7 +396,7 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.smembers(`tag:${tag}`)
 
-      if (keys.length === 0) return 0
+      if (keys.length === 0) {return 0}
 
       const pipeline = redis.pipeline()
       keys.forEach((key) => pipeline.del(key))
@@ -390,7 +407,9 @@ export class RedisCacheManager {
 
       return keys.length
     } catch (error) {
-      console.error('Cache invalidate by tag error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache invalidate by tag error:', error)
+      }
       return 0
     }
   }
@@ -403,14 +422,16 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.keys(pattern)
 
-      if (keys.length === 0) return 0
+      if (keys.length === 0) {return 0}
 
       await redis.del(...keys)
       this.stats.deletes += keys.length
 
       return keys.length
     } catch (error) {
-      console.error('Cache invalidate by pattern error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache invalidate by pattern error:', error)
+      }
       return 0
     }
   }
@@ -451,7 +472,9 @@ export class RedisCacheManager {
         keyCount,
       }
     } catch (error) {
-      console.error('Failed to get cache stats:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get cache stats:', error)
+      }
       return this.stats
     }
   }
@@ -498,7 +521,9 @@ export class RedisCacheManager {
         },
       }
     } catch (error) {
-      console.error('Cache health check failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache health check failed:', error)
+      }
       return {
         status: 'unhealthy',
         details: {
@@ -540,12 +565,16 @@ export class RedisCacheManager {
       const deleted = (await redis.eval(luaScript, 0, `${this.keyPrefix}:*`)) as number
 
       if (deleted > 0) {
-        console.log(`Cleaned up ${deleted} expired cache keys`)
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug(`Cleaned up ${deleted} expired cache keys`)
+        }
       }
 
       return deleted
     } catch (error) {
-      console.error('Cache cleanup error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Cache cleanup error:', error)
+      }
       return 0
     }
   }
@@ -573,7 +602,9 @@ export class RedisCacheManager {
     if (this.redis) {
       await this.redis.quit()
       this.redis = null
-      console.log('Redis cache disconnected')
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Redis cache disconnected')
+      }
     }
   }
 }
@@ -584,16 +615,16 @@ export class RedisCacheManager {
 export function createCacheMiddleware(cacheManager: RedisCacheManager) {
   return function cacheMiddleware<T>(
     strategy: CacheKeyStrategy,
-    identifier: string | ((req: any) => string),
+    identifier: string | ((req: unknown) => string),
     options?: {
       ttl?: number
       tags?: string[]
       version?: string
-      skipCache?: (req: any) => boolean
-      generateKey?: (req: any) => Record<string, any>
+      skipCache?: (req: unknown) => boolean
+      generateKey?: (req: unknown) => Record<string, unknown>
     }
   ) {
-    return async function (req: any, handler: () => Promise<T>): Promise<T> {
+    return async function (req: unknown, handler: () => Promise<T>): Promise<T> {
       try {
         // スキップ条件チェック
         if (options?.skipCache && options.skipCache(req)) {
@@ -626,7 +657,9 @@ export function createCacheMiddleware(cacheManager: RedisCacheManager) {
 
         return data
       } catch (error) {
-        console.error('Cache middleware error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          logger.error('Cache middleware error:', error)
+        }
         // キャッシュエラー時は元の処理を実行
         return await handler()
       }
@@ -643,7 +676,7 @@ export class SpecializedCacheHelpers {
   /**
    * ユーザーセッション用キャッシュ
    */
-  async cacheUserSession(userId: string, sessionData: any, ttl: number = 3600): Promise<void> {
+  async cacheUserSession(userId: string, sessionData: unknown, ttl: number = 3600): Promise<void> {
     await this.cacheManager.set(CacheKeyStrategy.SESSION_DATA, userId, sessionData, {
       ttl,
       tags: ['session', `user:${userId}`],
@@ -653,7 +686,7 @@ export class SpecializedCacheHelpers {
   /**
    * PMBOK プロセスデータ用キャッシュ
    */
-  async cachePMBOKProcess(processId: string, processData: any): Promise<void> {
+  async cachePMBOKProcess(processId: string, processData: unknown): Promise<void> {
     await this.cacheManager.set(
       CacheKeyStrategy.PMBOK_DATA,
       processId,
@@ -665,7 +698,7 @@ export class SpecializedCacheHelpers {
   /**
    * 試験結果用キャッシュ
    */
-  async cacheExamResults(examId: string, results: any): Promise<void> {
+  async cacheExamResults(examId: string, results: unknown): Promise<void> {
     await this.cacheManager.set(
       CacheKeyStrategy.EXAM_DATA,
       examId,
@@ -677,7 +710,7 @@ export class SpecializedCacheHelpers {
   /**
    * 学習進捗統計用キャッシュ
    */
-  async cacheLearningStats(userId: string, stats: any): Promise<void> {
+  async cacheLearningStats(userId: string, stats: unknown): Promise<void> {
     await this.cacheManager.set(
       CacheKeyStrategy.ANALYTICS_DATA,
       `learning_stats:${userId}`,

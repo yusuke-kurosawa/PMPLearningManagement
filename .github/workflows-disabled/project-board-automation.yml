@@ -1,0 +1,318 @@
+name: "Project Board Automation"
+
+on:
+  # 手動実行のみ（Project Boardが設定されるまで無効化）
+  workflow_dispatch:
+
+jobs:
+  board_automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move issues to appropriate columns
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = context.issue;
+            const action = context.payload.action;
+            
+            // Define project board automation rules
+            const boardRules = {
+              'issue_opened': {
+                condition: (issue, labels) => labels.includes('validated-feature'),
+                target_column: 'Product Backlog',
+                comment: '📋 Added to Product Backlog - ready for sprint planning'
+              },
+              'issue_assigned': {
+                condition: (issue, labels) => labels.includes('in-sprint'),
+                target_column: 'Sprint Backlog', 
+                comment: '🎯 Moved to Sprint Backlog - committed for current sprint'
+              },
+              'issue_labeled_in-progress': {
+                condition: (issue, labels) => labels.includes('in-progress'),
+                target_column: 'In Progress',
+                comment: '🔄 Development started - moved to In Progress'
+              },
+              'pull_request_opened': {
+                condition: (pr) => pr.draft === false,
+                target_column: 'Code Review',
+                comment: '👀 Pull request ready for code review'
+              },
+              'issue_labeled_testing': {
+                condition: (issue, labels) => labels.includes('testing'),
+                target_column: 'Testing & QA',
+                comment: '🧪 Moved to Testing - QA review in progress'
+              },
+              'issue_closed': {
+                condition: (issue) => issue.state === 'closed',
+                target_column: 'Done',
+                comment: '✅ Completed - moved to Done column'
+              }
+            };
+            
+            const currentIssue = context.payload.issue || context.payload.pull_request;
+            const labels = currentIssue?.labels?.map(l => l.name) || [];
+            
+            // Determine which rule applies
+            let ruleKey = action;
+            if (action === 'labeled') {
+              const newLabel = context.payload.label.name;
+              ruleKey = `${action}_${newLabel}`;
+            }
+            
+            console.log(`Processing rule: ${ruleKey}`);
+            console.log(`Issue labels: ${labels.join(', ')}`);
+            
+            const rule = boardRules[ruleKey];
+            if (rule && rule.condition(currentIssue, labels)) {
+              console.log(`Rule matched - target column: ${rule.target_column}`);
+              
+              // Add comment about board movement
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: rule.comment
+              });
+              
+              // Add workflow label for tracking
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: [`board:${rule.target_column.toLowerCase().replace(' ', '-')}`]
+              });
+            }
+
+  sprint_metrics:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.issue.labels.*.name, 'generate-sprint-metrics')
+    steps:
+      - name: Generate sprint metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Calculate current sprint dates (2-week sprints)
+            const now = new Date();
+            const sprintStart = new Date(now);
+            sprintStart.setDate(now.getDate() - (now.getDate() % 14));
+            const sprintEnd = new Date(sprintStart);
+            sprintEnd.setDate(sprintStart.getDate() + 14);
+            
+            // Get all issues for current sprint
+            const sprintIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'in-sprint',
+              state: 'all',
+              per_page: 100
+            });
+            
+            // Calculate sprint metrics
+            const totalIssues = sprintIssues.data.length;
+            const completedIssues = sprintIssues.data.filter(i => i.state === 'closed').length;
+            const inProgressIssues = sprintIssues.data.filter(i => 
+              i.state === 'open' && i.labels.some(l => l.name === 'in-progress')
+            ).length;
+            const blockedIssues = sprintIssues.data.filter(i =>
+              i.labels.some(l => l.name === 'blocked')
+            ).length;
+            
+            // Calculate velocity (simplified - assuming story points in issue titles)
+            let totalStoryPoints = 0;
+            let completedStoryPoints = 0;
+            
+            for (const issue of sprintIssues.data) {
+              // Extract story points from title pattern [X SP]
+              const match = issue.title.match(/\[(\d+)\s*SP\]/i);
+              const points = match ? parseInt(match[1]) : 3; // default 3 SP
+              totalStoryPoints += points;
+              
+              if (issue.state === 'closed') {
+                completedStoryPoints += points;
+              }
+            }
+            
+            const velocityPercentage = totalStoryPoints > 0 ? 
+              Math.round((completedStoryPoints / totalStoryPoints) * 100) : 0;
+            
+            // Generate metrics report
+            const metricsReport = `# 📊 Sprint Metrics Report
+            
+            **Sprint Period**: ${sprintStart.toISOString().split('T')[0]} to ${sprintEnd.toISOString().split('T')[0]}
+            **Generated**: ${now.toISOString()}
+            
+            ## 🎯 Sprint Progress
+            - **Total Issues**: ${totalIssues}
+            - **Completed**: ${completedIssues} (${Math.round((completedIssues/totalIssues)*100)}%)
+            - **In Progress**: ${inProgressIssues}
+            - **Blocked**: ${blockedIssues}
+            
+            ## 📈 Velocity Tracking
+            - **Committed Story Points**: ${totalStoryPoints}
+            - **Completed Story Points**: ${completedStoryPoints}
+            - **Velocity**: ${velocityPercentage}%
+            - **Target Velocity**: 85%
+            
+            ## 🚦 Sprint Health
+            ${velocityPercentage >= 85 ? '🟢 **On Track**' : 
+              velocityPercentage >= 70 ? '🟡 **At Risk**' : '🔴 **Behind Schedule**'}
+            
+            ${blockedIssues > 0 ? `⚠️ **${blockedIssues} Blocked Issues** - Immediate attention required` : ''}
+            
+            ## 📋 Issue Status Breakdown
+            `;
+            
+            // Add issue details by status
+            const statusGroups = {
+              'Completed': sprintIssues.data.filter(i => i.state === 'closed'),
+              'In Progress': sprintIssues.data.filter(i => 
+                i.state === 'open' && i.labels.some(l => l.name === 'in-progress')),
+              'Blocked': sprintIssues.data.filter(i =>
+                i.labels.some(l => l.name === 'blocked')),
+              'Not Started': sprintIssues.data.filter(i =>
+                i.state === 'open' && !i.labels.some(l => ['in-progress', 'blocked'].includes(l.name)))
+            };
+            
+            let statusReport = metricsReport;
+            for (const [status, issues] of Object.entries(statusGroups)) {
+              if (issues.length > 0) {
+                statusReport += `\n### ${status} (${issues.length})
+                ${issues.map(i => `- #${i.number} ${i.title}`).join('\n')}`;
+              }
+            }
+            
+            statusReport += `
+            ## 🎯 Recommendations
+            ${velocityPercentage < 70 ? '- Consider reducing sprint scope or addressing blockers immediately' : ''}
+            ${blockedIssues > 0 ? '- Prioritize unblocking dependencies in next standup' : ''}
+            ${inProgressIssues > totalIssues * 0.5 ? '- Too much work in progress - focus on completion' : ''}
+            - Update story point estimates based on actual completion times
+            - Schedule retrospective to discuss process improvements
+            
+            ## 📅 Next Actions
+            - [ ] Review blocked issues in daily standup
+            - [ ] Update sprint burndown chart
+            - [ ] Communicate progress to stakeholders
+            - [ ] Plan next sprint capacity
+            `;
+            
+            // Create or update sprint metrics issue
+            const existingMetrics = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'sprint-metrics',
+              state: 'open'
+            });
+            
+            if (existingMetrics.data.length > 0) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existingMetrics.data[0].number,
+                body: statusReport
+              });
+              console.log(`Updated sprint metrics issue #${existingMetrics.data[0].number}`);
+            } else {
+              const newMetrics = await github.rest.issues.create({
+                owner,
+                repo,
+                title: `📊 Sprint Metrics - Week ${Math.ceil(now.getTime() / (7*24*60*60*1000))}`,
+                body: statusReport,
+                labels: ['sprint-metrics', 'documentation', 'scrum-master']
+              });
+              console.log(`Created sprint metrics issue #${newMetrics.data.number}`);
+            }
+
+  daily_standup_prep:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Generate daily standup report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get yesterday's activity
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayISO = yesterday.toISOString().split('T')[0];
+            
+            // Get recent activity
+            const recentActivity = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'all',
+              since: yesterday.toISOString(),
+              per_page: 50
+            });
+            
+            // Get current sprint issues
+            const sprintIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'in-sprint',
+              state: 'open',
+              per_page: 100
+            });
+            
+            const blockedIssues = sprintIssues.data.filter(i =>
+              i.labels.some(l => l.name === 'blocked')
+            );
+            
+            const standupReport = `# 🗓️ Daily Standup Preparation
+            
+            **Date**: ${new Date().toISOString().split('T')[0]}
+            **Sprint**: Current 2-week iteration
+            
+            ## 📈 Yesterday's Progress
+            ${recentActivity.data.length > 0 ? 
+              recentActivity.data.slice(0, 10).map(issue => 
+                `- ${issue.state === 'closed' ? '✅' : '🔄'} #${issue.number} ${issue.title}`
+              ).join('\n') : 
+              '- No significant activity yesterday'
+            }
+            
+            ## 🚫 Blockers & Impediments (${blockedIssues.length})
+            ${blockedIssues.length > 0 ?
+              blockedIssues.map(issue => 
+                `- 🚫 #${issue.number} ${issue.title} - @${issue.assignees.map(a => a.login).join(', ') || 'unassigned'}`
+              ).join('\n') :
+              '- No blockers reported'
+            }
+            
+            ## 🎯 Today's Focus
+            - Complete in-progress items before starting new work
+            - Address any blockers identified above  
+            - Maintain sprint goal progress
+            - Update issue status and comments
+            
+            ## 📋 Sprint Health Check
+            - **Sprint Progress**: Review burndown chart
+            - **Team Capacity**: Check workload distribution
+            - **Quality Gates**: Ensure 90%+ test coverage
+            - **Dependencies**: Monitor external blockers
+            
+            ## 🤝 Team Discussion Points
+            - Any help needed from other team members?
+            - Cross-team coordination requirements?
+            - Process improvements or concerns?
+            - Sprint goal achievement on track?
+            
+            ---
+            *Generated automatically for Scrum Master facilitation*
+            `;
+            
+            console.log(standupReport);
+
+# Schedule daily standup prep at 8 AM JST (11 PM UTC previous day)
+on:
+  schedule:
+    - cron: '0 23 * * 0-4' # Sunday-Thursday for Monday-Friday standup
+
+# Schedule sprint metrics weekly on Fridays at 5 PM JST (8 AM UTC)  
+  schedule:
+    - cron: '0 8 * * 5'

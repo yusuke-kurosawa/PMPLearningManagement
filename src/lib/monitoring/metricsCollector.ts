@@ -5,6 +5,7 @@
 
 import { register, collectDefaultMetrics, Counter, Histogram, Gauge, Summary } from 'prom-client'
 import { z } from 'zod'
+import { logger } from '../../services/logger'
 
 // メトリクス設定スキーマ
 const MetricsConfigSchema = z.object({
@@ -489,7 +490,7 @@ export class MetricsCollector {
   /**
    * 特定のメトリクスの値を取得（デバッグ用）
    */
-  async getMetricValue(metricName: string): Promise<any> {
+  async getMetricValue(metricName: string): Promise<unknown> {
     const metric = register.getSingleMetric(metricName)
     if (metric) {
       return await metric.get()
@@ -556,7 +557,7 @@ export class MetricsCollector {
  * メトリクス収集用ミドルウェア
  */
 export function createMetricsMiddleware(collector: MetricsCollector) {
-  return function metricsMiddleware(req: any, res: any, next: () => void): void {
+  return function metricsMiddleware(req: unknown, res: unknown, next: () => void): void {
     const startTime = Date.now()
     const originalSend = res.send
     const originalJson = res.json
@@ -565,13 +566,13 @@ export function createMetricsMiddleware(collector: MetricsCollector) {
     let responseSize = 0
 
     // res.send をオーバーライド
-    res.send = function (data: any) {
+    res.send = function (data: unknown) {
       responseSize = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data || '', 'utf8')
       return originalSend.call(this, data)
     }
 
     // res.json をオーバーライド
-    res.json = function (data: any) {
+    res.json = function (data: unknown) {
       const jsonStr = JSON.stringify(data)
       responseSize = Buffer.byteLength(jsonStr, 'utf8')
       return originalJson.call(this, data)
@@ -626,7 +627,9 @@ export class SystemMetricsCollector {
       this.collectSystemMetrics()
     }, intervalMs)
 
-    console.log(`System metrics collection started (interval: ${intervalMs}ms)`)
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`System metrics collection started (interval: ${intervalMs}ms)`)
+    }
   }
 
   /**
@@ -636,7 +639,9 @@ export class SystemMetricsCollector {
     if (this.intervalId) {
       clearInterval(this.intervalId)
       this.intervalId = null
-      console.log('System metrics collection stopped')
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('System metrics collection stopped')
+      }
     }
   }
 
@@ -671,7 +676,9 @@ export class SystemMetricsCollector {
         eventLoopLagGauge.set(eventLoopLag)
       })
     } catch (error) {
-      console.error('System metrics collection error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('System metrics collection error:', error)
+      }
     }
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { pwaManager } from '@/lib/pwa'
+import { logger } from '../services/logger'
 
 export function PWAManager() {
   useEffect(() => {
@@ -10,10 +11,14 @@ export function PWAManager() {
       pwaManager
         .registerServiceWorker()
         .then((registration) => {
-          console.warn('SW registered: ', registration)
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('SW registered: ', registration)
+          }
         })
         .catch((registrationError) => {
-          console.error('SW registration failed: ', registrationError)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('SW registration failed: ', registrationError)
+          }
         })
     }
   }, [])

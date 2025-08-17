@@ -1,4 +1,5 @@
 import { openDB, IDBPDatabase } from 'idb'
+import { logger } from '../../services/logger'
 
 export interface SyncQueueItem {
   id: string
@@ -8,7 +9,7 @@ export interface SyncQueueItem {
     | 'flashcard-update'
     | 'setting-update'
     | 'user-action'
-  data: any
+  data: unknown
   timestamp: number
   retryCount: number
   maxRetries: number
@@ -63,7 +64,11 @@ export class SyncQueue {
   /**
    * Add item to sync queue
    */
-  async add(type: SyncQueueItem['type'], data: any, options: SyncOptions = {}): Promise<string> {
+  async add(
+    type: SyncQueueItem['type'],
+    data: unknown,
+    options: SyncOptions = {}
+  ): Promise<string> {
     try {
       const db = await this.initDB()
 
@@ -90,7 +95,9 @@ export class SyncQueue {
 
       return item.id
     } catch (error) {
-      console.error('Failed to add item to sync queue:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to add item to sync queue:', error)
+      }
       throw new Error(
         `Queue add failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -120,7 +127,9 @@ export class SyncQueue {
         })
         .slice(0, limit)
     } catch (error) {
-      console.error('Failed to get pending items:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get pending items:', error)
+      }
       return []
     }
   }
@@ -155,7 +164,9 @@ export class SyncQueue {
 
       await tx.complete
     } catch (error) {
-      console.error('Failed to update item status:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to update item status:', error)
+      }
     }
   }
 
@@ -170,7 +181,9 @@ export class SyncQueue {
       await tx.objectStore(this.STORE_NAME).delete(id)
       await tx.complete
     } catch (error) {
-      console.error('Failed to remove item from queue:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to remove item from queue:', error)
+      }
     }
   }
 
@@ -208,7 +221,9 @@ export class SyncQueue {
         }
       }
     } catch (error) {
-      console.error('Queue processing error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Queue processing error:', error)
+      }
     } finally {
       this.isProcessing = false
     }
@@ -242,7 +257,7 @@ export class SyncQueue {
   /**
    * Sync progress update to server
    */
-  private async syncProgressUpdate(data: any): Promise<void> {
+  private async syncProgressUpdate(data: unknown): Promise<void> {
     // Mock API call - replace with actual API endpoint
     const response = await fetch('/api/progress', {
       method: 'POST',
@@ -261,7 +276,7 @@ export class SyncQueue {
   /**
    * Sync exam result to server
    */
-  private async syncExamResult(data: any): Promise<void> {
+  private async syncExamResult(data: unknown): Promise<void> {
     // Mock API call - replace with actual API endpoint
     const response = await fetch('/api/exam-results', {
       method: 'POST',
@@ -280,7 +295,7 @@ export class SyncQueue {
   /**
    * Sync flashcard update to server
    */
-  private async syncFlashCardUpdate(data: any): Promise<void> {
+  private async syncFlashCardUpdate(data: unknown): Promise<void> {
     // Mock API call - replace with actual API endpoint
     const response = await fetch('/api/flashcards', {
       method: 'PUT',
@@ -299,7 +314,7 @@ export class SyncQueue {
   /**
    * Sync setting update to server
    */
-  private async syncSettingUpdate(data: any): Promise<void> {
+  private async syncSettingUpdate(data: unknown): Promise<void> {
     // Mock API call - replace with actual API endpoint
     const response = await fetch('/api/settings', {
       method: 'PUT',
@@ -318,7 +333,7 @@ export class SyncQueue {
   /**
    * Sync user action to server
    */
-  private async syncUserAction(data: any): Promise<void> {
+  private async syncUserAction(data: unknown): Promise<void> {
     // Mock API call - replace with actual API endpoint
     const response = await fetch('/api/user-actions', {
       method: 'POST',
@@ -401,7 +416,9 @@ export class SyncQueue {
         total: stats.total,
       }
     } catch (error) {
-      console.error('Failed to get queue stats:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get queue stats:', error)
+      }
       return {
         pending: 0,
         inProgress: 0,
@@ -433,7 +450,9 @@ export class SyncQueue {
       await tx.complete
       return removedCount
     } catch (error) {
-      console.error('Failed to clear completed items:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to clear completed items:', error)
+      }
       return 0
     }
   }
@@ -449,7 +468,9 @@ export class SyncQueue {
       await tx.objectStore(this.STORE_NAME).clear()
       await tx.complete
     } catch (error) {
-      console.error('Failed to clear queue:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to clear queue:', error)
+      }
     }
   }
 
@@ -486,7 +507,9 @@ export class SyncQueue {
       // Trigger immediate processing
       setTimeout(() => this.processQueue(), 100)
     } catch (error) {
-      console.error('Failed to retry failed items:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to retry failed items:', error)
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
 declare global {
-  var prisma: PrismaClient | undefined
+  const prisma: PrismaClient | undefined
 }
 
 const prismaClientSingleton = () => {
@@ -27,17 +27,17 @@ prisma.$use(async (params, next) => {
 })
 
 // Helper functions for common database operations
-export const db = {
+export const __db = {
   // Transaction helper
-  async transaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+  async transaction<_T>(fn: (tx: PrismaClient) => Promise<_T>): Promise<_T> {
     return await prisma.$transaction(async (tx) => {
       return await fn(tx as PrismaClient)
     })
   },
 
   // Pagination helper
-  async paginate<T>(
-    model: any,
+  async paginate<_T>(
+    model: unknown,
     {
       page = 1,
       limit = 10,
@@ -47,9 +47,9 @@ export const db = {
     }: {
       page?: number
       limit?: number
-      where?: any
-      orderBy?: any
-      include?: any
+      where?: unknown
+      orderBy?: unknown
+      include?: unknown
     }
   ) {
     const skip = (page - 1) * limit
@@ -79,7 +79,7 @@ export const db = {
   },
 
   // Batch operations helper
-  async batchCreate<T>(model: any, data: T[], chunkSize = 100) {
+  async batchCreate<_T>(model: unknown, data: T[], chunkSize = 100) {
     const results = []
 
     for (let i = 0; i < data.length; i += chunkSize) {
@@ -92,7 +92,7 @@ export const db = {
   },
 
   // Soft delete helper (if using soft deletes)
-  async softDelete(model: any, id: string) {
+  async softDelete(model: unknown, id: string) {
     return await model.update({
       where: { id },
       data: { deletedAt: new Date() },
@@ -100,7 +100,7 @@ export const db = {
   },
 
   // Restore soft deleted record
-  async restore(model: any, id: string) {
+  async restore(model: unknown, id: string) {
     return await model.update({
       where: { id },
       data: { deletedAt: null },

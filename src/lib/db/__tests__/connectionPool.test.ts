@@ -3,12 +3,12 @@
  * Developer 4: データベース最適化・インデックス・接続プール設定のテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest'
 import {
   EnhancedPrismaClient,
   DatabaseManager,
   DatabaseMonitor,
-  type DatabaseStats,
+  type ConnectionPoolConfig as _ConnectionPoolConfig
 } from '../connectionPool'
 import {
   QueryOptimizer,
@@ -235,7 +235,7 @@ describe('データベース最適化システム', () => {
       mockPrismaClient.user.count.mockResolvedValue(100)
 
       // プライベートメソッドをテストするため、リフレクションを使用
-      await (monitor as any).collectMetrics()
+      await (monitor as DatabaseMonitor & { collectMetrics(): Promise<void> }).collectMetrics()
 
       const metrics = monitor.getMetrics()
       expect(typeof metrics.response_time).toBe('number')
@@ -250,7 +250,7 @@ describe('データベース最適化システム', () => {
       )
       mockPrismaClient.user.count.mockResolvedValue(100)
 
-      await (monitor as any).collectMetrics()
+      await (monitor as DatabaseMonitor & { collectMetrics(): Promise<void> }).collectMetrics()
 
       const alerts = monitor.getAlerts()
       expect(alerts.some((alert) => alert.type === 'performance')).toBe(true)
@@ -599,7 +599,7 @@ describe('データベース最適化システム', () => {
     })
 
     it('クエリエラー時の統計記録', async () => {
-      const client = new EnhancedPrismaClient()
+      //       const client = new EnhancedPrismaClient() // TODO: Will be used in future
 
       // エラーを発生させるミドルウェアをテスト
       const middleware = vi.fn().mockRejectedValue(new Error('Query failed'))

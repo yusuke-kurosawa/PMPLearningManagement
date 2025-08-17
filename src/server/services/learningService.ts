@@ -8,6 +8,13 @@ import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { LearningProgress, ExamResult, StudySession } from '@prisma/client'
+import { logger } from '../../services/logger'
+
+// Knowledge Area Scores type
+type KnowledgeAreaScores = Record<string, number>
+
+// Process Group Scores type
+type ProcessGroupScores = Record<string, number>
 
 // 学習進捗データ型定義
 export interface LearningProgressWithStats extends LearningProgress {
@@ -113,7 +120,9 @@ export class LearningStatsCalculator {
     PMBOK_PROCESSES.knowledgeAreas.forEach((area) => {
       const areaSessions = sessions.filter((s) => s.knowledgeArea === area)
       const areaExams = examResults.filter(
-        (e) => e.knowledgeAreaScores && (e.knowledgeAreaScores as any)[area] !== undefined
+        (e) =>
+          e.knowledgeAreaScores &&
+          (e.knowledgeAreaScores as KnowledgeAreaScores)[area] !== undefined
       )
 
       stats[area] = {
@@ -122,7 +131,7 @@ export class LearningStatsCalculator {
         averageScore:
           areaExams.length > 0
             ? areaExams.reduce(
-                (sum, exam) => sum + ((exam.knowledgeAreaScores as any)[area] || 0),
+                (sum, exam) => sum + ((exam.knowledgeAreaScores as KnowledgeAreaScores)[area] || 0),
                 0
               ) / areaExams.length
             : 0,
@@ -141,7 +150,8 @@ export class LearningStatsCalculator {
     PMBOK_PROCESSES.processGroups.forEach((group) => {
       const groupSessions = sessions.filter((s) => s.processGroup === group)
       const groupExams = examResults.filter(
-        (e) => e.processGroupScores && (e.processGroupScores as any)[group] !== undefined
+        (e) =>
+          e.processGroupScores && (e.processGroupScores as ProcessGroupScores)[group] !== undefined
       )
 
       stats[group] = {
@@ -150,7 +160,7 @@ export class LearningStatsCalculator {
         averageScore:
           groupExams.length > 0
             ? groupExams.reduce(
-                (sum, exam) => sum + ((exam.processGroupScores as any)[group] || 0),
+                (sum, exam) => sum + ((exam.processGroupScores as ProcessGroupScores)[group] || 0),
                 0
               ) / groupExams.length
             : 0,
@@ -249,7 +259,9 @@ export class LearningService {
         },
       }
     } catch (error) {
-      console.error('学習進捗取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習進捗取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習進捗の取得中にエラーが発生しました',
@@ -327,7 +339,9 @@ export class LearningService {
         throw error
       }
 
-      console.error('学習セッション記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習セッション記録エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習セッションの記録中にエラーが発生しました',
@@ -358,14 +372,14 @@ export class LearningService {
     try {
       const { limit = 20, offset = 0, knowledgeArea, processGroup, dateFrom, dateTo } = options
 
-      const where: any = { userId }
+      const where: unknown = { userId }
 
-      if (knowledgeArea) where.knowledgeArea = knowledgeArea
-      if (processGroup) where.processGroup = processGroup
+      if (knowledgeArea) {where.knowledgeArea = knowledgeArea}
+      if (processGroup) {where.processGroup = processGroup}
       if (dateFrom || dateTo) {
         where.createdAt = {}
-        if (dateFrom) where.createdAt.gte = dateFrom
-        if (dateTo) where.createdAt.lte = dateTo
+        if (dateFrom) {where.createdAt.gte = dateFrom}
+        if (dateTo) {where.createdAt.lte = dateTo}
       }
 
       const [sessions, total, totalStats] = await Promise.all([
@@ -393,7 +407,9 @@ export class LearningService {
         },
       }
     } catch (error) {
-      console.error('学習履歴取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習履歴取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習履歴の取得中にエラーが発生しました',
@@ -402,7 +418,7 @@ export class LearningService {
   }
 
   // 学習目標設定
-  static async setLearningGoal(userId: string, goalData: LearningGoalData): Promise<any> {
+  static async setLearningGoal(userId: string, goalData: LearningGoalData): Promise<unknown> {
     try {
       return await prisma.learningGoal.create({
         data: {
@@ -415,7 +431,9 @@ export class LearningService {
         },
       })
     } catch (error) {
-      console.error('学習目標設定エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習目標設定エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習目標の設定中にエラーが発生しました',
@@ -424,9 +442,14 @@ export class LearningService {
   }
 
   // 学習目標取得
-  static async getLearningGoals(userId: string, activeOnly: boolean = false): Promise<any[]> {
+  static async getLearningGoals(
+    userId: string,
+    activeOnly: boolean = false
+  ): Promise<
+    Array<{ id: string; title: string; description: string; deadline?: Date; achieved: boolean }>
+  > {
     try {
-      const where: any = { userId }
+      const where: unknown = { userId }
 
       if (activeOnly) {
         where.achieved = false
@@ -438,7 +461,9 @@ export class LearningService {
         orderBy: { createdAt: 'desc' },
       })
     } catch (error) {
-      console.error('学習目標取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習目標取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習目標の取得中にエラーが発生しました',
@@ -491,7 +516,9 @@ export class LearningService {
         priorityAreas,
       }
     } catch (error) {
-      console.error('学習推奨取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習推奨取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習推奨の取得中にエラーが発生しました',
@@ -526,7 +553,9 @@ export class LearningService {
         })
       })
     } catch (error) {
-      console.error('学習進捗リセットエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習進捗リセットエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習進捗のリセット中にエラーが発生しました',
@@ -585,7 +614,9 @@ export class LearningService {
 
       return [csvHeaders, ...csvRows].map((row) => row.join(',')).join('\n')
     } catch (error) {
-      console.error('学習データエクスポートエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('学習データエクスポートエラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '学習データのエクスポート中にエラーが発生しました',

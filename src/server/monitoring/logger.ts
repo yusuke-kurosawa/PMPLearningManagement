@@ -37,7 +37,7 @@ export interface LogEntry {
   level: LogLevel
   message: string
   context?: LogContext
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   error?: {
     name: string
     message: string
@@ -169,10 +169,10 @@ export class Logger {
   static async withPerformance<T>(
     message: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<T> {
     const startTime = process.hrtime.bigint()
-    const startMemory = process.memoryUsage()
+    //     const startMemory = process.memoryUsage() // TODO: Will be used in future
 
     try {
       const result = await fn()
@@ -206,14 +206,14 @@ export class Logger {
   }
 
   // ログレベル別メソッド
-  static error(message: string, error?: Error | unknown, metadata?: Record<string, any>): void {
+  static error(message: string, error?: Error | unknown, metadata?: Record<string, unknown>): void {
     const errorInfo =
       error instanceof Error
         ? {
             name: error.name,
             message: error.message,
             stack: error.stack,
-            code: (error as any).code,
+            code: (error as Error & { code?: string }).code,
           }
         : error
           ? { message: String(error) }
@@ -222,11 +222,11 @@ export class Logger {
     logger.error(message, { metadata, error: errorInfo })
   }
 
-  static warn(message: string, metadata?: Record<string, any>): void {
+  static warn(message: string, metadata?: Record<string, unknown>): void {
     logger.warn(message, { metadata })
   }
 
-  static info(message: string, metadata?: Record<string, any>): void {
+  static info(message: string, metadata?: Record<string, unknown>): void {
     logger.info(message, { metadata })
   }
 
@@ -245,16 +245,16 @@ export class Logger {
     logger.http(message, { metadata })
   }
 
-  static debug(message: string, metadata?: Record<string, any>): void {
+  static debug(message: string, metadata?: Record<string, unknown>): void {
     logger.debug(message, { metadata })
   }
 
-  static verbose(message: string, metadata?: Record<string, any>): void {
+  static verbose(message: string, metadata?: Record<string, unknown>): void {
     logger.verbose(message, { metadata })
   }
 
   // 構造化ログ
-  static structured(level: LogLevel, event: string, data: Record<string, any>): void {
+  static structured(level: LogLevel, event: string, data: Record<string, unknown>): void {
     logger.log(level, `[${event}]`, {
       metadata: {
         event,
@@ -267,7 +267,7 @@ export class Logger {
   static security(
     event: string,
     severity: 'low' | 'medium' | 'high' | 'critical',
-    details: Record<string, any>
+    details: Record<string, unknown>
   ): void {
     this.structured(LogLevel.WARN, 'SECURITY_EVENT', {
       event,
@@ -282,7 +282,7 @@ export class Logger {
     entityType: string,
     entityId: string,
     action: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ): void {
     this.structured(LogLevel.INFO, 'BUSINESS_EVENT', {
       event,
@@ -297,7 +297,7 @@ export class Logger {
   static health(
     component: string,
     status: 'healthy' | 'degraded' | 'unhealthy',
-    metrics?: Record<string, any>
+    metrics?: Record<string, unknown>
   ): void {
     this.structured(LogLevel.INFO, 'HEALTH_CHECK', {
       component,
@@ -366,7 +366,7 @@ export class Logger {
   static auth(
     event: 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED' | 'PASSWORD_RESET' | 'ACCOUNT_LOCKED',
     userId: string | null,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ): void {
     this.structured(LogLevel.INFO, 'AUTH_EVENT', {
       event,
@@ -380,7 +380,7 @@ export class Logger {
     event: 'CREATED' | 'UPDATED' | 'CANCELLED' | 'PAYMENT_FAILED',
     userId: string,
     planId: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ): void {
     this.structured(LogLevel.INFO, 'SUBSCRIPTION_EVENT', {
       event,
@@ -394,7 +394,7 @@ export class Logger {
   static learning(
     event: 'SESSION_STARTED' | 'SESSION_COMPLETED' | 'EXAM_TAKEN' | 'GOAL_ACHIEVED',
     userId: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ): void {
     this.structured(LogLevel.INFO, 'LEARNING_EVENT', {
       event,
@@ -405,7 +405,7 @@ export class Logger {
 }
 
 // Express/Next.js用のリクエストログミドルウェア
-export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
+export const requestLoggingMiddleware = (req: unknown, res: unknown, next: unknown) => {
   const startTime = Date.now()
   const correlationId = req.headers['x-correlation-id'] || Logger.generateCorrelationId()
 
@@ -431,7 +431,7 @@ export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
 
   // レスポンス終了時のログ
   const originalSend = res.send
-  res.send = function (data: any) {
+  res.send = function (data: unknown) {
     const duration = Date.now() - startTime
     const statusCode = res.statusCode
 
@@ -456,7 +456,7 @@ export const requestLoggingMiddleware = (req: any, res: any, next: any) => {
 
 // tRPC用のログミドルウェア
 export const trpcLoggingMiddleware = () => {
-  return async ({ path, type, next, ctx }: any) => {
+  return async ({ path, type, next, ctx }: unknown) => {
     const correlationId = Logger.generateCorrelationId()
     const startTime = Date.now()
 
@@ -506,7 +506,7 @@ export const getLogStats = (): {
   }>
 } => {
   return {
-    transports: logger.transports.map((transport: any) => ({
+    transports: logger.transports.map((transport: unknown) => ({
       name: transport.name,
       level: transport.level,
       filename: transport.filename,

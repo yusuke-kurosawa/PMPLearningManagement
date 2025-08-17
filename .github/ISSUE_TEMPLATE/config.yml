@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 blank_issues_enabled: true
 contact_links:
   - name: 📚 PMP学習コミュニティ・ディスカッション
@@ -11,3 +12,16 @@ contact_links:
   - name: 📖 使い方ガイド・ドキュメント
     url: https://github.com/yusuke-kurosawa/PMPLearningManagement/blob/main/README.md
     about: アプリの使い方や学習のコツをまとめたガイドです。まずはここをチェック！
+=======
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ドキュメント
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/blob/main/README.md
+    about: プロジェクトドキュメントとガイド
+  - name: 💬 ディスカッション
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/discussions
+    about: 質問、アイデア、コミュニティでの議論
+  - name: 🔒 セキュリティ問題の報告
+    url: https://github.com/yusuke-kurosawa/PMPLearningManagement/security/advisories/new
+    about: セキュリティの脆弱性を責任をもって開示する
+>>>>>>> main

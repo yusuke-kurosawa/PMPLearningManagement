@@ -5,7 +5,7 @@
  */
 
 import client from 'prom-client'
-import { AsyncLocalStorage } from 'async_hooks'
+// import { AsyncLocalStorage } from 'async_hooks' // TODO: Will be used in future
 import { Logger } from './logger'
 
 // メトリクス収集間隔（ミリ秒）
@@ -404,12 +404,12 @@ export class Metrics {
 export const metricsMiddleware = () => {
   const metrics = Metrics.getInstance()
 
-  return (req: any, res: any, next: any) => {
+  return (req: unknown, res: unknown, next: unknown) => {
     const startTime = Date.now()
 
     // レスポンス終了時にメトリクス記録
     const originalSend = res.send
-    res.send = function (data: any) {
+    res.send = function (data: unknown) {
       const duration = Date.now() - startTime
       const route = req.route?.path || req.path
 
@@ -464,11 +464,11 @@ export const getHealthData = async (): Promise<{
 
 // パフォーマンス測定デコレータ
 export const measurePerformance = (metricName: string, labels: Record<string, string> = {}) => {
-  return (target: any, propertyName: string, descriptor: PropertyDescriptor) => {
+  return (target: unknown, propertyName: string, descriptor: PropertyDescriptor) => {
     const method = descriptor.value
     const metrics = Metrics.getInstance()
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now()
 
       try {

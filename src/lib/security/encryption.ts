@@ -6,8 +6,9 @@
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import Redis from 'ioredis'
-import { getRedisClient } from './rateLimiting'
+import { logger } from '../../services/logger'
+// import Redis from 'ioredis' // TODO: Will be used in future
+// import { getRedisClient } from './rateLimiting' // TODO: Will be used in future
 
 // 暗号化設定
 const ENCRYPTION_CONFIG = {
@@ -101,7 +102,9 @@ const getEncryptionEnv = () => {
         })(),
     })
   } catch (error) {
-    console.error('暗号化環境変数が正しく設定されていません:', error)
+    if (process.env.NODE_ENV === 'development') {
+      logger.error('暗号化環境変数が正しく設定されていません:', error)
+    }
     throw new Error('暗号化設定エラー')
   }
 }
@@ -133,7 +136,7 @@ export interface PasswordHashResult {
  */
 export class SymmetricEncryption {
   private readonly masterKey: Buffer
-  private keyManager?: any // Circular dependency回避のため動的インポート
+  private keyManager?: unknown // Circular dependency回避のため動的インポート
 
   constructor() {
     const env = getEncryptionEnv()
@@ -146,7 +149,9 @@ export class SymmetricEncryption {
       const { keyManager } = await import('./keyManagement')
       this.keyManager = keyManager
     } catch (error) {
-      console.warn('Key manager not available, using direct master key:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('Key manager not available, using direct master key:', error)
+      }
     }
   }
 
@@ -171,7 +176,7 @@ export class SymmetricEncryption {
       }
 
       const iv = crypto.randomBytes(ENCRYPTION_CONFIG.ivLength)
-      const cipher = crypto.createCipher(ENCRYPTION_CONFIG.algorithm, key)
+      const cipher = crypto.createCipheriv(ENCRYPTION_CONFIG.algorithm, key, iv)
       cipher.setAAD(Buffer.from('pmp-learning-system'))
 
       let encrypted = cipher.update(data, 'utf8', 'hex')
@@ -186,7 +191,9 @@ export class SymmetricEncryption {
         salt: salt?.toString('hex'),
       }
     } catch (error) {
-      console.error('暗号化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('暗号化エラー:', error)
+      }
       throw new Error('暗号化に失敗しました')
     }
   }
@@ -210,7 +217,7 @@ export class SymmetricEncryption {
         )
       }
 
-      const decipher = crypto.createDecipher(ENCRYPTION_CONFIG.algorithm, key)
+      const decipher = crypto.createDecipheriv(ENCRYPTION_CONFIG.algorithm, key, Buffer.from(input.iv, 'hex'))
       decipher.setAAD(Buffer.from('pmp-learning-system'))
       decipher.setAuthTag(Buffer.from(input.tag, 'hex'))
 
@@ -219,7 +226,9 @@ export class SymmetricEncryption {
 
       return decrypted
     } catch (error) {
-      console.error('復号化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('復号化エラー:', error)
+      }
       throw new Error('復号化に失敗しました')
     }
   }
@@ -268,7 +277,9 @@ export class HashingService {
         rounds,
       }
     } catch (error) {
-      console.error('パスワードハッシュ化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('パスワードハッシュ化エラー:', error)
+      }
       throw new Error('パスワードハッシュ化に失敗しました')
     }
   }
@@ -281,7 +292,9 @@ export class HashingService {
       const pepperedPassword = password + this.pepper
       return await bcrypt.compare(pepperedPassword, hash)
     } catch (error) {
-      console.error('パスワード検証エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('パスワード検証エラー:', error)
+      }
       return false
     }
   }
@@ -302,7 +315,9 @@ export class HashingService {
       hmac.update(hashData)
       return hmac.digest('hex')
     } catch (error) {
-      console.error('機密データハッシュ化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('機密データハッシュ化エラー:', error)
+      }
       throw new Error('データハッシュ化に失敗しました')
     }
   }
@@ -326,7 +341,8 @@ export class HashingService {
    */
   signSession(sessionData: object): string {
     const dataString = JSON.stringify(sessionData)
-    return this.hashSensitiveData(dataString, true)
+    // セッション署名にはタイムスタンプを使用しない（検証可能にするため）
+    return this.hashSensitiveData(dataString, false)
   }
 
   /**
@@ -454,8 +470,10 @@ export class PIIEncryption {
     for (const [key, value] of Object.entries(encryptedData)) {
       try {
         decrypted[key] = this.encryption.decrypt(value)
-      } catch (error) {
-        console.error(`PII復号化エラー (${key}):`, error)
+      } catch (_error) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.error(`PII復号化エラー (${key}):`, error)
+        }
         // 復号化に失敗した場合は空文字を返す
         decrypted[key] = ''
       }

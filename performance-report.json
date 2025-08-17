@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-16T23:23:44.557Z",
+  "results": {
+    "totalJsSize": 1144611,
+    "mainBundleSize": 165978,
+    "vendorBundleSize": 160277,
+    "totalCssSize": 87733,
+    "chunks": 39
+  }
+}

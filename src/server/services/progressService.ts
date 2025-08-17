@@ -7,7 +7,8 @@
 import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { UserRole, SubscriptionPlan } from '@prisma/client'
+import { logger } from '../../services/logger'
+// import { SubscriptionPlan } from '@prisma/client' // TODO: Will be used in future
 
 // 進捗分析期間の定義
 export type AnalysisPeriod = 'week' | 'month' | 'quarter' | 'year' | 'all'
@@ -114,12 +115,13 @@ export class ProgressService {
         previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
         previousEnd = new Date(now.getFullYear(), now.getMonth(), 0)
         break
-      case 'quarter':
+      case 'quarter': {
         const quarter = Math.floor(now.getMonth() / 3)
         start = new Date(now.getFullYear(), quarter * 3, 1)
         previousStart = new Date(now.getFullYear(), (quarter - 1) * 3, 1)
         previousEnd = new Date(now.getFullYear(), quarter * 3, 0)
         break
+      }
       case 'year':
         start = new Date(now.getFullYear(), 0, 1)
         previousStart = new Date(now.getFullYear() - 1, 0, 1)
@@ -250,7 +252,9 @@ export class ProgressService {
         },
       }
     } catch (error) {
-      console.error('ユーザーメトリクス計算エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('ユーザーメトリクス計算エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'メトリクス計算中にエラーが発生しました',
@@ -401,7 +405,9 @@ export class ProgressService {
         throw error
       }
 
-      console.error('コホート比較分析エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('コホート比較分析エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'コホート比較分析中にエラーが発生しました',
@@ -443,11 +449,12 @@ export class ProgressService {
           : 0
 
       // 学習ペース分析
-      const dailyAverageTime =
-        recentSessions.length > 0
-          ? recentSessions.reduce((sum, session) => sum + session.duration, 0) /
-            recentSessions.length
-          : 1800 // デフォルト30分
+      const dailyAverageTime = recentSessions.length > 0
+        ? recentSessions.reduce((sum, session) => sum + session.duration, 0) / recentSessions.length
+        : 1800 // デフォルト30分
+      
+      // 将来的に使用予定
+      void dailyAverageTime
 
       // 認定準備度スコア計算
       const readinessFactors = {
@@ -471,7 +478,7 @@ export class ProgressService {
       const knowledgeAreaStats: Record<string, number> = {}
       examResults.forEach((exam) => {
         if (exam.knowledgeAreaScores) {
-          Object.entries(exam.knowledgeAreaScores as any).forEach(([area, score]) => {
+          Object.entries(exam.knowledgeAreaScores as Record<string, number>).forEach(([area, score]) => {
             knowledgeAreaStats[area] = (knowledgeAreaStats[area] || 0) + (score as number)
           })
         }
@@ -541,7 +548,9 @@ export class ProgressService {
         throw error
       }
 
-      console.error('予測分析エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('予測分析エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '予測分析中にエラーが発生しました',
@@ -746,7 +755,9 @@ export class ProgressService {
         achievements,
       }
     } catch (error) {
-      console.error('進捗サマリー取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('進捗サマリー取得エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: '進捗サマリー取得中にエラーが発生しました',

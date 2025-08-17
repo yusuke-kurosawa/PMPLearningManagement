@@ -1,7 +1,7 @@
 ---
 name: mobile-app-developer
 description: Use this agent when developing mobile applications for iOS and Android platforms, implementing cross-platform solutions, optimizing mobile app performance, integrating device-specific features, preparing apps for store submission, or addressing mobile-specific technical challenges. Examples: <example>Context: User needs to create a new mobile app with offline capabilities. user: 'I need to build a mobile app for both iOS and Android that works offline and syncs when online' assistant: 'I'll use the mobile-app-developer agent to design and implement a cross-platform mobile solution with offline-first architecture and sync capabilities'</example> <example>Context: User has performance issues with their mobile app. user: 'My app is crashing frequently and takes too long to start up' assistant: 'Let me engage the mobile-app-developer agent to analyze and optimize your app's performance, reduce startup time, and eliminate crashes'</example>
-model: opus
+model: sonnet
 color: green
 ---
 

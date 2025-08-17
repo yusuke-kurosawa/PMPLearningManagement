@@ -9,6 +9,17 @@ import { httpBatchLink, loggerLink } from '@trpc/client'
 import { QueryClient, QueryCache } from '@tanstack/react-query'
 import superjson from 'superjson'
 import type { AppRouter } from '../trpc/server'
+import { logger } from '../../services/logger'
+
+// tRPC Error types
+interface TRPCError {
+  message: string
+  data?: {
+    code: string
+    httpStatus: number
+    [key: string]: unknown
+  }
+}
 
 // Create tRPC React hooks
 export const api = createTRPCReact<AppRouter>()
@@ -18,8 +29,8 @@ export const trpcMsw = createTRPCMsw<AppRouter>()
 
 // Base URL configuration
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') return '' // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}` // Vercel
+  if (typeof window !== 'undefined') {return ''} // browser should use relative url
+  if (process.env.VERCEL_URL) {return `https://${process.env.VERCEL_URL}`} // Vercel
   return `http://localhost:${process.env.PORT ?? 3000}` // dev SSR should use localhost
 }
 
@@ -44,7 +55,9 @@ export const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error, query) => {
-      console.error(`Query error for key ${query.queryKey}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`Query error for key ${query.queryKey}:`, error)
+      }
     },
   }),
 })
@@ -106,7 +119,7 @@ export const handleApiError = (error: unknown): ApiError => {
   }
 
   if (typeof error === 'object' && error !== null && 'data' in error) {
-    const trpcError = error as any
+    const trpcError = error as TRPCError
     return {
       message: trpcError.message || 'An error occurred',
       code: trpcError.data?.code || 'UNKNOWN_ERROR',
@@ -153,10 +166,14 @@ export const offlineUtils = {
       for (const item of queue) {
         try {
           // Process queued mutations
-          console.log('Processing offline mutation:', item)
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Processing offline mutation:', item)
+          }
           // Implementation would depend on specific mutation types
         } catch (error) {
-          console.error('Failed to process offline mutation:', error)
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('Failed to process offline mutation:', error)
+          }
         }
       }
 
@@ -175,7 +192,9 @@ export const performanceUtils = {
       return {
         end: () => {
           const duration = performance.now() - start
-          console.log(`API call ${name} took ${duration.toFixed(2)}ms`)
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug(`API call ${name} took ${duration.toFixed(2)}ms`)
+          }
 
           // Report to analytics if configured
           if (window.gtag) {

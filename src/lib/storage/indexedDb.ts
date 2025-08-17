@@ -1,11 +1,13 @@
-import { openDB, IDBPDatabase, IDBPTransaction } from 'idb'
+import { openDB, IDBPDatabase } from 'idb'
+import { logger } from '../../services/logger'
 
 export interface StorageItem {
   key: string
-  value: any
+  value: unknown
   timestamp: number
   version?: string
   userId?: string
+  expiresAt?: number
 }
 
 export interface StorageOptions {
@@ -60,11 +62,15 @@ export class IndexedDBStorage {
         },
 
         blocked() {
-          console.warn('IndexedDB upgrade blocked')
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('IndexedDB upgrade blocked')
+          }
         },
 
         blocking() {
-          console.warn('IndexedDB is blocking a newer version')
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('IndexedDB is blocking a newer version')
+          }
         },
       })
     }
@@ -75,7 +81,7 @@ export class IndexedDBStorage {
   /**
    * Store an item in IndexedDB
    */
-  async setItem(key: string, value: any, options: StorageOptions = {}): Promise<void> {
+  async setItem(key: string, value: unknown, options: StorageOptions = {}): Promise<void> {
     try {
       const db = await this.initDB()
 
@@ -89,14 +95,16 @@ export class IndexedDBStorage {
 
       // Add TTL if specified
       if (options.ttl) {
-        ;(item as any).expiresAt = Date.now() + options.ttl
+        item.expiresAt = Date.now() + options.ttl
       }
 
       const tx = db.transaction(this.STORE_NAME, 'readwrite')
       await tx.objectStore(this.STORE_NAME).put(item)
       await tx.complete
     } catch (error) {
-      console.error(`Failed to store item ${key}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`Failed to store item ${key}:`, error)
+      }
       throw new Error(`Storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -117,7 +125,7 @@ export class IndexedDBStorage {
       }
 
       // Check TTL
-      if ((item as any).expiresAt && Date.now() > (item as any).expiresAt) {
+      if (item.expiresAt && Date.now() > item.expiresAt) {
         await this.removeItem(key)
         return null
       }
@@ -126,7 +134,9 @@ export class IndexedDBStorage {
         ? this.decompress(item.value)
         : item.value
     } catch (error) {
-      console.error(`Failed to retrieve item ${key}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`Failed to retrieve item ${key}:`, error)
+      }
       return null
     }
   }
@@ -142,7 +152,9 @@ export class IndexedDBStorage {
       await tx.objectStore(this.STORE_NAME).delete(key)
       await tx.complete
     } catch (error) {
-      console.error(`Failed to remove item ${key}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`Failed to remove item ${key}:`, error)
+      }
       throw new Error(`Remove failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -160,7 +172,9 @@ export class IndexedDBStorage {
 
       return keys as string[]
     } catch (error) {
-      console.error('Failed to get keys:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get keys:', error)
+      }
       return []
     }
   }
@@ -176,7 +190,9 @@ export class IndexedDBStorage {
       await tx.objectStore(this.STORE_NAME).clear()
       await tx.complete
     } catch (error) {
-      console.error('Failed to clear storage:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to clear storage:', error)
+      }
       throw new Error(`Clear failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -196,7 +212,9 @@ export class IndexedDBStorage {
 
       return { used: 0, quota: 0 }
     } catch (error) {
-      console.error('Failed to get storage estimate:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get storage estimate:', error)
+      }
       return { used: 0, quota: 0 }
     }
   }
@@ -215,7 +233,9 @@ export class IndexedDBStorage {
 
       return items
     } catch (error) {
-      console.error('Failed to get items by user:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to get items by user:', error)
+      }
       return []
     }
   }
@@ -235,7 +255,7 @@ export class IndexedDBStorage {
 
       while (cursor) {
         const item = cursor.value
-        if ((item as any).expiresAt && now > (item as any).expiresAt) {
+        if (item.expiresAt && now > item.expiresAt) {
           await cursor.delete()
           cleanedCount++
         }
@@ -245,7 +265,9 @@ export class IndexedDBStorage {
       await tx.complete
       return cleanedCount
     } catch (error) {
-      console.error('Failed to cleanup expired items:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to cleanup expired items:', error)
+      }
       return 0
     }
   }
@@ -253,7 +275,7 @@ export class IndexedDBStorage {
   /**
    * Export data for backup
    */
-  async exportData(): Promise<{ [key: string]: any }> {
+  async exportData(): Promise<{ [key: string]: unknown }> {
     try {
       const db = await this.initDB()
 
@@ -261,7 +283,7 @@ export class IndexedDBStorage {
       const items = await tx.objectStore(this.STORE_NAME).getAll()
       await tx.complete
 
-      const exported: { [key: string]: any } = {}
+      const exported: { [key: string]: unknown } = {}
 
       items.forEach((item) => {
         exported[item.key] = {
@@ -274,7 +296,9 @@ export class IndexedDBStorage {
 
       return exported
     } catch (error) {
-      console.error('Failed to export data:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to export data:', error)
+      }
       return {}
     }
   }
@@ -282,7 +306,7 @@ export class IndexedDBStorage {
   /**
    * Import data from backup
    */
-  async importData(data: { [key: string]: any }): Promise<number> {
+  async importData(data: { [key: string]: unknown }): Promise<number> {
     try {
       const db = await this.initDB()
       let importedCount = 0
@@ -306,7 +330,9 @@ export class IndexedDBStorage {
       await tx.complete
       return importedCount
     } catch (error) {
-      console.error('Failed to import data:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Failed to import data:', error)
+      }
       throw new Error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -314,13 +340,15 @@ export class IndexedDBStorage {
   /**
    * Simple compression using JSON and base64
    */
-  private compress(data: any): string {
+  private compress(data: unknown): string {
     try {
       const json = JSON.stringify(data)
       const compressed = btoa(encodeURIComponent(json))
       return `compressed:${compressed}`
     } catch (error) {
-      console.warn('Compression failed, storing as-is:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('Compression failed, storing as-is:', error)
+      }
       return data
     }
   }
@@ -328,7 +356,7 @@ export class IndexedDBStorage {
   /**
    * Decompress data
    */
-  private decompress(compressedData: string): any {
+  private decompress(compressedData: string): unknown {
     try {
       if (!compressedData.startsWith('compressed:')) {
         return compressedData
@@ -338,7 +366,9 @@ export class IndexedDBStorage {
       const json = decodeURIComponent(atob(compressed))
       return JSON.parse(json)
     } catch (error) {
-      console.warn('Decompression failed:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('Decompression failed:', error)
+      }
       return compressedData
     }
   }
@@ -353,7 +383,7 @@ export class IndexedDBStorage {
 
 // Fallback to localStorage if IndexedDB is not supported
 export class FallbackStorage {
-  async setItem(key: string, value: any): Promise<void> {
+  async setItem(key: string, value: unknown): Promise<void> {
     try {
       localStorage.setItem(
         key,
@@ -373,12 +403,14 @@ export class FallbackStorage {
   async getItem<T>(key: string): Promise<T | null> {
     try {
       const item = localStorage.getItem(key)
-      if (!item) return null
+      if (!item) {return null}
 
       const parsed = JSON.parse(item)
       return parsed.value
     } catch (error) {
-      console.error(`Failed to get item ${key}:`, error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(`Failed to get item ${key}:`, error)
+      }
       return null
     }
   }
@@ -391,7 +423,7 @@ export class FallbackStorage {
     const keys: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (key) keys.push(key)
+      if (key) {keys.push(key)}
     }
     return keys
   }

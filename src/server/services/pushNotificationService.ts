@@ -9,11 +9,12 @@ import { prisma } from '@/lib/db'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { NotificationPriority } from './notificationService'
+import { logger } from '../../services/logger'
 
 // Web Push設定
 const VAPID_CONFIG = {
-  publicKey: process.env.VAPID_PUBLIC_KEY!,
-  privateKey: process.env.VAPID_PRIVATE_KEY!,
+  publicKey: process.env.VAPID_PUBLIC_KEY || "",
+  privateKey: process.env.VAPID_PRIVATE_KEY || "",
   subject: process.env.VAPID_SUBJECT || 'mailto:admin@pmplm.com',
 }
 
@@ -122,7 +123,7 @@ export class PushNotificationService {
           // 成功時の記録
           await this.recordDeliverySuccess(subscription.id)
           sentCount++
-        } catch (error: any) {
+        } catch (error: Error) {
           failureCount++
 
           // エラーの種類に応じた処理
@@ -161,7 +162,9 @@ export class PushNotificationService {
         errors,
       }
     } catch (error) {
-      console.error('プッシュ通知送信エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュ通知送信エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'プッシュ通知の送信中にエラーが発生しました',
@@ -238,7 +241,9 @@ export class PushNotificationService {
         success: true,
       }
     } catch (error) {
-      console.error('プッシュサブスクリプション登録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュサブスクリプション登録エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'プッシュサブスクリプションの登録中にエラーが発生しました',
@@ -278,7 +283,9 @@ export class PushNotificationService {
 
       return { success: result.count > 0 }
     } catch (error) {
-      console.error('プッシュサブスクリプション削除エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュサブスクリプション削除エラー:', error)
+      }
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'プッシュサブスクリプションの削除中にエラーが発生しました',
@@ -313,7 +320,9 @@ export class PushNotificationService {
         orderBy: { createdAt: 'desc' },
       })
     } catch (error) {
-      console.error('プッシュサブスクリプション取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュサブスクリプション取得エラー:', error)
+      }
       return []
     }
   }
@@ -364,7 +373,9 @@ export class PushNotificationService {
         },
       })
     } catch (error) {
-      console.error('配信成功記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('配信成功記録エラー:', error)
+      }
     }
   }
 
@@ -383,7 +394,9 @@ export class PushNotificationService {
         },
       })
     } catch (error) {
-      console.error('配信失敗記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('配信失敗記録エラー:', error)
+      }
     }
   }
 
@@ -398,7 +411,9 @@ export class PushNotificationService {
         },
       })
     } catch (error) {
-      console.error('サブスクリプション無効化エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('サブスクリプション無効化エラー:', error)
+      }
     }
   }
 
@@ -423,7 +438,9 @@ export class PushNotificationService {
         },
       })
     } catch (error) {
-      console.error('通知履歴記録エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('通知履歴記録エラー:', error)
+      }
     }
   }
 
@@ -492,12 +509,12 @@ export class PushNotificationService {
     topDeviceTypes: Array<{ deviceType: string; count: number }>
   }> {
     try {
-      const where: any = {}
-      if (userId) where.userId = userId
+      const where: unknown = {}
+      if (userId) {where.userId = userId}
       if (startDate || endDate) {
         where.createdAt = {}
-        if (startDate) where.createdAt.gte = startDate
-        if (endDate) where.createdAt.lte = endDate
+        if (startDate) {where.createdAt.gte = startDate}
+        if (endDate) {where.createdAt.lte = endDate}
       }
 
       const [historyStats, deviceStats] = await Promise.all([
@@ -542,7 +559,9 @@ export class PushNotificationService {
         })),
       }
     } catch (error) {
-      console.error('プッシュ通知統計取得エラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュ通知統計取得エラー:', error)
+      }
       return {
         totalSent: 0,
         totalDelivered: 0,
@@ -614,10 +633,14 @@ export class PushNotificationService {
         },
       })
 
-      console.log(`古いプッシュサブスクリプション削除: ${result.count}件`)
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug(`古いプッシュサブスクリプション削除: ${result.count}件`)
+      }
       return { cleaned: result.count }
     } catch (error) {
-      console.error('プッシュサブスクリプションクリーンアップエラー:', error)
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('プッシュサブスクリプションクリーンアップエラー:', error)
+      }
       return { cleaned: 0 }
     }
   }

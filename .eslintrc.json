@@ -1,82 +1,73 @@
 {
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
-    }
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "plugins": [
+    "react",
+    "react-hooks",
+    "jsx-a11y",
+    "@typescript-eslint"
+  ],
   "overrides": [
     {
-      "files": ["*.js", "*.jsx"],
-      "parser": "@babel/eslint-parser",
-      "parserOptions": {
-        "requireConfigFile": false,
-        "babelOptions": {
-          "presets": ["@babel/preset-react"]
-        }
-      }
-    },
-    {
       "files": ["*.ts", "*.tsx"],
-      "parser": "@typescript-eslint/parser"
-    },
-    {
-      "files": ["**/*.test.{js,jsx,ts,tsx}", "src/test/**/*.{js,jsx,ts,tsx}"],
-      "env": {
-        "jest": true,
-        "vitest-globals/env": true
-      },
-      "extends": ["plugin:vitest-globals/recommended"],
-      "globals": {
-        "vi": "readonly",
-        "expect": "readonly",
-        "describe": "readonly",
-        "it": "readonly",
-        "test": "readonly",
-        "beforeEach": "readonly",
-        "afterEach": "readonly",
-        "beforeAll": "readonly",
-        "afterAll": "readonly"
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["error", { 
+          "argsIgnorePattern": "^_", 
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "no-unused-vars": "off"
       }
     }
   ],
   "rules": {
-    "prettier/prettier": "error",
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }
-    ],
-    "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react/display-name": "error",
     "react/no-unescaped-entities": "off",
-    "no-console": "off",
+    "react/prop-types": "off",
+    "react/jsx-uses-react": "off",
+    "react/jsx-uses-vars": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-undef": "off",
     "no-case-declarations": "error",
     "no-useless-escape": "error",
+    "eqeqeq": ["error", "smart"],
+    "curly": ["error", "all"],
+    "jsx-a11y/no-autofocus": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
+    "jsx-a11y/label-has-associated-control": "warn",
     "@typescript-eslint/no-explicit-any": "warn"
   },
   "settings": {
     "react": {
       "version": "detect"
     }
-  },
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
   }
 }
