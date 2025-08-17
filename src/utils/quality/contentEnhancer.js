@@ -231,7 +231,7 @@ function determineBadges(content) {
 /**
  * 達成項目の生成
  */
-function generateAchievements(content) {
+function generateAchievements() {
   return [
     {
       id: 'first-module',

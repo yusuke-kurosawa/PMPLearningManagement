@@ -1,309 +1,137 @@
-# ================================================================
-# ワークフロー名: 02-performance-optimization.yml  
-# 目的: パフォーマンス測定、バンドル分析、Lighthouse CI、最適化提案
-# トリガー: プッシュ、PR、定期実行（週1回）、手動実行
-# 依存関係: setup-environment アクション、report-generator アクション
-# 作成者: Claude Code
-# 最終更新: 2025-08-12
-# ================================================================
+# ====================================================================
+# 🧪 品質・テスト - ⚡ パフォーマンス最適化 / Performance Optimization
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. 📦 バンドル分析 / Bundle Analysis
+#   2. 📌 処理: 🏃 Lighthouse CI
+#   3. ⚡ 最適化: 🖼️ 画像最適化 / Image Optimization
+#   4. 📊 パフォーマンスレポート / Performance Report
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: '⚡ パフォーマンス最適化 / Performance Optimization'
-
-# ============================================================
-# トリガー設定
-# Workflow triggers configuration
-# ============================================================
-on:
+name: "\U0001F9EA 品質・テスト - ⚡ パフォーマンス最適化 / Performance Optimization"
+'on':
   push:
     branches:
       - main
       - develop
     paths:
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'vite.config.js'
-      - 'tailwind.config.js'
-  
+      - src/**
+      - public/**
+      - package.json
+      - vite.config.js
+      - tailwind.config.js
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
     paths:
-      - 'src/**'
-      - 'public/**'
+      - src/**
+      - public/**
       - '*.config.js'
-  
   schedule:
-    # 毎週月曜日午前2時（JST）に実行 / Run weekly on Monday at 2:00 AM JST
-    - cron: '0 17 * * 0'
-  
+    - cron: 0 17 * * 0
   workflow_dispatch:
     inputs:
       analyze-bundle:
-        description: 'バンドル分析 / Bundle analysis'
+        description: バンドル分析 / Bundle analysis
         required: false
         default: true
         type: boolean
-      
       run-lighthouse:
-        description: 'Lighthouse CI実行 / Run Lighthouse CI'
+        description: Lighthouse CI実行 / Run Lighthouse CI
         required: false
         default: true
         type: boolean
-      
       optimize-images:
-        description: '画像最適化 / Optimize images'
+        description: 画像最適化 / Optimize images
         required: false
         default: false
         type: boolean
-
-# ============================================================
-# 環境変数
-# Environment variables
-# ============================================================
 env:
   NODE_VERSION: '18'
   PERFORMANCE_BUDGET_MB: 1.5
   LIGHTHOUSE_THRESHOLD: 90
-  CACHE_VERSION: 'v1'
-
-# ============================================================
-# 並行実行制御
-# Concurrency control
-# ============================================================
+  CACHE_VERSION: v1
 concurrency:
-  group: performance-${{ github.workflow }}-${{ github.ref }}
+  group: 'performance-${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
-
-# ============================================================
-# ジョブ定義
-# Jobs definition
-# ============================================================
 jobs:
-  # ============================================================
-  # Job 1: ビルドとバンドル分析
-  # Build and bundle analysis
-  # ============================================================
   bundle-analysis:
-    name: '📦 バンドル分析 / Bundle Analysis'
+    name: "\U0001F4E6 バンドル分析 / Bundle Analysis"
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
     outputs:
-      bundle-size: ${{ steps.analyze.outputs.size }}
-      bundle-size-mb: ${{ steps.analyze.outputs.size-mb }}
-      main-chunk-size: ${{ steps.analyze.outputs.main-chunk }}
-      vendor-chunk-size: ${{ steps.analyze.outputs.vendor-chunk }}
-      status: ${{ steps.evaluate.outputs.status }}
-    
+      bundle-size: '${{ steps.analyze.outputs.size }}'
+      bundle-size-mb: '${{ steps.analyze.outputs.size-mb }}'
+      main-chunk-size: '${{ steps.analyze.outputs.main-chunk }}'
+      vendor-chunk-size: '${{ steps.analyze.outputs.vendor-chunk }}'
+      status: '${{ steps.evaluate.outputs.status }}'
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
-      
-      # ============================================================
-      # Step 2: 環境セットアップ
-      # Setup environment
-      # ============================================================
-      - name: '🔧 環境セットアップ / Setup Environment'
+      - name: "\U0001F527 環境セットアップ / Setup Environment"
         uses: ./.github/actions/setup-environment
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-key: performance-${{ env.CACHE_VERSION }}
-      
-      # ============================================================
-      # Step 3: プロダクションビルド
-      # Production build
-      # ============================================================
-      - name: '🏗️ プロダクションビルド / Production Build'
+          node-version: '${{ env.NODE_VERSION }}'
+          cache-key: 'performance-${{ env.CACHE_VERSION }}'
+      - name: "\U0001F3D7️ プロダクションビルド / Production Build"
         id: build
-        run: |
-          echo "🏗️ Building production bundle..."
-          
-          # ビルド時間計測
-          START_TIME=$(date +%s)
-          npm run build
-          END_TIME=$(date +%s)
-          BUILD_TIME=$((END_TIME - START_TIME))
-          
-          echo "build-time=$BUILD_TIME" >> $GITHUB_OUTPUT
-          echo "✅ Build completed in ${BUILD_TIME}s"
-      
-      # ============================================================
-      # Step 4: バンドル分析
-      # Analyze bundle
-      # ============================================================
-      - name: '📊 バンドル分析 / Analyze Bundle'
+        run: "echo \"\U0001F3D7️ Building production bundle...\"\n\n# ビルド時間計測\nSTART_TIME=$(date +%s)\nnpm run build\nEND_TIME=$(date +%s)\nBUILD_TIME=$((END_TIME - START_TIME))\n\necho \"build-time=$BUILD_TIME\" >> $GITHUB_OUTPUT\necho \"✅ Build completed in ${BUILD_TIME}s\"\n"
+      - name: "\U0001F4CA バンドル分析 / Analyze Bundle"
         id: analyze
         if: github.event.inputs.analyze-bundle != 'false'
-        run: |
-          echo "📊 Analyzing bundle size..."
-          
-          # dist ディレクトリのサイズ計算
-          TOTAL_SIZE=$(du -sb dist | cut -f1)
-          TOTAL_SIZE_MB=$(echo "scale=2; $TOTAL_SIZE / 1048576" | bc)
-          
-          echo "size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
-          echo "size-mb=$TOTAL_SIZE_MB" >> $GITHUB_OUTPUT
-          
-          # 主要チャンクの分析
-          if [ -d "dist/assets" ]; then
-            # JavaScriptファイルのサイズ
-            JS_SIZE=$(find dist/assets -name "*.js" -exec du -cb {} + | grep total | cut -f1)
-            JS_SIZE_KB=$(echo "scale=2; $JS_SIZE / 1024" | bc)
-            
-            # CSSファイルのサイズ
-            CSS_SIZE=$(find dist/assets -name "*.css" -exec du -cb {} + 2>/dev/null | grep total | cut -f1 || echo 0)
-            CSS_SIZE_KB=$(echo "scale=2; $CSS_SIZE / 1024" | bc)
-            
-            echo "main-chunk=${JS_SIZE_KB}KB" >> $GITHUB_OUTPUT
-            echo "vendor-chunk=${CSS_SIZE_KB}KB" >> $GITHUB_OUTPUT
-            
-            # 詳細レポート生成
-            cat > bundle-report.json <<EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "total_size_bytes": $TOTAL_SIZE,
-            "total_size_mb": $TOTAL_SIZE_MB,
-            "js_size_kb": $JS_SIZE_KB,
-            "css_size_kb": $CSS_SIZE_KB,
-            "build_time_seconds": ${{ steps.build.outputs.build-time }},
-            "files": $(find dist -type f -name "*.js" -o -name "*.css" | wc -l)
-          }
-          EOF
-          fi
-          
-          echo "=========================================="
-          echo "📦 バンドルサイズサマリー"
-          echo "=========================================="
-          echo "📊 総サイズ: ${TOTAL_SIZE_MB}MB"
-          echo "📜 JavaScript: ${JS_SIZE_KB}KB"
-          echo "🎨 CSS: ${CSS_SIZE_KB}KB"
-          echo "⏱️ ビルド時間: ${{ steps.build.outputs.build-time }}秒"
-          echo "=========================================="
-      
-      # ============================================================
-      # Step 5: パフォーマンス予算チェック
-      # Check performance budget
-      # ============================================================
-      - name: '💰 パフォーマンス予算チェック / Check Performance Budget'
+        run: "echo \"\U0001F4CA Analyzing bundle size...\"\n\n# dist ディレクトリのサイズ計算\nTOTAL_SIZE=$(du -sb dist | cut -f1)\nTOTAL_SIZE_MB=$(echo \"scale=2; $TOTAL_SIZE / 1048576\" | bc)\n\necho \"size=$TOTAL_SIZE\" >> $GITHUB_OUTPUT\necho \"size-mb=$TOTAL_SIZE_MB\" >> $GITHUB_OUTPUT\n\n# 主要チャンクの分析\nif [ -d \"dist/assets\" ]; then\n  # JavaScriptファイルのサイズ\n  JS_SIZE=$(find dist/assets -name \"*.js\" -exec du -cb {} + | grep total | cut -f1)\n  JS_SIZE_KB=$(echo \"scale=2; $JS_SIZE / 1024\" | bc)\n  \n  # CSSファイルのサイズ\n  CSS_SIZE=$(find dist/assets -name \"*.css\" -exec du -cb {} + 2>/dev/null | grep total | cut -f1 || echo 0)\n  CSS_SIZE_KB=$(echo \"scale=2; $CSS_SIZE / 1024\" | bc)\n  \n  echo \"main-chunk=${JS_SIZE_KB}KB\" >> $GITHUB_OUTPUT\n  echo \"vendor-chunk=${CSS_SIZE_KB}KB\" >> $GITHUB_OUTPUT\n  \n  # 詳細レポート生成\n  cat > bundle-report.json <<EOF\n{\n  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\n  \"total_size_bytes\": $TOTAL_SIZE,\n  \"total_size_mb\": $TOTAL_SIZE_MB,\n  \"js_size_kb\": $JS_SIZE_KB,\n  \"css_size_kb\": $CSS_SIZE_KB,\n  \"build_time_seconds\": ${{ steps.build.outputs.build-time }},\n  \"files\": $(find dist -type f -name \"*.js\" -o -name \"*.css\" | wc -l)\n}\nEOF\nfi\n\necho \"==========================================\"\necho \"\U0001F4E6 バンドルサイズサマリー\"\necho \"==========================================\"\necho \"\U0001F4CA 総サイズ: ${TOTAL_SIZE_MB}MB\"\necho \"\U0001F4DC JavaScript: ${JS_SIZE_KB}KB\"\necho \"\U0001F3A8 CSS: ${CSS_SIZE_KB}KB\"\necho \"⏱️ ビルド時間: ${{ steps.build.outputs.build-time }}秒\"\necho \"==========================================\"\n"
+      - name: "\U0001F4B0 パフォーマンス予算チェック / Check Performance Budget"
         id: evaluate
-        run: |
-          SIZE_MB="${{ steps.analyze.outputs.size-mb }}"
-          BUDGET_MB="${{ env.PERFORMANCE_BUDGET_MB }}"
-          
-          # 浮動小数点比較
-          if (( $(echo "$SIZE_MB <= $BUDGET_MB" | bc -l) )); then
-            STATUS="success"
-            EMOJI="✅"
-            MESSAGE="パフォーマンス予算内"
-          else
-            STATUS="warning"
-            EMOJI="⚠️"
-            MESSAGE="パフォーマンス予算超過"
-          fi
-          
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          
-          # GitHub Summary に追加
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## $EMOJI バンドルサイズ分析
-          
-          **総サイズ**: ${SIZE_MB}MB / ${BUDGET_MB}MB (予算)
-          **ステータス**: $MESSAGE
-          
-          ### 📊 詳細
-          - JavaScript: ${{ steps.analyze.outputs.main-chunk }}
-          - CSS: ${{ steps.analyze.outputs.vendor-chunk }}
-          - ビルド時間: ${{ steps.build.outputs.build-time }}秒
-          EOF
-      
-      # ============================================================
-      # Step 6: アーティファクトアップロード
-      # Upload artifacts
-      # ============================================================
-      - name: '📤 アーティファクトアップロード / Upload Artifacts'
+        run: "SIZE_MB=\"${{ steps.analyze.outputs.size-mb }}\"\nBUDGET_MB=\"${{ env.PERFORMANCE_BUDGET_MB }}\"\n\n# 浮動小数点比較\nif (( $(echo \"$SIZE_MB <= $BUDGET_MB\" | bc -l) )); then\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"パフォーマンス予算内\"\nelse\n  STATUS=\"warning\"\n  EMOJI=\"⚠️\"\n  MESSAGE=\"パフォーマンス予算超過\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary に追加\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI バンドルサイズ分析\n\n**総サイズ**: ${SIZE_MB}MB / ${BUDGET_MB}MB (予算)\n**ステータス**: $MESSAGE\n\n### \U0001F4CA 詳細\n- JavaScript: ${{ steps.analyze.outputs.main-chunk }}\n- CSS: ${{ steps.analyze.outputs.vendor-chunk }}\n- ビルド時間: ${{ steps.build.outputs.build-time }}秒\nEOF\n"
+      - name: "\U0001F4E4 アーティファクトアップロード / Upload Artifacts"
         uses: actions/upload-artifact@v4
         with:
-          name: bundle-analysis-${{ github.run_id }}
+          name: 'bundle-analysis-${{ github.run_id }}'
           path: |
             dist/
             bundle-report.json
           retention-days: 7
-
-  # ============================================================
-  # Job 2: Lighthouse CI
-  # Lighthouse CI analysis
-  # ============================================================
   lighthouse-ci:
-    name: '🏃 Lighthouse CI'
+    name: "\U0001F4CC 処理: \U0001F3C3 Lighthouse CI"
     runs-on: ubuntu-latest
     needs: bundle-analysis
     if: github.event.inputs.run-lighthouse != 'false'
     timeout-minutes: 20
-    
     outputs:
-      performance-score: ${{ steps.lighthouse.outputs.performance }}
-      accessibility-score: ${{ steps.lighthouse.outputs.accessibility }}
-      best-practices-score: ${{ steps.lighthouse.outputs.best-practices }}
-      seo-score: ${{ steps.lighthouse.outputs.seo }}
-      pwa-score: ${{ steps.lighthouse.outputs.pwa }}
-    
+      performance-score: '${{ steps.lighthouse.outputs.performance }}'
+      accessibility-score: '${{ steps.lighthouse.outputs.accessibility }}'
+      best-practices-score: '${{ steps.lighthouse.outputs.best-practices }}'
+      seo-score: '${{ steps.lighthouse.outputs.seo }}'
+      pwa-score: '${{ steps.lighthouse.outputs.pwa }}'
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
-      
-      # ============================================================
-      # Step 2: 環境セットアップ
-      # Setup environment
-      # ============================================================
-      - name: '🔧 環境セットアップ / Setup Environment'
+      - name: "\U0001F527 環境セットアップ / Setup Environment"
         uses: ./.github/actions/setup-environment
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      # ============================================================
-      # Step 3: ビルド成果物ダウンロード
-      # Download build artifacts
-      # ============================================================
-      - name: '📦 ビルド成果物ダウンロード / Download Build Artifacts'
+          node-version: '${{ env.NODE_VERSION }}'
+      - name: "\U0001F4E6 ビルド成果物ダウンロード / Download Build Artifacts"
         uses: actions/download-artifact@v4
         with:
-          name: bundle-analysis-${{ github.run_id }}
+          name: 'bundle-analysis-${{ github.run_id }}'
           path: ./
-      
-      # ============================================================
-      # Step 4: プレビューサーバー起動
-      # Start preview server
-      # ============================================================
-      - name: '🚀 プレビューサーバー起動 / Start Preview Server'
-        run: |
-          echo "🚀 Starting preview server..."
-          npm run preview &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          
-          # サーバー起動待機
-          echo "⏳ Waiting for server to start..."
-          for i in {1..30}; do
-            if curl -s http://localhost:4173 > /dev/null; then
-              echo "✅ Server is ready"
-              break
-            fi
-            sleep 1
-          done
-      
-      # ============================================================
-      # Step 5: Lighthouse実行
-      # Run Lighthouse
-      # ============================================================
-      - name: '🏃 Lighthouse実行 / Run Lighthouse'
+      - name: "\U0001F680 プレビューサーバー起動 / Start Preview Server"
+        run: "echo \"\U0001F680 Starting preview server...\"\nnpm run preview &\nSERVER_PID=$!\necho \"SERVER_PID=$SERVER_PID\" >> $GITHUB_ENV\n\n# サーバー起動待機\necho \"⏳ Waiting for server to start...\"\nfor i in {1..30}; do\n  if curl -s http://localhost:4173 > /dev/null; then\n    echo \"✅ Server is ready\"\n    break\n  fi\n  sleep 1\ndone\n"
+      - name: "\U0001F3C3 Lighthouse実行 / Run Lighthouse"
         id: lighthouse
         uses: treosh/lighthouse-ci-action@v12
         with:
@@ -311,172 +139,67 @@ jobs:
             http://localhost:4173
           uploadArtifacts: true
           temporaryPublicStorage: true
-      
-      # ============================================================
-      # Step 6: スコア抽出と評価
-      # Extract and evaluate scores
-      # ============================================================
-      - name: '📊 スコア評価 / Evaluate Scores'
+      - name: "\U0001F4CA スコア評価 / Evaluate Scores"
         id: evaluate-lighthouse
-        run: |
-          # Lighthouseレポートからスコア抽出（仮の値）
-          PERFORMANCE=97
-          ACCESSIBILITY=85
-          BEST_PRACTICES=92
-          SEO=100
-          PWA=75
-          
-          echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
-          echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
-          echo "best-practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
-          echo "seo=$SEO" >> $GITHUB_OUTPUT
-          echo "pwa=$PWA" >> $GITHUB_OUTPUT
-          
-          # 平均スコア計算
-          AVERAGE=$(( (PERFORMANCE + ACCESSIBILITY + BEST_PRACTICES + SEO + PWA) / 5 ))
-          
-          # GitHub Summary
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## 🏃 Lighthouse スコア
-          
-          | カテゴリ | スコア | 評価 |
-          |---------|--------|------|
-          | ⚡ パフォーマンス | ${PERFORMANCE} | $([ $PERFORMANCE -ge 90 ] && echo "🟢" || echo "🟡") |
-          | ♿ アクセシビリティ | ${ACCESSIBILITY} | $([ $ACCESSIBILITY -ge 90 ] && echo "🟢" || echo "🟡") |
-          | 📋 ベストプラクティス | ${BEST_PRACTICES} | $([ $BEST_PRACTICES -ge 90 ] && echo "🟢" || echo "🟡") |
-          | 🔍 SEO | ${SEO} | $([ $SEO -ge 90 ] && echo "🟢" || echo "🟡") |
-          | 📱 PWA | ${PWA} | $([ $PWA -ge 90 ] && echo "🟢" || echo "🔴") |
-          
-          **平均スコア**: ${AVERAGE}/100
-          EOF
-      
-      # ============================================================
-      # Step 7: サーバー停止
-      # Stop server
-      # ============================================================
-      - name: '🛑 サーバー停止 / Stop Server'
+        run: "# Lighthouseレポートからスコア抽出（仮の値）\nPERFORMANCE=97\nACCESSIBILITY=85\nBEST_PRACTICES=92\nSEO=100\nPWA=75\n\necho \"performance=$PERFORMANCE\" >> $GITHUB_OUTPUT\necho \"accessibility=$ACCESSIBILITY\" >> $GITHUB_OUTPUT\necho \"best-practices=$BEST_PRACTICES\" >> $GITHUB_OUTPUT\necho \"seo=$SEO\" >> $GITHUB_OUTPUT\necho \"pwa=$PWA\" >> $GITHUB_OUTPUT\n\n# 平均スコア計算\nAVERAGE=$(( (PERFORMANCE + ACCESSIBILITY + BEST_PRACTICES + SEO + PWA) / 5 ))\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## \U0001F3C3 Lighthouse スコア\n\n| カテゴリ | スコア | 評価 |\n|---------|--------|------|\n| ⚡ パフォーマンス | ${PERFORMANCE} | $([ $PERFORMANCE -ge 90 ] && echo \"\U0001F7E2\" || echo \"\U0001F7E1\") |\n| ♿ アクセシビリティ | ${ACCESSIBILITY} | $([ $ACCESSIBILITY -ge 90 ] && echo \"\U0001F7E2\" || echo \"\U0001F7E1\") |\n| \U0001F4CB ベストプラクティス | ${BEST_PRACTICES} | $([ $BEST_PRACTICES -ge 90 ] && echo \"\U0001F7E2\" || echo \"\U0001F7E1\") |\n| \U0001F50D SEO | ${SEO} | $([ $SEO -ge 90 ] && echo \"\U0001F7E2\" || echo \"\U0001F7E1\") |\n| \U0001F4F1 PWA | ${PWA} | $([ $PWA -ge 90 ] && echo \"\U0001F7E2\" || echo \"\U0001F534\") |\n\n**平均スコア**: ${AVERAGE}/100\nEOF\n"
+      - name: "\U0001F6D1 サーバー停止 / Stop Server"
         if: always()
         run: |
           if [ -n "$SERVER_PID" ]; then
             kill $SERVER_PID || true
             echo "✅ Server stopped"
           fi
-
-  # ============================================================
-  # Job 3: 画像最適化
-  # Image optimization
-  # ============================================================
   image-optimization:
-    name: '🖼️ 画像最適化 / Image Optimization'
+    name: "⚡ 最適化: \U0001F5BC️ 画像最適化 / Image Optimization"
     runs-on: ubuntu-latest
     if: github.event.inputs.optimize-images == 'true'
     timeout-minutes: 15
-    
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      # ============================================================
-      # Step 2: 環境セットアップ
-      # Setup environment
-      # ============================================================
-      - name: '🔧 環境セットアップ / Setup Environment'
+          token: '${{ secrets.GITHUB_TOKEN }}'
+      - name: "\U0001F527 環境セットアップ / Setup Environment"
         uses: ./.github/actions/setup-environment
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      # ============================================================
-      # Step 3: 画像最適化実行
-      # Run image optimization
-      # ============================================================
-      - name: '🖼️ 画像最適化 / Optimize Images'
+          node-version: '${{ env.NODE_VERSION }}'
+      - name: "\U0001F5BC️ 画像最適化 / Optimize Images"
         id: optimize
-        run: |
-          echo "🖼️ Optimizing images..."
-          
-          # 画像最適化スクリプト実行
-          if [ -f "scripts/optimize-images.js" ]; then
-            node scripts/optimize-images.js
-            
-            # 変更確認
-            if git diff --quiet; then
-              echo "No images optimized"
-              echo "optimized=false" >> $GITHUB_OUTPUT
-            else
-              echo "Images optimized"
-              echo "optimized=true" >> $GITHUB_OUTPUT
-              
-              # 最適化結果の統計
-              OPTIMIZED_COUNT=$(git diff --name-only | grep -E '\.(png|jpg|jpeg|gif|svg)$' | wc -l)
-              echo "count=$OPTIMIZED_COUNT" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "⚠️ Image optimization script not found"
-            echo "optimized=false" >> $GITHUB_OUTPUT
-          fi
-      
-      # ============================================================
-      # Step 4: 変更をコミット
-      # Commit changes
-      # ============================================================
-      - name: '📝 変更をコミット / Commit Changes'
+        run: "echo \"\U0001F5BC️ Optimizing images...\"\n\n# 画像最適化スクリプト実行\nif [ -f \"scripts/optimize-images.js\" ]; then\n  node scripts/optimize-images.js\n  \n  # 変更確認\n  if git diff --quiet; then\n    echo \"No images optimized\"\n    echo \"optimized=false\" >> $GITHUB_OUTPUT\n  else\n    echo \"Images optimized\"\n    echo \"optimized=true\" >> $GITHUB_OUTPUT\n    \n    # 最適化結果の統計\n    OPTIMIZED_COUNT=$(git diff --name-only | grep -E '\\.(png|jpg|jpeg|gif|svg)$' | wc -l)\n    echo \"count=$OPTIMIZED_COUNT\" >> $GITHUB_OUTPUT\n  fi\nelse\n  echo \"⚠️ Image optimization script not found\"\n  echo \"optimized=false\" >> $GITHUB_OUTPUT\nfi\n"
+      - name: "\U0001F4DD 変更をコミット / Commit Changes"
         if: steps.optimize.outputs.optimized == 'true' && github.event_name == 'pull_request'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -A
-          git commit -m "🖼️ 画像最適化: ${{ steps.optimize.outputs.count }}個のファイルを最適化"
-          git push
-
-  # ============================================================
-  # Job 4: 総合レポート生成
-  # Generate comprehensive report
-  # ============================================================
+        run: "git config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\ngit add -A\ngit commit -m \"\U0001F5BC️ 画像最適化: ${{ steps.optimize.outputs.count }}個のファイルを最適化\"\ngit push\n"
   performance-report:
-    name: '📊 パフォーマンスレポート / Performance Report'
+    name: "\U0001F4CA パフォーマンスレポート / Performance Report"
     runs-on: ubuntu-latest
-    needs: [bundle-analysis, lighthouse-ci]
+    needs:
+      - bundle-analysis
+      - lighthouse-ci
     if: always()
     timeout-minutes: 10
-    
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
-      
-      # ============================================================
-      # Step 2: レポート生成
-      # Generate report
-      # ============================================================
-      - name: '📊 レポート生成 / Generate Report'
+      - name: "\U0001F4CA レポート生成 / Generate Report"
         uses: ./.github/actions/report-generator
         with:
-          report-type: 'performance'
-          output-format: 'all'
+          report-type: performance
+          output-format: all
           upload-artifact: true
           include-trends: true
-      
-      # ============================================================
-      # Step 3: 通知送信
-      # Send notification
-      # ============================================================
-      - name: '📢 通知送信 / Send Notification'
+      - name: "\U0001F4E2 通知送信 / Send Notification"
         if: needs.bundle-analysis.outputs.status == 'warning'
         uses: ./.github/actions/notification
         with:
-          status: 'warning'
-          title: 'パフォーマンス警告'
+          status: warning
+          title: パフォーマンス警告
           message: |
             バンドルサイズが予算を超過しています
             サイズ: ${{ needs.bundle-analysis.outputs.bundle-size-mb }}MB
             予算: ${{ env.PERFORMANCE_BUDGET_MB }}MB
-          notification-type: 'none'
+          notification-type: none
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write

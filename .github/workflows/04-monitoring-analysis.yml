@@ -1,150 +1,104 @@
-name: Bundle Analysis & Optimization
+# ====================================================================
+# 📊 監視・統合 - Bundle Analysis & Optimization
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. 🔍 分析: Bundle Analysis
+#   2. ⚡ 最適化: Tree Shaking Optimization
+#   3. 🔍 分析: Code Splitting Analysis
+#   4. ⚡ パフォーマンス: Performance Regression Check
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-on:
+name: "\U0001F4CA 監視・統合 - Bundle Analysis & Optimization"
+'on':
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   schedule:
-    - cron: '0 2 * * 1' # Weekly Monday 2AM
-  workflow_dispatch:
-
+    - cron: 0 2 * * 1
+  workflow_dispatch: null
 jobs:
   bundle-analysis:
-    name: Bundle Analysis
+    name: "\U0001F50D 分析: Bundle Analysis"
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-
+          cache: npm
       - name: Install dependencies
         run: npm ci
-
       - name: Build for analysis
         run: npm run build
         env:
           NODE_ENV: production
           GENERATE_SOURCEMAP: false
-
       - name: Install bundle analyzer
         run: |
           npm install -g webpack-bundle-analyzer
           npm install --save-dev @bundle-analyzer/webpack-plugin
           npm install --save-dev bundlesize
-
       - name: Analyze bundle
-        run: |
-          echo "🔍 Analyzing bundle composition..."
-          node ./scripts/analyze-bundle.js
-
+        run: "echo \"\U0001F50D Analyzing bundle composition...\"\nnode ./scripts/analyze-bundle.js\n"
       - name: Check bundle size limits
-        run: |
-          echo "📏 Checking bundle size limits..."
-          node ./scripts/check-bundle-size.js
-
+        run: "echo \"\U0001F4CF Checking bundle size limits...\"\nnode ./scripts/check-bundle-size.js\n"
       - name: Generate optimization report
-        run: |
-          echo "📊 Generating optimization recommendations..."
-          node ./scripts/generate-optimization-report.js
-
+        run: "echo \"\U0001F4CA Generating optimization recommendations...\"\nnode ./scripts/generate-optimization-report.js\n"
       - name: Upload bundle analysis
         uses: actions/upload-artifact@v3
         with:
-          name: bundle-analysis-${{ github.run_id }}
+          name: 'bundle-analysis-${{ github.run_id }}'
           path: |
             ./bundle-analysis/
             ./dist/stats.json
             ./bundle-report.html
-
       - name: Comment PR with bundle analysis
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: |
-            const fs = require('fs');
-            const path = './bundle-analysis/bundle-summary.json';
-            
-            if (fs.existsSync(path)) {
-              const analysis = JSON.parse(fs.readFileSync(path, 'utf8'));
-              
-              const comment = `## 📦 Bundle Analysis Report
-              
-              ### Bundle Size Summary
-              - **Total Size**: ${analysis.totalSize}
-              - **Gzipped Size**: ${analysis.gzippedSize}
-              - **Change**: ${analysis.sizeChange} (${analysis.sizeChangePercent})
-              
-              ### Top Large Dependencies
-              ${analysis.largeDependencies.map((dep, i) => 
-                `${i + 1}. **${dep.name}**: ${dep.size} (${dep.percentage}%)`
-              ).join('\\n')}
-              
-              ### Optimization Opportunities
-              ${analysis.optimizations.map((opt, i) => 
-                `${i + 1}. **${opt.type}**: ${opt.description} (${opt.potentialSaving})`
-              ).join('\\n')}
-              
-              ### Recommendations
-              ${analysis.recommendations.map((rec, i) => 
-                `${i + 1}. ${rec}`
-              ).join('\\n')}
-              
-              ${analysis.budgetStatus === 'exceeded' ? '⚠️ **Bundle size budget exceeded!**' : '✅ Bundle size within budget'}
-              
-              [View detailed analysis](${analysis.reportUrl})
-              `;
-              
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-              });
-            }
-
+          script: "const fs = require('fs');\nconst path = './bundle-analysis/bundle-summary.json';\n\nif (fs.existsSync(path)) {\n  const analysis = JSON.parse(fs.readFileSync(path, 'utf8'));\n  \n  const comment = `## \U0001F4E6 Bundle Analysis Report\n  \n  ### Bundle Size Summary\n  - **Total Size**: ${analysis.totalSize}\n  - **Gzipped Size**: ${analysis.gzippedSize}\n  - **Change**: ${analysis.sizeChange} (${analysis.sizeChangePercent})\n  \n  ### Top Large Dependencies\n  ${analysis.largeDependencies.map((dep, i) => \n    `${i + 1}. **${dep.name}**: ${dep.size} (${dep.percentage}%)`\n  ).join('\\\\n')}\n  \n  ### Optimization Opportunities\n  ${analysis.optimizations.map((opt, i) => \n    `${i + 1}. **${opt.type}**: ${opt.description} (${opt.potentialSaving})`\n  ).join('\\\\n')}\n  \n  ### Recommendations\n  ${analysis.recommendations.map((rec, i) => \n    `${i + 1}. ${rec}`\n  ).join('\\\\n')}\n  \n  ${analysis.budgetStatus === 'exceeded' ? '⚠️ **Bundle size budget exceeded!**' : '✅ Bundle size within budget'}\n  \n  [View detailed analysis](${analysis.reportUrl})\n  `;\n  \n  github.rest.issues.createComment({\n    issue_number: context.issue.number,\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    body: comment\n  });\n}\n"
+    timeout-minutes: 30
   treeshaking-optimization:
-    name: Tree Shaking Optimization
+    name: '⚡ 最適化: Tree Shaking Optimization'
     runs-on: ubuntu-latest
     needs: bundle-analysis
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-
+          cache: npm
       - name: Install analysis tools
         run: |
           npm install -g webpack-unused
           npm install --save-dev unused-webpack-plugin
           npm install --save-dev duplicate-package-checker-webpack-plugin
-
       - name: Analyze unused code
-        run: |
-          echo "🔍 Analyzing unused code..."
-          node ./scripts/analyze-unused-code.js
-
+        run: "echo \"\U0001F50D Analyzing unused code...\"\nnode ./scripts/analyze-unused-code.js\n"
       - name: Check for duplicate dependencies
-        run: |
-          echo "🔍 Checking for duplicate dependencies..."
-          node ./scripts/check-duplicate-dependencies.js
-
+        run: "echo \"\U0001F50D Checking for duplicate dependencies...\"\nnode ./scripts/check-duplicate-dependencies.js\n"
       - name: Generate tree shaking report
-        run: |
-          echo "🌳 Generating tree shaking optimization report..."
-          node ./scripts/generate-treeshaking-report.js
-
+        run: "echo \"\U0001F333 Generating tree shaking optimization report...\"\nnode ./scripts/generate-treeshaking-report.js\n"
       - name: Create optimization PR
         if: github.ref == 'refs/heads/main'
         uses: actions/github-script@v7
@@ -152,7 +106,7 @@ jobs:
           script: |
             const fs = require('fs');
             const reportPath = './bundle-analysis/treeshaking-report.json';
-            
+
             if (fs.existsSync(reportPath)) {
               const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
               
@@ -170,77 +124,61 @@ jobs:
                 console.log(`Created optimization branch: ${branchName}`);
               }
             }
-
+    timeout-minutes: 30
   code-splitting-analysis:
-    name: Code Splitting Analysis
+    name: "\U0001F50D 分析: Code Splitting Analysis"
     runs-on: ubuntu-latest
     needs: bundle-analysis
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-
+          cache: npm
       - name: Install dependencies
         run: npm ci
-
       - name: Analyze code splitting opportunities
         run: |
           echo "✂️ Analyzing code splitting opportunities..."
           node ./scripts/analyze-code-splitting.js
-
       - name: Generate route-based splitting recommendations
-        run: |
-          echo "🛣️ Analyzing route-based splitting..."
-          node ./scripts/analyze-route-splitting.js
-
+        run: "echo \"\U0001F6E3️ Analyzing route-based splitting...\"\nnode ./scripts/analyze-route-splitting.js\n"
       - name: Check lazy loading implementation
         run: |
           echo "⏰ Checking lazy loading implementation..."
           node ./scripts/check-lazy-loading.js
-
       - name: Upload code splitting analysis
         uses: actions/upload-artifact@v3
         with:
-          name: code-splitting-analysis-${{ github.run_id }}
+          name: 'code-splitting-analysis-${{ github.run_id }}'
           path: ./code-splitting-analysis/
-
+    timeout-minutes: 30
   performance-regression-check:
-    name: Performance Regression Check
+    name: '⚡ パフォーマンス: Performance Regression Check'
     runs-on: ubuntu-latest
-    needs: [bundle-analysis, treeshaking-optimization, code-splitting-analysis]
-    
+    needs:
+      - bundle-analysis
+      - treeshaking-optimization
+      - code-splitting-analysis
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Download analysis artifacts
         uses: actions/download-artifact@v3
         with:
           pattern: '*-analysis-*'
           merge-multiple: true
           path: ./analysis-results/
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
       - name: Check for performance regressions
-        run: |
-          echo "📉 Checking for performance regressions..."
-          node ./scripts/check-performance-regression.js
-
+        run: "echo \"\U0001F4C9 Checking for performance regressions...\"\nnode ./scripts/check-performance-regression.js\n"
       - name: Generate final optimization report
-        run: |
-          echo "📋 Generating final optimization report..."
-          node ./scripts/generate-final-report.js
-
+        run: "echo \"\U0001F4CB Generating final optimization report...\"\nnode ./scripts/generate-final-report.js\n"
       - name: Fail if critical regressions found
         run: |
           if [ -f "./analysis-results/critical-regressions.json" ]; then
@@ -250,3 +188,12 @@ jobs:
           else
             echo "✅ No critical performance regressions detected"
           fi
+    timeout-minutes: 30
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

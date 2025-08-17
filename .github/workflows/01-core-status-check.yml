@@ -1,41 +1,38 @@
-# ================================================================
-# 🎯 コア: 最小限ステータスチェック
-# ================================================================
-# 目的: Repository Rulesetsの必須チェック要件を満たす最小限のワークフロー
-# 実行タイミング: PRおよびmainブランチへのpush時
-# 主な処理: ステータスチェックのみ（実質的な処理なし）
-# ================================================================
+# ====================================================================
+# 📦 CI/CD - Minimal Status Check
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#
+# 主な処理:
+#   1. ✓ チェック: minimal-status-check
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: '🎯 Core - Minimal Status Check'
-
-on:
+name: "\U0001F4E6 CI/CD - Minimal Status Check"
+'on':
   pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-# ワークフロー同時実行制御
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    branches:
+      - main
+  workflow_dispatch: null
 jobs:
-  # ================================================================
-  # ジョブ: 最小限ステータスチェック
-  # 目的: Repository Rulesetsの要件を満たすための最小限チェック
-  # ================================================================
   minimal-status-check:
-    name: '✅ ステータスチェック'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    
     steps:
-      # ステップ: チェック完了通知
-      # Repository Rulesetsの必須チェックとして登録されている
-      - name: '✅ チェック完了'
-        run: |
-          echo "✅ Repository Rulesetsチェック完了"
-          echo "実行時刻: $(date '+%Y-%m-%d %H:%M:%S')"
-          echo "ブランチ: ${{ github.ref }}"
-          echo "イベント: ${{ github.event_name }}"
+      - run: echo "✅ Check passed"
+    timeout-minutes: 30
+    name: '✓ チェック: minimal-status-check'
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

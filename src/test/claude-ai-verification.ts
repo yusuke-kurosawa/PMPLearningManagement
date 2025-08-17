@@ -30,10 +30,10 @@ export const verifyClaudeAIIntegration = (): void => {
   /* eslint-disable-next-line no-console */
   if (process.env.NODE_ENV === 'development') {
     console.log(
+      '- Workflow optimization:',
+      `${improvements.githubWorkflows.before} → ${improvements.githubWorkflows.after}`
+    )
   }
-    '- Workflow optimization:',
-    `${improvements.githubWorkflows.before} → ${improvements.githubWorkflows.after}`
-  )
 }
 
 export default verifyClaudeAIIntegration

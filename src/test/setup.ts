@@ -2,6 +2,44 @@ import '@testing-library/jest-dom'
 import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
+
+// Polyfill for happy-dom v18 compatibility
+// Ensure window properties are available before tests run
+if (typeof globalThis !== 'undefined' && typeof globalThis.window !== 'undefined') {
+  const win = globalThis.window as any
+
+  // Ensure window.matchMedia exists early with proper mock
+  if (!win.matchMedia || typeof win.matchMedia !== 'function') {
+    win.matchMedia = vi.fn((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(() => false),
+    }))
+  }
+
+  // Mock Notification API for happy-dom v18
+  if (!win.Notification) {
+    win.Notification = class Notification {
+      static permission = 'default'
+      static requestPermission = vi.fn().mockResolvedValue('granted')
+
+      constructor(
+        public title: string,
+        public options?: any
+      ) {}
+      close = vi.fn()
+      addEventListener = vi.fn()
+      removeEventListener = vi.fn()
+      dispatchEvent = vi.fn()
+    }
+  }
+}
+
 // Conditional logger import for ES modules
 // const logger = { warn: console.warn }
 
@@ -122,20 +160,27 @@ global.ResizeObserver = vi.fn(() => ({
   disconnect: vi.fn(),
 }))
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-})
+// Additional window.matchMedia setup for enhanced compatibility
+// This is a secondary check to ensure matchMedia is always available during tests
+if (typeof window !== 'undefined') {
+  // Ensure it's always a function that returns the expected object
+  if (!window.matchMedia || typeof window.matchMedia !== 'function') {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(() => false),
+      })),
+    })
+  }
+}
 
 // Mock ServiceWorkerRegistration globally
 if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {

@@ -1,73 +1,77 @@
-# ================================================================
-# 🧪 品質: 継続的インテグレーションテスト
-# ================================================================
-# 目的: コードの品質と機能性を保証するための包括的テスト実行
-# 実行タイミング: push、PR作成時、手動実行
-# 主な処理: 
-#   - 単体テスト実行（Node.js 18/20）
-#   - E2Eテスト実行（Playwright）
-#   - カバレッジレポート生成
-#   - セキュリティスキャン
-# ================================================================
+# ====================================================================
+# 🧪 Quality - CI Tests
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#
+# 主な処理:
+#   1. 🧪 テスト: 🔬 Run Tests
+#   2. 🧪 テスト: 🎭 E2E Tests
+#   3. 🏗️ ビルド: 🏗️ Build Check
+#   4. 🔒 セキュリティ: 🔒 Security Scan
+#   5. ✅ 品質: ✅ Quality Gates
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: '🧪 Quality - CI Tests'
-
-on:
+name: "\U0001F9EA Quality - CI Tests"
+'on':
   push:
-    branches: [main, develop, 'feature/**', 'fix/**']
+    branches:
+      - main
+      - develop
+      - feature/**
+      - fix/**
   pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
-
-# パーミッション設定（最小権限の原則）
+    branches:
+      - main
+      - develop
+  workflow_dispatch: null
 permissions:
   contents: read
-  pull-requests: write  # PRへのコメント投稿用
-
-# ワークフロー同時実行制御
+  pull-requests: write
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.event_name == ''pull_request'' }}'
 jobs:
   test:
-    name: 🔬 Run Tests
+    name: "\U0001F9EA テスト: \U0001F52C Run Tests"
     runs-on: ubuntu-latest
-    
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
-    
+        node-version:
+          - 18.x
+          - 20.x
     steps:
-      - name: 📥 Checkout code
+      - name: "\U0001F4E5 Checkout code"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+      - name: "\U0001F527 Setup Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
+          node-version: '${{ matrix.node-version }}'
+          cache: npm
+      - name: "\U0001F4E6 Install dependencies"
         run: npm ci
-
-      - name: 🔍 Run linter
+      - name: "\U0001F50D Run linter"
         run: npm run lint
         continue-on-error: true
-
-      - name: 🧪 Run unit tests
-        run: npm run test:run
+      - name: "\U0001F9EA Run unit tests"
+        run: 'npm run test:run'
         env:
           NODE_ENV: test
-
-      - name: 📊 Generate coverage report
-        run: npm run test:coverage
+      - name: "\U0001F4CA Generate coverage report"
+        run: 'npm run test:coverage'
         env:
           NODE_ENV: test
-
-      - name: 📈 Upload coverage to Codecov
+      - name: "\U0001F4C8 Upload coverage to Codecov"
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v3
         with:
@@ -75,191 +79,129 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-
-      - name: 💾 Upload coverage artifacts
+      - name: "\U0001F4BE Upload coverage artifacts"
         if: matrix.node-version == '20.x'
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: coverage/
           retention-days: 7
-
-      - name: 📝 Upload test results
+      - name: "\U0001F4DD Upload test results"
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-${{ matrix.node-version }}
+          name: 'test-results-${{ matrix.node-version }}'
           path: test-results.xml
           retention-days: 7
-
+    timeout-minutes: 30
   e2e-tests:
-    name: 🎭 E2E Tests
+    name: "\U0001F9EA テスト: \U0001F3AD E2E Tests"
     runs-on: ubuntu-latest
     needs: test
-    
     steps:
-      - name: 📥 Checkout code
+      - name: "\U0001F4E5 Checkout code"
         uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js
+      - name: "\U0001F527 Setup Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
+          node-version: 20.x
+          cache: npm
+      - name: "\U0001F4E6 Install dependencies"
         run: npm ci
-
-      - name: 🎭 Install Playwright browsers
+      - name: "\U0001F3AD Install Playwright browsers"
         run: npx playwright install --with-deps
-
-      - name: 🏗️ Build application
+      - name: "\U0001F3D7️ Build application"
         run: npm run build
-
-      - name: 🎭 Run E2E tests
-        run: npm run test:e2e
+      - name: "\U0001F3AD Run E2E tests"
+        run: 'npm run test:e2e'
         continue-on-error: true
-
-      - name: 📸 Upload Playwright artifacts
+      - name: "\U0001F4F8 Upload Playwright artifacts"
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
+    timeout-minutes: 30
   build:
-    name: 🏗️ Build Check
+    name: "\U0001F3D7️ ビルド: \U0001F3D7️ Build Check"
     runs-on: ubuntu-latest
     needs: test
-    
     steps:
-      - name: 📥 Checkout code
+      - name: "\U0001F4E5 Checkout code"
         uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js
+      - name: "\U0001F527 Setup Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
+          node-version: 20.x
+          cache: npm
+      - name: "\U0001F4E6 Install dependencies"
         run: npm ci
-
-      - name: 🏗️ Build production
+      - name: "\U0001F3D7️ Build production"
         run: npm run build
         env:
           NODE_ENV: production
-
-      - name: 📊 Check bundle size
+      - name: "\U0001F4CA Check bundle size"
         run: |
           echo "Bundle size report:"
           du -sh dist/
           find dist -name "*.js" -o -name "*.css" | xargs ls -lh
-
-      - name: 💾 Upload build artifacts
+      - name: "\U0001F4BE Upload build artifacts"
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
           path: dist/
           retention-days: 7
-
+    timeout-minutes: 30
   security:
-    name: 🔒 Security Scan
+    name: "\U0001F512 セキュリティ: \U0001F512 Security Scan"
     runs-on: ubuntu-latest
-    
     steps:
-      - name: 📥 Checkout code
+      - name: "\U0001F4E5 Checkout code"
         uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js
+      - name: "\U0001F527 Setup Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
+          node-version: 20.x
+          cache: npm
+      - name: "\U0001F4E6 Install dependencies"
         run: npm ci
-
-      - name: 🔍 Run npm audit
+      - name: "\U0001F50D Run npm audit"
         run: npm audit --audit-level=moderate
         continue-on-error: true
-
-      - name: 🔒 Run security scan
+      - name: "\U0001F512 Run security scan"
         run: npx snyk test
         continue-on-error: true
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
+          SNYK_TOKEN: '${{ secrets.SNYK_TOKEN }}'
+    timeout-minutes: 30
   quality-gates:
-    name: ✅ Quality Gates
+    name: '✅ 品質: ✅ Quality Gates'
     runs-on: ubuntu-latest
-    needs: [test, build, security]
+    needs:
+      - test
+      - build
+      - security
     if: always()
-    
     steps:
-      - name: 📥 Checkout code
+      - name: "\U0001F4E5 Checkout code"
         uses: actions/checkout@v4
-
-      - name: 📊 Check test results
+      - name: "\U0001F4CA Check test results"
         run: |
           echo "Quality gates summary:"
           echo "- Unit tests: ${{ needs.test.result }}"
           echo "- Build: ${{ needs.build.result }}"
           echo "- Security: ${{ needs.security.result }}"
-          
+
           if [[ "${{ needs.test.result }}" != "success" || "${{ needs.build.result }}" != "success" ]]; then
             echo "❌ Quality gates failed"
             exit 1
           fi
-          
-          echo "✅ All quality gates passed"
 
-      - name: 📝 Comment on PR
+          echo "✅ All quality gates passed"
+      - name: "\U0001F4DD Comment on PR"
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: |
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
-              comment.body.includes('CI Results')
-            );
-            
-            const body = `## 🔬 CI Results
-            
-            | Check | Status |
-            |-------|--------|
-            | 🧪 Unit Tests | ${{ needs.test.result }} |
-            | 🏗️ Build | ${{ needs.build.result }} |
-            | 🔒 Security | ${{ needs.security.result }} |
-            
-            **Overall Status**: ${
-              needs.test.result === 'success' && 
-              needs.build.result === 'success' 
-                ? '✅ Ready to merge' 
-                : '❌ Checks failed'
-            }
-            
-            _Last updated: ${new Date().toISOString()}_`;
-            
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body
-              });
-            }
+          script: "const { data: comments } = await github.rest.issues.listComments({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  issue_number: context.issue.number,\n});\n\nconst botComment = comments.find(comment => \n  comment.user.type === 'Bot' && \n  comment.body.includes('CI Results')\n);\n\nconst body = `## \U0001F52C CI Results\n\n| Check | Status |\n|-------|--------|\n| \U0001F9EA Unit Tests | ${{ needs.test.result }} |\n| \U0001F3D7️ Build | ${{ needs.build.result }} |\n| \U0001F512 Security | ${{ needs.security.result }} |\n\n**Overall Status**: ${\n  needs.test.result === 'success' && \n  needs.build.result === 'success' \n    ? '✅ Ready to merge' \n    : '❌ Checks failed'\n}\n\n_Last updated: ${new Date().toISOString()}_`;\n\nif (botComment) {\n  await github.rest.issues.updateComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    comment_id: botComment.id,\n    body\n  });\n} else {\n  await github.rest.issues.createComment({\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    issue_number: context.issue.number,\n    body\n  });\n}\n"
+    timeout-minutes: 30

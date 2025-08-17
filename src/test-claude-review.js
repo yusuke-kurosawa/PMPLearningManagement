@@ -14,15 +14,14 @@ for (let i = 0; i < 1000000; i++) {
   document.getElementById('test')
 }
 
-// Unused variable
-const unusedVar = 'This is never used'
-
 // Missing error handling
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 function divideNumbers(a, b) {
   return a / b // No check for division by zero
 }
 
 // Inefficient array operation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 function findDuplicates(arr) {
   const duplicates = []
   for (let i = 0; i < arr.length; i++) {

@@ -18,6 +18,7 @@ const PWAOptimizationDashboard = () => {
     serviceWorker: { status: 'unknown', cacheHitRatio: 0, offlineRequests: 0 },
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_realTimeData, setRealTimeData] = useState([])
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [optimizations, setOptimizations] = useState([])
@@ -123,6 +124,7 @@ const PWAOptimizationDashboard = () => {
 
   const getCoreWebVitals = async () => {
     // Get metrics from web-vitals library
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _vitals = { lcp: 0, fid: 0, cls: 0 }
 
     if (typeof window !== 'undefined' && window.coreWebVitalsData) {

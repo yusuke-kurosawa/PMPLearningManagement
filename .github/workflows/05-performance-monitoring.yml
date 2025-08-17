@@ -1,869 +1,186 @@
-# ================================================================
-# Workflow: 05-performance-monitoring
-# Purpose: 包括的パフォーマンス監視・最適化・ベンチマーク
-#          Comprehensive performance monitoring, optimization, and benchmarking
-# Trigger: Deployment, Schedule, Performance degradation alerts
-# Dependencies: Lighthouse CI, Bundle analyzer, Core Web Vitals
-# Author: Claude Code Actions
-# Version: 1.0.0
-# Last Updated: 2025-08-12
-# ================================================================
+# ====================================================================
+# 🤖 自動化・AI - ⚡ [Performance] Monitoring & Optimization / パフォーマンス監視・最適化
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - workflow_run
+#   - プルリクエスト作成・更新時
+#   - 手動実行
+#   - スケジュール実行
+#   - repository_dispatch
+#
+# 主な処理:
+#   1. ⚡ パフォーマンス: 📊 [Baseline] Performance Measurement
+#   2. 📌 処理: 📈 [Vitals] Core Web Vitals Analysis
+#   3. ⚡ パフォーマンス: ⚡ [Optimize] Performance Enhancement
+#   4. ⚡ パフォーマンス: 📋 [Report] Performance Summary
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: "⚡ [Performance] Monitoring & Optimization / パフォーマンス監視・最適化"
-
-# --------------------------------
-# 📋 Permissions / 権限設定
-# --------------------------------
+name: "\U0001F916 自動化・AI - ⚡ [Performance] Monitoring & Optimization / パフォーマンス監視・最適化"
 permissions:
   contents: read
   issues: write
   pull-requests: write
   pages: read
-
-# --------------------------------
-# 🎯 Triggers / トリガー
-# --------------------------------
-on:
-  # デプロイ完了時 / On deployment completion
+'on':
   workflow_run:
-    workflows: ["Deploy to GitHub Pages"]
-    types: [completed]
-  
-  # プルリクエスト時 / On pull requests
+    workflows:
+      - Deploy to GitHub Pages
+    types:
+      - completed
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
     paths:
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'vite.config.*'
-  
-  # 手動実行 / Manual execution
+      - src/**
+      - public/**
+      - package.json
+      - vite.config.*
   workflow_dispatch:
     inputs:
       monitoring_scope:
-        description: 'Monitoring scope / 監視範囲'
+        description: Monitoring scope / 監視範囲
         required: true
-        default: 'full'
+        default: full
         type: choice
         options:
-          - 'quick'
-          - 'standard'
-          - 'full'
-          - 'benchmark'
-      
+          - quick
+          - standard
+          - full
+          - benchmark
       target_urls:
-        description: 'Target URLs (comma-separated) / 対象URL'
+        description: Target URLs (comma-separated) / 対象URL
         required: false
         default: 'https://yusuke-kurosawa.github.io/PMPLearningManagement/'
         type: string
-  
-  # スケジュール実行（毎日午前4時） / Daily at 4 AM
   schedule:
-    - cron: '0 4 * * *'
-  
-  # パフォーマンス劣化アラート / Performance degradation alert
+    - cron: 0 4 * * *
   repository_dispatch:
-    types: [performance-alert]
-
-# --------------------------------
-# 🌍 Environment / 環境設定
-# --------------------------------
+    types:
+      - performance-alert
 env:
   LIGHTHOUSE_THRESHOLD_PERFORMANCE: 90
   LIGHTHOUSE_THRESHOLD_ACCESSIBILITY: 95
   LIGHTHOUSE_THRESHOLD_BEST_PRACTICES: 90
   LIGHTHOUSE_THRESHOLD_SEO: 90
-  BUNDLE_SIZE_THRESHOLD_MB: 1.0
-  FIRST_CONTENTFUL_PAINT_THRESHOLD: 1.5  # seconds
-  LARGEST_CONTENTFUL_PAINT_THRESHOLD: 2.5  # seconds
-
-# --------------------------------
-# 🔧 Jobs / ジョブ定義
-# ================================
+  BUNDLE_SIZE_THRESHOLD_MB: 1
+  FIRST_CONTENTFUL_PAINT_THRESHOLD: 1.5
+  LARGEST_CONTENTFUL_PAINT_THRESHOLD: 2.5
 jobs:
   performance-baseline:
-    # ================================
-    # Job: performance-baseline
-    # Description: パフォーマンスベースライン測定
-    #              Performance baseline measurement
-    # Dependencies: Build artifacts
-    # Timeout: 20分
-    # ================================
-    name: "📊 [Baseline] Performance Measurement"
+    name: "⚡ パフォーマンス: \U0001F4CA [Baseline] Performance Measurement"
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
     outputs:
-      lighthouse_performance: ${{ steps.lighthouse.outputs.performance }}
-      lighthouse_accessibility: ${{ steps.lighthouse.outputs.accessibility }}
-      lighthouse_best_practices: ${{ steps.lighthouse.outputs.best_practices }}
-      lighthouse_seo: ${{ steps.lighthouse.outputs.seo }}
-      bundle_size_mb: ${{ steps.bundle-analysis.outputs.bundle_size_mb }}
-      needs_optimization: ${{ steps.threshold-check.outputs.needs_optimization }}
-      performance_grade: ${{ steps.grading.outputs.performance_grade }}
-    
+      lighthouse_performance: '${{ steps.lighthouse.outputs.performance }}'
+      lighthouse_accessibility: '${{ steps.lighthouse.outputs.accessibility }}'
+      lighthouse_best_practices: '${{ steps.lighthouse.outputs.best_practices }}'
+      lighthouse_seo: '${{ steps.lighthouse.outputs.seo }}'
+      bundle_size_mb: '${{ steps.bundle-analysis.outputs.bundle_size_mb }}'
+      needs_optimization: '${{ steps.threshold-check.outputs.needs_optimization }}'
+      performance_grade: '${{ steps.grading.outputs.performance_grade }}'
     steps:
-      # ================
-      # Repository Setup
-      # 目的: リポジトリとビルド環境準備
-      # Purpose: Setup repository and build environment
-      # ================
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-      
-      - name: "📦 Install Dependencies"
-        run: |
-          echo "📦 Installing dependencies for performance testing..."
-          npm ci
-      
-      # ================
-      # Application Build
-      # 目的: パフォーマンステスト用ビルド
-      # Purpose: Build for performance testing
-      # ================
-      - name: "🏗️ Build Application"
-        run: |
-          echo "🏗️ Building optimized application..."
-          
-          # パフォーマンス最適化ビルド
-          NODE_ENV=production npm run build
-          
-          # ビルド結果の確認
-          echo "📊 Build output analysis:"
-          if [[ -d "dist" ]]; then
-            ls -la dist/
-            find dist/ -name "*.js" -exec ls -lh {} \; | head -10
-            find dist/ -name "*.css" -exec ls -lh {} \; | head -5
-          else
-            echo "⚠️ Build directory not found"
-          fi
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
+        run: "echo \"\U0001F4E6 Installing dependencies for performance testing...\"\nnpm ci\n"
+      - name: "\U0001F3D7️ Build Application"
+        run: "echo \"\U0001F3D7️ Building optimized application...\"\n\n# パフォーマンス最適化ビルド\nNODE_ENV=production npm run build\n\n# ビルド結果の確認\necho \"\U0001F4CA Build output analysis:\"\nif [[ -d \"dist\" ]]; then\n  ls -la dist/\n  find dist/ -name \"*.js\" -exec ls -lh {} \\; | head -10\n  find dist/ -name \"*.css\" -exec ls -lh {} \\; | head -5\nelse\n  echo \"⚠️ Build directory not found\"\nfi\n"
         id: build
-      
-      # ================
-      # Bundle Size Analysis
-      # 目的: バンドルサイズの詳細分析
-      # Purpose: Detailed bundle size analysis
-      # ================
-      - name: "📦 Bundle Size Analysis"
+      - name: "\U0001F4E6 Bundle Size Analysis"
         id: bundle-analysis
-        run: |
-          echo "📦 Analyzing bundle sizes..."
-          
-          # バンドルアナライザー実行
-          echo "🔍 Running bundle analyzer..."
-          npm run analyze-bundle 2>/dev/null || echo "Bundle analyzer not configured"
-          
-          # ファイルサイズ計算
-          if [[ -d "dist" ]]; then
-            # 総サイズ計算
-            total_size_bytes=$(du -sb dist/ | cut -f1)
-            total_size_mb=$(echo "scale=2; $total_size_bytes / 1024 / 1024" | bc -l)
-            
-            # JavaScript ファイルサイズ
-            js_size_bytes=$(find dist/ -name "*.js" -exec stat -f%z {} \; 2>/dev/null | awk '{sum += $1} END {print sum}' || echo "0")
-            js_size_mb=$(echo "scale=2; $js_size_bytes / 1024 / 1024" | bc -l 2>/dev/null || echo "0")
-            
-            # CSS ファイルサイズ
-            css_size_bytes=$(find dist/ -name "*.css" -exec stat -f%z {} \; 2>/dev/null | awk '{sum += $1} END {print sum}' || echo "0")
-            css_size_kb=$(echo "scale=2; $css_size_bytes / 1024" | bc -l 2>/dev/null || echo "0")
-            
-            # 画像ファイルサイズ
-            img_size_bytes=$(find dist/ -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" 2>/dev/null | xargs stat -f%z 2>/dev/null | awk '{sum += $1} END {print sum}' || echo "0")
-            img_size_kb=$(echo "scale=2; $img_size_bytes / 1024" | bc -l 2>/dev/null || echo "0")
-            
-            echo "📊 Bundle Analysis Results:"
-            echo "   Total Size: ${total_size_mb}MB"
-            echo "   JavaScript: ${js_size_mb}MB"
-            echo "   CSS: ${css_size_kb}KB"
-            echo "   Images: ${img_size_kb}KB"
-            
-            # 出力設定
-            echo "bundle_size_mb=$total_size_mb" >> $GITHUB_OUTPUT
-            echo "js_size_mb=$js_size_mb" >> $GITHUB_OUTPUT
-            echo "css_size_kb=$css_size_kb" >> $GITHUB_OUTPUT
-            echo "img_size_kb=$img_size_kb" >> $GITHUB_OUTPUT
-            
-            # バンドル情報をJSON形式で保存
-            cat > bundle-analysis.json << EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "total_size_mb": $total_size_mb,
-            "javascript_size_mb": $js_size_mb,
-            "css_size_kb": $css_size_kb,
-            "images_size_kb": $img_size_kb,
-            "threshold_mb": ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}
-          }
-          EOF
-          else
-            echo "⚠️ Build directory not found for bundle analysis"
-            echo "bundle_size_mb=0" >> $GITHUB_OUTPUT
-          fi
-      
-      # ================
-      # Lighthouse Performance Audit
-      # 目的: Lighthouse による包括的パフォーマンス監査
-      # Purpose: Comprehensive performance audit with Lighthouse
-      # ================
-      - name: "🔍 Lighthouse Performance Audit"
+        run: "echo \"\U0001F4E6 Analyzing bundle sizes...\"\n\n# バンドルアナライザー実行\necho \"\U0001F50D Running bundle analyzer...\"\nnpm run analyze-bundle 2>/dev/null || echo \"Bundle analyzer not configured\"\n\n# ファイルサイズ計算\nif [[ -d \"dist\" ]]; then\n  # 総サイズ計算\n  total_size_bytes=$(du -sb dist/ | cut -f1)\n  total_size_mb=$(echo \"scale=2; $total_size_bytes / 1024 / 1024\" | bc -l)\n  \n  # JavaScript ファイルサイズ\n  js_size_bytes=$(find dist/ -name \"*.js\" -exec stat -f%z {} \\; 2>/dev/null | awk '{sum += $1} END {print sum}' || echo \"0\")\n  js_size_mb=$(echo \"scale=2; $js_size_bytes / 1024 / 1024\" | bc -l 2>/dev/null || echo \"0\")\n  \n  # CSS ファイルサイズ\n  css_size_bytes=$(find dist/ -name \"*.css\" -exec stat -f%z {} \\; 2>/dev/null | awk '{sum += $1} END {print sum}' || echo \"0\")\n  css_size_kb=$(echo \"scale=2; $css_size_bytes / 1024\" | bc -l 2>/dev/null || echo \"0\")\n  \n  # 画像ファイルサイズ\n  img_size_bytes=$(find dist/ -name \"*.png\" -o -name \"*.jpg\" -o -name \"*.jpeg\" -o -name \"*.gif\" -o -name \"*.svg\" -o -name \"*.webp\" 2>/dev/null | xargs stat -f%z 2>/dev/null | awk '{sum += $1} END {print sum}' || echo \"0\")\n  img_size_kb=$(echo \"scale=2; $img_size_bytes / 1024\" | bc -l 2>/dev/null || echo \"0\")\n  \n  echo \"\U0001F4CA Bundle Analysis Results:\"\n  echo \"   Total Size: ${total_size_mb}MB\"\n  echo \"   JavaScript: ${js_size_mb}MB\"\n  echo \"   CSS: ${css_size_kb}KB\"\n  echo \"   Images: ${img_size_kb}KB\"\n  \n  # 出力設定\n  echo \"bundle_size_mb=$total_size_mb\" >> $GITHUB_OUTPUT\n  echo \"js_size_mb=$js_size_mb\" >> $GITHUB_OUTPUT\n  echo \"css_size_kb=$css_size_kb\" >> $GITHUB_OUTPUT\n  echo \"img_size_kb=$img_size_kb\" >> $GITHUB_OUTPUT\n  \n  # バンドル情報をJSON形式で保存\n  cat > bundle-analysis.json << EOF\n{\n  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\n  \"total_size_mb\": $total_size_mb,\n  \"javascript_size_mb\": $js_size_mb,\n  \"css_size_kb\": $css_size_kb,\n  \"images_size_kb\": $img_size_kb,\n  \"threshold_mb\": ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}\n}\nEOF\nelse\n  echo \"⚠️ Build directory not found for bundle analysis\"\n  echo \"bundle_size_mb=0\" >> $GITHUB_OUTPUT\nfi\n"
+      - name: "\U0001F50D Lighthouse Performance Audit"
         id: lighthouse
-        run: |
-          echo "🔍 Running Lighthouse performance audit..."
-          
-          # テストサーバー起動
-          echo "🚀 Starting test server..."
-          npm run preview &
-          SERVER_PID=$!
-          echo "server_pid=$SERVER_PID" >> $GITHUB_OUTPUT
-          
-          # サーバー起動待機
-          sleep 15
-          
-          # サーバー起動確認
-          curl -f http://localhost:4173 > /dev/null 2>&1 || {
-            echo "❌ Test server failed to start"
-            exit 1
-          }
-          
-          echo "✅ Test server started successfully"
-          
-          # Lighthouse 実行
-          echo "🔍 Running Lighthouse audit..."
-          npx lighthouse http://localhost:4173 \
-            --output=json \
-            --output=html \
-            --output-path=lighthouse-results \
-            --chrome-flags="--headless --no-sandbox --disable-gpu" \
-            --throttling-method=devtools || true
-          
-          # サーバー停止
-          kill $SERVER_PID || true
-          
-          # Lighthouse 結果解析
-          if [[ -f "lighthouse-results.report.json" ]]; then
-            echo "📊 Parsing Lighthouse results..."
-            
-            # スコア抽出
-            performance=$(jq -r '.categories.performance.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)
-            accessibility=$(jq -r '.categories.accessibility.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)
-            best_practices=$(jq -r '.categories["best-practices"].score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)
-            seo=$(jq -r '.categories.seo.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)
-            
-            # Core Web Vitals 抽出
-            fcp=$(jq -r '.audits["first-contentful-paint"].displayValue' lighthouse-results.report.json 2>/dev/null || echo "N/A")
-            lcp=$(jq -r '.audits["largest-contentful-paint"].displayValue' lighthouse-results.report.json 2>/dev/null || echo "N/A")
-            cls=$(jq -r '.audits["cumulative-layout-shift"].displayValue' lighthouse-results.report.json 2>/dev/null || echo "N/A")
-            fid=$(jq -r '.audits["max-potential-fid"].displayValue' lighthouse-results.report.json 2>/dev/null || echo "N/A")
-            
-            echo "📊 Lighthouse Scores:"
-            echo "   Performance: ${performance}/100"
-            echo "   Accessibility: ${accessibility}/100"
-            echo "   Best Practices: ${best_practices}/100"
-            echo "   SEO: ${seo}/100"
-            
-            echo "📊 Core Web Vitals:"
-            echo "   First Contentful Paint: $fcp"
-            echo "   Largest Contentful Paint: $lcp"
-            echo "   Cumulative Layout Shift: $cls"
-            echo "   First Input Delay: $fid"
-            
-            # 出力設定
-            echo "performance=$performance" >> $GITHUB_OUTPUT
-            echo "accessibility=$accessibility" >> $GITHUB_OUTPUT
-            echo "best_practices=$best_practices" >> $GITHUB_OUTPUT
-            echo "seo=$seo" >> $GITHUB_OUTPUT
-            echo "fcp=$fcp" >> $GITHUB_OUTPUT
-            echo "lcp=$lcp" >> $GITHUB_OUTPUT
-            echo "cls=$cls" >> $GITHUB_OUTPUT
-            
-            # Lighthouse データをJSON形式で保存
-            cat > lighthouse-summary.json << EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "scores": {
-              "performance": $performance,
-              "accessibility": $accessibility,
-              "best_practices": $best_practices,
-              "seo": $seo
-            },
-            "core_web_vitals": {
-              "first_contentful_paint": "$fcp",
-              "largest_contentful_paint": "$lcp",
-              "cumulative_layout_shift": "$cls",
-              "first_input_delay": "$fid"
-            }
-          }
-          EOF
-          else
-            echo "❌ Lighthouse results not found"
-            # デフォルト値設定
-            echo "performance=0" >> $GITHUB_OUTPUT
-            echo "accessibility=0" >> $GITHUB_OUTPUT
-            echo "best_practices=0" >> $GITHUB_OUTPUT
-            echo "seo=0" >> $GITHUB_OUTPUT
-          fi
-      
-      # ================
-      # Performance Threshold Check
-      # 目的: パフォーマンス閾値のチェック
-      # Purpose: Check performance thresholds
-      # ================
-      - name: "🎯 Performance Threshold Check"
+        run: "echo \"\U0001F50D Running Lighthouse performance audit...\"\n\n# テストサーバー起動\necho \"\U0001F680 Starting test server...\"\nnpm run preview &\nSERVER_PID=$!\necho \"server_pid=$SERVER_PID\" >> $GITHUB_OUTPUT\n\n# サーバー起動待機\nsleep 15\n\n# サーバー起動確認\ncurl -f http://localhost:4173 > /dev/null 2>&1 || {\n  echo \"❌ Test server failed to start\"\n  exit 1\n}\n\necho \"✅ Test server started successfully\"\n\n# Lighthouse 実行\necho \"\U0001F50D Running Lighthouse audit...\"\nnpx lighthouse http://localhost:4173 \\\n  --output=json \\\n  --output=html \\\n  --output-path=lighthouse-results \\\n  --chrome-flags=\"--headless --no-sandbox --disable-gpu\" \\\n  --throttling-method=devtools || true\n\n# サーバー停止\nkill $SERVER_PID || true\n\n# Lighthouse 結果解析\nif [[ -f \"lighthouse-results.report.json\" ]]; then\n  echo \"\U0001F4CA Parsing Lighthouse results...\"\n  \n  # スコア抽出\n  performance=$(jq -r '.categories.performance.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)\n  accessibility=$(jq -r '.categories.accessibility.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)\n  best_practices=$(jq -r '.categories[\"best-practices\"].score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)\n  seo=$(jq -r '.categories.seo.score * 100' lighthouse-results.report.json 2>/dev/null | cut -d. -f1)\n  \n  # Core Web Vitals 抽出\n  fcp=$(jq -r '.audits[\"first-contentful-paint\"].displayValue' lighthouse-results.report.json 2>/dev/null || echo \"N/A\")\n  lcp=$(jq -r '.audits[\"largest-contentful-paint\"].displayValue' lighthouse-results.report.json 2>/dev/null || echo \"N/A\")\n  cls=$(jq -r '.audits[\"cumulative-layout-shift\"].displayValue' lighthouse-results.report.json 2>/dev/null || echo \"N/A\")\n  fid=$(jq -r '.audits[\"max-potential-fid\"].displayValue' lighthouse-results.report.json 2>/dev/null || echo \"N/A\")\n  \n  echo \"\U0001F4CA Lighthouse Scores:\"\n  echo \"   Performance: ${performance}/100\"\n  echo \"   Accessibility: ${accessibility}/100\"\n  echo \"   Best Practices: ${best_practices}/100\"\n  echo \"   SEO: ${seo}/100\"\n  \n  echo \"\U0001F4CA Core Web Vitals:\"\n  echo \"   First Contentful Paint: $fcp\"\n  echo \"   Largest Contentful Paint: $lcp\"\n  echo \"   Cumulative Layout Shift: $cls\"\n  echo \"   First Input Delay: $fid\"\n  \n  # 出力設定\n  echo \"performance=$performance\" >> $GITHUB_OUTPUT\n  echo \"accessibility=$accessibility\" >> $GITHUB_OUTPUT\n  echo \"best_practices=$best_practices\" >> $GITHUB_OUTPUT\n  echo \"seo=$seo\" >> $GITHUB_OUTPUT\n  echo \"fcp=$fcp\" >> $GITHUB_OUTPUT\n  echo \"lcp=$lcp\" >> $GITHUB_OUTPUT\n  echo \"cls=$cls\" >> $GITHUB_OUTPUT\n  \n  # Lighthouse データをJSON形式で保存\n  cat > lighthouse-summary.json << EOF\n{\n  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\n  \"scores\": {\n    \"performance\": $performance,\n    \"accessibility\": $accessibility,\n    \"best_practices\": $best_practices,\n    \"seo\": $seo\n  },\n  \"core_web_vitals\": {\n    \"first_contentful_paint\": \"$fcp\",\n    \"largest_contentful_paint\": \"$lcp\",\n    \"cumulative_layout_shift\": \"$cls\",\n    \"first_input_delay\": \"$fid\"\n  }\n}\nEOF\nelse\n  echo \"❌ Lighthouse results not found\"\n  # デフォルト値設定\n  echo \"performance=0\" >> $GITHUB_OUTPUT\n  echo \"accessibility=0\" >> $GITHUB_OUTPUT\n  echo \"best_practices=0\" >> $GITHUB_OUTPUT\n  echo \"seo=0\" >> $GITHUB_OUTPUT\nfi\n"
+      - name: "\U0001F3AF Performance Threshold Check"
         id: threshold-check
-        run: |
-          echo "🎯 Checking performance thresholds..."
-          
-          # 変数取得
-          performance="${{ steps.lighthouse.outputs.performance }}"
-          accessibility="${{ steps.lighthouse.outputs.accessibility }}"
-          best_practices="${{ steps.lighthouse.outputs.best_practices }}"
-          seo="${{ steps.lighthouse.outputs.seo }}"
-          bundle_size="${{ steps.bundle-analysis.outputs.bundle_size_mb }}"
-          
-          # 閾値チェック
-          needs_optimization=false
-          issues=()
-          
-          # パフォーマンススコア
-          if [[ $performance -lt ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }} ]]; then
-            echo "⚠️ Performance score below threshold: $performance < ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }}"
-            needs_optimization=true
-            issues+=("performance")
-          fi
-          
-          # アクセシビリティ
-          if [[ $accessibility -lt ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }} ]]; then
-            echo "⚠️ Accessibility score below threshold: $accessibility < ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }}"
-            needs_optimization=true
-            issues+=("accessibility")
-          fi
-          
-          # ベストプラクティス
-          if [[ $best_practices -lt ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }} ]]; then
-            echo "⚠️ Best practices score below threshold: $best_practices < ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }}"
-            needs_optimization=true
-            issues+=("best-practices")
-          fi
-          
-          # SEO
-          if [[ $seo -lt ${{ env.LIGHTHOUSE_THRESHOLD_SEO }} ]]; then
-            echo "⚠️ SEO score below threshold: $seo < ${{ env.LIGHTHOUSE_THRESHOLD_SEO }}"
-            needs_optimization=true
-            issues+=("seo")
-          fi
-          
-          # バンドルサイズ
-          if (( $(echo "$bundle_size > ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}" | bc -l) )); then
-            echo "⚠️ Bundle size above threshold: ${bundle_size}MB > ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB"
-            needs_optimization=true
-            issues+=("bundle-size")
-          fi
-          
-          echo "needs_optimization=$needs_optimization" >> $GITHUB_OUTPUT
-          echo "optimization_issues=${issues[*]}" >> $GITHUB_OUTPUT
-          
-          if [[ "$needs_optimization" == "true" ]]; then
-            echo "🎯 Optimization needed for: ${issues[*]}"
-          else
-            echo "✅ All performance metrics within thresholds"
-          fi
-      
-      # ================
-      # Performance Grading
-      # 目的: パフォーマンス総合評価
-      # Purpose: Overall performance grading
-      # ================
-      - name: "🏆 Performance Grading"
+        run: "echo \"\U0001F3AF Checking performance thresholds...\"\n\n# 変数取得\nperformance=\"${{ steps.lighthouse.outputs.performance }}\"\naccessibility=\"${{ steps.lighthouse.outputs.accessibility }}\"\nbest_practices=\"${{ steps.lighthouse.outputs.best_practices }}\"\nseo=\"${{ steps.lighthouse.outputs.seo }}\"\nbundle_size=\"${{ steps.bundle-analysis.outputs.bundle_size_mb }}\"\n\n# 閾値チェック\nneeds_optimization=false\nissues=()\n\n# パフォーマンススコア\nif [[ $performance -lt ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }} ]]; then\n  echo \"⚠️ Performance score below threshold: $performance < ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }}\"\n  needs_optimization=true\n  issues+=(\"performance\")\nfi\n\n# アクセシビリティ\nif [[ $accessibility -lt ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }} ]]; then\n  echo \"⚠️ Accessibility score below threshold: $accessibility < ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }}\"\n  needs_optimization=true\n  issues+=(\"accessibility\")\nfi\n\n# ベストプラクティス\nif [[ $best_practices -lt ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }} ]]; then\n  echo \"⚠️ Best practices score below threshold: $best_practices < ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }}\"\n  needs_optimization=true\n  issues+=(\"best-practices\")\nfi\n\n# SEO\nif [[ $seo -lt ${{ env.LIGHTHOUSE_THRESHOLD_SEO }} ]]; then\n  echo \"⚠️ SEO score below threshold: $seo < ${{ env.LIGHTHOUSE_THRESHOLD_SEO }}\"\n  needs_optimization=true\n  issues+=(\"seo\")\nfi\n\n# バンドルサイズ\nif (( $(echo \"$bundle_size > ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}\" | bc -l) )); then\n  echo \"⚠️ Bundle size above threshold: ${bundle_size}MB > ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB\"\n  needs_optimization=true\n  issues+=(\"bundle-size\")\nfi\n\necho \"needs_optimization=$needs_optimization\" >> $GITHUB_OUTPUT\necho \"optimization_issues=${issues[*]}\" >> $GITHUB_OUTPUT\n\nif [[ \"$needs_optimization\" == \"true\" ]]; then\n  echo \"\U0001F3AF Optimization needed for: ${issues[*]}\"\nelse\n  echo \"✅ All performance metrics within thresholds\"\nfi\n"
+      - name: "\U0001F3C6 Performance Grading"
         id: grading
-        run: |
-          echo "🏆 Calculating overall performance grade..."
-          
-          performance="${{ steps.lighthouse.outputs.performance }}"
-          accessibility="${{ steps.lighthouse.outputs.accessibility }}"
-          best_practices="${{ steps.lighthouse.outputs.best_practices }}"
-          seo="${{ steps.lighthouse.outputs.seo }}"
-          
-          # 総合スコア計算（重み付き平均）
-          # Performance: 40%, Accessibility: 25%, Best Practices: 20%, SEO: 15%
-          overall_score=$((
-            (performance * 40 + accessibility * 25 + best_practices * 20 + seo * 15) / 100
-          ))
-          
-          # グレード判定
-          if [[ $overall_score -ge 90 ]]; then
-            grade="A+"
-            grade_emoji="🏆"
-          elif [[ $overall_score -ge 85 ]]; then
-            grade="A"
-            grade_emoji="🥇"
-          elif [[ $overall_score -ge 80 ]]; then
-            grade="B+"
-            grade_emoji="🥈"
-          elif [[ $overall_score -ge 75 ]]; then
-            grade="B"
-            grade_emoji="🥉"
-          elif [[ $overall_score -ge 70 ]]; then
-            grade="C+"
-            grade_emoji="📈"
-          elif [[ $overall_score -ge 60 ]]; then
-            grade="C"
-            grade_emoji="⚠️"
-          else
-            grade="D"
-            grade_emoji="🔴"
-          fi
-          
-          echo "📊 Overall Performance Score: ${overall_score}/100"
-          echo "🏆 Performance Grade: ${grade_emoji} ${grade}"
-          
-          echo "performance_grade=${grade_emoji} ${grade}" >> $GITHUB_OUTPUT
-          echo "overall_score=$overall_score" >> $GITHUB_OUTPUT
-
+        run: "echo \"\U0001F3C6 Calculating overall performance grade...\"\n\nperformance=\"${{ steps.lighthouse.outputs.performance }}\"\naccessibility=\"${{ steps.lighthouse.outputs.accessibility }}\"\nbest_practices=\"${{ steps.lighthouse.outputs.best_practices }}\"\nseo=\"${{ steps.lighthouse.outputs.seo }}\"\n\n# 総合スコア計算（重み付き平均）\n# Performance: 40%, Accessibility: 25%, Best Practices: 20%, SEO: 15%\noverall_score=$((\n  (performance * 40 + accessibility * 25 + best_practices * 20 + seo * 15) / 100\n))\n\n# グレード判定\nif [[ $overall_score -ge 90 ]]; then\n  grade=\"A+\"\n  grade_emoji=\"\U0001F3C6\"\nelif [[ $overall_score -ge 85 ]]; then\n  grade=\"A\"\n  grade_emoji=\"\U0001F947\"\nelif [[ $overall_score -ge 80 ]]; then\n  grade=\"B+\"\n  grade_emoji=\"\U0001F948\"\nelif [[ $overall_score -ge 75 ]]; then\n  grade=\"B\"\n  grade_emoji=\"\U0001F949\"\nelif [[ $overall_score -ge 70 ]]; then\n  grade=\"C+\"\n  grade_emoji=\"\U0001F4C8\"\nelif [[ $overall_score -ge 60 ]]; then\n  grade=\"C\"\n  grade_emoji=\"⚠️\"\nelse\n  grade=\"D\"\n  grade_emoji=\"\U0001F534\"\nfi\n\necho \"\U0001F4CA Overall Performance Score: ${overall_score}/100\"\necho \"\U0001F3C6 Performance Grade: ${grade_emoji} ${grade}\"\n\necho \"performance_grade=${grade_emoji} ${grade}\" >> $GITHUB_OUTPUT\necho \"overall_score=$overall_score\" >> $GITHUB_OUTPUT\n"
   core-web-vitals:
-    # ================================
-    # Job: core-web-vitals
-    # Description: Core Web Vitals 詳細分析
-    #              Detailed Core Web Vitals analysis
-    # Dependencies: performance-baseline (parallel)
-    # Timeout: 15分
-    # ================================
-    name: "📈 [Vitals] Core Web Vitals Analysis"
+    name: "\U0001F4CC 処理: \U0001F4C8 [Vitals] Core Web Vitals Analysis"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: performance-baseline
-    
     steps:
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-      
-      # ================
-      # Advanced Core Web Vitals Analysis
-      # 目的: Core Web Vitals の詳細分析
-      # Purpose: Detailed Core Web Vitals analysis
-      # ================
-      - name: "📈 Detailed Core Web Vitals Analysis"
-        run: |
-          echo "📈 Analyzing Core Web Vitals in detail..."
-          
-          # Web Vitals 測定スクリプト実行
-          npm ci
-          npm run build
-          
-          # テストサーバー起動
-          npm run preview &
-          SERVER_PID=$!
-          sleep 10
-          
-          # Core Web Vitals 測定（より詳細な分析）
-          echo "🔍 Measuring detailed Core Web Vitals..."
-          
-          # 複数回測定して平均値を取得
-          measurements=()
-          for i in {1..3}; do
-            echo "📊 Measurement round $i/3..."
-            
-            npx lighthouse http://localhost:4173 \
-              --output=json \
-              --output-path="lighthouse-cwv-$i.json" \
-              --chrome-flags="--headless --no-sandbox" \
-              --throttling-method=devtools \
-              --only-categories=performance || true
-            
-            if [[ -f "lighthouse-cwv-$i.json" ]]; then
-              measurements+=("lighthouse-cwv-$i.json")
-            fi
-            
-            sleep 5
-          done
-          
-          # 測定結果の統合分析
-          if [[ ${#measurements[@]} -gt 0 ]]; then
-            echo "📊 Analyzing ${#measurements[@]} measurements..."
-            
-            # 平均値計算（簡易実装）
-            total_fcp=0
-            total_lcp=0
-            valid_measurements=0
-            
-            for file in "${measurements[@]}"; do
-              if [[ -f "$file" ]]; then
-                fcp_numeric=$(jq -r '.audits["first-contentful-paint"].numericValue // 0' "$file" 2>/dev/null | cut -d. -f1)
-                lcp_numeric=$(jq -r '.audits["largest-contentful-paint"].numericValue // 0' "$file" 2>/dev/null | cut -d. -f1)
-                
-                if [[ $fcp_numeric -gt 0 && $lcp_numeric -gt 0 ]]; then
-                  total_fcp=$((total_fcp + fcp_numeric))
-                  total_lcp=$((total_lcp + lcp_numeric))
-                  valid_measurements=$((valid_measurements + 1))
-                fi
-              fi
-            done
-            
-            if [[ $valid_measurements -gt 0 ]]; then
-              avg_fcp=$((total_fcp / valid_measurements))
-              avg_lcp=$((total_lcp / valid_measurements))
-              
-              avg_fcp_seconds=$(echo "scale=2; $avg_fcp / 1000" | bc -l)
-              avg_lcp_seconds=$(echo "scale=2; $avg_lcp / 1000" | bc -l)
-              
-              echo "📊 Average FCP: ${avg_fcp_seconds}s"
-              echo "📊 Average LCP: ${avg_lcp_seconds}s"
-              
-              # 閾値評価
-              if (( $(echo "$avg_fcp_seconds <= ${{ env.FIRST_CONTENTFUL_PAINT_THRESHOLD }}" | bc -l) )); then
-                echo "✅ FCP within good threshold"
-                fcp_status="good"
-              else
-                echo "⚠️ FCP needs improvement"
-                fcp_status="needs-improvement"
-              fi
-              
-              if (( $(echo "$avg_lcp_seconds <= ${{ env.LARGEST_CONTENTFUL_PAINT_THRESHOLD }}" | bc -l) )); then
-                echo "✅ LCP within good threshold"
-                lcp_status="good"
-              else
-                echo "⚠️ LCP needs improvement"
-                lcp_status="needs-improvement"
-              fi
-            else
-              echo "⚠️ No valid measurements obtained"
-            fi
-          else
-            echo "❌ No measurements were successful"
-          fi
-          
-          # テストサーバー停止
-          kill $SERVER_PID || true
+          cache: npm
+      - name: "\U0001F4C8 Detailed Core Web Vitals Analysis"
+        run: "echo \"\U0001F4C8 Analyzing Core Web Vitals in detail...\"\n\n# Web Vitals 測定スクリプト実行\nnpm ci\nnpm run build\n\n# テストサーバー起動\nnpm run preview &\nSERVER_PID=$!\nsleep 10\n\n# Core Web Vitals 測定（より詳細な分析）\necho \"\U0001F50D Measuring detailed Core Web Vitals...\"\n\n# 複数回測定して平均値を取得\nmeasurements=()\nfor i in {1..3}; do\n  echo \"\U0001F4CA Measurement round $i/3...\"\n  \n  npx lighthouse http://localhost:4173 \\\n    --output=json \\\n    --output-path=\"lighthouse-cwv-$i.json\" \\\n    --chrome-flags=\"--headless --no-sandbox\" \\\n    --throttling-method=devtools \\\n    --only-categories=performance || true\n  \n  if [[ -f \"lighthouse-cwv-$i.json\" ]]; then\n    measurements+=(\"lighthouse-cwv-$i.json\")\n  fi\n  \n  sleep 5\ndone\n\n# 測定結果の統合分析\nif [[ ${#measurements[@]} -gt 0 ]]; then\n  echo \"\U0001F4CA Analyzing ${#measurements[@]} measurements...\"\n  \n  # 平均値計算（簡易実装）\n  total_fcp=0\n  total_lcp=0\n  valid_measurements=0\n  \n  for file in \"${measurements[@]}\"; do\n    if [[ -f \"$file\" ]]; then\n      fcp_numeric=$(jq -r '.audits[\"first-contentful-paint\"].numericValue // 0' \"$file\" 2>/dev/null | cut -d. -f1)\n      lcp_numeric=$(jq -r '.audits[\"largest-contentful-paint\"].numericValue // 0' \"$file\" 2>/dev/null | cut -d. -f1)\n      \n      if [[ $fcp_numeric -gt 0 && $lcp_numeric -gt 0 ]]; then\n        total_fcp=$((total_fcp + fcp_numeric))\n        total_lcp=$((total_lcp + lcp_numeric))\n        valid_measurements=$((valid_measurements + 1))\n      fi\n    fi\n  done\n  \n  if [[ $valid_measurements -gt 0 ]]; then\n    avg_fcp=$((total_fcp / valid_measurements))\n    avg_lcp=$((total_lcp / valid_measurements))\n    \n    avg_fcp_seconds=$(echo \"scale=2; $avg_fcp / 1000\" | bc -l)\n    avg_lcp_seconds=$(echo \"scale=2; $avg_lcp / 1000\" | bc -l)\n    \n    echo \"\U0001F4CA Average FCP: ${avg_fcp_seconds}s\"\n    echo \"\U0001F4CA Average LCP: ${avg_lcp_seconds}s\"\n    \n    # 閾値評価\n    if (( $(echo \"$avg_fcp_seconds <= ${{ env.FIRST_CONTENTFUL_PAINT_THRESHOLD }}\" | bc -l) )); then\n      echo \"✅ FCP within good threshold\"\n      fcp_status=\"good\"\n    else\n      echo \"⚠️ FCP needs improvement\"\n      fcp_status=\"needs-improvement\"\n    fi\n    \n    if (( $(echo \"$avg_lcp_seconds <= ${{ env.LARGEST_CONTENTFUL_PAINT_THRESHOLD }}\" | bc -l) )); then\n      echo \"✅ LCP within good threshold\"\n      lcp_status=\"good\"\n    else\n      echo \"⚠️ LCP needs improvement\"\n      lcp_status=\"needs-improvement\"\n    fi\n  else\n    echo \"⚠️ No valid measurements obtained\"\n  fi\nelse\n  echo \"❌ No measurements were successful\"\nfi\n\n# テストサーバー停止\nkill $SERVER_PID || true\n"
         id: cwv-analysis
-
   performance-optimization:
-    # ================================
-    # Job: performance-optimization
-    # Description: パフォーマンス最適化の提案と実行
-    #              Performance optimization suggestions and execution
-    # Dependencies: performance-baseline
-    # Timeout: 20分
-    # ================================
-    name: "⚡ [Optimize] Performance Enhancement"
+    name: '⚡ パフォーマンス: ⚡ [Optimize] Performance Enhancement'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: performance-baseline
     if: needs.performance-baseline.outputs.needs_optimization == 'true'
-    
     steps:
-      - name: "📥 Checkout Repository"
+      - name: "\U0001F4E5 Checkout Repository"
         uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
-      
-      - name: "⚙️ Setup Node.js"
+          token: '${{ github.token }}'
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-      
-      - name: "📦 Install Dependencies"
+          cache: npm
+      - name: "\U0001F4E6 Install Dependencies"
         run: npm ci
-      
-      # ================
-      # Bundle Optimization
-      # 目的: バンドル最適化の実行
-      # Purpose: Execute bundle optimization
-      # ================
-      - name: "📦 Bundle Optimization"
-        if: contains(needs.performance-baseline.outputs.optimization_issues, 'bundle-size')
-        run: |
-          echo "📦 Executing bundle optimization..."
-          
-          # webpack-bundle-analyzer で詳細分析
-          npm install --save-dev webpack-bundle-analyzer 2>/dev/null || true
-          
-          # Tree-shaking の改善
-          echo "🌳 Optimizing tree-shaking..."
-          
-          # 使用されていないコードの特定（簡易版）
-          echo "🔍 Identifying unused code..."
-          npx depcheck --json > unused-deps.json 2>/dev/null || true
-          
-          if [[ -f "unused-deps.json" ]]; then
-            unused_count=$(jq -r '.dependencies | length' unused-deps.json 2>/dev/null || echo "0")
-            echo "📊 Unused dependencies found: $unused_count"
-          fi
-          
-          # コード分割の改善提案
-          echo "✂️ Analyzing code splitting opportunities..."
-          find src/ -name "*.jsx" -o -name "*.tsx" | xargs wc -l | sort -nr | head -5 | while read line; do
-            echo "📋 Large component: $line"
-          done
-          
-          echo "✅ Bundle optimization analysis completed"
+      - name: "\U0001F4E6 Bundle Optimization"
+        if: 'contains(needs.performance-baseline.outputs.optimization_issues, ''bundle-size'')'
+        run: "echo \"\U0001F4E6 Executing bundle optimization...\"\n\n# webpack-bundle-analyzer で詳細分析\nnpm install --save-dev webpack-bundle-analyzer 2>/dev/null || true\n\n# Tree-shaking の改善\necho \"\U0001F333 Optimizing tree-shaking...\"\n\n# 使用されていないコードの特定（簡易版）\necho \"\U0001F50D Identifying unused code...\"\nnpx depcheck --json > unused-deps.json 2>/dev/null || true\n\nif [[ -f \"unused-deps.json\" ]]; then\n  unused_count=$(jq -r '.dependencies | length' unused-deps.json 2>/dev/null || echo \"0\")\n  echo \"\U0001F4CA Unused dependencies found: $unused_count\"\nfi\n\n# コード分割の改善提案\necho \"✂️ Analyzing code splitting opportunities...\"\nfind src/ -name \"*.jsx\" -o -name \"*.tsx\" | xargs wc -l | sort -nr | head -5 | while read line; do\n  echo \"\U0001F4CB Large component: $line\"\ndone\n\necho \"✅ Bundle optimization analysis completed\"\n"
         id: bundle-optimization
-      
-      # ================
-      # Image Optimization
-      # 目的: 画像最適化の実行
-      # Purpose: Execute image optimization
-      # ================
-      - name: "🖼️ Image Optimization"
-        run: |
-          echo "🖼️ Executing image optimization..."
-          
-          # 大きな画像ファイルの特定
-          large_images=()
-          if [[ -d "public" ]]; then
-            while IFS= read -r -d '' img; do
-              size=$(stat -f%z "$img" 2>/dev/null || stat -c%s "$img" 2>/dev/null || echo "0")
-              if [[ $size -gt 100000 ]]; then  # 100KB以上
-                large_images+=("$img")
-                echo "🖼️ Large image: $img ($(($size / 1024))KB)"
-              fi
-            done < <(find public/ src/ -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" \) -print0 2>/dev/null)
-          fi
-          
-          # 画像最適化スクリプト実行
-          if [[ -f "scripts/optimize-images.js" ]]; then
-            node scripts/optimize-images.js || echo "Image optimization script executed"
-          fi
-          
-          echo "📊 Large images found: ${#large_images[@]}"
-          echo "image_optimization_completed=true" >> $GITHUB_OUTPUT
+      - name: "\U0001F5BC️ Image Optimization"
+        run: "echo \"\U0001F5BC️ Executing image optimization...\"\n\n# 大きな画像ファイルの特定\nlarge_images=()\nif [[ -d \"public\" ]]; then\n  while IFS= read -r -d '' img; do\n    size=$(stat -f%z \"$img\" 2>/dev/null || stat -c%s \"$img\" 2>/dev/null || echo \"0\")\n    if [[ $size -gt 100000 ]]; then  # 100KB以上\n      large_images+=(\"$img\")\n      echo \"\U0001F5BC️ Large image: $img ($(($size / 1024))KB)\"\n    fi\n  done < <(find public/ src/ -type f \\( -name \"*.jpg\" -o -name \"*.jpeg\" -o -name \"*.png\" -o -name \"*.gif\" \\) -print0 2>/dev/null)\nfi\n\n# 画像最適化スクリプト実行\nif [[ -f \"scripts/optimize-images.js\" ]]; then\n  node scripts/optimize-images.js || echo \"Image optimization script executed\"\nfi\n\necho \"\U0001F4CA Large images found: ${#large_images[@]}\"\necho \"image_optimization_completed=true\" >> $GITHUB_OUTPUT\n"
         id: image-optimization
-      
-      # ================
-      # Performance Best Practices
-      # 目的: パフォーマンスベストプラクティス実装
-      # Purpose: Implement performance best practices
-      # ================
-      - name: "🚀 Performance Best Practices"
-        run: |
-          echo "🚀 Implementing performance best practices..."
-          
-          optimizations_applied=()
-          
-          # Service Worker の確認と最適化
-          if [[ -f "public/sw.js" ]]; then
-            echo "✅ Service Worker present"
-            optimizations_applied+=("service-worker")
-          else
-            echo "⚠️ Service Worker not found - consider implementing for caching"
-          fi
-          
-          # Preload/Prefetch の確認
-          echo "🔍 Analyzing resource hints..."
-          if [[ -f "index.html" ]]; then
-            if grep -q "preload\|prefetch" index.html; then
-              echo "✅ Resource hints found"
-              optimizations_applied+=("resource-hints")
-            else
-              echo "⚠️ Consider adding preload/prefetch for critical resources"
-            fi
-          fi
-          
-          # Font loading 最適化
-          echo "🔤 Checking font loading optimization..."
-          if [[ -f "src/index.css" ]] && grep -q "font-display" src/index.css; then
-            echo "✅ Font display optimization present"
-            optimizations_applied+=("font-display")
-          else
-            echo "⚠️ Consider adding font-display: swap for web fonts"
-          fi
-          
-          echo "optimizations_applied=${optimizations_applied[*]}" >> $GITHUB_OUTPUT
+      - name: "\U0001F680 Performance Best Practices"
+        run: "echo \"\U0001F680 Implementing performance best practices...\"\n\noptimizations_applied=()\n\n# Service Worker の確認と最適化\nif [[ -f \"public/sw.js\" ]]; then\n  echo \"✅ Service Worker present\"\n  optimizations_applied+=(\"service-worker\")\nelse\n  echo \"⚠️ Service Worker not found - consider implementing for caching\"\nfi\n\n# Preload/Prefetch の確認\necho \"\U0001F50D Analyzing resource hints...\"\nif [[ -f \"index.html\" ]]; then\n  if grep -q \"preload\\|prefetch\" index.html; then\n    echo \"✅ Resource hints found\"\n    optimizations_applied+=(\"resource-hints\")\n  else\n    echo \"⚠️ Consider adding preload/prefetch for critical resources\"\n  fi\nfi\n\n# Font loading 最適化\necho \"\U0001F524 Checking font loading optimization...\"\nif [[ -f \"src/index.css\" ]] && grep -q \"font-display\" src/index.css; then\n  echo \"✅ Font display optimization present\"\n  optimizations_applied+=(\"font-display\")\nelse\n  echo \"⚠️ Consider adding font-display: swap for web fonts\"\nfi\n\necho \"optimizations_applied=${optimizations_applied[*]}\" >> $GITHUB_OUTPUT\n"
         id: best-practices
-
-  # ================================
-  # Job: performance-report
-  # Description: 包括的パフォーマンスレポート
-  #              Comprehensive performance report
-  # Dependencies: All performance jobs
-  # Timeout: 15分
-  # ================================
   performance-report:
-    name: "📋 [Report] Performance Summary"
+    name: "⚡ パフォーマンス: \U0001F4CB [Report] Performance Summary"
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [performance-baseline, core-web-vitals, performance-optimization]
+    needs:
+      - performance-baseline
+      - core-web-vitals
+      - performance-optimization
     if: always()
-    
     steps:
-      - name: "📋 Generate Performance Report"
-        run: |
-          echo "📋 Generating comprehensive performance report..."
-          
-          cat > performance-report.md << EOF
-          # ⚡ Performance Monitoring Report
-          
-          ## 🏆 Performance Grade / パフォーマンスグレード
-          
-          **Overall Grade**: ${{ needs.performance-baseline.outputs.performance_grade }}
-          
-          ## 📊 Lighthouse Metrics / Lighthouse指標
-          
-          | Metric | Score | Threshold | Status |
-          |--------|-------|-----------|---------|
-          | **Performance** | ${{ needs.performance-baseline.outputs.lighthouse_performance }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }} | $([ "${{ needs.performance-baseline.outputs.lighthouse_performance }}" -ge "${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }}" ] && echo "✅ Pass" || echo "⚠️ Needs Improvement") |
-          | **Accessibility** | ${{ needs.performance-baseline.outputs.lighthouse_accessibility }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }} | $([ "${{ needs.performance-baseline.outputs.lighthouse_accessibility }}" -ge "${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }}" ] && echo "✅ Pass" || echo "⚠️ Needs Improvement") |
-          | **Best Practices** | ${{ needs.performance-baseline.outputs.lighthouse_best_practices }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }} | $([ "${{ needs.performance-baseline.outputs.lighthouse_best_practices }}" -ge "${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }}" ] && echo "✅ Pass" || echo "⚠️ Needs Improvement") |
-          | **SEO** | ${{ needs.performance-baseline.outputs.lighthouse_seo }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_SEO }} | $([ "${{ needs.performance-baseline.outputs.lighthouse_seo }}" -ge "${{ env.LIGHTHOUSE_THRESHOLD_SEO }}" ] && echo "✅ Pass" || echo "⚠️ Needs Improvement") |
-          
-          ## 📦 Bundle Analysis / バンドル分析
-          
-          - **Total Bundle Size**: ${{ needs.performance-baseline.outputs.bundle_size_mb }}MB
-          - **Threshold**: ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB
-          - **Status**: $([ "${{ needs.performance-baseline.outputs.bundle_size_mb }}" \< "${{ env.BUNDLE_SIZE_THRESHOLD_MB }}" ] && echo "✅ Within Limit" || echo "⚠️ Exceeds Threshold")
-          
-          ## 📈 Core Web Vitals / コアウェブバイタル
-          
-          - **First Contentful Paint**: ${{ needs.performance-baseline.outputs.lighthouse_fcp || 'N/A' }}
-          - **Largest Contentful Paint**: ${{ needs.performance-baseline.outputs.lighthouse_lcp || 'N/A' }}
-          - **Cumulative Layout Shift**: ${{ needs.performance-baseline.outputs.lighthouse_cls || 'N/A' }}
-          
-          ## 🔧 Optimization Status / 最適化状況
-          
-          - **Optimization Required**: ${{ needs.performance-baseline.outputs.needs_optimization }}
-          - **Optimization Job**: ${{ needs.performance-optimization.result }}
-          EOF
-          
-          if [[ "${{ needs.performance-optimization.result }}" == "success" ]]; then
-            cat >> performance-report.md << EOF
-          - **Bundle Optimization**: Completed
-          - **Image Optimization**: ${{ needs.performance-optimization.outputs.image_optimization_completed || 'N/A' }}
-          - **Best Practices Applied**: ${{ needs.performance-optimization.outputs.optimizations_applied || 'N/A' }}
-          EOF
-          fi
-          
-          cat >> performance-report.md << EOF
-          
-          ## 🎯 Performance Recommendations / パフォーマンス推奨事項
-          
-          ### 🔴 Critical Priority / 重要優先度
-          EOF
-          
-          # 重要な推奨事項を動的に追加
-          if [[ "${{ needs.performance-baseline.outputs.lighthouse_performance }}" -lt "70" ]]; then
-            echo "- **Critical Performance Issues**: Address fundamental performance problems immediately"
-          fi >> performance-report.md
-          
-          if [[ "${{ needs.performance-baseline.outputs.bundle_size_mb }}" > "2" ]]; then
-            echo "- **Bundle Size Reduction**: Implement aggressive code splitting and tree-shaking"
-          fi >> performance-report.md
-          
-          cat >> performance-report.md << EOF
-          
-          ### 🟡 High Priority / 高優先度
-          - Implement advanced caching strategies
-          - Optimize critical rendering path
-          - Enable compression (Gzip/Brotli)
-          - Optimize images and fonts
-          
-          ### 🟢 Medium Priority / 中優先度
-          - Implement progressive web app features
-          - Add resource hints (preload, prefetch)
-          - Optimize third-party scripts
-          - Monitor real user metrics (RUM)
-          
-          ## 📊 Performance Trends / パフォーマンストレンド
-          
-          *Historical performance data will be available after multiple runs*
-          
-          ## 📞 Next Actions / 次のアクション
-          
-          1. **Review Critical Issues**: Address any performance scores below 70
-          2. **Implement Optimizations**: Apply recommended performance improvements
-          3. **Monitor Regularly**: Set up continuous performance monitoring
-          4. **Update Baselines**: Adjust performance thresholds as needed
-          5. **User Experience Focus**: Prioritize optimizations that improve user experience
-          
-          ---
-          *Generated by Performance Monitoring System at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
-          *Next monitoring: $(date -u -d '+1 day' '+%Y-%m-%d %H:%M:%S UTC')*
-          EOF
-          
-          echo "✅ Performance report generated"
-      
-      # ================
-      # Create Performance Issue (if needed)
-      # 目的: パフォーマンス問題のIssue作成
-      # Purpose: Create performance issue if needed
-      # ================
-      - name: "🚨 Create Performance Issue"
+      - name: "\U0001F4CB Generate Performance Report"
+        run: "echo \"\U0001F4CB Generating comprehensive performance report...\"\n\ncat > performance-report.md << EOF\n# ⚡ Performance Monitoring Report\n\n## \U0001F3C6 Performance Grade / パフォーマンスグレード\n\n**Overall Grade**: ${{ needs.performance-baseline.outputs.performance_grade }}\n\n## \U0001F4CA Lighthouse Metrics / Lighthouse指標\n\n| Metric | Score | Threshold | Status |\n|--------|-------|-----------|---------|\n| **Performance** | ${{ needs.performance-baseline.outputs.lighthouse_performance }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }} | $([ \"${{ needs.performance-baseline.outputs.lighthouse_performance }}\" -ge \"${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }}\" ] && echo \"✅ Pass\" || echo \"⚠️ Needs Improvement\") |\n| **Accessibility** | ${{ needs.performance-baseline.outputs.lighthouse_accessibility }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }} | $([ \"${{ needs.performance-baseline.outputs.lighthouse_accessibility }}\" -ge \"${{ env.LIGHTHOUSE_THRESHOLD_ACCESSIBILITY }}\" ] && echo \"✅ Pass\" || echo \"⚠️ Needs Improvement\") |\n| **Best Practices** | ${{ needs.performance-baseline.outputs.lighthouse_best_practices }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }} | $([ \"${{ needs.performance-baseline.outputs.lighthouse_best_practices }}\" -ge \"${{ env.LIGHTHOUSE_THRESHOLD_BEST_PRACTICES }}\" ] && echo \"✅ Pass\" || echo \"⚠️ Needs Improvement\") |\n| **SEO** | ${{ needs.performance-baseline.outputs.lighthouse_seo }}/100 | ${{ env.LIGHTHOUSE_THRESHOLD_SEO }} | $([ \"${{ needs.performance-baseline.outputs.lighthouse_seo }}\" -ge \"${{ env.LIGHTHOUSE_THRESHOLD_SEO }}\" ] && echo \"✅ Pass\" || echo \"⚠️ Needs Improvement\") |\n\n## \U0001F4E6 Bundle Analysis / バンドル分析\n\n- **Total Bundle Size**: ${{ needs.performance-baseline.outputs.bundle_size_mb }}MB\n- **Threshold**: ${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB\n- **Status**: $([ \"${{ needs.performance-baseline.outputs.bundle_size_mb }}\" \\< \"${{ env.BUNDLE_SIZE_THRESHOLD_MB }}\" ] && echo \"✅ Within Limit\" || echo \"⚠️ Exceeds Threshold\")\n\n## \U0001F4C8 Core Web Vitals / コアウェブバイタル\n\n- **First Contentful Paint**: ${{ needs.performance-baseline.outputs.lighthouse_fcp || 'N/A' }}\n- **Largest Contentful Paint**: ${{ needs.performance-baseline.outputs.lighthouse_lcp || 'N/A' }}\n- **Cumulative Layout Shift**: ${{ needs.performance-baseline.outputs.lighthouse_cls || 'N/A' }}\n\n## \U0001F527 Optimization Status / 最適化状況\n\n- **Optimization Required**: ${{ needs.performance-baseline.outputs.needs_optimization }}\n- **Optimization Job**: ${{ needs.performance-optimization.result }}\nEOF\n\nif [[ \"${{ needs.performance-optimization.result }}\" == \"success\" ]]; then\n  cat >> performance-report.md << EOF\n- **Bundle Optimization**: Completed\n- **Image Optimization**: ${{ needs.performance-optimization.outputs.image_optimization_completed || 'N/A' }}\n- **Best Practices Applied**: ${{ needs.performance-optimization.outputs.optimizations_applied || 'N/A' }}\nEOF\nfi\n\ncat >> performance-report.md << EOF\n\n## \U0001F3AF Performance Recommendations / パフォーマンス推奨事項\n\n### \U0001F534 Critical Priority / 重要優先度\nEOF\n\n# 重要な推奨事項を動的に追加\nif [[ \"${{ needs.performance-baseline.outputs.lighthouse_performance }}\" -lt \"70\" ]]; then\n  echo \"- **Critical Performance Issues**: Address fundamental performance problems immediately\"\nfi >> performance-report.md\n\nif [[ \"${{ needs.performance-baseline.outputs.bundle_size_mb }}\" > \"2\" ]]; then\n  echo \"- **Bundle Size Reduction**: Implement aggressive code splitting and tree-shaking\"\nfi >> performance-report.md\n\ncat >> performance-report.md << EOF\n\n### \U0001F7E1 High Priority / 高優先度\n- Implement advanced caching strategies\n- Optimize critical rendering path\n- Enable compression (Gzip/Brotli)\n- Optimize images and fonts\n\n### \U0001F7E2 Medium Priority / 中優先度\n- Implement progressive web app features\n- Add resource hints (preload, prefetch)\n- Optimize third-party scripts\n- Monitor real user metrics (RUM)\n\n## \U0001F4CA Performance Trends / パフォーマンストレンド\n\n*Historical performance data will be available after multiple runs*\n\n## \U0001F4DE Next Actions / 次のアクション\n\n1. **Review Critical Issues**: Address any performance scores below 70\n2. **Implement Optimizations**: Apply recommended performance improvements\n3. **Monitor Regularly**: Set up continuous performance monitoring\n4. **Update Baselines**: Adjust performance thresholds as needed\n5. **User Experience Focus**: Prioritize optimizations that improve user experience\n\n---\n*Generated by Performance Monitoring System at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*\n*Next monitoring: $(date -u -d '+1 day' '+%Y-%m-%d %H:%M:%S UTC')*\nEOF\n\necho \"✅ Performance report generated\"\n"
+      - name: "\U0001F6A8 Create Performance Issue"
         if: needs.performance-baseline.outputs.needs_optimization == 'true' && (needs.performance-baseline.outputs.lighthouse_performance < 60 || needs.performance-baseline.outputs.bundle_size_mb > 2)
         uses: actions/github-script@v7
         with:
-          github-token: ${{ github.token }}
-          script: |
-            const performanceScore = '${{ needs.performance-baseline.outputs.lighthouse_performance }}';
-            const bundleSize = '${{ needs.performance-baseline.outputs.bundle_size_mb }}';
-            
-            let priority = 'medium';
-            if (performanceScore < 50 || bundleSize > 3) {
-              priority = 'critical';
-            } else if (performanceScore < 70 || bundleSize > 2) {
-              priority = 'high';
-            }
-            
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `⚡ Performance Degradation Detected - ${priority.toUpperCase()} Priority`,
-              body: `
-            ## ⚡ Performance Alert - Action Required
-            
-            **Performance Score**: ${performanceScore}/100
-            **Bundle Size**: ${bundleSize}MB
-            **Priority**: ${priority.toUpperCase()}
-            **Detection Date**: ${new Date().toISOString()}
-            
-            ### 📊 Current Metrics
-            - Lighthouse Performance: ${performanceScore}/100 (Target: ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }})
-            - Bundle Size: ${bundleSize}MB (Target: <${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB)
-            - Optimization Required: ${{ needs.performance-baseline.outputs.needs_optimization }}
-            
-            ### 🎯 Issues Detected
-            ${{ needs.performance-baseline.outputs.optimization_issues }}
-            
-            ### 📋 Recommended Actions
-            1. Review performance report in workflow artifacts
-            2. Implement bundle size optimization
-            3. Address Lighthouse performance recommendations
-            4. Monitor Core Web Vitals improvements
-            5. Consider implementing performance budget
-            
-            ### 🔗 Related Reports
-            - Performance Report: Available in workflow artifacts
-            - Bundle Analysis: Check bundle-analysis.json
-            - Lighthouse Report: Review lighthouse-results.report.html
-            
-            **This issue was automatically created by the Performance Monitoring System.**
-              `,
-              labels: ['performance', priority, 'optimization', 'auto-generated']
-            });
-      
-      # ================
-      # Upload Performance Reports
-      # 目的: パフォーマンスレポートのアーティファクト保存
-      # Purpose: Save performance reports as artifacts
-      # ================
-      - name: "📦 Upload Performance Reports"
+          github-token: '${{ github.token }}'
+          script: "const performanceScore = '${{ needs.performance-baseline.outputs.lighthouse_performance }}';\nconst bundleSize = '${{ needs.performance-baseline.outputs.bundle_size_mb }}';\n\nlet priority = 'medium';\nif (performanceScore < 50 || bundleSize > 3) {\n  priority = 'critical';\n} else if (performanceScore < 70 || bundleSize > 2) {\n  priority = 'high';\n}\n\nawait github.rest.issues.create({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  title: `⚡ Performance Degradation Detected - ${priority.toUpperCase()} Priority`,\n  body: `\n## ⚡ Performance Alert - Action Required\n\n**Performance Score**: ${performanceScore}/100\n**Bundle Size**: ${bundleSize}MB\n**Priority**: ${priority.toUpperCase()}\n**Detection Date**: ${new Date().toISOString()}\n\n### \U0001F4CA Current Metrics\n- Lighthouse Performance: ${performanceScore}/100 (Target: ${{ env.LIGHTHOUSE_THRESHOLD_PERFORMANCE }})\n- Bundle Size: ${bundleSize}MB (Target: <${{ env.BUNDLE_SIZE_THRESHOLD_MB }}MB)\n- Optimization Required: ${{ needs.performance-baseline.outputs.needs_optimization }}\n\n### \U0001F3AF Issues Detected\n${{ needs.performance-baseline.outputs.optimization_issues }}\n\n### \U0001F4CB Recommended Actions\n1. Review performance report in workflow artifacts\n2. Implement bundle size optimization\n3. Address Lighthouse performance recommendations\n4. Monitor Core Web Vitals improvements\n5. Consider implementing performance budget\n\n### \U0001F517 Related Reports\n- Performance Report: Available in workflow artifacts\n- Bundle Analysis: Check bundle-analysis.json\n- Lighthouse Report: Review lighthouse-results.report.html\n\n**This issue was automatically created by the Performance Monitoring System.**\n  `,\n  labels: ['performance', priority, 'optimization', 'auto-generated']\n});\n"
+      - name: "\U0001F4E6 Upload Performance Reports"
         uses: actions/upload-artifact@v4
         with:
-          name: performance-report-${{ github.run_id }}
+          name: 'performance-report-${{ github.run_id }}'
           path: |
             performance-report.md
             lighthouse-results.report.html
@@ -873,3 +190,6 @@ jobs:
             lighthouse-cwv-*.json
             unused-deps.json
           retention-days: 90
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

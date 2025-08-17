@@ -1,25 +1,32 @@
-# Prompt Templates → [Full Development Guides](../../docs/development/)
+# 📋 Prompts - Memory Bank Reference
 
-This directory contains minimal prompt templates for quick use. For comprehensive guidelines and detailed instructions, see the full development guides.
+> 📌 **Note**: Large prompt templates have been moved to maintain optimal memory usage
 
-## Available Templates
+## Prompt Template Locations
 
-### Code Review
-- **Quick Template**: [code-review-template.md](code-review-template.md)
-- **Full Guide**: [Code Review Guide](../../docs/development/code-review-guide.md)
+### Quick Templates (< 200 lines - kept here)
+- 📝 [Code Review Template](code-review-template.md) - Quick review checklist
+- 🏗️ [Architecture Review](architecture-review-template.md) - Quick architecture check
 
-### Architecture Review  
-- **Quick Template**: [architecture-review-template.md](architecture-review-template.md)
-- **Full Guide**: [Architecture Review Guide](../../docs/development/architecture-review-guide.md)
+### Comprehensive Templates (moved to docs)
+- 🔒 [Security Audit](../../docs/prompts/security-audit.md) - Full security review
+- 📊 [Monitoring & Observability](../../docs/prompts/monitoring-observability.md) - Complete monitoring setup
+- 🚀 [CI/CD Optimization](../../docs/prompts/ci-cd-optimization.md) - Pipeline optimization
+- 📋 [Deployment Checklist](../../docs/prompts/deployment-checklist.md) - Full deployment guide
+- 🚨 [Incident Analysis](../../docs/prompts/incident-analysis.md) - Incident response
+- ⚡ [Performance Optimization](../../docs/prompts/performance-optimization.md) - Performance tuning
+- 🐛 [Debugging Guide](../../docs/prompts/debugging.md) - Debugging strategies
 
 ## Full Development Guides
+📖 **Complete documentation**: [docs/development/](../../docs/development/)
 
-📖 **Complete documentation available at**: [docs/development/](../../docs/development/)
-
-- [Testing Guidelines](../../docs/development/testing-guidelines.md)
-- [Workflow Creation Guide](../../docs/development/workflow-creation-guide.md)
-- [Architecture Review Guide](../../docs/development/architecture-review-guide.md)
-- [Code Review Guide](../../docs/development/code-review-guide.md)
+## Memory Bank Purpose
+This directory maintains:
+- ✅ Quick reference templates (< 200 lines)
+- ✅ Links to comprehensive templates
+- ✅ Lightweight memory footprint
+- ✅ Fast access to common prompts
 
 ---
-*Memory Bank: Quick templates for immediate use. See full guides for comprehensive instructions and examples.*
+*Last Updated: 2025-08-17*
+*Large templates maintained in `/docs/prompts/`*

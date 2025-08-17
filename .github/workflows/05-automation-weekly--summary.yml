@@ -1,0 +1,60 @@
+# ====================================================================
+# 🤖 自動化・AI - Weekly Claude Interaction Summary
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. 📊 サマリー: generate-summary
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
+
+name: "\U0001F916 自動化・AI - Weekly Claude Interaction Summary"
+'on':
+  schedule:
+    - cron: 0 9 * * 1
+  workflow_dispatch: null
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm install @octokit/rest
+      - name: Generate Claude Interaction Summary
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_OWNER: '${{ github.repository_owner }}'
+          GITHUB_REPO: '${{ github.event.repository.name }}'
+        run: |
+          node scripts/claude-interaction-analyzer.js
+      - name: Create Summary Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          script: "const fs = require('fs');\nconst path = require('path');\n\n// Read the generated report\nconst reportPath = path.join(process.cwd(), 'docs', 'claude-interaction-analysis.md');\nlet reportContent = '';\n\ntry {\n  reportContent = fs.readFileSync(reportPath, 'utf8');\n} catch (error) {\n  console.log('No report found, generating basic summary...');\n  reportContent = `# Weekly Claude Interaction Summary\n  \n  No detailed analysis available. Run the analyzer to generate insights.\n  \n  Generated: ${new Date().toISOString()}`;\n}\n\n// Get date range for the title\nconst today = new Date();\nconst weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);\nconst dateRange = `${weekAgo.toISOString().split('T')[0]} to ${today.toISOString().split('T')[0]}`;\n\nconst issueBody = `## \U0001F4CA Weekly Claude Code Interaction Summary\n\n**Period:** ${dateRange}\n**Generated:** ${today.toISOString()}\n\n${reportContent}\n\n---\n\n### \U0001F527 Actions Available\n- \U0001F4C8 [View Full Analytics](../docs/claude-interaction-analysis.md)\n- \U0001F50D [Search Claude Issues](../issues?q=is%3Aissue+label%3Aclaude-code)\n- ⚙️ [Manage Automation](../actions)\n\n### \U0001F4CB Quick Links\n- [Create Manual Log](../issues/new?template=claude-interaction.yml)\n- [Run Analysis](../actions/workflows/weekly-claude-summary.yml)\n- [View Trends](../pulse)\n\n*This summary is automatically generated every Monday. For real-time insights, run the analyzer manually.*`;\n\nconst response = await github.rest.issues.create({\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  title: `\U0001F4CA Weekly Claude Summary (${dateRange})`,\n  body: issueBody,\n  labels: ['claude-code', 'automated', 'summary', 'weekly-report']\n});\n\nconsole.log(`Created weekly summary issue #${response.data.number}`);\n"
+      - name: Commit analysis results
+        run: "git config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\n\nif [ -f \"docs/claude-interaction-analysis.md\" ]; then\n  git add docs/claude-interaction-analysis.md\n  git commit -m \"\U0001F4CA Update Claude interaction analysis [automated]\" || echo \"No changes to commit\"\n  git push || echo \"Nothing to push\"\nfi\n"
+    timeout-minutes: 30
+    name: "\U0001F4CA サマリー: generate-summary"
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: '${{ github.ref != ''refs/heads/main'' }}'

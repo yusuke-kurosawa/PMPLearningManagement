@@ -1,349 +1,152 @@
-# ================================================================
-# ワークフロー名: 03-security-comprehensive-scan.yml
-# 目的: 依存関係脆弱性スキャン、コードセキュリティ分析、シークレット検出
-# トリガー: プッシュ、PR、定期実行（毎日）、手動実行
-# 依存関係: setup-environment アクション、notification アクション
-# 作成者: Claude Code
-# 最終更新: 2025-08-12
-# ================================================================
+# ====================================================================
+# 🔒 包括的セキュリティスキャン / Comprehensive Security Scan
+# ====================================================================
+# 目的: ワークフロー自動実行
+#
+# 実行タイミング:
+#   - コードプッシュ時
+#   - プルリクエスト作成・更新時
+#   - スケジュール実行
+#   - 手動実行
+#
+# 主な処理:
+#   1. 📦 依存関係スキャン / Dependency Scan
+#   2. 🔍 コードセキュリティ分析 / Code Security Analysis
+#   3. 🔑 シークレット検出 / Secret Detection
+#   4. 📊 セキュリティレポート / Security Report
+#
+# 依存関係: Node.js, npm, GitHub Actions
+# 実行時間目安: 約10-15分
+# 最終更新: 2025-08-17
+# ====================================================================
 
-name: '🔒 包括的セキュリティスキャン / Comprehensive Security Scan'
-
-# ============================================================
-# トリガー設定
-# Workflow triggers configuration
-# ============================================================
-on:
+name: "\U0001F512 包括的セキュリティスキャン / Comprehensive Security Scan"
+'on':
   push:
     branches:
       - main
       - develop
-      - 'release/**'
-  
+      - release/**
   pull_request:
-    types: [opened, synchronize, reopened]
-  
+    types:
+      - opened
+      - synchronize
+      - reopened
   schedule:
-    # 毎日午前3時（JST）に実行 / Run daily at 3:00 AM JST
-    - cron: '0 18 * * *'
-  
+    - cron: 0 18 * * *
   workflow_dispatch:
     inputs:
       scan-type:
-        description: 'スキャンタイプ / Scan type'
+        description: スキャンタイプ / Scan type
         required: false
-        default: 'all'
+        default: all
         type: choice
         options:
           - all
           - dependencies
           - code
           - secrets
-      
       severity-threshold:
-        description: '深刻度閾値 / Severity threshold'
+        description: 深刻度閾値 / Severity threshold
         required: false
-        default: 'high'
+        default: high
         type: choice
         options:
           - critical
           - high
           - medium
           - low
-
-# ============================================================
-# 環境変数
-# Environment variables
-# ============================================================
 env:
   NODE_VERSION: '18'
-  SECURITY_THRESHOLD: 'high'
-  CACHE_VERSION: 'v1'
-
-# ============================================================
-# 権限設定（最小権限の原則）
-# Permissions (principle of least privilege)
-# ============================================================
+  SECURITY_THRESHOLD: high
+  CACHE_VERSION: v1
 permissions:
   contents: read
   security-events: write
   issues: write
   pull-requests: write
-
-# ============================================================
-# 並行実行制御
-# Concurrency control
-# ============================================================
 concurrency:
-  group: security-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false  # セキュリティスキャンは中断しない
-
-# ============================================================
-# ジョブ定義
-# Jobs definition
-# ============================================================
+  group: 'security-${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
 jobs:
-  # ============================================================
-  # Job 1: 依存関係脆弱性スキャン
-  # Dependency vulnerability scan
-  # ============================================================
   dependency-scan:
-    name: '📦 依存関係スキャン / Dependency Scan'
+    name: "\U0001F4E6 依存関係スキャン / Dependency Scan"
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
     outputs:
-      vulnerabilities: ${{ steps.npm-audit.outputs.vulnerabilities }}
-      critical: ${{ steps.npm-audit.outputs.critical }}
-      high: ${{ steps.npm-audit.outputs.high }}
-      status: ${{ steps.evaluate.outputs.status }}
-    
+      vulnerabilities: '${{ steps.npm-audit.outputs.vulnerabilities }}'
+      critical: '${{ steps.npm-audit.outputs.critical }}'
+      high: '${{ steps.npm-audit.outputs.high }}'
+      status: '${{ steps.evaluate.outputs.status }}'
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
-      
-      # ============================================================
-      # Step 2: 環境セットアップ
-      # Setup environment
-      # ============================================================
-      - name: '🔧 環境セットアップ / Setup Environment'
+      - name: "\U0001F527 環境セットアップ / Setup Environment"
         uses: ./.github/actions/setup-environment
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-key: security-${{ env.CACHE_VERSION }}
-      
-      # ============================================================
-      # Step 3: npm audit実行
-      # Run npm audit
-      # ============================================================
-      - name: '🔍 npm audit実行 / Run npm audit'
+          node-version: '${{ env.NODE_VERSION }}'
+          cache-key: 'security-${{ env.CACHE_VERSION }}'
+      - name: "\U0001F50D npm audit実行 / Run npm audit"
         id: npm-audit
         continue-on-error: true
-        run: |
-          echo "🔍 Running npm audit..."
-          
-          # npm audit実行とJSON出力
-          npm audit --json > npm-audit-report.json || true
-          
-          # 脆弱性カウント抽出
-          if [ -f npm-audit-report.json ]; then
-            TOTAL=$(jq '.metadata.vulnerabilities.total // 0' npm-audit-report.json)
-            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit-report.json)
-            HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit-report.json)
-            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' npm-audit-report.json)
-            LOW=$(jq '.metadata.vulnerabilities.low // 0' npm-audit-report.json)
-          else
-            TOTAL=0
-            CRITICAL=0
-            HIGH=0
-            MODERATE=0
-            LOW=0
-          fi
-          
-          echo "vulnerabilities=$TOTAL" >> $GITHUB_OUTPUT
-          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
-          echo "high=$HIGH" >> $GITHUB_OUTPUT
-          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
-          echo "low=$LOW" >> $GITHUB_OUTPUT
-          
-          # サマリー出力
-          echo "=========================================="
-          echo "📦 npm audit結果"
-          echo "=========================================="
-          echo "🔴 Critical: $CRITICAL"
-          echo "🟠 High: $HIGH"
-          echo "🟡 Moderate: $MODERATE"
-          echo "🟢 Low: $LOW"
-          echo "📊 Total: $TOTAL"
-          echo "=========================================="
-      
-      # ============================================================
-      # Step 4: Snyk脆弱性スキャン（オプション）
-      # Snyk vulnerability scan (optional)
-      # ============================================================
-      - name: '🐺 Snyk脆弱性スキャン / Snyk Vulnerability Scan'
+        run: "echo \"\U0001F50D Running npm audit...\"\n\n# npm audit実行とJSON出力\nnpm audit --json > npm-audit-report.json || true\n\n# 脆弱性カウント抽出\nif [ -f npm-audit-report.json ]; then\n  TOTAL=$(jq '.metadata.vulnerabilities.total // 0' npm-audit-report.json)\n  CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit-report.json)\n  HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit-report.json)\n  MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' npm-audit-report.json)\n  LOW=$(jq '.metadata.vulnerabilities.low // 0' npm-audit-report.json)\nelse\n  TOTAL=0\n  CRITICAL=0\n  HIGH=0\n  MODERATE=0\n  LOW=0\nfi\n\necho \"vulnerabilities=$TOTAL\" >> $GITHUB_OUTPUT\necho \"critical=$CRITICAL\" >> $GITHUB_OUTPUT\necho \"high=$HIGH\" >> $GITHUB_OUTPUT\necho \"moderate=$MODERATE\" >> $GITHUB_OUTPUT\necho \"low=$LOW\" >> $GITHUB_OUTPUT\n\n# サマリー出力\necho \"==========================================\"\necho \"\U0001F4E6 npm audit結果\"\necho \"==========================================\"\necho \"\U0001F534 Critical: $CRITICAL\"\necho \"\U0001F7E0 High: $HIGH\"\necho \"\U0001F7E1 Moderate: $MODERATE\"\necho \"\U0001F7E2 Low: $LOW\"\necho \"\U0001F4CA Total: $TOTAL\"\necho \"==========================================\"\n"
+      - name: "\U0001F43A Snyk脆弱性スキャン / Snyk Vulnerability Scan"
         if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: '${{ secrets.SNYK_TOKEN }}'
         with:
-          args: --severity-threshold=${{ github.event.inputs.severity-threshold || env.SECURITY_THRESHOLD }}
-      
-      # ============================================================
-      # Step 5: 結果評価
-      # Evaluate results
-      # ============================================================
-      - name: '📊 結果評価 / Evaluate Results'
+          args: '--severity-threshold=${{ github.event.inputs.severity-threshold || env.SECURITY_THRESHOLD }}'
+      - name: "\U0001F4CA 結果評価 / Evaluate Results"
         id: evaluate
-        run: |
-          CRITICAL="${{ steps.npm-audit.outputs.critical }}"
-          HIGH="${{ steps.npm-audit.outputs.high }}"
-          THRESHOLD="${{ github.event.inputs.severity-threshold || env.SECURITY_THRESHOLD }}"
-          
-          # ステータス判定
-          if [ "$CRITICAL" -gt 0 ]; then
-            STATUS="failure"
-            EMOJI="🔴"
-            MESSAGE="Critical脆弱性が検出されました"
-          elif [ "$HIGH" -gt 0 ] && [ "$THRESHOLD" != "critical" ]; then
-            STATUS="warning"
-            EMOJI="🟠"
-            MESSAGE="High脆弱性が検出されました"
-          else
-            STATUS="success"
-            EMOJI="✅"
-            MESSAGE="深刻な脆弱性は検出されませんでした"
-          fi
-          
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          
-          # GitHub Summary
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## $EMOJI 依存関係脆弱性スキャン結果
-          
-          **ステータス**: $MESSAGE
-          
-          | 深刻度 | 件数 |
-          |--------|------|
-          | 🔴 Critical | ${{ steps.npm-audit.outputs.critical }} |
-          | 🟠 High | ${{ steps.npm-audit.outputs.high }} |
-          | 🟡 Moderate | ${{ steps.npm-audit.outputs.moderate }} |
-          | 🟢 Low | ${{ steps.npm-audit.outputs.low }} |
-          
-          **総脆弱性数**: ${{ steps.npm-audit.outputs.vulnerabilities }}
-          EOF
-      
-      # ============================================================
-      # Step 6: レポートアップロード
-      # Upload report
-      # ============================================================
-      - name: '📤 レポートアップロード / Upload Report'
+        run: "CRITICAL=\"${{ steps.npm-audit.outputs.critical }}\"\nHIGH=\"${{ steps.npm-audit.outputs.high }}\"\nTHRESHOLD=\"${{ github.event.inputs.severity-threshold || env.SECURITY_THRESHOLD }}\"\n\n# ステータス判定\nif [ \"$CRITICAL\" -gt 0 ]; then\n  STATUS=\"failure\"\n  EMOJI=\"\U0001F534\"\n  MESSAGE=\"Critical脆弱性が検出されました\"\nelif [ \"$HIGH\" -gt 0 ] && [ \"$THRESHOLD\" != \"critical\" ]; then\n  STATUS=\"warning\"\n  EMOJI=\"\U0001F7E0\"\n  MESSAGE=\"High脆弱性が検出されました\"\nelse\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"深刻な脆弱性は検出されませんでした\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI 依存関係脆弱性スキャン結果\n\n**ステータス**: $MESSAGE\n\n| 深刻度 | 件数 |\n|--------|------|\n| \U0001F534 Critical | ${{ steps.npm-audit.outputs.critical }} |\n| \U0001F7E0 High | ${{ steps.npm-audit.outputs.high }} |\n| \U0001F7E1 Moderate | ${{ steps.npm-audit.outputs.moderate }} |\n| \U0001F7E2 Low | ${{ steps.npm-audit.outputs.low }} |\n\n**総脆弱性数**: ${{ steps.npm-audit.outputs.vulnerabilities }}\nEOF\n"
+      - name: "\U0001F4E4 レポートアップロード / Upload Report"
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-scan-report-${{ github.run_id }}
+          name: 'dependency-scan-report-${{ github.run_id }}'
           path: |
             npm-audit-report.json
           retention-days: 30
-
-  # ============================================================
-  # Job 2: コードセキュリティ分析
-  # Code security analysis
-  # ============================================================
   code-security:
-    name: '🔍 コードセキュリティ分析 / Code Security Analysis'
+    name: "\U0001F50D コードセキュリティ分析 / Code Security Analysis"
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
     outputs:
-      issues: ${{ steps.semgrep.outputs.issues }}
-      status: ${{ steps.evaluate-code.outputs.status }}
-    
+      issues: '${{ steps.semgrep.outputs.issues }}'
+      status: '${{ steps.evaluate-code.outputs.status }}'
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 全履歴取得（より正確な分析のため）
-      
-      # ============================================================
-      # Step 2: 環境セットアップ
-      # Setup environment
-      # ============================================================
-      - name: '🔧 環境セットアップ / Setup Environment'
+          fetch-depth: 0
+      - name: "\U0001F527 環境セットアップ / Setup Environment"
         uses: ./.github/actions/setup-environment
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      # ============================================================
-      # Step 3: ESLintセキュリティプラグイン実行
-      # Run ESLint security plugin
-      # ============================================================
-      - name: '🔍 ESLintセキュリティチェック / ESLint Security Check'
+          node-version: '${{ env.NODE_VERSION }}'
+      - name: "\U0001F50D ESLintセキュリティチェック / ESLint Security Check"
         id: eslint-security
         continue-on-error: true
-        run: |
-          echo "🔍 Running ESLint security checks..."
-          
-          # セキュリティルールでESLint実行
-          npx eslint src/ \
-            --format json \
-            --output-file eslint-security-report.json \
-            || true
-          
-          # 問題カウント
-          if [ -f eslint-security-report.json ]; then
-            ERRORS=$(jq '[.[] | .errorCount] | add // 0' eslint-security-report.json)
-            WARNINGS=$(jq '[.[] | .warningCount] | add // 0' eslint-security-report.json)
-          else
-            ERRORS=0
-            WARNINGS=0
-          fi
-          
-          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
-          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
-          
-          echo "📊 ESLint結果: Errors: $ERRORS, Warnings: $WARNINGS"
-      
-      # ============================================================
-      # Step 4: Semgrep分析（SAST）
-      # Semgrep analysis (SAST)
-      # ============================================================
-      - name: '🔬 Semgrep分析 / Semgrep Analysis'
+        run: "echo \"\U0001F50D Running ESLint security checks...\"\n\n# セキュリティルールでESLint実行\nnpx eslint src/ \\\n  --format json \\\n  --output-file eslint-security-report.json \\\n  || true\n\n# 問題カウント\nif [ -f eslint-security-report.json ]; then\n  ERRORS=$(jq '[.[] | .errorCount] | add // 0' eslint-security-report.json)\n  WARNINGS=$(jq '[.[] | .warningCount] | add // 0' eslint-security-report.json)\nelse\n  ERRORS=0\n  WARNINGS=0\nfi\n\necho \"errors=$ERRORS\" >> $GITHUB_OUTPUT\necho \"warnings=$WARNINGS\" >> $GITHUB_OUTPUT\n\necho \"\U0001F4CA ESLint結果: Errors: $ERRORS, Warnings: $WARNINGS\"\n"
+      - name: "\U0001F52C Semgrep分析 / Semgrep Analysis"
         id: semgrep
         uses: returntocorp/semgrep-action@v1
         continue-on-error: true
         with:
-          config: >-
-            p/security-audit
-            p/javascript
-            p/react
-            p/nodejs
-      
-      # ============================================================
-      # Step 5: カスタムセキュリティスキャナー
-      # Custom security scanner
-      # ============================================================
-      - name: '🛡️ カスタムセキュリティスキャナー / Custom Security Scanner'
+          config: p/security-audit p/javascript p/react p/nodejs
+      - name: "\U0001F6E1️ カスタムセキュリティスキャナー / Custom Security Scanner"
         id: custom-scanner
-        run: |
-          echo "🛡️ Running custom security scanner..."
-          
-          # カスタムセキュリティスクリプト実行
-          if [ -f "scripts/code-security-scanner.js" ]; then
-            node scripts/code-security-scanner.js > security-scan-report.json || true
-            
-            # 結果解析
-            if [ -f security-scan-report.json ]; then
-              ISSUES=$(jq '.issues | length // 0' security-scan-report.json)
-              echo "issues=$ISSUES" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "⚠️ Custom security scanner not found"
-            echo "issues=0" >> $GITHUB_OUTPUT
-          fi
-      
-      # ============================================================
-      # Step 6: 結果評価
-      # Evaluate results
-      # ============================================================
-      - name: '📊 結果評価 / Evaluate Results'
+        run: "echo \"\U0001F6E1️ Running custom security scanner...\"\n\n# カスタムセキュリティスクリプト実行\nif [ -f \"scripts/code-security-scanner.js\" ]; then\n  node scripts/code-security-scanner.js > security-scan-report.json || true\n  \n  # 結果解析\n  if [ -f security-scan-report.json ]; then\n    ISSUES=$(jq '.issues | length // 0' security-scan-report.json)\n    echo \"issues=$ISSUES\" >> $GITHUB_OUTPUT\n  fi\nelse\n  echo \"⚠️ Custom security scanner not found\"\n  echo \"issues=0\" >> $GITHUB_OUTPUT\nfi\n"
+      - name: "\U0001F4CA 結果評価 / Evaluate Results"
         id: evaluate-code
         run: |
           ERRORS="${{ steps.eslint-security.outputs.errors }}"
           WARNINGS="${{ steps.eslint-security.outputs.warnings }}"
           CUSTOM_ISSUES="${{ steps.custom-scanner.outputs.issues }}"
-          
+
           # ステータス判定
           TOTAL_ISSUES=$((ERRORS + CUSTOM_ISSUES))
-          
+
           if [ "$TOTAL_ISSUES" -gt 10 ]; then
             STATUS="failure"
             EMOJI="❌"
@@ -357,187 +160,88 @@ jobs:
             EMOJI="✅"
             MESSAGE="セキュリティ問題は検出されませんでした"
           fi
-          
+
           echo "status=$STATUS" >> $GITHUB_OUTPUT
-          
+
           # GitHub Summary
           cat >> $GITHUB_STEP_SUMMARY <<EOF
           ## $EMOJI コードセキュリティ分析結果
-          
+
           **ステータス**: $MESSAGE
-          
+
           ### 検出された問題
           - ESLint エラー: $ERRORS
           - ESLint 警告: $WARNINGS
           - カスタムスキャナー: $CUSTOM_ISSUES
-          
+
           **総問題数**: $TOTAL_ISSUES
           EOF
-
-  # ============================================================
-  # Job 3: シークレット検出
-  # Secret detection
-  # ============================================================
   secret-detection:
-    name: '🔑 シークレット検出 / Secret Detection'
+    name: "\U0001F511 シークレット検出 / Secret Detection"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
     outputs:
-      secrets-found: ${{ steps.detect.outputs.found }}
-      status: ${{ steps.evaluate-secrets.outputs.status }}
-    
+      secrets-found: '${{ steps.detect.outputs.found }}'
+      status: '${{ steps.evaluate-secrets.outputs.status }}'
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      # ============================================================
-      # Step 2: TruffleHog実行
-      # Run TruffleHog
-      # ============================================================
-      - name: '🐷 TruffleHog実行 / Run TruffleHog'
+      - name: "\U0001F437 TruffleHog実行 / Run TruffleHog"
         id: trufflehog
         uses: trufflesecurity/trufflehog@main
         continue-on-error: true
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
+          base: '${{ github.event.repository.default_branch }}'
           head: HEAD
-      
-      # ============================================================
-      # Step 3: GitLeaks実行
-      # Run GitLeaks
-      # ============================================================
-      - name: '🔍 GitLeaks実行 / Run GitLeaks'
+      - name: "\U0001F50D GitLeaks実行 / Run GitLeaks"
         id: gitleaks
         uses: gitleaks/gitleaks-action@v2
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # ============================================================
-      # Step 4: カスタムパターン検出
-      # Custom pattern detection
-      # ============================================================
-      - name: '🔎 カスタムパターン検出 / Custom Pattern Detection'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - name: "\U0001F50E カスタムパターン検出 / Custom Pattern Detection"
         id: detect
-        run: |
-          echo "🔎 Checking for hardcoded secrets..."
-          
-          # 危険なパターンの検出
-          PATTERNS=(
-            "password\s*=\s*['\"][^'\"]{8,}['\"]"
-            "api[_-]?key\s*=\s*['\"][^'\"]{20,}['\"]"
-            "token\s*=\s*['\"][^'\"]{20,}['\"]"
-            "secret\s*=\s*['\"][^'\"]{10,}['\"]"
-            "private[_-]?key"
-          )
-          
-          FOUND=0
-          for pattern in "${PATTERNS[@]}"; do
-            if grep -rEi "$pattern" --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" --exclude-dir=node_modules --exclude-dir=dist .; then
-              FOUND=$((FOUND + 1))
-            fi
-          done
-          
-          echo "found=$FOUND" >> $GITHUB_OUTPUT
-          
-          if [ "$FOUND" -gt 0 ]; then
-            echo "⚠️ Potential secrets detected: $FOUND patterns found"
-          else
-            echo "✅ No hardcoded secrets detected"
-          fi
-      
-      # ============================================================
-      # Step 5: 結果評価
-      # Evaluate results
-      # ============================================================
-      - name: '📊 結果評価 / Evaluate Results'
+        run: "echo \"\U0001F50E Checking for hardcoded secrets...\"\n\n# 危険なパターンの検出\nPATTERNS=(\n  \"password\\s*=\\s*['\\\"][^'\\\"]{8,}['\\\"]\"\n  \"api[_-]?key\\s*=\\s*['\\\"][^'\\\"]{20,}['\\\"]\"\n  \"token\\s*=\\s*['\\\"][^'\\\"]{20,}['\\\"]\"\n  \"secret\\s*=\\s*['\\\"][^'\\\"]{10,}['\\\"]\"\n  \"private[_-]?key\"\n)\n\nFOUND=0\nfor pattern in \"${PATTERNS[@]}\"; do\n  if grep -rEi \"$pattern\" --include=\"*.js\" --include=\"*.jsx\" --include=\"*.ts\" --include=\"*.tsx\" --exclude-dir=node_modules --exclude-dir=dist .; then\n    FOUND=$((FOUND + 1))\n  fi\ndone\n\necho \"found=$FOUND\" >> $GITHUB_OUTPUT\n\nif [ \"$FOUND\" -gt 0 ]; then\n  echo \"⚠️ Potential secrets detected: $FOUND patterns found\"\nelse\n  echo \"✅ No hardcoded secrets detected\"\nfi\n"
+      - name: "\U0001F4CA 結果評価 / Evaluate Results"
         id: evaluate-secrets
-        run: |
-          FOUND="${{ steps.detect.outputs.found }}"
-          
-          if [ "$FOUND" -gt 0 ]; then
-            STATUS="failure"
-            EMOJI="🔴"
-            MESSAGE="潜在的なシークレットが検出されました"
-          else
-            STATUS="success"
-            EMOJI="✅"
-            MESSAGE="シークレットは検出されませんでした"
-          fi
-          
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          
-          # GitHub Summary
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## $EMOJI シークレット検出結果
-          
-          **ステータス**: $MESSAGE
-          **検出数**: $FOUND
-          
-          ### 推奨事項
-          - すべてのシークレットは環境変数またはシークレット管理システムで管理してください
-          - .gitignoreに機密ファイルが含まれていることを確認してください
-          - pre-commitフックでシークレット検出を実行することを推奨します
-          EOF
-
-  # ============================================================
-  # Job 4: セキュリティレポート統合
-  # Security report consolidation
-  # ============================================================
+        run: "FOUND=\"${{ steps.detect.outputs.found }}\"\n\nif [ \"$FOUND\" -gt 0 ]; then\n  STATUS=\"failure\"\n  EMOJI=\"\U0001F534\"\n  MESSAGE=\"潜在的なシークレットが検出されました\"\nelse\n  STATUS=\"success\"\n  EMOJI=\"✅\"\n  MESSAGE=\"シークレットは検出されませんでした\"\nfi\n\necho \"status=$STATUS\" >> $GITHUB_OUTPUT\n\n# GitHub Summary\ncat >> $GITHUB_STEP_SUMMARY <<EOF\n## $EMOJI シークレット検出結果\n\n**ステータス**: $MESSAGE\n**検出数**: $FOUND\n\n### 推奨事項\n- すべてのシークレットは環境変数またはシークレット管理システムで管理してください\n- .gitignoreに機密ファイルが含まれていることを確認してください\n- pre-commitフックでシークレット検出を実行することを推奨します\nEOF\n"
   security-report:
-    name: '📊 セキュリティレポート / Security Report'
+    name: "\U0001F4CA セキュリティレポート / Security Report"
     runs-on: ubuntu-latest
-    needs: [dependency-scan, code-security, secret-detection]
+    needs:
+      - dependency-scan
+      - code-security
+      - secret-detection
     if: always()
     timeout-minutes: 10
-    
     steps:
-      # ============================================================
-      # Step 1: リポジトリチェックアウト
-      # Checkout repository
-      # ============================================================
-      - name: '📥 リポジトリチェックアウト / Checkout Repository'
+      - name: "\U0001F4E5 リポジトリチェックアウト / Checkout Repository"
         uses: actions/checkout@v4
-      
-      # ============================================================
-      # Step 2: レポート生成
-      # Generate report
-      # ============================================================
-      - name: '📊 統合レポート生成 / Generate Consolidated Report'
+      - name: "\U0001F4CA 統合レポート生成 / Generate Consolidated Report"
         uses: ./.github/actions/report-generator
         with:
-          report-type: 'security'
-          output-format: 'all'
+          report-type: security
+          output-format: all
           upload-artifact: true
-      
-      # ============================================================
-      # Step 3: Issue作成（Critical脆弱性検出時）
-      # Create issue for critical vulnerabilities
-      # ============================================================
-      - name: '📝 Issue作成 / Create Issue'
+      - name: "\U0001F4DD Issue作成 / Create Issue"
         if: needs.dependency-scan.outputs.critical > 0 || needs.secret-detection.outputs.status == 'failure'
         uses: ./.github/actions/notification
         with:
-          status: 'failure'
-          title: '🔴 緊急: セキュリティ脆弱性検出'
+          status: failure
+          title: "\U0001F534 緊急: セキュリティ脆弱性検出"
           message: |
             緊急対応が必要なセキュリティ問題が検出されました。
-            
+
             依存関係脆弱性:
             - Critical: ${{ needs.dependency-scan.outputs.critical }}
             - High: ${{ needs.dependency-scan.outputs.high }}
-            
+
             シークレット検出: ${{ needs.secret-detection.outputs.status }}
-            
+
             詳細はワークフロー実行結果を確認してください。
-          notification-type: 'issue'
+          notification-type: issue
           create-issue: true
           issue-labels: 'security,critical,automated'
