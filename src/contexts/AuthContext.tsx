@@ -446,11 +446,7 @@ export const useAuth = (): AuthContextType => {
 
 // HOC for protected components
 export const withAuth = (Component, requiredRole = null) => {
-<<<<<<< HEAD:src/contexts/AuthContext.jsx
-  return (props) => {
-=======
   const WrappedComponent = (props) => {
->>>>>>> main:src/contexts/AuthContext.tsx
     const { isAuthenticated, role, loading, hasRole } = useAuth()
     const navigate = useNavigate()
 
