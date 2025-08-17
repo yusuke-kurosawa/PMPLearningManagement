@@ -1,0 +1,94 @@
+# ================================================================
+# 🚀 デプロイメント: GitHub Pages本番環境
+# ================================================================
+# 目的: 本番環境への自動デプロイメント
+# 実行タイミング: mainブランチへのpush時、手動実行
+# 主な処理:
+#   - Node.js依存関係インストール
+#   - プロダクションビルド
+#   - GitHub Pagesへのデプロイ
+# ================================================================
+
+name: '🚀 Deployment - Production'
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ワークフロー同時実行制御
+# デプロイメントはキャンセルしないよう設定
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # ================================================================
+  # ジョブ: ビルド
+  # 目的: プロダクション用ビルドとアーティファクト生成
+  # ================================================================
+  build:
+    name: '🏗️ プロダクションビルド'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      # ステップ: ソースコードのチェックアウト
+      - name: '📥 ソースコード取得'
+        uses: actions/checkout@v4
+        
+      # ステップ: Node.js環境セットアップ
+      # キャッシュを使用してビルド時間を短縮
+      - name: '🔧 Node.jsセットアップ'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      # ステップ: 依存関係インストール
+      # npm ciを使用して確実なインストールを実行
+      - name: '📦 依存関係インストール'
+        run: npm ci
+        
+      # ステップ: プロダクションビルド
+      # 最適化されたビルドを実行
+      - name: '🏗️ ビルド実行'
+        run: npm run build:optimized
+        env:
+          NODE_ENV: production
+          
+      # ステップ: GitHub Pages設定
+      - name: '⚙️ GitHub Pages設定'
+        uses: actions/configure-pages@v4
+        
+      # ステップ: アーティファクトアップロード
+      # distディレクトリをPages用アーティファクトとしてアップロード
+      - name: '📤 アーティファクトアップロード'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  # ================================================================
+  # ジョブ: デプロイ
+  # 目的: GitHub Pagesへのデプロイ実行
+  # ================================================================
+  deploy:
+    name: '🚀 本番デプロイ'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 10
+    
+    steps:
+      # ステップ: GitHub Pagesへのデプロイ
+      # ビルドアーティファクトをGitHub Pagesにデプロイ
+      - name: '🚀 GitHub Pagesデプロイ'
+        id: deployment
+        uses: actions/deploy-pages@v4

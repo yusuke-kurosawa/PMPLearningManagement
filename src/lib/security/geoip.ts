@@ -9,7 +9,7 @@ import { getRedisClient } from './rateLimiting'
 import { logger } from '../../services/logger'
 
 // GeoIP レスポンススキーマ
-const GeoLocationSchema = z.object({
+const _GeoLocationSchema = z.object({
   ip: z.string().ip(),
   country: z.string(),
   countryCode: z.string().length(2),
@@ -28,7 +28,7 @@ const GeoLocationSchema = z.object({
   threat: z.number().min(0).max(100).default(0),
 })
 
-export type GeoLocation = z.infer<typeof GeoLocationSchema>
+export type GeoLocation = z.infer<typeof _GeoLocationSchema>
 
 // 地理制限設定
 export interface GeoRestrictionConfig {

@@ -1,4 +1,16 @@
-name: 🧪 Continuous Integration Tests
+# ================================================================
+# 🧪 品質: 継続的インテグレーションテスト
+# ================================================================
+# 目的: コードの品質と機能性を保証するための包括的テスト実行
+# 実行タイミング: push、PR作成時、手動実行
+# 主な処理: 
+#   - 単体テスト実行（Node.js 18/20）
+#   - E2Eテスト実行（Playwright）
+#   - カバレッジレポート生成
+#   - セキュリティスキャン
+# ================================================================
+
+name: '🧪 Quality - CI Tests'
 
 on:
   push:
@@ -6,6 +18,16 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
+
+# パーミッション設定（最小権限の原則）
+permissions:
+  contents: read
+  pull-requests: write  # PRへのコメント投稿用
+
+# ワークフロー同時実行制御
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:

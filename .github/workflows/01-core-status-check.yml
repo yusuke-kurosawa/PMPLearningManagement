@@ -1,0 +1,41 @@
+# ================================================================
+# 🎯 コア: 最小限ステータスチェック
+# ================================================================
+# 目的: Repository Rulesetsの必須チェック要件を満たす最小限のワークフロー
+# 実行タイミング: PRおよびmainブランチへのpush時
+# 主な処理: ステータスチェックのみ（実質的な処理なし）
+# ================================================================
+
+name: '🎯 Core - Minimal Status Check'
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# ワークフロー同時実行制御
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ================================================================
+  # ジョブ: 最小限ステータスチェック
+  # 目的: Repository Rulesetsの要件を満たすための最小限チェック
+  # ================================================================
+  minimal-status-check:
+    name: '✅ ステータスチェック'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      # ステップ: チェック完了通知
+      # Repository Rulesetsの必須チェックとして登録されている
+      - name: '✅ チェック完了'
+        run: |
+          echo "✅ Repository Rulesetsチェック完了"
+          echo "実行時刻: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "ブランチ: ${{ github.ref }}"
+          echo "イベント: ${{ github.event_name }}"

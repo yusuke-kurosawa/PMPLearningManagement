@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
 import { GeoIPService } from '../geoip'
-import * as fc from 'fast-check'
+// import * as fc from 'fast-check' // Currently unused
 
 // Redis モック
 vi.mock('../rateLimiting', () => ({
