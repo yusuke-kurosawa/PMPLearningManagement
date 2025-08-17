@@ -1,182 +1,291 @@
-# PMPLearningManagement エージェント選択ガイド
+# 🤖 Claude Code エージェントシステム
 
-このディレクトリには、プロジェクトの各種作業に特化したエージェント定義が役割別に整理されています。適切なエージェントを効率的に選択するためのガイドです。
+> **重要**: このディレクトリは Claude Code の専門エージェントシステムです。各エージェントは特定の専門領域を持ち、高品質な支援を提供します。
 
-## 🎯 エージェント選択クイックガイド
+## 📋 概要
 
-### 作業タイプ別の推奨エージェント
+`.claude/agents`ディレクトリは、PMPLearningManagementプロジェクトの開発・運用を支援する専門AIエージェントの定義と設定を管理します。各エージェントは特定の役割と責任を持ち、相互に連携して複雑なタスクを遂行します。
 
-| 作業内容                        | 推奨エージェント        | カテゴリ       |
-| ------------------------------- | ----------------------- | -------------- |
-| 🔧 フロントエンド開発・修正     | frontend-developer      | development    |
-| 🔧 バックエンド開発・API作成    | backend-developer       | development    |
-| 🔧 フルスタック機能実装         | fullstack-developer     | development    |
-| 📱 モバイルアプリ開発           | mobile-app-developer    | development    |
-| 🏗️ システム設計・アーキテクチャ | architect-reviewer      | architecture   |
-| ☁️ クラウドインフラ設計         | cloud-architect         | architecture   |
-| 🔧 マイクロサービス設計         | microservices-architect | architecture   |
-| 📋 プロジェクト管理・計画       | project-manager         | management     |
-| 📊 プロダクト戦略・要件定義     | product-manager         | management     |
-| 🏃 アジャイル開発・スクラム     | scrum-master            | management     |
-| 📈 ビジネス要件分析             | business-analyst        | management     |
-| 🚀 CI/CD・デプロイ自動化        | devops-engineer         | infrastructure |
-| 🗄️ データベース設計・最適化     | database-admin          | infrastructure |
-| 🧪 品質保証・テスト戦略         | qa-expert               | quality        |
-| 🤖 テスト自動化                 | test-automator          | quality        |
-| 🛡️ セキュリティ監査・脆弱性対策 | security-auditor        | quality        |
-| 🎯 エージェント調整・最適化     | agent-organizer         | coordination   |
-| 📋 コンテキスト管理・状態管理   | context-manager         | coordination   |
+## 🏗️ エージェントカテゴリ構造
 
-## 📁 カテゴリ別エージェント一覧
-
-### 🔧 Development (開発系)
-
-フロントエンド、バックエンド、フルスタック、モバイル開発に特化
-
-```bash
-development/
-├── frontend-developer.md      # React/Vue/Angular等のUI開発
-├── backend-developer.md       # API/サーバーサイド開発
-├── fullstack-developer.md     # エンドツーエンド機能実装
-└── mobile-app-developer.md    # iOS/Android/React Native開発
+```
+agents/
+├── 🏗️ architecture/        # システム設計・アーキテクチャ
+│   ├── architect-reviewer   # 設計レビュー・技術選定
+│   ├── cloud-architect      # クラウドインフラ設計
+│   └── microservices-architect # マイクロサービス設計
+│
+├── 🎯 coordination/         # 調整・統合管理
+│   ├── agent-organizer      # エージェント編成・最適化
+│   └── context-manager      # コンテキスト管理・同期
+│
+├── 💻 development/          # 開発実装
+│   ├── frontend-developer   # フロントエンド開発
+│   ├── backend-developer    # バックエンド開発
+│   ├── fullstack-developer  # フルスタック開発
+│   └── mobile-app-developer # モバイルアプリ開発
+│
+├── 🔧 infrastructure/       # インフラストラクチャ
+│   ├── devops-engineer      # CI/CD・自動化
+│   └── database-admin       # データベース管理
+│
+├── 📊 management/           # プロジェクト管理
+│   ├── project-manager      # プロジェクト計画・進捗
+│   ├── product-manager      # プロダクト戦略
+│   ├── scrum-master         # アジャイル・スクラム
+│   └── business-analyst     # ビジネス分析
+│
+└── 🛡️ quality/             # 品質保証
+    ├── qa-expert            # テスト戦略・品質管理
+    ├── test-automator       # 自動化テスト
+    └── security-auditor     # セキュリティ監査
 ```
 
-**使用例**:
+## 🎯 エージェント選択マトリックス
 
-- 新機能の実装
-- UIコンポーネントの作成
-- API エンドポイントの開発
-- データベーススキーマとAPIの統合
+### タスク別推奨エージェント
 
-### 🏗️ Architecture (アーキテクチャ系)
+| タスクカテゴリ | 主担当エージェント | 支援エージェント | 優先度 |
+|--------------|------------------|----------------|--------|
+| **新機能開発** | @fullstack-developer | @architect-reviewer, @qa-expert | 🔴 高 |
+| **バグ修正** | @frontend-developer / @backend-developer | @test-automator | 🔴 高 |
+| **設計レビュー** | @architect-reviewer | @security-auditor, @database-admin | 🔴 高 |
+| **CI/CD構築** | @devops-engineer | @test-automator | 🟡 中 |
+| **DB最適化** | @database-admin | @backend-developer | 🟡 中 |
+| **セキュリティ監査** | @security-auditor | @devops-engineer | 🔴 高 |
+| **プロジェクト計画** | @project-manager | @scrum-master, @business-analyst | 🟡 中 |
+| **テスト自動化** | @test-automator | @qa-expert | 🟡 中 |
 
-システム設計、技術選定、アーキテクチャレビューに特化
+### フェーズ別エージェント構成
 
-```bash
-architecture/
-├── architect-reviewer.md       # 設計レビュー・技術選定
-├── cloud-architect.md         # AWS/GCP/Azure設計
-└── microservices-architect.md # 分散システム・マイクロサービス
+```mermaid
+graph LR
+    A[計画] --> B[設計]
+    B --> C[開発]
+    C --> D[テスト]
+    D --> E[デプロイ]
+    
+    A --> PM[product-manager<br/>business-analyst]
+    B --> AR[architect-reviewer<br/>cloud-architect]
+    C --> DEV[fullstack-developer<br/>frontend/backend]
+    D --> QA[qa-expert<br/>test-automator]
+    E --> OPS[devops-engineer<br/>database-admin]
 ```
 
-**使用例**:
+## 🚀 エージェント呼び出し方法
 
-- システム全体の設計
-- 技術スタックの選定
-- スケーラビリティの検討
-- クラウド移行計画
-
-### 📋 Management (管理系)
-
-プロジェクト管理、プロダクト戦略、チームマネジメントに特化
+### 基本的な呼び出し
 
 ```bash
-management/
-├── project-manager.md    # プロジェクト計画・進捗管理
-├── product-manager.md    # プロダクト戦略・ロードマップ
-├── scrum-master.md       # アジャイル・スクラム運営
-└── business-analyst.md   # 要件分析・ビジネスプロセス
+# 単一エージェント呼び出し
+@agent-frontend-developer Reactコンポーネントを作成してください
+
+# 複数エージェント協調
+@agent-organizer フルスタック機能を実装するチームを編成してください
+
+# 専門的なレビュー
+@agent-architect-reviewer 現在のアーキテクチャをレビューしてください
 ```
 
-**使用例**:
-
-- プロジェクト計画の策定
-- 要件定義・仕様書作成
-- リリース計画・マイルストーン設定
-- チーム協業の最適化
-
-### 🏗️ Infrastructure (インフラ系)
-
-インフラ構築、CI/CD、データベース管理に特化
+### 高度な使用方法
 
 ```bash
-infrastructure/
-├── devops-engineer.md  # CI/CD・デプロイ自動化
-└── database-admin.md   # DB設計・最適化・運用
+# コンテキスト付き呼び出し
+@agent-context-manager 現在の状態を分析して
+@agent-fullstack-developer 継続して実装を進めてください
+
+# パイプライン実行
+@agent-project-manager タスクを定義して
+@agent-architect-reviewer 設計をレビューして
+@agent-fullstack-developer 実装してください
+@agent-qa-expert テストを実行してください
 ```
 
-**使用例**:
+## 📊 エージェント能力マトリックス
 
-- CI/CDパイプラインの構築
-- Docker/Kubernetesの設定
-- データベース設計・最適化
-- 監視・ロギング設定
+### 技術スキル評価
 
-### 🧪 Quality (品質保証系)
+| エージェント | Frontend | Backend | Database | DevOps | Security | Architecture |
+|------------|:--------:|:-------:|:--------:|:------:|:--------:|:------------:|
+| frontend-developer | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ |
+| backend-developer | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| fullstack-developer | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| devops-engineer | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| architect-reviewer | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
-テスト、品質管理、セキュリティに特化
+### 協調性スコア
+
+| エージェントペア | 協調性 | 効率性 | 推奨度 |
+|----------------|:------:|:------:|:------:|
+| frontend + backend | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 🔴 高 |
+| architect + developer | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 🔴 高 |
+| qa + developer | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 🟡 中 |
+| devops + security | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 🔴 高 |
+
+## 🔧 エージェント設定
+
+### エージェント定義フォーマット
+
+```yaml
+# エージェント名.md
+---
+name: エージェント名
+role: 役割
+expertise: 
+  - 専門領域1
+  - 専門領域2
+capabilities:
+  - 能力1
+  - 能力2
+limitations:
+  - 制限事項1
+collaboration:
+  - 連携可能エージェント
+---
+
+## プロンプト
+{エージェント固有のプロンプト}
+
+## コンテキスト
+{必要なコンテキスト情報}
+
+## 出力フォーマット
+{期待される出力形式}
+```
+
+### パフォーマンス設定
+
+```javascript
+// agent-config.json
+{
+  "performance": {
+    "timeout": 30000,        // タイムアウト（ms）
+    "maxRetries": 3,         // 最大リトライ回数
+    "cacheResults": true,    // 結果のキャッシュ
+    "parallelExecution": true // 並列実行許可
+  },
+  "quality": {
+    "minAccuracy": 0.9,      // 最小精度
+    "reviewRequired": false, // レビュー必須
+    "testCoverage": 0.8      // テストカバレッジ
+  }
+}
+```
+
+## 📈 メトリクスとモニタリング
+
+### エージェントパフォーマンス指標
 
 ```bash
-quality/
-├── qa-expert.md      # テスト戦略・品質管理
-├── test-automator.md # テスト自動化・E2Eテスト
-└── security-auditor.md # セキュリティ監査・脆弱性対策
+# パフォーマンス確認
+npm run agent:metrics
+
+# 出力例:
+エージェント別統計:
+- frontend-developer: 
+  - タスク完了率: 96%
+  - 平均応答時間: 2.3秒
+  - 精度スコア: 94%
+  
+- architect-reviewer:
+  - レビュー完了率: 98%
+  - 問題検出率: 87%
+  - 改善提案数: 平均3.2件/レビュー
 ```
 
-**使用例**:
-
-- テスト計画の策定
-- 自動化テストの実装
-- セキュリティ監査・脆弱性診断
-- パフォーマンステスト
-
-### 🎯 Coordination (調整・統合系)
-
-エージェント間の調整、コンテキスト管理に特化
+### 継続的改善
 
 ```bash
-coordination/
-├── agent-organizer.md # エージェント編成・ワークフロー最適化
-└── context-manager.md # コンテキスト管理・状態同期
+# エージェント最適化
+npm run agent:optimize
+
+# トレーニング実行
+npm run agent:train -- --agent=frontend-developer
+
+# A/Bテスト
+npm run agent:ab-test -- --variant=new-prompt
 ```
 
-**使用例**:
+## 🎮 ベストプラクティス
 
-- 複数エージェントの協調作業
-- プロジェクトコンテキストの管理
-- 作業状態の同期・追跡
-- ワークフローの最適化
+### ✅ 推奨事項
 
-## 🚀 効率的なエージェント選択方法
+1. **適切なエージェント選択**
+   - タスクの性質に最適なエージェントを選ぶ
+   - 必要に応じて複数エージェントを協調させる
 
-### 1. 作業スコープで選択
+2. **コンテキスト管理**
+   - @context-manager で状態を同期
+   - 大規模タスクは段階的に実行
 
-- **単一技術領域**: 専門特化エージェント（frontend-developer, backend-developer等）
-- **横断的作業**: 統合型エージェント（fullstack-developer, architect-reviewer等）
-- **複数エージェント協調**: coordination カテゴリのエージェント
+3. **品質保証**
+   - 重要タスクは @qa-expert でレビュー
+   - セキュリティ関連は @security-auditor で監査
 
-### 2. プロジェクトフェーズで選択
+4. **効率化**
+   - 定型タスクは自動化
+   - 並列実行可能なタスクは同時実行
 
-- **計画・設計フェーズ**: management + architecture
-- **開発フェーズ**: development + infrastructure
-- **テスト・リリースフェーズ**: quality + infrastructure
+### ❌ 避けるべきこと
 
-### 3. 緊急度・優先度で選択
+1. **不適切なエージェント使用**
+   - 専門外のタスクを強制しない
+   - 単純タスクに複雑なエージェントを使わない
 
-- **高優先度・複雑**: 経験豊富なエージェント（architect-reviewer, fullstack-developer）
-- **並行作業**: 複数の専門特化エージェント
-- **品質重視**: quality カテゴリを必ず含める
+2. **過度な依存**
+   - 全てをエージェントに任せない
+   - 人間のレビューを省略しない
 
-## 📊 パフォーマンス指標
+3. **コンテキスト無視**
+   - プロジェクト状態を考慮しない実行
+   - 前提条件の確認を怠る
 
-各エージェントは以下の指標で評価・最適化されています：
+## 🔄 エージェント間連携
 
-- **応答精度**: 90%以上
-- **タスク完了率**: 95%以上
-- **実行時間効率**: 要求仕様に応じて最適化
-- **協調性**: 他エージェントとの連携スコア
-- **専門性深度**: 各領域での専門知識レベル
+### 連携パターン
 
-## 🔄 継続的改善
+```mermaid
+graph TD
+    AO[agent-organizer] --> CM[context-manager]
+    CM --> AR[architect-reviewer]
+    AR --> FD[fullstack-developer]
+    FD --> QA[qa-expert]
+    QA --> DO[devops-engineer]
+    DO --> SA[security-auditor]
+```
 
-このエージェント構成は以下に基づいて継続的に最適化されています：
+### 連携例
 
-- パフォーマンス分析結果
-- プロジェクト要件の変化
-- 新技術・手法の導入
-- チーム構成・スキルレベルの変化
+```bash
+# 新機能開発の完全フロー
+1. @agent-product-manager 要件を定義
+2. @agent-architect-reviewer 設計をレビュー
+3. @agent-fullstack-developer 実装
+4. @agent-test-automator テスト作成
+5. @agent-qa-expert 品質確認
+6. @agent-devops-engineer デプロイ
+7. @agent-security-auditor セキュリティ監査
+```
+
+## 🛠️ トラブルシューティング
+
+### よくある問題と解決方法
+
+| 問題 | 原因 | 解決方法 |
+|-----|------|---------|
+| エージェント応答なし | タイムアウト | タイムアウト設定を延長 |
+| 不正確な出力 | コンテキスト不足 | @context-manager で状態同期 |
+| 協調エラー | 依存関係の問題 | @agent-organizer で調整 |
+| パフォーマンス低下 | リソース不足 | 並列実行を制限 |
+
+## 📚 関連ドキュメント
+
+- [エージェント開発ガイド](./.claude/docs/agent-development.md)
+- [プロンプトエンジニアリング](./.claude/prompts/README.md)
+- [コンテキスト管理](./.claude/context/README.md)
 
 ---
 
-_最終更新: 2025-08-10_
-_管理責任者: context-manager + agent-organizer_
+**最終更新**: 2025-08-15  
+**バージョン**: 2.0.0  
+**メンテナー**: @agent-organizer + @context-manager
