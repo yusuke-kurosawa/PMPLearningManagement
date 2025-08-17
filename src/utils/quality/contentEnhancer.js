@@ -303,8 +303,8 @@ function adjustDifficulty(profile) {
   const scoreHistory = profile.scoreHistory || []
   const averageScore = scoreHistory.reduce((a, b) => a + b, 0) / scoreHistory.length
 
-  if (averageScore < 60) return 'easy'
-  if (averageScore < 80) return 'medium'
+  if (averageScore < 60) {return 'easy'}
+  if (averageScore < 80) {return 'medium'}
   return 'hard'
 }
 
@@ -409,8 +409,8 @@ function checkClarity(content) {
   const avgSentenceLength = text.length / sentences
 
   // 1文が長すぎない（100文字以下が理想）
-  if (avgSentenceLength <= 100) return 100
-  if (avgSentenceLength <= 150) return 80
+  if (avgSentenceLength <= 100) {return 100}
+  if (avgSentenceLength <= 150) {return 80}
   return 60
 }
 

@@ -42,7 +42,11 @@
     "docs:consolidate": "node scripts/consolidate-docs.js",
     "quality:check": "node scripts/validate-pmbok-content.js && node scripts/check-content-quality.js",
     "quality:dashboard": "node scripts/generate-quality-dashboard.js",
-    "fix:all": "node scripts/auto-fix/fix-all-issues.js"
+    "fix:all": "node scripts/auto-fix/fix-all-issues.js",
+    "lint:header": "eslint src --ext .js,.jsx,.ts,.tsx -c .eslintrc.header.json",
+    "lint:header:fix": "eslint src --ext .js,.jsx,.ts,.tsx -c .eslintrc.header.json --fix",
+    "header:validate": "npm run lint:header",
+    "header:apply": "npm run lint:header:fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

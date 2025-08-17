@@ -428,26 +428,26 @@ export function calculateJapaneseQualityScore(text) {
   // 文法エラーのチェック
   GRAMMAR_RULES.duplications.forEach((rule) => {
     const matches = text.match(rule.pattern)
-    if (matches) issues.grammar += matches.length
+    if (matches) {issues.grammar += matches.length}
   })
 
   // 句読点エラーのチェック
   GRAMMAR_RULES.punctuation.forEach((rule) => {
     const matches = text.match(rule.pattern)
-    if (matches) issues.punctuation += matches.length
+    if (matches) {issues.punctuation += matches.length}
   })
 
   // 専門用語の不統一チェック
   Object.keys(PMBOK_TERMINOLOGY).forEach((term) => {
     const pattern = new RegExp(term, 'g')
     const matches = text.match(pattern)
-    if (matches) issues.terminology += matches.length
+    if (matches) {issues.terminology += matches.length}
   })
 
   // 読みやすさのチェック（長文の数）
   const sentences = text.split('。')
   sentences.forEach((sentence) => {
-    if (sentence.length > 100) issues.readability++
+    if (sentence.length > 100) {issues.readability++}
   })
 
   // スコア計算（100点満点）
