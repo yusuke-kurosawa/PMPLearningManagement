@@ -1,7 +1,9 @@
 /**
- * User Service
- * Business logic for user management operations
- * 担当: API・データエンジニア, 認証・セキュリティエンジニア
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { prisma } from '@/lib/db'

@@ -1,3 +1,10 @@
+/**
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'

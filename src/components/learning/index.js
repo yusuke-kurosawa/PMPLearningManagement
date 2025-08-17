@@ -1,4 +1,10 @@
-// Learning Components
+/**
+ * 学習機能・教育コンテンツ実装
+ * Developer 10: 教育システム・学習体験
+ * 機能: フラッシュカード, 模擬試験, 進捗管理
+ * セキュリティレベル: Low
+ * 最終更新: {updated}
+ */
 export { default as FlashCard } from './FlashCard.jsx'
 export { default as FlashCardLearning } from './FlashCardLearning.jsx'
 export { default as LearningModal } from './LearningModal.jsx'

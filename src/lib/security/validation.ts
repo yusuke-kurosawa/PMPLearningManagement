@@ -1,3 +1,10 @@
+/**
+ * セキュリティ・監視システム実装
+ * Developer 7: セキュリティ・DevOpsエンジニア
+ * 機能: 暗号化, レート制限, メトリクス収集
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
+ */
 import { z } from 'zod'
 
 // Common validation patterns

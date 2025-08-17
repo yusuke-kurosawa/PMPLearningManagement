@@ -1,6 +1,9 @@
 /**
- * PWA Install Prompt Manager
- * Developer 6: PWA & Mobile Developer Implementation
+ * PWA・モバイル機能実装
+ * Developer 6: PWA & Mobile Developer
+ * 機能: Service Worker, Cache API, Push Notifications
+ * プラットフォーム: Progressive Web App
+ * 最終更新: {updated}
  */
 
 interface BeforeInstallPromptEvent extends Event {

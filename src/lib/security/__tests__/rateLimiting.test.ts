@@ -1,6 +1,9 @@
 /**
- * Rate Limiting システムのテスト
- * Developer 3: API Rate Limiting・DDoS防止・Redis実装のテスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'

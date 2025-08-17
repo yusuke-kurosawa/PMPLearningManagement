@@ -1,3 +1,10 @@
+/**
+ * PWA・モバイル機能実装
+ * Developer 6: PWA & Mobile Developer
+ * 機能: Service Worker, Cache API, Push Notifications
+ * プラットフォーム: Progressive Web App
+ * 最終更新: {updated}
+ */
 import React, { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronUp, Star, Heart, Share2, Bookmark } from 'lucide-react'
 

@@ -1,15 +1,9 @@
 /**
- * AI Coaching Service
- *
- * Provides personalized learning recommendations, progress analysis,
- * and adaptive learning paths based on user performance and patterns.
- *
- * Key features:
- * - Personalized learning path generation
- * - Weakness identification and targeted improvement
- * - Study schedule optimization
- * - Real-time progress coaching
- * - Career guidance integration
+ * フロントエンドサービス・状態管理実装
+ * Developer 9: React専門・状態管理
+ * 技術スタック: React Context, Zustand, Custom Hooks
+ * セキュリティレベル: Medium
+ * 最終更新: {updated}
  */
 
 class AICoachingService {

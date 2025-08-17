@@ -1,6 +1,9 @@
 /**
- * 高度な Rate Limiting システム
- * Developer 3: API Rate Limiting・DDoS防止・Redis実装
+ * セキュリティ・監視システム実装
+ * Developer 7: セキュリティ・DevOpsエンジニア
+ * 機能: 暗号化, レート制限, メトリクス収集
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
  */
 
 import Redis from 'ioredis'

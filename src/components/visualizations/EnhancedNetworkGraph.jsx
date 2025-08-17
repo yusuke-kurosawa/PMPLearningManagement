@@ -1,3 +1,10 @@
+/**
+ * UI/UXコンポーネント実装
+ * Developer 4: フロントエンド・ビジュアライゼーション
+ * 技術スタック: React, D3.js, Framer Motion
+ * セキュリティレベル: Low
+ * 最終更新: {updated}
+ */
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import * as d3 from 'd3'
 import {

@@ -1,7 +1,9 @@
 /**
- * Learning Router (tRPC)
- * Learning progress, study sessions, and analytics endpoints
- * 担当: ビジネスロジックエンジニア, API・データエンジニア
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { z } from 'zod'

@@ -1,6 +1,9 @@
 /**
- * 実用的なGeoIPサービス実装
- * Developer 1: GeoIPサービス統合・IP地理的制限機能・異常アクセスパターン検知
+ * セキュリティ・監視システム実装
+ * Developer 7: セキュリティ・DevOpsエンジニア
+ * 機能: 暗号化, レート制限, メトリクス収集
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
  */
 
 import Redis from 'ioredis'

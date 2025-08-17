@@ -1,6 +1,9 @@
 /**
- * 学習データ収集・分析サービス
- * ユーザーの学習進捗、効果、パフォーマンスを測定し、最適な学習体験を提供
+ * フロントエンドサービス・状態管理実装
+ * Developer 9: React専門・状態管理
+ * 技術スタック: React Context, Zustand, Custom Hooks
+ * セキュリティレベル: Medium
+ * 最終更新: {updated}
  */
 
 class LearningDataCollector {

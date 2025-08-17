@@ -1,6 +1,9 @@
 /**
- * Context Manager React Context
- * Provides context management services throughout the React application
+ * フロントエンドサービス・状態管理実装
+ * Developer 9: React専門・状態管理
+ * 技術スタック: React Context, Zustand, Custom Hooks
+ * セキュリティレベル: Medium
+ * 最終更新: {updated}
  */
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'

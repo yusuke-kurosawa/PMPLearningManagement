@@ -1,22 +1,13 @@
 /**
- * データ暗号化システムのテスト
- * Developer 2: データ暗号化・ハッシュ化・暗号化ユーティリティ実装のテスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import crypto from 'crypto'
-import {
-  SymmetricEncryption,
-  HashingService,
-  TokenGenerator,
-  PIIEncryption,
-  DatabaseEncryption,
-  symmetricEncryption,
-  hashingService,
-  tokenGenerator,
-  piiEncryption,
-  databaseEncryption,
-} from '../encryption'
 
 // テスト用の環境変数設定
 const originalEnv = process.env
@@ -32,13 +23,16 @@ describe('データ暗号化システム', () => {
   afterEach(() => {
     // 環境変数を復元
     process.env = { ...originalEnv }
+    // モジュールキャッシュをクリア
+    vi.resetModules()
   })
 
   describe('SymmetricEncryption', () => {
-    let encryption: SymmetricEncryption
+    let encryption: any
 
-    beforeEach(() => {
-      encryption = new SymmetricEncryption()
+    beforeEach(async () => {
+      const module = await import('../encryption')
+      encryption = new module.SymmetricEncryption()
     })
 
     it('データを暗号化して復号化できる', () => {

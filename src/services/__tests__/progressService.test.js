@@ -1,3 +1,10 @@
+/**
+ * フロントエンドサービス・状態管理実装
+ * Developer 9: React専門・状態管理
+ * 技術スタック: React Context, Zustand, Custom Hooks
+ * セキュリティレベル: Medium
+ * 最終更新: {updated}
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@test/utils/test-utils'
 import { useProgress, processCategories, processGroups } from '../progressService'

@@ -1,3 +1,10 @@
+/**
+ * 認証・認可システム実装
+ * Developer 1: 包括的認可システム（RBAC）実装
+ * セキュリティレベル: Critical
+ * 依存関係: Supabase, JWT, React
+ * 最終更新: {updated}
+ */
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

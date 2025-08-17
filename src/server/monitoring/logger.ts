@@ -1,7 +1,9 @@
 /**
- * Structured Logging System
- * Centralized logging with correlation IDs and structured data
- * 担当: DevOpsエンジニア
+ * セキュリティ・監視システム実装
+ * Developer 7: セキュリティ・DevOpsエンジニア
+ * 機能: 暗号化, レート制限, メトリクス収集
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
  */
 
 import winston from 'winston'

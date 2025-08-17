@@ -1,8 +1,12 @@
 /**
- * Next.js API Routes用 Rate Limiting ミドルウェア
- * Developer 3: API Rate Limiting・DDoS防止・Redis実装
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 import { NextRequest, NextResponse } from 'next/server'
 import {
   slidingWindowLimiter,

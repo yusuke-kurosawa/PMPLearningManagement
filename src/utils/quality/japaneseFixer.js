@@ -1,8 +1,12 @@
 /**
- * 日本語品質自動修正ユーティリティ
- * 文法、敬語、専門用語の統一など、日本語の品質を向上させる再利用可能な関数集
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 /**
  * 日本語文法修正ルール
  */
@@ -235,7 +239,7 @@ export function unifyKatakana(text) {
  */
 function unifyLongVowelMark(text) {
   // 3音以上のカタカナ語の末尾の長音記号を削除
-  const longVowelRules = [{ pattern: /([ァ-ヴ]{3,})ー([^ァ-ヴ]|$)/g, check: shouldRemoveLongVowel }]
+  // const longVowelRules = [{ pattern: /([ァ-ヴ]{3,})ー([^ァ-ヴ]|$)/g, check: shouldRemoveLongVowel }]
 
   let fixed = text
   // JIS規格に基づく処理

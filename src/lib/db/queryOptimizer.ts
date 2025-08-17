@@ -1,6 +1,9 @@
 /**
- * データベースクエリ最適化ユーティリティ
- * Developer 4: データベース最適化・インデックス・接続プール設定
+ * データベース・永続化層実装
+ * Developer 5: データベース・パフォーマンス最適化
+ * 技術スタック: Prisma, PostgreSQL, Redis
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { Prisma } from '@prisma/client'

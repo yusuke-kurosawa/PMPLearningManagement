@@ -1,8 +1,12 @@
 /**
- * コンテンツ品質向上ユーティリティ
- * PMP試験対策、学習効果、エンゲージメントを向上させる再利用可能な機能集
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 /**
  * PMP試験対策コンテンツの生成
  */
@@ -231,7 +235,7 @@ function determineBadges(content) {
 /**
  * 達成項目の生成
  */
-function generateAchievements(content) {
+function generateAchievements(_content) {
   return [
     {
       id: 'first-module',

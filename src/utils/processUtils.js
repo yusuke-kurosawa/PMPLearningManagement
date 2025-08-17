@@ -1,5 +1,12 @@
-// プロセスIDを生成するユーティリティ関数
-export const generateProcessId = (knowledgeAreaId, processGroup, processIndex) => {
+/**
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
+ */ export const generateProcessId = (knowledgeAreaId, processGroup, processIndex) => {
   const groupMap = {
     立上げ: 'initiating',
     計画: 'planning',

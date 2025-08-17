@@ -1,3 +1,10 @@
+/**
+ * PWA・モバイル機能実装
+ * Developer 6: PWA & Mobile Developer
+ * 機能: Service Worker, Cache API, Push Notifications
+ * プラットフォーム: Progressive Web App
+ * 最終更新: {updated}
+ */
 import React, { useState, useMemo } from 'react'
 import { Search, Filter, ChevronDown, ChevronRight, BookOpen, Eye } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

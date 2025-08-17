@@ -1,7 +1,9 @@
 /**
- * Subscription Management Service
- * Business logic for subscription lifecycle, billing, and plan management
- * 担当: ビジネスロジックエンジニア, 統合・外部APIエンジニア
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { prisma } from '@/lib/db'

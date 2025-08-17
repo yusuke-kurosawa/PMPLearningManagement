@@ -1,4 +1,12 @@
-import { NextAuthOptions } from 'next-auth'
+/**
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
+ */ import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'

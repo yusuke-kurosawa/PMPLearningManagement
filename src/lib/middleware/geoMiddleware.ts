@@ -1,8 +1,12 @@
 /**
- * GeoIP統合ミドルウェア
- * Developer 1: 地理的制限とアクセスパターン監視のミドルウェア
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 import { Request, Response, NextFunction } from 'express'
 import { geoIPService, GeoRestrictionConfig } from '../security/geoip'
 import { ddosProtection } from '../security/rateLimiting'

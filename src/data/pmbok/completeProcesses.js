@@ -1,6 +1,12 @@
-// 完全なPMBOK第6版の49プロセスデータ
-// PMBOK準拠性を100%にするための完全なプロセス定義
-
+/**
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
+ */
 export const completeProcessGroups = ['立上げ', '計画', '実行', '監視・コントロール', '終結']
 
 export const completeKnowledgeAreas = [

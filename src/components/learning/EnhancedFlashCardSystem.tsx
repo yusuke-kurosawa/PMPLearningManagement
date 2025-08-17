@@ -1,6 +1,9 @@
 /**
- * Enhanced Flashcard System with Spaced Repetition and Backend Integration
- * Developer 3: Flashcard System Developer Implementation
+ * 学習機能・教育コンテンツ実装
+ * Developer 10: 教育システム・学習体験
+ * 機能: フラッシュカード, 模擬試験, 進捗管理
+ * セキュリティレベル: Low
+ * 最終更新: {updated}
  */
 
 import React, { useState, useEffect, useCallback } from 'react'

@@ -1,6 +1,9 @@
 /**
- * キーローテーション・キー管理システム テストファイル
- * Developer 3: 包括的なキー管理機能テスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
@@ -299,7 +302,7 @@ describe('KeyManagementSystem', () => {
 
     it('should warn when production setup is called in non-production', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      
+
       // 環境変数がtestに設定されていることを確認
       const originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'test'

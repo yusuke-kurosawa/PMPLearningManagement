@@ -1,3 +1,10 @@
+/**
+ * 認証・認可システム実装
+ * Developer 1: 包括的認可システム（RBAC）実装
+ * セキュリティレベル: Critical
+ * 依存関係: Supabase, JWT, React
+ * 最終更新: {updated}
+ */
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'

@@ -1,5 +1,12 @@
-// PMP模擬試験の問題バンク
-
+/**
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
+ */
 export const questionTypes = {
   SINGLE_CHOICE: 'single_choice',
   MULTIPLE_CHOICE: 'multiple_choice',

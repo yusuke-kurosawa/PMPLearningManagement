@@ -1,8 +1,12 @@
 /**
- * 包括的Redis キャッシングシステム
- * Developer 5: Redisキャッシング戦略・ミドルウェア・無効化ロジック実装
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 import Redis from 'ioredis'
 import { z } from 'zod'
 

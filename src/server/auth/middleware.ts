@@ -1,7 +1,9 @@
 /**
- * Authentication Middleware
- * Request authentication, authorization, and rate limiting
- * 担当: 認証・セキュリティエンジニア
+ * 認証・認可システム実装
+ * Developer 1: 包括的認可システム（RBAC）実装
+ * セキュリティレベル: Critical
+ * 依存関係: Supabase, JWT, React
+ * 最終更新: {updated}
  */
 
 import { NextRequest, NextResponse } from 'next/server'

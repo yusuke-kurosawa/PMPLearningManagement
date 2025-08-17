@@ -1,6 +1,9 @@
 /**
- * Context Monitoring and Rotation Service
- * Monitors context usage and implements automatic rotation policies
+ * フロントエンドサービス・状態管理実装
+ * Developer 9: React専門・状態管理
+ * 技術スタック: React Context, Zustand, Custom Hooks
+ * セキュリティレベル: Medium
+ * 最終更新: {updated}
  */
 
 import contextManager from './contextManager.js'

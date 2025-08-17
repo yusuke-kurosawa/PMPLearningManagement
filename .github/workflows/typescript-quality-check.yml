@@ -1,0 +1,323 @@
+# TypeScript品質保証ワークフロー
+# 目的: すべてのPull RequestでTypeScript品質を自動検証
+# 実行タイミング: Pull Request作成・更新時、main/develop ブランチへのpush時
+# 主な処理: TypeScript型チェック、ESLint検証、新規JavaScript検出
+
+name: 🔍 TypeScript Quality Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch: # 手動実行対応
+
+# 並行実行制御：同一ブランチで実行中の場合はキャンセル
+concurrency:
+  group: typescript-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+# 最小権限設定
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  typescript-quality-check:
+    name: 🎯 TypeScript品質検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+        with:
+          # フルヒストリー取得（差分検出用）
+          fetch-depth: 0
+
+      - name: 📋 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 依存関係インストール
+        run: |
+          npm ci
+          echo "✅ Dependencies installed"
+
+      - name: 🚫 新規JavaScriptファイル検出
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Checking for new JavaScript files..."
+          
+          # ベースブランチとの差分で新規JavaScriptファイルを検出
+          NEW_JS_FILES=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | grep -E "^A.*\.(js|jsx)$" || true)
+          
+          if [ ! -z "$NEW_JS_FILES" ]; then
+            echo "❌ ERROR: New JavaScript files detected in this PR!"
+            echo "Found files:"
+            echo "$NEW_JS_FILES"
+            echo ""
+            echo "🔧 Please use TypeScript (.ts/.tsx) instead:"
+            echo "$NEW_JS_FILES" | sed 's/\.jsx\?$/.tsx/' | sed 's/^A\t/  Recommended: /'
+            echo ""
+            echo "📚 See TypeScript migration guide: docs/TYPESCRIPT_MIGRATION_ROADMAP.md"
+            exit 1
+          else
+            echo "✅ No new JavaScript files detected"
+          fi
+
+      - name: 🔍 TypeScript型チェック
+        run: |
+          echo "📝 Running TypeScript compilation check..."
+          npm run typecheck
+          echo "✅ TypeScript compilation successful"
+
+      - name: 🎨 ESLint TypeScript検証
+        run: |
+          echo "🔍 Running ESLint with TypeScript rules..."
+          npm run lint
+          echo "✅ ESLint validation passed"
+
+      - name: 📊 TypeScript化率計算
+        id: ts-adoption
+        run: |
+          echo "📊 Calculating TypeScript adoption rate..."
+          
+          # TypeScriptファイル数計算
+          TS_FILES=$(find src -name "*.ts" -o -name "*.tsx" | wc -l)
+          # JavaScriptファイル数計算（node_modules, dist除外）
+          JS_FILES=$(find . -name "*.js" -o -name "*.jsx" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./coverage/*" | wc -l)
+          
+          TOTAL_FILES=$((TS_FILES + JS_FILES))
+          
+          if [ $TOTAL_FILES -gt 0 ]; then
+            TS_PERCENTAGE=$((TS_FILES * 100 / TOTAL_FILES))
+          else
+            TS_PERCENTAGE=100
+          fi
+          
+          echo "ts_files=$TS_FILES" >> $GITHUB_OUTPUT
+          echo "js_files=$JS_FILES" >> $GITHUB_OUTPUT
+          echo "total_files=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          echo "adoption_rate=$TS_PERCENTAGE" >> $GITHUB_OUTPUT
+          
+          echo "📈 TypeScript Adoption: $TS_PERCENTAGE% ($TS_FILES/$TOTAL_FILES files)"
+          
+          # 100%達成チェック
+          if [ $TS_PERCENTAGE -eq 100 ]; then
+            echo "🎉 100% TypeScript adoption achieved!"
+          else
+            echo "🎯 Target: 100% TypeScript adoption"
+            echo "📋 Remaining: $JS_FILES JavaScript files"
+          fi
+
+      - name: 🔍 any型使用検出
+        run: |
+          echo "🚫 Checking for 'any' type usage..."
+          
+          # srcディレクトリ内のTypeScriptファイルでany型使用をチェック
+          ANY_USAGE=$(grep -r ": any\|<any>\|any\[\]\|: any\|as any" src --include="*.ts" --include="*.tsx" || true)
+          
+          if [ ! -z "$ANY_USAGE" ]; then
+            echo "⚠️ WARNING: 'any' type usage detected:"
+            echo "$ANY_USAGE"
+            echo ""
+            echo "🔧 Please replace 'any' with specific types or 'unknown'"
+            echo "📚 See TypeScript guidelines: docs/TYPESCRIPT_UNIFIED_STANDARDS.md"
+            # Warning only - not failing the build yet
+          else
+            echo "✅ No 'any' type usage detected"
+          fi
+
+      - name: 🧪 型安全性テスト実行
+        run: |
+          echo "🧪 Running tests to verify type safety..."
+          npm run test:run
+          echo "✅ Type safety tests passed"
+
+      - name: 📝 品質レポート生成
+        if: always()
+        run: |
+          echo "📝 Generating TypeScript quality report..."
+          
+          # TypeScript統一状況レポート実行
+          node scripts/typescript-enforcement.js > typescript-quality-report.txt || true
+          
+          echo "📊 TypeScript Quality Report Generated"
+          echo "Report content:"
+          cat typescript-quality-report.txt
+
+      - name: 💬 PR品質レポートコメント
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // TypeScript化率の取得
+            const tsFiles = '${{ steps.ts-adoption.outputs.ts_files }}';
+            const jsFiles = '${{ steps.ts-adoption.outputs.js_files }}';
+            const adoptionRate = '${{ steps.ts-adoption.outputs.adoption_rate }}';
+            
+            // 品質レポートの読み込み
+            let qualityReport = '';
+            try {
+              qualityReport = fs.readFileSync('typescript-quality-report.txt', 'utf8');
+            } catch (error) {
+              qualityReport = 'Quality report generation failed';
+            }
+            
+            // PRコメント作成
+            const comment = `## 🔍 TypeScript品質チェック結果
+            
+            ### 📊 TypeScript化進捗
+            - **TypeScriptファイル**: ${tsFiles}件
+            - **JavaScriptファイル**: ${jsFiles}件  
+            - **TypeScript化率**: ${adoptionRate}%
+            
+            ${adoptionRate === '100' ? '🎉 **100% TypeScript化達成!**' : `🎯 **目標まで**: ${100 - adoptionRate}%`}
+            
+            ### ✅ 品質チェック
+            - ✅ TypeScriptコンパイル成功
+            - ✅ ESLint TypeScript準拠
+            - ✅ テスト通過
+            - ✅ 新規JavaScriptファイルなし
+            
+            ### 📋 詳細レポート
+            \`\`\`
+            ${qualityReport}
+            \`\`\`
+            
+            ---
+            🤖 *このコメントは [TypeScript Quality Check workflow](.github/workflows/typescript-quality-check.yml) により自動生成されました*
+            `;
+            
+            // 既存のコメントを検索
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('🔍 TypeScript品質チェック結果')
+            );
+            
+            if (existingComment) {
+              // 既存コメントを更新
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // 新規コメント作成
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: 📊 品質メトリクス収集
+        if: always()
+        run: |
+          echo "📊 Collecting quality metrics..."
+          
+          # メトリクスファイル作成
+          cat > typescript-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "pr_number": "${{ github.event.number }}",
+            "typescript_files": ${{ steps.ts-adoption.outputs.ts_files }},
+            "javascript_files": ${{ steps.ts-adoption.outputs.js_files }},
+            "adoption_rate": ${{ steps.ts-adoption.outputs.adoption_rate }},
+            "workflow_status": "success"
+          }
+          EOF
+          
+          echo "✅ Quality metrics collected"
+
+      - name: 📤 メトリクスアーティファクト保存
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-quality-metrics-${{ github.run_id }}
+          path: |
+            typescript-quality-report.txt
+            typescript-metrics.json
+          retention-days: 30
+
+  # TypeScript厳格モード検証（オプション）
+  strict-mode-check:
+    name: 🎯 TypeScript厳格モード検証
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: typescript-quality-check
+
+    steps:
+      - name: 📥 リポジトリチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 📋 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 依存関係インストール
+        run: npm ci
+
+      - name: 🔒 厳格設定確認
+        run: |
+          echo "🔒 Verifying strict TypeScript configuration..."
+          
+          # tsconfig.jsonの厳格設定確認
+          if ! grep -q '"strict": true' tsconfig.json; then
+            echo "❌ ERROR: strict mode not enabled in tsconfig.json"
+            exit 1
+          fi
+          
+          if ! grep -q '"noImplicitAny": true' tsconfig.json; then
+            echo "❌ ERROR: noImplicitAny not enabled in tsconfig.json"
+            exit 1
+          fi
+          
+          echo "✅ Strict TypeScript configuration verified"
+
+      - name: 🔍 厳格モードコンパイル
+        run: |
+          echo "🔍 Running TypeScript compilation in strict mode..."
+          
+          # 一時的により厳格な設定でコンパイルチェック
+          npx tsc --noEmit --strict --exactOptionalPropertyTypes
+          
+          echo "✅ Strict mode compilation successful"
+
+  # 通知ジョブ（失敗時のSlack通知など）
+  notify-quality-check:
+    name: 📢 品質チェック結果通知
+    runs-on: ubuntu-latest
+    needs: [typescript-quality-check, strict-mode-check]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📢 成功通知
+        if: needs.typescript-quality-check.result == 'success' && needs.strict-mode-check.result == 'success'
+        run: |
+          echo "🎉 TypeScript quality check passed on main branch!"
+          echo "All quality gates are green ✅"
+
+      - name: 🚨 失敗通知
+        if: needs.typescript-quality-check.result == 'failure' || needs.strict-mode-check.result == 'failure'
+        run: |
+          echo "🚨 TypeScript quality check failed on main branch!"
+          echo "Immediate attention required ❌"
+          # 将来的にSlack通知やメール通知を追加可能

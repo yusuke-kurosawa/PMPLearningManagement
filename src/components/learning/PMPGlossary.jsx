@@ -1,3 +1,10 @@
+/**
+ * 学習機能・教育コンテンツ実装
+ * Developer 10: 教育システム・学習体験
+ * 機能: フラッシュカード, 模擬試験, 進捗管理
+ * セキュリティレベル: Low
+ * 最終更新: {updated}
+ */
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { Search, X, Tag, Book, ChevronRight } from 'lucide-react'
 import { useLocation } from 'react-router-dom'

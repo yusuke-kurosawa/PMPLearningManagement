@@ -1,7 +1,9 @@
 /**
- * Stripe Payment Service
- * Payment processing, subscription management, and billing operations
- * 担当: 統合・外部APIエンジニア, ビジネスロジックエンジニア
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import Stripe from 'stripe'

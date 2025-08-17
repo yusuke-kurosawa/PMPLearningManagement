@@ -1,7 +1,9 @@
 /**
- * Learning Service
- * Business logic for learning progress management and analytics
- * 担当: ビジネスロジックエンジニア, API・データエンジニア
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { prisma } from '@/lib/db'

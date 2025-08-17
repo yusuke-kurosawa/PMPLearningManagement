@@ -1,8 +1,12 @@
 /**
- * API Client Configuration for PMP Learning Management System
- * Provides unified API client with authentication, error handling, and caching
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 import { createTRPCReact } from '@trpc/react-query'
 import { createTRPCMsw } from 'msw-trpc'
 import { httpBatchLink, loggerLink } from '@trpc/client'

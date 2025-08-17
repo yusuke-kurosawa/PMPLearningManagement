@@ -1,3 +1,10 @@
+/**
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
+ */
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@test/utils/test-utils'

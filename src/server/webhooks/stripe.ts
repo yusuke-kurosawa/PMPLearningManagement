@@ -1,7 +1,9 @@
 /**
- * Stripe WebHook Handler
- * Process Stripe events and sync subscription/payment status
- * 担当: 統合・外部APIエンジニア
+ * 決済システム統合
+ * Developer 3: 決済・サブスクリプション管理
+ * 決済プロバイダー: Stripe
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
  */
 
 import { NextRequest, NextResponse } from 'next/server'

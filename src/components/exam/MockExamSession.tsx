@@ -1,6 +1,9 @@
 /**
- * Enhanced Mock Exam Component with Backend Integration
- * Developer 1: Mock Exam Lead Implementation
+ * 学習機能・教育コンテンツ実装
+ * Developer 10: 教育システム・学習体験
+ * 機能: フラッシュカード, 模擬試験, 進捗管理
+ * セキュリティレベル: Low
+ * 最終更新: {updated}
  */
 
 import React, { useEffect, useCallback, useState } from 'react'

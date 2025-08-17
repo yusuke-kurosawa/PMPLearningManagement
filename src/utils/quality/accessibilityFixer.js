@@ -1,8 +1,12 @@
 /**
- * アクセシビリティ自動修正ユーティリティ
- * WCAG 2.1 AA準拠のための再利用可能な修正関数集
+ * ファイル説明: {description}
+ * 開発者: {developer}
+ * 専門分野: {specialization}
+ * 作成日: {created}
+ * 最終更新: {updated}
+ * 依存関係: {dependencies}
+ * セキュリティレベル: {security_level}
  */
-
 /**
  * 画像のalt属性を自動生成・修正
  */

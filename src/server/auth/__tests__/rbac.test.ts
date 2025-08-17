@@ -1,6 +1,9 @@
 /**
- * RBAC (Role-Based Access Control) システムのテスト
- * Developer 1: 包括的認可システム（RBAC）実装のテスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'

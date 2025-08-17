@@ -1,7 +1,9 @@
 /**
- * Authentication Router (tRPC)
- * User authentication, registration, and session management
- * 担当: 認証・セキュリティエンジニア, リード
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { z } from 'zod'

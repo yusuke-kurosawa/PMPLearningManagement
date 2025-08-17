@@ -1,6 +1,9 @@
 /**
- * データベース接続プール・最適化システムのテスト
- * Developer 4: データベース最適化・インデックス・接続プール設定のテスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'

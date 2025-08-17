@@ -1,6 +1,9 @@
 /**
- * Redis キャッシングシステムのテスト
- * Developer 5: Redisキャッシング戦略・ミドルウェア・無効化ロジック実装のテスト
+ * テストケース実装
+ * Developer 8: 品質保証エンジニア
+ * テストタイプ: {test_type}
+ * 対象: {target}
+ * 最終更新: {updated}
  */
 
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'

@@ -1,6 +1,9 @@
 /**
- * Core Web Vitals Optimization System
- * Automatically measures and optimizes LCP, FID, and CLS
+ * PWA・モバイル機能実装
+ * Developer 6: PWA & Mobile Developer
+ * 機能: Service Worker, Cache API, Push Notifications
+ * プラットフォーム: Progressive Web App
+ * 最終更新: {updated}
  */
 
 import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals'

@@ -1,6 +1,9 @@
 /**
- * 包括的ヘルスチェック・システム監視
- * Developer 6: Prometheus監視・ヘルスチェック・パフォーマンス測定実装
+ * セキュリティ・監視システム実装
+ * Developer 7: セキュリティ・DevOpsエンジニア
+ * 機能: 暗号化, レート制限, メトリクス収集
+ * セキュリティレベル: Critical
+ * 最終更新: {updated}
  */
 
 import { z } from 'zod'

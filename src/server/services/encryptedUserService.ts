@@ -1,6 +1,9 @@
 /**
- * 暗号化対応ユーザーサービス
- * Developer 2: データ暗号化・ハッシュ化・暗号化ユーティリティ実装
+ * バックエンドサービス実装
+ * Developer 2: サーバーサイド・API基盤
+ * 技術スタック: tRPC, Prisma
+ * セキュリティレベル: High
+ * 最終更新: {updated}
  */
 
 import { prisma } from '@/lib/db'
