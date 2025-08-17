@@ -26,7 +26,7 @@ describe('データ暗号化システム', () => {
     // テスト用環境変数の設定
     process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex')
     process.env.HASH_PEPPER = crypto.randomBytes(16).toString('hex')
-    process.env.APP_SECRET = 'test-app-secret-for-hmac-operations'
+    process.env.APP_SECRET = crypto.randomBytes(32).toString('hex') // 32バイト = 64文字のhex
   })
 
   afterEach(() => {
