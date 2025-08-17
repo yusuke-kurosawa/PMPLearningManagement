@@ -630,7 +630,7 @@ export class SubscriptionService {
         try {
           await this.syncSubscriptionStatus(subscription.userId)
           processed++
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.error(`期限切れサブスクリプション処理エラー (${subscription.userId}):`, error)
           }

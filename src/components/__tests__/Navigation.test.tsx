@@ -1,12 +1,46 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@test/utils/test-utils'
-import { checkA11y } from '@test/utils/accessibility'
+import { render, screen } from '../../test/utils/test-utils'
+import { checkA11y } from '../../test/utils/accessibility'
 import Navigation from '../layout/Navigation'
 
 // Mock GlobalSearch component to avoid complex dependencies in unit tests
-vi.mock('../GlobalSearch', () => ({
+vi.mock('../shared/GlobalSearch', () => ({
   default: () => <div data-testid="global-search">Global Search</div>,
+}))
+
+// Mock useTheme hook from ThemeContext
+vi.mock('../../contexts/ThemeContext', () => ({
+  default: React.createContext(null),
+  useTheme: () => ({
+    settings: {
+      darkMode: false,
+    },
+    toggleDarkMode: vi.fn(),
+    isDarkMode: false,
+    toggleTheme: vi.fn(),
+  })
+}))
+
+// Mock useAuth hook from AuthContext  
+vi.mock('../../contexts/AuthContext', () => ({
+  default: React.createContext(null),
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    isAuthenticated: false,
+    userName: null,
+    userAvatar: null,
+    role: 'guest',
+    isAdmin: false,
+    isInstructor: false,
+    signOut: vi.fn(),
+  })
+}))
+
+// Mock SettingsTrigger component
+vi.mock('../shared/SettingsTrigger', () => ({
+  default: () => <div data-testid="settings-trigger">Settings</div>,
 }))
 
 describe('Navigation', () => {
@@ -84,15 +118,15 @@ describe('Navigation', () => {
   it('has navigation links with correct hrefs', async () => {
     render(<Navigation />)
 
-    // Check that navigation links have correct hrefs
+    // Check that navigation links have correct hrefs (BrowserRouter format in tests)
     const matrixLink = screen.getByRole('link', { name: /マトリックス/i })
-    expect(matrixLink).toHaveAttribute('href', '#/matrix')
+    expect(matrixLink).toHaveAttribute('href', '/matrix')
 
     const networkLink = screen.getByRole('link', { name: /ネットワーク図/i })
-    expect(networkLink).toHaveAttribute('href', '#/network')
+    expect(networkLink).toHaveAttribute('href', '/network')
 
     const glossaryLink = screen.getByRole('link', { name: /用語集/i })
-    expect(glossaryLink).toHaveAttribute('href', '#/glossary')
+    expect(glossaryLink).toHaveAttribute('href', '/glossary')
   })
 
   describe('Accessibility', () => {

@@ -238,7 +238,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
 
               {/* Refresh Interval */}
               <div>
-                <label className="mb-2 block text-sm font-medium" htmlFor="refresh-interval">Refresh Interval</label>
+                <label htmlFor="refresh-interval" className="mb-2 block text-sm font-medium">Refresh Interval</label>
                 <select
                   id="refresh-interval"
                   value={refreshInterval}

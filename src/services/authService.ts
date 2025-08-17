@@ -94,14 +94,14 @@ export type OAuthProvider = 'google' | 'github' | 'microsoft'
  * ログイン試行記録インターフェース
  * @description 失敗したログイン試行の追跡用
  */
-interface LoginAttempt {
-  /** 試行時刻 */
-  timestamp: Date
-  /** IPアドレス */
-  ipAddress?: string
-  /** ユーザーエージェント */
-  userAgent?: string
-}
+// interface _LoginAttempt {
+//   /** 試行時刻 */
+//   timestamp: Date
+//   /** IPアドレス */
+//   ipAddress?: string
+//   /** ユーザーエージェント */
+//   userAgent?: string
+// }
 
 // ========================================
 // メイン認証サービスクラス

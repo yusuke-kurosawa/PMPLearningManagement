@@ -118,7 +118,7 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
             localStorage.setItem('searchHistory', JSON.stringify(userData.searchHistory))
           }
           alert('データのインポートが完了しました。')
-        } catch (error) {
+        } catch (_error) {
           alert('ファイルの形式が正しくありません。')
         }
       }

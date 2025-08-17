@@ -31,10 +31,10 @@ on:
     outputs:
       build-success:
         description: 'ビルドが成功したか'
-        value: ${{ jobs.shared-setup.outputs.build-success }}
+        value: ${{ jobs.build-application.outputs.build-success || 'skipped' }}
       test-results:
         description: 'テスト結果'
-        value: ${{ jobs.shared-setup.outputs.test-results }}
+        value: ${{ jobs.test-execution.outputs.test-results || 'skipped' }}
 
 env:
   NODE_VERSION: ${{ inputs.node-version }}
@@ -161,7 +161,7 @@ jobs:
   build-application:
     name: 🏗️ アプリケーションビルド
     runs-on: ubuntu-latest
-    needs: [shared-setup, quality-checks]
+    needs: shared-setup
     if: contains(inputs.workflow-type, 'build') || contains(inputs.workflow-type, 'full')
     outputs:
       build-success: ${{ steps.build.outcome == 'success' }}

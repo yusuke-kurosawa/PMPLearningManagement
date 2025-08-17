@@ -186,14 +186,19 @@ const MockExam = () => {
   const isBookmarked = bookmarkedQuestions.has(currentQuestion.id)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" role="main">
+      {/* Screen reader announcement for exam state */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Question {currentQuestionIndex + 1} of {examQuestions.length}. Time remaining: {formatTime(timeRemaining)}.
+      </div>
+      
       {/* ヘッダー */}
-      <div className="sticky top-0 z-40 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-40 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold">PMP模擬試験</h2>
-              <span className="text-sm text-gray-600">
+              <h1 className="text-lg font-semibold">PMP模擬試験</h1>
+              <span className="text-sm text-gray-600" aria-label="Progress indicator">
                 問題 {currentQuestionIndex + 1} / {examQuestions.length}
               </span>
             </div>
@@ -210,25 +215,30 @@ const MockExam = () => {
 
               <button
                 onClick={() => setIsPaused(!isPaused)}
-                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100"
+                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label={isPaused ? 'Resume exam timer' : 'Pause exam timer'}
+                aria-pressed={isPaused}
               >
                 {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
               </button>
 
               <button
                 onClick={() => setShowQuestionList(!showQuestionList)}
-                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100"
+                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Show question list"
+                aria-expanded={showQuestionList}
+                aria-controls="question-list-sidebar"
               >
                 <List className="h-5 w-5" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="mx-auto max-w-4xl p-4">
         {/* 問題表示エリア */}
-        <div className="mb-4 rounded-lg bg-white p-6 shadow-lg">
+        <section className="mb-4 rounded-lg bg-white p-6 shadow-lg" aria-labelledby="current-question">
           <div className="mb-6 flex items-start justify-between">
             <div className="flex-1">
               <div className="mb-2 flex items-center gap-2">
@@ -243,25 +253,32 @@ const MockExam = () => {
                       : '難'}
                 </span>
               </div>
-              <h3 className="text-lg font-medium leading-relaxed text-gray-900">
+              <h2 id="current-question" className="text-lg font-medium leading-relaxed text-gray-900">
                 {currentQuestion.question}
-              </h3>
+              </h2>
             </div>
 
             <button
               onClick={toggleBookmark}
-              className={`rounded-lg p-2 transition-colors ${
+              className={`rounded-lg p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
                 isBookmarked
                   ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
                   : 'text-gray-400 hover:bg-gray-100'
               }`}
+              aria-label={isBookmarked ? 'Remove bookmark from this question' : 'Bookmark this question'}
+              aria-pressed={isBookmarked}
             >
               <Flag className="h-5 w-5" />
             </button>
           </div>
 
           {/* 選択肢 */}
-          <div className="space-y-3">
+          <fieldset className="space-y-3">
+            <legend className="sr-only">
+              {currentQuestion.type === questionTypes.SINGLE_CHOICE 
+                ? 'Select one answer' 
+                : 'Select multiple answers'}
+            </legend>
             {currentQuestion.options.map((option) => {
               const optionLetter = option.charAt(0)
               const isSelected =
@@ -298,14 +315,14 @@ const MockExam = () => {
                 </button>
               )
             })}
-          </div>
+          </fieldset>
 
           {currentQuestion.type === questionTypes.MULTIPLE_CHOICE && (
             <p className="mt-4 text-sm text-gray-600">
               ※ 複数選択問題です。該当するものをすべて選択してください。
             </p>
           )}
-        </div>
+        </section>
 
         {/* ナビゲーションボタン */}
         <div className="flex items-center justify-between">

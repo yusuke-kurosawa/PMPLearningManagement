@@ -5,6 +5,7 @@ import Footer from './Footer'
 import CommandPalette from '../shared/CommandPalette'
 import QuickShortcuts from '../shared/QuickShortcuts'
 import SettingsTrigger from '../shared/SettingsTrigger'
+import SkipLinks from '../shared/SkipLinks'
 
 const AppLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -33,6 +34,9 @@ const AppLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 transition-colors dark:bg-gray-900">
+      {/* Skip Links for Accessibility */}
+      <SkipLinks />
+
       {/* Global Command Palette */}
       <CommandPalette />
 
@@ -45,6 +49,7 @@ const AppLayout = ({ children }) => {
 
         {/* Main Content Area */}
         <main
+          id="main-content"
           className={`
             flex-1 transition-all duration-300
             ${showSidebar ? (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64') : 'ml-0'}

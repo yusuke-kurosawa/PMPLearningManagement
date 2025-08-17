@@ -249,7 +249,7 @@ class AuditLogger {
    * @returns Promise<void>
    */
   async log(event: AuditEvent): Promise<void> {
-    if (!this.isEnabled) { return }
+    if (!this.isEnabled) {return}
 
     try {
       const auditEntry = this.createAuditEntry(event)
@@ -317,7 +317,7 @@ class AuditLogger {
    * @private
    */
   private async flush(): Promise<void> {
-    if (this.queue.length === 0) { return }
+    if (this.queue.length === 0) {return}
 
     const batch = [...this.queue]
     this.queue = []
@@ -379,9 +379,9 @@ class AuditLogger {
 
     const errorActions = [AuditEventTypes.INVALID_TOKEN]
 
-    if (criticalActions.includes(action)) { return AuditSeverity.CRITICAL }
-    if (warningActions.includes(action)) { return AuditSeverity.WARNING }
-    if (errorActions.includes(action)) { return AuditSeverity.ERROR }
+    if (criticalActions.includes(action)) {return AuditSeverity.CRITICAL}
+    if (warningActions.includes(action)) {return AuditSeverity.WARNING}
+    if (errorActions.includes(action)) {return AuditSeverity.ERROR}
 
     return AuditSeverity.INFO
   }
@@ -404,32 +404,26 @@ class AuditLogger {
       }
       
       // Node.js環境での安全な乱数生成
-      if (typeof process !== 'undefined' && process.versions?.node) {
+      if (typeof require !== 'undefined') {
         try {
-          // 動的インポートを使用してrequire警告を回避
-          const crypto = await import('crypto')
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const crypto = require('crypto')
           const randomBytes = crypto.randomBytes(16)
           const randomString = randomBytes.toString('hex').substring(0, 12)
           return `${timestamp}-${randomString}`
         } catch (nodeError) {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('Node.js crypto module利用不可:', nodeError)
-          }
+          console.warn('Node.js crypto module利用不可:', nodeError)
         }
       }
       
       // 最終フォールバック（開発環境専用、暗号学的に安全でない）
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('⚠️ セキュリティ警告: 開発環境フォールバック使用。本番環境ではCrypto APIが必要です。')
-      }
+      console.warn('⚠️ セキュリティ警告: 開発環境フォールバック使用。本番環境ではCrypto APIが必要です。')
       const timestamp_suffix = Date.now().toString(36)
       const counter = (this.fallbackCounter = (this.fallbackCounter || 0) + 1)
       return `${timestamp}-dev-${timestamp_suffix}-${counter.toString(36)}`
       
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('ID生成エラー:', error)
-      }
+      console.error('ID生成エラー:', error)
       // 緊急フォールバック（タイムスタンプベース）
       return `${timestamp}-emergency-${timestamp.toString(36)}`
     }
@@ -462,18 +456,18 @@ class AuditLogger {
 
     // Detect browser
     let browser = 'Unknown'
-    if (userAgent.includes('Firefox')) { browser = 'Firefox' }
-    else if (userAgent.includes('Chrome')) { browser = 'Chrome' }
-    else if (userAgent.includes('Safari')) { browser = 'Safari' }
-    else if (userAgent.includes('Edge')) { browser = 'Edge' }
+    if (userAgent.includes('Firefox')) {browser = 'Firefox'}
+    else if (userAgent.includes('Chrome')) {browser = 'Chrome'}
+    else if (userAgent.includes('Safari')) {browser = 'Safari'}
+    else if (userAgent.includes('Edge')) {browser = 'Edge'}
 
     // Detect OS
     let os = 'Unknown'
-    if (platform.includes('Win')) { os = 'Windows' }
-    else if (platform.includes('Mac')) { os = 'macOS' }
-    else if (platform.includes('Linux')) { os = 'Linux' }
-    else if (userAgent.includes('Android')) { os = 'Android' }
-    else if (userAgent.includes('iOS')) { os = 'iOS' }
+    if (platform.includes('Win')) {os = 'Windows'}
+    else if (platform.includes('Mac')) {os = 'macOS'}
+    else if (platform.includes('Linux')) {os = 'Linux'}
+    else if (userAgent.includes('Android')) {os = 'Android'}
+    else if (userAgent.includes('iOS')) {os = 'iOS'}
 
     // Detect device type
     let deviceType = 'Desktop'
@@ -533,7 +527,7 @@ class AuditLogger {
 
       const { data, error } = await query
 
-      if (error) { throw error }
+      if (error) {throw error}
 
       return data
     } catch (error) {

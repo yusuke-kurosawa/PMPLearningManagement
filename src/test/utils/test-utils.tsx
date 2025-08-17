@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import ThemeContext from '../../contexts/ThemeContext'
 import AuthContext, { AuthContextType } from '../../contexts/AuthContext'
 import { UserRoles } from '../../services/authService'
@@ -11,6 +11,24 @@ const mockThemeContext = {
   isDarkMode: false,
   toggleTheme: vi.fn(),
   setTheme: vi.fn(),
+}
+
+// Mock settings context (for Navigation component)
+// const mockSettings = {
+//   darkMode: false,
+//   toggleDarkMode: vi.fn(),
+//   language: 'ja',
+//   setLanguage: vi.fn(),
+// }
+
+// Create a mock settings context provider
+const MockSettingsProvider = ({ children }: { children: React.ReactNode }) => {
+  // Use a simple Context.Provider since we're mocking
+  return React.createElement(
+    'div',
+    { 'data-testid': 'mock-settings-provider' },
+    children
+  )
 }
 
 // Mock auth context value
@@ -42,27 +60,27 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 
 const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <BrowserRouter>
+    <MemoryRouter initialEntries={['/']}>
       <ThemeContext.Provider value={mockThemeContext}>
         <AuthContext.Provider value={mockAuthContext}>{children}</AuthContext.Provider>
       </ThemeContext.Provider>
-    </BrowserRouter>
+    </MemoryRouter>
   )
 }
 
 const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
-  const { themeContext, authContext, initialEntries, ...renderOptions } = options
+  const { themeContext, authContext, initialEntries = ['/'], ...renderOptions } = options
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const mergedThemeContext = { ...mockThemeContext, ...themeContext }
     const mergedAuthContext = { ...mockAuthContext, ...authContext }
 
     return (
-      <BrowserRouter>
+      <MemoryRouter initialEntries={initialEntries}>
         <ThemeContext.Provider value={mergedThemeContext}>
           <AuthContext.Provider value={mergedAuthContext}>{children}</AuthContext.Provider>
         </ThemeContext.Provider>
-      </BrowserRouter>
+      </MemoryRouter>
     )
   }
 
@@ -83,18 +101,8 @@ export const mockLocation = {
   key: 'default',
 }
 
-// Mock useNavigate and useLocation hooks
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom')
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useLocation: () => mockLocation,
-  }
-})
-
 // Helper function to create test data
-export const _createTestUser = (overrides: Record<string, unknown> = {}) => ({
+export const createTestUser = (overrides: Record<string, unknown> = {}) => ({
   id: '123',
   email: 'test@example.com',
   name: 'Test User',
@@ -103,10 +111,10 @@ export const _createTestUser = (overrides: Record<string, unknown> = {}) => ({
 })
 
 // Helper function to wait for async operations
-export const _waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0))
+export const waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 // Mock window methods commonly used in tests
-export const _mockWindowMethods = () => {
+export const mockWindowMethods = () => {
   Object.defineProperty(window, 'scrollTo', {
     value: vi.fn(),
     writable: true,
@@ -128,7 +136,7 @@ export const _mockWindowMethods = () => {
 }
 
 // Mock localStorage
-export const _mockLocalStorage = () => {
+export const mockLocalStorage = () => {
   const storage: { [key: string]: string } = {}
 
   return {
@@ -165,7 +173,7 @@ export const createMockTouch = (overrides: Partial<Touch> = {}): Touch => ({
 })
 
 // Helper to create proper TouchEvent for testing
-export const _createMockTouchEvent = (
+export const createMockTouchEvent = (
   type: string,
   touchData: Array<Partial<Touch>> = []
 ): TouchEvent => {

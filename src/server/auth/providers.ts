@@ -123,8 +123,8 @@ export const authOptions: NextAuthOptions = {
   providers: [
     // Google OAuth Provider
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
           prompt: 'consent',
@@ -136,8 +136,8 @@ export const authOptions: NextAuthOptions = {
 
     // GitHub OAuth Provider
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
     }),
 
     // Email/Password Credentials Provider
@@ -234,13 +234,13 @@ export const authOptions: NextAuthOptions = {
         // OAuth プロバイダーの場合、既存ユーザーをチェック
         if (account?.provider !== 'credentials') {
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
+            where: { email: user?.email },
           })
 
           // 新規ユーザーの場合、デフォルト設定で作成
           if (!existingUser) {
             await createUserWithDefaults({
-              email: user.email!,
+              email: user?.email,
               name: user.name,
               image: user.image,
             })
@@ -295,7 +295,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.sub!
+        session.user.id = token?.sub
         session.user.role = token.role
         session.user.subscriptionPlan = token.subscriptionPlan
         session.user.subscriptionActive = token.subscriptionActive

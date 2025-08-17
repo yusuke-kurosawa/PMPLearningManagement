@@ -1,16 +1,74 @@
 #!/usr/bin/env node
 /**
- * ESLint警告完全解消スクリプト
- *
+ * ESLint警告完全解消スクリプト - Issue #90
+ * 172個の警告を自動修正してClean Codeを達成
+ * 
  * 主な修正内容:
- * 1. 未使用変数に_プレフィックス追加
- * 2. any型をunknown型に置換
- * 3. 未使用のインポートを削除
+ * 1. no-non-null-assertion (36個) - ! → 安全なアクセス
+ * 2. jsx-a11y修正 - アクセシビリティ改善
+ * 3. 未使用変数に_プレフィックス追加
+ * 4. any型をunknown型に置換
  */
 
 const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
+
+// no-non-null-assertion修正 (最優先)
+function fixNonNullAssertions() {
+  console.log('⚡ no-non-null-assertion修正中 (36個)...')
+  
+  const nonNullFiles = [
+    'src/components/visualizations/ITTOForceGraph.jsx',
+    'src/components/visualizations/EnhancedNetworkGraph.jsx',
+    'src/components/visualizations/SankeyDiagram.jsx',
+    'src/components/learning/FlashCardLearning.jsx'
+  ];
+
+  let fixedCount = 0;
+
+  nonNullFiles.forEach(filePath => {
+    const fullPath = path.join(process.cwd(), filePath);
+    
+    if (!fs.existsSync(fullPath)) {
+      console.log(`⚠️ ファイルが見つかりません: ${filePath}`);
+      return;
+    }
+
+    console.log(`🔍 修正中: ${filePath}`);
+    let content = fs.readFileSync(fullPath, 'utf8');
+    let modified = false;
+
+    // .! → ?. に変換 (最安全)
+    const dotPattern = /(\w+)\.(\w+)!/g;
+    if (content.match(dotPattern)) {
+      content = content.replace(dotPattern, '$1?.$2');
+      modified = true;
+    }
+
+    // [index]! → ?.[index] に変換
+    const arrayPattern = /(\w+)\[([^\]]+)\]!/g;
+    if (content.match(arrayPattern)) {
+      content = content.replace(arrayPattern, '$1?.[$2]');
+      modified = true;
+    }
+
+    // querySelector! などのDOM要素アクセス
+    const queryPattern = /(\w+\.querySelector[^(]*\([^)]+\))!/g;
+    if (content.match(queryPattern)) {
+      content = content.replace(queryPattern, '$1');
+      modified = true;
+    }
+
+    if (modified) {
+      fs.writeFileSync(fullPath, content, 'utf8');
+      console.log(`✅ 修正完了: ${filePath}`);
+      fixedCount++;
+    }
+  });
+
+  console.log(`📊 ${fixedCount}個のファイルでno-non-null-assertionを修正\n`);
+}
 
 const warningFixes = [
   // 未使用変数の修正
@@ -228,19 +286,22 @@ function fixGenericTypes() {
 async function main() {
   console.log('🔧 ESLint警告完全解消スクリプト開始...\n')
 
-  // 1. 未使用変数の修正
+  // 1. 最優先: no-non-null-assertion修正 (36個)
+  fixNonNullAssertions()
+
+  // 2. 未使用変数の修正
   console.log('📝 未使用変数を修正中...')
   for (const { file, replacements } of warningFixes) {
     fixFile(file, replacements)
   }
 
-  // 2. 未使用importの削除
+  // 3. 未使用importの削除
   removeUnusedImports()
 
-  // 3. ジェネリック型の修正
+  // 4. ジェネリック型の修正
   fixGenericTypes()
 
-  // 4. any型の修正
+  // 5. any型の修正
   fixAnyTypes()
 
   // 5. 最終チェック

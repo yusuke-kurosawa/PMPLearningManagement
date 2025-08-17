@@ -40,7 +40,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -63,7 +63,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -106,7 +106,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -128,7 +128,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'malicious-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -159,7 +159,7 @@ describe('JWT検証ミドルウェア', () => {
         iss: 'pmp-learning-system',
       }
 
-      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET!)
+      const token = jwt.sign(payload, process.env.NEXTAUTH_SECRET || "")
 
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
@@ -231,8 +231,7 @@ describe('JWT検証ミドルウェア', () => {
       const request = new NextRequest('http://localhost:3000/')
 
       // getTokenをモックして認証不要のルートをテスト
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue(null)
 
@@ -250,7 +249,7 @@ describe('JWT検証ミドルウェア', () => {
       const request = new NextRequest('http://localhost:3000/dashboard')
 
       // getTokenをモックして未認証状態をシミュレート
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue(null)
 
@@ -264,7 +263,7 @@ describe('JWT検証ミドルウェア', () => {
       const request = new NextRequest('http://localhost:3000/admin')
 
       // 一般ユーザーをモック
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
       const { getToken } = require('next-auth/jwt')
       getToken.mockResolvedValue({
         sub: 'user123',

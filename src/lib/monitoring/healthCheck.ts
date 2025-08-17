@@ -243,7 +243,7 @@ export class HealthCheckManager {
       }
 
       return { status, uptime }
-    } catch (error) {
+    } catch (_error) {
       return { status: HealthStatus.CRITICAL, uptime: 0 }
     }
   }

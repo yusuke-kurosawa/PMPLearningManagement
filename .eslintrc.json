@@ -9,8 +9,7 @@
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -26,6 +25,21 @@
     "jsx-a11y",
     "@typescript-eslint"
   ],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["error", { 
+          "argsIgnorePattern": "^_", 
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "no-unused-vars": "off"
+      }
+    }
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
@@ -33,30 +47,20 @@
     "react/jsx-uses-vars": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-non-null-assertion": "warn",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "prefer-const": "error",
     "no-var": "error",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "eqeqeq": "error",
-    "curly": "error"
+    "eqeqeq": ["error", "smart"],
+    "curly": ["error", "all"],
+    "jsx-a11y/no-autofocus": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
+    "jsx-a11y/label-has-associated-control": "warn"
   },
   "settings": {
     "react": {
       "version": "detect"
     }
-  },
-  "ignorePatterns": [
-    "dist",
-    "node_modules",
-    "coverage",
-    "test-results",
-    "playwright-report",
-    "*.config.js",
-    "*.config.mjs",
-    "*.config.ts"
-  ]
+  }
 }

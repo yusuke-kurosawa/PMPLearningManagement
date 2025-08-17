@@ -1,0 +1,153 @@
+# ================================================================
+# 🏗️ 再利用可能ワークフロー: ビルド処理
+# ================================================================
+# 目的: アプリケーションのビルド処理を標準化
+# 使用方法: 他のワークフローから呼び出して使用
+# ================================================================
+
+name: '🏗️ Reusable - Build'
+
+on:
+  workflow_call:
+    inputs:
+      build-mode:
+        description: 'ビルドモード (development|production|optimized)'
+        required: false
+        type: string
+        default: 'production'
+      node-version:
+        description: 'Node.jsのバージョン'
+        required: false
+        type: string
+        default: '18'
+      upload-artifact:
+        description: 'ビルド成果物をアップロードするか'
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      build-size:
+        description: 'ビルドサイズ'
+        value: ${{ jobs.build.outputs.size }}
+      build-time:
+        description: 'ビルド時間（秒）'
+        value: ${{ jobs.build.outputs.time }}
+
+jobs:
+  build:
+    name: '🏗️ ビルド処理'
+    runs-on: ubuntu-latest
+    outputs:
+      size: ${{ steps.measure.outputs.size }}
+      time: ${{ steps.measure.outputs.time }}
+    
+    steps:
+      # ステップ: ソースコードのチェックアウト
+      - name: '📥 ソースコード取得'
+        uses: actions/checkout@v4
+        
+      # ステップ: Node.js環境セットアップ
+      - name: '🔧 Node.js ${{ inputs.node-version }}セットアップ'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          
+      # ステップ: 依存関係インストール
+      - name: '📦 依存関係インストール'
+        run: npm ci
+        
+      # ステップ: ビルド実行
+      - name: '🏗️ ビルド実行 (${{ inputs.build-mode }})'
+        id: build
+        run: |
+          START_TIME=$(date +%s)
+          
+          # ビルドモードに応じてコマンドを選択
+          case "${{ inputs.build-mode }}" in
+            "development")
+              npm run build:dev || npm run build
+              ;;
+            "optimized")
+              npm run build:optimized || npm run build
+              ;;
+            *)
+              npm run build
+              ;;
+          esac
+          
+          END_TIME=$(date +%s)
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "Build completed in ${BUILD_TIME} seconds"
+        env:
+          NODE_ENV: ${{ inputs.build-mode == 'development' && 'development' || 'production' }}
+          
+      # ステップ: ビルドサイズ測定
+      - name: '📏 ビルドサイズ測定'
+        id: measure
+        run: |
+          # ビルドサイズを測定
+          if [ -d "dist" ]; then
+            SIZE=$(du -sh dist | cut -f1)
+            echo "size=${SIZE}" >> $GITHUB_OUTPUT
+            echo "Build size: ${SIZE}"
+            
+            # 詳細情報を表示
+            echo "=== Build Details ==="
+            find dist -name "*.js" -o -name "*.css" | head -10 | xargs ls -lh
+          else
+            echo "size=N/A" >> $GITHUB_OUTPUT
+          fi
+          
+          # ビルド時間を記録
+          echo "time=${BUILD_TIME:-0}" >> $GITHUB_OUTPUT
+          
+      # ステップ: バンドル分析
+      - name: '📊 バンドル分析'
+        run: |
+          echo "=== Bundle Analysis ==="
+          if [ -f "dist/stats.json" ]; then
+            echo "Bundle stats available"
+          fi
+          
+          # JavaScriptファイルの合計サイズ
+          JS_SIZE=$(find dist -name "*.js" -exec du -ch {} + 2>/dev/null | grep total$ | cut -f1)
+          echo "Total JS size: ${JS_SIZE:-0}"
+          
+          # CSSファイルの合計サイズ
+          CSS_SIZE=$(find dist -name "*.css" -exec du -ch {} + 2>/dev/null | grep total$ | cut -f1)
+          echo "Total CSS size: ${CSS_SIZE:-0}"
+        continue-on-error: true
+        
+      # ステップ: ビルド成果物アップロード
+      - name: '💾 ビルド成果物アップロード'
+        if: inputs.upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ inputs.build-mode }}
+          path: dist/
+          retention-days: 7
+          
+      # ステップ: ビルド品質チェック
+      - name: '✅ ビルド品質チェック'
+        run: |
+          # 必須ファイルの存在確認
+          echo "=== Build Quality Check ==="
+          
+          # index.htmlの存在確認
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Error: index.html not found"
+            exit 1
+          fi
+          
+          # アセットファイルの確認
+          JS_COUNT=$(find dist -name "*.js" | wc -l)
+          CSS_COUNT=$(find dist -name "*.css" | wc -l)
+          
+          echo "✅ index.html found"
+          echo "📦 JavaScript files: ${JS_COUNT}"
+          echo "🎨 CSS files: ${CSS_COUNT}"
+          
+          if [ "$JS_COUNT" -eq 0 ]; then
+            echo "⚠️ Warning: No JavaScript files found"
+          fi

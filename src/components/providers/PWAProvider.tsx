@@ -298,7 +298,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           minInterval: defaultConfig.syncInterval,
         })
       }
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.debug('PWA: Periodic background sync not supported or permission denied')
       }
@@ -476,7 +476,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           description: 'App link copied to clipboard',
         })
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     }

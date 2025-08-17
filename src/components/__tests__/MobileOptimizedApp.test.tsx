@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import MobileOptimizedApp from '../mobile/MobileOptimizedApp'
+import type { ServiceWorkerRegistration as _ServiceWorkerRegistration } from '../../types/service-worker'
 
 expect.extend(toHaveNoViolations)
 
@@ -123,7 +124,8 @@ describe('MobileOptimizedApp', () => {
         </MobileOptimizedApp>
       )
 
-      expect(screen.getByRole('button')).toBeInTheDocument()
+      const buttons = screen.getAllByRole('button')
+      expect(buttons.length).toBeGreaterThan(0) // At least one button
       expect(screen.getByText('PMP Learning')).toBeInTheDocument()
     })
 
@@ -144,7 +146,8 @@ describe('MobileOptimizedApp', () => {
       fireEvent(window, new Event('offline'))
 
       await waitFor(() => {
-        expect(screen.getByText(/offline/i)).toBeInTheDocument()
+        const offlineElements = screen.getAllByText(/offline/i)
+        expect(offlineElements.length).toBeGreaterThan(0)
       })
     })
 

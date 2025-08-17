@@ -162,7 +162,7 @@ const PMBOK7PerformanceDomains: React.FC = () => {
     <div className={`p-6 ${settings.darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
       {/* ヘッダー */}
       <div className="mb-8">
-        <h2 className="mb-3 text-3xl font-bold">PMBOK第7版 - 8つのパフォーマンスドメイン</h2>
+        <h1 className="mb-3 text-3xl font-bold">PMBOK第7版 - 8つのパフォーマンスドメイン</h1>
         <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           プロジェクトパフォーマンスを構成する相互関連した活動領域
         </p>

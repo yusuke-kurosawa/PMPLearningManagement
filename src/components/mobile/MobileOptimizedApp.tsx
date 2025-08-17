@@ -79,6 +79,7 @@ import { useToast } from '../../hooks/use-toast'
 // import { Tabs } from '../ui/tabs' // TODO: Will be used in future
 import { Switch } from '../ui/switch'
 // import { Progress } from '../ui/progress' // TODO: Will be used in future
+import SkipLinks from '../shared/SkipLinks'
 interface PWACapabilities {
   isInstalled: boolean
   isStandalone: boolean
@@ -252,6 +253,14 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const registerTouchGestures = () => {
     if (!appRef.current || !pwaCapabilities.supportsTouchGestures) {return}
     const element = appRef.current
+
+    const handleTouchMove = (_e: TouchEvent) => {
+      // Clear long press timeout on move
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current)
+        touchTimeoutRef.current = null
+      }
+    }
     element.addEventListener('touchstart', handleTouchStart, { passive: false })
     element.addEventListener('touchmove', handleTouchMove, { passive: false })
     element.addEventListener('touchend', handleTouchEnd, { passive: false })
@@ -291,6 +300,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   //   }
   const handleTouchEnd = (e: TouchEvent) => {
     if (!touchStart) {return}
+
     // Clear long press timeout
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
@@ -388,7 +398,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               },
             }))
           }
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.debug('Battery API not supported')
           }
@@ -429,6 +439,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   }
   const handleInstallApp = async () => {
     if (!installPromptEvent) {return}
+
     try {
       const result = await installPromptEvent.prompt()
       if (process.env.NODE_ENV === 'development') {
@@ -491,8 +502,11 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   ]
   return (
     <div ref={appRef} className={`min-h-screen bg-gray-50 ${isDarkMode ? 'dark' : ''}`}>
+      {/* Skip Links for Accessibility */}
+      <SkipLinks />
+
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
+      <header id="navigation" className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -624,7 +638,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         </div>
       </header>
       {/* Main Content */}
-      <main className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
+      <main id="main-content" className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
       {/* Mobile Bottom Navigation */}
       {deviceInfo.isMobile && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">

@@ -67,8 +67,7 @@ export class SLOManager extends EventEmitter {
   private monitoringInterval: NodeJS.Timer | null = null
   private prometheusRegistry: client.Registry
 
-  // SLO Compliance Metrics
-  private sloComplianceGauge: client.Gauge<string>
+  // SLO Compliance private sloComplianceGauge: client.Gauge<string>
   private sloViolationsCounter: client.Counter<string>
   private alertsSentCounter: client.Counter<string>
   private errorBudgetGauge: client.Gauge<string>
@@ -305,7 +304,7 @@ export class SLOManager extends EventEmitter {
 
       // Check for violations
       await this.evaluateSLOCompliance(slo, currentValue)
-    } catch (error) {
+    } catch (_error) {
       Logger.error(`SLO evaluation error for ${slo.id}:`, error)
     }
   }
@@ -509,7 +508,7 @@ export class SLOManager extends EventEmitter {
           channel,
           severity: violation.severity,
         })
-      } catch (error) {
+      } catch (_error) {
         Logger.error(`Failed to send alert to ${channel}:`, error)
       }
     }

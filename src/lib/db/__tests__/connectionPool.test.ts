@@ -8,7 +8,7 @@ import {
   EnhancedPrismaClient,
   DatabaseManager,
   DatabaseMonitor,
-  type _DatabaseStats,
+  type _
 } from '../connectionPool'
 import {
   QueryOptimizer,

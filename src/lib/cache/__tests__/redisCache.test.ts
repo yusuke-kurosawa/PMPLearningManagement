@@ -10,7 +10,7 @@ import {
   SpecializedCacheHelpers,
   CacheKeyStrategy,
   type CacheEntry,
-  type _CacheStats,
+  type _
 } from '../redisCache'
 import { AdvancedCacheManager, PMPCacheStrategies } from '../cacheStrategies'
 

@@ -38,15 +38,15 @@ interface TouchList {
   [index: number]: Touch
 }
 
-interface _TouchEvent extends UIEvent {
-  touches: TouchList
-  targetTouches: TouchList
-  changedTouches: TouchList
-  altKey: boolean
-  metaKey: boolean
-  ctrlKey: boolean
-  shiftKey: boolean
-}
+// interface TouchEvent extends UIEvent {
+//   touches: TouchList
+//   targetTouches: TouchList
+//   changedTouches: TouchList
+//   altKey: boolean
+//   metaKey: boolean
+//   ctrlKey: boolean
+//   shiftKey: boolean
+// }
 
 // Add missing properties to global objects for testing
 declare global {

@@ -256,7 +256,7 @@ const CommandPalette: React.FC = () => {
 
       const result = Function(`"use strict"; return (${cleanExpr})`)()
       return `= ${result}`
-    } catch (error) {
+    } catch (_error) {
       return 'エラー: 無効な式です'
     }
   }

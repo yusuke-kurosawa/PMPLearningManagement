@@ -395,7 +395,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
         title: 'Deck Exported',
         description: 'Your deck has been exported successfully.',
       })
-    } catch (error) {
+    } catch (__error) {
       toast({
         title: 'Export Failed',
         description: 'Failed to export deck.',

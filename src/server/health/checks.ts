@@ -406,7 +406,7 @@ export class HealthChecker {
         status: response.ok ? 'healthy' : 'unhealthy',
         responseTime,
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
