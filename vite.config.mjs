@@ -4,7 +4,14 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      // TypeScript support optimization
+      babel: {
+        plugins: []
+      }
+    })
+  ],
   
   // GitHub Pages configuration
   base: '/PMPLearningManagement/',
@@ -33,7 +40,13 @@ export default defineConfig({
             '@radix-ui/react-dropdown-menu'
           ],
           // Chart libraries (optional loading)
-          charts: ['recharts']
+          charts: ['recharts'],
+          // TypeScript and validation libraries
+          validation: ['zod', 'react-hook-form', '@hookform/resolvers'],
+          // State management and utilities
+          state: ['zustand', '@tanstack/react-query'],
+          // Authentication and security
+          auth: ['@supabase/supabase-js', '@supabase/auth-ui-react']
         },
         // Optimize chunk names for mobile caching
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -86,7 +99,8 @@ export default defineConfig({
       '@data': resolve(__dirname, './src/data'),
       '@hooks': resolve(__dirname, './src/hooks'),
       '@contexts': resolve(__dirname, './src/contexts'),
-      '@utils': resolve(__dirname, './src/utils')
+      '@utils': resolve(__dirname, './src/utils'),
+      '@types': resolve(__dirname, './src/types')
     }
   },
   
@@ -124,12 +138,21 @@ export default defineConfig({
     exclude: ['@stryker-mutator/core']
   },
 
-  // Performance optimizations
+  // Performance optimizations with TypeScript support
   esbuild: {
     target: 'es2020',
     treeShaking: true,
     minifyIdentifiers: true,
     minifySyntax: true,
-    minifyWhitespace: true
+    minifyWhitespace: true,
+    // TypeScript optimizations
+    keepNames: false,
+    loader: {
+      '.ts': 'ts',
+      '.tsx': 'tsx'
+    },
+    // Optimize for production builds
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    legalComments: 'none'
   }
 })

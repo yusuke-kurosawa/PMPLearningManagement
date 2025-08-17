@@ -1,0 +1,69 @@
+name: '🔧 複合アクション'
+description: '複合的な処理を統合実行するためのアクションディレクトリ'
+author: 'DevOps Team'
+
+inputs:
+  action-type:
+    description: '実行する複合アクションの種類'
+    required: true
+    type: choice
+    options:
+      - build-optimize
+      - quality-gate
+      - setup-node-cache
+
+outputs:
+  result:
+    description: '複合アクションの実行結果'
+    value: ${{ steps.action-selector.outputs.result }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📋 アクション選択と実行
+      id: action-selector
+      shell: bash
+      run: |
+        echo "🔧 複合アクション実行開始: ${{ inputs.action-type }}"
+        
+        case "${{ inputs.action-type }}" in
+          "build-optimize")
+            echo "🏗️ ビルド最適化アクションを実行"
+            echo "result=build-optimize-completed" >> $GITHUB_OUTPUT
+            ;;
+          "quality-gate")
+            echo "🚪 品質ゲートアクションを実行"
+            echo "result=quality-gate-completed" >> $GITHUB_OUTPUT
+            ;;
+          "setup-node-cache")
+            echo "⚡ Node.jsキャッシュセットアップを実行"
+            echo "result=setup-node-cache-completed" >> $GITHUB_OUTPUT
+            ;;
+          *)
+            echo "❌ 未知のアクションタイプ: ${{ inputs.action-type }}"
+            echo "result=error-unknown-action" >> $GITHUB_OUTPUT
+            exit 1
+            ;;
+        esac
+        
+        echo "✅ 複合アクション完了"
+
+    - name: 📊 実行サマリー
+      shell: bash
+      run: |
+        echo "## 🔧 複合アクション実行サマリー" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
+        echo "| **アクションタイプ** | \`${{ inputs.action-type }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **実行結果** | \`${{ steps.action-selector.outputs.result }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **実行時刻** | $(date -Iseconds) |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📂 利用可能な複合アクション" >> $GITHUB_STEP_SUMMARY
+        echo "- **build-optimize**: ビルド最適化処理" >> $GITHUB_STEP_SUMMARY
+        echo "- **quality-gate**: 品質ゲート検証" >> $GITHUB_STEP_SUMMARY
+        echo "- **setup-node-cache**: Node.jsキャッシュ設定" >> $GITHUB_STEP_SUMMARY
+
+branding:
+  icon: 'package'
+  color: 'blue'

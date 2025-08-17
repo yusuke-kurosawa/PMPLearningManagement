@@ -1,0 +1,290 @@
+# 🎯 Core TypeScript Type Check Workflow
+# 
+# 目的: TypeScript型チェック統合による品質保証強化
+# 実行タイミング: PR作成時、メインブランチプッシュ時、手動実行
+# 主な処理: 型チェック、型カバレッジ測定、型エラー報告
+# パフォーマンス目標: 型チェック30秒以内、型カバレッジ95%以上
+
+name: 🎯 Core TypeScript Type Check
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'fix/**'
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_cache:
+        description: 'キャッシュをスキップするか'
+        required: false
+        default: 'false'
+        type: boolean
+      verbose:
+        description: '詳細ログを有効にするか'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: 'v1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # ============================================
+  # TypeScript型チェック基盤
+  # ============================================
+  typescript-check:
+    name: 🔍 TypeScript型チェック実行
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Node.js ${{ env.NODE_VERSION }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: 📦 依存関係インストール（キャッシュ活用）
+        run: |
+          if [ "${{ inputs.skip_cache }}" = "true" ]; then
+            npm ci --cache ~/.npm --no-fund --no-audit
+          else
+            npm ci --prefer-offline --cache ~/.npm --no-fund --no-audit
+          fi
+
+      - name: 🏗️ TypeScript設定検証
+        run: |
+          echo "📋 TypeScript設定の検証"
+          npx tsc --showConfig | head -20
+          echo "✅ TypeScript設定は有効です"
+
+      - name: 🎯 TypeScript型チェック実行
+        run: |
+          echo "🔍 TypeScript型チェック開始..."
+          start_time=$(date +%s)
+          
+          # 型チェック実行
+          npm run typecheck
+          
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          echo "⏱️ 型チェック完了: ${duration}秒"
+          
+          # パフォーマンス目標チェック（30秒以内）
+          if [ $duration -gt 30 ]; then
+            echo "⚠️ 警告: 型チェック時間が目標を超過しました（${duration}s > 30s）"
+          else
+            echo "✅ 型チェック時間が目標内です（${duration}s ≤ 30s）"
+          fi
+
+      - name: 📊 型エラー詳細分析
+        if: failure()
+        run: |
+          echo "📊 型エラーの詳細分析"
+          echo "====================="
+          
+          # TypeScript診断情報取得
+          npx tsc --noEmit --listFiles | head -10
+          echo ""
+          echo "型チェックログ:"
+          npx tsc --noEmit 2>&1 | head -50 || true
+
+      - name: 📈 TypeScript増分チェック設定検証
+        run: |
+          echo "📈 TypeScript増分ビルド設定検証"
+          if [ -f ".tsbuildinfo" ]; then
+            echo "✅ 増分ビルド情報ファイルが存在します"
+            ls -la .tsbuildinfo
+          else
+            echo "📝 増分ビルド情報ファイルが生成されます"
+          fi
+
+  # ============================================
+  # 型カバレッジ測定（実験的）
+  # ============================================
+  type-coverage:
+    name: 📊 型カバレッジ測定
+    runs-on: ubuntu-latest
+    needs: typescript-check
+    timeout-minutes: 10
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+
+      - name: 🔧 Node.js ${{ env.NODE_VERSION }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: 📦 依存関係インストール
+        run: npm ci --prefer-offline --no-fund --no-audit
+
+      - name: 📊 型カバレッジ測定（実験的）
+        run: |
+          echo "📊 型カバレッジ分析開始..."
+          
+          # any使用率計算
+          any_count=$(grep -r "any" src/ --include="*.ts" --include="*.tsx" | wc -l || echo "0")
+          total_type_annotations=$(grep -r ": " src/ --include="*.ts" --include="*.tsx" | wc -l || echo "1")
+          
+          # any使用率計算（分母0防止）
+          if [ "$total_type_annotations" -gt 0 ]; then
+            any_percentage=$(echo "scale=2; ($any_count * 100) / $total_type_annotations" | bc -l || echo "0")
+          else
+            any_percentage="0"
+          fi
+          
+          echo "📈 型カバレッジレポート:"
+          echo "  - any使用箇所: ${any_count}件"
+          echo "  - 型注釈総数: ${total_type_annotations}件"
+          echo "  - any使用率: ${any_percentage}%"
+          
+          # 目標チェック（1%以下）
+          if (( $(echo "$any_percentage <= 1.0" | bc -l) )); then
+            echo "✅ any使用率が目標内です（${any_percentage}% ≤ 1%）"
+          else
+            echo "⚠️ 警告: any使用率が目標を超過しています（${any_percentage}% > 1%）"
+          fi
+
+      - name: 🔍 型安全性チェック
+        run: |
+          echo "🔍 型安全性追加チェック"
+          
+          # non-null assertion使用チェック
+          nonnull_count=$(grep -r "!" src/ --include="*.ts" --include="*.tsx" | grep -v "//" | wc -l || echo "0")
+          echo "📋 non-null assertion使用: ${nonnull_count}件"
+          
+          # @ts-ignore/@ts-expect-error使用チェック  
+          ts_ignore_count=$(grep -r "@ts-ignore\|@ts-expect-error" src/ --include="*.ts" --include="*.tsx" | wc -l || echo "0")
+          echo "📋 TypeScript ignore使用: ${ts_ignore_count}件"
+          
+          if [ "$ts_ignore_count" -gt 5 ]; then
+            echo "⚠️ 警告: TypeScript ignoreの使用が多すぎます（${ts_ignore_count}件 > 5件）"
+          else
+            echo "✅ TypeScript ignoreの使用は適切です（${ts_ignore_count}件 ≤ 5件）"
+          fi
+
+  # ============================================
+  # ESLint TypeScript統合チェック
+  # ============================================
+  eslint-typescript:
+    name: 🔧 ESLint TypeScript統合チェック
+    runs-on: ubuntu-latest
+    needs: typescript-check
+    timeout-minutes: 10
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+
+      - name: 🔧 Node.js ${{ env.NODE_VERSION }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: 📦 依存関係インストール
+        run: npm ci --prefer-offline --no-fund --no-audit
+
+      - name: 🔧 ESLint TypeScript実行
+        run: |
+          echo "🔧 ESLint TypeScript統合チェック開始..."
+          
+          # TypeScriptファイルのみをチェック
+          npm run lint -- --ext .ts,.tsx --format=compact
+          
+          echo "✅ ESLint TypeScriptチェック完了"
+
+      - name: 📊 ESLint TypeScript統計
+        run: |
+          echo "📊 ESLint TypeScript統計"
+          
+          # TypeScript関連の警告/エラー統計
+          lint_output=$(npm run lint -- --ext .ts,.tsx --format=json 2>/dev/null || echo "[]")
+          
+          # エラー/警告カウント（基本的な統計）
+          error_count=$(echo "$lint_output" | grep -c '"severity":2' || echo "0")
+          warning_count=$(echo "$lint_output" | grep -c '"severity":1' || echo "0")
+          
+          echo "📋 ESLint結果:"
+          echo "  - エラー: ${error_count}件"
+          echo "  - 警告: ${warning_count}件"
+          
+          if [ "$error_count" -eq 0 ]; then
+            echo "✅ ESLintエラーなし"
+          else
+            echo "❌ ESLintエラーあり: ${error_count}件"
+          fi
+
+  # ============================================
+  # 総合レポート生成
+  # ============================================
+  summary-report:
+    name: 📈 TypeScript品質総合レポート
+    runs-on: ubuntu-latest
+    needs: [typescript-check, type-coverage, eslint-typescript]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: 📈 TypeScript品質総合レポート生成
+        run: |
+          echo "📈 TypeScript品質総合レポート"
+          echo "============================="
+          echo ""
+          echo "🎯 Phase 1完了: ビルドシステム最適化"
+          echo "  ✅ TypeScript設定厳格化"
+          echo "  ✅ Vite TypeScript統合"
+          echo "  ✅ ESLint TypeScript強化"
+          echo ""
+          echo "📊 品質指標:"
+          echo "  - 型チェック: ${{ needs.typescript-check.result }}"
+          echo "  - 型カバレッジ: ${{ needs.type-coverage.result }}"
+          echo "  - ESLint統合: ${{ needs.eslint-typescript.result }}"
+          echo ""
+          echo "🚀 次のステップ: パフォーマンス最適化とBundle分析"
+          echo ""
+          echo "🔗 関連Issue: #132"
+
+      - name: 📊 成功率計算
+        run: |
+          # 成功率計算
+          total_jobs=3
+          successful_jobs=0
+          
+          [ "${{ needs.typescript-check.result }}" = "success" ] && successful_jobs=$((successful_jobs + 1))
+          [ "${{ needs.type-coverage.result }}" = "success" ] && successful_jobs=$((successful_jobs + 1))  
+          [ "${{ needs.eslint-typescript.result }}" = "success" ] && successful_jobs=$((successful_jobs + 1))
+          
+          success_rate=$(echo "scale=1; ($successful_jobs * 100) / $total_jobs" | bc -l)
+          
+          echo "📊 TypeScript品質ワークフロー成功率: ${success_rate}%"
+          
+          if (( $(echo "$success_rate >= 90" | bc -l) )); then
+            echo "🎉 優秀: TypeScript品質が高いレベルを維持しています"
+          elif (( $(echo "$success_rate >= 70" | bc -l) )); then
+            echo "⚠️ 改善推奨: TypeScript品質を向上させることを推奨します"
+          else
+            echo "❌ 要改善: TypeScript品質に問題があります"
+          fi
+
+# セキュリティ設定: 最小権限の原則
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write

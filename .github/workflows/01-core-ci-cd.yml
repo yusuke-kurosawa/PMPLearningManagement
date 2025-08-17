@@ -20,9 +20,29 @@ env:
   NODE_VERSION: "20"
   CACHE_VERSION: v1
 jobs:
+  # TypeScript型チェック統合
+  typescript-check:
+    name: 🎯 TypeScript型チェック
+    uses: ./.github/workflows/01-core-typescript-check.yml
+    timeout-minutes: 15
+
+  # TypeScript最適化ビルド
+  typescript-build:
+    name: 🏗️ TypeScript最適化ビルド
+    uses: ./.github/workflows/09-reusable-typescript-build.yml
+    needs: typescript-check
+    with:
+      node-version: "20"
+      build-target: "production"
+      run-typecheck: false  # 既に実行済み
+      bundle-analysis: true
+      cache-strategy: "aggressive"
+    timeout-minutes: 20
+
   integrated-checks:
     name: 🔄 統合品質・ビルドチェック
     uses: ./.github/workflows/00-reusable-workflows.yml
+    needs: [typescript-check, typescript-build]
     with:
       workflow-type: full
       node-version: "20"
@@ -42,6 +62,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
+      - typescript-check
+      - typescript-build
       - integrated-checks
       - claude-security-scan
     environment: production

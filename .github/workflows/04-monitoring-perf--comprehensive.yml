@@ -115,7 +115,7 @@ jobs:
           echo "📊 Analyzing bundle composition..."
 
           # Install bundle analyzer
-          npm install --save-dev webpack-bundle-analyzer@latest
+          npm install --save-dev webpack-bundle-analyzer@^4.10.2
 
           # Generate bundle analysis report
           npx vite-bundle-analyzer dist --format json > bundle-analysis.json
@@ -325,7 +325,7 @@ jobs:
           }
       - name: 🏮 Install Lighthouse CI
         run: |
-          npm install -g @lhci/cli@latest
+          npm install -g @lhci/cli@^0.14.0
           google-chrome --version
       - name: 🏮 Run Lighthouse Analysis (${{ matrix.device }})
         id: lighthouse-${{ matrix.device }}
@@ -486,7 +486,7 @@ jobs:
           echo "📡 Testing under ${{ matrix.scenario }} conditions..."
 
           # Install Puppeteer for network simulation
-          npm install --save-dev puppeteer@latest
+          npm install --save-dev puppeteer@^23.0.0
 
           # Create network testing script
           cat > network-test-${{ matrix.scenario }}.js << 'EOF'

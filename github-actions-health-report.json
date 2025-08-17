@@ -1,13 +1,18 @@
 {
-  "timestamp": "2025-08-17T12:15:41.888Z",
+  "timestamp": "2025-08-17T12:23:27.469Z",
   "guidelines": {
-    "integratedGuidelinesExists": false,
+    "integratedGuidelinesExists": true,
     "actionsDocumentationExists": true,
-    "lastModified": null,
-    "status": "needs-attention"
+    "lastModified": "2025-08-17T12:21:47.717Z",
+    "status": "healthy",
+    "completeness": {
+      "totalSections": 5,
+      "missingSections": [],
+      "completenessScore": "100.0"
+    }
   },
   "workflows": {
-    "totalWorkflows": 40,
+    "totalWorkflows": 42,
     "categories": 9,
     "categoryDistribution": {
       "00": [
@@ -22,6 +27,7 @@
         "01-ci-lighthouse.yml",
         "01-core-ci-cd.yml",
         "01-core-status-check.yml",
+        "01-core-typescript-check.yml",
         "01-deploy-cd--production.yml",
         "01-deploy-workflow.yml",
         "01-quality-comprehensive-check.yml"
@@ -66,17 +72,20 @@
       "09": [
         "09-reusable-build.yml",
         "09-reusable-node-setup.yml",
-        "09-reusable-setup.yml"
+        "09-reusable-setup.yml",
+        "09-reusable-typescript-build.yml"
       ]
     },
-    "issues": 0,
-    "issueDetails": [],
-    "status": "healthy"
+    "issues": 1,
+    "issueDetails": [
+      "09-reusable-typescript-build.yml: Missing manual trigger"
+    ],
+    "status": "good"
   },
   "actions": {
     "totalActions": 15,
-    "healthyActions": 11,
-    "healthScore": "73.3",
+    "healthyActions": 14,
+    "healthScore": "93.3",
     "actionDetails": {
       "cache-dependencies": {
         "hasActionYml": true,
@@ -93,22 +102,18 @@
         "status": "healthy"
       },
       "composite": {
-        "hasActionYml": false,
+        "hasActionYml": true,
         "hasDocumentation": false,
-        "lastModified": null,
-        "issues": [
-          "Missing action.yml file"
-        ],
-        "status": "needs-attention"
+        "lastModified": "2025-08-17T12:20:59.285Z",
+        "issues": [],
+        "status": "healthy"
       },
       "deploy-preview": {
         "hasActionYml": true,
         "hasDocumentation": false,
-        "lastModified": "2025-08-09T08:51:17.149Z",
-        "issues": [
-          "Missing Japanese documentation"
-        ],
-        "status": "needs-attention"
+        "lastModified": "2025-08-17T12:20:33.322Z",
+        "issues": [],
+        "status": "healthy"
       },
       "idd-validator": {
         "hasActionYml": true,
@@ -127,11 +132,9 @@
       "performance-audit": {
         "hasActionYml": true,
         "hasDocumentation": false,
-        "lastModified": "2025-08-09T08:52:15.993Z",
-        "issues": [
-          "Missing Japanese documentation"
-        ],
-        "status": "needs-attention"
+        "lastModified": "2025-08-17T12:20:43.063Z",
+        "issues": [],
+        "status": "healthy"
       },
       "quality-check": {
         "hasActionYml": true,
@@ -178,7 +181,7 @@
       "setup-node-env": {
         "hasActionYml": true,
         "hasDocumentation": false,
-        "lastModified": "2025-08-17T06:01:23.806Z",
+        "lastModified": "2025-08-17T12:21:16.123Z",
         "issues": [],
         "status": "healthy"
       },
@@ -192,29 +195,23 @@
         "status": "needs-attention"
       }
     },
-    "status": "needs-improvement"
+    "status": "good"
   },
   "integration": {
     "crossReferences": {
-      "guidelinesToActions": false,
+      "guidelinesToActions": true,
       "actionsToGuidelines": true,
       "workflowReferences": false
     },
-    "integrationScore": "33.3",
+    "integrationScore": "66.7",
     "status": "needs-improvement"
   },
   "recommendations": [
     {
-      "priority": "high",
-      "category": "guidelines",
-      "title": "Update Guidelines Documentation",
-      "description": "Ensure integrated guidelines and actions documentation are up to date"
-    },
-    {
       "priority": "medium",
-      "category": "actions",
-      "title": "Improve Custom Actions Health",
-      "description": "Update action.yml files and documentation for unhealthy actions"
+      "category": "workflows",
+      "title": "Fix Workflow Compliance Issues",
+      "description": "Address 1 workflow compliance issues"
     },
     {
       "priority": "low",

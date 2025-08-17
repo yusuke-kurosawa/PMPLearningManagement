@@ -1,5 +1,5 @@
-name: 'Deploy Preview Environment'
-description: 'Deploys a preview environment for PR reviews with automatic cleanup'
+name: '🌐 プレビュー環境デプロイ'
+description: 'PRレビュー用のプレビュー環境をデプロイし、自動クリーンアップを行います'
 author: 'DevOps Team'
 
 inputs:

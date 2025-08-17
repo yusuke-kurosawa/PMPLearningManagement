@@ -3,6 +3,10 @@
 このディレクトリには、PMPLearningManagementプロジェクトで使用する再利用可能なGitHub Actionsが含まれています。
 各アクションは特定のタスクを効率化し、ワークフロー全体の保守性を向上させます。
 
+> 📋 **関連ドキュメント**:  
+> - [統合ガイドライン](../../.claude/context/github-actions-rules.md) - ワークフロー作成・保守の統合ルール  
+> - [開発者向けリファレンス](../../docs/development/github-actions-reference.md) - 開発者向け詳細ガイド
+
 ## 📁 アクション一覧（実在するもの）
 
 ```

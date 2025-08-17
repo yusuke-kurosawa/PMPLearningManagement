@@ -1,0 +1,263 @@
+# 🔧 Reusable TypeScript Build Workflow
+#
+# 目的: TypeScript対応の再利用可能ビルドワークフロー
+# 利用場面: CI/CD全般でのビルド処理
+# 最適化: 型チェック統合、キャッシュ戦略、パフォーマンス監視
+
+name: 🔧 Reusable - TypeScript Build
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.jsのバージョン'
+        required: false
+        type: string
+        default: '20'
+      build-target:
+        description: 'ビルドターゲット（development/production）'
+        required: false
+        type: string
+        default: 'production'
+      run-typecheck:
+        description: '型チェックを実行するか'
+        required: false
+        type: boolean
+        default: true
+      bundle-analysis:
+        description: 'Bundle分析を実行するか'
+        required: false
+        type: boolean
+        default: false
+      cache-strategy:
+        description: 'キャッシュ戦略（aggressive/normal/disabled）'
+        required: false
+        type: string
+        default: 'normal'
+    outputs:
+      build-time:
+        description: 'ビルド時間（秒）'
+        value: ${{ jobs.typescript-build.outputs.build-time }}
+      bundle-size:
+        description: 'バンドルサイズ（MB）'
+        value: ${{ jobs.typescript-build.outputs.bundle-size }}
+      typecheck-time:
+        description: '型チェック時間（秒）'
+        value: ${{ jobs.typescript-build.outputs.typecheck-time }}
+
+env:
+  CACHE_VERSION: 'v1'
+
+jobs:
+  typescript-build:
+    name: 🏗️ TypeScript最適化ビルド
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      build-time: ${{ steps.build-metrics.outputs.build-time }}
+      bundle-size: ${{ steps.build-metrics.outputs.bundle-size }}
+      typecheck-time: ${{ steps.typecheck-metrics.outputs.typecheck-time }}
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Node.js ${{ inputs.node-version }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # ============================================
+      # インテリジェントキャッシュ戦略
+      # ============================================
+      - name: 📦 依存関係キャッシュ（戦略: ${{ inputs.cache-strategy }}）
+        id: deps-cache
+        uses: actions/cache@v3
+        if: inputs.cache-strategy != 'disabled'
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            .tsbuildinfo
+          key: ${{ runner.os }}-deps-${{ inputs.cache-strategy }}-${{ hashFiles('package-lock.json', 'tsconfig.json') }}-${{ env.CACHE_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-deps-${{ inputs.cache-strategy }}-
+            ${{ runner.os }}-deps-normal-
+
+      - name: 📦 依存関係インストール
+        run: |
+          echo "📦 依存関係インストール開始"
+          
+          install_start=$(date +%s)
+          
+          if [ "${{ steps.deps-cache.outputs.cache-hit }}" = "true" ] && [ "${{ inputs.cache-strategy }}" != "disabled" ]; then
+            echo "✅ キャッシュヒット: 高速インストール実行"
+            npm ci --prefer-offline --no-fund --no-audit
+          else
+            echo "📥 フルインストール実行"
+            npm ci --no-fund --no-audit
+          fi
+          
+          install_end=$(date +%s)
+          install_duration=$((install_end - install_start))
+          echo "⏱️ 依存関係インストール完了: ${install_duration}秒"
+
+      # ============================================
+      # TypeScript型チェック
+      # ============================================
+      - name: 🎯 TypeScript型チェック実行
+        id: typecheck-metrics
+        if: inputs.run-typecheck
+        run: |
+          echo "🎯 TypeScript型チェック開始..."
+          
+          typecheck_start=$(date +%s)
+          
+          # 型チェック実行
+          npm run typecheck
+          
+          typecheck_end=$(date +%s)
+          typecheck_duration=$((typecheck_end - typecheck_start))
+          
+          echo "⏱️ 型チェック完了: ${typecheck_duration}秒"
+          echo "typecheck-time=${typecheck_duration}" >> $GITHUB_OUTPUT
+          
+          # パフォーマンス目標チェック（30秒以内）
+          if [ $typecheck_duration -gt 30 ]; then
+            echo "⚠️ 警告: 型チェック時間が目標を超過（${typecheck_duration}s > 30s）"
+          else
+            echo "✅ 型チェック時間が目標内（${typecheck_duration}s ≤ 30s）"
+          fi
+
+      # ============================================
+      # 最適化ビルド実行
+      # ============================================
+      - name: 🏗️ 最適化ビルド実行
+        id: build-metrics
+        run: |
+          echo "🏗️ TypeScript最適化ビルド開始..."
+          echo "📋 ビルドターゲット: ${{ inputs.build-target }}"
+          
+          build_start=$(date +%s)
+          
+          # 環境変数設定
+          if [ "${{ inputs.build-target }}" = "production" ]; then
+            export NODE_ENV=production
+            echo "🎯 プロダクションビルド実行"
+            npm run build
+          else
+            export NODE_ENV=development
+            echo "🔧 開発ビルド実行"
+            npm run build
+          fi
+          
+          build_end=$(date +%s)
+          build_duration=$((build_end - build_start))
+          
+          echo "⏱️ ビルド完了: ${build_duration}秒"
+          echo "build-time=${build_duration}" >> $GITHUB_OUTPUT
+          
+          # バンドルサイズ測定
+          if [ -d "dist" ]; then
+            bundle_size_bytes=$(du -s dist | cut -f1)
+            bundle_size_mb=$(echo "scale=2; $bundle_size_bytes / 1024" | bc -l)
+            echo "📦 バンドルサイズ: ${bundle_size_mb}MB"
+            echo "bundle-size=${bundle_size_mb}" >> $GITHUB_OUTPUT
+            
+            # パフォーマンス目標チェック（1.5MB以内）
+            if (( $(echo "$bundle_size_mb <= 1.5" | bc -l) )); then
+              echo "✅ バンドルサイズが目標内（${bundle_size_mb}MB ≤ 1.5MB）"
+            else
+              echo "⚠️ 警告: バンドルサイズが目標を超過（${bundle_size_mb}MB > 1.5MB）"
+            fi
+          else
+            echo "❌ distディレクトリが見つかりません"
+            echo "bundle-size=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # ビルドパフォーマンス目標チェック（60秒以内）
+          if [ $build_duration -gt 60 ]; then
+            echo "⚠️ 警告: ビルド時間が目標を超過（${build_duration}s > 60s）"
+          else
+            echo "✅ ビルド時間が目標内（${build_duration}s ≤ 60s）"
+          fi
+
+      # ============================================
+      # Bundle分析（オプション）
+      # ============================================
+      - name: 📊 Bundle分析実行
+        if: inputs.bundle-analysis && inputs.build-target == 'production'
+        run: |
+          echo "📊 Bundle分析開始..."
+          
+          # 基本的なファイル分析
+          echo "📁 ビルド成果物:"
+          find dist -type f -name "*.js" -o -name "*.css" | head -10
+          
+          echo ""
+          echo "📊 主要ファイルサイズ:"
+          find dist -type f \( -name "*.js" -o -name "*.css" \) -exec ls -lh {} \; | sort -k5 -hr | head -5
+          
+          echo ""
+          echo "🎯 チャンク分析:"
+          find dist -name "*.js" | while read file; do
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+            size_kb=$(echo "scale=1; $size / 1024" | bc -l)
+            echo "  $(basename "$file"): ${size_kb}KB"
+          done | sort -k2 -nr | head -5
+
+      # ============================================
+      # TypeScript型情報キャッシュ最適化
+      # ============================================
+      - name: 💾 TypeScript型情報キャッシュ
+        if: inputs.cache-strategy != 'disabled'
+        uses: actions/cache@v3
+        with:
+          path: |
+            .tsbuildinfo
+            node_modules/.cache
+          key: ${{ runner.os }}-typescript-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx', 'tsconfig.json') }}-${{ env.CACHE_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-typescript-
+
+      # ============================================
+      # ビルド成果物アップロード
+      # ============================================
+      - name: 📤 ビルド成果物アップロード
+        uses: actions/upload-artifact@v3
+        with:
+          name: typescript-build-${{ inputs.build-target }}-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
+
+      # ============================================
+      # ビルド品質レポート
+      # ============================================
+      - name: 📈 ビルド品質レポート
+        run: |
+          echo "📈 TypeScript最適化ビルド完了レポート"
+          echo "======================================"
+          echo ""
+          echo "🎯 ビルド設定:"
+          echo "  - Node.js: ${{ inputs.node-version }}"
+          echo "  - ターゲット: ${{ inputs.build-target }}"
+          echo "  - 型チェック: ${{ inputs.run-typecheck }}"
+          echo "  - Bundle分析: ${{ inputs.bundle-analysis }}"
+          echo "  - キャッシュ戦略: ${{ inputs.cache-strategy }}"
+          echo ""
+          echo "📊 パフォーマンス指標:"
+          echo "  - ビルド時間: ${{ steps.build-metrics.outputs.build-time }}秒"
+          echo "  - バンドルサイズ: ${{ steps.build-metrics.outputs.bundle-size }}MB"
+          if [ "${{ inputs.run-typecheck }}" = "true" ]; then
+            echo "  - 型チェック時間: ${{ steps.typecheck-metrics.outputs.typecheck-time }}秒"
+          fi
+          echo ""
+          echo "✅ TypeScript最適化ビルド成功"
+
+# セキュリティ設定: 最小権限の原則
+permissions:
+  contents: read
+  actions: read

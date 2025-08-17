@@ -1,5 +1,5 @@
-name: 'Performance Audit'
-description: 'Comprehensive performance audit using Lighthouse, bundle analysis, and Web Vitals'
+name: '⚡ パフォーマンス監査'
+description: 'Lighthouse、バンドル分析、Web Vitalsを使用した包括的パフォーマンス監査'
 author: 'DevOps Team'
 
 inputs:

@@ -313,7 +313,7 @@ jobs:
           echo "🏮 Running Lighthouse pre-deployment audit..."
 
           # Install Lighthouse CI
-          npm install -g @lhci/cli@latest
+          npm install -g @lhci/cli@^0.14.0
 
           # Create Lighthouse configuration
           cat > .lighthouserc.json << EOF
@@ -587,7 +587,7 @@ jobs:
           echo "🏮 Running post-deployment Lighthouse audit..."
 
           # Install Lighthouse CI
-          npm install -g @lhci/cli@latest
+          npm install -g @lhci/cli@^0.14.0
 
           site_url="${{ needs.github-pages-deployment.outputs.deployment-url }}"
 

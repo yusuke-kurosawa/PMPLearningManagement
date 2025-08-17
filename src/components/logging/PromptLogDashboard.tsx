@@ -71,13 +71,94 @@ import promptLogService from '../../services/promptLogService'
 import { useToast } from '../ui/use-toast'
 import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from 'date-fns'
 
-const PromptLogDashboard = () => {
+// Type imports
+import type {
+  BaseLogEntry,
+  PromptLogEntry,
+  ResponseLogEntry,
+  InteractionLogEntry,
+  LogQueryFilters,
+  QueryResult,
+  LogStatistics,
+  ExportFormat,
+  PromptLogConfig,
+  LogType,
+  LogStatus,
+  InteractionAction,
+  UserActivitySummary,
+  UserActivity,
+  TagStatistics,
+} from '../../types/services/prompt-log'
+
+// ==================== Type Definitions ====================
+
+interface PromptLogDashboardFilters {
+  type: LogType | 'all'
+  userId: string
+  sessionId: string
+  status: LogStatus | 'all'
+  timeRange: string
+  searchQuery: string
+  tags: string[]
+}
+
+interface SortConfig {
+  field: string
+  order: 'asc' | 'desc'
+}
+
+interface ChartData {
+  activity: Array<{
+    date: string
+    prompts: number
+    responses: number
+    interactions: number
+  }>
+  cost: Array<{
+    model: string
+    cost: number
+    count: number
+  }>
+  tags: TagStatistics[]
+}
+
+interface StatCardProps {
+  title: string
+  value: string | number
+  icon: React.ReactNode
+  trend?: 'up' | 'down' | null
+}
+
+interface LogDetailDialogProps {
+  log: BaseLogEntry
+  onClose: () => void
+}
+
+interface ConfigurationPanelProps {
+  config: PromptLogConfig
+  onUpdate: (config: PromptLogConfig) => void
+}
+
+interface TimeRange {
+  start: number
+  end: number
+}
+
+// ==================== Main Component ====================
+
+const PromptLogDashboard: React.FC = () => {
   const { toast } = useToast()
-  const [logs, setLogs] = useState([])
-  const [statistics, setStatistics] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedLog, setSelectedLog] = useState(null)
-  const [filters, setFilters] = useState({
+  
+  // State Management
+  const [logs, setLogs] = useState<QueryResult<BaseLogEntry>>({ 
+    data: [], 
+    totalCount: 0, 
+    hasMore: false 
+  })
+  const [statistics, setStatistics] = useState<LogStatistics | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [selectedLog, setSelectedLog] = useState<BaseLogEntry | null>(null)
+  const [filters, setFilters] = useState<PromptLogDashboardFilters>({
     type: 'all',
     userId: '',
     sessionId: '',
@@ -86,13 +167,13 @@ const PromptLogDashboard = () => {
     searchQuery: '',
     tags: [],
   })
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(50)
-  const [sortConfig, setSortConfig] = useState({ field: 'timestamp', order: 'desc' })
-  const [exportFormat, setExportFormat] = useState('json')
-  const [config, setConfig] = useState(promptLogService.getConfig())
-  const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [refreshInterval, setRefreshInterval] = useState(null)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(50)
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'timestamp', order: 'desc' })
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('json')
+  const [config, setConfig] = useState<PromptLogConfig>(promptLogService.getConfig())
+  const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false)
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null)
 
   // Load initial data
   useEffect(() => {
@@ -100,7 +181,7 @@ const PromptLogDashboard = () => {
     loadStatistics()
 
     // Set up auto-refresh if enabled
-    if (config.autoRefresh) {
+    if ((config as any).autoRefresh) {
       const interval = setInterval(() => {
         loadLogs()
         loadStatistics()
@@ -116,16 +197,19 @@ const PromptLogDashboard = () => {
     setLoading(true)
     try {
       const timeRange = getTimeRange(filters.timeRange)
-      const result = await promptLogService.queryLogs({
+      const queryFilters: LogQueryFilters = {
         ...filters,
+        type: filters.type !== 'all' ? filters.type : undefined,
+        status: filters.status !== 'all' ? filters.status : undefined,
         startTime: timeRange.start,
         endTime: timeRange.end,
         sort: sortConfig,
         page: currentPage,
         limit: pageSize,
-      })
+      }
+      const result = await promptLogService.queryLogs(queryFilters)
       setLogs(result)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load logs:', error)
       toast({
         title: 'Error loading logs',
@@ -135,7 +219,7 @@ const PromptLogDashboard = () => {
     } finally {
       setLoading(false)
     }
-  }, [filters, sortConfig, currentPage, pageSize])
+  }, [filters, sortConfig, currentPage, pageSize, toast])
 
   // Load statistics
   const loadStatistics = useCallback(async () => {
@@ -143,7 +227,7 @@ const PromptLogDashboard = () => {
       const timeRange = getTimeRange(filters.timeRange)
       const stats = await promptLogService.getStatistics(timeRange)
       setStatistics(stats)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load statistics:', error)
     }
   }, [filters.timeRange])
@@ -159,7 +243,7 @@ const PromptLogDashboard = () => {
   }, [loadStatistics])
 
   // Get time range based on filter
-  const getTimeRange = (range) => {
+  const getTimeRange = (range: string): TimeRange => {
     const now = Date.now()
     switch (range) {
       case '1h':
@@ -180,8 +264,16 @@ const PromptLogDashboard = () => {
   // Handle log export
   const handleExport = async () => {
     try {
-      const exportData = await promptLogService.exportLogs(exportFormat, filters)
-      const blob = new Blob([exportData], { type: getMimeType(exportFormat) })
+      const exportOptions = {
+        format: exportFormat,
+        filters: {
+          ...filters,
+          type: filters.type !== 'all' ? filters.type : undefined,
+          status: filters.status !== 'all' ? filters.status : undefined,
+        }
+      }
+      const exportResult = await promptLogService.exportLogs(exportOptions)
+      const blob = new Blob([exportResult.data], { type: getMimeType(exportFormat) })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -195,7 +287,7 @@ const PromptLogDashboard = () => {
         title: 'Export successful',
         description: `Logs exported as ${exportFormat.toUpperCase()}`,
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Export failed',
         description: error.message,
@@ -205,8 +297,8 @@ const PromptLogDashboard = () => {
   }
 
   // Get MIME type for export format
-  const getMimeType = (format) => {
-    const types = {
+  const getMimeType = (format: ExportFormat): string => {
+    const types: Record<ExportFormat, string> = {
       json: 'application/json',
       jsonl: 'application/x-ndjson',
       csv: 'text/csv',
@@ -220,13 +312,13 @@ const PromptLogDashboard = () => {
     if (window.confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
       try {
         await promptLogService.clearAllLogs()
-        setLogs([])
+        setLogs({ data: [], totalCount: 0, hasMore: false })
         setStatistics(null)
         toast({
           title: 'Logs cleared',
           description: 'All logs have been permanently deleted',
         })
-      } catch (error) {
+      } catch (error: any) {
         toast({
           title: 'Clear failed',
           description: error.message,
@@ -237,7 +329,7 @@ const PromptLogDashboard = () => {
   }
 
   // Handle config update
-  const handleConfigUpdate = async (newConfig) => {
+  const handleConfigUpdate = async (newConfig: PromptLogConfig) => {
     try {
       promptLogService.updateConfig(newConfig)
       setConfig(newConfig)
@@ -245,7 +337,7 @@ const PromptLogDashboard = () => {
         title: 'Configuration updated',
         description: 'Settings have been saved',
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Update failed',
         description: error.message,
@@ -255,7 +347,7 @@ const PromptLogDashboard = () => {
   }
 
   // Handle sort
-  const handleSort = (field) => {
+  const handleSort = (field: string) => {
     setSortConfig((prev) => ({
       field,
       order: prev.field === field && prev.order === 'asc' ? 'desc' : 'asc',
@@ -263,29 +355,29 @@ const PromptLogDashboard = () => {
   }
 
   // Format timestamp
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: number): string => {
     return format(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
   }
 
   // Format relative time
-  const formatRelativeTime = (timestamp) => {
+  const formatRelativeTime = (timestamp: number): string => {
     return formatDistanceToNow(new Date(timestamp), { addSuffix: true })
   }
 
   // Get status color
-  const getStatusColor = (status) => {
-    const colors = {
+  const getStatusColor = (status: LogStatus | null): string => {
+    const colors: Record<LogStatus, string> = {
       completed: 'bg-green-500',
       pending: 'bg-yellow-500',
       error: 'bg-red-500',
-      processing: 'bg-blue-500',
+      cancelled: 'bg-gray-500',
     }
-    return colors[status] || 'bg-gray-500'
+    return status ? colors[status] || 'bg-gray-500' : 'bg-gray-500'
   }
 
   // Get type icon
-  const getTypeIcon = (type) => {
-    const icons = {
+  const getTypeIcon = (type: LogType): React.ReactNode => {
+    const icons: Record<LogType, React.ReactNode> = {
       prompt: <MessageSquare className='h-4 w-4' />,
       response: <Bot className='h-4 w-4' />,
       interaction: <User className='h-4 w-4' />,
@@ -294,20 +386,26 @@ const PromptLogDashboard = () => {
   }
 
   // Prepare chart data
-  const chartData = useMemo(() => {
+  const chartData: ChartData = useMemo(() => {
     if (!statistics) {
-      return {}
+      return { activity: [], cost: [], tags: [] }
     }
 
     // Activity over time
-    const activityData = logs.data?.reduce((acc, log) => {
+    const activityData = logs.data?.reduce<Record<string, {
+      date: string
+      prompts: number
+      responses: number
+      interactions: number
+    }>>((acc, log) => {
       const date = format(new Date(log.timestamp), 'yyyy-MM-dd')
       if (!acc[date]) {
         acc[date] = { date, prompts: 0, responses: 0, interactions: 0 }
       }
-      acc[date][`${log.type}s`]++
+      const typeKey = `${log.type}s` as 'prompts' | 'responses' | 'interactions'
+      acc[date][typeKey]++
       return acc
-    }, {})
+    }, {}) || {}
 
     // Cost by model
     const costData = Object.entries(statistics.costAnalysis?.costByModel || {}).map(
@@ -322,7 +420,7 @@ const PromptLogDashboard = () => {
     const tagData = statistics.topTags || []
 
     return {
-      activity: Object.values(activityData || {}),
+      activity: Object.values(activityData),
       cost: costData,
       tags: tagData,
     }
@@ -413,7 +511,9 @@ const PromptLogDashboard = () => {
                   <Label>Type</Label>
                   <Select
                     value={filters.type}
-                    onValueChange={(value) => setFilters({ ...filters, type: value })}
+                    onValueChange={(value: typeof filters.type) => 
+                      setFilters({ ...filters, type: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -430,7 +530,9 @@ const PromptLogDashboard = () => {
                   <Label>Status</Label>
                   <Select
                     value={filters.status}
-                    onValueChange={(value) => setFilters({ ...filters, status: value })}
+                    onValueChange={(value: typeof filters.status) => 
+                      setFilters({ ...filters, status: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -447,7 +549,9 @@ const PromptLogDashboard = () => {
                   <Label>Time Range</Label>
                   <Select
                     value={filters.timeRange}
-                    onValueChange={(value) => setFilters({ ...filters, timeRange: value })}
+                    onValueChange={(value: string) => 
+                      setFilters({ ...filters, timeRange: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -482,7 +586,7 @@ const PromptLogDashboard = () => {
             <CardHeader>
               <CardTitle>Log Entries</CardTitle>
               <CardDescription>
-                Showing {logs.pagination?.data?.length || 0} of {logs.pagination?.total || 0} logs
+                Showing {logs.data?.length || 0} of {logs.totalCount || 0} logs
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -541,11 +645,20 @@ const PromptLogDashboard = () => {
                                 {log.status || 'N/A'}
                               </Badge>
                             </TableCell>
-                            <TableCell>{log.model || '-'}</TableCell>
-                            <TableCell>{log.metadata?.totalTokens || '-'}</TableCell>
                             <TableCell>
-                              {log.metrics?.cost?.total
-                                ? `$${log.metrics.cost.total.toFixed(4)}`
+                              {log.type === 'response' ? (log as ResponseLogEntry).model || '-' : '-'}
+                            </TableCell>
+                            <TableCell>
+                              {log.type === 'response' ? 
+                                (log as ResponseLogEntry).metadata?.totalTokens || '-' : 
+                                log.type === 'prompt' ? 
+                                  (log as PromptLogEntry).metrics?.tokenCount || '-' : 
+                                  '-'
+                              }
+                            </TableCell>
+                            <TableCell>
+                              {log.type === 'response' && (log as ResponseLogEntry).metrics?.cost?.total
+                                ? `$${(log as ResponseLogEntry).metrics.cost!.total.toFixed(4)}`
                                 : '-'}
                             </TableCell>
                             <TableCell>
@@ -767,7 +880,7 @@ const PromptLogDashboard = () => {
                 <AlertTitle>Export Information</AlertTitle>
                 <AlertDescription>
                   Current filters will be applied to the export. You are exporting{' '}
-                  {logs.pagination?.total || 0} logs from the selected time range.
+                  {logs.totalCount || 0} logs from the selected time range.
                 </AlertDescription>
               </Alert>
 
@@ -797,8 +910,10 @@ const PromptLogDashboard = () => {
   )
 }
 
+// ==================== Sub Components ====================
+
 // Stat Card Component
-const StatCard = ({ title, value, icon, trend }) => {
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
@@ -828,11 +943,21 @@ const StatCard = ({ title, value, icon, trend }) => {
 }
 
 // Log Detail Dialog Component
-const LogDetailDialog = ({ log, onClose }) => {
-  const [activeTab, setActiveTab] = useState('content')
+const LogDetailDialog: React.FC<LogDetailDialogProps> = ({ log, onClose }) => {
+  const [activeTab, setActiveTab] = useState<string>('content')
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
+  }
+
+  const getStatusColor = (status: LogStatus | null): string => {
+    const colors: Record<LogStatus, string> = {
+      completed: 'bg-green-100 text-green-800',
+      pending: 'bg-yellow-100 text-yellow-800',
+      error: 'bg-red-100 text-red-800',
+      cancelled: 'bg-blue-100 text-blue-800',
+    }
+    return status ? colors[status] || 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'
   }
 
   return (
@@ -857,12 +982,14 @@ const LogDetailDialog = ({ log, onClose }) => {
               <div className='space-y-2'>
                 <Label>Prompt</Label>
                 <div className='relative'>
-                  <pre className='overflow-x-auto rounded-lg bg-muted p-4'>{log.prompt}</pre>
+                  <pre className='overflow-x-auto rounded-lg bg-muted p-4'>
+                    {(log as PromptLogEntry).prompt}
+                  </pre>
                   <Button
                     variant='ghost'
                     size='sm'
                     className='absolute right-2 top-2'
-                    onClick={() => copyToClipboard(log.prompt)}
+                    onClick={() => copyToClipboard((log as PromptLogEntry).prompt)}
                   >
                     <Copy className='h-4 w-4' />
                   </Button>
@@ -874,12 +1001,14 @@ const LogDetailDialog = ({ log, onClose }) => {
               <div className='space-y-2'>
                 <Label>Response</Label>
                 <div className='relative'>
-                  <pre className='overflow-x-auto rounded-lg bg-muted p-4'>{log.response}</pre>
+                  <pre className='overflow-x-auto rounded-lg bg-muted p-4'>
+                    {(log as ResponseLogEntry).response}
+                  </pre>
                   <Button
                     variant='ghost'
                     size='sm'
                     className='absolute right-2 top-2'
-                    onClick={() => copyToClipboard(log.response)}
+                    onClick={() => copyToClipboard((log as ResponseLogEntry).response)}
                   >
                     <Copy className='h-4 w-4' />
                   </Button>
@@ -891,18 +1020,18 @@ const LogDetailDialog = ({ log, onClose }) => {
               <div className='space-y-4'>
                 <div>
                   <Label>Action</Label>
-                  <p className='text-lg font-semibold'>{log.action}</p>
+                  <p className='text-lg font-semibold'>{(log as InteractionLogEntry).action}</p>
                 </div>
-                {log.feedback && (
+                {(log as InteractionLogEntry).feedback && (
                   <div>
                     <Label>Feedback</Label>
-                    <p>{log.feedback}</p>
+                    <p>{(log as InteractionLogEntry).feedback}</p>
                   </div>
                 )}
-                {log.rating && (
+                {(log as InteractionLogEntry).rating && (
                   <div>
                     <Label>Rating</Label>
-                    <p>{log.rating}/5</p>
+                    <p>{(log as InteractionLogEntry).rating}/5</p>
                   </div>
                 )}
               </div>
@@ -923,10 +1052,10 @@ const LogDetailDialog = ({ log, onClose }) => {
                 <Label>Status</Label>
                 <Badge className={getStatusColor(log.status)}>{log.status || 'N/A'}</Badge>
               </div>
-              {log.model && (
+              {log.type === 'response' && (log as ResponseLogEntry).model && (
                 <div>
                   <Label>Model</Label>
-                  <p>{log.model}</p>
+                  <p>{(log as ResponseLogEntry).model}</p>
                 </div>
               )}
             </div>
@@ -940,59 +1069,76 @@ const LogDetailDialog = ({ log, onClose }) => {
               </div>
             )}
 
-            {log.error && (
+            {log.type === 'response' && (log as ResponseLogEntry).error && (
               <Alert variant='destructive'>
                 <AlertCircle className='h-4 w-4' />
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{log.error}</AlertDescription>
+                <AlertDescription>{(log as ResponseLogEntry).error}</AlertDescription>
               </Alert>
             )}
           </TabsContent>
 
           <TabsContent value='metrics' className='space-y-4'>
-            {log.metrics && (
+            {log.type === 'response' && (log as ResponseLogEntry).metrics && (
               <div className='grid gap-4 md:grid-cols-2'>
-                {log.metrics.latency && (
+                {(log as ResponseLogEntry).metrics.latency && (
                   <div>
                     <Label>Latency</Label>
-                    <p className='text-lg font-semibold'>{log.metrics.latency}ms</p>
+                    <p className='text-lg font-semibold'>
+                      {(log as ResponseLogEntry).metrics.latency}ms
+                    </p>
                   </div>
                 )}
-                {log.metrics.tokenCount && (
-                  <div>
-                    <Label>Token Count</Label>
-                    <p className='text-lg font-semibold'>{log.metrics.tokenCount}</p>
-                  </div>
-                )}
-                {log.metrics.cost && (
+                {(log as ResponseLogEntry).metrics.cost && (
                   <div>
                     <Label>Cost</Label>
                     <div className='space-y-1'>
-                      <p>Prompt: ${log.metrics.cost.prompt.toFixed(4)}</p>
-                      <p>Completion: ${log.metrics.cost.completion.toFixed(4)}</p>
-                      <p className='font-semibold'>Total: ${log.metrics.cost.total.toFixed(4)}</p>
+                      <p>Prompt: ${(log as ResponseLogEntry).metrics.cost!.prompt.toFixed(4)}</p>
+                      <p>Completion: ${(log as ResponseLogEntry).metrics.cost!.completion.toFixed(4)}</p>
+                      <p className='font-semibold'>
+                        Total: ${(log as ResponseLogEntry).metrics.cost!.total.toFixed(4)}
+                      </p>
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {log.metadata && (
+            {log.type === 'prompt' && (log as PromptLogEntry).metrics && (
+              <div className='grid gap-4 md:grid-cols-2'>
+                <div>
+                  <Label>Token Count</Label>
+                  <p className='text-lg font-semibold'>
+                    {(log as PromptLogEntry).metrics.tokenCount}
+                  </p>
+                </div>
+                <div>
+                  <Label>Character Count</Label>
+                  <p className='text-lg font-semibold'>
+                    {(log as PromptLogEntry).metrics.characterCount}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {log.type === 'response' && (log as ResponseLogEntry).metadata && (
               <div className='space-y-2'>
-                {log.metadata.totalTokens && (
+                {(log as ResponseLogEntry).metadata.totalTokens && (
                   <div>
                     <Label>Token Usage</Label>
                     <div className='space-y-1'>
-                      <p>Prompt Tokens: {log.metadata.promptTokens || 0}</p>
-                      <p>Completion Tokens: {log.metadata.completionTokens || 0}</p>
-                      <p className='font-semibold'>Total: {log.metadata.totalTokens}</p>
+                      <p>Prompt Tokens: {(log as ResponseLogEntry).metadata.promptTokens || 0}</p>
+                      <p>Completion Tokens: {(log as ResponseLogEntry).metadata.completionTokens || 0}</p>
+                      <p className='font-semibold'>
+                        Total: {(log as ResponseLogEntry).metadata.totalTokens}
+                      </p>
                     </div>
                   </div>
                 )}
-                {log.metadata.completionTime && (
+                {(log as ResponseLogEntry).metadata.completionTime && (
                   <div>
                     <Label>Completion Time</Label>
-                    <p>{log.metadata.completionTime}ms</p>
+                    <p>{(log as ResponseLogEntry).metadata.completionTime}ms</p>
                   </div>
                 )}
               </div>
@@ -1011,8 +1157,8 @@ const LogDetailDialog = ({ log, onClose }) => {
 }
 
 // Configuration Panel Component
-const ConfigurationPanel = ({ config, onUpdate }) => {
-  const [localConfig, setLocalConfig] = useState(config)
+const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ config, onUpdate }) => {
+  const [localConfig, setLocalConfig] = useState<PromptLogConfig>(config)
 
   const handleSave = () => {
     onUpdate(localConfig)
@@ -1058,7 +1204,9 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
           <Label>Retention Policy</Label>
           <Select
             value={localConfig.retentionPolicy}
-            onValueChange={(value) => setLocalConfig({ ...localConfig, retentionPolicy: value })}
+            onValueChange={(value: typeof localConfig.retentionPolicy) => 
+              setLocalConfig({ ...localConfig, retentionPolicy: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -1123,18 +1271,9 @@ const ConfigurationPanel = ({ config, onUpdate }) => {
   )
 }
 
+// ==================== Constants ====================
+
 // Color palette for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
-
-// Helper function to get status color
-const getStatusColor = (status) => {
-  const colors = {
-    completed: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    error: 'bg-red-100 text-red-800',
-    processing: 'bg-blue-100 text-blue-800',
-  }
-  return colors[status] || 'bg-gray-100 text-gray-800'
-}
 
 export default PromptLogDashboard

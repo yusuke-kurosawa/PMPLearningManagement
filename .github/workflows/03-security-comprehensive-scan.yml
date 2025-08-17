@@ -106,7 +106,7 @@ jobs:
           echo "=========================================="
       - name: 🐺 Snyk脆弱性スキャン / Snyk Vulnerability Scan
         if: env.SNYK_TOKEN != ''
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@v1
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -276,7 +276,7 @@ jobs:
           fetch-depth: 0
       - name: 🐷 TruffleHog実行 / Run TruffleHog
         id: trufflehog
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.81.9
         continue-on-error: true
         with:
           path: ./

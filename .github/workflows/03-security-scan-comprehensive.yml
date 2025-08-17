@@ -125,7 +125,7 @@ jobs:
           }
       - name: 🔍 Snyk Security Analysis
         if: secrets.SNYK_TOKEN
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
