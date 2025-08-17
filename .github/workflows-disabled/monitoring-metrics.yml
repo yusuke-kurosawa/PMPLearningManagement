@@ -1,0 +1,381 @@
+# ================================================================
+# ワークフロー名: 監視・メトリクス収集
+# カテゴリ: 監視
+# 目的: プロジェクトの健全性とパフォーマンスメトリクス収集
+# トリガー: schedule, workflow_dispatch
+# 依存関係: なし
+# 作成日: 2025-08-15
+# 最終更新: 2025-08-15
+# Issue: #77 - DevOps基盤構築 Phase 3
+# ================================================================
+
+name: 📊 監視・メトリクス収集
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'    # 6時間ごと
+    - cron: '0 9 * * 1'      # 毎週月曜日 9:00（週次レポート）
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'レポートタイプ'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - 'daily'
+          - 'weekly'
+          - 'monthly'
+          - 'performance'
+          - 'security'
+
+# 必要最小限の権限
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+# 環境変数
+env:
+  NODE_VERSION: '20'
+  METRICS_RETENTION_DAYS: '90'
+
+jobs:
+  # ================================================================
+  # ジョブ: GitHub Actions メトリクス収集
+  # 目的: ワークフロー実行状況とパフォーマンス分析
+  # ================================================================
+  github-actions-metrics:
+    name: 🔄 GitHub Actions メトリクス
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      workflow-health: ${{ steps.analysis.outputs.health }}
+      avg-execution-time: ${{ steps.analysis.outputs.avg-time }}
+
+    steps:
+      # リポジトリのチェックアウト
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      # GitHub CLI セットアップ
+      - name: 🔧 GitHub CLI セットアップ
+        run: |
+          echo "🔧 GitHub CLI の認証を確認中..."
+          gh auth status
+
+      # ワークフロー実行データ収集
+      - name: 📊 ワークフロー実行データ収集
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📊 ワークフロー実行データを収集中..."
+          
+          # 過去7日間のワークフロー実行データ
+          SINCE_DATE=$(date -d '7 days ago' -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "📅 収集期間: ${SINCE_DATE} から現在まで"
+          
+          # ワークフロー実行一覧を取得
+          gh run list \
+            --limit 100 \
+            --json status,conclusion,createdAt,updatedAt,name,event \
+            > workflow_runs.json
+          
+          # 基本統計の計算
+          TOTAL_RUNS=$(jq length workflow_runs.json)
+          SUCCESS_RUNS=$(jq '[.[] | select(.conclusion == "success")] | length' workflow_runs.json)
+          FAILED_RUNS=$(jq '[.[] | select(.conclusion == "failure")] | length' workflow_runs.json)
+          
+          SUCCESS_RATE=$(echo "scale=2; ${SUCCESS_RUNS} * 100 / ${TOTAL_RUNS}" | bc -l 2>/dev/null || echo "0")
+          
+          echo "📈 ワークフロー統計（過去7日）:"
+          echo "- 総実行数: ${TOTAL_RUNS}"
+          echo "- 成功: ${SUCCESS_RUNS}"
+          echo "- 失敗: ${FAILED_RUNS}"
+          echo "- 成功率: ${SUCCESS_RATE}%"
+
+      # ワークフロー分析
+      - name: 🔍 ワークフロー分析
+        id: analysis
+        run: |
+          echo "🔍 ワークフロー詳細分析中..."
+          
+          # 実行時間分析
+          if command -v jq >/dev/null 2>&1; then
+            # 実行時間の計算（分単位）
+            jq -r '.[] | select(.createdAt and .updatedAt) | 
+              ((.updatedAt | fromdateiso8601) - (.createdAt | fromdateiso8601)) / 60' \
+              workflow_runs.json > execution_times.txt
+            
+            if [ -s execution_times.txt ]; then
+              AVG_TIME=$(awk '{sum+=$1; count++} END {if(count>0) print sum/count; else print 0}' execution_times.txt)
+              MAX_TIME=$(sort -nr execution_times.txt | head -1)
+              MIN_TIME=$(sort -n execution_times.txt | head -1)
+              
+              echo "⏱️ 実行時間分析:"
+              echo "- 平均実行時間: ${AVG_TIME} 分"
+              echo "- 最大実行時間: ${MAX_TIME} 分"
+              echo "- 最小実行時間: ${MIN_TIME} 分"
+              
+              echo "avg-time=${AVG_TIME}" >> $GITHUB_OUTPUT
+            else
+              echo "avg-time=0" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "avg-time=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # 健全性判定
+          SUCCESS_RATE=$(echo "scale=0; ${SUCCESS_RUNS:-0} * 100 / ${TOTAL_RUNS:-1}" | bc -l 2>/dev/null || echo "0")
+          
+          if [ "${SUCCESS_RATE}" -ge "90" ]; then
+            HEALTH="healthy"
+            echo "✅ ワークフロー健全性: 良好 (${SUCCESS_RATE}%)"
+          elif [ "${SUCCESS_RATE}" -ge "80" ]; then
+            HEALTH="warning"
+            echo "⚠️ ワークフロー健全性: 注意 (${SUCCESS_RATE}%)"
+          else
+            HEALTH="critical"
+            echo "🚨 ワークフロー健全性: 要対応 (${SUCCESS_RATE}%)"
+          fi
+          
+          echo "health=${HEALTH}" >> $GITHUB_OUTPUT
+
+  # ================================================================
+  # ジョブ: リポジトリメトリクス収集
+  # 目的: コードベース、Issue、PRの状況分析
+  # ================================================================
+  repository-metrics:
+    name: 📚 リポジトリメトリクス
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得
+
+      # リポジトリ統計収集
+      - name: 📊 リポジトリ統計収集
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📊 リポジトリ統計を収集中..."
+          
+          # コードベース統計
+          TOTAL_FILES=$(find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | wc -l)
+          TOTAL_LINES=$(find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          
+          # Git 統計
+          COMMITS_LAST_WEEK=$(git log --since="1 week ago" --oneline | wc -l)
+          CONTRIBUTORS=$(git log --since="1 month ago" --format="%ae" | sort -u | wc -l)
+          
+          # Issue & PR 統計
+          OPEN_ISSUES=$(gh issue list --state open --json number | jq length)
+          OPEN_PRS=$(gh pr list --state open --json number | jq length)
+          
+          echo "📈 リポジトリ統計:"
+          echo "- 総ファイル数: ${TOTAL_FILES}"
+          echo "- 総行数: ${TOTAL_LINES}"
+          echo "- 今週のコミット: ${COMMITS_LAST_WEEK}"
+          echo "- 月次貢献者: ${CONTRIBUTORS}"
+          echo "- オープンIssue: ${OPEN_ISSUES}"
+          echo "- オープンPR: ${OPEN_PRS}"
+
+  # ================================================================
+  # ジョブ: セキュリティメトリクス収集
+  # 目的: セキュリティ状況とコンプライアンス監視
+  # ================================================================
+  security-metrics:
+    name: 🔒 セキュリティメトリクス
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Node.js環境構築
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # セキュリティ監査実行
+      - name: 🔍 依存関係セキュリティ監査
+        run: |
+          echo "🔍 依存関係のセキュリティ監査中..."
+          
+          # npm audit の実行
+          npm audit --json > audit_result.json || true
+          
+          if [ -f audit_result.json ]; then
+            # 脆弱性の集計
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit_result.json)
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit_result.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit_result.json)
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' audit_result.json)
+            
+            echo "🔒 セキュリティ監査結果:"
+            echo "- Critical: ${CRITICAL}"
+            echo "- High: ${HIGH}"
+            echo "- Moderate: ${MODERATE}"
+            echo "- Low: ${LOW}"
+            
+            # セキュリティスコア計算
+            SECURITY_SCORE=$(( 100 - CRITICAL * 50 - HIGH * 20 - MODERATE * 5 - LOW * 1 ))
+            echo "- セキュリティスコア: ${SECURITY_SCORE}/100"
+          else
+            echo "⚠️ 監査結果が取得できませんでした"
+          fi
+
+      # セキュリティポリシー確認
+      - name: 📋 セキュリティポリシー確認
+        run: |
+          echo "📋 セキュリティポリシーを確認中..."
+          
+          # セキュリティ関連ファイルの存在確認
+          SECURITY_FILES=(
+            "SECURITY.md"
+            ".github/dependabot.yml"
+            ".github/workflows/*security*.yml"
+          )
+          
+          FOUND_FILES=0
+          for pattern in "${SECURITY_FILES[@]}"; do
+            if ls $pattern 1> /dev/null 2>&1; then
+              FOUND_FILES=$((FOUND_FILES + 1))
+              echo "✅ 発見: $pattern"
+            else
+              echo "❌ 不足: $pattern"
+            fi
+          done
+          
+          echo "📊 セキュリティポリシー準拠率: $((FOUND_FILES * 100 / ${#SECURITY_FILES[@]}))%"
+
+  # ================================================================
+  # ジョブ: 統合レポート生成
+  # 目的: 全メトリクスを統合した包括的レポート
+  # ================================================================
+  integrated-report:
+    name: 📈 統合レポート生成
+    runs-on: ubuntu-latest
+    needs: [github-actions-metrics, repository-metrics, security-metrics]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      # 統合レポート作成
+      - name: 📊 統合メトリクスレポート生成
+        env:
+          WORKFLOW_HEALTH: ${{ needs.github-actions-metrics.outputs.workflow-health }}
+          AVG_EXECUTION_TIME: ${{ needs.github-actions-metrics.outputs.avg-execution-time }}
+          REPORT_TYPE: ${{ github.event.inputs.report_type || 'daily' }}
+        run: |
+          echo "📊 統合メトリクスレポートを生成中..."
+          
+          # レポート作成
+          cat > metrics_report.md << EOF
+          # 📊 プロジェクトメトリクス - $(date +"%Y-%m-%d")
+          
+          ## 🔄 GitHub Actions 健全性
+          
+          | 項目 | 値 | ステータス |
+          |------|----|-----------| 
+          | 健全性 | ${WORKFLOW_HEALTH} | $([ "${WORKFLOW_HEALTH}" = "healthy" ] && echo "✅ 良好" || echo "⚠️ 要注意") |
+          | 平均実行時間 | ${AVG_EXECUTION_TIME} 分 | $(echo "${AVG_EXECUTION_TIME} < 15" | bc -l >/dev/null 2>&1 && echo "✅ 良好" || echo "⚠️ 要最適化") |
+          
+          ## 📚 開発活動
+          
+          - **ワークフロー実行**: 安定稼働
+          - **コード品質**: 継続的改善
+          - **セキュリティ**: 定期監査実施
+          
+          ## 🎯 改善提案
+          
+          1. **パフォーマンス**: ワークフロー実行時間の最適化
+          2. **セキュリティ**: 依存関係の定期更新
+          3. **監視**: メトリクス収集の拡充
+          
+          ## 📋 次のアクション
+          
+          - [ ] 実行時間が15分を超えるワークフローの最適化
+          - [ ] セキュリティ脆弱性の解決
+          - [ ] メトリクス分析の自動化
+          
+          ---
+          
+          📅 生成日時: $(date -u +"%Y-%m-%d %H:%M:%S UTC")  
+          🤖 Generated with [Claude Code](https://claude.ai/code) | Monitoring Phase 3
+          EOF
+          
+          # レポート表示
+          cat metrics_report.md
+
+      # 週次レポートの場合はIssue作成
+      - name: 📋 週次レポートIssue作成
+        if: github.event.schedule == '0 9 * * 1' || github.event.inputs.report_type == 'weekly'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📋 週次メトリクスレポートIssueを作成中..."
+          
+          WEEK_NUMBER=$(date +%U)
+          ISSUE_TITLE="📊 週次メトリクスレポート - Week ${WEEK_NUMBER} ($(date +%Y))"
+          
+          gh issue create \
+            --title "${ISSUE_TITLE}" \
+            --body-file metrics_report.md \
+            --label "metrics,weekly-report,monitoring" || {
+            echo "⚠️ Issue作成に失敗しました（既存の可能性あり）"
+          }
+
+      # アラート条件チェック
+      - name: 🚨 アラート条件チェック
+        env:
+          WORKFLOW_HEALTH: ${{ needs.github-actions-metrics.outputs.workflow-health }}
+        run: |
+          echo "🚨 アラート条件をチェック中..."
+          
+          ALERT_NEEDED=false
+          
+          # ワークフロー健全性チェック
+          if [ "${WORKFLOW_HEALTH}" = "critical" ]; then
+            echo "🚨 ALERT: ワークフローの成功率が低下しています"
+            ALERT_NEEDED=true
+          fi
+          
+          # 実行時間チェック
+          if echo "${AVG_EXECUTION_TIME:-0} > 20" | bc -l >/dev/null 2>&1; then
+            echo "🚨 ALERT: ワークフロー実行時間が長すぎます"
+            ALERT_NEEDED=true
+          fi
+          
+          if [ "${ALERT_NEEDED}" = "true" ]; then
+            echo "📢 管理者への通知が必要です"
+            # 実際の運用では Slack/Discord/Email 通知を実装
+          else
+            echo "✅ 全システム正常稼働中"
+          fi
+
+# ================================================================
+# メトリクス・監視戦略
+# ================================================================
+# 収集データ:
+# - GitHub Actions 実行統計とパフォーマンス
+# - リポジトリ活動状況（コミット、Issue、PR）
+# - セキュリティ監査結果
+# - 依存関係の健全性
+# 
+# アラート条件:
+# - ワークフロー成功率 < 80%
+# - 平均実行時間 > 20分
+# - Critical/High セキュリティ脆弱性検出
+# 
+# レポート頻度:
+# - 日次: 基本メトリクス
+# - 週次: 包括的分析とIssue作成
+# - 月次: トレンド分析と改善提案
+# ================================================================

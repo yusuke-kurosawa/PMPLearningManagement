@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback = null,
 }) => {
   const location = useLocation()
-  const { isAuthenticated, loading, role: _role, hasRole, hasPermission } = useAuth()
+  const { isAuthenticated, loading, hasRole, hasPermission } = useAuth()
 
   // Show loading state
   if (loading) {

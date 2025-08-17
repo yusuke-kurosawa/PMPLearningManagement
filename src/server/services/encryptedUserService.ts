@@ -22,7 +22,7 @@ const EncryptedUserDataSchema = z.object({
   address: z.string().optional(),
 })
 
-const _DecryptionInputSchema = z.object({
+const __DecryptionInputSchema = z.object({
   // TODO: Will be used in future
   encrypted: z.string(),
   iv: z.string(),
@@ -65,8 +65,8 @@ export class EncryptedUserService {
             ${encryptedResult.encryptedData.address ? JSON.stringify(encryptedResult.encryptedData.address) : null},
             ${encryptedResult.emailHash},
             ${encryptedResult.nameHash},
-            ${encryptedResult.encryptedData.phone ? hashingService.hashSensitiveData(validatedData.phone!) : null},
-            ${encryptedResult.encryptedData.address ? hashingService.hashSensitiveData(validatedData.address!) : null},
+            ${encryptedResult.encryptedData.phone ? hashingService.hashSensitiveData(validatedData?.phone) : null},
+            ${encryptedResult.encryptedData.address ? hashingService.hashSensitiveData(validatedData?.address) : null},
             ${encryptedResult.emailSearchHashes},
             ${encryptedResult.nameSearchHashes},
             ${validatedData.phone ? piiEncryption.createPartialSearchHashes(validatedData.phone) : []},
@@ -408,6 +408,6 @@ export class EncryptedUserService {
 }
 
 // サービスインスタンスのエクスポート
-export const _encryptedUserService = new EncryptedUserService()
+export const __encryptedUserService = new EncryptedUserService()
 
 export default EncryptedUserService

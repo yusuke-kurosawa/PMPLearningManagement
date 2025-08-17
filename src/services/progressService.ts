@@ -806,7 +806,7 @@ class ProgressService {
           const progress = JSON.parse(result) as ProgressData
           await this.saveProgress(progress)
           resolve(progress)
-        } catch (error) {
+        } catch (_error) {
           reject(error)
         }
       }

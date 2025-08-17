@@ -322,7 +322,16 @@ describe('App Mobile Detection and Routing', () => {
       })
 
       // No touch support
-      delete window.ontouchstart
+      try {
+        Object.defineProperty(window, 'ontouchstart', {
+          value: undefined,
+          writable: true,
+          configurable: true,
+        })
+      } catch {
+        // プロパティが既に定義されている場合は無視
+        window.ontouchstart = undefined
+      }
       Object.defineProperty(navigator, 'maxTouchPoints', {
         writable: true,
         configurable: true,

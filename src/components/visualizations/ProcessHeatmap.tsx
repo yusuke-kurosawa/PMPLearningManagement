@@ -16,7 +16,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '複雑度',
       description: 'ITTOの数に基づくプロセスの複雑さ',
       calculate: (process) => {
-        if (!data) return 0
+        if (!data) {return 0}
         const links = data.links.filter(
           (l) =>
             l.source === process.id ||
@@ -31,7 +31,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '学習進捗',
       description: '各プロセスの学習完了度',
       calculate: (process) => {
-        if (!progressData) return 0
+        if (!progressData) {return 0}
         const progress = progressData[process.id]
         return progress ? progress.understandingLevel : 0
       },
@@ -40,7 +40,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
       name: '接続性',
       description: '他のプロセスとの関連度',
       calculate: (process) => {
-        if (!data) return 0
+        if (!data) {return 0}
         const connectedProcesses = new Set()
         data.links.forEach((link) => {
           if (link.source === process.id || link.source.id === process.id) {
@@ -103,7 +103,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
 
   // ヒートマップデータの準備
   const heatmapData = useMemo(() => {
-    if (!data) return null
+    if (!data) {return null}
 
     const processes = data.nodes.filter((n) => n.type === 'process')
     const knowledgeAreas = [
@@ -149,7 +149,7 @@ const ProcessHeatmap = ({ data, progressData }) => {
 
   // ヒートマップの描画
   useEffect(() => {
-    if (!heatmapData || !svgRef.current) return
+    if (!heatmapData || !svgRef.current) {return}
 
     const margin = { top: 120, right: 200, bottom: 60, left: 200 }
     const width = dimensions.width - margin.left - margin.right

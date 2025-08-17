@@ -1,0 +1,398 @@
+{
+  "timestamp": "2025-08-16T13:02:04.678Z",
+  "siteUrl": "https://yusuke-kurosawa.github.io/PMPLearningManagement/",
+  "wcagLevel": "AA",
+  "summary": {
+    "accessibilityScore": 4,
+    "totalRoutes": 8,
+    "totalViolations": 8,
+    "totalWarnings": 16,
+    "highPriorityIssues": 0,
+    "complianceLevel": "Poor"
+  },
+  "results": [
+    {
+      "route": {
+        "path": "",
+        "name": "Home",
+        "priority": "high"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/matrix",
+        "name": "PMBOK Matrix",
+        "priority": "high"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/network",
+        "name": "Network Graph",
+        "priority": "medium"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/integrated",
+        "name": "Integrated View",
+        "priority": "medium"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/visualizations",
+        "name": "Visualizations Hub",
+        "priority": "medium"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/glossary",
+        "name": "PMP Glossary",
+        "priority": "high"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/progress",
+        "name": "Progress Dashboard",
+        "priority": "medium"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    },
+    {
+      "route": {
+        "path": "#/flashcards",
+        "name": "Flash Cards",
+        "priority": "high"
+      },
+      "checks": [
+        {
+          "type": "violation",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing H1 heading",
+          "impact": "Page structure unclear to screen readers",
+          "recommendation": "Add one H1 heading as page title",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "medium",
+          "rule": "WCAG 1.3.1 - Info and Relationships",
+          "description": "Page missing main landmark",
+          "impact": "Screen reader users cannot quickly navigate to main content",
+          "recommendation": "Add <main> element or role=\"main\"",
+          "wcagLevel": "A"
+        },
+        {
+          "type": "warning",
+          "severity": "low",
+          "rule": "WCAG 2.4.1 - Bypass Blocks",
+          "description": "No skip link found",
+          "impact": "Keyboard users must tab through all navigation",
+          "recommendation": "Add skip link to main content",
+          "wcagLevel": "A"
+        }
+      ],
+      "summary": {
+        "violations": 1,
+        "warnings": 2,
+        "totalIssues": 3,
+        "severity": "medium"
+      }
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": 1,
+      "rule": "WCAG 1.3.1 - Info and Relationships",
+      "severity": "medium",
+      "affectedElements": 16,
+      "affectedRoutes": [
+        "Home",
+        "PMBOK Matrix",
+        "Network Graph",
+        "Integrated View",
+        "Visualizations Hub",
+        "PMP Glossary",
+        "Progress Dashboard",
+        "Flash Cards"
+      ],
+      "recommendation": "Add one H1 heading as page title",
+      "impact": "Page structure unclear to screen readers",
+      "wcagLevel": "A",
+      "estimatedEffort": "Medium"
+    },
+    {
+      "priority": 2,
+      "rule": "WCAG 2.4.1 - Bypass Blocks",
+      "severity": "low",
+      "affectedElements": 8,
+      "affectedRoutes": [
+        "Home",
+        "PMBOK Matrix",
+        "Network Graph",
+        "Integrated View",
+        "Visualizations Hub",
+        "PMP Glossary",
+        "Progress Dashboard",
+        "Flash Cards"
+      ],
+      "recommendation": "Add skip link to main content",
+      "impact": "Keyboard users must tab through all navigation",
+      "wcagLevel": "A",
+      "estimatedEffort": "Low"
+    }
+  ],
+  "thresholds": {
+    "minContrastRatio": 4.5,
+    "maxFontSize": 24,
+    "minTouchTarget": 44
+  }
+}

@@ -133,10 +133,10 @@ class SearchService {
     str2 = str2.toLowerCase()
 
     // 完全一致
-    if (str1 === str2) return 1
+    if (str1 === str2) {return 1}
 
     // 部分一致
-    if (str2.includes(str1) || str1.includes(str2)) return 0.9
+    if (str2.includes(str1) || str1.includes(str2)) {return 0.9}
 
     // レーベンシュタイン距離による類似度計算
     const distance = this.levenshteinDistance(str1, str2)
@@ -187,7 +187,7 @@ class SearchService {
     const results = []
 
     this.searchIndex.forEach((item) => {
-      if (!types.includes(item.type)) return
+      if (!types.includes(item.type)) {return}
 
       let score = 0
 
@@ -261,7 +261,7 @@ class SearchService {
 
   // 検索履歴の管理
   addToHistory(query) {
-    if (!query || query.trim().length === 0) return
+    if (!query || query.trim().length === 0) {return}
 
     // 重複を削除
     this.searchHistory = this.searchHistory.filter((item) => item !== query)

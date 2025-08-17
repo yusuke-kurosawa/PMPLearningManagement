@@ -113,7 +113,7 @@ const StudyGroups = () => {
 
   // 進捗の共有
   const handleShareProgress = (groupId) => {
-    if (!userProgress) return
+    if (!userProgress) {return}
 
     collaborationService.shareProgress(groupId, currentUser, userProgress)
     alert('進捗を共有しました！')
@@ -127,7 +127,7 @@ const StudyGroups = () => {
 
   // お知らせの投稿
   const handlePostAnnouncement = () => {
-    if (!newAnnouncement.trim() || !selectedGroup) return
+    if (!newAnnouncement.trim() || !selectedGroup) {return}
 
     collaborationService.addAnnouncement(selectedGroup.id, {
       content: newAnnouncement,
@@ -160,7 +160,7 @@ const StudyGroups = () => {
 
   // 進捗率の計算
   const calculateProgressPercentage = (progress) => {
-    if (!progress || !progress.totalProcesses) return 0
+    if (!progress || !progress.totalProcesses) {return 0}
     return Math.round((progress.completedProcesses / progress.totalProcesses) * 100)
   }
 

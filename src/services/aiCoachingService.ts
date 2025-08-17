@@ -84,7 +84,7 @@ class AICoachingService {
 
       // Personalized recommendations
       immediateActions: this.generateImmediateActions(weaknesses, profile),
-      weeklySchedule: this.generateWeeklySchedule(profile, weaknesses, learningGoals),
+      weeklySchedule: this.generateWeeklySchedule(profile, weaknesses, _learningGoals),
       studyPlan: this.generateStudyPlan(userProgress, weaknesses, strengths),
 
       // Adaptive elements
@@ -92,8 +92,8 @@ class AICoachingService {
       preferredLearningMethods: this.getPreferredMethods(profile),
 
       // Career integration
-      careerAlignment: this.getCareerAlignment(profile, learningGoals),
-      postCertificationPath: this.generatePostCertificationPath(profile, learningGoals),
+      careerAlignment: this.getCareerAlignment(_profile, __learningGoals),
+      postCertificationPath: this.generatePostCertificationPath(_profile, __learningGoals),
     }
 
     this.updateLearningPattern(userId, learningPath)
@@ -237,9 +237,9 @@ class AICoachingService {
   /**
    * Generate weekly study schedule based on user preferences and weaknesses
    */
-  generateWeeklySchedule(profile, weaknesses, learningGoals) {
+  generateWeeklySchedule(profile, weaknesses, _learningGoals) {
     const availableHours = profile.availableStudyTime || 10 // hours per week
-    const _intensity = learningGoals.intensity || 'moderate'
+    // const intensity = learningGoals.intensity || 'moderate'
 
     const schedule = {
       totalWeeklyHours: availableHours,
@@ -399,9 +399,9 @@ class AICoachingService {
   /**
    * Generate post-certification career development path
    */
-  generatePostCertificationPath(profile, learningGoals) {
-    const _careerLevel = learningGoals.currentRole || 'aspiring_pm'
-    const _targetRole = learningGoals.targetRole || 'senior_pm'
+  generatePostCertificationPath(_profile, __learningGoals) {
+    // const careerLevel = learningGoals.currentRole || 'aspiring_pm'
+    // const targetRole = learningGoals.targetRole || 'senior_pm'
 
     return {
       immediate: {
@@ -443,7 +443,7 @@ class AICoachingService {
    * Utility methods
    */
   calculateAverage(scores) {
-    if (scores.length === 0) return 0
+    if (scores.length === 0) {return 0}
     return scores.reduce((sum, score) => sum + score, 0) / scores.length
   }
 

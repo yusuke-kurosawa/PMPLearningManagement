@@ -24,12 +24,12 @@ export function parseProcessId(processId: string): {
   index: number
 } | null {
   const match = processId.match(/^([A-Z]{3})_([A-Z]{2})_(\d{2})$/)
-  if (!match) return null
+  if (!match) {return null}
 
   return {
-    knowledgeAreaCode: match[1]!,
-    processGroupCode: match[2]!,
-    index: parseInt(match[3]!, 10),
+    knowledgeAreaCode: match?.[1],
+    processGroupCode: match?.[2],
+    index: parseInt(match?.[3], 10),
   }
 }
 
@@ -37,7 +37,7 @@ export function parseProcessId(processId: string): {
  * Validate process data structure
  */
 export function validateProcessData(processData: unknown): boolean {
-  if (!processData || typeof processData !== 'object') return false
+  if (!processData || typeof processData !== 'object') {return false}
 
   const process = processData as Record<string, unknown>
   return !!(

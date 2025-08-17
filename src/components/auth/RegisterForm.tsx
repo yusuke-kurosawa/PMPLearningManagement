@@ -133,16 +133,16 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
   }
 
   const getPasswordStrengthColor: React.FC = () => {
-    if (passwordStrength < 30) return 'bg-red-500'
-    if (passwordStrength < 60) return 'bg-yellow-500'
-    if (passwordStrength < 80) return 'bg-blue-500'
+    if (passwordStrength < 30) {return 'bg-red-500'}
+    if (passwordStrength < 60) {return 'bg-yellow-500'}
+    if (passwordStrength < 80) {return 'bg-blue-500'}
     return 'bg-green-500'
   }
 
   const getPasswordStrengthText: React.FC = () => {
-    if (passwordStrength < 30) return 'Weak'
-    if (passwordStrength < 60) return 'Fair'
-    if (passwordStrength < 80) return 'Good'
+    if (passwordStrength < 30) {return 'Weak'}
+    if (passwordStrength < 60) {return 'Fair'}
+    if (passwordStrength < 80) {return 'Good'}
     return 'Strong'
   }
 
@@ -295,9 +295,11 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
             />
             <button
               type="button"
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
               onClick={() => setShowPassword(!showPassword)}
               disabled={loading || isSubmitting}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -349,9 +351,11 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
             />
             <button
               type="button"
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               disabled={loading || isSubmitting}
+              aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+              aria-pressed={showConfirmPassword}
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

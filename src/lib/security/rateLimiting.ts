@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { logger } from '../../services/logger'
 
 // Rate Limiting 設定スキーマ
-const RateLimitConfigSchema = z.object({
+const _RateLimitConfigSchema = z.object({
   windowMs: z.number().positive(),
   maxRequests: z.number().positive(),
   skipSuccessfulRequests: z.boolean().optional().default(false),
@@ -17,7 +17,7 @@ const RateLimitConfigSchema = z.object({
   onLimitReached: z.function().optional(),
 })
 
-export type RateLimitConfig = z.infer<typeof RateLimitConfigSchema>
+export type RateLimitConfig = z.infer<typeof _RateLimitConfigSchema>
 
 // Rate Limiting 結果
 export interface RateLimitResult {
@@ -525,8 +525,8 @@ export class DDoSProtection {
       const failedAttempts = parseInt(ipReputationData[0] || '0')
       const successRate = parseFloat(ipReputationData[1] || '1.0')
 
-      if (failedAttempts > 10) score += 25
-      if (successRate < 0.5) score += 30
+      if (failedAttempts > 10) {score += 25}
+      if (successRate < 0.5) {score += 30}
 
       // 新しいIPアドレス（初回接続）
       if (!ipReputationData[2]) {

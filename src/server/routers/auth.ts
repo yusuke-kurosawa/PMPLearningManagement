@@ -50,7 +50,7 @@ const signUpSchema = z.object({
   agreeToTerms: z.boolean().refine((val) => val === true, '利用規約に同意する必要があります'),
 })
 
-const _signInSchema = z.object({
+const __signInSchema = z.object({
   // TODO: Will be used in future
   email: z.string().email('有効なメールアドレスを入力してください').toLowerCase(),
   password: z.string().min(1, 'パスワードを入力してください'),

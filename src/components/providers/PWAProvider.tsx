@@ -298,7 +298,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           minInterval: defaultConfig.syncInterval,
         })
       }
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.debug('PWA: Periodic background sync not supported or permission denied')
       }
@@ -367,7 +367,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const processOfflineQueue = async () => {
-    if (offlineQueue.length === 0) return
+    if (offlineQueue.length === 0) {return}
 
     const processedItems: number[] = []
 
@@ -415,7 +415,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const updateApp = async (): Promise<void> => {
-    if (!serviceWorkerReg) return
+    if (!serviceWorkerReg) {return}
 
     setIsUpdating(true)
 
@@ -453,7 +453,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const requestNotificationPermission = async (): Promise<boolean> => {
-    if (!capabilities.hasNotifications) return false
+    if (!capabilities.hasNotifications) {return false}
 
     try {
       const permission = await Notification.requestPermission()
@@ -476,7 +476,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
           description: 'App link copied to clipboard',
         })
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     }
@@ -507,7 +507,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const requestWakeLock = async (): Promise<void> => {
-    if (!capabilities.hasWakeLock || wakeLock) return
+    if (!capabilities.hasWakeLock || wakeLock) {return}
 
     try {
       const extendedNavigator = navigator as ExtendedNavigator
@@ -539,7 +539,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const getStorageUsage = async (): Promise<StorageEstimate | null> => {
-    if (!capabilities.hasStorageQuota) return null
+    if (!capabilities.hasStorageQuota) {return null}
 
     try {
       return await navigator.storage.estimate()
@@ -552,7 +552,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
   }
 
   const registerForPush = async (): Promise<PushSubscription | null> => {
-    if (!capabilities.hasPushNotifications || !serviceWorkerReg) return null
+    if (!capabilities.hasPushNotifications || !serviceWorkerReg) {return null}
 
     try {
       const subscription = await serviceWorkerReg.pushManager.subscribe({

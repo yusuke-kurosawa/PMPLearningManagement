@@ -180,7 +180,7 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
 
   const handleMultipleAnswerChange = (option: string) => {
     const currentQuestion = getCurrentQuestion()
-    if (!currentQuestion) return
+    if (!currentQuestion) {return}
 
     const currentAnswers = (currentSession?.answers[currentQuestion.id] as string[]) || []
 
@@ -193,7 +193,7 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
 
   const toggleBookmark = () => {
     const currentQuestion = getCurrentQuestion()
-    if (!currentQuestion) return
+    if (!currentQuestion) {return}
 
     const isBookmarked = currentSession?.bookmarkedQuestions.has(currentQuestion.id)
     if (isBookmarked) {
@@ -206,7 +206,7 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
   }
 
   const handleSubmitExam = async () => {
-    if (!currentSession) return
+    if (!currentSession) {return}
 
     try {
       const results = await submitExam()
@@ -243,8 +243,8 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
 
   const getTimeStatus = (timeRemaining: number, totalTime: number) => {
     const percentage = (timeRemaining / totalTime) * 100
-    if (percentage > 50) return 'good'
-    if (percentage > 25) return 'warning'
+    if (percentage > 50) {return 'good'}
+    if (percentage > 25) {return 'warning'}
     return 'danger'
   }
 

@@ -72,7 +72,7 @@ const defaultKeyGenerator = (req: NextRequest): string => {
 }
 
 // User-Agent解析
-const _parseUserAgent = (
+const __parseUserAgent = (
   // TODO: Will be used in future
   userAgent: string | null
 ): {

@@ -111,7 +111,7 @@ const KnowledgeAreaHeatmap = React.memo(() => {
 
   // D3.jsでの描画
   useEffect(() => {
-    if (!svgRef.current) return
+    if (!svgRef.current) {return}
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -355,7 +355,7 @@ const KnowledgeAreaHeatmap = React.memo(() => {
               className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
               onClick={() => {
                 const term = glossaryService.getTermByName('ヒートマップ')
-                if (term) setSelectedGlossaryTerm(term)
+                if (term) {setSelectedGlossaryTerm(term)}
               }}
             >
               <Info className="h-4 w-4" />

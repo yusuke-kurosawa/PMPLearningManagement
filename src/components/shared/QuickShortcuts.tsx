@@ -104,7 +104,7 @@ const QuickShortcuts: React.FC<QuickShortcutsProps> = ({ className = '' }) => {
     if (saved) {
       try {
         setShortcuts(JSON.parse(saved))
-      } catch (e) {
+      } catch (_e) {
         setShortcuts(defaultShortcuts)
       }
     } else {
@@ -114,7 +114,7 @@ const QuickShortcuts: React.FC<QuickShortcutsProps> = ({ className = '' }) => {
     if (savedRecent) {
       try {
         setRecentItems(JSON.parse(savedRecent))
-      } catch (e) {
+      } catch (_e) {
         setRecentItems([])
       }
     }

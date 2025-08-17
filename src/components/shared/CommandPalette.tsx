@@ -31,7 +31,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 
 const CommandPalette: React.FC = () => {
   const navigate = useNavigate()
-  //   const _location = useLocation() // TODO: Will be used in future
+  //   const __location = useLocation() // TODO: Will be used in future
   const { settings, toggleDarkMode } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -95,10 +95,10 @@ const CommandPalette: React.FC = () => {
 
   // Detect mode from query prefix
   useEffect(() => {
-    if (query.startsWith('= ')) setMode('calculate')
-    else if (query.startsWith('> ')) setMode('navigate')
-    else if (query.startsWith('# ')) setMode('settings')
-    else setMode('search')
+    if (query.startsWith('= ')) {setMode('calculate')}
+    else if (query.startsWith('> ')) {setMode('navigate')}
+    else if (query.startsWith('# ')) {setMode('settings')}
+    else {setMode('search')}
   }, [query])
 
   // Navigation commands
@@ -246,7 +246,7 @@ const CommandPalette: React.FC = () => {
   const calculateExpression = (expr) => {
     try {
       const cleanExpr = expr.replace('= ', '').trim()
-      if (!cleanExpr) return ''
+      if (!cleanExpr) {return ''}
 
       // Basic math operations only for security
       const allowedChars = /^[0-9+\-*/.() ]+$/
@@ -256,7 +256,7 @@ const CommandPalette: React.FC = () => {
 
       const result = Function(`"use strict"; return (${cleanExpr})`)()
       return `= ${result}`
-    } catch (error) {
+    } catch (_error) {
       return 'エラー: 無効な式です'
     }
   }
@@ -291,7 +291,7 @@ const CommandPalette: React.FC = () => {
         // search mode
         const allCommands = [...quickActions, ...navigationCommands, ...settingsCommands]
 
-        if (!searchTerm) return allCommands.slice(0, 8)
+        if (!searchTerm) {return allCommands.slice(0, 8)}
 
         return allCommands.filter(
           (cmd) =>
@@ -346,7 +346,7 @@ const CommandPalette: React.FC = () => {
 
   const modeInfo = getModeInfo()
 
-  if (!isOpen) return null
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-[200] overflow-y-auto">

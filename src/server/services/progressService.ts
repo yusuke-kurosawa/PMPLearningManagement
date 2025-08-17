@@ -449,10 +449,12 @@ export class ProgressService {
           : 0
 
       // 学習ペース分析
-      //       const dailyAverageTime = // TODO: Will be used in future
-      recentSessions.length > 0
+      const dailyAverageTime = recentSessions.length > 0
         ? recentSessions.reduce((sum, session) => sum + session.duration, 0) / recentSessions.length
         : 1800 // デフォルト30分
+      
+      // 将来的に使用予定
+      void dailyAverageTime
 
       // 認定準備度スコア計算
       const readinessFactors = {
@@ -476,7 +478,7 @@ export class ProgressService {
       const knowledgeAreaStats: Record<string, number> = {}
       examResults.forEach((exam) => {
         if (exam.knowledgeAreaScores) {
-          Object.entries(exam.knowledgeAreaScores as any).forEach(([area, score]) => {
+          Object.entries(exam.knowledgeAreaScores as Record<string, number>).forEach(([area, score]) => {
             knowledgeAreaStats[area] = (knowledgeAreaStats[area] || 0) + (score as number)
           })
         }

@@ -10,8 +10,6 @@ import {
 } from 'd3-sankey'
 import {
   Download,
-  _Settings,
-  _Palette,
   AlignLeft,
   AlignRight,
   AlignCenter,
@@ -102,7 +100,7 @@ const SankeyDiagram = ({ data }) => {
 
   // サンキーデータの準備
   const sankeyData = useMemo(() => {
-    if (!data) return null
+    if (!data) {return null}
 
     // ノードの作成（プロセス群とプロセス）
     const nodes = []
@@ -200,7 +198,7 @@ const SankeyDiagram = ({ data }) => {
 
   // サンキーダイアグラムの描画
   useEffect(() => {
-    if (!sankeyData || !svgRef.current) return
+    if (!sankeyData || !svgRef.current) {return}
 
     const theme = themes[selectedTheme]
     const margin = { top: 40, right: 150, bottom: 40, left: 150 }

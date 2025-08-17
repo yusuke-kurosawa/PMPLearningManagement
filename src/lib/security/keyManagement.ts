@@ -246,7 +246,7 @@ export class KeyManagementSystem {
 
     if (process.env.NODE_ENV === 'development') {
       logger.info(
-        `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key.expiresAt!)})`
+        `Key deprecated: ${keyId.substring(0, 8)}... (expires: ${new Date(key?.expiresAt)})`
       )
     }
   }
@@ -443,7 +443,7 @@ export class KeyManagementSystem {
    * ストレージからアクティブキーを検索
    */
   private async findActiveKeyFromStorage(purpose: string): Promise<KeyVersion | null> {
-    if (!this.redis) return null
+    if (!this.redis) {return null}
 
     try {
       const keyIds = await this.redis.zrevrange('keys:by_created', 0, 10)

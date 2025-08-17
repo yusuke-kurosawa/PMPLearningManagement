@@ -21,7 +21,7 @@ const AICoachingDashboard = () => {
   const [learningPath, setLearningPath] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeCoaching, setActiveCoaching] = useState(null)
-  const [_userProgress, setUserProgress] = useState({})
+  const [, setUserProgress] = useState({})
   const [selectedWeekness, setSelectedWeekness] = useState(null)
 
   // Mock user ID - in real app this would come from auth context
@@ -291,6 +291,14 @@ const AICoachingDashboard = () => {
                     key={index}
                     className="cursor-pointer rounded border border-gray-200 p-3 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                     onClick={() => setSelectedWeekness(selectedWeekness === index ? null : index)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedWeekness(selectedWeekness === index ? null : index)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">

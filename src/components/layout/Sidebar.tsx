@@ -115,7 +115,7 @@ const Sidebar = () => {
   const getItemByPath = (path) => {
     for (const section of Object.values(menuSections)) {
       const item = section.items.find((item) => item.path === path)
-      if (item) return item
+      if (item) {return item}
     }
     return null
   }
@@ -151,7 +151,7 @@ const Sidebar = () => {
             <div className="space-y-1">
               {favorites.map((path) => {
                 const item = getItemByPath(path)
-                if (!item) return null
+                if (!item) {return null}
                 const isActive = location.pathname === path
                 const Icon = item.icon
                 return (
@@ -198,7 +198,7 @@ const Sidebar = () => {
             <div className="space-y-1">
               {recentPages.slice(0, 5).map((path) => {
                 const item = getItemByPath(path)
-                if (!item) return null
+                if (!item) {return null}
                 const isActive = location.pathname === path
                 const Icon = item.icon
                 return (

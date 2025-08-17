@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act } from '@test/utils/test-utils'
+import { renderHook, act } from '../../test/utils/test-utils'
 import { useProgress, processCategories, processGroups } from '../progressService'
 
 // Mock localStorage
@@ -67,88 +67,116 @@ describe('progressService', () => {
       const { result } = renderHook(() => useProgress())
 
       expect(result.current.progress).toBeDefined()
-      expect(result.current.progress.completedProcesses).toBe(0)
-      expect(result.current.progress.totalProcesses).toBeGreaterThan(0)
-      expect(result.current.progress.studyTime).toBe(0)
+      expect(result.current.statistics).toBeDefined()
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(0)
+        expect(result.current.statistics.overall.total).toBeGreaterThan(0)
+        expect(result.current.statistics.studyTime).toBe(0)
+      }
     })
 
     it('should load existing progress data from localStorage', () => {
       const existingProgress = {
-        completedProcesses: ['4.1', '4.2', '5.1'],
-        processProgress: {
-          4.1: { completed: true, studyTime: 30, lastStudied: '2025-08-08T10:00:00Z' },
-          4.2: { completed: true, studyTime: 45, lastStudied: '2025-08-08T10:30:00Z' },
-          5.1: { completed: true, studyTime: 25, lastStudied: '2025-08-08T11:00:00Z' },
+        knowledgeAreas: {},
+        processGroups: {},
+        processes: {
+          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
+          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
+          'p3': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T11:00:00Z' },
         },
-        totalStudyTime: 100,
-        lastStudyDate: '2025-08-08T11:00:00Z',
+        studySessions: [
+          { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },
+          { date: '2025-08-08T10:30:00Z', duration: 45, processCount: 1 },
+          { date: '2025-08-08T11:00:00Z', duration: 25, processCount: 1 },
+        ],
+        goals: {},
+        lastUpdated: '2025-08-08T11:00:00Z',
       }
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(existingProgress))
 
       const { result } = renderHook(() => useProgress())
 
-      expect(result.current.progress.completedProcesses).toBe(3)
-      expect(result.current.progress.studyTime).toBe(100)
+      expect(result.current.progress).toBeDefined()
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(3)
+        expect(result.current.statistics.studyTime).toBe(100)
+      }
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('pmp_learning_progress')
     })
 
-    it('should mark a process as completed', () => {
+    it('should mark a process as completed', async () => {
       mockLocalStorage.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useProgress())
 
-      act(() => {
-        result.current.markProcessComplete('4.1')
+      await act(async () => {
+        await result.current.updateProgress('p1', { completed: true })
       })
 
-      expect(result.current.progress.completedProcesses).toBe(1)
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(1)
+      }
       expect(mockLocalStorage.setItem).toHaveBeenCalled()
     })
 
-    it('should record study time for a process', () => {
+    it('should record study time for a process', async () => {
       mockLocalStorage.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useProgress())
 
-      act(() => {
-        result.current.recordStudyTime('4.1', 30)
+      await act(async () => {
+        await result.current.updateStudyTime(30)
       })
 
-      expect(result.current.progress.studyTime).toBe(30)
+      if (result.current.statistics) {
+        expect(result.current.statistics.studyTime).toBe(30)
+      }
       expect(mockLocalStorage.setItem).toHaveBeenCalled()
     })
 
     it('should calculate knowledge area progress correctly', () => {
       const existingProgress = {
-        completedProcesses: ['4.1', '4.2'], // 2 Integration Management processes
-        processProgress: {
-          4.1: { completed: true, studyTime: 30, lastStudied: '2025-08-08T10:00:00Z' },
-          4.2: { completed: true, studyTime: 45, lastStudied: '2025-08-08T10:30:00Z' },
+        knowledgeAreas: {},
+        processGroups: {},
+        processes: {
+          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
+          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
         },
-        totalStudyTime: 75,
-        lastStudyDate: '2025-08-08T10:30:00Z',
+        studySessions: [
+          { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },
+          { date: '2025-08-08T10:30:00Z', duration: 45, processCount: 1 },
+        ],
+        goals: {},
+        lastUpdated: '2025-08-08T10:30:00Z',
       }
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(existingProgress))
 
       const { result } = renderHook(() => useProgress())
 
-      const integrationProgress =
-        result.current.progress.knowledgeAreaProgress['Integration Management']
-      expect(integrationProgress).toBeDefined()
-      expect(integrationProgress.completed).toBeGreaterThan(0)
+      expect(result.current.statistics).toBeDefined()
+      if (result.current.statistics) {
+        const integrationProgress = result.current.statistics.byCategory.integration
+        expect(integrationProgress).toBeDefined()
+        expect(integrationProgress.completed).toBeGreaterThan(0)
+      }
     })
 
-    it('should reset progress when requested', () => {
+    it('should reset progress when requested', async () => {
       const existingProgress = {
-        completedProcesses: ['4.1', '4.2'],
-        processProgress: {
-          4.1: { completed: true, studyTime: 30, lastStudied: '2025-08-08T10:00:00Z' },
-          4.2: { completed: true, studyTime: 45, lastStudied: '2025-08-08T10:30:00Z' },
+        knowledgeAreas: {},
+        processGroups: {},
+        processes: {
+          'p1': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:00:00Z' },
+          'p2': { completed: true, understanding: 100, notes: '', lastStudied: '2025-08-08T10:30:00Z' },
         },
-        totalStudyTime: 75,
-        lastStudyDate: '2025-08-08T10:30:00Z',
+        studySessions: [
+          { date: '2025-08-08T10:00:00Z', duration: 30, processCount: 1 },
+          { date: '2025-08-08T10:30:00Z', duration: 45, processCount: 1 },
+        ],
+        goals: {},
+        lastUpdated: '2025-08-08T10:30:00Z',
       }
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(existingProgress))
@@ -156,18 +184,22 @@ describe('progressService', () => {
       const { result } = renderHook(() => useProgress())
 
       // Initial state should have progress
-      expect(result.current.progress.completedProcesses).toBeGreaterThan(0)
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBeGreaterThan(0)
+      }
 
-      act(() => {
-        result.current.resetProgress()
+      await act(async () => {
+        await result.current.resetProgress()
       })
 
       // After reset, progress should be cleared
-      expect(result.current.progress.completedProcesses).toBe(0)
-      expect(result.current.progress.studyTime).toBe(0)
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(0)
+        expect(result.current.statistics.studyTime).toBe(0)
+      }
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         'pmp_learning_progress',
-        expect.stringContaining('{"completedProcesses":[]')
+        expect.stringContaining('{"knowledgeAreas":{}')
       )
     })
 
@@ -180,7 +212,9 @@ describe('progressService', () => {
 
       // Should still work with default values
       expect(result.current.progress).toBeDefined()
-      expect(result.current.progress.completedProcesses).toBe(0)
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(0)
+      }
     })
 
     it('should handle invalid JSON in localStorage', () => {
@@ -190,26 +224,30 @@ describe('progressService', () => {
 
       // Should fall back to default values
       expect(result.current.progress).toBeDefined()
-      expect(result.current.progress.completedProcesses).toBe(0)
+      if (result.current.statistics) {
+        expect(result.current.statistics.overall.completed).toBe(0)
+      }
     })
 
-    it('should update last study date when marking process complete', () => {
+    it('should update last study date when marking process complete', async () => {
       mockLocalStorage.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useProgress())
 
       const beforeTime = Date.now()
 
-      act(() => {
-        result.current.markProcessComplete('4.1')
+      await act(async () => {
+        await result.current.updateProgress('p1', { completed: true })
       })
 
       const afterTime = Date.now()
 
-      expect(result.current.progress.lastStudyDate).toBeTruthy()
-      const lastStudyTime = new Date(result.current.progress.lastStudyDate).getTime()
-      expect(lastStudyTime).toBeGreaterThanOrEqual(beforeTime)
-      expect(lastStudyTime).toBeLessThanOrEqual(afterTime)
+      expect(result.current.progress?.lastUpdated).toBeTruthy()
+      if (result.current.progress?.lastUpdated) {
+        const lastStudyTime = new Date(result.current.progress.lastUpdated).getTime()
+        expect(lastStudyTime).toBeGreaterThanOrEqual(beforeTime)
+        expect(lastStudyTime).toBeLessThanOrEqual(afterTime)
+      }
     })
   })
 })

@@ -187,7 +187,7 @@ const ProcessFlowDiagram = React.memo(() => {
 
   // D3.jsでの描画
   useEffect(() => {
-    if (!svgRef.current || !processData) return
+    if (!svgRef.current || !processData) {return}
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()

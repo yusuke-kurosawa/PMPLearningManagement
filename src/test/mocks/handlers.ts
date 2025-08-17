@@ -1,7 +1,142 @@
 import { http, HttpResponse } from 'msw'
 
 export const handlers = [
-  // Mock API endpoints (if any external APIs are used in the future)
+  // GeoIP API mocks
+  http.get('http://ip-api.com/json/:ip', ({ params }) => {
+    const { ip } = params
+    if (ip === '203.0.113.1') {
+      return HttpResponse.json({
+        status: 'success',
+        country: 'Japan',
+        countryCode: 'JP',
+        region: '13',
+        regionName: 'Tokyo',
+        city: 'Tokyo',
+        lat: 35.6895,
+        lon: 139.6917,
+        timezone: 'Asia/Tokyo',
+        isp: 'Example ISP',
+        org: 'Example Org',
+        proxy: false,
+        hosting: false,
+      })
+    }
+    if (ip === '8.8.8.8') {
+      return HttpResponse.json({ status: 'fail', message: 'API failed' })
+    }
+    if (ip === '0.0.0.0') {
+      return HttpResponse.json({ status: 'fail', message: 'Invalid IP' })
+    }
+    // Default response for other IPs
+    return HttpResponse.json({
+      status: 'success',
+      country: 'Unknown',
+      countryCode: 'XX',
+      region: 'Unknown',
+      regionName: 'Unknown',
+      city: 'Unknown',
+      lat: 0,
+      lon: 0,
+      timezone: 'UTC',
+      isp: 'Unknown ISP',
+      org: 'Unknown Org',
+      proxy: false,
+      hosting: false,
+    })
+  }),
+
+  http.get('https://api.ipgeolocation.io/ipgeo', ({ request }) => {
+    const url = new URL(request.url)
+    const ip = url.searchParams.get('ip')
+    
+    if (ip === '203.0.113.1') {
+      return HttpResponse.json({
+        ip: '203.0.113.1',
+        country_name: 'Japan',
+        country_code2: 'JP',
+        state_prov: 'Tokyo',
+        city: 'Tokyo',
+        latitude: '35.6895',
+        longitude: '139.6917',
+        time_zone: {
+          name: 'Asia/Tokyo'
+        },
+        isp: 'Example ISP',
+        organization: 'Example Org',
+        security: {
+          threat_score: 10
+        }
+      })
+    }
+    
+    if (ip === '8.8.8.8') {
+      return HttpResponse.json({
+        ip: '8.8.8.8',
+        country_name: 'United States',
+        country_code2: 'US',
+        state_prov: 'California',
+        city: 'San Francisco',
+        latitude: '37.7749',
+        longitude: '-122.4194',
+        time_zone: {
+          name: 'America/Los_Angeles'
+        },
+        isp: 'Example ISP',
+        organization: 'Example Org',
+        security: {
+          is_proxy: false,
+          is_vpn: true,
+          is_tor: false,
+          is_hosting: false,
+          threat_score: 0
+        }
+      })
+    }
+    
+    return HttpResponse.json({
+      ip: ip || 'unknown',
+      country_name: 'Test Country',
+      country_code2: 'TC',
+      state_prov: 'Test State',
+      city: 'Test City',
+      latitude: '0',
+      longitude: '0',
+      time_zone: {
+        name: 'UTC'
+      },
+      isp: 'Test ISP',
+      organization: 'Test Org',
+      security: {
+        threat_score: 0
+      }
+    })
+  }),
+
+  http.get('https://geoip.maxmind.com/geoip/v2.1/insights/:ip', ({ params }) => {
+    const { ip } = params
+    return HttpResponse.json({
+      country: {
+        iso_code: 'JP',
+        names: { en: 'Japan' }
+      },
+      subdivisions: [{
+        iso_code: '13',
+        names: { en: 'Tokyo' }
+      }],
+      city: {
+        names: { en: 'Tokyo' }
+      },
+      location: {
+        latitude: 35.6895,
+        longitude: 139.6917,
+        time_zone: 'Asia/Tokyo'
+      },
+      traits: {
+        ip_address: ip
+      }
+    })
+  }),
+  // Internal API endpoints
   http.get('/api/progress', () => {
     return HttpResponse.json({
       totalProcesses: 49,

@@ -51,23 +51,21 @@ jobs:
     name: 🔄 統合品質・ビルドチェック
     uses: ./.github/workflows/00-reusable-workflows.yml
     with:
-      workflow-type: 'build'
+      workflow-type: 'full'
       node-version: '20'
-      skip-tests: true
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true' }}
 
   # ================================================================
-  # ジョブ2: セキュリティスキャン（簡易版）
+  # ジョブ2: セキュリティスキャン
   # ================================================================
   security-scan:
-    name: 🔒 簡易セキュリティチェック
-    runs-on: ubuntu-latest
+    name: 🤖 Claude統合セキュリティスキャン
+    uses: ./.github/workflows/00-reusable-workflows.yml
     needs: quality-build-check
-    
-    steps:
-      - name: ✅ セキュリティ基本チェック
-        run: |
-          echo "🔍 セキュリティ基本チェック実行中..."
-          echo "✅ セキュリティチェック完了"
+    with:
+      workflow-type: 'security'
+      node-version: '20'
+      skip-tests: true
 
   # ================================================================
   # ジョブ3: 結果統合と成功判定

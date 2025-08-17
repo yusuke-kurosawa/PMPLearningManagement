@@ -2,11 +2,9 @@
  * Mobile-Optimized App Shell with PWA Features
  * Developer 6: PWA & Mobile Developer Implementation
  */
-
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { logger } from '../../services/logger'
-
 // Extended Navigator interface for Safari standalone detection
 interface ExtendedNavigator extends Navigator {
   standalone?: boolean
@@ -17,7 +15,6 @@ interface ExtendedNavigator extends Navigator {
     saveData: boolean
   }
 }
-
 // Battery Manager interface
 interface BatteryManager {
   charging: boolean
@@ -27,7 +24,6 @@ interface BatteryManager {
   addEventListener(type: string, listener: EventListener): void
   removeEventListener(type: string, listener: EventListener): void
 }
-
 // Before Install Prompt Event interface
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[]
@@ -83,7 +79,7 @@ import { useToast } from '../../hooks/use-toast'
 // import { Tabs } from '../ui/tabs' // TODO: Will be used in future
 import { Switch } from '../ui/switch'
 // import { Progress } from '../ui/progress' // TODO: Will be used in future
-
+import SkipLinks from '../shared/SkipLinks'
 interface PWACapabilities {
   isInstalled: boolean
   isStandalone: boolean
@@ -98,7 +94,6 @@ interface PWACapabilities {
   supportsBatteryAPI: boolean
   supportsNetworkInformation: boolean
 }
-
 interface TouchGesture {
   type: 'swipe' | 'pinch' | 'tap' | 'longPress'
   direction?: 'left' | 'right' | 'up' | 'down'
@@ -109,7 +104,6 @@ interface TouchGesture {
   duration: number
   distance: number
 }
-
 interface DeviceInfo {
   userAgent: string
   platform: string
@@ -132,12 +126,10 @@ interface DeviceInfo {
     saveData: boolean
   }
 }
-
 const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
-
   // PWA State
   const [pwaCapabilities, setPwaCapabilities] = useState<PWACapabilities>({
     isInstalled: false,
@@ -155,7 +147,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     supportsBatteryAPI: 'getBattery' in navigator,
     supportsNetworkInformation: 'connection' in navigator,
   })
-
   // Mobile State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({
@@ -169,13 +160,11 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     devicePixelRatio: window.devicePixelRatio,
     orientation: window.innerHeight > window.innerWidth ? 'portrait' : 'landscape',
   })
-
   // Touch and Gesture State
   const [touchStart, setTouchStart] = useState<{ x: number; y: number; time: number } | null>(null)
   const [activeGestures, setActiveGestures] = useState<TouchGesture[]>([])
   const swipeThreshold = 100 // Threshold for swipe detection (pixels)
   const longPressThreshold = 500 // Threshold for long press detection (milliseconds)
-
   // App State
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
@@ -183,44 +172,37 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(
     null
   )
-
   // Refs
   const appRef = useRef<HTMLDivElement>(null)
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
   // Initialize PWA features
   useEffect(() => {
     initializePWA()
     registerTouchGestures()
     monitorDeviceInfo()
-
     return () => {
       if (touchTimeoutRef.current) {
         clearTimeout(touchTimeoutRef.current)
       }
     }
   }, [])
-
   const initializePWA = async () => {
     // Check if app is installed
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as ExtendedNavigator).standalone ||
       document.referrer.includes('android-app://')
-
     setPwaCapabilities((prev) => ({
       ...prev,
       isStandalone,
       isInstalled: isStandalone,
     }))
-
     // Listen for install prompt
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault()
       setInstallPromptEvent(e)
       setPwaCapabilities((prev) => ({ ...prev, canInstall: true }))
     })
-
     // Listen for app installation
     window.addEventListener('appinstalled', () => {
       setPwaCapabilities((prev) => ({ ...prev, isInstalled: true, canInstall: false }))
@@ -229,7 +211,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         description: 'PMP Learning Management has been installed successfully!',
       })
     })
-
     // Monitor online/offline status
     window.addEventListener('online', () => {
       setPwaCapabilities((prev) => ({ ...prev, isOnline: true }))
@@ -239,7 +220,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         description: 'Syncing your data...',
       })
     })
-
     window.addEventListener('offline', () => {
       setPwaCapabilities((prev) => ({ ...prev, isOnline: false }))
       setOfflineMode(true)
@@ -249,7 +229,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         variant: 'destructive',
       })
     })
-
     // Request notification permission
     if ('Notification' in window && Notification.permission === 'default') {
       const permission = await Notification.requestPermission()
@@ -257,7 +236,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       setNotificationsEnabled(Notification.permission === 'granted')
     }
-
     // Register service worker
     if ('serviceWorker' in navigator) {
       try {
@@ -272,33 +250,34 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
   }
-
   const registerTouchGestures = () => {
-    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) return
-
+    if (!appRef.current || !pwaCapabilities.supportsTouchGestures) {return}
     const element = appRef.current
 
+    const handleTouchMove = (_e: TouchEvent) => {
+      // Clear long press timeout on move
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current)
+        touchTimeoutRef.current = null
+      }
+    }
     element.addEventListener('touchstart', handleTouchStart, { passive: false })
     element.addEventListener('touchmove', handleTouchMove, { passive: false })
     element.addEventListener('touchend', handleTouchEnd, { passive: false })
   }
-
   const handleTouchStart = (e: TouchEvent) => {
     const touch = e.touches[0]
     const startTime = Date.now()
-
     setTouchStart({
       x: touch.clientX,
       y: touch.clientY,
       time: startTime,
     })
-
     // Set up long press detection
     touchTimeoutRef.current = setTimeout(() => {
       if (pwaCapabilities.supportsVibration) {
         navigator.vibrate(50) // Short vibration for long press feedback
       }
-
       // Trigger long press gesture
       const gesture: TouchGesture = {
         type: 'longPress',
@@ -309,11 +288,9 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         duration: longPressThreshold,
         distance: 0,
       }
-
       handleGesture(gesture)
     }, longPressThreshold)
   }
-
   //   const handleTouchMove = (e: TouchEvent) => { // TODO: Will be used in future
   //     // Clear long press timeout on move
   //     if (touchTimeoutRef.current) {
@@ -321,24 +298,20 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   //       touchTimeoutRef.current = null
   //     }
   //   }
-
   const handleTouchEnd = (e: TouchEvent) => {
-    if (!touchStart) return
+    if (!touchStart) {return}
 
     // Clear long press timeout
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
       touchTimeoutRef.current = null
     }
-
     const touch = e.changedTouches[0]
     const endTime = Date.now()
     const duration = endTime - touchStart.time
-
     const deltaX = touch.clientX - touchStart.x
     const deltaY = touch.clientY - touchStart.y
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
     // Detect tap
     if (duration < 200 && distance < 10) {
       const gesture: TouchGesture = {
@@ -352,17 +325,14 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       handleGesture(gesture)
     }
-
     // Detect swipe
     else if (distance > swipeThreshold) {
       let direction: TouchGesture['direction']
-
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         direction = deltaX > 0 ? 'right' : 'left'
       } else {
         direction = deltaY > 0 ? 'down' : 'up'
       }
-
       const gesture: TouchGesture = {
         type: 'swipe',
         direction,
@@ -373,16 +343,12 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         duration,
         distance,
       }
-
       handleGesture(gesture)
     }
-
     setTouchStart(null)
   }
-
   const handleGesture = (gesture: TouchGesture) => {
     setActiveGestures((prev) => [...prev.slice(-4), gesture]) // Keep last 5 gestures
-
     // Handle specific gestures
     switch (gesture.type) {
       case 'swipe':
@@ -394,7 +360,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           setIsMobileMenuOpen(false)
         }
         break
-
       case 'longPress':
         // Show context menu or action sheet
         if (pwaCapabilities.supportsVibration) {
@@ -403,7 +368,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         break
     }
   }
-
   const monitorDeviceInfo = () => {
     // Update device info on resize
     const handleResize = () => {
@@ -417,7 +381,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         orientation: window.innerHeight > window.innerWidth ? 'portrait' : 'landscape',
       }))
     }
-
     // Update battery info
     const updateBatteryInfo = async () => {
       if ('getBattery' in navigator) {
@@ -435,14 +398,13 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               },
             }))
           }
-        } catch (error) {
+        } catch (_error) {
           if (process.env.NODE_ENV === 'development') {
             logger.debug('Battery API not supported')
           }
         }
       }
     }
-
     // Update network info
     const updateNetworkInfo = () => {
       if ('connection' in navigator) {
@@ -460,35 +422,29 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     }
-
     window.addEventListener('resize', handleResize)
     window.addEventListener('orientationchange', handleResize)
-
     updateBatteryInfo()
     updateNetworkInfo()
-
     // Update battery and network info periodically
     const interval = setInterval(() => {
       updateBatteryInfo()
       updateNetworkInfo()
     }, 60000) // Every minute
-
     return () => {
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('orientationchange', handleResize)
       clearInterval(interval)
     }
   }
-
   const handleInstallApp = async () => {
-    if (!installPromptEvent) return
+    if (!installPromptEvent) {return}
 
     try {
       const result = await installPromptEvent.prompt()
       if (process.env.NODE_ENV === 'development') {
         logger.debug('Install prompt result:', result)
       }
-
       setInstallPromptEvent(null)
       setPwaCapabilities((prev) => ({ ...prev, canInstall: false }))
     } catch (error) {
@@ -497,7 +453,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
   }
-
   const handleShareApp = async () => {
     if ('share' in navigator) {
       try {
@@ -520,12 +475,10 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     }
   }
-
   const toggleNotifications = async () => {
     if (!notificationsEnabled && 'Notification' in window) {
       const permission = await Notification.requestPermission()
       setNotificationsEnabled(permission === 'granted')
-
       if (permission === 'granted') {
         toast({
           title: 'Notifications Enabled',
@@ -536,7 +489,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       setNotificationsEnabled(false)
     }
   }
-
   const navigation = [
     { id: 'home', label: 'ホーム', icon: Home, href: '/' },
     { id: 'matrix', label: 'マトリックス', icon: Grid, href: '/matrix' },
@@ -548,11 +500,13 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     { id: 'mock-exam', label: '模擬試験', icon: GraduationCap, href: '/mock-exam' },
     { id: 'collaboration', label: 'コラボ', icon: Users, href: '/collaboration' },
   ]
-
   return (
     <div ref={appRef} className={`min-h-screen bg-gray-50 ${isDarkMode ? 'dark' : ''}`}>
+      {/* Skip Links for Accessibility */}
+      <SkipLinks />
+
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
+      <header id="navigation" className="sticky top-0 z-50 border-b border-gray-200 bg-white md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -566,7 +520,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                 <div className="border-b pb-4">
                   <h2 className="text-lg font-semibold">PMP Learning</h2>
                   <p className="text-sm text-gray-600">Mobile Study App</p>
-
                   {/* PWA Status Indicators */}
                   <div className="mt-3 flex items-center gap-2">
                     <Badge
@@ -580,7 +533,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                       )}
                       {pwaCapabilities.isOnline ? 'Online' : 'Offline'}
                     </Badge>
-
                     {pwaCapabilities.isInstalled && (
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Smartphone className="h-3 w-3" />
@@ -589,7 +541,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                     )}
                   </div>
                 </div>
-
                 {/* Navigation Menu */}
                 <nav className="space-y-2">
                   {navigation.map((item) => (
@@ -607,7 +558,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                     </Button>
                   ))}
                 </nav>
-
                 {/* PWA Actions */}
                 <div className="space-y-3 border-t pt-4">
                   {pwaCapabilities.canInstall && (
@@ -616,26 +566,22 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                       Install App
                     </Button>
                   )}
-
                   <Button variant="outline" className="w-full" onClick={handleShareApp}>
                     <Share className="mr-2 h-4 w-4" />
                     Share App
                   </Button>
                 </div>
-
                 {/* Quick _Settings */}
                 <div className="space-y-3 border-t pt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700">Dark Mode</span>
                     <Switch checked={isDarkMode} onCheckedChange={setIsDarkMode} />
                   </div>
-
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700">Notifications</span>
                     <Switch checked={notificationsEnabled} onCheckedChange={toggleNotifications} />
                   </div>
                 </div>
-
                 {/* Device Info */}
                 <div className="border-t pt-4">
                   <h4 className="mb-3 text-sm font-medium text-gray-700">Device Info</h4>
@@ -646,12 +592,10 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                         {deviceInfo.screenWidth} × {deviceInfo.screenHeight}
                       </span>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <span>Orientation:</span>
                       <span className="capitalize">{deviceInfo.orientation}</span>
                     </div>
-
                     {deviceInfo.battery && (
                       <div className="flex items-center justify-between">
                         <span>Battery:</span>
@@ -661,7 +605,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
                         </div>
                       </div>
                     )}
-
                     {deviceInfo.network && (
                       <div className="flex items-center justify-between">
                         <span>Network:</span>
@@ -673,10 +616,8 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               </div>
             </SheetContent>
           </Sheet>
-
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold">PMP Learning</h1>
-
             {!pwaCapabilities.isOnline && (
               <Badge variant="destructive" className="text-xs">
                 <WifiOff className="mr-1 h-3 w-3" />
@@ -684,24 +625,20 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
               </Badge>
             )}
           </div>
-
           <div className="flex items-center gap-2">
             {pwaCapabilities.canInstall && (
               <Button variant="ghost" size="sm" onClick={handleInstallApp}>
                 <Download className="h-4 w-4" />
               </Button>
             )}
-
             <Button variant="ghost" size="sm">
               <Bell className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
-
       {/* Main Content */}
-      <main className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
-
+      <main id="main-content" className={`${deviceInfo.isMobile ? 'pb-16' : ''}`}>{children}</main>
       {/* Mobile Bottom Navigation */}
       {deviceInfo.isMobile && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">
@@ -721,10 +658,8 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
         </nav>
       )}
-
       {/* PWA Update Available Toast */}
       {/* This would be triggered by service worker */}
-
       {/* Offline Indicator */}
       {offlineMode && (
         <div className="fixed left-0 right-0 top-0 z-50 bg-yellow-500 py-2 text-center text-white">
@@ -734,7 +669,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
         </div>
       )}
-
       {/* Install Prompt Banner */}
       {pwaCapabilities.canInstall && !pwaCapabilities.isInstalled && (
         <div className="fixed bottom-16 left-4 right-4 z-40 rounded-lg bg-blue-600 p-4 text-white shadow-lg md:bottom-4 md:left-auto md:right-4 md:w-80">
@@ -769,7 +703,6 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
         </div>
       )}
-
       {/* Debug Info (Development Only) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed right-4 top-20 z-50 max-w-xs rounded-lg bg-black bg-opacity-80 p-3 text-xs text-white">
@@ -791,5 +724,4 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
     </div>
   )
 }
-
 export default MobileOptimizedApp

@@ -5,7 +5,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
-  createPermissionChecker,
   requirePermission,
   requireOwnership,
   Permission,
@@ -196,25 +195,25 @@ describe('RBAC システム', () => {
     describe('特別なロールチェック', () => {
       it('管理者ロールの判定', () => {
         expect(createPermissionChecker(adminUser).isAdmin()).toBe(true)
-        expect(createPermissionChecker(instructorUser).isAdmin()).toBe(false)
+        expect(create(instructorUser).isAdmin()).toBe(false)
         expect(create(premiumUser).isAdmin()).toBe(false)
       })
 
       it('インストラクターロールの判定', () => {
         expect(createPermissionChecker(adminUser).isInstructor()).toBe(true) // 管理者もインストラクター権限
-        expect(createPermissionChecker(instructorUser).isInstructor()).toBe(true)
+        expect(create(instructorUser).isInstructor()).toBe(true)
         expect(create(premiumUser).isInstructor()).toBe(false)
       })
 
       it('プレミアムユーザーの判定', () => {
         expect(createPermissionChecker(premiumUser).isPremiumUser()).toBe(true)
-        expect(createPermissionChecker(adminUser).isPremiumUser()).toBe(true) // エンタープライズもプレミアム
+        expect(create(adminUser).isPremiumUser()).toBe(true) // エンタープライズもプレミアム
         expect(create(freeUser).isPremiumUser()).toBe(false)
       })
 
       it('エンタープライズユーザーの判定', () => {
         expect(createPermissionChecker(adminUser).isEnterpriseUser()).toBe(true)
-        expect(createPermissionChecker(premiumUser).isEnterpriseUser()).toBe(false)
+        expect(create(premiumUser).isEnterpriseUser()).toBe(false)
         expect(create(freeUser).isEnterpriseUser()).toBe(false)
       })
     })

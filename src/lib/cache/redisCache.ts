@@ -316,7 +316,7 @@ export class RedisCacheManager {
       for (let i = 0; i < identifiers.length; i++) {
         if (values[i]) {
           try {
-            const entry: CacheEntry<T> = JSON.parse(values[i]!)
+            const entry: CacheEntry<T> = JSON.parse(values[i] || '{}')
             results.set(identifiers[i], entry.data)
             this.stats.hits++
           } catch (error) {
@@ -396,7 +396,7 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.smembers(`tag:${tag}`)
 
-      if (keys.length === 0) return 0
+      if (keys.length === 0) {return 0}
 
       const pipeline = redis.pipeline()
       keys.forEach((key) => pipeline.del(key))
@@ -422,7 +422,7 @@ export class RedisCacheManager {
       const redis = await this.getRedis()
       const keys = await redis.keys(pattern)
 
-      if (keys.length === 0) return 0
+      if (keys.length === 0) {return 0}
 
       await redis.del(...keys)
       this.stats.deletes += keys.length

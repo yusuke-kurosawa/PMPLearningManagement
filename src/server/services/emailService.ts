@@ -129,7 +129,7 @@ class EmailTemplateLoader {
       templateCache.set(templateName, template)
 
       return template
-    } catch (error) {
+    } catch (_error) {
       if (process.env.NODE_ENV === 'development') {
         logger.error(`メールテンプレート読み込みエラー (${templateName}):`, error)
       }

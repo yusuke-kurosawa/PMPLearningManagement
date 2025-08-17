@@ -410,7 +410,7 @@ class PWAInstallPromptManager {
 // Singleton instance
 let installPromptManager: PWAInstallPromptManager | null = null
 
-export const _getInstallPromptManager = (
+export const __getInstallPromptManager = (
   config?: Partial<InstallPromptConfig>
 ): PWAInstallPromptManager => {
   if (!installPromptManager) {

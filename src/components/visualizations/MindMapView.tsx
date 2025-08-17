@@ -29,7 +29,7 @@ const MindMapView = ({ data }) => {
 
   // マインドマップデータの準備
   const mindMapData = useMemo(() => {
-    if (!data) return null
+    if (!data) {return null}
 
     // ルートノード（PMBOK）
     const root = {
@@ -128,7 +128,7 @@ const MindMapView = ({ data }) => {
 
   // マインドマップの描画
   useEffect(() => {
-    if (!mindMapData || !svgRef.current) return
+    if (!mindMapData || !svgRef.current) {return}
 
     const width = dimensions.width
     const height = dimensions.height
@@ -245,21 +245,21 @@ const MindMapView = ({ data }) => {
     node
       .append('circle')
       .attr('r', (d) => {
-        if (d.depth === 0) return 30
-        if (d.depth === 1) return 20
-        if (d.depth === 2) return 15
-        if (d.depth === 3) return 10
+        if (d.depth === 0) {return 30}
+        if (d.depth === 1) {return 20}
+        if (d.depth === 2) {return 15}
+        if (d.depth === 3) {return 10}
         return 5
       })
       .attr('fill', (d) => {
-        if (d.depth === 0) return '#6366f1'
-        if (d.depth === 1) return colorScale(d.data.area)
-        if (d.depth === 2) return processGroupColors[d.data.group] || '#94a3b8'
-        if (d.depth === 3) return '#e5e7eb'
+        if (d.depth === 0) {return '#6366f1'}
+        if (d.depth === 1) {return colorScale(d.data.area)}
+        if (d.depth === 2) {return processGroupColors[d.data.group] || '#94a3b8'}
+        if (d.depth === 3) {return '#e5e7eb'}
         return '#f3f4f6'
       })
       .attr('stroke', (d) => {
-        if (d.children || d._children) return '#333'
+        if (d.children || d._children) {return '#333'}
         return 'none'
       })
       .attr('stroke-width', 2)
@@ -293,9 +293,9 @@ const MindMapView = ({ data }) => {
       .attr('text-anchor', (d) => (d.x < Math.PI === !d.children ? 'start' : 'end'))
       .attr('transform', (d) => (d.x >= Math.PI ? 'rotate(180)' : null))
       .attr('font-size', (d) => {
-        if (d.depth === 0) return '16px'
-        if (d.depth === 1) return '14px'
-        if (d.depth === 2) return '12px'
+        if (d.depth === 0) {return '16px'}
+        if (d.depth === 1) {return '14px'}
+        if (d.depth === 2) {return '12px'}
         return '10px'
       })
       .attr('font-weight', (d) => (d.depth <= 1 ? 'bold' : 'normal'))
