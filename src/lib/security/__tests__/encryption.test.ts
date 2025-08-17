@@ -18,6 +18,10 @@ import {
   databaseEncryption,
 } from '../encryption'
 
+// テスト用環境変数を32バイト以上に設定
+process.env.APP_SECRET = 'test-encryption-secret-key-32-chars-minimum-length-required'
+process.env.ADMIN_SECRET = 'test-admin-secret-key-32-chars-minimum-length-required'
+
 // テスト用の環境変数設定
 const originalEnv = process.env
 

@@ -18,7 +18,7 @@ const PWAOptimizationDashboard = () => {
     serviceWorker: { status: 'unknown', cacheHitRatio: 0, offlineRequests: 0 },
   })
 
-  const [realTimeData, setRealTimeData] = useState([])
+  const [_realTimeData, setRealTimeData] = useState([])
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [optimizations, setOptimizations] = useState([])
   const [alerts, setAlerts] = useState([])
@@ -123,7 +123,7 @@ const PWAOptimizationDashboard = () => {
 
   const getCoreWebVitals = async () => {
     // Get metrics from web-vitals library
-    const vitals = { lcp: 0, fid: 0, cls: 0 }
+    const _vitals = { lcp: 0, fid: 0, cls: 0 }
 
     if (typeof window !== 'undefined' && window.coreWebVitalsData) {
       return window.coreWebVitalsData

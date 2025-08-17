@@ -299,7 +299,7 @@ describe('KeyManagementSystem', () => {
 
     it('should warn when production setup is called in non-production', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      
+
       // 環境変数がtestに設定されていることを確認
       const originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'test'

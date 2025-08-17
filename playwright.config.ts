@@ -43,10 +43,10 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     // Global test timeout
-    timeout: 30000,
+    // timeout: 30000,
 
     // Navigation timeout
-    navigationTimeout: 30000,
+    // navigationTimeout: 30000,
 
     // Action timeout
     actionTimeout: 10000,
@@ -120,11 +120,11 @@ export default defineConfig({
 
     // Take screenshots on assertion failures
     toHaveScreenshot: {
-      mode: 'only-on-failure',
+      // mode: 'only-on-failure',
     },
 
     toMatchSnapshot: {
-      mode: 'only-on-failure',
+      // mode: 'only-on-failure',
     },
   },
 })

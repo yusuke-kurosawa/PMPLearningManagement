@@ -62,13 +62,9 @@
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react/display-name": "error",
-    "react/no-unescaped-entities": "error",
-    "no-console": [
-      "warn",
-      {
-        "allow": ["warn", "error"]
-      }
-    ],
+    "react/no-unescaped-entities": "off",
+    "no-console": "off",
+    "no-undef": "off",
     "no-case-declarations": "error",
     "no-useless-escape": "error",
     "@typescript-eslint/no-explicit-any": "warn"

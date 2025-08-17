@@ -53,7 +53,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const formatBytes = (bytes) => {
+  const _formatBytes = (bytes) => {
     if (!bytes) return '0 B'
     const k = 1024
     const sizes = ['B', 'KB', 'MB', 'GB']
