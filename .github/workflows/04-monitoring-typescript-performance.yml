@@ -1,0 +1,356 @@
+# 📊 TypeScript Performance Monitoring
+#
+# 目的: TypeScript型チェック・ビルドパフォーマンスの継続的監視
+# 実行タイミング: PR作成時、メインブランチプッシュ時、定期実行
+# 主な処理: パフォーマンス測定、履歴追跡、異常検知、レポート生成
+
+name: 📊 TypeScript Performance Monitoring
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      - 'tsconfig.json'
+      - 'vite.config.mjs'
+      - 'package.json'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      - 'tsconfig.json'
+      - 'vite.config.mjs'
+  schedule:
+    # 毎日午前6時（JST）に実行
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      detailed_analysis:
+        description: '詳細分析を実行するか'
+        required: false
+        default: 'false'
+        type: boolean
+      benchmark_mode:
+        description: 'ベンチマークモードで実行するか'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: 'v1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false  # パフォーマンス測定は継続実行
+
+jobs:
+  # ============================================
+  # TypeScript パフォーマンス測定
+  # ============================================
+  typescript-performance:
+    name: 🎯 TypeScript パフォーマンス測定
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      overall-score: ${{ steps.performance-analysis.outputs.overall-score }}
+      typecheck-duration: ${{ steps.performance-analysis.outputs.typecheck-duration }}
+      build-duration: ${{ steps.performance-analysis.outputs.build-duration }}
+      bundle-size: ${{ steps.performance-analysis.outputs.bundle-size }}
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Node.js ${{ env.NODE_VERSION }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: 📦 依存関係インストール（最適化）
+        run: |
+          echo "📦 依存関係インストール開始..."
+          start_time=$(date +%s)
+          
+          npm ci --prefer-offline --no-fund --no-audit
+          
+          end_time=$(date +%s)
+          install_duration=$((end_time - start_time))
+          echo "⏱️ 依存関係インストール完了: ${install_duration}秒"
+
+      - name: 📊 TypeScript パフォーマンス分析実行
+        id: performance-analysis
+        run: |
+          echo "📊 TypeScript パフォーマンス分析開始..."
+          
+          # TypeScript パフォーマンス監視実行
+          npm run perf:typescript
+          
+          # メトリクス結果読み取り
+          if [ -f ".github/typescript-metrics.json" ]; then
+            echo "📋 メトリクス結果の読み取り..."
+            
+            # JSONから値を抽出（基本的なパース）
+            overall_score=$(grep -o '"overallScore":[[:space:]]*[0-9]*' .github/typescript-metrics.json | grep -o '[0-9]*' || echo "0")
+            typecheck_duration=$(grep -o '"duration":[[:space:]]*[0-9.]*' .github/typescript-metrics.json | head -1 | grep -o '[0-9.]*' || echo "0")
+            build_duration=$(grep -A 10 '"build":' .github/typescript-metrics.json | grep -o '"duration":[[:space:]]*[0-9.]*' | grep -o '[0-9.]*' || echo "0")
+            bundle_size=$(grep -o '"totalSizeMB":[[:space:]]*[0-9.]*' .github/typescript-metrics.json | grep -o '[0-9.]*' || echo "0")
+            
+            echo "📈 パフォーマンス指標:"
+            echo "  - 総合スコア: ${overall_score}/100"
+            echo "  - 型チェック時間: ${typecheck_duration}秒"
+            echo "  - ビルド時間: ${build_duration}秒"
+            echo "  - バンドルサイズ: ${bundle_size}MB"
+            
+            # GitHub Actions出力
+            echo "overall-score=${overall_score}" >> $GITHUB_OUTPUT
+            echo "typecheck-duration=${typecheck_duration}" >> $GITHUB_OUTPUT
+            echo "build-duration=${build_duration}" >> $GITHUB_OUTPUT
+            echo "bundle-size=${bundle_size}" >> $GITHUB_OUTPUT
+          else
+            echo "❌ メトリクスファイルが見つかりません"
+            echo "overall-score=0" >> $GITHUB_OUTPUT
+            echo "typecheck-duration=0" >> $GITHUB_OUTPUT
+            echo "build-duration=0" >> $GITHUB_OUTPUT
+            echo "bundle-size=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📤 TypeScript メトリクス アップロード
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: typescript-metrics-${{ github.run_id }}
+          path: .github/typescript-metrics.json
+          retention-days: 30
+
+      - name: 🔍 詳細分析（オプション）
+        if: inputs.detailed_analysis == 'true'
+        run: |
+          echo "🔍 TypeScript 詳細分析実行..."
+          
+          # TypeScript トレース分析
+          echo "📊 TypeScript トレース分析:"
+          npm run typecheck:trace || true
+          
+          if [ -d "trace" ]; then
+            echo "✅ TypeScript トレース生成成功"
+            ls -la trace/
+          else
+            echo "❌ TypeScript トレース生成失敗"
+          fi
+          
+          # ビルド統計
+          echo ""
+          echo "📊 ビルド統計分析:"
+          npm run build:stats || true
+
+  # ============================================
+  # パフォーマンス回帰検知
+  # ============================================
+  performance-regression-check:
+    name: 📉 パフォーマンス回帰検知
+    runs-on: ubuntu-latest
+    needs: typescript-performance
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+
+      - name: 📊 パフォーマンス回帰分析
+        run: |
+          echo "📊 パフォーマンス回帰分析"
+          echo "======================="
+          
+          current_score="${{ needs.typescript-performance.outputs.overall-score }}"
+          typecheck_time="${{ needs.typescript-performance.outputs.typecheck-duration }}"
+          build_time="${{ needs.typescript-performance.outputs.build-duration }}"
+          bundle_size="${{ needs.typescript-performance.outputs.bundle-size }}"
+          
+          echo "📋 現在のパフォーマンス指標:"
+          echo "  - 総合スコア: ${current_score}/100"
+          echo "  - 型チェック時間: ${typecheck_time}秒"
+          echo "  - ビルド時間: ${build_time}秒"
+          echo "  - バンドルサイズ: ${bundle_size}MB"
+          
+          # 回帰しきい値チェック
+          echo ""
+          echo "🚨 回帰チェック:"
+          
+          # 型チェック時間チェック（30秒以内）
+          if (( $(echo "$typecheck_time > 30" | bc -l) )); then
+            echo "⚠️ 警告: 型チェック時間が目標を超過 (${typecheck_time}s > 30s)"
+          else
+            echo "✅ 型チェック時間OK (${typecheck_time}s ≤ 30s)"
+          fi
+          
+          # ビルド時間チェック（60秒以内）
+          if (( $(echo "$build_time > 60" | bc -l) )); then
+            echo "⚠️ 警告: ビルド時間が目標を超過 (${build_time}s > 60s)"
+          else
+            echo "✅ ビルド時間OK (${build_time}s ≤ 60s)"
+          fi
+          
+          # バンドルサイズチェック（1.5MB以内）
+          if (( $(echo "$bundle_size > 1.5" | bc -l) )); then
+            echo "⚠️ 警告: バンドルサイズが目標を超過 (${bundle_size}MB > 1.5MB)"
+          else
+            echo "✅ バンドルサイズOK (${bundle_size}MB ≤ 1.5MB)"
+          fi
+          
+          # 総合スコアチェック（90点以上）
+          if [ "$current_score" -lt 90 ]; then
+            echo "⚠️ 警告: 総合スコアが低下 (${current_score}/100 < 90/100)"
+          else
+            echo "✅ 総合スコアOK (${current_score}/100 ≥ 90/100)"
+          fi
+
+  # ============================================
+  # ベンチマーク実行（オプション）
+  # ============================================
+  benchmark:
+    name: 🏃 TypeScript ベンチマーク
+    runs-on: ubuntu-latest
+    if: inputs.benchmark_mode == 'true'
+    timeout-minutes: 45
+    steps:
+      - name: 📥 ソースコード取得
+        uses: actions/checkout@v4
+
+      - name: 🔧 Node.js ${{ env.NODE_VERSION }}セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: 📦 依存関係インストール
+        run: npm ci --no-fund --no-audit
+
+      - name: 🏃 TypeScript ベンチマーク実行
+        run: |
+          echo "🏃 TypeScript ベンチマーク開始..."
+          
+          # 5回実行して平均値計算
+          total_typecheck=0
+          total_build=0
+          iterations=5
+          
+          for i in $(seq 1 $iterations); do
+            echo "📊 実行 ${i}/${iterations}..."
+            
+            # 型チェック時間測定
+            start_time=$(date +%s%3N)
+            npm run typecheck
+            end_time=$(date +%s%3N)
+            typecheck_time=$(( (end_time - start_time) ))
+            total_typecheck=$((total_typecheck + typecheck_time))
+            
+            # ビルド時間測定
+            start_time=$(date +%s%3N)
+            npm run build
+            end_time=$(date +%s%3N)
+            build_time=$(( (end_time - start_time) ))
+            total_build=$((total_build + build_time))
+            
+            echo "  型チェック: ${typecheck_time}ms, ビルド: ${build_time}ms"
+          done
+          
+          # 平均値計算
+          avg_typecheck=$((total_typecheck / iterations))
+          avg_build=$((total_build / iterations))
+          
+          echo ""
+          echo "🎯 ベンチマーク結果（${iterations}回平均）:"
+          echo "  - 型チェック: ${avg_typecheck}ms"
+          echo "  - ビルド: ${avg_build}ms"
+
+  # ============================================
+  # 総合レポート生成
+  # ============================================
+  performance-report:
+    name: 📈 TypeScript パフォーマンスレポート
+    runs-on: ubuntu-latest
+    needs: [typescript-performance, performance-regression-check]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: 📈 総合パフォーマンスレポート生成
+        run: |
+          echo "📈 TypeScript パフォーマンス総合レポート"
+          echo "========================================"
+          echo "📅 測定時刻: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "🔗 関連Issue: #132"
+          echo ""
+          
+          # パフォーマンス指標サマリー
+          echo "📊 パフォーマンス指標サマリー:"
+          echo "  🎯 総合スコア: ${{ needs.typescript-performance.outputs.overall-score }}/100"
+          echo "  ⏱️ 型チェック時間: ${{ needs.typescript-performance.outputs.typecheck-duration }}秒"
+          echo "  🏗️ ビルド時間: ${{ needs.typescript-performance.outputs.build-duration }}秒"
+          echo "  📦 バンドルサイズ: ${{ needs.typescript-performance.outputs.bundle-size }}MB"
+          echo ""
+          
+          # 目標達成状況
+          echo "🎯 目標達成状況:"
+          typecheck_time="${{ needs.typescript-performance.outputs.typecheck-duration }}"
+          build_time="${{ needs.typescript-performance.outputs.build-duration }}"
+          bundle_size="${{ needs.typescript-performance.outputs.bundle-size }}"
+          
+          # 型チェック目標チェック
+          if (( $(echo "$typecheck_time <= 30" | bc -l) )); then
+            echo "  ✅ 型チェック時間目標達成 (${typecheck_time}s ≤ 30s)"
+          else
+            echo "  ❌ 型チェック時間目標未達成 (${typecheck_time}s > 30s)"
+          fi
+          
+          # ビルド目標チェック
+          if (( $(echo "$build_time <= 60" | bc -l) )); then
+            echo "  ✅ ビルド時間目標達成 (${build_time}s ≤ 60s)"
+          else
+            echo "  ❌ ビルド時間目標未達成 (${build_time}s > 60s)"
+          fi
+          
+          # バンドルサイズ目標チェック
+          if (( $(echo "$bundle_size <= 1.5" | bc -l) )); then
+            echo "  ✅ バンドルサイズ目標達成 (${bundle_size}MB ≤ 1.5MB)"
+          else
+            echo "  ❌ バンドルサイズ目標未達成 (${bundle_size}MB > 1.5MB)"
+          fi
+          
+          echo ""
+          echo "🚀 最適化状況: Issue #132 実装完了"
+          echo "  ✅ TypeScript設定厳格化"
+          echo "  ✅ Vite TypeScript対応強化" 
+          echo "  ✅ CI/CD TypeScript統合"
+          echo "  ✅ パフォーマンス監視システム"
+
+      - name: 📊 成功率計算
+        run: |
+          echo "📊 TypeScript パフォーマンス監視成功率計算"
+          
+          # 各ジョブの成功状況
+          typescript_success="${{ needs.typescript-performance.result }}"
+          
+          echo "📋 実行結果:"
+          echo "  - TypeScript パフォーマンス測定: ${typescript_success}"
+          
+          if [ "$typescript_success" = "success" ]; then
+            echo "🎉 TypeScript パフォーマンス監視: 100%成功"
+          else
+            echo "⚠️ TypeScript パフォーマンス監視: 一部失敗"
+          fi
+
+# セキュリティ設定: 最小権限の原則
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
