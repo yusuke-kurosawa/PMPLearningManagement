@@ -6,15 +6,22 @@
  * 最終更新: {updated}
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import crypto from 'crypto'
 
 // テスト用の環境変数設定
 const originalEnv = process.env
 
+// テスト開始前に環境変数を設定
+beforeAll(() => {
+  process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex')
+  process.env.HASH_PEPPER = crypto.randomBytes(16).toString('hex')
+  process.env.APP_SECRET = crypto.randomBytes(32).toString('hex') // 32バイト = 64文字のhex
+})
+
 describe('データ暗号化システム', () => {
   beforeEach(() => {
-    // テスト用環境変数の設定
+    // テスト用環境変数の設定（各テストで新しいキー）
     process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex')
     process.env.HASH_PEPPER = crypto.randomBytes(16).toString('hex')
     process.env.APP_SECRET = crypto.randomBytes(32).toString('hex') // 32バイト = 64文字のhex
@@ -28,11 +35,13 @@ describe('データ暗号化システム', () => {
   })
 
   describe('SymmetricEncryption', () => {
+    let SymmetricEncryption: any
     let encryption: any
 
     beforeEach(async () => {
       const module = await import('../encryption')
-      encryption = new module.SymmetricEncryption()
+      SymmetricEncryption = module.SymmetricEncryption
+      encryption = new SymmetricEncryption()
     })
 
     it('データを暗号化して復号化できる', () => {
@@ -106,9 +115,12 @@ describe('データ暗号化システム', () => {
   })
 
   describe('HashingService', () => {
-    let hashing: HashingService
+    let HashingService: any
+    let hashing: any
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const module = await import('../encryption')
+      HashingService = module.HashingService
       hashing = new HashingService()
     })
 
@@ -194,9 +206,12 @@ describe('データ暗号化システム', () => {
   })
 
   describe('TokenGenerator', () => {
-    let tokenGen: TokenGenerator
+    let TokenGenerator: any
+    let tokenGen: any
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const module = await import('../encryption')
+      TokenGenerator = module.TokenGenerator
       tokenGen = new TokenGenerator()
     })
 
@@ -234,11 +249,12 @@ describe('データ暗号化システム', () => {
       expect(uniqueTokens.size).toBe(tokens.length)
     })
 
-    it('期限付きトークンの生成と検証', () => {
+    it('期限付きトークンの生成と検証', async () => {
       const payload = { userId: 'user123', action: 'reset-password' }
 
       // 暗号化結果を完全に取得する必要があります
-      const encryption = new SymmetricEncryption()
+      const module = await import('../encryption')
+      const encryption = new module.SymmetricEncryption()
       const tokenData = {
         payload,
         exp: Date.now() + 60 * 60 * 1000, // 1時間後
@@ -258,10 +274,11 @@ describe('データ暗号化システム', () => {
       expect(verifiedPayload).toEqual(payload)
     })
 
-    it('期限切れトークンは検証に失敗する', () => {
+    it('期限切れトークンは検証に失敗する', async () => {
       const payload = { userId: 'user123', action: 'expired-token' }
 
-      const encryption = new SymmetricEncryption()
+      const module = await import('../encryption')
+      const encryption = new module.SymmetricEncryption()
       const tokenData = {
         payload,
         exp: Date.now() - 1000, // 1秒前（期限切れ）
@@ -283,9 +300,12 @@ describe('データ暗号化システム', () => {
   })
 
   describe('PIIEncryption', () => {
-    let pii: PIIEncryption
+    let PIIEncryption: any
+    let pii: any
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const module = await import('../encryption')
+      PIIEncryption = module.PIIEncryption
       pii = new PIIEncryption()
     })
 
@@ -356,9 +376,12 @@ describe('データ暗号化システム', () => {
   })
 
   describe('DatabaseEncryption', () => {
-    let dbEncryption: DatabaseEncryption
+    let DatabaseEncryption: any
+    let dbEncryption: any
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const module = await import('../encryption')
+      DatabaseEncryption = module.DatabaseEncryption
       dbEncryption = new DatabaseEncryption()
     })
 
@@ -423,16 +446,18 @@ describe('データ暗号化システム', () => {
   })
 
   describe('エラーハンドリングとセキュリティ', () => {
-    it('環境変数が設定されていない場合の適切なエラー処理', () => {
+    it('環境変数が設定されていない場合の適切なエラー処理', async () => {
       delete process.env.ENCRYPTION_KEY
       delete process.env.HASH_PEPPER
       delete process.env.APP_SECRET
 
-      expect(() => new SymmetricEncryption()).toThrow('暗号化設定エラー')
+      const module = await import('../encryption')
+      expect(() => new module.SymmetricEncryption()).toThrow('暗号化設定エラー')
     })
 
-    it('不正なフォーマットのデータ復号化は失敗する', () => {
-      const encryption = new SymmetricEncryption()
+    it('不正なフォーマットのデータ復号化は失敗する', async () => {
+      const module = await import('../encryption')
+      const encryption = new module.SymmetricEncryption()
 
       const invalidData = {
         encrypted: 'invalid-hex-data',
@@ -443,8 +468,9 @@ describe('データ暗号化システム', () => {
       expect(() => encryption.decrypt(invalidData)).toThrow()
     })
 
-    it('メモリダンプ攻撃への対策（タイミング攻撃防止）', () => {
-      const hashing = new HashingService()
+    it('メモリダンプ攻撃への対策（タイミング攻撃防止）', async () => {
+      const module = await import('../encryption')
+      const hashing = new module.HashingService()
       const sessionData = { userId: 'timing-test', role: 'user' }
 
       const correctSignature = hashing.signSession(sessionData)
@@ -467,6 +493,9 @@ describe('データ暗号化システム', () => {
 
   describe('統合テスト', () => {
     it('暗号化システム全体のワークフロー', async () => {
+      const module = await import('../encryption')
+      const databaseEncryption = new module.DatabaseEncryption()
+
       // 1. ユーザー登録時の暗号化
       const userData = {
         email: 'integration@example.com',
@@ -489,6 +518,7 @@ describe('データ暗号化システム', () => {
       expect(decrypted).toEqual(userData)
 
       // 4. パスワードハッシュ化（別のワークフロー）
+      const hashingService = new module.HashingService()
       const password = 'UserSecurePassword123!'
       const passwordHash = await hashingService.hashPassword(password)
       const passwordVerified = await hashingService.verifyPassword(password, passwordHash.hash)
