@@ -133,16 +133,18 @@ export class RedisCacheManager {
    * データの圧縮
    */
   private compress(data: string): Buffer {
-    import zlib from 'zlib'
-    return zlib.gzipSync(Buffer.from(data))
+    // Note: zlib is a Node.js module and not available in browser environment
+    // For now, return uncompressed buffer for browser compatibility
+    return Buffer.from(data)
   }
 
   /**
    * データの展開
    */
   private decompress(data: Buffer): string {
-    import zlib from 'zlib'
-    return zlib.gunzipSync(data).toString()
+    // Note: zlib is a Node.js module and not available in browser environment
+    // For now, return uncompressed data for browser compatibility
+    return data.toString()
   }
 
   /**

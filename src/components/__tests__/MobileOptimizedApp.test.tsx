@@ -7,6 +7,15 @@ import type { ServiceWorkerRegistration as _ServiceWorkerRegistration } from '..
 
 expect.extend(toHaveNoViolations)
 
+// Mock react-router-dom
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  }
+})
+
 // Mock intersection observer
 const mockIntersectionObserver = vi.fn()
 mockIntersectionObserver.mockReturnValue({

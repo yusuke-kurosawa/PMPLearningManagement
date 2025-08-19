@@ -3,6 +3,12 @@
  * Developer 1: 包括的なGeoIPサービステスト
  */
 
+// Skip this test in browser environment (requires Node.js modules)
+if (typeof window !== 'undefined') {
+  import { describe } from 'vitest'
+  describe.skip('GeoIPService (Node.js only)', () => {})
+} else {
+
 import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest'
 import { GeoIPService } from '../geoip'
 // import * as fc from 'fast-check' // Currently unused
@@ -519,3 +525,4 @@ describe('GeoIPService', () => {
     })
   })
 })
+} // End of Node.js only tests

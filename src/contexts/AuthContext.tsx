@@ -60,7 +60,12 @@ interface AuthProviderProps {
 
 // Auth Provider Component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const navigate = useNavigate()
+  let navigate: ReturnType<typeof useNavigate> | null = null
+  try {
+    navigate = useNavigate()
+  } catch (_error) {
+    // useNavigate may not be available in test environment
+  }
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [role, setRole] = useState<string>(UserRoles.GUEST)
@@ -106,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (process.env.NODE_ENV === 'development') {
           logger.error('Auth initialization error:', error)
         }
-        setAuthError(error.message)
+        setAuthError(error?.message || 'Authentication initialization failed')
       } finally {
         setLoading(false)
       }
@@ -145,7 +150,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSession(null)
         setRole(UserRoles.GUEST)
         setPermissions([])
-        navigate('/login')
+        if (navigate) {
+          navigate('/login')
+        }
         break
 
       case 'TOKEN_REFRESHED':

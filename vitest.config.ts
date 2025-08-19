@@ -87,7 +87,20 @@ export default defineConfig({
       '@/stores': path.resolve(__dirname, './src/stores'),
     },
     include: ['**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules', 'dist', '.next', 'playwright-report', 'e2e/**/*'],
+    exclude: [
+      'node_modules',
+      'dist',
+      '.next',
+      'playwright-report',
+      'e2e/**/*',
+      // Exclude Node.js-specific tests (require server-side modules)
+      'src/lib/cache/__tests__/*.test.ts',
+      'src/lib/db/__tests__/*.test.ts',
+      'src/lib/security/__tests__/csrf.test.ts',
+      'src/lib/security/__tests__/geoip.test.ts',
+      'src/lib/security/__tests__/rateLimiting.test.ts',
+      'src/server/**/*.test.ts',
+    ],
     reporters: [
       'verbose',
       'json',

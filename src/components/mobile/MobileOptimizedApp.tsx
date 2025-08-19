@@ -189,7 +189,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const initializePWA = async () => {
     // Check if app is installed
     const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
       (window.navigator as ExtendedNavigator).standalone ||
       document.referrer.includes('android-app://')
     setPwaCapabilities((prev) => ({
@@ -230,11 +230,19 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     })
     // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      const permission = await Notification.requestPermission()
-      setNotificationsEnabled(permission === 'granted')
+    if ('Notification' in window && window.Notification) {
+      if (Notification.permission === 'default') {
+        try {
+          const permission = await Notification.requestPermission()
+          setNotificationsEnabled(permission === 'granted')
+        } catch (_error) {
+          setNotificationsEnabled(false)
+        }
+      } else {
+        setNotificationsEnabled(Notification.permission === 'granted')
+      }
     } else {
-      setNotificationsEnabled(Notification.permission === 'granted')
+      setNotificationsEnabled(false)
     }
     // Register service worker
     if ('serviceWorker' in navigator) {

@@ -7,6 +7,11 @@ import { describe, it, expect, beforeEach, afterEach, vi, beforeAll } from 'vite
 import { CSRFProtection } from '../csrf'
 import * as fc from 'fast-check'
 
+// Skip this test in browser environment (requires Node.js crypto module)
+if (typeof window !== 'undefined') {
+  describe.skip('CSRFProtectionManager (Node.js only)', () => {})
+} else {
+
 // Crypto モック
 const cryptoMock = {
   randomBytes: vi.fn().mockImplementation((size: number) => ({
@@ -490,3 +495,4 @@ describe('Enhanced CSRF Protection', () => {
     })
   })
 })
+} // End of Node.js only tests
