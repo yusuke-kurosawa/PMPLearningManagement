@@ -201,7 +201,7 @@ const ITTONetworkDiagram = () => {
   // Combine all nodes for easier access
   const allNodes = useMemo(() => {
     return [...ittoData.processes, ...ittoData.inputs, ...ittoData.tools, ...ittoData.outputs]
-  }, [])
+  }, [ittoData])
 
   // Get connected nodes for highlighting
   const getConnectedNodes = (nodeId) => {

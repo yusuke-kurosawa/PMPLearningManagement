@@ -40,14 +40,14 @@ const IntegratedView = React.memo(() => {
     [isDragging]
   )
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = () => {
     setIsDragging(false)
-  }, [])
+  }
 
-  const resetSplit = useCallback(() => {
+  const resetSplit = () => {
     setSplitRatio(50)
     setFullscreenView(null)
-  }, [])
+  }
 
   const toggleFullscreen = useCallback((view) => {
     setFullscreenView((prev) => (prev === view ? null : view))

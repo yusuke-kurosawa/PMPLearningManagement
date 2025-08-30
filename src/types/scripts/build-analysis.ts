@@ -254,14 +254,17 @@ export interface ResponsiveImageInfo {
 
 // Content Quality Analysis
 export interface ContentQualityAnalyzer {
-  readonly checkContentQuality: () => Promise<any>
+  readonly checkContentQuality: () => Promise<unknown>
 }
 
 export interface EducationalQualityStandards {
-  readonly LEARNING_LEVELS: Record<string, {
-    readonly weight: number
-    readonly keywords: readonly string[]
-  }>
+  readonly LEARNING_LEVELS: Record<
+    string,
+    {
+      readonly weight: number
+      readonly keywords: readonly string[]
+    }
+  >
   readonly READABILITY_METRICS: {
     readonly sentence_length: { readonly ideal: number; readonly max: number }
     readonly word_complexity: { readonly max_syllables: number }
@@ -306,7 +309,7 @@ export interface QualityReport {
     readonly exam_prep_gate: boolean
     readonly accessibility_gate: boolean
   }
-  readonly detailed_analysis: Record<string, any>
+  readonly detailed_analysis: Record<string, unknown>
   readonly issues: readonly {
     readonly severity: string
     readonly message: string

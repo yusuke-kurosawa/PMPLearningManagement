@@ -9,7 +9,7 @@ import { ReactNode } from 'react'
 export type UserRole = 'admin' | 'instructor' | 'student' | 'guest'
 
 // User permissions type definition
-export type UserPermission = 
+export type UserPermission =
   | 'view_content'
   | 'take_exams'
   | 'view_progress'
@@ -34,13 +34,13 @@ export interface UserProfile {
   role: UserRole
   created_at: string
   updated_at: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Auth state interface
 export interface AuthState {
   user: UserProfile | null
-  session: any | null
+  session: unknown | null
   loading: boolean
   error: string | null
 }
@@ -48,11 +48,11 @@ export interface AuthState {
 // Auth context type
 export interface AuthContextType {
   user: UserProfile | null
-  session: any | null
+  session: unknown | null
   loading: boolean
   error: string | null
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, userData?: Record<string, any>) => Promise<void>
+  signUp: (email: string, password: string, userData?: Record<string, unknown>) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>
   hasPermission: (permission: UserPermission) => boolean
@@ -104,7 +104,7 @@ export interface AuthValidationResult {
 export type OAuthProvider = 'google' | 'github' | 'discord'
 
 // Auth error types
-export type AuthErrorType = 
+export type AuthErrorType =
   | 'invalid_credentials'
   | 'user_not_found'
   | 'email_already_exists'

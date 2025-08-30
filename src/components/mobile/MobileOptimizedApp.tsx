@@ -644,7 +644,12 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
           <div className='flex items-center gap-2'>
             {pwaCapabilities.canInstall && (
-              <Button variant='ghost' size='sm' onClick={handleInstallApp} aria-label='アプリをインストール'>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={handleInstallApp}
+                aria-label='アプリをインストール'
+              >
                 <Download className='h-4 w-4' />
               </Button>
             )}

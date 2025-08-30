@@ -15,7 +15,7 @@ export type ITTOItemType = 'input' | 'tool' | 'technique' | 'output'
 /**
  * ITTOアイテムカテゴリ型
  */
-export type ITTOItemCategory = 
+export type ITTOItemCategory =
   | 'document'
   | 'plan'
   | 'register'
@@ -60,24 +60,24 @@ export type DetailedITTOItem = ITTOItem & {
   qualityCriteria: string[]
   completionCriteria: string[]
   reviewCriteria: string[]
-  
+
   // 関連性
   relatedItems: string[]
   dependencies: string[]
   alternatives: string[]
-  
+
   // 実装ガイド
   implementationGuidance: string
   commonMistakes: string[]
   bestPractices: string[]
-  
+
   // テンプレート・リソース
   templates: ITTOTemplate[]
   resources: ITTOResource[]
-  
+
   // メトリクス
   qualityMetrics: ITTOMetric[]
-  
+
   // バリエーション
   variations: ITTOVariation[]
 }
@@ -416,14 +416,14 @@ export const isHighComplexityItem = (item: ITTOItem): boolean => {
  * ITTOアイテムのタイプ別フィルタリング
  */
 export const filterITTOByType = (items: ITTOItem[], type: ITTOItemType): ITTOItem[] => {
-  return items.filter(item => item.type === type)
+  return items.filter((item) => item.type === type)
 }
 
 /**
  * ITTOアイテムのカテゴリ別フィルタリング
  */
 export const filterITTOByCategory = (items: ITTOItem[], category: ITTOItemCategory): ITTOItem[] => {
-  return items.filter(item => item.category === category)
+  return items.filter((item) => item.category === category)
 }
 
 // ==================== エクスポート統合 ====================

@@ -58,14 +58,19 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-// Auth Provider Component
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  let navigate: ReturnType<typeof useNavigate> | null = null
-  try {
-    navigate = useNavigate()
-  } catch (_error) {
-    // useNavigate may not be available in test environment
-  }
+// Helper component that uses navigation
+const AuthProviderWithNavigation: React.FC<AuthProviderProps> = ({ children }) => {
+  const navigate = useNavigate()
+  return <AuthProviderInternal navigate={navigate}>{children}</AuthProviderInternal>
+}
+
+// Internal Auth Provider Component
+interface AuthProviderInternalProps extends AuthProviderProps {
+  navigate?: ReturnType<typeof useNavigate>
+}
+
+const AuthProviderInternal: React.FC<AuthProviderInternalProps> = ({ children, navigate }) => {
+  // Hooks must be called at the top level
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [role, setRole] = useState<string>(UserRoles.GUEST)
@@ -442,6 +447,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+// Export the AuthProvider that automatically handles navigation
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Try to use navigation if available (inside Router)
+  try {
+    return <AuthProviderWithNavigation>{children}</AuthProviderWithNavigation>
+  } catch {
+    // Fallback to provider without navigation (for tests or outside Router)
+    return <AuthProviderInternal>{children}</AuthProviderInternal>
+  }
 }
 
 // Custom hook to use auth context

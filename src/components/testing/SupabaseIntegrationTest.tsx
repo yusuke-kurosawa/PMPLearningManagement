@@ -16,7 +16,8 @@ import {
   Users,
   FileText,
   BarChart3,
-  RefreshCw} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react'
 import { useProgressV2 } from '../../hooks/useProgressV2'
 import { logger } from '../../services/logger'
 
@@ -54,7 +55,8 @@ const SupabaseIntegrationTest = () => {
     getExamStats,
     syncData,
     migrateToSupabase,
-    checkMigrationFeasibility} = useProgressV2({
+    checkMigrationFeasibility,
+  } = useProgressV2({
     enableMigration: true,
     autoSync: false, // テスト中は自動同期を無効化
   })
@@ -68,7 +70,8 @@ const SupabaseIntegrationTest = () => {
         { name: '同期状態確認', status: 'pending', message: '' },
         { name: 'プロセス進捗取得', status: 'pending', message: '' },
         { name: 'プロセス進捗更新', status: 'pending', message: '' },
-      ]},
+      ],
+    },
     {
       name: 'データ記録テスト',
       status: 'pending',
@@ -76,21 +79,24 @@ const SupabaseIntegrationTest = () => {
         { name: '学習セッション記録', status: 'pending', message: '' },
         { name: 'フラッシュカードセッション記録', status: 'pending', message: '' },
         { name: '模擬試験結果記録', status: 'pending', message: '' },
-      ]},
+      ],
+    },
     {
       name: '統計取得テスト',
       status: 'pending',
       tests: [
         { name: 'フラッシュカード統計取得', status: 'pending', message: '' },
         { name: '模擬試験統計取得', status: 'pending', message: '' },
-      ]},
+      ],
+    },
     {
       name: '同期・移行テスト',
       status: 'pending',
       tests: [
         { name: 'データ同期実行', status: 'pending', message: '' },
         { name: '移行実行可能性チェック', status: 'pending', message: '' },
-      ]},
+      ],
+    },
   ])
 
   const [isRunningTests, setIsRunningTests] = useState(false)
@@ -114,7 +120,8 @@ const SupabaseIntegrationTest = () => {
               ...suite,
               tests: suite.tests.map((test) =>
                 test.name === testName ? { ...test, status, message, duration } : test
-              )}
+              ),
+            }
           : suite
       )
     )
@@ -167,13 +174,15 @@ const SupabaseIntegrationTest = () => {
   const testAuthentication = async () => {
     return {
       success: true,
-      message: `認証状態: ${isAuthenticated ? '認証済み' : '未認証'}`}
+      message: `認証状態: ${isAuthenticated ? '認証済み' : '未認証'}`,
+    }
   }
 
   const testSyncStatus = async () => {
     return {
       success: true,
-      message: `オンライン: ${syncStatus.isOnline}, 保留中: ${syncStatus.pendingChanges}件`}
+      message: `オンライン: ${syncStatus.isOnline}, 保留中: ${syncStatus.pendingChanges}件`,
+    }
   }
 
   const testGetProcessProgress = async () => {
@@ -182,17 +191,20 @@ const SupabaseIntegrationTest = () => {
       success: progress !== null,
       message: progress
         ? `プロセス進捗取得成功: 完了=${progress.completed}, 理解度=${progress.understanding}`
-        : 'プロセス進捗取得失敗'}
+        : 'プロセス進捗取得失敗',
+    }
   }
 
   const testUpdateProcessProgress = async () => {
     const success = await updateProcessProgress('p1', {
       completed: true,
       understanding: 85,
-      notes: 'テスト更新'})
+      notes: 'テスト更新',
+    })
     return {
       success,
-      message: success ? 'プロセス進捗更新成功' : 'プロセス進捗更新失敗'}
+      message: success ? 'プロセス進捗更新成功' : 'プロセス進捗更新失敗',
+    }
   }
 
   const testRecordStudySession = async () => {
@@ -201,10 +213,12 @@ const SupabaseIntegrationTest = () => {
       duration: 30,
       processCount: 1,
       type: 'reading',
-      focusArea: 'integration'})
+      focusArea: 'integration',
+    })
     return {
       success,
-      message: success ? '学習セッション記録成功' : '学習セッション記録失敗'}
+      message: success ? '学習セッション記録成功' : '学習セッション記録失敗',
+    }
   }
 
   const testRecordFlashCardSession = async () => {
@@ -213,12 +227,14 @@ const SupabaseIntegrationTest = () => {
       correctAnswers: 8,
       duration: 15,
       sessionType: 'itto',
-      targetArea: 'integration'})
+      targetArea: 'integration',
+    })
     return {
       success,
       message: success
         ? 'フラッシュカードセッション記録成功'
-        : 'フラッシュカードセッション記録失敗'}
+        : 'フラッシュカードセッション記録失敗',
+    }
   }
 
   const testRecordExamResult = async () => {
@@ -231,10 +247,13 @@ const SupabaseIntegrationTest = () => {
         correct: 15,
         total: 20,
         domainScores: { integration: 80, scope: 70 },
-        timeSpent: 45}})
+        timeSpent: 45,
+      },
+    })
     return {
       success,
-      message: success ? '模擬試験結果記録成功' : '模擬試験結果記録失敗'}
+      message: success ? '模擬試験結果記録成功' : '模擬試験結果記録失敗',
+    }
   }
 
   const testGetFlashCardStats = async () => {
@@ -243,7 +262,8 @@ const SupabaseIntegrationTest = () => {
       success: stats !== null,
       message: stats
         ? `フラッシュカード統計取得成功: セッション数=${stats.totalSessions}, 正解率=${stats.averageAccuracy}%`
-        : 'フラッシュカード統計取得失敗'}
+        : 'フラッシュカード統計取得失敗',
+    }
   }
 
   const testGetExamStats = async () => {
@@ -252,21 +272,24 @@ const SupabaseIntegrationTest = () => {
       success: stats !== null,
       message: stats
         ? `模擬試験統計取得成功: 受験回数=${stats.totalExams}, 平均点=${stats.averageScore}`
-        : '模擬試験統計取得失敗'}
+        : '模擬試験統計取得失敗',
+    }
   }
 
   const testSyncData = async () => {
     const success = await syncData()
     return {
       success,
-      message: success ? 'データ同期成功' : 'データ同期失敗'}
+      message: success ? 'データ同期成功' : 'データ同期失敗',
+    }
   }
 
   const testMigrationFeasibility = async () => {
     const result = await checkMigrationFeasibility()
     return {
       success: true,
-      message: `移行可能: ${result.canMigrate}, データサイズ: ${Math.round(result.dataSize / 1024)}KB, レコード数: ${result.recordCount}`}
+      message: `移行可能: ${result.canMigrate}, データサイズ: ${Math.round(result.dataSize / 1024)}KB, レコード数: ${result.recordCount}`,
+    }
   }
 
   // ========================================
@@ -284,17 +307,22 @@ const SupabaseIntegrationTest = () => {
         認証状態確認: testAuthentication,
         同期状態確認: testSyncStatus,
         プロセス進捗取得: testGetProcessProgress,
-        プロセス進捗更新: testUpdateProcessProgress},
+        プロセス進捗更新: testUpdateProcessProgress,
+      },
       データ記録テスト: {
         学習セッション記録: testRecordStudySession,
         フラッシュカードセッション記録: testRecordFlashCardSession,
-        模擬試験結果記録: testRecordExamResult},
+        模擬試験結果記録: testRecordExamResult,
+      },
       統計取得テスト: {
         フラッシュカード統計取得: testGetFlashCardStats,
-        模擬試験統計取得: testGetExamStats},
+        模擬試験統計取得: testGetExamStats,
+      },
       '同期・移行テスト': {
         データ同期実行: testSyncData,
-        移行実行可能性チェック: testMigrationFeasibility}}
+        移行実行可能性チェック: testMigrationFeasibility,
+      },
+    }
 
     const tests = testMappings[suiteName] || {}
     let allPassed = true

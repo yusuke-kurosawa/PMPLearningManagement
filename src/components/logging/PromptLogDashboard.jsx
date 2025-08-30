@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog'
-import { Progress } from '../ui/progress'
+// // import { Progress } from '../ui/progress' // TODO: Will be used in future // TODO: Will be used in future
 import {
   BarChart,
   Bar,
@@ -69,7 +69,7 @@ import {
 } from 'lucide-react'
 import promptLogService from '../../services/promptLogService'
 import { useToast } from '../ui/use-toast'
-import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 
 const PromptLogDashboard = () => {
   const { toast } = useToast()
@@ -87,12 +87,12 @@ const PromptLogDashboard = () => {
     tags: [],
   })
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(50)
+  // //   const [pageSize, setPageSize] = useState(50) // TODO: Will be used in future // TODO: Will be used in future
   const [sortConfig, setSortConfig] = useState({ field: 'timestamp', order: 'desc' })
   const [exportFormat, setExportFormat] = useState('json')
   const [config, setConfig] = useState(promptLogService.getConfig())
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [refreshInterval, setRefreshInterval] = useState(null)
+  // //   const [refreshInterval, setRefreshInterval] = useState(null) // TODO: Will be used in future // TODO: Will be used in future
 
   // Load initial data
   useEffect(() => {

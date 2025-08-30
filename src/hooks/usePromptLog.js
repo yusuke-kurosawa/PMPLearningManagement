@@ -190,9 +190,10 @@ export const usePromptLog = (options = {}) => {
    */
   const clearUserLogs = useCallback(async () => {
     try {
-      const userLogs = await promptLogService.queryLogs({
-        userId: user?.id || 'anonymous',
-      })
+      // TODO: Will be used in future
+      // const userLogs = await promptLogService.queryLogs({
+      //   userId: user?.id || 'anonymous',
+      // })
 
       // Note: This would need to be implemented in the service
       // For now, we'll just clear all logs

@@ -9,9 +9,10 @@
   body {
     overflow-x: hidden;
   }
-  
+
   /* Better touch targets for mobile */
-  button, a {
+  button,
+  a {
     min-height: 44px;
     min-width: 44px;
   }

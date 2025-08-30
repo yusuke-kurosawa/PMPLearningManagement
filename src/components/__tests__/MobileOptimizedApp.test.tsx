@@ -27,8 +27,22 @@ window.IntersectionObserver = mockIntersectionObserver
 
 // Mock service worker
 const mockServiceWorker = {
-  register: vi.fn().mockResolvedValue({}),
-  ready: vi.fn().mockResolvedValue({}),
+  register: vi.fn().mockResolvedValue({
+    scope: '/',
+    updatefound: null,
+    active: { state: 'activated' },
+    installing: null,
+    waiting: null,
+  }),
+  ready: Promise.resolve({
+    scope: '/',
+    updatefound: null,
+    active: { state: 'activated' },
+    installing: null,
+    waiting: null,
+  }),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 }
 Object.defineProperty(navigator, 'serviceWorker', {
   value: mockServiceWorker,
@@ -72,6 +86,41 @@ Object.defineProperty(window, 'devicePixelRatio', {
   value: 2,
   writable: true,
 })
+
+// Mock clipboard API
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: vi.fn().mockResolvedValue(undefined),
+    readText: vi.fn().mockResolvedValue(''),
+  },
+  writable: true,
+})
+
+// Mock share API
+Object.defineProperty(navigator, 'share', {
+  value: vi.fn().mockResolvedValue(undefined),
+  writable: true,
+})
+
+// Mock composedPath for touch events
+if (!Event.prototype.composedPath) {
+  Event.prototype.composedPath = function () {
+    if (this.path) {
+      return this.path
+    }
+    let target = this.target
+    const path = []
+    while (target) {
+      path.push(target)
+      target = target.parentNode
+    }
+    if (path.length > 0 && !path.includes(window)) {
+      path.push(document)
+      path.push(window)
+    }
+    return path
+  }
+}
 
 const renderWithRouter = (component) => {
   return render(<BrowserRouter>{component}</BrowserRouter>)
@@ -171,16 +220,16 @@ describe('MobileOptimizedApp', () => {
       const mockInstallEvent = new Event('beforeinstallprompt')
       Object.defineProperty(mockInstallEvent, 'prompt', {
         value: vi.fn().mockResolvedValue({}),
-        writable: false
+        writable: false,
       })
       Object.defineProperty(mockInstallEvent, 'preventDefault', {
         value: vi.fn(),
-        writable: false
+        writable: false,
       })
 
       // Dispatch the event to window
       window.dispatchEvent(mockInstallEvent)
-      
+
       // Wait for state update then open mobile menu
       await waitFor(async () => {
         const menuButtons = screen.getAllByRole('button', { name: /メニューを開く/i })
@@ -299,7 +348,7 @@ describe('MobileOptimizedApp', () => {
       fireEvent(container.firstChild!, touchStartEvent)
 
       // Wait longer than the long press threshold (500ms)
-      await new Promise(resolve => setTimeout(resolve, 600))
+      await new Promise((resolve) => setTimeout(resolve, 600))
 
       // Component should handle the gesture without error
       expect(container).toBeInTheDocument()
@@ -509,7 +558,7 @@ describe('MobileOptimizedApp', () => {
         value: { writeText: mockClipboard },
         writable: true,
       })
-      
+
       // Ensure navigator.share is not available
       Object.defineProperty(navigator, 'share', {
         value: undefined,

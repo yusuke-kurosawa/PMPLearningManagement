@@ -3,7 +3,7 @@
  * REST API、GraphQL、WebSocket通信の型安全性を提供
  */
 
-import type { Timestamp, Result, Pagination } from './base'
+import type { Timestamp, Pagination } from './base'
 
 // ==================== HTTP関連型 ====================
 
@@ -48,8 +48,8 @@ export type ContentType =
  */
 export type ApiRequestHeaders = {
   'Content-Type'?: ContentType
-  'Authorization'?: string
-  'Accept'?: string
+  Authorization?: string
+  Accept?: string
   'User-Agent'?: string
   'X-Request-ID'?: string
   'X-Client-Version'?: string
@@ -62,7 +62,7 @@ export type ApiRequestHeaders = {
 export type ApiResponseHeaders = {
   'Content-Type'?: ContentType
   'Cache-Control'?: string
-  'ETag'?: string
+  ETag?: string
   'Last-Modified'?: string
   'X-Rate-Limit-Remaining'?: string
   'X-Request-ID'?: string

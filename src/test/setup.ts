@@ -157,35 +157,36 @@ Object.defineProperty(window.Notification, 'requestPermission', {
 
 // Mock ServiceWorkerRegistration globally
 if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {
-  ;(window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
-    scope = '/'
-    updateViaCache = 'none' as const
-    active = null
-    installing = null
-    waiting = null
-    onupdatefound = null
+  ;(window as unknown as { ServiceWorkerRegistration: unknown }).ServiceWorkerRegistration =
+    class ServiceWorkerRegistration {
+      scope = '/'
+      updateViaCache = 'none' as const
+      active = null
+      installing = null
+      waiting = null
+      onupdatefound = null
 
-    async getNotifications() {
-      return []
-    }
-    async showNotification() {
-      return
-    }
-    async update() {
-      return
-    }
-    async unregister() {
-      return false
-    }
+      async getNotifications() {
+        return []
+      }
+      async showNotification() {
+        return
+      }
+      async update() {
+        return
+      }
+      async unregister() {
+        return false
+      }
 
-    pushManager = {
-      getSubscription: vi.fn(),
-      subscribe: vi.fn(),
-      permissionState: vi.fn(),
-    }
+      pushManager = {
+        getSubscription: vi.fn(),
+        subscribe: vi.fn(),
+        permissionState: vi.fn(),
+      }
 
-    prototype = ServiceWorkerRegistration.prototype
-  }
+      prototype = ServiceWorkerRegistration.prototype
+    }
 }
 
 // Mock scrollTo

@@ -210,7 +210,10 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
                   {/* Theme */}
                   <div>
-                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                    <label
+                      htmlFor=''
+                      className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'
+                    >
                       テーマ
                     </label>
                     <div className='flex gap-3'>
@@ -247,10 +250,14 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
                   {/* Font Size */}
                   <div>
-                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                    <label
+                      htmlFor='-input'
+                      className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'
+                    >
                       フォントサイズ
                     </label>
                     <select
+                      id='-input'
                       value={localSettings.fontSize}
                       onChange={(e) =>
                         setLocalSettings({ ...localSettings, fontSize: e.target.value })
@@ -474,10 +481,14 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
 
                   {/* Default View */}
                   <div>
-                    <label className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                    <label
+                      htmlFor='-input'
+                      className='mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300'
+                    >
                       デフォルト表示
                     </label>
                     <select
+                      id='-input'
                       value={localSettings.defaultView}
                       onChange={(e) =>
                         setLocalSettings({ ...localSettings, defaultView: e.target.value })

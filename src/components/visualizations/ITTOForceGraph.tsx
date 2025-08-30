@@ -624,9 +624,9 @@ const ITTOForceGraph = React.memo(() => {
     }))
   }, [])
 
-  const togglePanel = useCallback(() => {
+  const togglePanel = () => {
     setIsPanelOpen((prev) => !prev)
-  }, [])
+  }
 
   return (
     <div className='relative flex h-screen w-full'>

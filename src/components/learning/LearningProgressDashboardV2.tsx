@@ -23,12 +23,13 @@ import {
   WifiOff,
   AlertTriangle,
   Upload,
-  Download} from 'lucide-react'
+  Download,
+} from 'lucide-react'
 import { useProgressV2 } from '../../hooks/useProgressV2'
 import { processCategories, processGroups } from '../../services/progressService'
 import DataMigrationDashboard from '../migration/DataMigrationDashboard'
 
-const _LearningProgressDashboardV2 = () => {
+const LearningProgressDashboardV2 = () => {
   const navigate = useNavigate()
   const {
     statistics,
@@ -40,10 +41,12 @@ const _LearningProgressDashboardV2 = () => {
     resetProgress,
     syncData,
     migrateToSupabase,
-    refreshData} = useProgressV2({
+    refreshData,
+  } = useProgressV2({
     loadOnMount: true,
     autoSync: true,
-    enableMigration: true})
+    enableMigration: true,
+  })
 
   const [selectedView, setSelectedView] = useState('overview')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -117,7 +120,8 @@ const _LearningProgressDashboardV2 = () => {
       month: 'numeric',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'})
+      minute: '2-digit',
+    })
   }
 
   const getProgressColor = (percentage: number) => {
@@ -165,9 +169,9 @@ const _LearningProgressDashboardV2 = () => {
     await syncData()
   }
 
-  const handleMigrate = async () => {
-    await migrateToSupabase()
-  }
+  // const handleMigrate = async () => { // TODO: Will be used in future
+  //   await migrateToSupabase()
+  // }
 
   return (
     <>
@@ -244,7 +248,8 @@ const _LearningProgressDashboardV2 = () => {
                   <div
                     className='h-2 rounded-full bg-blue-600 transition-all duration-300'
                     style={{
-                      width: `${migrationStatus.total > 0 ? (migrationStatus.progress / migrationStatus.total) * 100 : 0}%`}}
+                      width: `${migrationStatus.total > 0 ? (migrationStatus.progress / migrationStatus.total) * 100 : 0}%`,
+                    }}
                   />
                 </div>
                 <div className='mt-1 text-xs text-blue-700'>
@@ -322,7 +327,8 @@ const _LearningProgressDashboardV2 = () => {
                     {Object.entries(processCategories).map(([key, name]) => {
                       const stat = statistics.byCategory[key as keyof typeof processCategories] || {
                         completed: 0,
-                        total: 0}
+                        total: 0,
+                      }
                       const percentage =
                         stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 0
 
@@ -355,7 +361,8 @@ const _LearningProgressDashboardV2 = () => {
                     {Object.entries(processGroups).map(([key, name]) => {
                       const stat = statistics.byGroup[key as keyof typeof processGroups] || {
                         completed: 0,
-                        total: 0}
+                        total: 0,
+                      }
                       const percentage =
                         stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 0
 

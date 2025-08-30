@@ -122,7 +122,7 @@ class CoreWebVitalsOptimizer {
     }
   }
 
-  triggerOptimization(metricName, value, status) {
+  triggerOptimization(metricName, _value, _status) {
     const optimizations = {
       lcp: () => this.optimizeLCPDynamic(),
       inp: () => this.optimizeINPDynamic(),
@@ -352,7 +352,7 @@ class CoreWebVitalsOptimizer {
 
         this.worker = new Worker(URL.createObjectURL(workerBlob))
         this.worker.onmessage = (e) => {
-          const { type, result } = e.data
+          const { type } = e.data
           if (type === 'computation-result') {
             // Handle result
             console.log('Web worker computation completed')
@@ -368,7 +368,7 @@ class CoreWebVitalsOptimizer {
     // Add passive event listeners where appropriate
     const passiveEvents = ['touchstart', 'touchmove', 'wheel', 'scroll']
 
-    passiveEvents.forEach((eventType) => {
+    passiveEvents.forEach((_eventType) => {
       // Override addEventListener to use passive listeners
       const originalAddEventListener = EventTarget.prototype.addEventListener
       EventTarget.prototype.addEventListener = function (type, listener, options) {

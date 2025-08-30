@@ -11,7 +11,7 @@ interface ServiceWorkerRegistration {
   waiting: ServiceWorker | null
 
   // Event handlers
-  onupdatefound: ((this: ServiceWorkerRegistration, ev: Event) => any) | null
+  onupdatefound: ((this: ServiceWorkerRegistration, ev: Event) => void) | null
 
   // Methods
   getNotifications(filter?: GetNotificationOptions): Promise<Notification[]>
@@ -128,9 +128,9 @@ interface ServiceWorkerContainer {
   getRegistrations(): Promise<ServiceWorkerRegistration[]>
   register(scriptURL: string, options?: RegistrationOptions): Promise<ServiceWorkerRegistration>
 
-  oncontrollerchange: ((this: ServiceWorkerContainer, ev: Event) => any) | null
-  onmessage: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null
-  onmessageerror: ((this: ServiceWorkerContainer, ev: MessageEvent) => any) | null
+  oncontrollerchange: ((this: ServiceWorkerContainer, ev: Event) => void) | null
+  onmessage: ((this: ServiceWorkerContainer, ev: MessageEvent) => void) | null
+  onmessageerror: ((this: ServiceWorkerContainer, ev: MessageEvent) => void) | null
 }
 
 interface RegistrationOptions {

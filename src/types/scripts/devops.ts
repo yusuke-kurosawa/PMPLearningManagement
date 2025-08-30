@@ -300,7 +300,10 @@ export interface DeploymentOptimizer {
   readonly copyPWAAssets: () => PWAAssets
   readonly createNoJekyll: () => void
   readonly optimizeAssets: () => BundleAnalysis
-  readonly generateReport: (pwaAssets: PWAAssets, bundleAnalysis?: BundleAnalysis) => DeploymentReport
+  readonly generateReport: (
+    pwaAssets: PWAAssets,
+    bundleAnalysis?: BundleAnalysis
+  ) => DeploymentReport
 }
 
 export interface PWAAssets {
@@ -346,13 +349,13 @@ export interface HealthReport {
     readonly status: 'healthy' | 'unhealthy' | 'unknown'
     readonly responseTime: number
     readonly version?: string
-    readonly details: Record<string, any>
+    readonly details: Record<string, unknown>
     readonly error?: string
   }
   readonly assets: {
     readonly status: 'healthy' | 'unhealthy' | 'unknown'
     readonly responseTime: number
-    readonly details: Record<string, any>
+    readonly details: Record<string, unknown>
     readonly error?: string
   }
   readonly performanceTests: readonly {
@@ -365,7 +368,7 @@ export interface HealthReport {
     readonly category: string
     readonly message: string
     readonly action?: string
-    readonly details?: any
+    readonly details?: unknown
     readonly error?: string
   }[]
   readonly overallStatus: string

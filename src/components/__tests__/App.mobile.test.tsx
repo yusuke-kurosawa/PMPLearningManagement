@@ -106,7 +106,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Trigger resize event to activate mobile detection
       fireEvent(window, new Event('resize'))
@@ -138,7 +138,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -161,7 +161,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('desktop-navigation')).toBeInTheDocument()
@@ -186,7 +186,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -210,7 +210,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -236,7 +236,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Initially should be desktop
       await waitFor(() => {
@@ -290,7 +290,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Initially should be mobile
       await waitFor(() => {
@@ -338,7 +338,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       fireEvent(window, new Event('orientationchange'))
 
@@ -377,7 +377,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Should fallback to desktop version (small screen but no touch)
       await waitFor(() => {
@@ -406,7 +406,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -430,7 +430,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Components should eventually load
       await waitFor(() => {
@@ -444,7 +444,7 @@ describe('App Mobile Detection and Routing', () => {
       const { unmount } = render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       unmount()
 
@@ -468,7 +468,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Fire multiple resize events
       for (let i = 0; i < 10; i++) {
@@ -498,7 +498,7 @@ describe('App Mobile Detection and Routing', () => {
       const { container } = render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('mobile-app')).toBeInTheDocument()
@@ -524,7 +524,7 @@ describe('App Mobile Detection and Routing', () => {
       const { container } = render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       await waitFor(() => {
         expect(screen.getByTestId('desktop-navigation')).toBeInTheDocument()
@@ -554,7 +554,7 @@ describe('App Mobile Detection and Routing', () => {
       render(<App />)
 
       // Trigger resize event to activate mobile detection
-      fireEvent(window, new Event("resize"))
+      fireEvent(window, new Event('resize'))
 
       // Should not crash the app and show desktop version
       await waitFor(() => {

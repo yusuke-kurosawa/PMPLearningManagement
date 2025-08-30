@@ -12,7 +12,7 @@
 
 .high-contrast button,
 .high-contrast a {
-  @apply ring-2 ring-offset-2 ring-black dark:ring-white;
+  @apply ring-2 ring-black ring-offset-2 dark:ring-white;
 }
 
 /* Compact mode */
@@ -34,7 +34,7 @@
 
 .compact button,
 .compact .card {
-  @apply py-2 px-3;
+  @apply px-3 py-2;
 }
 
 /* Custom color themes */

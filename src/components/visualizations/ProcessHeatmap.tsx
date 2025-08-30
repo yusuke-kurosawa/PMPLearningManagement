@@ -335,8 +335,11 @@ const ProcessHeatmap = ({ data, progressData }) => {
       {/* コントロールパネル */}
       <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>表示メトリクス</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            表示メトリクス
+          </label>
           <select
+            id='-input'
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value)}
             className='w-full rounded-md border border-gray-300 px-3 py-2'

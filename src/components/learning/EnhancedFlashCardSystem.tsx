@@ -142,7 +142,7 @@ const EnhancedFlashCardSystem: React.FC = () => {
   useEffect(() => {
     loadDecks()
     loadCards()
-  }, [])
+  }, [loadCards, loadDecks])
 
   // Auto-reveal timer
   useEffect(() => {

@@ -10,19 +10,14 @@ import type { ProcessId, Timestamp, EntityMetadata } from '../common/base'
 /**
  * プロセス群型 - PMBOK第6版の5つのプロセス群
  */
-export type ProcessGroup = 
-  | '立上げ'
-  | '計画'
-  | '実行'
-  | '監視・コントロール'
-  | '終結'
+export type ProcessGroup = '立上げ' | '計画' | '実行' | '監視・コントロール' | '終結'
 
 /**
  * 知識エリアID型
  */
-export type KnowledgeAreaId = 
+export type KnowledgeAreaId =
   | 'integration'
-  | 'scope' 
+  | 'scope'
   | 'schedule'
   | 'cost'
   | 'quality'
@@ -89,31 +84,32 @@ export type Process = {
 /**
  * 詳細プロセス型 - メタデータ付き
  */
-export type DetailedProcess = Process & EntityMetadata & {
-  // 詳細情報
-  objectives: string[]
-  successCriteria: string[]
-  commonChallenges: string[]
-  bestPractices: string[]
-  
-  // 関連性
-  relatedProcesses: ProcessId[]
-  supportingProcesses: ProcessId[]
-  
-  // 実行ガイド
-  executionSteps: ProcessStep[]
-  checkpoints: ProcessCheckpoint[]
-  
-  // メトリクス
-  metrics: ProcessMetric[]
-  
-  // 学習リソース
-  resources: ProcessResource[]
-  
-  // タグ・分類
-  tags: string[]
-  categories: string[]
-}
+export type DetailedProcess = Process &
+  EntityMetadata & {
+    // 詳細情報
+    objectives: string[]
+    successCriteria: string[]
+    commonChallenges: string[]
+    bestPractices: string[]
+
+    // 関連性
+    relatedProcesses: ProcessId[]
+    supportingProcesses: ProcessId[]
+
+    // 実行ガイド
+    executionSteps: ProcessStep[]
+    checkpoints: ProcessCheckpoint[]
+
+    // メトリクス
+    metrics: ProcessMetric[]
+
+    // 学習リソース
+    resources: ProcessResource[]
+
+    // タグ・分類
+    tags: string[]
+    categories: string[]
+  }
 
 /**
  * プロセスステップ型
@@ -171,12 +167,12 @@ export type ProcessResource = {
 /**
  * プロセス関係性タイプ型
  */
-export type ProcessRelationshipType = 
-  | 'sequential'     // 順次実行
-  | 'parallel'       // 並行実行
-  | 'overlapping'    // 重複実行
-  | 'iterative'      // 反復実行
-  | 'conditional'    // 条件付き実行
+export type ProcessRelationshipType =
+  | 'sequential' // 順次実行
+  | 'parallel' // 並行実行
+  | 'overlapping' // 重複実行
+  | 'iterative' // 反復実行
+  | 'conditional' // 条件付き実行
 
 /**
  * プロセス関係性型
@@ -220,7 +216,7 @@ export type ProcessFlowVariation = {
 /**
  * プロセス実行状態型
  */
-export type ProcessExecutionStatus = 
+export type ProcessExecutionStatus =
   | 'not-started'
   | 'in-progress'
   | 'completed'
@@ -403,17 +399,17 @@ export const isHighComplexityProcess = (process: Process): boolean => {
  * プロセス群別フィルタリング
  */
 export const filterProcessesByGroup = (processes: Process[], group: ProcessGroup): Process[] => {
-  return processes.filter(process => process.processGroup === group)
+  return processes.filter((process) => process.processGroup === group)
 }
 
 /**
  * 知識エリア別フィルタリング
  */
 export const filterProcessesByKnowledgeArea = (
-  processes: Process[], 
+  processes: Process[],
   knowledgeArea: KnowledgeAreaId
 ): Process[] => {
-  return processes.filter(process => process.knowledgeArea === knowledgeArea)
+  return processes.filter((process) => process.knowledgeArea === knowledgeArea)
 }
 
 // ==================== エクスポート統合 ====================

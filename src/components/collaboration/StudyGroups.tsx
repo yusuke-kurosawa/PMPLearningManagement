@@ -506,7 +506,12 @@ const StudyGroups = () => {
 
               <div className='space-y-4'>
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>グループ名</label>
+                  <label
+                    htmlFor='input-1754995293941-501'
+                    className='mb-1 block text-sm font-medium'
+                  >
+                    グループ名
+                  </label>
                   <input
                     aria-label='Input field'
                     id='input-1754995293941-501'
@@ -521,8 +526,11 @@ const StudyGroups = () => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>説明</label>
+                  <label htmlFor='-input' className='mb-1 block text-sm font-medium'>
+                    説明
+                  </label>
                   <textarea
+                    id='-input'
                     value={newGroup.description}
                     onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
                     className={`h-24 w-full rounded-lg border px-3 py-2 ${
@@ -533,8 +541,11 @@ const StudyGroups = () => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>目標試験日</label>
+                  <label htmlFor='-input' className='mb-1 block text-sm font-medium'>
+                    目標試験日
+                  </label>
                   <input
+                    id='-input'
                     type='date'
                     value={newGroup.targetDate}
                     onChange={(e) => setNewGroup({ ...newGroup, targetDate: e.target.value })}

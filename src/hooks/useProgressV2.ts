@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { progressServiceV2, ApiResponse, SyncStatus } from '../services/progressServiceV2'
+import { progressServiceV2, SyncStatus } from '../services/progressServiceV2'
 import { dataMigrationService, MigrationStatus } from '../services/dataMigrationService'
 import { authHelpers } from '../lib/auth/supabase'
 import { logger } from '../services/logger'
@@ -24,7 +24,8 @@ import {
   ProcessCategory,
   ProcessGroup,
   processCategories,
-  processGroups} from '../services/progressService'
+  processGroups,
+} from '../services/progressService'
 
 // ========================================
 // 新しい型定義
@@ -102,7 +103,8 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
     autoSync = true,
     syncInterval = 300000, // 5分
     loadOnMount = true,
-    enableMigration = true} = options
+    enableMigration = true,
+  } = options
 
   // ========================================
   // 状態管理
@@ -116,7 +118,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
     lastSyncTime: null,
     pendingChanges: 0,
     isOnline: navigator.onLine,
-    isSyncing: false
+    isSyncing: false,
   })
   const [migrationStatus, setMigrationStatus] = useState<MigrationStatus>({
     isRunning: false,
@@ -126,7 +128,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
     completed: false,
     errors: [],
     startTime: null,
-    endTime: null
+    endTime: null,
   })
 
   // ========================================
@@ -183,7 +185,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
         overall: {
           completed: completedCount,
           total: processes.length,
-          percentage: Math.round((completedCount / processes.length) * 100)
+          percentage: Math.round((completedCount / processes.length) * 100),
         },
         byCategory: categoryStats,
         byGroup: groupStats,
@@ -194,7 +196,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
                 (latest, p) => (p.updated_at > latest ? p.updated_at : latest),
                 processProgress[0].updated_at
               )
-            : null
+            : null,
       }
     } catch (error) {
       logger.error('Failed to calculate statistics:', error)
@@ -541,7 +543,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
         canMigrate: false,
         issues: ['Migration is disabled'],
         dataSize: 0,
-        recordCount: 0
+        recordCount: 0,
       }
     }
 
@@ -553,7 +555,7 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
         canMigrate: false,
         issues: [`Error: ${(error as Error).message}`],
         dataSize: 0,
-        recordCount: 0
+        recordCount: 0,
       }
     }
   }, [enableMigration])
@@ -648,7 +650,8 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
 
       // ユーティリティ
       refreshData,
-      resetProgress}),
+      resetProgress,
+    }),
     [
       statistics,
       isLoading,
