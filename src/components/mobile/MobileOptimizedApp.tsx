@@ -72,7 +72,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 import { Button } from '../ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '../ui/sheet'
 import { Badge } from '../ui/badge'
 // import { Card } from '../ui/card' // TODO: Will be used in future
 import { useToast } from '../../hooks/use-toast'
@@ -527,16 +527,16 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
         <div className='flex items-center justify-between px-4 py-3'>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant='ghost' size='sm'>
+              <Button variant='ghost' size='sm' aria-label='メニューを開く'>
                 <Menu className='h-5 w-5' />
               </Button>
             </SheetTrigger>
             <SheetContent side='left' className='w-80'>
+              <SheetTitle>PMP Learning</SheetTitle>
+              <SheetDescription>Mobile Study App</SheetDescription>
               <div className='space-y-6'>
                 {/* User Profile Section */}
                 <div className='border-b pb-4'>
-                  <h2 className='text-lg font-semibold'>PMP Learning</h2>
-                  <p className='text-sm text-gray-600'>Mobile Study App</p>
                   {/* PWA Status Indicators */}
                   <div className='mt-3 flex items-center gap-2'>
                     <Badge
@@ -644,11 +644,11 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
           <div className='flex items-center gap-2'>
             {pwaCapabilities.canInstall && (
-              <Button variant='ghost' size='sm' onClick={handleInstallApp}>
+              <Button variant='ghost' size='sm' onClick={handleInstallApp} aria-label='アプリをインストール'>
                 <Download className='h-4 w-4' />
               </Button>
             )}
-            <Button variant='ghost' size='sm'>
+            <Button variant='ghost' size='sm' aria-label='通知'>
               <Bell className='h-4 w-4' />
             </Button>
           </div>
