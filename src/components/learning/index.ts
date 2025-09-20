@@ -17,3 +17,6 @@ export { default as PMITalentTriangle } from './PMITalentTriangle.tsx'
 export { default as StrategicAlignment } from './StrategicAlignment.tsx'
 export { default as BusinessEnvironmentAnalysis } from './BusinessEnvironmentAnalysis.tsx'
 export { default as StrategicAlignmentToolkit } from './StrategicAlignmentToolkit.tsx'
+
+// Organization Culture and Change Management
+export { default as OrganizationChangeManagement } from './OrganizationChangeManagement.tsx'

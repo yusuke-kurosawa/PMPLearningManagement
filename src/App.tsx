@@ -96,6 +96,9 @@ const StrategicAlignmentToolkit = React.lazy(() => import('./components/learning
 const ProjectBenefitLearning = React.lazy(() => import('./components/learning/benefit/ProjectBenefitLearning'))
 const IncrementalValueVisualization = React.lazy(() => import('./components/learning/benefit/IncrementalValueVisualization'))
 
+// Project Governance Learning Components
+const ProjectGovernanceLearning = React.lazy(() => import('./components/learning/governance/ProjectGovernanceLearning'))
+
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
 const NetworkLoading = () => <NetworkLoader />
@@ -254,6 +257,9 @@ function App() {
                           {/* Project Benefit and Value Learning Routes */}
                           <Route path='/project-benefits' element={<ProjectBenefitLearning />} />
                           <Route path='/incremental-value' element={<IncrementalValueVisualization />} />
+                          
+                          {/* Project Governance Learning Routes */}
+                          <Route path='/governance' element={<ProjectGovernanceLearning />} />
                           
                           <Route
                             path='/ai-coaching'
@@ -547,6 +553,16 @@ function App() {
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <IncrementalValueVisualization />
+                            </Suspense>
+                          }
+                        />
+                        
+                        {/* Project Governance Learning Routes */}
+                        <Route
+                          path='/governance'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <ProjectGovernanceLearning />
                             </Suspense>
                           }
                         />

@@ -239,6 +239,13 @@ const Navigation = () => {
       category: 'benefit',
     },
     {
+      path: '/governance',
+      label: 'プロジェクト・ガバナンス',
+      icon: Shield,
+      isNew: true,
+      category: 'governance',
+    },
+    {
       path: '/pmbok-versions',
       label: 'PMBOK版',
       icon: ToggleLeft,
