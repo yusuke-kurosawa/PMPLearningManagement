@@ -12,6 +12,7 @@ export const glossaryCategories = [
   { id: 'stakeholder', name: 'ステークホルダー', color: 'bg-indigo-500' },
   { id: 'integration', name: '統合', color: 'bg-violet-500' },
   { id: 'agile', name: 'アジャイル', color: 'bg-teal-500' },
+  { id: 'organization', name: '組織', color: 'bg-amber-500' },
 ]
 
 export const glossaryTerms = [
@@ -411,6 +412,509 @@ export const glossaryTerms = [
       'プロジェクトやプロジェクトのフェーズを完了するために作成される、独自で検証可能なプロダクト、所産、サービス提供能力',
     categories: ['general'],
     relatedTerms: ['Work Package', 'Milestone'],
+  },
+
+  // PMO関連用語
+  {
+    id: 46,
+    term: 'PMO (Project Management Office)',
+    japanese: 'プロジェクト・マネジメント・オフィス',
+    description:
+      'プロジェクトの管理を標準化し、資源、方法論、ツール、技術を共有することにより、プロジェクト実行を促進する組織構造',
+    categories: ['organization', 'general'],
+    relatedTerms: ['Supportive PMO', 'Controlling PMO', 'Directive PMO', 'PMO Governance'],
+  },
+  {
+    id: 47,
+    term: 'Supportive PMO',
+    japanese: '支援型PMO',
+    description:
+      'ベストプラクティス、テンプレート、トレーニングを提供し、プロジェクト・マネジャーを支援するPMOタイプ',
+    categories: ['organization'],
+    relatedTerms: ['PMO (Project Management Office)', 'Controlling PMO', 'Directive PMO'],
+  },
+  {
+    id: 48,
+    term: 'Controlling PMO',
+    japanese: 'コントロール型PMO',
+    description: 'プロジェクト監査を通じて標準準拠を監視し、一定レベルの管理を提供するPMOタイプ',
+    categories: ['organization'],
+    relatedTerms: [
+      'PMO (Project Management Office)',
+      'Supportive PMO',
+      'Directive PMO',
+      'PMO Governance',
+    ],
+  },
+  {
+    id: 49,
+    term: 'Directive PMO',
+    japanese: '指令型PMO',
+    description: 'プロジェクトを直接管理し、共有資源を割り当てるPMOタイプ',
+    categories: ['organization'],
+    relatedTerms: ['PMO (Project Management Office)', 'Supportive PMO', 'Controlling PMO'],
+  },
+  {
+    id: 50,
+    term: 'ACoE (Agile Center of Excellence)',
+    japanese: 'アジャイル・センター・オブ・エクセレンス',
+    description:
+      'アジャイルのマインドセット、スキル、能力を組織全体に育成し、チームを支援する組織構造',
+    categories: ['agile', 'organization'],
+    relatedTerms: [
+      'VDO (Value Delivery Office)',
+      'PMO (Project Management Office)',
+      'Sprint',
+      'Velocity',
+    ],
+  },
+  {
+    id: 51,
+    term: 'VDO (Value Delivery Office)',
+    japanese: '価値実現オフィス',
+    description:
+      'ビジネス価値の実現に焦点を当て、プロジェクトや製品の価値創出を支援する組織構造。ACoEの別名',
+    categories: ['agile', 'organization'],
+    relatedTerms: [
+      'ACoE (Agile Center of Excellence)',
+      'PMO (Project Management Office)',
+      'Business Case',
+    ],
+  },
+  {
+    id: 52,
+    term: 'PMO Governance',
+    japanese: 'PMOガバナンス',
+    description: 'PMOによって実施される、プロジェクトポートフォリオの監督と標準化のプロセス',
+    categories: ['organization', 'integration'],
+    relatedTerms: [
+      'PMO (Project Management Office)',
+      'Controlling PMO',
+      'Change Control Board (CCB)',
+    ],
+  },
+  {
+    id: 53,
+    term: 'PMO Maturity Model',
+    japanese: 'PMO成熟度モデル',
+    description: 'PMOの能力と効果を評価し、継続的改善を導くためのフレームワーク',
+    categories: ['organization', 'quality'],
+    relatedTerms: ['PMO (Project Management Office)', 'Quality Assurance', 'Lessons Learned'],
+  },
+
+  // アジャイル関連用語（拡張）
+  {
+    id: 54,
+    term: 'Agile Manifesto',
+    japanese: 'アジャイル・マニフェスト',
+    description:
+      '2001年に発表されたソフトウェア開発の価値観と原則を記した宣言。4つの価値（個人と対話、動くソフトウェア、顧客との協調、変化への対応）と12の原則から構成される',
+    categories: ['agile'],
+    relatedTerms: ['Scrum', 'Sprint', 'User Story', 'Agile Coach'],
+  },
+  {
+    id: 55,
+    term: 'Scrum',
+    japanese: 'スクラム',
+    description:
+      '複雑なプロダクト開発のためのアジャイルフレームワーク。スプリント、ロール（プロダクトオーナー、スクラムマスター、開発チーム）、イベント、アーティファクトで構成される',
+    categories: ['agile'],
+    relatedTerms: [
+      'Sprint',
+      'Product Backlog',
+      'Sprint Backlog',
+      'Daily Scrum',
+      'Sprint Retrospective',
+    ],
+  },
+  {
+    id: 56,
+    term: 'User Story',
+    japanese: 'ユーザーストーリー',
+    description:
+      'エンドユーザーの視点から書かれた機能要求の簡潔な記述。「～として、～したい、なぜなら～」の形式で表現されることが多い',
+    categories: ['agile'],
+    relatedTerms: ['Product Backlog', 'Acceptance Criteria', 'Story Points', 'Epic'],
+  },
+  {
+    id: 57,
+    term: 'Sprint Backlog',
+    japanese: 'スプリント・バックログ',
+    description:
+      'スプリント中に完了する作業項目のリスト。プロダクトバックログから選択されたアイテムと、それらを成果物に変換するための計画',
+    categories: ['agile'],
+    relatedTerms: ['Product Backlog', 'Sprint', 'Sprint Planning', 'Daily Scrum'],
+  },
+  {
+    id: 58,
+    term: 'Daily Scrum',
+    japanese: 'デイリースクラム',
+    description:
+      '毎日同じ時間・場所で行う15分のチーム同期ミーティング。昨日の作業、今日の計画、障害について共有',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Scrum Master', 'Sprint Retrospective', 'Sprint Review'],
+  },
+  {
+    id: 59,
+    term: 'Sprint Retrospective',
+    japanese: 'スプリント・レトロスペクティブ',
+    description:
+      'スプリント終了時に行うチームの振り返り会議。プロセスと協力体制を検査し、次のスプリントでの改善計画を作成',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Sprint Review', 'Continuous Improvement', 'Lessons Learned'],
+  },
+  {
+    id: 60,
+    term: 'Kanban',
+    japanese: 'カンバン',
+    description:
+      'ワークフローを可視化し、仕掛かり作業（WIP）を制限し、フローを最大化するアジャイル手法。日本のトヨタ生産方式に由来',
+    categories: ['agile'],
+    relatedTerms: ['WIP Limit', 'Kanban Board', 'Lead Time', 'Cycle Time'],
+  },
+  {
+    id: 61,
+    term: 'Product Owner',
+    japanese: 'プロダクトオーナー',
+    description:
+      'スクラムチームにおいて、プロダクトの価値を最大化する責任を持つ役割。プロダクトバックログの管理と優先順位付けを行う',
+    categories: ['agile'],
+    relatedTerms: ['Product Backlog', 'Scrum', 'Sprint Planning', 'Stakeholder'],
+  },
+  {
+    id: 62,
+    term: 'Scrum Master',
+    japanese: 'スクラムマスター',
+    description:
+      'スクラムチームがスクラムフレームワークを理解し実践できるよう支援するサーバント・リーダー。障害の除去とプロセス改善を促進',
+    categories: ['agile'],
+    relatedTerms: ['Scrum', 'Daily Scrum', 'Sprint Retrospective', 'Servant Leadership'],
+  },
+  {
+    id: 63,
+    term: 'Story Points',
+    japanese: 'ストーリーポイント',
+    description:
+      'ユーザーストーリーの複雑性、労力、リスクを表す相対的な見積もり単位。フィボナッチ数列（1,2,3,5,8,13...）がよく使われる',
+    categories: ['agile'],
+    relatedTerms: ['User Story', 'Velocity', 'Planning Poker', 'Sprint Planning'],
+  },
+  {
+    id: 64,
+    term: 'Epic',
+    japanese: 'エピック',
+    description:
+      '複数のスプリントにまたがる大きなユーザーストーリー。より小さなユーザーストーリーに分解される',
+    categories: ['agile'],
+    relatedTerms: ['User Story', 'Product Backlog', 'Feature', 'Theme'],
+  },
+  {
+    id: 65,
+    term: 'Burndown Chart',
+    japanese: 'バーンダウンチャート',
+    description: 'スプリント内で残っている作業量を時系列で示すグラフ。進捗の可視化と予測に使用',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Velocity', 'Burnup Chart', 'Sprint Backlog'],
+  },
+  {
+    id: 66,
+    term: 'Definition of Done',
+    japanese: '完了の定義',
+    description:
+      'プロダクトインクリメントが「完了」とみなされるために満たすべき条件のチェックリスト',
+    categories: ['agile', 'quality'],
+    relatedTerms: ['Acceptance Criteria', 'Sprint Review', 'Quality Assurance'],
+  },
+  {
+    id: 67,
+    term: 'Sprint Planning',
+    japanese: 'スプリント計画',
+    description:
+      'スプリントの開始時に行う計画会議。スプリントゴールの設定とスプリントバックログの作成を行う',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Sprint Backlog', 'Product Backlog', 'Sprint Goal'],
+  },
+  {
+    id: 68,
+    term: 'Sprint Review',
+    japanese: 'スプリントレビュー',
+    description:
+      'スプリント終了時に行うインクリメントの検査会議。ステークホルダーに成果をデモし、フィードバックを収集',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Product Increment', 'Sprint Retrospective', 'Stakeholder'],
+  },
+  {
+    id: 69,
+    term: 'Product Increment',
+    japanese: 'プロダクト・インクリメント',
+    description:
+      'スプリント中に完成したすべてのプロダクトバックログアイテムの総和。利用可能な状態である必要がある',
+    categories: ['agile'],
+    relatedTerms: ['Sprint', 'Definition of Done', 'Sprint Review', 'Product Backlog'],
+  },
+  {
+    id: 70,
+    term: 'WIP Limit',
+    japanese: 'WIP制限',
+    description:
+      '仕掛かり作業（Work In Progress）の最大数を制限すること。カンバンにおいて流れを最適化するための手法',
+    categories: ['agile'],
+    relatedTerms: ['Kanban', 'Kanban Board', 'Flow', 'Cycle Time'],
+  },
+  {
+    id: 71,
+    term: 'Planning Poker',
+    japanese: 'プランニングポーカー',
+    description:
+      'チーム全員が参加する見積もり手法。各メンバーがカードを使って同時に見積もりを提示し、合意形成を行う',
+    categories: ['agile'],
+    relatedTerms: ['Story Points', 'User Story', 'Sprint Planning', 'Relative Estimation'],
+  },
+  {
+    id: 72,
+    term: 'Agile Coach',
+    japanese: 'アジャイルコーチ',
+    description: '組織やチームがアジャイルの価値観、原則、実践を採用し改善するのを支援する専門家',
+    categories: ['agile', 'organization'],
+    relatedTerms: [
+      'Scrum Master',
+      'ACoE (Agile Center of Excellence)',
+      'Agile Manifesto',
+      'Servant Leadership',
+    ],
+  },
+  {
+    id: 73,
+    term: 'Sprint Goal',
+    japanese: 'スプリントゴール',
+    description: 'スプリントで達成すべき目的。チームに柔軟性を与えながら方向性を示す',
+    categories: ['agile'],
+    relatedTerms: ['Sprint Planning', 'Sprint Backlog', 'Product Owner', 'Sprint Review'],
+  },
+  {
+    id: 74,
+    term: 'Acceptance Criteria',
+    japanese: '受入基準',
+    description: 'ユーザーストーリーが完了とみなされるために満たすべき条件のリスト',
+    categories: ['agile', 'quality'],
+    relatedTerms: ['User Story', 'Definition of Done', 'Sprint Review', 'Quality Control'],
+  },
+  {
+    id: 75,
+    term: 'Servant Leadership',
+    japanese: 'サーバント・リーダーシップ',
+    description:
+      'チームメンバーの成長と成功を支援することを第一とするリーダーシップスタイル。スクラムマスターの基本姿勢',
+    categories: ['agile', 'organization'],
+    relatedTerms: ['Scrum Master', 'Agile Coach', 'Self-Organizing Team'],
+  },
+  {
+    id: 76,
+    term: 'Self-Organizing Team',
+    japanese: '自己組織化チーム',
+    description:
+      '外部からの指示なしに、作業の進め方を自ら決定し管理するチーム。アジャイルの基本原則の一つ',
+    categories: ['agile', 'organization'],
+    relatedTerms: ['Scrum', 'Agile Manifesto', 'Cross-Functional Team', 'Servant Leadership'],
+  },
+  {
+    id: 77,
+    term: 'Cross-Functional Team',
+    japanese: 'クロスファンクショナル・チーム',
+    description: 'プロダクトを完成させるために必要なすべてのスキルを持つメンバーで構成されるチーム',
+    categories: ['agile', 'organization'],
+    relatedTerms: ['Self-Organizing Team', 'Scrum', 'T-shaped Skills'],
+  },
+  {
+    id: 78,
+    term: 'Continuous Integration',
+    japanese: '継続的インテグレーション',
+    description: 'コードの変更を頻繁にメインブランチに統合し、自動テストを実行する開発プラクティス',
+    categories: ['agile', 'quality'],
+    relatedTerms: ['Continuous Delivery', 'DevOps', 'Test Automation'],
+  },
+  {
+    id: 79,
+    term: 'Continuous Delivery',
+    japanese: '継続的デリバリー',
+    description: 'ソフトウェアを短いサイクルで本番環境にリリース可能な状態に保つプラクティス',
+    categories: ['agile', 'quality'],
+    relatedTerms: ['Continuous Integration', 'DevOps', 'Continuous Deployment'],
+  },
+  {
+    id: 80,
+    term: 'Minimum Viable Product (MVP)',
+    japanese: '実用最小限の製品',
+    description: '顧客に価値を提供し、フィードバックを得るために必要な最小限の機能を持つ製品',
+    categories: ['agile'],
+    relatedTerms: ['Product Increment', 'User Story', 'Lean Startup', 'Product Owner'],
+  },
+
+  // OPM関連用語
+  {
+    id: 81,
+    term: 'OPM (Organizational Project Management)',
+    japanese: '組織のプロジェクトマネジメント',
+    description:
+      'プロジェクト、プログラム、ポートフォリオ、定常業務のマネジメントを調整し、組織の戦略を実行するためのフレームワーク',
+    categories: ['organization'],
+    relatedTerms: [
+      'Portfolio Management',
+      'Program Management',
+      'PMO (Project Management Office)',
+      'Value Delivery System',
+    ],
+  },
+  {
+    id: 82,
+    term: 'Portfolio Management',
+    japanese: 'ポートフォリオマネジメント',
+    description:
+      '戦略目標達成のために実施するプロジェクト、プログラム、サブポートフォリオ、定常業務の集合を管理すること。事業戦略に準じる',
+    categories: ['organization'],
+    relatedTerms: [
+      'OPM (Organizational Project Management)',
+      'Program Management',
+      'Project',
+      'Value Delivery System',
+    ],
+  },
+  {
+    id: 83,
+    term: 'Program Management',
+    japanese: 'プログラムマネジメント',
+    description:
+      '個別プロジェクトでは実現できないベネフィットを得るために関連する複数プロジェクトやその他の活動を調整して実施すること',
+    categories: ['organization'],
+    relatedTerms: [
+      'OPM (Organizational Project Management)',
+      'Portfolio Management',
+      'Project Management',
+      'Benefits Management Plan',
+    ],
+  },
+  {
+    id: 84,
+    term: 'Value Delivery System',
+    japanese: '価値実現システム',
+    description:
+      'ポートフォリオ、プログラム、プロジェクトを通じて組織に価値を提供する統合的なフレームワーク',
+    categories: ['organization'],
+    relatedTerms: [
+      'OPM (Organizational Project Management)',
+      'Portfolio Management',
+      'VDO (Value Delivery Office)',
+      'Business Case',
+    ],
+  },
+  {
+    id: 85,
+    term: 'Functional Organization',
+    japanese: '機能型組織',
+    description: '専門分野ごとに部門が分かれ、各部門が独立して運営される組織構造。PMの権限は限定的',
+    categories: ['organization'],
+    relatedTerms: [
+      'Matrix Organization',
+      'Projectized Organization',
+      'Project Manager',
+      'Organizational Process Assets',
+    ],
+  },
+  {
+    id: 86,
+    term: 'Matrix Organization',
+    japanese: 'マトリックス型組織',
+    description:
+      '機能部門とプロジェクトチームの両方に報告ラインを持つ組織構造。PMと機能部門マネジャーが権限を共有',
+    categories: ['organization'],
+    relatedTerms: [
+      'Functional Organization',
+      'Projectized Organization',
+      'Strong Matrix',
+      'Weak Matrix',
+      'Balanced Matrix',
+    ],
+  },
+  {
+    id: 87,
+    term: 'Projectized Organization',
+    japanese: 'プロジェクト型組織',
+    description: 'プロジェクトを中心に組織が構成され、PMが高い権限を持つ組織構造',
+    categories: ['organization'],
+    relatedTerms: [
+      'Functional Organization',
+      'Matrix Organization',
+      'Project Manager',
+      'Project Charter',
+    ],
+  },
+  {
+    id: 88,
+    term: 'OBS (Organizational Breakdown Structure)',
+    japanese: '組織ブレークダウン構造',
+    description: 'プロジェクトの組織構造を階層的に表現した図。責任の所在を明確化',
+    categories: ['organization', 'resource'],
+    relatedTerms: [
+      'WBS (Work Breakdown Structure)',
+      'RAM (Responsibility Assignment Matrix)',
+      'RACI Chart',
+      'Resource Management',
+    ],
+  },
+  {
+    id: 89,
+    term: 'Strong Matrix',
+    japanese: '強いマトリックス',
+    description: 'プロジェクトマネジャーが機能部門マネジャーより強い権限を持つマトリックス型組織',
+    categories: ['organization'],
+    relatedTerms: ['Matrix Organization', 'Weak Matrix', 'Balanced Matrix', 'Project Manager'],
+  },
+  {
+    id: 90,
+    term: 'Weak Matrix',
+    japanese: '弱いマトリックス',
+    description: '機能部門マネジャーがプロジェクトマネジャーより強い権限を持つマトリックス型組織',
+    categories: ['organization'],
+    relatedTerms: [
+      'Matrix Organization',
+      'Strong Matrix',
+      'Balanced Matrix',
+      'Functional Organization',
+    ],
+  },
+  {
+    id: 91,
+    term: 'Balanced Matrix',
+    japanese: 'バランス型マトリックス',
+    description: 'プロジェクトマネジャーと機能部門マネジャーが同等の権限を持つマトリックス型組織',
+    categories: ['organization'],
+    relatedTerms: ['Matrix Organization', 'Strong Matrix', 'Weak Matrix', 'Project Manager'],
+  },
+  {
+    id: 92,
+    term: 'RAM (Responsibility Assignment Matrix)',
+    japanese: '責任分担マトリックス',
+    description: 'プロジェクトの作業パッケージまたは活動を、実行する個人またはチームと関連付けた表',
+    categories: ['organization', 'resource'],
+    relatedTerms: [
+      'RACI Chart',
+      'OBS (Organizational Breakdown Structure)',
+      'WBS (Work Breakdown Structure)',
+      'Resource Management',
+    ],
+  },
+  {
+    id: 93,
+    term: 'RACI Chart',
+    japanese: 'RACI図',
+    description:
+      '責任分担マトリックスの一種。Responsible(実行責任)、Accountable(説明責任)、Consulted(相談)、Informed(通知)の4つの役割を明確化',
+    categories: ['organization', 'resource'],
+    relatedTerms: [
+      'RAM (Responsibility Assignment Matrix)',
+      'OBS (Organizational Breakdown Structure)',
+      'Stakeholder Register',
+    ],
   },
 ]
 

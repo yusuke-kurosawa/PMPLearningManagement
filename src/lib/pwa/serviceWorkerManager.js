@@ -1,3 +1,5 @@
+const { logger } = require('../../services/logger')
+
 /**
  * Service Worker Manager
  * Manages service worker registration, updates, and communication
@@ -20,7 +22,7 @@ class ServiceWorkerManager {
 
   async initialize() {
     if (!('serviceWorker' in navigator)) {
-      console.warn('Service Worker not supported')
+      logger.warn('Service Worker not supported')
       return
     }
 
@@ -29,9 +31,9 @@ class ServiceWorkerManager {
       this.setupEventListeners()
       this.startPerformanceMonitoring()
 
-      console.log('✅ Service Worker Manager initialized')
+      logger.info('✅ Service Worker Manager initialized')
     } catch (error) {
-      console.error('❌ Service Worker initialization failed:', error)
+      logger.error('❌ Service Worker initialization failed:', error)
     }
   }
 
@@ -46,13 +48,13 @@ class ServiceWorkerManager {
 
       this.analytics.registrationTime = Date.now()
 
-      console.log('🔄 Service Worker registered:', this.registration)
+      logger.info('🔄 Service Worker registered:', this.registration)
 
       // Check for updates immediately and then periodically
       await this.checkForUpdate()
       this.startUpdateChecker()
     } catch (error) {
-      console.error('Service Worker registration failed:', error)
+      logger.error('Service Worker registration failed:', error)
       throw error
     }
   }
@@ -61,7 +63,7 @@ class ServiceWorkerManager {
     // Listen for service worker state changes
     if (this.registration) {
       this.registration.addEventListener('updatefound', () => {
-        console.log('🔄 Service Worker update found')
+        logger.info('🔄 Service Worker update found')
         this.handleUpdateFound()
       })
     }
@@ -73,7 +75,7 @@ class ServiceWorkerManager {
 
     // Listen for controller change (new SW activated)
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('🔄 Service Worker controller changed')
+      logger.info('🔄 Service Worker controller changed')
       this.handleControllerChange()
     })
 
@@ -101,7 +103,7 @@ class ServiceWorkerManager {
           this.notifyUpdateAvailable()
         } else {
           // First install
-          console.log('✅ Service Worker installed for the first time')
+          logger.info('✅ Service Worker installed for the first time')
         }
       }
     })
@@ -112,12 +114,12 @@ class ServiceWorkerManager {
 
     switch (type) {
       case 'SW_UPDATED':
-        console.log(`🔄 Service Worker updated to version ${version}`)
+        logger.info(`🔄 Service Worker updated to version ${version}`)
         this.analytics.updateCount++
         break
 
       case 'ANALYTICS_RESPONSE':
-        console.log('📊 Service Worker Analytics:', payload)
+        logger.info('📊 Service Worker Analytics:', payload)
         this.mergeAnalytics(payload)
         break
 
@@ -134,7 +136,7 @@ class ServiceWorkerManager {
         break
 
       default:
-        console.log('Unknown message from SW:', event.data)
+        logger.info('Unknown message from SW:', event.data)
     }
   }
 
@@ -144,7 +146,7 @@ class ServiceWorkerManager {
   }
 
   handleOnlineStatusChange(isOnline) {
-    console.log(`📡 Network status: ${isOnline ? 'Online' : 'Offline'}`)
+    logger.info(`📡 Network status: ${isOnline ? 'Online' : 'Offline'}`)
 
     if (!isOnline) {
       this.analytics.offlineCount++
@@ -170,9 +172,9 @@ class ServiceWorkerManager {
 
     try {
       await this.registration.update()
-      console.log('🔍 Checked for Service Worker updates')
+      logger.info('🔍 Checked for Service Worker updates')
     } catch (error) {
-      console.error('Failed to check for updates:', error)
+      logger.error('Failed to check for updates:', error)
     }
   }
 
@@ -197,14 +199,14 @@ class ServiceWorkerManager {
   }
 
   notifyUpdateAvailable() {
-    console.log('🔔 Service Worker update available')
+    logger.info('🔔 Service Worker update available')
 
     // Notify all registered callbacks
     this.updateCallbacks.forEach((callback) => {
       try {
         callback()
       } catch (error) {
-        console.error('Update callback error:', error)
+        logger.error('Update callback error:', error)
       }
     })
 
@@ -276,7 +278,7 @@ class ServiceWorkerManager {
 
   async applyUpdate() {
     if (!this.registration || !this.registration.waiting) {
-      console.warn('No service worker update available')
+      logger.warn('No service worker update available')
       return
     }
 
@@ -290,9 +292,9 @@ class ServiceWorkerManager {
         notification.remove()
       }
 
-      console.log('🔄 Applying Service Worker update...')
+      logger.info('🔄 Applying Service Worker update...')
     } catch (error) {
-      console.error('Failed to apply update:', error)
+      logger.error('Failed to apply update:', error)
     }
   }
 
@@ -343,7 +345,7 @@ class ServiceWorkerManager {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       tags.forEach((tag) => {
         this.registration.sync.register(tag).catch((error) => {
-          console.error(`Background sync registration failed for ${tag}:`, error)
+          logger.error(`Background sync registration failed for ${tag}:`, error)
         })
       })
     }
@@ -376,7 +378,7 @@ class ServiceWorkerManager {
     try {
       return JSON.parse(localStorage.getItem('pmp-progress') || '{}')
     } catch (error) {
-      console.error('Failed to get progress data:', error)
+      logger.error('Failed to get progress data:', error)
       return {}
     }
   }
@@ -385,13 +387,13 @@ class ServiceWorkerManager {
     try {
       return JSON.parse(localStorage.getItem('pmp-exam-results') || '[]')
     } catch (error) {
-      console.error('Failed to get exam results:', error)
+      logger.error('Failed to get exam results:', error)
       return []
     }
   }
 
   handleCacheStatus(status) {
-    console.log('📊 Cache Status:', status)
+    logger.info('📊 Cache Status:', status)
     this.analytics.cacheHitCount += status.hits || 0
   }
 
@@ -462,10 +464,10 @@ class ServiceWorkerManager {
     if (this.registration) {
       try {
         await this.registration.unregister()
-        console.log('🗑️ Service Worker unregistered')
+        logger.info('🗑️ Service Worker unregistered')
         return true
       } catch (error) {
-        console.error('Failed to unregister Service Worker:', error)
+        logger.error('Failed to unregister Service Worker:', error)
         return false
       }
     }

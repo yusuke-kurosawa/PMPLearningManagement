@@ -10,20 +10,17 @@ import React, { useState, useEffect } from 'react'
 import {
   Database,
   Upload,
-  Download,
   RefreshCw,
   AlertTriangle,
   CheckCircle,
   XCircle,
   Settings,
   Shield,
-  Clock,
-  HardDrive,
   Wifi,
   WifiOff,
   Play,
-  Pause,
-  X} from 'lucide-react'
+  X,
+} from 'lucide-react'
 import { useProgressV2 } from '../../hooks/useProgressV2'
 import { logger } from '../../services/logger'
 
@@ -62,9 +59,11 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
     migrateToSupabase,
     checkMigrationFeasibility,
     syncData,
-    forcSync} = useProgressV2({
+    forcSync,
+  } = useProgressV2({
     enableMigration: true,
-    autoSync: true})
+    autoSync: true,
+  })
 
   const [migrationSettings, setMigrationSettings] = useState<MigrationSettings>({
     includeProcessProgress: true,
@@ -73,7 +72,8 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
     includeExamResults: true,
     includeLearningGoals: true,
     createBackup: true,
-    batchSize: 10})
+    batchSize: 10,
+  })
 
   const [feasibilityCheck, setFeasibilityCheck] = useState<{
     canMigrate: boolean
@@ -89,6 +89,7 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
   // エフェクト
   // ========================================
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       handleCheckFeasibility()
@@ -147,7 +148,8 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
   const handleSettingChange = (key: keyof MigrationSettings, value: boolean | number) => {
     setMigrationSettings((prev) => ({
       ...prev,
-      [key]: value}))
+      [key]: value,
+    }))
   }
 
   // ========================================
@@ -340,7 +342,8 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
                   <div
                     className='h-2 rounded-full bg-blue-600 transition-all duration-300'
                     style={{
-                      width: formatProgress(migrationStatus.progress, migrationStatus.total)}}
+                      width: formatProgress(migrationStatus.progress, migrationStatus.total),
+                    }}
                   />
                 </div>
 
@@ -439,10 +442,14 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
                 <div className='mt-4 border-t border-gray-200 pt-4'>
                   <div className='grid grid-cols-2 gap-4'>
                     <div>
-                      <label className='mb-1 block text-sm font-medium text-gray-700'>
+                      <label
+                        htmlFor='-input'
+                        className='mb-1 block text-sm font-medium text-gray-700'
+                      >
                         バッチサイズ
                       </label>
                       <input
+                        id='-input'
                         type='number'
                         min='1'
                         max='50'

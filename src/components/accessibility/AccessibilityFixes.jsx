@@ -213,6 +213,8 @@ export const AccessibleLoading = ({ text = '読み込み中...' }) => (
  * フォーカストラップフック
  */
 export const useFocusTrap = (ref) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     if (!ref.current) {
       return

@@ -1,3 +1,5 @@
+const { logger } = require('../../services/logger')
+
 // 完全なPMBOK第6版の49プロセスデータ
 // PMBOK準拠性を100%にするための完全なプロセス定義
 
@@ -675,7 +677,7 @@ export function validateProcessCount() {
       })
     }
     if (count !== area.processes) {
-      console.warn(`⚠️ ${area.name}: Expected ${area.processes} processes, got ${count}`)
+      logger.warn(`⚠️ ${area.name}: Expected ${area.processes} processes, got ${count}`)
     }
     totalProcesses += count
   })

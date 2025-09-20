@@ -58,11 +58,11 @@ export interface BackupData {
   version: string
   userId: string | null
   data: {
-    processes: Record<string, any>
-    studySessions: any[]
-    flashCardSessions: any[]
-    examResults: any[]
-    goals: Record<string, any>
+    processes: Record<string, unknown>
+    studySessions: unknown[]
+    flashCardSessions: unknown[]
+    examResults: unknown[]
+    goals: Record<string, unknown>
   }
   metadata: {
     totalRecords: number
@@ -102,7 +102,8 @@ class DataMigrationService {
     completed: false,
     errors: [],
     startTime: null,
-    endTime: null}
+    endTime: null,
+  }
 
   private readonly STORAGE_KEY = 'pmp_migration_backup'
   private readonly VERSION = '1.0.0'
@@ -147,7 +148,8 @@ class DataMigrationService {
       includeFlashCardSessions: true,
       includeExamResults: true,
       includeLearningGoals: true,
-      createBackup: true}
+      createBackup: true,
+    }
 
     const mergedOptions = { ...defaultOptions, ...options }
 
@@ -204,9 +206,11 @@ class DataMigrationService {
           studySessions: { migrated: 0, failed: 0 },
           flashCardSessions: { migrated: 0, failed: 0 },
           examResults: { migrated: 0, failed: 0 },
-          learningGoals: { migrated: 0, failed: 0 }},
+          learningGoals: { migrated: 0, failed: 0 },
+        },
         errors: [],
-        duration: 0}
+        duration: 0,
+      }
 
       // プロセス進捗の移行
       if (mergedOptions.includeProcessProgress) {
@@ -295,11 +299,13 @@ class DataMigrationService {
           studySessions: { migrated: 0, failed: 0 },
           flashCardSessions: { migrated: 0, failed: 0 },
           examResults: { migrated: 0, failed: 0 },
-          learningGoals: { migrated: 0, failed: 0 }},
+          learningGoals: { migrated: 0, failed: 0 },
+        },
         errors: this.migrationStatus.errors,
         duration: this.migrationStatus.startTime
           ? new Date().getTime() - new Date(this.migrationStatus.startTime).getTime()
-          : 0}
+          : 0,
+      }
 
       return errorResult
     } finally {
@@ -316,7 +322,7 @@ class DataMigrationService {
    * @private
    */
   private async migrateProcessProgress(
-    processes: Record<string, any>,
+    processes: Record<string, unknown>,
     options: MigrationOptions
   ): Promise<{ migrated: number; failed: number }> {
     let migrated = 0
@@ -366,7 +372,7 @@ class DataMigrationService {
    * @private
    */
   private async migrateStudySessions(
-    sessions: any[],
+    sessions: unknown[],
     options: MigrationOptions
   ): Promise<{ migrated: number; failed: number }> {
     let migrated = 0
@@ -411,7 +417,7 @@ class DataMigrationService {
    * @private
    */
   private async migrateFlashCardSessions(
-    sessions: any[],
+    sessions: unknown[],
     options: MigrationOptions
   ): Promise<{ migrated: number; failed: number }> {
     let migrated = 0
@@ -424,7 +430,7 @@ class DataMigrationService {
         try {
           if (!options.dryRun) {
             // timestampを除去してからrecordFlashCardSessionに渡す
-            const { timestamp, ...sessionData } = session
+            const { ...sessionData } = session
             const response = await progressServiceV2.recordFlashCardSession(sessionData)
             if (response.success) {
               migrated++
@@ -460,7 +466,7 @@ class DataMigrationService {
    * @private
    */
   private async migrateExamResults(
-    examResults: any[],
+    examResults: unknown[],
     options: MigrationOptions
   ): Promise<{ migrated: number; failed: number }> {
     let migrated = 0
@@ -505,7 +511,7 @@ class DataMigrationService {
    * @private
    */
   private async migrateLearningGoals(
-    goals: Record<string, any>,
+    goals: Record<string, unknown>,
     options: MigrationOptions
   ): Promise<{ migrated: number; failed: number }> {
     let migrated = 0
@@ -561,7 +567,8 @@ class DataMigrationService {
       completed: false,
       errors: [],
       startTime: null,
-      endTime: null}
+      endTime: null,
+    }
   }
 
   /**
@@ -598,11 +605,14 @@ class DataMigrationService {
           studySessions: localData.studySessions || [],
           flashCardSessions: localData.flashCardSessions || [],
           examResults: localData.examResults || [],
-          goals: localData.goals || {}},
+          goals: localData.goals || {},
+        },
         metadata: {
           totalRecords: 0,
           sizeBytes: 0,
-          checksum: ''}}
+          checksum: '',
+        },
+      }
 
       // メタデータの計算
       backupData.metadata.totalRecords =
@@ -657,7 +667,8 @@ class DataMigrationService {
         flashCardSessions: backup.data.flashCardSessions,
         examResults: backup.data.examResults,
         goals: backup.data.goals,
-        lastUpdated: backup.timestamp}
+        lastUpdated: backup.timestamp,
+      }
 
       await progressService.saveProgress(restoredData)
 
@@ -786,14 +797,16 @@ class DataMigrationService {
         canMigrate,
         issues,
         dataSize,
-        recordCount}
+        recordCount,
+      }
     } catch (error) {
       logger.error('Failed to check migration feasibility:', error)
       return {
         canMigrate: false,
         issues: [`Error checking feasibility: ${(error as Error).message}`],
         dataSize: 0,
-        recordCount: 0}
+        recordCount: 0,
+      }
     }
   }
 

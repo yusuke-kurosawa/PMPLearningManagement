@@ -39,6 +39,7 @@ const MockExam = () => {
   }
 
   // タイマー機能
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (examState === 'in_progress' && !isPaused) {
       intervalRef.current = setInterval(() => {

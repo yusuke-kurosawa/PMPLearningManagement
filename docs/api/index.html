@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMP Learning Management API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.10.5/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.10.5/favicon-16x16.png" sizes="16x16" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+
+        .swagger-ui .topbar {
+            background-color: #1f77b4;
+            padding: 10px 0;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #fff;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper .download-url-button {
+            background-color: #89bf04;
+            color: #fff;
+            border-color: #89bf04;
+        }
+
+        .swagger-ui .info .title {
+            color: #1f77b4;
+        }
+
+        /* Custom styling for PMP branding */
+        .pmp-header {
+            background: linear-gradient(135deg, #1f77b4 0%, #2e86ab 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .pmp-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .pmp-header p {
+            margin: 1rem 0 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .pmp-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .pmp-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-links {
+            background: white;
+            padding: 2rem;
+            margin: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-links h3 {
+            color: #1f77b4;
+            margin-top: 0;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-link {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link:hover {
+            border-color: #1f77b4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-link h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1f77b4;
+        }
+
+        .quick-link p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .environment-selector {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .environment-selector select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .pmp-header h1 {
+                font-size: 2rem;
+            }
+            .pmp-badges {
+                gap: 0.5rem;
+            }
+            .quick-links {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pmp-header">
+        <h1>PMP Learning Management API</h1>
+        <p>Comprehensive API for Project Management Professional exam preparation and learning</p>
+        <div class="pmp-badges">
+            <span class="pmp-badge">OpenAPI 3.1</span>
+            <span class="pmp-badge">PMBOK 6th & 7th Edition</span>
+            <span class="pmp-badge">AI-Powered Learning</span>
+            <span class="pmp-badge">Real-time Collaboration</span>
+            <span class="pmp-badge">Advanced Analytics</span>
+        </div>
+    </div>
+
+    <div class="environment-selector">
+        <label for="environment">API Environment:</label>
+        <select id="environment" onchange="changeEnvironment(this.value)">
+            <option value="https://api.pmplearning.com/v2">Production</option>
+            <option value="https://staging-api.pmplearning.com/v2">Staging</option>
+            <option value="https://dev-api.pmplearning.com/v2">Development</option>
+            <option value="http://localhost:3000/api/trpc" selected>Local Development</option>
+        </select>
+    </div>
+
+    <div class="quick-links">
+        <h3>🚀 Quick Start Guide</h3>
+        <div class="quick-links-grid">
+            <a href="#/Authentication" class="quick-link">
+                <h4>🔐 Authentication</h4>
+                <p>Learn how to authenticate and manage user sessions with JWT tokens</p>
+            </a>
+            <a href="#/PMBOK%20Knowledge%20Areas" class="quick-link">
+                <h4>📚 PMBOK Knowledge Areas</h4>
+                <p>Access all 10 knowledge areas and 49 processes with detailed ITTO information</p>
+            </a>
+            <a href="#/Learning%20Progress" class="quick-link">
+                <h4>📈 Learning Progress</h4>
+                <p>Track study sessions, progress analytics, and learning streaks</p>
+            </a>
+            <a href="#/Assessments" class="quick-link">
+                <h4>🎯 Mock Exams</h4>
+                <p>Create and manage PMP practice exams with detailed scoring</p>
+            </a>
+            <a href="#/AI%20Services" class="quick-link">
+                <h4>🤖 AI Coaching</h4>
+                <p>Get personalized study recommendations and chat with AI coach</p>
+            </a>
+            <a href="#/Collaboration" class="quick-link">
+                <h4>👥 Collaboration</h4>
+                <p>Manage study groups, discussions, and shared learning resources</p>
+            </a>
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js" charset="UTF-8"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+
+    <script>
+        let currentSpec = './openapi-spec.yaml';
+        
+        window.onload = function() {
+            initializeSwaggerUI();
+        }
+
+        function initializeSwaggerUI() {
+            const ui = SwaggerUIBundle({
+                url: currentSpec,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                tryItOutEnabled: true,
+                filter: true,
+                validatorUrl: null,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
+                onComplete: function() {
+                    // Add custom functionality after Swagger UI loads
+                    addCustomFeatures();
+                },
+                requestInterceptor: function(request) {
+                    // Add custom headers or modify requests
+                    if (localStorage.getItem('pmp_api_token')) {
+                        request.headers.Authorization = 'Bearer ' + localStorage.getItem('pmp_api_token');
+                    }
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Handle authentication responses
+                    if (response.url.includes('/auth/login') && response.obj && response.obj.tokens) {
+                        localStorage.setItem('pmp_api_token', response.obj.tokens.accessToken);
+                        showNotification('Authentication successful! Token saved for future requests.', 'success');
+                    }
+                    return response;
+                }
+            });
+
+            window.ui = ui;
+        }
+
+        function changeEnvironment(newServer) {
+            // Update the server in Swagger UI
+            if (window.ui && window.ui.specActions) {
+                window.ui.specActions.updateUrl(currentSpec);
+                window.ui.specActions.updateServers([{
+                    url: newServer,
+                    description: 'Selected Environment'
+                }]);
+            }
+        }
+
+        function addCustomFeatures() {
+            // Add authentication helper
+            addAuthenticationHelper();
+            
+            // Add example data buttons
+            addExampleDataButtons();
+            
+            // Add copy curl commands
+            addCopyButtons();
+        }
+
+        function addAuthenticationHelper() {
+            const authSection = document.querySelector('[data-tag="Authentication"]');
+            if (authSection) {
+                const helper = document.createElement('div');
+                helper.innerHTML = `
+                    <div style="background: #e8f4fd; padding: 1rem; margin: 1rem 0; border-radius: 4px; border-left: 4px solid #1f77b4;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #1f77b4;">🔐 Authentication Helper</h4>
+                        <p style="margin: 0 0 1rem 0;">Use these test credentials to try the API:</p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="fillLoginForm('test@example.com', 'password123')" 
+                                    style="padding: 0.5rem 1rem; background: #1f77b4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Fill Test User
+                            </button>
+                            <button onclick="fillLoginForm('admin@example.com', 'admin123')" 
+                                    style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Fill Admin User
+                            </button>
+                        </div>
+                    </div>
+                `;
+                authSection.appendChild(helper);
+            }
+        }
+
+        function fillLoginForm(email, password) {
+            // Find and fill the login form
+            const emailInput = document.querySelector('input[placeholder*="email" i], input[name*="email" i]');
+            const passwordInput = document.querySelector('input[type="password"]');
+            
+            if (emailInput && passwordInput) {
+                emailInput.value = email;
+                passwordInput.value = password;
+                
+                // Trigger change events
+                emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                showNotification(`Filled login form with ${email}`, 'info');
+            } else {
+                showNotification('Please open the /auth/login endpoint first', 'warning');
+            }
+        }
+
+        function addExampleDataButtons() {
+            // Add example data for common requests
+            const processSection = document.querySelector('[data-tag="Process Management"]');
+            if (processSection) {
+                const examples = document.createElement('div');
+                examples.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #1f77b4;">📋 Common Examples</h4>
+                        <p style="margin: 0 0 1rem 0;">Quickly test common scenarios:</p>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button onclick="testEndpoint('/pmbok/processes?knowledgeArea=integration')"
+                                    style="padding: 0.25rem 0.5rem; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
+                                Integration Processes
+                            </button>
+                            <button onclick="testEndpoint('/pmbok/processes/develop-project-charter')"
+                                    style="padding: 0.25rem 0.5rem; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
+                                Charter Process
+                            </button>
+                            <button onclick="testEndpoint('/pmbok/knowledge-areas/risk')"
+                                    style="padding: 0.25rem 0.5rem; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
+                                Risk Management
+                            </button>
+                        </div>
+                    </div>
+                `;
+                processSection.appendChild(examples);
+            }
+        }
+
+        function testEndpoint(endpoint) {
+            showNotification(`Testing endpoint: ${endpoint}`, 'info');
+            // This could be expanded to actually execute the request
+        }
+
+        function addCopyButtons() {
+            // This would add copy buttons for curl commands
+            // Implementation would depend on Swagger UI's internal structure
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545',
+                info: '#17a2b8'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type]};
+                color: white;
+                padding: 1rem;
+                border-radius: 4px;
+                z-index: 10000;
+                max-width: 300px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                notification.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to open search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.filter-container input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        });
+
+        // Add development helpers
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('🚀 PMP Learning Management API Documentation');
+            console.log('Development mode detected - additional debugging tools available');
+            console.log('Available commands:');
+            console.log('  window.ui - Swagger UI instance');
+            console.log('  localStorage.getItem("pmp_api_token") - Current auth token');
+            console.log('  showNotification(message, type) - Show notification');
+        }
+    </script>
+
+    <!-- Additional custom styling for better mobile experience -->
+    <style>
+        @media (max-width: 768px) {
+            .swagger-ui .wrapper {
+                padding: 0 10px;
+            }
+            
+            .swagger-ui .info {
+                margin: 20px 0;
+            }
+            
+            .swagger-ui .scheme-container {
+                padding: 10px 0;
+            }
+        }
+
+        /* Enhance the try-it-out experience */
+        .swagger-ui .try-out__btn {
+            background: #1f77b4;
+            color: white;
+            border: 1px solid #1f77b4;
+        }
+
+        .swagger-ui .btn.execute {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .swagger-ui .btn.execute:hover {
+            background: #218838;
+            border-color: #1e7e34;
+        }
+
+        /* Improve response section styling */
+        .swagger-ui .responses-inner h4 {
+            color: #1f77b4;
+        }
+
+        .swagger-ui .response-col_status {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</body>
+</html>

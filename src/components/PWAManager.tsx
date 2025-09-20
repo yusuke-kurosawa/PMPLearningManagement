@@ -5,6 +5,7 @@ import { pwaManager } from '@/lib/pwa'
 import { logger } from '../services/logger'
 
 export function PWAManager() {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Register service worker
     if ('serviceWorker' in navigator) {

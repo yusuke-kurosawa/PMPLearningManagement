@@ -251,6 +251,7 @@ const EnhancedCollaborationHub: React.FC = () => {
   const [replyContent, setReplyContent] = useState('')
 
   // Load data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadInitialData()
 

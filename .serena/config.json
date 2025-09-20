@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "createdAt": "2025-09-20T05:22:23.254Z",
+  "settings": {
+    "autoUpdate": true,
+    "maxCacheSize": 52428800,
+    "logRetention": 30
+  }
+}

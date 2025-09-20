@@ -1,3 +1,5 @@
+import { logger } from '../services/logger'
+
 /**
  * パフォーマンス監視ユーティリティ
  * Web Vitals計測とパフォーマンス最適化
@@ -66,7 +68,7 @@ class PerformanceMonitor {
       observer.observe({ entryTypes: ['paint'] })
       this.observers.set('paint', observer)
     } catch (_e) {
-      console.debug('Paint observer not supported')
+      logger.debug('Paint observer not supported')
     }
   }
 
@@ -87,7 +89,7 @@ class PerformanceMonitor {
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
       this.observers.set('lcp', observer)
     } catch (_e) {
-      console.debug('LCP observer not supported')
+      logger.debug('LCP observer not supported')
     }
   }
 
@@ -109,7 +111,7 @@ class PerformanceMonitor {
       observer.observe({ entryTypes: ['first-input'] })
       this.observers.set('fid', observer)
     } catch (_e) {
-      console.debug('FID observer not supported')
+      logger.debug('FID observer not supported')
     }
   }
 
@@ -140,7 +142,7 @@ class PerformanceMonitor {
         this.reportMetric('CLS', this.metrics.CLS)
       })
     } catch (_e) {
-      console.debug('CLS observer not supported')
+      logger.debug('CLS observer not supported')
     }
   }
 
@@ -157,7 +159,7 @@ class PerformanceMonitor {
         this.reportMetric('TTFB', this.metrics.TTFB)
       }
     } catch (_e) {
-      console.debug('TTFB measurement not supported')
+      logger.debug('TTFB measurement not supported')
     }
   }
 
@@ -184,7 +186,7 @@ class PerformanceMonitor {
       observer.observe({ entryTypes: ['event'] })
       this.observers.set('inp', observer)
     } catch (_e) {
-      console.debug('INP observer not supported')
+      logger.debug('INP observer not supported')
     }
   }
 
@@ -199,7 +201,7 @@ class PerformanceMonitor {
         const totalMemoryMB = Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
 
         if (usedMemoryMB > totalMemoryMB * 0.8) {
-          console.warn(`High memory usage: ${usedMemoryMB}MB / ${totalMemoryMB}MB`)
+          logger.warn(`High memory usage: ${usedMemoryMB}MB / ${totalMemoryMB}MB`)
         }
       }, 30000) // 30秒ごとにチェック
     }
@@ -216,7 +218,7 @@ class PerformanceMonitor {
     const totalSizeMB = Math.round((totalSize / 1024 / 1024) * 100) / 100
 
     if (totalSizeMB > 1) {
-      console.warn(`Large bundle size detected: ${totalSizeMB}MB`)
+      logger.warn(`Large bundle size detected: ${totalSizeMB}MB`)
     }
   }
 
@@ -236,7 +238,7 @@ class PerformanceMonitor {
     // コンソールログ（開発環境のみ）
     if (process.env.NODE_ENV === 'development') {
       const rating = this.getRating(name, value)
-      console.log(`[Performance] ${name}: ${value}ms (${rating})`)
+      logger.info(`[Performance] ${name}: ${value}ms (${rating})`)
     }
   }
 

@@ -66,7 +66,7 @@ export const ContextManagerProvider: React.FC<ContextManagerProviderProps> = ({ 
   const contextAPI = useMemo<ContextManagerAPI>(
     () => ({
       // Storage operations
-      store: (key: string, data: any, options?: StoreOptions) => {
+      store: (key: string, data: unknown, options?: StoreOptions) => {
         const start = performance.now()
         const result = contextManager.store(key, data, options)
         const duration = performance.now() - start
@@ -103,11 +103,11 @@ export const ContextManagerProvider: React.FC<ContextManagerProviderProps> = ({ 
       },
 
       // Performance operations
-      optimizeComponent: (Component: React.ComponentType, options?: any) => {
+      optimizeComponent: (Component: React.ComponentType, options?: Record<string, unknown>) => {
         return performanceOptimizer.optimizeComponent(Component, options)
       },
 
-      lazyLoad: async (componentKey: string, loader: () => Promise<any>) => {
+      lazyLoad: async (componentKey: string, loader: () => Promise<unknown>) => {
         return await performanceOptimizer.lazyLoadComponent(componentKey, loader)
       },
 
@@ -115,11 +115,11 @@ export const ContextManagerProvider: React.FC<ContextManagerProviderProps> = ({ 
         return performanceOptimizer.observeForLazyLoading(element, loadHandler)
       },
 
-      debounce: <T extends (...args: any[]) => any>(func: T, wait: number) => {
+      debounce: <T extends (...args: unknown[]) => unknown>(func: T, wait: number) => {
         return performanceOptimizer.debounce(func, wait)
       },
 
-      throttle: <T extends (...args: any[]) => any>(func: T, limit: number) => {
+      throttle: <T extends (...args: unknown[]) => unknown>(func: T, limit: number) => {
         return performanceOptimizer.throttle(func, limit)
       },
 

@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog'
-import { Progress } from '../ui/progress'
+// // import { Progress } from '../ui/progress' // TODO: Will be used in future // TODO: Will be used in future
 import {
   BarChart,
   Bar,
@@ -42,13 +42,11 @@ import {
 import {
   Download,
   Search,
-  Filter,
   RefreshCw,
   Trash2,
   Archive,
   Settings,
   AlertCircle,
-  CheckCircle,
   Clock,
   TrendingUp,
   TrendingDown,
@@ -56,10 +54,8 @@ import {
   MessageSquare,
   Bot,
   User,
-  Calendar,
   FileText,
   Database,
-  Activity,
   Eye,
   Copy,
   Share2,
@@ -69,7 +65,8 @@ import {
 } from 'lucide-react'
 import promptLogService from '../../services/promptLogService'
 import { useToast } from '../ui/use-toast'
-import { format, formatDistanceToNow, startOfDay, endOfDay, subDays } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
+const { logger } = require('../../services/logger')
 
 const PromptLogDashboard = () => {
   const { toast } = useToast()
@@ -87,14 +84,17 @@ const PromptLogDashboard = () => {
     tags: [],
   })
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(50)
+  // //   const [pageSize, setPageSize] = useState(50) // TODO: Will be used in future // TODO: Will be used in future
   const [sortConfig, setSortConfig] = useState({ field: 'timestamp', order: 'desc' })
   const [exportFormat, setExportFormat] = useState('json')
   const [config, setConfig] = useState(promptLogService.getConfig())
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [refreshInterval, setRefreshInterval] = useState(null)
+  // //   const [refreshInterval, setRefreshInterval] = useState(null) // TODO: Will be used in future // TODO: Will be used in future
 
   // Load initial data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadLogs()
     loadStatistics()
@@ -126,7 +126,7 @@ const PromptLogDashboard = () => {
       })
       setLogs(result)
     } catch (error) {
-      console.error('Failed to load logs:', error)
+      logger.error('Failed to load logs:', error)
       toast({
         title: 'Error loading logs',
         description: error.message,
@@ -144,7 +144,7 @@ const PromptLogDashboard = () => {
       const stats = await promptLogService.getStatistics(timeRange)
       setStatistics(stats)
     } catch (error) {
-      console.error('Failed to load statistics:', error)
+      logger.error('Failed to load statistics:', error)
     }
   }, [filters.timeRange])
 

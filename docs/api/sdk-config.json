@@ -1,0 +1,181 @@
+{
+  "packageName": "pmp-learning-api",
+  "packageVersion": "2.1.0",
+  "clientPackage": "pmp_learning_client",
+  "packageCompany": "PMP Learning Management",
+  "packageAuthor": "PMP Learning Team",
+  "packageDescription": "Official SDK for PMP Learning Management API - comprehensive project management professional exam preparation",
+  "packageUrl": "https://pmplearning.com",
+  "licenseInfo": "MIT",
+  "generators": [
+    {
+      "name": "typescript-axios",
+      "lang": "typescript",
+      "outputDir": "./sdks/typescript",
+      "additionalProperties": {
+        "npmName": "@pmp-learning/api-client",
+        "npmVersion": "2.1.0",
+        "supportsES6": true,
+        "withInterfaces": true,
+        "modelPropertyNaming": "camelCase",
+        "enumPropertyNaming": "UPPERCASE",
+        "stringEnums": true,
+        "useSingleRequestParameter": false,
+        "withoutPrefixEnums": false,
+        "withSeparateModelsAndApi": true,
+        "apiPackage": "api",
+        "modelPackage": "model",
+        "snapshot": false,
+        "prependFormOrBodyParameters": true
+      },
+      "globalProperties": {
+        "models": "true",
+        "apis": "true",
+        "supportingFiles": "true",
+        "modelTests": "true",
+        "apiTests": "false",
+        "modelDocs": "true",
+        "apiDocs": "true"
+      }
+    },
+    {
+      "name": "python",
+      "lang": "python",
+      "outputDir": "./sdks/python", 
+      "additionalProperties": {
+        "packageName": "pmp_learning_api",
+        "projectName": "pmp-learning-api",
+        "packageVersion": "2.1.0",
+        "packageUrl": "https://github.com/pmp-learning/python-sdk",
+        "pythonVersion": ">=3.8",
+        "generateSourceCodeOnly": false,
+        "library": "urllib3",
+        "packageCompany": "PMP Learning Management"
+      }
+    },
+    {
+      "name": "java",
+      "lang": "java",
+      "outputDir": "./sdks/java",
+      "additionalProperties": {
+        "groupId": "com.pmplearning",
+        "artifactId": "pmp-learning-api-client",
+        "artifactVersion": "2.1.0",
+        "invokerPackage": "com.pmplearning.client",
+        "modelPackage": "com.pmplearning.client.model",
+        "apiPackage": "com.pmplearning.client.api",
+        "library": "okhttp-gson",
+        "dateLibrary": "java8",
+        "java8": true,
+        "performBeanValidation": true,
+        "useBeanValidation": true,
+        "hideGenerationTimestamp": true,
+        "serializationLibrary": "gson",
+        "licenseName": "MIT",
+        "licenseUrl": "https://opensource.org/licenses/MIT"
+      }
+    },
+    {
+      "name": "csharp",
+      "lang": "csharp",
+      "outputDir": "./sdks/csharp",
+      "additionalProperties": {
+        "packageName": "PMPLearning.ApiClient",
+        "packageVersion": "2.1.0",
+        "packageCompany": "PMP Learning Management",
+        "packageAuthors": "PMP Learning Team",
+        "packageDescription": "Official .NET SDK for PMP Learning Management API",
+        "packageCopyright": "Copyright (c) PMP Learning Management",
+        "clientPackage": "PMPLearning.ApiClient",
+        "packageTitlePrefix": "PMP Learning",
+        "targetFramework": "net6.0",
+        "sourceFolder": "src/main/CsharpDotNet2/PMPLearning/ApiClient",
+        "excludeTests": false,
+        "generatePropertyDocumentation": true,
+        "nonPublicApi": false,
+        "validatable": true,
+        "nullableReferenceTypes": true,
+        "library": "httpclient"
+      }
+    },
+    {
+      "name": "go",
+      "lang": "go",
+      "outputDir": "./sdks/go",
+      "additionalProperties": {
+        "packageName": "pmplearning",
+        "packageVersion": "2.1.0",
+        "packageUrl": "github.com/pmp-learning/go-sdk",
+        "isGoSubmodule": false,
+        "generateInterfaces": true,
+        "structPrefix": true,
+        "withGoMod": true,
+        "enumClassPrefix": true,
+        "withAWSV4Signature": false
+      }
+    }
+  ],
+  "examples": {
+    "typescript": {
+      "authentication": "examples/typescript/authentication.ts",
+      "learningProgress": "examples/typescript/learning-progress.ts",
+      "mockExam": "examples/typescript/mock-exam.ts",
+      "aiCoaching": "examples/typescript/ai-coaching.ts",
+      "collaboration": "examples/typescript/collaboration.ts"
+    },
+    "python": {
+      "authentication": "examples/python/authentication.py",
+      "learningProgress": "examples/python/learning_progress.py", 
+      "mockExam": "examples/python/mock_exam.py",
+      "aiCoaching": "examples/python/ai_coaching.py",
+      "collaboration": "examples/python/collaboration.py"
+    },
+    "java": {
+      "authentication": "examples/java/Authentication.java",
+      "learningProgress": "examples/java/LearningProgress.java",
+      "mockExam": "examples/java/MockExam.java",
+      "aiCoaching": "examples/java/AiCoaching.java",
+      "collaboration": "examples/java/Collaboration.java"
+    },
+    "csharp": {
+      "authentication": "examples/csharp/Authentication.cs",
+      "learningProgress": "examples/csharp/LearningProgress.cs",
+      "mockExam": "examples/csharp/MockExam.cs",
+      "aiCoaching": "examples/csharp/AiCoaching.cs",
+      "collaboration": "examples/csharp/Collaboration.cs"
+    }
+  },
+  "postGenerationCommands": [
+    {
+      "lang": "typescript",
+      "commands": [
+        "cd ./sdks/typescript && npm install",
+        "cd ./sdks/typescript && npm run build",
+        "cd ./sdks/typescript && npm run test"
+      ]
+    },
+    {
+      "lang": "python", 
+      "commands": [
+        "cd ./sdks/python && python -m pip install -e .",
+        "cd ./sdks/python && python -m pip install pytest",
+        "cd ./sdks/python && python -m pytest tests/"
+      ]
+    },
+    {
+      "lang": "java",
+      "commands": [
+        "cd ./sdks/java && mvn clean compile",
+        "cd ./sdks/java && mvn test"
+      ]
+    },
+    {
+      "lang": "csharp",
+      "commands": [
+        "cd ./sdks/csharp && dotnet restore",
+        "cd ./sdks/csharp && dotnet build",
+        "cd ./sdks/csharp && dotnet test"
+      ]
+    }
+  ]
+}

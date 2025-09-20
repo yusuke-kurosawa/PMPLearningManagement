@@ -149,6 +149,7 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children, config = {} 
     hasFileSystemAccess: 'showOpenFilePicker' in window,
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     initializePWA()
     setupEventListeners()

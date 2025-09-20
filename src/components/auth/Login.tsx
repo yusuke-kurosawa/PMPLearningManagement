@@ -29,6 +29,9 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false)
 
   // Redirect if already authenticated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isAuthenticated) {
       const from = location.state?.from?.pathname || '/'

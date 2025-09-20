@@ -21,17 +21,18 @@ const DiscussionThread = ({ targetId, targetType, title = 'ディスカッショ
   const [expandedComments, setExpandedComments] = useState(new Set())
   const [currentUser, setCurrentUser] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadComments()
     // ユーザー名の読み込み
     const savedUser = localStorage.getItem('username') || 'Anonymous'
     setCurrentUser(savedUser)
-  }, [targetId, targetType])
+  }, [targetId, targetType, loadComments])
 
-  const loadComments = () => {
+  const loadComments = useCallback((...args) => {
     const loadedComments = collaborationService.getComments(targetId, targetType)
     setComments(loadedComments)
-  }
+  }, [])
 
   // コメントの投稿
   const handlePostComment = () => {

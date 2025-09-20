@@ -5,6 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
+const { logger } = require('/logger')
 
 class PromptLogService {
   constructor() {
@@ -37,13 +38,13 @@ class PromptLogService {
       const request = indexedDB.open(this.dbName, this.dbVersion)
 
       request.onerror = () => {
-        console.error('Failed to open IndexedDB:', request.error)
+        logger.error('Failed to open IndexedDB:', request.error)
         reject(request.error)
       }
 
       request.onsuccess = () => {
         this.db = request.result
-        console.info('PromptLog DB initialized successfully')
+        logger.info('PromptLog DB initialized successfully')
         resolve()
       }
 
@@ -216,14 +217,14 @@ class PromptLogService {
         transaction.onerror = reject
       })
 
-      console.info(`Flushed ${logsToProcess.length} logs to storage`)
+      logger.info(`Flushed ${logsToProcess.length} logs to storage`)
 
       // Trigger analytics if enabled
       if (this.config.enableAnalytics) {
         this.analyzeRecentLogs()
       }
     } catch (error) {
-      console.error('Failed to flush logs:', error)
+      logger.error('Failed to flush logs:', error)
       // Re-queue failed logs
       this.queue.unshift(...logsToProcess)
     } finally {
@@ -356,7 +357,7 @@ class PromptLogService {
           deletedCount++
           cursor.continue()
         } else {
-          console.info(`Cleaned up ${deletedCount} old logs`)
+          logger.info(`Cleaned up ${deletedCount} old logs`)
           resolve(deletedCount)
         }
       }
@@ -752,7 +753,7 @@ class PromptLogService {
    */
   async archiveLog(log) {
     // Implement external storage archival (e.g., to server, cloud storage)
-    console.info(`Archiving log: ${log.id}`)
+    logger.info(`Archiving log: ${log.id}`)
   }
 
   /**
@@ -772,7 +773,7 @@ class PromptLogService {
 
       // Trigger alerts or notifications based on analysis
       if (stats.errorRate > 10) {
-        console.warn(`High error rate detected: ${stats.errorRate}%`)
+        logger.warn(`High error rate detected: ${stats.errorRate}%`)
       }
     }
   }
@@ -801,7 +802,7 @@ class PromptLogService {
       const request = objectStore.clear()
 
       request.onsuccess = () => {
-        console.info('All logs cleared')
+        logger.info('All logs cleared')
         resolve()
       }
 
@@ -814,7 +815,7 @@ class PromptLogService {
    */
   updateConfig(newConfig) {
     this.config = { ...this.config, ...newConfig }
-    console.info('PromptLog configuration updated:', this.config)
+    logger.info('PromptLog configuration updated:', this.config)
   }
 
   /**

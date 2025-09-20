@@ -1,13 +1,15 @@
+const { logger } = require('services/logger')
+
 // Test file for Claude AI review
 export function testFunction(a, b) {
   // This function needs improvement
   const result = a + b
-  console.log(result)
+  logger.info(result)
   return result
 }
 
 // Potential security issue
-eval('console.log("test")')
+eval('logger.info("test")')
 
 // Performance issue
 for (let i = 0; i < 1000000; i++) {

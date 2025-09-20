@@ -108,7 +108,7 @@ const PMBOKMatrix = memo(() => {
 
   // knowledgeAreas, processes, processDetails は外部ファイルからインポート済み
 
-  const originalProcessDetails = {
+  /* const originalProcessDetails = { // TODO: Will be used in future
     プロジェクト憲章の作成: {
       inputs: ['ビジネス文書', '合意書', '組織体の環境要因', '組織のプロセス資産'],
       tools: ['専門家の判断', 'データ収集', '対人関係とチームに関するスキル', '会議'],
@@ -964,7 +964,7 @@ const PMBOKMatrix = memo(() => {
         '組織のプロセス資産更新版',
       ],
     },
-  }
+  } */
 
   const toggleArea = useCallback(
     (areaId) => {

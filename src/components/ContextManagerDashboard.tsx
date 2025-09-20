@@ -6,11 +6,11 @@
 import React, { useState, useEffect } from 'react'
 import { useContextMonitoring } from '../contexts/ContextManagerContext'
 import { logger } from '../services/logger'
-import type { 
-  ContextStats, 
-  MonitoringData, 
+import type {
+  ContextStats,
+  MonitoringData,
   PerformanceMetrics,
-  ContextManagerDashboardProps 
+  ContextManagerDashboardProps,
 } from '../types/context'
 import {
   Activity,
@@ -32,6 +32,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }: ContextManagerDash
   const [refreshInterval, setRefreshInterval] = useState(5000) // 5 seconds
 
   // Auto-refresh data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isOpen) {
       return

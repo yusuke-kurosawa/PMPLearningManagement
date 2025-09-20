@@ -57,6 +57,8 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
   }
 
   // レスポンシブ対応
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -403,8 +405,11 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
       {/* コントロールパネル */}
       <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>レイアウト</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            レイアウト
+          </label>
           <select
+            id='-input'
             value={selectedLayout}
             onChange={(e) => setSelectedLayout(e.target.value)}
             className='w-full rounded-md border border-gray-300 px-3 py-2'
@@ -418,8 +423,11 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>カラーテーマ</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            カラーテーマ
+          </label>
           <select
+            id='-input'
             value={selectedTheme}
             onChange={(e) => setSelectedTheme(e.target.value)}
             className='w-full rounded-md border border-gray-300 px-3 py-2'
@@ -433,8 +441,11 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>アニメーション速度</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            アニメーション速度
+          </label>
           <input
+            id='-input'
             type='range'
             min='0.5'
             max='2'
@@ -446,8 +457,11 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>ノードサイズ</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            ノードサイズ
+          </label>
           <input
+            id='-input'
             type='range'
             min='0.5'
             max='2'

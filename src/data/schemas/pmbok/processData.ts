@@ -1,5 +1,6 @@
 // PMBOK第6版の49プロセスデータ - 完全版
 import { getAllProcesses } from '../../pmbok/completeProcesses.js'
+import { logger } from '../../../services/logger.js'
 
 // プロセスデータを動的に生成
 const generateProcessData = () => {
@@ -164,7 +165,7 @@ export const processData = generateProcessData()
 // デバッグ用: プロセス数の確認
 const processCount = processData.length
 if (processCount !== 49) {
-  console.warn(`⚠️ プロセス数が49ではありません: ${processCount}個のプロセスが定義されています`)
+  logger.warn(`⚠️ プロセス数が49ではありません: ${processCount}個のプロセスが定義されています`)
 }
 
 // 知識エリア別のプロセス数を検証

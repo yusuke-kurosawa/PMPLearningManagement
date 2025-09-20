@@ -1,0 +1,684 @@
+# 🎯 Comprehensive E2E Testing Pipeline for PMP Learning Management System
+#
+# This workflow provides complete end-to-end testing coverage including:
+# - Cross-browser testing (Chrome, Firefox, Safari, Edge)
+# - Mobile and tablet device testing
+# - Visual regression testing for D3.js visualizations
+# - Accessibility testing with axe-core
+# - Performance testing with Core Web Vitals monitoring
+# - Self-healing test automation with AI-powered recovery
+# - Complete learning journey validation
+# - Authentication and security testing
+#
+# Triggers:
+# - Pull requests to main branch
+# - Manual dispatch with configuration options
+# - Scheduled nightly runs for comprehensive coverage
+#
+# Features:
+# - Parallel test execution for faster feedback
+# - Intelligent test retry with self-healing
+# - Comprehensive reporting and analytics
+# - Visual diff generation for regressions
+# - Performance benchmarking and alerts
+# - Test result aggregation and insights
+
+name: 🎯 Comprehensive E2E Testing
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'e2e/**'
+      - 'playwright.config.ts'
+      - 'package.json'
+      - '.github/workflows/e2e-comprehensive-testing.yml'
+  
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'auth-only'
+          - 'learning-journey'
+          - 'visual-regression'
+          - 'accessibility'
+          - 'performance'
+          - 'mobile-only'
+          - 'cross-browser'
+      
+      browsers:
+        description: 'Browsers to test'
+        required: true
+        default: 'chromium,firefox,webkit'
+        type: string
+      
+      enable_visual_testing:
+        description: 'Enable visual regression testing'
+        required: true
+        default: true
+        type: boolean
+      
+      enable_performance_testing:
+        description: 'Enable performance testing'
+        required: true
+        default: true
+        type: boolean
+      
+      parallel_jobs:
+        description: 'Number of parallel test jobs'
+        required: true
+        default: '4'
+        type: string
+  
+  schedule:
+    # 毎日午前2時（JST）に包括的テストを実行
+    - cron: '0 17 * * *' # 17:00 UTC = 02:00 JST
+
+# 並行実行制御 - 同じブランチで実行中のワークフローをキャンセル
+concurrency:
+  group: e2e-testing-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # テスト環境設定
+  NODE_ENV: test
+  CI: true
+  
+  # Playwright設定
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+  
+  # パフォーマンス監視
+  ENABLE_PERFORMANCE_MONITORING: ${{ github.event.inputs.enable_performance_testing || 'true' }}
+  
+  # ビジュアルテスト設定
+  ENABLE_VISUAL_REGRESSION: ${{ github.event.inputs.enable_visual_testing || 'true' }}
+  
+  # テスト設定
+  TEST_SUITE: ${{ github.event.inputs.test_suite || 'all' }}
+  BROWSERS: ${{ github.event.inputs.browsers || 'chromium,firefox,webkit' }}
+  PARALLEL_JOBS: ${{ github.event.inputs.parallel_jobs || '4' }}
+  
+  # 結果レポート設定
+  GENERATE_DETAILED_REPORTS: true
+  UPLOAD_FAILURE_ARTIFACTS: true
+
+jobs:
+  # 🚀 テスト環境準備とビルド
+  setup-and-build:
+    name: 🏗️ Environment Setup and Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      build-success: ${{ steps.build.outcome == 'success' }}
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 🔑 Generate Cache Key
+        id: cache-key
+        run: |
+          echo "key=e2e-deps-${{ hashFiles('package-lock.json', 'playwright.config.ts') }}" >> $GITHUB_OUTPUT
+      
+      - name: 📦 Cache Dependencies and Browsers
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            e2e-deps-
+      
+      - name: 📚 Install Dependencies
+        run: |
+          npm ci --prefer-offline
+          npx playwright install --with-deps
+      
+      - name: 🏗️ Build Application
+        id: build
+        run: |
+          npm run build
+          echo "Build completed successfully"
+      
+      - name: 💾 Cache Build Output
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+
+  # 🧪 認証フローテスト
+  authentication-tests:
+    name: 🔐 Authentication Flow Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'auth-only') }}
+    timeout-minutes: 20
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            project: desktop-chromium
+          - browser: firefox
+            project: desktop-firefox
+          - browser: webkit
+            project: desktop-webkit
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: 🧪 Run Authentication Tests
+        run: |
+          npx playwright test e2e/tests/auth/ \
+            --project=${{ matrix.project }} \
+            --reporter=html,json,junit \
+            --output-dir=test-results/auth-${{ matrix.browser }}
+        env:
+          BROWSER: ${{ matrix.browser }}
+      
+      - name: 📊 Upload Authentication Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-test-results-${{ matrix.browser }}
+          path: |
+            test-results/auth-${{ matrix.browser }}
+            playwright-report
+          retention-days: 30
+
+  # 📚 学習ジャーニーテスト
+  learning-journey-tests:
+    name: 📚 Learning Journey Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'learning-journey') }}
+    timeout-minutes: 45
+    
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4] # 学習ジャーニーテストを4つのシャードに分割
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: 📚 Run Learning Journey Tests (Shard ${{ matrix.shard }})
+        run: |
+          npx playwright test e2e/tests/learning/ \
+            --project=desktop-chromium \
+            --shard=${{ matrix.shard }}/4 \
+            --reporter=html,json \
+            --output-dir=test-results/learning-shard-${{ matrix.shard }}
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+      
+      - name: 📊 Upload Learning Journey Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-test-results-shard-${{ matrix.shard }}
+          path: |
+            test-results/learning-shard-${{ matrix.shard }}
+            playwright-report
+          retention-days: 30
+
+  # 👁️ ビジュアル回帰テスト
+  visual-regression-tests:
+    name: 👁️ Visual Regression Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && env.ENABLE_VISUAL_REGRESSION == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'visual-regression') }}
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        component-group:
+          - home-and-navigation
+          - pmbok-visualizations
+          - d3-network-graphs
+          - learning-interfaces
+          - exam-and-progress
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: 🖼️ Restore Visual Baselines
+        uses: actions/cache@v4
+        with:
+          path: e2e/baselines/visual
+          key: visual-baselines-${{ hashFiles('src/**/*.{jsx,tsx,css}') }}
+          restore-keys: |
+            visual-baselines-
+      
+      - name: 👁️ Run Visual Regression Tests
+        run: |
+          npx playwright test e2e/tests/visual/ \
+            --project=visual-regression \
+            --grep="${{ matrix.component-group }}" \
+            --reporter=html,json \
+            --output-dir=test-results/visual-${{ matrix.component-group }}
+        env:
+          COMPONENT_GROUP: ${{ matrix.component-group }}
+      
+      - name: 🎨 Generate Visual Diff Reports
+        if: always()
+        run: |
+          if [ -d "test-results/visual-${{ matrix.component-group }}" ]; then
+            echo "Generating visual diff reports..."
+            node e2e/utils/generate-visual-diff-report.js test-results/visual-${{ matrix.component-group }}
+          fi
+      
+      - name: 📊 Upload Visual Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-test-results-${{ matrix.component-group }}
+          path: |
+            test-results/visual-${{ matrix.component-group }}
+            playwright-report
+            test-results/visual-diffs
+          retention-days: 30
+
+  # ♿ アクセシビリティテスト
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'accessibility') }}
+    timeout-minutes: 25
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: ♿ Run Accessibility Tests
+        run: |
+          npx playwright test e2e/tests/accessibility/ \
+            --project=accessibility \
+            --reporter=html,json \
+            --output-dir=test-results/accessibility
+        env:
+          ACCESSIBILITY_STANDARDS: 'WCAG21AA'
+      
+      - name: 📋 Generate Accessibility Report
+        if: always()
+        run: |
+          node e2e/utils/generate-accessibility-report.js test-results/accessibility
+      
+      - name: 📊 Upload Accessibility Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-test-results
+          path: |
+            test-results/accessibility
+            playwright-report
+            accessibility-report.html
+          retention-days: 30
+
+  # ⚡ パフォーマンステスト
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && env.ENABLE_PERFORMANCE_MONITORING == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'performance') }}
+    timeout-minutes: 20
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: 📊 Restore Performance Baselines
+        uses: actions/cache@v4
+        with:
+          path: e2e/baselines/performance
+          key: performance-baselines-${{ github.sha }}
+          restore-keys: |
+            performance-baselines-
+      
+      - name: ⚡ Run Performance Tests
+        run: |
+          npx playwright test e2e/tests/performance/ \
+            --project=performance \
+            --reporter=html,json \
+            --output-dir=test-results/performance
+        env:
+          PERFORMANCE_THRESHOLDS: 'strict'
+      
+      - name: 📈 Generate Performance Report
+        if: always()
+        run: |
+          node e2e/utils/generate-performance-report.js test-results/performance
+      
+      - name: 📊 Upload Performance Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-test-results
+          path: |
+            test-results/performance
+            playwright-report
+            performance-report.html
+          retention-days: 30
+
+  # 📱 モバイルデバイステスト
+  mobile-tests:
+    name: 📱 Mobile Device Tests
+    runs-on: ubuntu-latest
+    needs: setup-and-build
+    if: ${{ needs.setup-and-build.outputs.build-success == 'true' && (env.TEST_SUITE == 'all' || env.TEST_SUITE == 'mobile-only') }}
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        device:
+          - mobile-chrome
+          - mobile-safari
+          - tablet-ipad
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js and Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: ${{ needs.setup-and-build.outputs.cache-key }}
+      
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
+      
+      - name: 📱 Run Mobile Tests
+        run: |
+          npx playwright test e2e/tests/mobile/ \
+            --project=${{ matrix.device }} \
+            --reporter=html,json \
+            --output-dir=test-results/mobile-${{ matrix.device }}
+        env:
+          DEVICE: ${{ matrix.device }}
+      
+      - name: 📊 Upload Mobile Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-test-results-${{ matrix.device }}
+          path: |
+            test-results/mobile-${{ matrix.device }}
+            playwright-report
+          retention-days: 30
+
+  # 📊 テスト結果集約と分析
+  test-results-analysis:
+    name: 📊 Test Results Analysis
+    runs-on: ubuntu-latest
+    needs: [authentication-tests, learning-journey-tests, visual-regression-tests, accessibility-tests, performance-tests, mobile-tests]
+    if: always()
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Repository Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📦 Install Analysis Dependencies
+        run: |
+          npm ci --production=false
+      
+      - name: 📥 Download All Test Results
+        uses: actions/download-artifact@v4
+        with:
+          path: collected-results
+      
+      - name: 📊 Aggregate and Analyze Results
+        run: |
+          node e2e/utils/aggregate-test-results.js collected-results
+          node e2e/utils/generate-comprehensive-report.js collected-results
+        env:
+          GENERATE_AI_INSIGHTS: true
+      
+      - name: 📈 Generate Test Analytics Dashboard
+        run: |
+          node e2e/utils/generate-analytics-dashboard.js collected-results
+      
+      - name: 🎯 Calculate Quality Gates
+        id: quality-gates
+        run: |
+          QUALITY_RESULT=$(node e2e/utils/calculate-quality-gates.js collected-results)
+          echo "quality-passed=$QUALITY_RESULT" >> $GITHUB_OUTPUT
+          echo "Quality Gates Result: $QUALITY_RESULT"
+      
+      - name: 📊 Upload Comprehensive Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-report
+          path: |
+            comprehensive-report.html
+            test-analytics-dashboard.html
+            quality-gates-report.json
+            test-trends.json
+          retention-days: 90
+      
+      - name: 📈 Update Test Metrics
+        run: |
+          node e2e/utils/update-test-metrics.js \
+            --results-path collected-results \
+            --branch ${{ github.ref_name }} \
+            --commit ${{ github.sha }}
+      
+      - name: 💬 Generate Summary Comment
+        if: github.event_name == 'pull_request'
+        run: |
+          node e2e/utils/generate-pr-comment.js collected-results > pr-comment.md
+      
+      - name: 📝 Post PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('pr-comment.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # 🚨 品質ゲート評価
+  quality-gate:
+    name: 🚨 Quality Gate Evaluation
+    runs-on: ubuntu-latest
+    needs: test-results-analysis
+    if: always()
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📥 Download Comprehensive Report
+        uses: actions/download-artifact@v4
+        with:
+          name: comprehensive-test-report
+          path: reports
+      
+      - name: 🎯 Evaluate Quality Gates
+        id: evaluate
+        run: |
+          if [ -f "reports/quality-gates-report.json" ]; then
+            PASSED=$(jq -r '.passed' reports/quality-gates-report.json)
+            GATES=$(jq -r '.gates | to_entries | map("\(.key): \(.value.passed)") | join(", ")' reports/quality-gates-report.json)
+            
+            echo "Quality Gates Status: $PASSED"
+            echo "Individual Gates: $GATES"
+            
+            if [ "$PASSED" = "true" ]; then
+              echo "✅ All quality gates passed!"
+              echo "status=success" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Some quality gates failed!"
+              echo "status=failure" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "⚠️ Quality gates report not found"
+            echo "status=warning" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 🎉 Success Notification
+        if: steps.evaluate.outputs.status == 'success'
+        run: |
+          echo "🎉 All E2E tests passed and quality gates are satisfied!"
+          echo "The application is ready for deployment."
+      
+      - name: ❌ Failure Notification
+        if: steps.evaluate.outputs.status == 'failure'
+        run: |
+          echo "❌ E2E tests failed or quality gates not met!"
+          echo "Please review the test results and fix issues before merging."
+          exit 1
+      
+      - name: ⚠️ Warning Notification
+        if: steps.evaluate.outputs.status == 'warning'
+        run: |
+          echo "⚠️ E2E testing completed with warnings."
+          echo "Please review the test results for potential issues."
+
+# 📊 ワークフロー完了後の処理
+env:
+  WORKFLOW_CONCLUSION: ${{ job.status }}
+  TOTAL_DURATION: ${{ github.event.workflow_run.conclusion }}

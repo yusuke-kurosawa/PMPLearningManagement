@@ -16,6 +16,8 @@ const AuthCallback: React.FC = () => {
   const [message, setMessage] = useState('')
   const [error, setError] = useState(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {

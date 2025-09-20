@@ -165,7 +165,7 @@ export type BreadcrumbItem = {
 /**
  * 入力フィールド型
  */
-export type InputType = 
+export type InputType =
   | 'text'
   | 'email'
   | 'password'
@@ -282,7 +282,7 @@ export type NotificationType = 'success' | 'error' | 'warning' | 'info'
 /**
  * 通知位置型
  */
-export type NotificationPosition = 
+export type NotificationPosition =
   | 'top-left'
   | 'top-center'
   | 'top-right'
@@ -512,14 +512,16 @@ export type FocusManagement = {
 /**
  * レスポンシブ値型
  */
-export type ResponsiveValue<T> = T | {
-  base?: T
-  sm?: T
-  md?: T
-  lg?: T
-  xl?: T
-  '2xl'?: T
-}
+export type ResponsiveValue<T> =
+  | T
+  | {
+      base?: T
+      sm?: T
+      md?: T
+      lg?: T
+      xl?: T
+      '2xl'?: T
+    }
 
 /**
  * ビューポート情報型

@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMP Learning API - Interactive Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        .tutorial-step {
+            display: none;
+        }
+        .tutorial-step.active {
+            display: block;
+        }
+        .code-block {
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .api-response {
+            background-color: #1a202c;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-color: #48bb78; background-color: #1a2e1a; }
+        .error { border-color: #f56565; background-color: #2e1a1a; }
+        .loading { border-color: #4299e1; background-color: #1a1e2e; }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1f77b4 0%, #2e86ab 100%);
+            transition: width 0.3s ease;
+        }
+
+        .tutorial-nav {
+            position: sticky;
+            top: 20px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .step-indicator:hover {
+            background-color: #f7fafc;
+        }
+
+        .step-indicator.completed {
+            background-color: #e6fffa;
+            border-left: 4px solid #38b2ac;
+        }
+
+        .step-indicator.active {
+            background-color: #ebf8ff;
+            border-left: 4px solid #1f77b4;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .step-number.completed {
+            background-color: #38b2ac;
+            color: white;
+        }
+
+        .step-number.active {
+            background-color: #1f77b4;
+            color: white;
+        }
+
+        .interactive-element {
+            border: 2px dashed #cbd5e0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            background-color: #f7fafc;
+            transition: all 0.3s;
+        }
+
+        .interactive-element:hover {
+            border-color: #1f77b4;
+            background-color: #ebf8ff;
+        }
+
+        .form-group {
+            margin: 1rem 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #1f77b4;
+            box-shadow: 0 0 0 3px rgba(31, 119, 180, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background-color: #1f77b4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1a6da8;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background-color: #e6fffa;
+            border: 1px solid #81e6d9;
+            color: #234e52;
+        }
+
+        .alert-error {
+            background-color: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #742a2a;
+        }
+
+        .alert-info {
+            background-color: #ebf8ff;
+            border: 1px solid #90cdf4;
+            color: #1a365d;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a202c;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                PMP Learning API Interactive Tutorial
+            </h1>
+            <p class="text-xl text-gray-600 mb-6">
+                Learn how to use the PMP Learning Management API through hands-on examples
+            </p>
+            
+            <!-- Overall Progress -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Tutorial Progress</span>
+                    <span id="overall-progress-text">0% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="overall-progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-8">
+            <!-- Navigation Sidebar -->
+            <div class="w-1/4">
+                <div class="tutorial-nav">
+                    <h3 class="font-bold text-lg mb-4">Tutorial Steps</h3>
+                    <div id="step-navigation">
+                        <!-- Navigation items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="w-3/4">
+                <!-- Tutorial Steps -->
+                
+                <!-- Step 1: Introduction -->
+                <div id="step-1" class="tutorial-step active">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">🚀 Welcome to the PMP Learning API</h2>
+                        
+                        <p class="text-lg text-gray-600 mb-6">
+                            This interactive tutorial will guide you through the core features of the PMP Learning Management API. 
+                            You'll learn how to authenticate, track learning progress, take mock exams, and leverage AI coaching.
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-blue-50 p-6 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2">📚 What You'll Learn</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• API authentication and token management</li>
+                                    <li>• Working with PMBOK knowledge areas</li>
+                                    <li>• Tracking learning progress</li>
+                                    <li>• Creating and managing mock exams</li>
+                                    <li>• Using AI coaching features</li>
+                                    <li>• Implementing collaboration features</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-green-50 p-6 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2">🎯 Prerequisites</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Basic understanding of REST APIs</li>
+                                    <li>• Familiarity with JSON</li>
+                                    <li>• JavaScript knowledge (optional)</li>
+                                    <li>• PMP exam preparation context</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-2">🔧 API Environment Setup</h4>
+                            <p class="text-gray-600 mb-4">Select your preferred API environment for this tutorial:</p>
+                            
+                            <div class="form-group">
+                                <label>API Base URL:</label>
+                                <select id="api-base-url" class="w-full">
+                                    <option value="https://api.pmplearning.com/v2">Production (Read-only examples)</option>
+                                    <option value="https://staging-api.pmplearning.com/v2">Staging (Safe testing)</option>
+                                    <option value="http://localhost:3000/api/trpc" selected>Local Development</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button id="test-connection" class="btn btn-primary">
+                                    Test API Connection
+                                </button>
+                            </div>
+                            
+                            <div id="connection-status" class="mt-4"></div>
+                        </div>
+
+                        <div class="flex justify-end mt-6">
+                            <button onclick="nextStep()" class="btn btn-primary">
+                                Get Started →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Authentication -->
+                <div id="step-2" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">🔐 Authentication</h2>
+                        
+                        <p class="text-gray-600 mb-6">
+                            Every API request requires authentication. Let's start by understanding the authentication flow 
+                            and implementing login functionality.
+                        </p>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">Authentication Flow</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <ol class="list-decimal list-inside space-y-2 text-sm">
+                                    <li>User provides email and password</li>
+                                    <li>API validates credentials</li>
+                                    <li>API returns access token and refresh token</li>
+                                    <li>Client stores tokens securely</li>
+                                    <li>Client includes access token in subsequent requests</li>
+                                    <li>Client refreshes token when it expires</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-4">🧪 Try It: User Login</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold mb-3">Login Form</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>Email:</label>
+                                        <input id="login-email" type="email" value="test@example.com" 
+                                               placeholder="Enter your email">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Password:</label>
+                                        <input id="login-password" type="password" value="password123" 
+                                               placeholder="Enter your password">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="flex items-center">
+                                            <input id="remember-me" type="checkbox" class="mr-2">
+                                            Remember me
+                                        </label>
+                                    </div>
+                                    
+                                    <button id="perform-login" class="btn btn-primary w-full">
+                                        Login
+                                    </button>
+                                    
+                                    <div class="mt-4 text-sm text-gray-600">
+                                        <p><strong>Test Accounts:</strong></p>
+                                        <p>• User: test@example.com / password123</p>
+                                        <p>• Admin: admin@example.com / admin123</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">API Request</h5>
+                                    <div class="code-block">
+<pre><code class="language-javascript" id="login-code">
+// POST /auth/login
+const loginData = {
+  email: "test@example.com",
+  password: "password123",
+  rememberMe: true
+};
+
+const response = await fetch('/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(loginData)
+});
+
+const result = await response.json();
+</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="login-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="interactive-element mt-6">
+                            <h4 class="font-bold mb-4">📝 Code Example: Complete Authentication Client</h4>
+                            
+                            <div class="code-block">
+<pre><code class="language-javascript">
+class PMPAuthClient {
+  constructor(baseURL) {
+    this.baseURL = baseURL;
+    this.accessToken = localStorage.getItem('accessToken');
+    this.refreshToken = localStorage.getItem('refreshToken');
+  }
+
+  async login(email, password, rememberMe = false) {
+    const response = await fetch(`${this.baseURL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, rememberMe })
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      this.accessToken = result.tokens.accessToken;
+      this.refreshToken = result.tokens.refreshToken;
+      
+      localStorage.setItem('accessToken', this.accessToken);
+      localStorage.setItem('refreshToken', this.refreshToken);
+      
+      this.setupTokenRefresh(result.tokens.expiresIn);
+      return result.user;
+    }
+    
+    throw new Error(result.error.message);
+  }
+
+  async makeAuthenticatedRequest(endpoint, options = {}) {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+
+    if (response.status === 401) {
+      await this.refreshToken();
+      return this.makeAuthenticatedRequest(endpoint, options);
+    }
+
+    return response.json();
+  }
+}
+</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-6">
+                            <button onclick="previousStep()" class="btn btn-secondary">
+                                ← Previous
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-primary" id="auth-next-btn" disabled>
+                                Next: PMBOK Data →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: PMBOK Knowledge Areas -->
+                <div id="step-3" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">📚 PMBOK Knowledge Areas</h2>
+                        
+                        <p class="text-gray-600 mb-6">
+                            The PMBOK Guide defines 10 knowledge areas with 49 processes. Let's explore how to retrieve 
+                            and work with this structured data through the API.
+                        </p>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-4">🧪 Try It: Get Knowledge Areas</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>PMBOK Version:</label>
+                                        <select id="pmbok-version">
+                                            <option value="6">PMBOK 6th Edition</option>
+                                            <option value="7">PMBOK 7th Edition</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="flex items-center">
+                                            <input id="include-processes" type="checkbox">
+                                            Include process details
+                                        </label>
+                                    </div>
+                                    
+                                    <button id="get-knowledge-areas" class="btn btn-primary w-full">
+                                        Get Knowledge Areas
+                                    </button>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">API Request</h5>
+                                    <div class="code-block">
+<pre><code class="language-javascript" id="knowledge-areas-code">
+// GET /pmbok/knowledge-areas
+const response = await authClient.makeAuthenticatedRequest(
+  '/pmbok/knowledge-areas?version=6&includeProcesses=false'
+);
+
+console.log('Knowledge Areas:', response.knowledgeAreas);
+</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="knowledge-areas-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="interactive-element mt-6">
+                            <h4 class="font-bold mb-4">🎯 Try It: Explore Specific Process</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>Select Process:</label>
+                                        <select id="process-selector">
+                                            <option value="develop-project-charter">Develop Project Charter</option>
+                                            <option value="plan-scope-management">Plan Scope Management</option>
+                                            <option value="estimate-costs">Estimate Costs</option>
+                                            <option value="plan-risk-management">Plan Risk Management</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="flex items-center">
+                                            <input id="include-itto" type="checkbox" checked>
+                                            Include ITTO details
+                                        </label>
+                                    </div>
+                                    
+                                    <button id="get-process-detail" class="btn btn-primary w-full">
+                                        Get Process Details
+                                    </button>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">Process Information</h5>
+                                    <div id="process-info" class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-gray-500">Select and fetch a process to see details here...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="process-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="font-bold mb-3">💡 Key Concepts</h4>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">Knowledge Areas (10)</h5>
+                                    <p class="text-sm text-gray-600">Integration, Scope, Schedule, Cost, Quality, Resource, Communications, Risk, Procurement, Stakeholder</p>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">Process Groups (5)</h5>
+                                    <p class="text-sm text-gray-600">Initiating, Planning, Executing, Monitoring & Controlling, Closing</p>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">ITTO Framework</h5>
+                                    <p class="text-sm text-gray-600">Inputs, Tools & Techniques, Outputs for each process</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-6">
+                            <button onclick="previousStep()" class="btn btn-secondary">
+                                ← Previous
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-primary">
+                                Next: Learning Progress →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Learning Progress -->
+                <div id="step-4" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">📈 Learning Progress Tracking</h2>
+                        
+                        <p class="text-gray-600 mb-6">
+                            Track your study sessions, monitor progress across knowledge areas, and maintain learning streaks.
+                            This is core to building effective PMP exam preparation tools.
+                        </p>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-4">🧪 Try It: Record Study Session</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>Process Studied:</label>
+                                        <select id="study-process">
+                                            <option value="develop-project-charter">Develop Project Charter</option>
+                                            <option value="plan-scope-management">Plan Scope Management</option>
+                                            <option value="estimate-costs">Estimate Costs</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Study Duration (minutes):</label>
+                                        <input id="study-duration" type="number" value="30" min="5" max="300">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Confidence Level (1-5):</label>
+                                        <input id="study-confidence" type="range" min="1" max="5" value="4" 
+                                               class="w-full" oninput="updateConfidenceDisplay(this.value)">
+                                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                            <span>Low</span>
+                                            <span id="confidence-value">4</span>
+                                            <span>High</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Study Notes:</label>
+                                        <textarea id="study-notes" rows="3" 
+                                                  placeholder="What did you focus on? Key insights?"></textarea>
+                                    </div>
+                                    
+                                    <button id="record-session" class="btn btn-primary w-full">
+                                        Record Study Session
+                                    </button>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">API Request</h5>
+                                    <div class="code-block">
+<pre><code class="language-javascript" id="session-code">
+// POST /learning/sessions
+const sessionData = {
+  processId: "develop-project-charter",
+  processName: "Develop Project Charter",
+  knowledgeArea: "Integration",
+  processGroup: "Initiating",
+  duration: 1800, // 30 minutes in seconds
+  completed: true,
+  confidence: 4,
+  notes: "Focused on business case analysis"
+};
+
+const response = await authClient.makeAuthenticatedRequest(
+  '/learning/sessions',
+  {
+    method: 'POST',
+    body: JSON.stringify(sessionData)
+  }
+);
+</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="session-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="interactive-element mt-6">
+                            <h4 class="font-bold mb-4">📊 Try It: View Learning Progress</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label class="flex items-center">
+                                            <input id="include-recommendations" type="checkbox">
+                                            Include AI recommendations
+                                        </label>
+                                    </div>
+                                    
+                                    <button id="get-progress" class="btn btn-primary w-full">
+                                        Get Learning Progress
+                                    </button>
+                                    
+                                    <div class="mt-4 space-y-2">
+                                        <button id="get-streak" class="btn btn-secondary w-full">
+                                            Get Study Streak
+                                        </button>
+                                        <button id="get-ka-progress" class="btn btn-secondary w-full">
+                                            Knowledge Area Progress
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">Progress Visualization</h5>
+                                    <div id="progress-chart" class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-center text-gray-500">
+                                            <p>📊</p>
+                                            <p>Progress data will appear here</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="progress-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="font-bold mb-3">📋 Learning Progress Metrics</h4>
+                            <div class="grid md:grid-cols-4 gap-4">
+                                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-blue-600" id="metric-overall">--%</div>
+                                    <div class="text-sm text-gray-600">Overall Progress</div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-green-600" id="metric-streak">--</div>
+                                    <div class="text-sm text-gray-600">Current Streak</div>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-yellow-600" id="metric-time">--h</div>
+                                    <div class="text-sm text-gray-600">Study Time</div>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-purple-600" id="metric-sessions">--</div>
+                                    <div class="text-sm text-gray-600">Sessions</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-6">
+                            <button onclick="previousStep()" class="btn btn-secondary">
+                                ← Previous
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-primary">
+                                Next: Mock Exams →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Mock Exams -->
+                <div id="step-5" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">🎯 Mock Exams</h2>
+                        
+                        <p class="text-gray-600 mb-6">
+                            Create and manage PMP practice exams with real-time scoring and detailed analytics.
+                            This feature is essential for exam preparation applications.
+                        </p>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-4">🧪 Try It: Start Mock Exam</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>Exam Type:</label>
+                                        <select id="exam-type" onchange="updateExamConfig()">
+                                            <option value="practice">Practice (30 questions)</option>
+                                            <option value="focused">Focused (50 questions)</option>
+                                            <option value="full">Full Exam (180 questions)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Time Limit (minutes):</label>
+                                        <input id="exam-time-limit" type="number" value="30" min="15" max="230">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Focus Areas (for focused exams):</label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center text-sm">
+                                                <input type="checkbox" value="integration" class="focus-area mr-2">
+                                                Integration Management
+                                            </label>
+                                            <label class="flex items-center text-sm">
+                                                <input type="checkbox" value="scope" class="focus-area mr-2">
+                                                Scope Management
+                                            </label>
+                                            <label class="flex items-center text-sm">
+                                                <input type="checkbox" value="risk" class="focus-area mr-2">
+                                                Risk Management
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Difficulty:</label>
+                                        <select id="exam-difficulty">
+                                            <option value="easy">Easy</option>
+                                            <option value="intermediate" selected>Intermediate</option>
+                                            <option value="hard">Hard</option>
+                                            <option value="mixed">Mixed</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button id="start-exam" class="btn btn-primary w-full">
+                                        Start Mock Exam
+                                    </button>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">Exam Configuration</h5>
+                                    <div id="exam-config-display" class="bg-gray-50 p-4 rounded-lg space-y-2">
+                                        <div><strong>Type:</strong> <span id="config-type">Practice</span></div>
+                                        <div><strong>Questions:</strong> <span id="config-questions">30</span></div>
+                                        <div><strong>Time:</strong> <span id="config-time">30 minutes</span></div>
+                                        <div><strong>Difficulty:</strong> <span id="config-difficulty">Intermediate</span></div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h6 class="font-semibold mb-2">Exam Features:</h6>
+                                        <ul class="text-sm space-y-1 text-gray-600">
+                                            <li>✓ Real-time timer</li>
+                                            <li>✓ Question flagging</li>
+                                            <li>✓ Auto-save progress</li>
+                                            <li>✓ Detailed analytics</li>
+                                            <li>✓ Knowledge area scoring</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="exam-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="interactive-element mt-6" id="exam-simulation" style="display: none;">
+                            <h4 class="font-bold mb-4">🎮 Exam Simulation</h4>
+                            
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg mb-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="text-lg font-bold">Mock PMP Exam</span>
+                                        <div class="text-sm opacity-90">Question <span id="current-q">1</span> of <span id="total-q">30</span></div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold" id="exam-timer">30:00</div>
+                                        <div class="text-sm opacity-90">Time Remaining</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="question-display" class="mb-6">
+                                <!-- Question content will be inserted here -->
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button id="prev-question" class="btn btn-secondary" disabled>
+                                    ← Previous
+                                </button>
+                                <button id="flag-question" class="btn btn-secondary">
+                                    🚩 Flag for Review
+                                </button>
+                                <button id="next-question" class="btn btn-primary">
+                                    Next →
+                                </button>
+                                <button id="finish-exam" class="btn btn-primary" style="display: none;">
+                                    Finish Exam
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="interactive-element mt-6" id="exam-results" style="display: none;">
+                            <h4 class="font-bold mb-4">📊 Exam Results</h4>
+                            
+                            <div class="grid md:grid-cols-3 gap-6">
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold mb-2" id="final-score">--/--</div>
+                                    <div class="text-gray-600">Final Score</div>
+                                    <div class="mt-2">
+                                        <span id="pass-status" class="px-3 py-1 rounded-full text-sm font-semibold">
+                                            --
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-2">Knowledge Area Scores</h5>
+                                    <div id="ka-scores" class="space-y-1 text-sm">
+                                        <!-- Knowledge area scores -->
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-2">Recommendations</h5>
+                                    <div id="exam-recommendations" class="space-y-1 text-sm">
+                                        <!-- Recommendations -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-6">
+                            <button onclick="previousStep()" class="btn btn-secondary">
+                                ← Previous
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-primary">
+                                Next: AI Coaching →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: AI Coaching -->
+                <div id="step-6" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">🤖 AI Coaching</h2>
+                        
+                        <p class="text-gray-600 mb-6">
+                            Leverage AI-powered study recommendations and interactive coaching to personalize 
+                            the learning experience for each user.
+                        </p>
+
+                        <div class="interactive-element">
+                            <h4 class="font-bold mb-4">🧪 Try It: Get AI Recommendations</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>Max Recommendations:</label>
+                                        <select id="max-recommendations">
+                                            <option value="3">3 recommendations</option>
+                                            <option value="5" selected>5 recommendations</option>
+                                            <option value="10">10 recommendations</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button id="get-ai-recommendations" class="btn btn-primary w-full">
+                                        Get AI Recommendations
+                                    </button>
+                                    
+                                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                        <h6 class="font-semibold mb-2">🎯 AI Features</h6>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Personalized study plans</li>
+                                            <li>• Weak area identification</li>
+                                            <li>• Optimal study scheduling</li>
+                                            <li>• Exam readiness assessment</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">AI Recommendations</h5>
+                                    <div id="ai-recommendations" class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-center text-gray-500">
+                                            <p>🤖</p>
+                                            <p>AI recommendations will appear here</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="ai-recommendations-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="interactive-element mt-6">
+                            <h4 class="font-bold mb-4">💬 Try It: Chat with AI Coach</h4>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="form-group">
+                                        <label>Ask the AI Coach:</label>
+                                        <textarea id="ai-chat-message" rows="4" 
+                                                  placeholder="Ask about PMBOK processes, study tips, exam strategies..."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Context (optional):</label>
+                                        <select id="chat-context">
+                                            <option value="">General question</option>
+                                            <option value="integration">Integration Management</option>
+                                            <option value="scope">Scope Management</option>
+                                            <option value="risk">Risk Management</option>
+                                            <option value="exam-prep">Exam Preparation</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button id="send-ai-chat" class="btn btn-primary w-full">
+                                        Ask AI Coach
+                                    </button>
+                                    
+                                    <div class="mt-4">
+                                        <h6 class="font-semibold mb-2">💡 Sample Questions</h6>
+                                        <div class="space-y-2">
+                                            <button onclick="askSampleQuestion('difference-costs-budget')" 
+                                                    class="btn btn-secondary w-full text-left text-sm">
+                                                "What's the difference between Estimate Costs and Determine Budget?"
+                                            </button>
+                                            <button onclick="askSampleQuestion('study-plan')" 
+                                                    class="btn btn-secondary w-full text-left text-sm">
+                                                "Create a 2-week study plan for Risk Management"
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-semibold mb-3">AI Coach Response</h5>
+                                    <div id="ai-chat-response" class="bg-gray-50 p-4 rounded-lg min-h-40 max-h-80 overflow-y-auto">
+                                        <div class="text-center text-gray-500">
+                                            <p>🤖</p>
+                                            <p>AI coach response will appear here</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="chat-api-response" class="api-response" style="display: none;"></div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="font-bold mb-3">🎯 AI Coaching Benefits</h4>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="bg-green-50 p-6 rounded-lg">
+                                    <h5 class="font-semibold mb-3 text-green-800">For Learners</h5>
+                                    <ul class="space-y-2 text-sm text-green-700">
+                                        <li>• Personalized study recommendations</li>
+                                        <li>• Instant answers to PMBOK questions</li>
+                                        <li>• Adaptive learning paths</li>
+                                        <li>• Study motivation and progress insights</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-blue-50 p-6 rounded-lg">
+                                    <h5 class="font-semibold mb-3 text-blue-800">For Applications</h5>
+                                    <ul class="space-y-2 text-sm text-blue-700">
+                                        <li>• Higher user engagement</li>
+                                        <li>• Improved learning outcomes</li>
+                                        <li>• Reduced support burden</li>
+                                        <li>• Data-driven feature development</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-6">
+                            <button onclick="previousStep()" class="btn btn-secondary">
+                                ← Previous
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-primary">
+                                Next: Completion →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Completion -->
+                <div id="step-7" class="tutorial-step">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🎉</div>
+                            <h2 class="text-3xl font-bold mb-4">Tutorial Complete!</h2>
+                            <p class="text-xl text-gray-600 mb-8">
+                                You've successfully learned the core features of the PMP Learning Management API.
+                            </p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-blue-50 p-6 rounded-lg">
+                                <h3 class="font-bold text-lg mb-4">🚀 What You've Learned</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>✅ API authentication and token management</li>
+                                    <li>✅ Working with PMBOK knowledge areas and processes</li>
+                                    <li>✅ Recording and tracking learning progress</li>
+                                    <li>✅ Creating and managing mock exams</li>
+                                    <li>✅ Leveraging AI coaching features</li>
+                                    <li>✅ Understanding API response structures</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-green-50 p-6 rounded-lg">
+                                <h3 class="font-bold text-lg mb-4">📚 Next Steps</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Explore the full API documentation</li>
+                                    <li>• Download SDKs for your language</li>
+                                    <li>• Build a proof-of-concept application</li>
+                                    <li>• Join our developer community</li>
+                                    <li>• Check out advanced examples</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <a href="../openapi-spec.yaml" class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                <h4 class="font-bold mb-2">📋 OpenAPI Spec</h4>
+                                <p class="text-sm text-gray-600">Download the complete API specification</p>
+                            </a>
+                            
+                            <a href="../index.html" class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                <h4 class="font-bold mb-2">🔍 API Explorer</h4>
+                                <p class="text-sm text-gray-600">Interactive API documentation</p>
+                            </a>
+                            
+                            <a href="../guides/pmp-learning-workflows.md" class="block p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                <h4 class="font-bold mb-2">📖 Workflow Guide</h4>
+                                <p class="text-sm text-gray-600">Comprehensive implementation examples</p>
+                            </a>
+                        </div>
+
+                        <div class="text-center">
+                            <button onclick="restartTutorial()" class="btn btn-secondary mr-4">
+                                🔄 Restart Tutorial
+                            </button>
+                            <button onclick="window.open('https://docs.pmplearning.com', '_blank')" class="btn btn-primary">
+                                📚 Full Documentation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+        // Tutorial state management
+        let currentStep = 1;
+        let totalSteps = 7;
+        let completedSteps = new Set();
+        let apiBaseURL = 'http://localhost:3000/api/trpc';
+        let authToken = null;
+        let examSession = null;
+
+        // Tutorial steps data
+        const steps = [
+            { id: 1, title: 'Introduction', description: 'Overview and setup' },
+            { id: 2, title: 'Authentication', description: 'Login and token management' },
+            { id: 3, title: 'PMBOK Data', description: 'Knowledge areas and processes' },
+            { id: 4, title: 'Learning Progress', description: 'Track study sessions' },
+            { id: 5, title: 'Mock Exams', description: 'Create and manage exams' },
+            { id: 6, title: 'AI Coaching', description: 'Personalized recommendations' },
+            { id: 7, title: 'Completion', description: 'Next steps and resources' }
+        ];
+
+        // Initialize tutorial
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTutorial();
+            setupEventListeners();
+            updateNavigation();
+        });
+
+        function initializeTutorial() {
+            // Populate step navigation
+            const navigation = document.getElementById('step-navigation');
+            navigation.innerHTML = steps.map(step => `
+                <div class="step-indicator" data-step="${step.id}" onclick="goToStep(${step.id})">
+                    <div class="step-number">${step.id}</div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-sm">${step.title}</div>
+                        <div class="text-xs text-gray-500">${step.description}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateProgress();
+        }
+
+        function setupEventListeners() {
+            // API connection test
+            document.getElementById('test-connection').addEventListener('click', testAPIConnection);
+            
+            // Authentication
+            document.getElementById('perform-login').addEventListener('click', performLogin);
+            
+            // Knowledge Areas
+            document.getElementById('get-knowledge-areas').addEventListener('click', getKnowledgeAreas);
+            document.getElementById('get-process-detail').addEventListener('click', getProcessDetail);
+            
+            // Learning Progress
+            document.getElementById('record-session').addEventListener('click', recordStudySession);
+            document.getElementById('get-progress').addEventListener('click', getLearningProgress);
+            document.getElementById('get-streak').addEventListener('click', getStudyStreak);
+            document.getElementById('get-ka-progress').addEventListener('click', getKAProgress);
+            
+            // Mock Exams
+            document.getElementById('start-exam').addEventListener('click', startMockExam);
+            
+            // AI Coaching
+            document.getElementById('get-ai-recommendations').addEventListener('click', getAIRecommendations);
+            document.getElementById('send-ai-chat').addEventListener('click', sendAIChat);
+            
+            // API base URL change
+            document.getElementById('api-base-url').addEventListener('change', function(e) {
+                apiBaseURL = e.target.value;
+            });
+        }
+
+        // Navigation functions
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                completedSteps.add(currentStep);
+                goToStep(currentStep + 1);
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        }
+
+        function goToStep(stepNumber) {
+            if (stepNumber >= 1 && stepNumber <= totalSteps) {
+                // Hide current step
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                
+                // Show new step
+                currentStep = stepNumber;
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                
+                // Update navigation
+                updateNavigation();
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function updateNavigation() {
+            document.querySelectorAll('.step-indicator').forEach(indicator => {
+                const stepId = parseInt(indicator.dataset.step);
+                const stepNumber = indicator.querySelector('.step-number');
+                
+                indicator.classList.remove('active', 'completed');
+                stepNumber.classList.remove('active', 'completed');
+                
+                if (stepId === currentStep) {
+                    indicator.classList.add('active');
+                    stepNumber.classList.add('active');
+                } else if (completedSteps.has(stepId)) {
+                    indicator.classList.add('completed');
+                    stepNumber.classList.add('completed');
+                }
+            });
+        }
+
+        function updateProgress() {
+            const progress = (completedSteps.size / totalSteps) * 100;
+            document.getElementById('overall-progress-fill').style.width = `${progress}%`;
+            document.getElementById('overall-progress-text').textContent = `${Math.round(progress)}% Complete`;
+        }
+
+        function restartTutorial() {
+            currentStep = 1;
+            completedSteps.clear();
+            authToken = null;
+            examSession = null;
+            
+            // Reset all response areas
+            document.querySelectorAll('.api-response').forEach(el => {
+                el.style.display = 'none';
+                el.innerHTML = '';
+            });
+            
+            // Reset forms
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = false;
+                } else {
+                    el.value = '';
+                }
+            });
+            
+            goToStep(1);
+        }
+
+        // API interaction functions
+        async function makeAPIRequest(endpoint, options = {}) {
+            const url = `${apiBaseURL}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+                
+                const data = await response.json();
+                
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    ok: false,
+                    status: 0,
+                    error: error.message
+                };
+            }
+        }
+
+        function displayAPIResponse(containerId, response, isSuccess = null) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            
+            // Determine success based on response if not explicitly provided
+            if (isSuccess === null) {
+                isSuccess = response.ok && response.status < 400;
+            }
+            
+            container.className = `api-response ${isSuccess ? 'success' : 'error'}`;
+            
+            const responseData = {
+                timestamp: new Date().toISOString(),
+                status: response.status || 'Unknown',
+                url: response.url || 'N/A',
+                ...(response.data ? response.data : response)
+            };
+            
+            container.innerHTML = `<pre><code>${JSON.stringify(responseData, null, 2)}</code></pre>`;
+        }
+
+        // Specific API functions
+        async function testAPIConnection() {
+            const container = document.getElementById('connection-status');
+            container.innerHTML = '<div class="alert alert-info">Testing connection...</div>';
+            
+            const response = await makeAPIRequest('/health');
+            
+            if (response.ok) {
+                container.innerHTML = '<div class="alert alert-success">✅ Connection successful!</div>';
+            } else {
+                container.innerHTML = `<div class="alert alert-error">❌ Connection failed: ${response.error || 'Unknown error'}</div>`;
+            }
+        }
+
+        async function performLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            const response = await makeAPIRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email,
+                    password,
+                    rememberMe
+                })
+            });
+            
+            displayAPIResponse('login-response', response);
+            
+            if (response.ok && response.data.success) {
+                authToken = response.data.tokens.accessToken;
+                document.getElementById('auth-next-btn').disabled = false;
+                
+                // Update login code example
+                document.getElementById('login-code').innerHTML = `
+// Successful login response
+const result = ${JSON.stringify(response.data, null, 2)};
+
+// Store tokens
+localStorage.setItem('accessToken', result.tokens.accessToken);
+localStorage.setItem('refreshToken', result.tokens.refreshToken);
+
+// User is now authenticated
+console.log('Welcome,', result.user.name);
+                `;
+                
+                Prism.highlightAll();
+            }
+        }
+
+        async function getKnowledgeAreas() {
+            const version = document.getElementById('pmbok-version').value;
+            const includeProcesses = document.getElementById('include-processes').checked;
+            
+            const response = await makeAPIRequest(`/pmbok/knowledge-areas?version=${version}&includeProcesses=${includeProcesses}`);
+            
+            displayAPIResponse('knowledge-areas-response', response);
+            
+            // Update code example
+            document.getElementById('knowledge-areas-code').textContent = `
+// GET /pmbok/knowledge-areas
+const response = await authClient.makeAuthenticatedRequest(
+  '/pmbok/knowledge-areas?version=${version}&includeProcesses=${includeProcesses}'
+);
+
+console.log('Knowledge Areas:', response.knowledgeAreas);
+console.log('Total areas:', response.totalAreas);
+            `;
+            
+            Prism.highlightAll();
+        }
+
+        async function getProcessDetail() {
+            const processId = document.getElementById('process-selector').value;
+            const includeITTO = document.getElementById('include-itto').checked;
+            
+            const response = await makeAPIRequest(`/pmbok/processes/${processId}?includeITTO=${includeITTO}&includeRelated=true`);
+            
+            displayAPIResponse('process-response', response);
+            
+            // Update process info display
+            if (response.ok && response.data) {
+                const process = response.data;
+                document.getElementById('process-info').innerHTML = `
+                    <div><strong>Name:</strong> ${process.name}</div>
+                    <div><strong>Knowledge Area:</strong> ${process.knowledgeArea}</div>
+                    <div><strong>Process Group:</strong> ${process.processGroup}</div>
+                    <div><strong>Complexity:</strong> ${process.complexity || 'N/A'}</div>
+                    ${includeITTO ? `
+                        <div><strong>Inputs:</strong> ${process.inputs?.length || 0}</div>
+                        <div><strong>Tools & Techniques:</strong> ${process.toolsAndTechniques?.length || 0}</div>
+                        <div><strong>Outputs:</strong> ${process.outputs?.length || 0}</div>
+                    ` : ''}
+                `;
+            }
+        }
+
+        async function recordStudySession() {
+            const processId = document.getElementById('study-process').value;
+            const duration = parseInt(document.getElementById('study-duration').value) * 60; // Convert to seconds
+            const confidence = parseInt(document.getElementById('study-confidence').value);
+            const notes = document.getElementById('study-notes').value;
+            
+            // Mock session data (in real implementation, you'd get this from the process details)
+            const sessionData = {
+                processId,
+                processName: getProcessName(processId),
+                knowledgeArea: getKnowledgeArea(processId),
+                processGroup: getProcessGroup(processId),
+                duration,
+                completed: true,
+                confidence,
+                notes
+            };
+            
+            const response = await makeAPIRequest('/learning/sessions', {
+                method: 'POST',
+                body: JSON.stringify(sessionData)
+            });
+            
+            displayAPIResponse('session-response', response);
+            
+            // Update session code example
+            document.getElementById('session-code').textContent = `
+// POST /learning/sessions
+const sessionData = ${JSON.stringify(sessionData, null, 2)};
+
+const response = await authClient.makeAuthenticatedRequest(
+  '/learning/sessions',
+  {
+    method: 'POST',
+    body: JSON.stringify(sessionData)
+  }
+);
+            `;
+            
+            Prism.highlightAll();
+        }
+
+        async function getLearningProgress() {
+            const includeRecommendations = document.getElementById('include-recommendations').checked;
+            
+            const response = await makeAPIRequest(`/learning/progress?includeStats=true&includeRecommendations=${includeRecommendations}`);
+            
+            displayAPIResponse('progress-response', response);
+            
+            // Update metrics display (mock data for demo)
+            if (response.ok) {
+                updateMetricsDisplay({
+                    overallProgress: 72.5,
+                    currentStreak: 7,
+                    totalStudyTime: 45.7,
+                    totalSessions: 124
+                });
+                
+                // Update progress chart
+                document.getElementById('progress-chart').innerHTML = createProgressChart([
+                    { name: 'Integration', progress: 85 },
+                    { name: 'Scope', progress: 67 },
+                    { name: 'Schedule', progress: 72 },
+                    { name: 'Cost', progress: 58 },
+                    { name: 'Quality', progress: 81 }
+                ]);
+            }
+        }
+
+        async function getStudyStreak() {
+            const response = await makeAPIRequest('/learning/streak');
+            displayAPIResponse('progress-response', response);
+        }
+
+        async function getKAProgress() {
+            const response = await makeAPIRequest('/learning/knowledge-area-progress');
+            displayAPIResponse('progress-response', response);
+        }
+
+        async function startMockExam() {
+            const examType = document.getElementById('exam-type').value;
+            const timeLimit = parseInt(document.getElementById('exam-time-limit').value) * 60; // Convert to seconds
+            const difficulty = document.getElementById('exam-difficulty').value;
+            
+            const focusAreas = Array.from(document.querySelectorAll('.focus-area:checked'))
+                .map(cb => cb.value);
+            
+            const examConfig = {
+                examType,
+                questionCount: getQuestionCount(examType),
+                timeLimit,
+                focusAreas,
+                difficulty,
+                includeExplanations: true
+            };
+            
+            const response = await makeAPIRequest('/exams/mock', {
+                method: 'POST',
+                body: JSON.stringify(examConfig)
+            });
+            
+            displayAPIResponse('exam-response', response);
+            
+            if (response.ok) {
+                examSession = response.data;
+                showExamSimulation();
+            }
+        }
+
+        async function getAIRecommendations() {
+            const maxRecommendations = document.getElementById('max-recommendations').value;
+            
+            const response = await makeAPIRequest(`/ai/coaching/recommendations?includeReasons=true&maxRecommendations=${maxRecommendations}`);
+            
+            displayAPIResponse('ai-recommendations-response', response);
+            
+            // Display recommendations in a user-friendly format
+            if (response.ok && response.data.recommendations) {
+                const container = document.getElementById('ai-recommendations');
+                container.innerHTML = response.data.recommendations.map(rec => `
+                    <div class="bg-white p-3 rounded border-l-4 border-blue-500 mb-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <h6 class="font-semibold text-sm">${rec.title}</h6>
+                            <span class="text-xs px-2 py-1 rounded ${getPriorityColor(rec.priority)}">${rec.priority}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">${rec.description}</p>
+                        <div class="text-xs text-gray-500">
+                            Confidence: ${Math.round(rec.confidence * 100)}% • 
+                            Est. time: ${rec.estimatedStudyTime}h
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function sendAIChat() {
+            const message = document.getElementById('ai-chat-message').value;
+            const context = document.getElementById('chat-context').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            const chatData = {
+                message,
+                context: context ? { knowledgeArea: context } : {},
+                sessionId: `tutorial_${Date.now()}`
+            };
+            
+            const response = await makeAPIRequest('/ai/coaching/chat', {
+                method: 'POST',
+                body: JSON.stringify(chatData)
+            });
+            
+            displayAPIResponse('chat-api-response', response);
+            
+            // Display chat response
+            if (response.ok && response.data.response) {
+                const container = document.getElementById('ai-chat-response');
+                container.innerHTML = `
+                    <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                        <div class="font-semibold text-sm text-blue-800 mb-1">🤖 AI Coach:</div>
+                        <p class="text-sm">${response.data.response}</p>
+                    </div>
+                    ${response.data.suggestions ? `
+                        <div class="mt-3">
+                            <div class="font-semibold text-xs text-gray-600 mb-2">Suggested follow-ups:</div>
+                            ${response.data.suggestions.map(suggestion => `
+                                <div class="text-xs text-blue-600 cursor-pointer hover:underline">${suggestion}</div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+            }
+        }
+
+        // Helper functions
+        function updateConfidenceDisplay(value) {
+            document.getElementById('confidence-value').textContent = value;
+        }
+
+        function updateExamConfig() {
+            const examType = document.getElementById('exam-type').value;
+            const questionCount = getQuestionCount(examType);
+            const defaultTimeLimit = getDefaultTimeLimit(examType);
+            
+            document.getElementById('exam-time-limit').value = defaultTimeLimit;
+            document.getElementById('config-type').textContent = examType.charAt(0).toUpperCase() + examType.slice(1);
+            document.getElementById('config-questions').textContent = questionCount;
+            document.getElementById('config-time').textContent = defaultTimeLimit + ' minutes';
+            document.getElementById('config-difficulty').textContent = document.getElementById('exam-difficulty').value;
+        }
+
+        function getQuestionCount(examType) {
+            const counts = { practice: 30, focused: 50, full: 180 };
+            return counts[examType] || 30;
+        }
+
+        function getDefaultTimeLimit(examType) {
+            const limits = { practice: 30, focused: 60, full: 230 };
+            return limits[examType] || 30;
+        }
+
+        function getProcessName(processId) {
+            const names = {
+                'develop-project-charter': 'Develop Project Charter',
+                'plan-scope-management': 'Plan Scope Management',
+                'estimate-costs': 'Estimate Costs'
+            };
+            return names[processId] || processId;
+        }
+
+        function getKnowledgeArea(processId) {
+            const areas = {
+                'develop-project-charter': 'Integration',
+                'plan-scope-management': 'Scope',
+                'estimate-costs': 'Cost'
+            };
+            return areas[processId] || 'Unknown';
+        }
+
+        function getProcessGroup(processId) {
+            const groups = {
+                'develop-project-charter': 'Initiating',
+                'plan-scope-management': 'Planning',
+                'estimate-costs': 'Planning'
+            };
+            return groups[processId] || 'Unknown';
+        }
+
+        function updateMetricsDisplay(metrics) {
+            document.getElementById('metric-overall').textContent = metrics.overallProgress + '%';
+            document.getElementById('metric-streak').textContent = metrics.currentStreak;
+            document.getElementById('metric-time').textContent = metrics.totalStudyTime + 'h';
+            document.getElementById('metric-sessions').textContent = metrics.totalSessions;
+        }
+
+        function createProgressChart(data) {
+            return data.map(item => `
+                <div class="mb-2">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>${item.name}</span>
+                        <span>${item.progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${item.progress}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getPriorityColor(priority) {
+            const colors = {
+                high: 'bg-red-100 text-red-800',
+                medium: 'bg-yellow-100 text-yellow-800',
+                low: 'bg-green-100 text-green-800'
+            };
+            return colors[priority] || 'bg-gray-100 text-gray-800';
+        }
+
+        function showExamSimulation() {
+            document.getElementById('exam-simulation').style.display = 'block';
+            
+            // Mock question display
+            const mockQuestion = {
+                id: 'q1',
+                question: 'Which of the following is the primary output of the Develop Project Charter process?',
+                options: [
+                    { id: 'a', text: 'Project management plan' },
+                    { id: 'b', text: 'Project charter' },
+                    { id: 'c', text: 'Business case' },
+                    { id: 'd', text: 'Stakeholder register' }
+                ],
+                knowledgeArea: 'Integration',
+                processGroup: 'Initiating',
+                difficulty: 'intermediate'
+            };
+            
+            displayMockQuestion(mockQuestion);
+            startMockTimer(30 * 60); // 30 minutes
+        }
+
+        function displayMockQuestion(question) {
+            document.getElementById('question-display').innerHTML = `
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>${question.knowledgeArea} • ${question.processGroup}</span>
+                        <span class="capitalize">${question.difficulty}</span>
+                    </div>
+                    <p class="text-lg font-medium mb-4">${question.question}</p>
+                    <div class="space-y-2">
+                        ${question.options.map(option => `
+                            <label class="flex items-start p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="mock-answer" value="${option.id}" class="mt-1 mr-3">
+                                <span>${option.id.toUpperCase()}. ${option.text}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function startMockTimer(seconds) {
+            let timeRemaining = seconds;
+            const timerElement = document.getElementById('exam-timer');
+            
+            const interval = setInterval(() => {
+                const minutes = Math.floor(timeRemaining / 60);
+                const secs = timeRemaining % 60;
+                timerElement.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(interval);
+                    finishMockExam();
+                }
+                
+                timeRemaining--;
+            }, 1000);
+        }
+
+        function finishMockExam() {
+            document.getElementById('exam-simulation').style.display = 'none';
+            document.getElementById('exam-results').style.display = 'block';
+            
+            // Mock results
+            document.getElementById('final-score').textContent = '142/180';
+            document.getElementById('pass-status').textContent = 'PASSED';
+            document.getElementById('pass-status').className += ' bg-green-100 text-green-800';
+            
+            document.getElementById('ka-scores').innerHTML = `
+                <div>Integration: 85%</div>
+                <div>Scope: 78%</div>
+                <div>Schedule: 72%</div>
+                <div>Cost: 81%</div>
+                <div>Quality: 88%</div>
+            `;
+            
+            document.getElementById('exam-recommendations').innerHTML = `
+                <div>• Review Schedule Management</div>
+                <div>• Practice more Risk questions</div>
+                <div>• Focus on Procurement processes</div>
+            `;
+        }
+
+        function askSampleQuestion(questionType) {
+            const questions = {
+                'difference-costs-budget': "What's the difference between Estimate Costs and Determine Budget processes?",
+                'study-plan': "Create a 2-week study plan for Risk Management focusing on my weak areas"
+            };
+            
+            document.getElementById('ai-chat-message').value = questions[questionType] || '';
+        }
+    </script>
+</body>
+</html>

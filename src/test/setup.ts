@@ -2,6 +2,8 @@ import '@testing-library/jest-dom'
 import { beforeAll, beforeEach, afterEach, afterAll, vi, expect } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 import { cleanup } from '@testing-library/react'
+import { logger } from '../services/logger'
+
 // Conditional logger import for ES modules
 // const logger = { warn: console.warn }
 
@@ -66,7 +68,7 @@ async function setupMSWServer() {
     return server
   } catch (_error) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('MSW server not available, skipping mock server setup')
+      logger.warn('MSW server not available, skipping mock server setup')
     }
     return null
   }
@@ -157,35 +159,36 @@ Object.defineProperty(window.Notification, 'requestPermission', {
 
 // Mock ServiceWorkerRegistration globally
 if (typeof window !== 'undefined' && !window.ServiceWorkerRegistration) {
-  ;(window as any).ServiceWorkerRegistration = class ServiceWorkerRegistration {
-    scope = '/'
-    updateViaCache = 'none' as const
-    active = null
-    installing = null
-    waiting = null
-    onupdatefound = null
+  ;(window as unknown as { ServiceWorkerRegistration: unknown }).ServiceWorkerRegistration =
+    class ServiceWorkerRegistration {
+      scope = '/'
+      updateViaCache = 'none' as const
+      active = null
+      installing = null
+      waiting = null
+      onupdatefound = null
 
-    async getNotifications() {
-      return []
-    }
-    async showNotification() {
-      return
-    }
-    async update() {
-      return
-    }
-    async unregister() {
-      return false
-    }
+      async getNotifications() {
+        return []
+      }
+      async showNotification() {
+        return
+      }
+      async update() {
+        return
+      }
+      async unregister() {
+        return false
+      }
 
-    pushManager = {
-      getSubscription: vi.fn(),
-      subscribe: vi.fn(),
-      permissionState: vi.fn(),
-    }
+      pushManager = {
+        getSubscription: vi.fn(),
+        subscribe: vi.fn(),
+        permissionState: vi.fn(),
+      }
 
-    prototype = ServiceWorkerRegistration.prototype
-  }
+      prototype = ServiceWorkerRegistration.prototype
+    }
 }
 
 // Mock scrollTo

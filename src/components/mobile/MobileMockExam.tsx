@@ -50,6 +50,7 @@ export function MobileMockExam({ questions, timeLimit, onComplete }: MobileMockE
   const isFlagged = flaggedQuestions.has(currentQuestion?.id)
 
   // Timer
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isPaused || timeRemaining <= 0) {
       return

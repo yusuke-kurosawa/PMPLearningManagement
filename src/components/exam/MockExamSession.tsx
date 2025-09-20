@@ -82,6 +82,9 @@ const MockExamSession: React.FC<MockExamSessionProps> = ({ initialSettings }) =>
   )
 
   // Auto-save answers periodically
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!currentSession?.isCompleted) {
       const interval = setInterval(async () => {

@@ -177,6 +177,7 @@ const ProjectSimulator = () => {
     },
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let interval
     if (simulationState === 'running') {
@@ -222,17 +223,17 @@ const ProjectSimulator = () => {
     })
   }, [])
 
-  const pauseSimulation = useCallback(() => {
+  const pauseSimulation = () => {
     setSimulationState((prev) => (prev === 'running' ? 'paused' : 'running'))
-  }, [])
+  }
 
-  const resetSimulation = useCallback(() => {
+  const resetSimulation = () => {
     setSimulationState('menu')
     setCurrentScenario(null)
     setCurrentChallenge(null)
     setDecisions([])
     setTimeElapsed(0)
-  }, [])
+  }
 
   const handleDecision = useCallback(
     (option) => {

@@ -76,6 +76,8 @@ const SankeyDiagram = ({ data }) => {
   }
 
   // レスポンシブ対応
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -354,8 +356,11 @@ const SankeyDiagram = ({ data }) => {
       {/* コントロールパネル */}
       <div className='absolute right-4 top-4 max-w-xs space-y-4 rounded-lg bg-white p-4 shadow-lg'>
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>カラーテーマ</label>
+          <label htmlFor='-input' className='mb-2 block text-sm font-medium text-gray-700'>
+            カラーテーマ
+          </label>
           <select
+            id='-input'
             value={selectedTheme}
             onChange={(e) => setSelectedTheme(e.target.value)}
             className='w-full rounded-md border border-gray-300 px-3 py-2'
@@ -369,7 +374,9 @@ const SankeyDiagram = ({ data }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>ノード配置</label>
+          <label htmlFor='' className='mb-2 block text-sm font-medium text-gray-700'>
+            ノード配置
+          </label>
           <div className='grid grid-cols-2 gap-2'>
             {Object.entries(alignments).map(([key, alignment]) => {
               const Icon = alignment.icon
@@ -392,10 +399,14 @@ const SankeyDiagram = ({ data }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>
+          <label
+            htmlFor='nodewidth-px-input'
+            className='mb-2 block text-sm font-medium text-gray-700'
+          >
             ノード幅: {nodeWidth}px
           </label>
           <input
+            id='nodewidth-px-input'
             type='range'
             min='5'
             max='30'
@@ -406,10 +417,14 @@ const SankeyDiagram = ({ data }) => {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>
+          <label
+            htmlFor='nodepadding-px-input'
+            className='mb-2 block text-sm font-medium text-gray-700'
+          >
             ノード間隔: {nodePadding}px
           </label>
           <input
+            id='nodepadding-px-input'
             type='range'
             min='5'
             max='30'

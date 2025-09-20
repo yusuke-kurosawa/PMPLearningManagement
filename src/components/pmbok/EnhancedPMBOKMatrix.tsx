@@ -152,12 +152,13 @@ const EnhancedPMBOKMatrix: React.FC = () => {
   const [compactMode, setCompactMode] = useState(false)
 
   // Load data
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadPMBOKData()
     loadUserProgress()
-  }, [])
+  }, [loadPMBOKData, loadUserProgress])
 
-  const loadPMBOKData = async () => {
+  const loadPMBOKData = useCallback(async (...args) => {
     setIsLoading(true)
     setError(null)
 
@@ -165,7 +166,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       const data = await api.pmbok.getProcesses.query({
         version: selectedVersion === 'both' ? undefined : selectedVersion,
         includeDetails: true,
-      })
+      }, []))
 
       setProcesses(data)
     } catch (error) {
@@ -181,14 +182,14 @@ const EnhancedPMBOKMatrix: React.FC = () => {
     }
   }
 
-  const loadUserProgress = async () => {
+  const loadUserProgress = useCallback(async (...args) => {
     try {
       const progress = await api.pmbok.getUserProgress.query()
       const progressMap = progress.reduce(
         (acc, p) => {
           acc[p.processId] = p
           return acc
-        },
+        }, []),
         {} as Record<string, UserProgress>
       )
 

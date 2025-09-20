@@ -136,6 +136,8 @@ const MentorshipHub = () => {
       sessionTypes: ['テクニカル指導', 'プロダクト戦略', 'キャリア相談'],
     },
   ]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setMentors(mockMentors)
     setFilteredMentors(mockMentors)

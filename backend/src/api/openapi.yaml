@@ -1,0 +1,1080 @@
+openapi: 3.1.0
+info:
+  title: PMP Learning Management API
+  description: Comprehensive API for PMBOK 6th and 7th Edition learning management system
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api@pmplm.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.pmplm.com/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Principles
+    description: PMBOK 7th Edition principles
+  - name: Performance Domains
+    description: PMBOK 7th Edition performance domains
+  - name: Processes
+    description: PMBOK 6th Edition processes
+  - name: Learning Paths
+    description: Structured learning paths
+  - name: Assessments
+    description: Quizzes and exams
+  - name: Progress
+    description: User progress tracking
+  - name: Collaboration
+    description: Study groups and discussions
+  - name: Resources
+    description: Learning resources and materials
+
+paths:
+  # Authentication endpoints
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  # Principles endpoints
+  /principles:
+    get:
+      tags: [Principles]
+      summary: List all principles
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: complexity
+          in: query
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, VERY_HIGH]
+        - name: includeActions
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: List of principles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Principle'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /principles/{id}:
+    get:
+      tags: [Principles]
+      summary: Get principle by ID
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+        - name: includeAll
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Principle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrincipleDetail'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /principles/{id}/relationships:
+    get:
+      tags: [Principles]
+      summary: Get principle relationships
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        200:
+          description: Principle relationships
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      domains:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DomainMapping'
+                      resources:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Resource'
+
+  # Performance Domains endpoints
+  /domains:
+    get:
+      tags: [Performance Domains]
+      summary: List all performance domains
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: includeFocusAreas
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: includeOutcomes
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: List of domains
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PerformanceDomain'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /domains/{id}:
+    get:
+      tags: [Performance Domains]
+      summary: Get domain by ID
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+        - name: includeAll
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Domain details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DomainDetail'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /domains/{id}/interactions:
+    get:
+      tags: [Performance Domains]
+      summary: Get domain interactions
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        200:
+          description: Domain interactions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DomainInteraction'
+
+  /domains/interaction-map:
+    get:
+      tags: [Performance Domains]
+      summary: Get complete interaction map
+      responses:
+        200:
+          description: Interaction map
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      nodes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DomainNode'
+                      edges:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InteractionEdge'
+
+  # Learning Paths endpoints
+  /learning-paths:
+    get:
+      tags: [Learning Paths]
+      summary: List available learning paths
+      parameters:
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [BEGINNER, INTERMEDIATE, ADVANCED, EXPERT]
+        - name: pmbokVersion
+          in: query
+          schema:
+            type: string
+            enum: [V6, V7, BOTH]
+      responses:
+        200:
+          description: List of learning paths
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LearningPath'
+
+  /learning-paths/{id}/enroll:
+    post:
+      tags: [Learning Paths]
+      summary: Enroll in a learning path
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        201:
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PathEnrollment'
+        409:
+          description: Already enrolled
+
+  # Progress endpoints
+  /progress/overview:
+    get:
+      tags: [Progress]
+      summary: Get user progress overview
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Progress overview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProgressOverview'
+
+  /progress/principles:
+    get:
+      tags: [Progress]
+      summary: Get progress for principles
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Principles progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityProgress'
+
+  /progress/domains:
+    get:
+      tags: [Progress]
+      summary: Get progress for performance domains
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Domains progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityProgress'
+
+  # Assessment endpoints
+  /assessments:
+    get:
+      tags: [Assessments]
+      summary: List available assessments
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [PRACTICE_QUIZ, CHAPTER_TEST, MOCK_EXAM, CERTIFICATION_PREP, DIAGNOSTIC]
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+            enum: [EASY, MEDIUM, HARD, EXPERT]
+      responses:
+        200:
+          description: List of assessments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assessment'
+
+  /assessments/{id}/start:
+    post:
+      tags: [Assessments]
+      summary: Start an assessment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        201:
+          description: Assessment started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExamAttempt'
+
+  /assessments/attempts/{attemptId}/submit:
+    post:
+      tags: [Assessments]
+      summary: Submit assessment answers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnswerSubmission'
+      responses:
+        200:
+          description: Assessment submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExamResult'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: cuid
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+        minLength: 2
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        firstName:
+          type: string
+        lastName:
+          type: string
+        username:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, INSTRUCTOR, MENTOR, STUDENT, GUEST]
+        avatarUrl:
+          type: string
+
+    Principle:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        complexity:
+          type: string
+        order:
+          type: integer
+
+    PrincipleDetail:
+      allOf:
+        - $ref: '#/components/schemas/Principle'
+        - type: object
+          properties:
+            details:
+              type: string
+            keyActions:
+              type: array
+              items:
+                $ref: '#/components/schemas/KeyAction'
+            examples:
+              type: array
+              items:
+                $ref: '#/components/schemas/PrincipleExample'
+            domainMappings:
+              type: array
+              items:
+                $ref: '#/components/schemas/DomainMapping'
+
+    KeyAction:
+      type: object
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        actionEn:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+
+    PrincipleExample:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        scenario:
+          type: string
+        application:
+          type: string
+        outcome:
+          type: string
+        industry:
+          type: string
+        projectType:
+          type: string
+
+    PerformanceDomain:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        complexity:
+          type: string
+        order:
+          type: integer
+
+    DomainDetail:
+      allOf:
+        - $ref: '#/components/schemas/PerformanceDomain'
+        - type: object
+          properties:
+            focusAreas:
+              type: array
+              items:
+                $ref: '#/components/schemas/FocusArea'
+            outcomes:
+              type: array
+              items:
+                $ref: '#/components/schemas/DomainOutcome'
+            interactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/DomainInteraction'
+            examples:
+              type: array
+              items:
+                $ref: '#/components/schemas/DomainExample'
+
+    FocusArea:
+      type: object
+      properties:
+        id:
+          type: string
+        area:
+          type: string
+        areaEn:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+
+    DomainOutcome:
+      type: object
+      properties:
+        id:
+          type: string
+        outcome:
+          type: string
+        outcomeEn:
+          type: string
+        description:
+          type: string
+        measurementCriteria:
+          type: string
+        order:
+          type: integer
+
+    DomainInteraction:
+      type: object
+      properties:
+        id:
+          type: string
+        fromDomain:
+          $ref: '#/components/schemas/PerformanceDomain'
+        toDomain:
+          $ref: '#/components/schemas/PerformanceDomain'
+        interactionType:
+          type: string
+          enum: [STRONG, MODERATE, WEAK, CONDITIONAL]
+        description:
+          type: string
+        strength:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    DomainExample:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        scenario:
+          type: string
+        implementation:
+          type: string
+        benefits:
+          type: string
+        challenges:
+          type: string
+        industry:
+          type: string
+        projectType:
+          type: string
+
+    DomainMapping:
+      type: object
+      properties:
+        id:
+          type: string
+        domain:
+          $ref: '#/components/schemas/PerformanceDomain'
+        mappingType:
+          type: string
+          enum: [PRIMARY, SECONDARY, SUPPORTING, RELATED]
+        relevanceScore:
+          type: integer
+          minimum: 1
+          maximum: 10
+        description:
+          type: string
+
+    DomainNode:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        x:
+          type: number
+        y:
+          type: number
+
+    InteractionEdge:
+      type: object
+      properties:
+        source:
+          type: string
+        target:
+          type: string
+        type:
+          type: string
+        strength:
+          type: integer
+
+    Resource:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [VIDEO, ARTICLE, EBOOK, PODCAST, INFOGRAPHIC, TEMPLATE, CASE_STUDY, SIMULATION]
+        url:
+          type: string
+        duration:
+          type: integer
+        difficulty:
+          type: string
+        isPremium:
+          type: boolean
+
+    LearningPath:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        level:
+          type: string
+          enum: [BEGINNER, INTERMEDIATE, ADVANCED, EXPERT]
+        estimatedHours:
+          type: integer
+        pmbokVersion:
+          type: string
+          enum: [V6, V7, BOTH]
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearningStep'
+
+    LearningStep:
+      type: object
+      properties:
+        id:
+          type: string
+        stepType:
+          type: string
+          enum: [PRINCIPLE, DOMAIN, PROCESS, KNOWLEDGE_AREA, ASSESSMENT, PRACTICE, VIDEO, READING]
+        name:
+          type: string
+        description:
+          type: string
+        estimatedMinutes:
+          type: integer
+        order:
+          type: integer
+
+    PathEnrollment:
+      type: object
+      properties:
+        id:
+          type: string
+        pathId:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED, COMPLETED, DROPPED]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        progressPercent:
+          type: number
+
+    ProgressOverview:
+      type: object
+      properties:
+        overallProgress:
+          type: number
+        principlesProgress:
+          type: number
+        domainsProgress:
+          type: number
+        totalStudyTime:
+          type: integer
+        completedAssessments:
+          type: integer
+        averageScore:
+          type: number
+        achievements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Achievement'
+
+    EntityProgress:
+      type: object
+      properties:
+        entityId:
+          type: string
+        entityName:
+          type: string
+        progressPercent:
+          type: number
+        masteryLevel:
+          type: string
+          enum: [NOVICE, BEGINNER, COMPETENT, PROFICIENT, EXPERT]
+        lastAccessedAt:
+          type: string
+          format: date-time
+        timeSpentMinutes:
+          type: integer
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        iconUrl:
+          type: string
+        points:
+          type: integer
+        tier:
+          type: string
+          enum: [BRONZE, SILVER, GOLD, PLATINUM, DIAMOND]
+        unlockedAt:
+          type: string
+          format: date-time
+
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        pmbokVersion:
+          type: string
+        difficulty:
+          type: string
+        timeLimit:
+          type: integer
+        passingScore:
+          type: number
+        questionCount:
+          type: integer
+
+    ExamAttempt:
+      type: object
+      properties:
+        id:
+          type: string
+        assessmentId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, FILL_BLANK, MATCHING, ORDERING, ESSAY]
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionOption'
+        points:
+          type: number
+
+    QuestionOption:
+      type: object
+      properties:
+        id:
+          type: string
+        option:
+          type: string
+        order:
+          type: integer
+
+    AnswerSubmission:
+      type: object
+      properties:
+        questionId:
+          type: string
+        selectedOptions:
+          type: array
+          items:
+            type: string
+        textAnswer:
+          type: string
+
+    ExamResult:
+      type: object
+      properties:
+        attemptId:
+          type: string
+        score:
+          type: number
+        passed:
+          type: boolean
+        timeSpent:
+          type: integer
+        correctAnswers:
+          type: integer
+        totalQuestions:
+          type: integer
+        categoryScores:
+          type: object
+          additionalProperties:
+            type: number

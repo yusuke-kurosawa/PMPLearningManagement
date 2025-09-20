@@ -10,17 +10,7 @@ import { supabase, authHelpers } from '../lib/auth/supabase'
 import { logger } from './logger'
 
 // 既存の型定義をインポート
-import {
-  ProcessCategory,
-  ProcessGroup,
-  ProcessProgress,
-  FlashCardSession,
-  ExamResult,
-  StudySession,
-  LearningGoal,
-  ProgressData,
-  processCategories,
-  processGroups} from './progressService'
+// Note: Types are imported directly from progressService where needed
 
 // ========================================
 // Supabase Database 型定義
@@ -404,7 +394,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const { data, error } = await supabase
@@ -418,7 +409,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -427,7 +419,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: 'プロファイル取得中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -443,7 +436,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       if (!navigator.onLine) {
@@ -452,7 +446,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'OFFLINE', message: 'オフライン時の更新はキューに追加されました' },
-          isOnline: false}
+          isOnline: false,
+        }
       }
 
       const { data, error } = await supabase
@@ -467,7 +462,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -476,7 +472,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: 'プロファイル更新中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -496,7 +493,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       let query = supabase
@@ -516,7 +514,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data: data || [], error: null, isOnline: navigator.onLine }
@@ -525,7 +524,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: 'プロセス進捗取得中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -542,24 +542,28 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const updateData = {
         ...updates,
         last_studied: new Date().toISOString(),
-        study_count: updates.study_count ? updates.study_count + 1 : 1}
+        study_count: updates.study_count ? updates.study_count + 1 : 1,
+      }
 
       if (!navigator.onLine) {
         // オフラインの場合はキューに追加
         this.addToOfflineQueue('update', 'process_progress', {
           user_id: user.id,
           process_id: processId,
-          ...updateData})
+          ...updateData,
+        })
         return {
           data: null,
           error: { code: 'OFFLINE', message: 'オフライン時の更新はキューに追加されました' },
-          isOnline: false}
+          isOnline: false,
+        }
       }
 
       const { data, error } = await supabase
@@ -567,7 +571,8 @@ export class ProgressServiceV2 {
         .upsert({
           user_id: user.id,
           process_id: processId,
-          ...updateData})
+          ...updateData,
+        })
         .select()
         .single()
 
@@ -576,7 +581,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -585,7 +591,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: 'プロセス進捗更新中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -605,13 +612,15 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const session = {
         user_id: user.id,
         session_date: new Date().toISOString(),
-        ...sessionData}
+        ...sessionData,
+      }
 
       if (!navigator.onLine) {
         // オフラインの場合はキューに追加
@@ -619,7 +628,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'OFFLINE', message: 'オフライン時のセッションはキューに追加されました' },
-          isOnline: false}
+          isOnline: false,
+        }
       }
 
       const { data, error } = await supabase
@@ -633,7 +643,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -642,7 +653,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: '学習セッション記録中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -662,13 +674,15 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const session = {
         user_id: user.id,
         session_timestamp: new Date().toISOString(),
-        ...sessionData}
+        ...sessionData,
+      }
 
       if (!navigator.onLine) {
         // オフラインの場合はキューに追加
@@ -676,7 +690,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'OFFLINE', message: 'オフライン時のセッションはキューに追加されました' },
-          isOnline: false}
+          isOnline: false,
+        }
       }
 
       const { data, error } = await supabase
@@ -690,7 +705,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -700,8 +716,10 @@ export class ProgressServiceV2 {
         data: null,
         error: {
           code: 'UNKNOWN_ERROR',
-          message: 'フラッシュカードセッション記録中にエラーが発生しました'},
-        isOnline: navigator.onLine}
+          message: 'フラッシュカードセッション記録中にエラーが発生しました',
+        },
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -721,13 +739,15 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const exam = {
         user_id: user.id,
         exam_timestamp: new Date().toISOString(),
-        ...examData}
+        ...examData,
+      }
 
       if (!navigator.onLine) {
         // オフラインの場合はキューに追加
@@ -735,7 +755,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'OFFLINE', message: 'オフライン時の試験結果はキューに追加されました' },
-          isOnline: false}
+          isOnline: false,
+        }
       }
 
       const { data, error } = await supabase.from('exam_results').insert(exam).select().single()
@@ -745,7 +766,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -754,7 +776,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: '模擬試験結果記録中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -772,18 +795,21 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const { data, error } = await supabase.rpc('get_user_learning_stats', {
-        target_user_id: user.id})
+        target_user_id: user.id,
+      })
 
       if (error) {
         logger.error('学習統計取得エラー:', error)
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data: data?.[0] || null, error: null, isOnline: navigator.onLine }
@@ -792,7 +818,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: '学習統計取得中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -808,7 +835,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: 'NO_USER', message: 'ユーザーが認証されていません' },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       const { data, error } = await supabase
@@ -822,7 +850,8 @@ export class ProgressServiceV2 {
         return {
           data: null,
           error: { code: error.code, message: error.message },
-          isOnline: navigator.onLine}
+          isOnline: navigator.onLine,
+        }
       }
 
       return { data, error: null, isOnline: navigator.onLine }
@@ -831,7 +860,8 @@ export class ProgressServiceV2 {
       return {
         data: null,
         error: { code: 'UNKNOWN_ERROR', message: '学習サマリー取得中にエラーが発生しました' },
-        isOnline: navigator.onLine}
+        isOnline: navigator.onLine,
+      }
     }
   }
 
@@ -853,7 +883,8 @@ export class ProgressServiceV2 {
       table,
       data,
       timestamp: Date.now(),
-      retry_count: 0}
+      retry_count: 0,
+    }
 
     this.offlineQueue.push(operation)
     localStorage.setItem('pmp_offline_queue', JSON.stringify(this.offlineQueue))
@@ -915,7 +946,7 @@ export class ProgressServiceV2 {
    */
   private async executeOfflineOperation(operation: OfflineOperation): Promise<void> {
     switch (operation.type) {
-      case 'insert':
+      case 'insert': {
         const { error: insertError } = await supabase
           .from(operation.table as any)
           .insert(operation.data)
@@ -923,8 +954,9 @@ export class ProgressServiceV2 {
           throw insertError
         }
         break
+      }
 
-      case 'update':
+      case 'update': {
         const { error: updateError } = await supabase
           .from(operation.table as any)
           .update(operation.data)
@@ -933,8 +965,9 @@ export class ProgressServiceV2 {
           throw updateError
         }
         break
+      }
 
-      case 'delete':
+      case 'delete': {
         const { error: deleteError } = await supabase
           .from(operation.table as any)
           .delete()
@@ -943,6 +976,7 @@ export class ProgressServiceV2 {
           throw deleteError
         }
         break
+      }
     }
   }
 
@@ -981,7 +1015,7 @@ export class ProgressServiceV2 {
     window.addEventListener('online', () => {
       logger.info('ネットワーク復旧 - 自動同期開始')
       this.syncOfflineQueue()
-    }
+    })
 
     // 定期同期
     setInterval(
