@@ -1,7 +1,7 @@
-# PMP Learning Management - Project Overview (Updated: 2025-09-20T05:22:23.455Z)
+# PMP Learning Management - Project Overview (Updated: 2025-09-20T07:42:07.853Z)
 
 ## Recent Changes (63 files)
-- added: ./package.json (10001 bytes)
+- added: ./package.json (10041 bytes)
 - added: ./e2e/README.md (1485 bytes)
 - added: ./backend/README.md (2198 bytes)
 - added: ./.claude/devops/README.md (2474 bytes)
@@ -67,9 +67,9 @@
 
 ## Project Status
 - Version: 2.0.0
-- Dependencies: 44
+- Dependencies: 45
 - Dev Dependencies: 56
-- Git Status: feat/test-improvements-and-claude-workflow (158 commits)
+- Git Status: main (165 commits)
 
 ## Architecture
 - Framework: React 18.2 with TypeScript
@@ -81,7 +81,7 @@
 ## Performance Metrics
 - Files Scanned: 63
 - Cache Hits: 0
-- Update Time: 201ms
+- Update Time: 188ms
 
 ## Next Actions
 - Continue TypeScript migration
