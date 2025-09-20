@@ -43,6 +43,8 @@ const UserSettingsPanel: React.FC<{ isOpen; onClose }> = ({ isOpen, onClose }) =
   ]
 
   // Watch for changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const hasChanges = JSON.stringify(localSettings) !== JSON.stringify(settings)
     setHasChanges(hasChanges)

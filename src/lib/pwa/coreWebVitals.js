@@ -4,6 +4,7 @@
  */
 
 import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals'
+const { logger } = require('../../services/logger')
 
 class CoreWebVitalsOptimizer {
   constructor() {
@@ -26,7 +27,7 @@ class CoreWebVitalsOptimizer {
       return
     }
 
-    console.log('🚀 Core Web Vitals optimization system initialized')
+    logger.info('🚀 Core Web Vitals optimization system initialized')
 
     // Track all Core Web Vitals
     this.trackLCP()
@@ -112,7 +113,7 @@ class CoreWebVitalsOptimizer {
       status = 'needs-improvement'
     }
 
-    console.log(
+    logger.info(
       `📊 ${metricName.toUpperCase()}: ${value}${metricName === 'cls' ? '' : 'ms'} (${status})`
     )
 
@@ -122,6 +123,7 @@ class CoreWebVitalsOptimizer {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   triggerOptimization(metricName, _value, _status) {
     const optimizations = {
       lcp: () => this.optimizeLCPDynamic(),
@@ -132,7 +134,7 @@ class CoreWebVitalsOptimizer {
     }
 
     if (optimizations[metricName]) {
-      console.log(`🔧 Triggering ${metricName.toUpperCase()} optimization...`)
+      logger.info(`🔧 Triggering ${metricName.toUpperCase()} optimization...`)
       optimizations[metricName]()
     }
   }
@@ -175,7 +177,7 @@ class CoreWebVitalsOptimizer {
     try {
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
     } catch (e) {
-      console.warn('LCP observer not supported')
+      logger.warn('LCP observer not supported')
     }
 
     return elements
@@ -299,7 +301,7 @@ class CoreWebVitalsOptimizer {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.duration > 50) {
-            console.warn(`Long task detected: ${entry.duration}ms`)
+            logger.warn(`Long task detected: ${entry.duration}ms`)
             // Could implement task scheduling here
           }
         }
@@ -308,7 +310,7 @@ class CoreWebVitalsOptimizer {
       try {
         observer.observe({ entryTypes: ['longtask'] })
       } catch (e) {
-        console.warn('Long task observer not supported')
+        logger.warn('Long task observer not supported')
       }
     }
   }
@@ -355,11 +357,11 @@ class CoreWebVitalsOptimizer {
           const { type } = e.data
           if (type === 'computation-result') {
             // Handle result
-            console.log('Web worker computation completed')
+            logger.info('Web worker computation completed')
           }
         }
       } catch (e) {
-        console.warn('Web worker creation failed:', e)
+        logger.warn('Web worker creation failed:', e)
       }
     }
   }
@@ -368,6 +370,7 @@ class CoreWebVitalsOptimizer {
     // Add passive event listeners where appropriate
     const passiveEvents = ['touchstart', 'touchmove', 'wheel', 'scroll']
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     passiveEvents.forEach((_eventType) => {
       // Override addEventListener to use passive listeners
       const originalAddEventListener = EventTarget.prototype.addEventListener
@@ -401,7 +404,7 @@ class CoreWebVitalsOptimizer {
             continue
           }
 
-          console.warn(`Layout shift detected: ${entry.value}`)
+          logger.warn(`Layout shift detected: ${entry.value}`)
           this.fixLayoutShift(entry)
         }
       })
@@ -409,7 +412,7 @@ class CoreWebVitalsOptimizer {
       try {
         observer.observe({ entryTypes: ['layout-shift'] })
       } catch (e) {
-        console.warn('Layout shift observer not supported')
+        logger.warn('Layout shift observer not supported')
       }
     }
   }
@@ -624,7 +627,7 @@ class CoreWebVitalsOptimizer {
   removeUnusedCSS() {
     // This would require a more sophisticated implementation
     // For now, we'll add a performance hint
-    console.info('💡 Consider using PurgeCSS to remove unused CSS')
+    logger.info('💡 Consider using PurgeCSS to remove unused CSS')
   }
 
   optimizeCriticalRenderingPath() {
@@ -648,11 +651,11 @@ class CoreWebVitalsOptimizer {
   }
 
   optimizeServerResponse() {
-    console.info('💡 Consider implementing server-side caching and CDN')
+    logger.info('💡 Consider implementing server-side caching and CDN')
   }
 
   optimizeCDN() {
-    console.info('💡 Consider using a CDN for static assets')
+    logger.info('💡 Consider using a CDN for static assets')
   }
 
   // Cleanup

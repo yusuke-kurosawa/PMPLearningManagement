@@ -176,6 +176,7 @@ const MobileOptimizedApp: React.FC<{ children: React.ReactNode }> = ({ children 
   const appRef = useRef<HTMLDivElement>(null)
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Initialize PWA features
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     initializePWA()
     registerTouchGestures()

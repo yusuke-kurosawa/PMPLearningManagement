@@ -425,7 +425,7 @@ class AuditLogger {
       const counter = (this.fallbackCounter = (this.fallbackCounter || 0) + 1)
       return `${timestamp}-dev-${timestamp_suffix}-${counter.toString(36)}`
     } catch (error) {
-      console.error('ID生成エラー:', error)
+      logger.error('ID生成エラー:', error)
       // 緊急フォールバック（タイムスタンプベース）
       return `${timestamp}-emergency-${timestamp.toString(36)}`
     }

@@ -10,18 +10,7 @@ import { supabase, authHelpers } from '../lib/auth/supabase'
 import { logger } from './logger'
 
 // 既存の型定義をインポート
-import {
-  ProcessCategory,
-  ProcessGroup,
-  ProcessProgress,
-  FlashCardSession,
-  ExamResult,
-  StudySession,
-  LearningGoal,
-  ProgressData,
-  processCategories,
-  processGroups,
-} from './progressService'
+// Note: Types are imported directly from progressService where needed
 
 // ========================================
 // Supabase Database 型定義
@@ -957,7 +946,7 @@ export class ProgressServiceV2 {
    */
   private async executeOfflineOperation(operation: OfflineOperation): Promise<void> {
     switch (operation.type) {
-      case 'insert':
+      case 'insert': {
         const { error: insertError } = await supabase
           .from(operation.table as any)
           .insert(operation.data)
@@ -965,8 +954,9 @@ export class ProgressServiceV2 {
           throw insertError
         }
         break
+      }
 
-      case 'update':
+      case 'update': {
         const { error: updateError } = await supabase
           .from(operation.table as any)
           .update(operation.data)
@@ -975,8 +965,9 @@ export class ProgressServiceV2 {
           throw updateError
         }
         break
+      }
 
-      case 'delete':
+      case 'delete': {
         const { error: deleteError } = await supabase
           .from(operation.table as any)
           .delete()
@@ -985,6 +976,7 @@ export class ProgressServiceV2 {
           throw deleteError
         }
         break
+      }
     }
   }
 

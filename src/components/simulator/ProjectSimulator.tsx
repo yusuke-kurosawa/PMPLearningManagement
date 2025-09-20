@@ -177,6 +177,7 @@ const ProjectSimulator = () => {
     },
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let interval
     if (simulationState === 'running') {

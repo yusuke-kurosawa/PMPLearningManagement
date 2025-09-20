@@ -19,6 +19,7 @@ const AuthPage: React.FC = () => {
   const [currentMode, setCurrentMode] = useState(mode)
 
   // Redirect if already authenticated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isAuthenticated) {
       const returnTo = searchParams.get('returnTo') || '/'

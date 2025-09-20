@@ -12,6 +12,10 @@ import {
   GraduationCap,
   Users,
   Play,
+  Target,
+  BarChart3,
+  Building2,
+  Zap,
 } from 'lucide-react'
 
 const Home: React.FC = () => {
@@ -123,6 +127,42 @@ const Home: React.FC = () => {
       color: 'bg-gradient-to-r from-pink-500 to-rose-500',
       isNew: true,
     },
+    {
+      title: 'PMIタレント・トライアングル',
+      description:
+        '新機能！技術的なプロジェクト管理、戦略的ビジネス管理、リーダーシップの3つのスキルセットを統合的に学習。バランスの取れたPMプロフェッショナルを目指しましょう。',
+      icon: Target,
+      link: '/talent-triangle',
+      color: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+      isNew: true,
+    },
+    {
+      title: '戦略適合分析',
+      description:
+        '新機能！組織戦略とプロジェクト目標の整合性を分析。企業価値と顧客価値を最大化する戦略的プロジェクト管理を学びます。',
+      icon: BarChart3,
+      link: '/strategic-alignment',
+      color: 'bg-gradient-to-r from-red-500 to-pink-500',
+      isNew: true,
+    },
+    {
+      title: 'ビジネス環境分析',
+      description:
+        '新機能！PESTLE、SWOT、ポーターの五つの力などのフレームワークを活用して、プロジェクトを取り巻くビジネス環境を分析。',
+      icon: Building2,
+      link: '/business-environment',
+      color: 'bg-gradient-to-r from-gray-500 to-gray-700',
+      isNew: true,
+    },
+    {
+      title: '戦略ツールキット',
+      description:
+        '新機能！BSC、ポートフォリオ管理、価値提案キャンバスなどの戦略ツールを実践的に学習。シナリオベースの演習で理解を深めます。',
+      icon: Zap,
+      link: '/strategic-toolkit',
+      color: 'bg-gradient-to-r from-violet-500 to-purple-500',
+      isNew: true,
+    },
   ]
 
   return (
@@ -139,10 +179,56 @@ const Home: React.FC = () => {
         </div>
 
         {/* Feature Cards */}
-        <div className='mb-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-          {features.map((feature) => {
-            const Icon = feature.icon
-            return (
+        <div className='mb-12'>
+          {/* Strategic Business Skills Section */}
+          <div className='mb-8'>
+            <h2 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
+              戦略とビジネススキル
+            </h2>
+            <p className='mb-6 text-gray-600 dark:text-gray-300'>
+              PMIタレント・トライアングルの重要な要素である戦略的思考とビジネススキルを強化
+            </p>
+            <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>
+              {features.filter(f => f.link === '/talent-triangle' || f.link === '/strategic-alignment' || f.link === '/business-environment' || f.link === '/strategic-toolkit').map((feature) => {
+                const Icon = feature.icon
+                return (
+                  <Link
+                    key={feature.link}
+                    to={feature.link}
+                    className={`relative overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/50`}
+                  >
+                    {feature.isNew && (
+                      <div className='absolute right-0 top-0 translate-x-8 translate-y-4 rotate-45 transform bg-red-500 px-4 py-1 text-xs text-white'>
+                        NEW
+                      </div>
+                    )}
+                    <div className='p-6'>
+                      <div
+                        className={`${feature.color} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
+                      >
+                        <Icon className='h-6 w-6 text-white' />
+                      </div>
+                      <h3 className='mb-2 text-xl font-semibold dark:text-white'>{feature.title}</h3>
+                      <p className='mb-4 text-gray-600 dark:text-gray-300'>{feature.description}</p>
+                      <div className='flex items-center font-medium text-blue-600 dark:text-blue-400'>
+                        <span>詳しく見る</span>
+                        <ArrowRight className='ml-1 h-4 w-4' />
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Other Features Section */}
+          <h2 className='mb-6 text-2xl font-bold text-gray-900 dark:text-white'>
+            学習ツールと機能
+          </h2>
+          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            {features.filter(f => f.link !== '/talent-triangle' && f.link !== '/strategic-alignment' && f.link !== '/business-environment' && f.link !== '/strategic-toolkit').map((feature) => {
+              const Icon = feature.icon
+              return (
               <Link
                 key={feature.link}
                 to={feature.link}
@@ -175,8 +261,9 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </Link>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
         {/* Quick Stats */}

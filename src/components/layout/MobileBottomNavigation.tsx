@@ -12,6 +12,10 @@ import {
   Users,
   ChevronUp,
   X,
+  Zap,
+  GitBranch,
+  Settings,
+  BarChart3,
 } from 'lucide-react'
 
 const MobileBottomNavigation = () => {
@@ -21,6 +25,7 @@ const MobileBottomNavigation = () => {
   const location = useLocation()
 
   // Auto-hide on scroll
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -54,6 +59,14 @@ const MobileBottomNavigation = () => {
     { path: '/data-management', label: 'データ', icon: Users },
   ]
 
+  // Agile learning items
+  const agileItems = [
+    { path: '/agile-manifesto', label: 'アジャイル宣言', icon: Zap, isNew: true },
+    { path: '/agile-principles', label: 'アジャイル原則', icon: GitBranch, isNew: true },
+    { path: '/agile-practices', label: 'アジャイル実践', icon: Settings, isNew: true },
+    { path: '/agile-values', label: 'アジャイル価値比較', icon: BarChart3, isNew: true },
+  ]
+
   return (
     <>
       {/* Overlay for overflow menu */}
@@ -66,7 +79,7 @@ const MobileBottomNavigation = () => {
 
       {/* Overflow Menu */}
       {showOverflowMenu && (
-        <div className='animate-slide-up fixed bottom-20 left-4 right-4 z-50 rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
+        <div className='animate-slide-up fixed bottom-20 left-4 right-4 z-50 max-h-[70vh] overflow-y-auto rounded-2xl border bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
           <div className='p-4'>
             <div className='mb-4 flex items-center justify-between'>
               <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>その他の機能</h3>
@@ -78,28 +91,76 @@ const MobileBottomNavigation = () => {
                 <X className='h-5 w-5' />
               </button>
             </div>
-            <div className='grid grid-cols-2 gap-3'>
-              {overflowItems.map(({ path, label, icon: Icon }) => {
-                const isActive = location.pathname === path
-                return (
-                  <Link
-                    key={path}
-                    to={path}
-                    onClick={() => setShowOverflowMenu(false)}
-                    className={`
-                      flex flex-col items-center gap-2 rounded-xl p-4 transition-all
-                      ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'text-gray-600 hover:bg-gray-50 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-700'
-                      }
-                    `}
-                  >
-                    <Icon className='h-6 w-6' />
-                    <span className='text-center text-xs font-medium'>{label}</span>
-                  </Link>
-                )
-              })}
+
+            {/* Core Features */}
+            <div className='mb-4'>
+              <h4 className='mb-2 text-sm font-medium text-gray-500 dark:text-gray-400'>
+                主要機能
+              </h4>
+              <div className='grid grid-cols-2 gap-3'>
+                {overflowItems.map(({ path, label, icon: Icon }) => {
+                  const isActive = location.pathname === path
+                  return (
+                    <Link
+                      key={path}
+                      to={path}
+                      onClick={() => setShowOverflowMenu(false)}
+                      className={`
+                        flex flex-col items-center gap-2 rounded-xl p-4 transition-all
+                        ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'text-gray-600 hover:bg-gray-50 active:scale-95 dark:text-gray-400 dark:hover:bg-gray-700'
+                        }
+                      `}
+                    >
+                      <Icon className='h-6 w-6' />
+                      <span className='text-center text-xs font-medium'>{label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Agile Learning Section */}
+            <div>
+              <div className='mb-2 flex items-center gap-2'>
+                <Zap className='h-4 w-4 text-amber-500' />
+                <h4 className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                  アジャイル学習
+                </h4>
+                <span className='rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
+                  NEW
+                </span>
+              </div>
+              <div className='grid grid-cols-2 gap-3'>
+                {agileItems.map(({ path, label, icon: Icon, isNew }) => {
+                  const isActive = location.pathname === path
+                  return (
+                    <Link
+                      key={path}
+                      to={path}
+                      onClick={() => setShowOverflowMenu(false)}
+                      className={`
+                        relative flex flex-col items-center gap-2 rounded-xl p-4 transition-all
+                        ${
+                          isActive
+                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+                            : 'text-gray-600 hover:bg-amber-50 active:scale-95 dark:text-gray-400 dark:hover:bg-amber-900/20'
+                        }
+                      `}
+                    >
+                      <Icon className='h-6 w-6' />
+                      <span className='text-center text-xs font-medium'>{label}</span>
+                      {isNew && (
+                        <span className='absolute -right-1 -top-1 rounded-full bg-red-500 px-1 py-0.5 text-xs text-white'>
+                          NEW
+                        </span>
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>

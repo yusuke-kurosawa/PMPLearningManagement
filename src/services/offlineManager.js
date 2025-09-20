@@ -22,6 +22,7 @@
  */
 
 import { openDB } from 'idb'
+const { logger } = require('/logger')
 
 // Configuration
 const DB_NAME = 'pmp-learning-offline-db'
@@ -78,9 +79,9 @@ class OfflineManager {
       // Initialize cache strategies
       this.initializeCacheStrategies()
 
-      console.log('✅ Offline Manager initialized successfully')
+      logger.info('✅ Offline Manager initialized successfully')
     } catch (error) {
-      console.error('❌ Offline Manager initialization failed:', error)
+      logger.error('❌ Offline Manager initialization failed:', error)
     }
   }
 
@@ -176,7 +177,7 @@ class OfflineManager {
    */
   async handleOnline() {
     this.isOnline = true
-    console.log('🌐 Network connected - starting sync')
+    logger.info('🌐 Network connected - starting sync')
 
     // Perform immediate sync
     await this.performBackgroundSync()
@@ -190,7 +191,7 @@ class OfflineManager {
    */
   handleOffline() {
     this.isOnline = false
-    console.log('📴 Network disconnected - offline mode activated')
+    logger.info('📴 Network disconnected - offline mode activated')
 
     // Notify user
     this.notifyUser('オフラインモードが有効です。学習を続けられます。', 'info')
@@ -206,9 +207,9 @@ class OfflineManager {
       try {
         const registration = await navigator.serviceWorker.ready
         await registration.sync.register(SYNC_TAG)
-        console.log('✅ Background sync registered')
+        logger.info('✅ Background sync registered')
       } catch (error) {
-        console.error('❌ Background sync registration failed:', error)
+        logger.error('❌ Background sync registration failed:', error)
       }
     }
   }
@@ -230,21 +231,21 @@ class OfflineManager {
       const pendingItems = await this.getPendingSyncItems()
 
       if (pendingItems.length === 0) {
-        console.log('✅ No pending items to sync')
+        logger.info('✅ No pending items to sync')
         return
       }
 
-      console.log(`🔄 Syncing ${pendingItems.length} items...`)
+      logger.info(`🔄 Syncing ${pendingItems.length} items...`)
 
       // Sync each item
       for (const item of pendingItems) {
         await this.syncItem(item)
       }
 
-      console.log('✅ Background sync completed')
+      logger.info('✅ Background sync completed')
       this.notifyUser('データ同期が完了しました', 'success')
     } catch (error) {
-      console.error('❌ Background sync failed:', error)
+      logger.error('❌ Background sync failed:', error)
       this.notifyUser('同期に失敗しました。後で再試行します。', 'error')
     } finally {
       this.syncPending = false
@@ -282,12 +283,12 @@ class OfflineManager {
       if (response.ok) {
         // Remove from pending sync
         await this.removePendingSyncItem(item.id)
-        console.log(`✅ Synced item: ${item.id}`)
+        logger.info(`✅ Synced item: ${item.id}`)
       } else {
-        console.error(`❌ Failed to sync item: ${item.id}`)
+        logger.error(`❌ Failed to sync item: ${item.id}`)
       }
     } catch (error) {
-      console.error(`❌ Error syncing item ${item.id}:`, error)
+      logger.error(`❌ Error syncing item ${item.id}:`, error)
     }
   }
 
@@ -316,17 +317,17 @@ class OfflineManager {
       '/api/exam/questions-basic',
     ]
 
-    console.log('📥 Prefetching critical data...')
+    logger.info('📥 Prefetching critical data...')
 
     for (const url of criticalUrls) {
       try {
         await this.prefetchUrl(url)
       } catch (error) {
-        console.error(`Failed to prefetch ${url}:`, error)
+        logger.error(`Failed to prefetch ${url}:`, error)
       }
     }
 
-    console.log('✅ Critical data prefetch completed')
+    logger.info('✅ Critical data prefetch completed')
   }
 
   /**
@@ -347,7 +348,7 @@ class OfflineManager {
         await this.cacheResponse(url, data)
       }
     } catch (error) {
-      console.error(`Prefetch failed for ${url}:`, error)
+      logger.error(`Prefetch failed for ${url}:`, error)
     }
   }
 
@@ -571,7 +572,7 @@ class OfflineManager {
       await store.put(question)
     }
 
-    console.log(`✅ Cached ${questions.length} exam questions for offline use`)
+    logger.info(`✅ Cached ${questions.length} exam questions for offline use`)
   }
 
   /**
@@ -619,7 +620,7 @@ class OfflineManager {
       const tx = this.db.transaction(storeName, 'readwrite')
       const store = tx.objectStore(storeName)
       await store.clear()
-      console.log(`✅ Cleared store: ${storeName}`)
+      logger.info(`✅ Cleared store: ${storeName}`)
     } else {
       // Clear all stores
       for (const store of Object.values(STORES)) {
@@ -627,7 +628,7 @@ class OfflineManager {
         const objectStore = tx.objectStore(store)
         await objectStore.clear()
       }
-      console.log('✅ Cleared all offline data')
+      logger.info('✅ Cleared all offline data')
     }
   }
 
@@ -663,7 +664,7 @@ class OfflineManager {
 
     // Console log
     const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'
-    console.log(`${emoji} ${message}`)
+    logger.info(`${emoji} ${message}`)
   }
 
   /**
@@ -678,13 +679,13 @@ class OfflineManager {
         this.notifyUser('バックグラウンド同期が完了しました', 'success')
         break
       case 'cache-updated':
-        console.log('Cache updated:', data)
+        logger.info('Cache updated:', data)
         break
       case 'offline-ready':
         this.notifyUser('オフライン学習の準備ができました', 'success')
         break
       default:
-        console.log('Service Worker message:', type, data)
+        logger.info('Service Worker message:', type, data)
     }
   }
 

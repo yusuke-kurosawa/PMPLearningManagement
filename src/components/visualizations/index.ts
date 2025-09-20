@@ -9,3 +9,6 @@ export { default as ProcessFlowDiagram } from './ProcessFlowDiagram.jsx'
 export { default as ProcessHeatmap } from './ProcessHeatmap.jsx'
 export { default as SankeyDiagram } from './SankeyDiagram.jsx'
 export { default as VisualizationHub } from './VisualizationHub.jsx'
+
+// OPM Visualization Components
+export { default as OPMHierarchyDiagram } from './OPMHierarchyDiagram.tsx'

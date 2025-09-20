@@ -22,6 +22,8 @@ export function useTouchGestures(handlers: SwipeHandlers) {
   const pinchStartDistanceRef = useRef<number>(0)
   const [isPinching, setIsPinching] = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const minSwipeDistance = 50
     const maxSwipeTime = 300

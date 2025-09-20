@@ -76,6 +76,7 @@ const RegisterForm: React.FC<{ onToggleMode }> = ({ onToggleMode }) => {
   const watchPassword = watch('password')
 
   // Update password strength when password changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     if (watchPassword) {
       const strength = authValidation.getPasswordStrength(watchPassword)

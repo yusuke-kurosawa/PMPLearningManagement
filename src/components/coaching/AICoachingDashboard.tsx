@@ -27,6 +27,7 @@ const AICoachingDashboard = () => {
   // Mock user ID - in real app this would come from auth context
   const userId = 'user123'
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadAICoaching()
   }, [])

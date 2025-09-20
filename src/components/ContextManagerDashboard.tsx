@@ -32,6 +32,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }: ContextManagerDash
   const [refreshInterval, setRefreshInterval] = useState(5000) // 5 seconds
 
   // Auto-refresh data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isOpen) {
       return

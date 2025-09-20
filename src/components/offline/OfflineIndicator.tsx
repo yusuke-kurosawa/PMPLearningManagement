@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react'
 import { WifiOff, Wifi, CloudOff, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { logger } from '../../services/logger'
 
 interface OfflineIndicatorProps {
   className?: string
@@ -19,13 +20,15 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
   const [syncPending, setSyncPending] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true)
       // Trigger background sync when coming online
       if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
         navigator.serviceWorker.ready.then((registration: ServiceWorkerRegistration) => {
-          // @ts-ignore - sync is not in TypeScript types yet
+          // @ts-expect-error - sync is not in TypeScript types yet
           registration.sync.register('offline-queue')
         })
       }
@@ -53,13 +56,13 @@ export function OfflineIndicator({ className, showDetails = false }: OfflineIndi
 
     // Check connection quality
     const checkConnection = () => {
-      // @ts-ignore - connection is not standard yet
+      // @ts-expect-error - connection is not standard yet
       const connection =
         navigator.connection || navigator.mozConnection || navigator.webkitConnection
       if (connection) {
         // Check for slow connections
         if (connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g') {
-          console.warn('Slow connection detected:', connection.effectiveType)
+          logger.warn('Slow connection detected:', connection.effectiveType)
         }
       }
     }

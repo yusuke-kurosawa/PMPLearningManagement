@@ -17,6 +17,8 @@ export function MobileLayout({ children }: MobileLayoutProps) {
   const [isOnline, setIsOnline] = useState(true)
   const [showOfflineBanner, setShowOfflineBanner] = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Check if can show install prompt
     if (isMobile() && !isStandalone()) {

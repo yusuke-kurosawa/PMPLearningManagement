@@ -1,3 +1,5 @@
+import { logger } from '../services/logger'
+
 /**
  * Performance utilities for optimization
  */
@@ -55,7 +57,7 @@ export function measurePerformance<T>(func: () => T, label: string = 'Performanc
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${label}: ${end - start} milliseconds`)
+      logger.info(`${label}: ${end - start} milliseconds`)
     }
   }
 

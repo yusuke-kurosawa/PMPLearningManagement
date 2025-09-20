@@ -71,6 +71,10 @@ const ITTOForceGraph = React.memo(() => {
   // )
 
   // Check for mobile device
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768)

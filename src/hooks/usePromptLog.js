@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import promptLogService from '../services/promptLogService'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/use-toast'
+const { logger } = require('../services/logger')
 
 export const usePromptLog = (options = {}) => {
   const { user } = useAuth()
@@ -52,7 +53,7 @@ export const usePromptLog = (options = {}) => {
         promptIdRef.current = promptId
         return promptId
       } catch (error) {
-        console.error('Failed to log prompt:', error)
+        logger.error('Failed to log prompt:', error)
         if (config.showErrors) {
           toast({
             title: 'Logging Error',
@@ -95,7 +96,7 @@ export const usePromptLog = (options = {}) => {
         responseIdRef.current = responseId
         return responseId
       } catch (error) {
-        console.error('Failed to log response:', error)
+        logger.error('Failed to log response:', error)
         if (config.showErrors) {
           toast({
             title: 'Logging Error',
@@ -127,7 +128,7 @@ export const usePromptLog = (options = {}) => {
           ...data,
         })
       } catch (error) {
-        console.error('Failed to log interaction:', error)
+        logger.error('Failed to log interaction:', error)
         return null
       }
     },
@@ -152,7 +153,7 @@ export const usePromptLog = (options = {}) => {
           context,
         })
       } catch (err) {
-        console.error('Failed to log error:', err)
+        logger.error('Failed to log error:', err)
         return null
       }
     },
@@ -178,7 +179,7 @@ export const usePromptLog = (options = {}) => {
           ...filters,
         })
       } catch (error) {
-        console.error('Failed to get history:', error)
+        logger.error('Failed to get history:', error)
         return []
       }
     },
@@ -205,7 +206,7 @@ export const usePromptLog = (options = {}) => {
         })
       }
     } catch (error) {
-      console.error('Failed to clear logs:', error)
+      logger.error('Failed to clear logs:', error)
       toast({
         title: 'Error',
         description: 'Failed to clear logs',
@@ -241,7 +242,7 @@ export const usePromptLog = (options = {}) => {
           description: `Logs exported as ${format.toUpperCase()}`,
         })
       } catch (error) {
-        console.error('Failed to export logs:', error)
+        logger.error('Failed to export logs:', error)
         toast({
           title: 'Export Failed',
           description: error.message,
@@ -259,7 +260,7 @@ export const usePromptLog = (options = {}) => {
     try {
       return await promptLogService.getStatistics(timeRange)
     } catch (error) {
-      console.error('Failed to get statistics:', error)
+      logger.error('Failed to get statistics:', error)
       return null
     }
   }, [])

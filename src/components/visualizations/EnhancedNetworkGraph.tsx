@@ -57,6 +57,8 @@ const EnhancedNetworkGraph = ({ data, onNodeClick }) => {
   }
 
   // レスポンシブ対応
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {

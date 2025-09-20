@@ -22,8 +22,6 @@ import {
   Wifi,
   WifiOff,
   AlertTriangle,
-  Upload,
-  Download,
 } from 'lucide-react'
 import { useProgressV2 } from '../../hooks/useProgressV2'
 import { processCategories, processGroups } from '../../services/progressService'
@@ -40,7 +38,7 @@ const LearningProgressDashboardV2 = () => {
     migrationStatus,
     resetProgress,
     syncData,
-    migrateToSupabase,
+    migrateToSupabase: _migrateToSupabase,
     refreshData,
   } = useProgressV2({
     loadOnMount: true,

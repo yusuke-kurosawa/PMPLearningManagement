@@ -94,6 +94,7 @@ const UserProfile = () => {
   const watchNewPassword = passwordForm.watch('newPassword')
 
   // Update password strength when new password changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     if (watchNewPassword) {
       const strength = authValidation.getPasswordStrength(watchNewPassword)

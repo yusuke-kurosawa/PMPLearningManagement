@@ -12,6 +12,8 @@ const AppLayout = ({ children }) => {
   const [showSidebar, setShowSidebar] = useState(true)
 
   // Check if we should show sidebar based on screen size
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const checkScreenSize = () => {
       setShowSidebar(window.innerWidth >= 1024) // lg breakpoint

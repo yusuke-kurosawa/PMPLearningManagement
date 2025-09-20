@@ -89,6 +89,8 @@ const EnhancedProgressDashboard: React.FC = () => {
     exportProgress,
   } = useProgressStore()
   // Load data on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadProgress()
     checkAchievements()

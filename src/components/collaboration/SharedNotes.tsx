@@ -33,14 +33,15 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
   })
 
   // ノートの読み込み
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadNotes()
     // ユーザー名の読み込み（簡易実装）
     const savedUser = localStorage.getItem('username') || 'Anonymous'
     setCurrentUser(savedUser)
-  }, [processId, knowledgeArea, filterTag])
+  }, [processId, knowledgeArea, filterTag, loadNotes])
 
-  const loadNotes = () => {
+  const loadNotes = useCallback((...args) => {
     const filters = {
       processId,
       knowledgeArea,
@@ -48,7 +49,7 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
     }
     const loadedNotes = collaborationService.getNotes(filters)
     setNotes(loadedNotes)
-  }
+  }, [])
 
   // ノートの作成
   const handleCreateNote = () => {

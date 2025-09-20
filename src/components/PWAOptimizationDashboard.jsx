@@ -4,6 +4,7 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+const { logger } = require('../services/logger')
 
 /**
  * PWA Optimization Dashboard
@@ -25,6 +26,7 @@ const PWAOptimizationDashboard = () => {
   const [alerts, setAlerts] = useState([])
   const metricsIntervalRef = useRef(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     initializeDashboard()
     startRealTimeMonitoring()
@@ -52,7 +54,7 @@ const PWAOptimizationDashboard = () => {
       // Check for optimization opportunities
       await analyzeOptimizations()
     } catch (error) {
-      console.error('Dashboard initialization failed:', error)
+      logger.error('Dashboard initialization failed:', error)
     }
   }
 
@@ -107,7 +109,7 @@ const PWAOptimizationDashboard = () => {
       // Check for performance alerts
       checkPerformanceAlerts(newMetrics)
     } catch (error) {
-      console.error('Failed to update metrics:', error)
+      logger.error('Failed to update metrics:', error)
     }
   }
 
@@ -191,7 +193,7 @@ const PWAOptimizationDashboard = () => {
         setRealTimeData(history.slice(-50))
       }
     } catch (error) {
-      console.warn('Failed to load historical data:', error)
+      logger.warn('Failed to load historical data:', error)
     }
   }
 

@@ -42,13 +42,11 @@ import {
 import {
   Download,
   Search,
-  Filter,
   RefreshCw,
   Trash2,
   Archive,
   Settings,
   AlertCircle,
-  CheckCircle,
   Clock,
   TrendingUp,
   TrendingDown,
@@ -56,10 +54,8 @@ import {
   MessageSquare,
   Bot,
   User,
-  Calendar,
   FileText,
   Database,
-  Activity,
   Eye,
   Copy,
   Share2,
@@ -70,6 +66,7 @@ import {
 import promptLogService from '../../services/promptLogService'
 import { useToast } from '../ui/use-toast'
 import { format, formatDistanceToNow } from 'date-fns'
+const { logger } = require('../../services/logger')
 
 const PromptLogDashboard = () => {
   const { toast } = useToast()
@@ -95,6 +92,9 @@ const PromptLogDashboard = () => {
   // //   const [refreshInterval, setRefreshInterval] = useState(null) // TODO: Will be used in future // TODO: Will be used in future
 
   // Load initial data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadLogs()
     loadStatistics()
@@ -126,7 +126,7 @@ const PromptLogDashboard = () => {
       })
       setLogs(result)
     } catch (error) {
-      console.error('Failed to load logs:', error)
+      logger.error('Failed to load logs:', error)
       toast({
         title: 'Error loading logs',
         description: error.message,
@@ -144,7 +144,7 @@ const PromptLogDashboard = () => {
       const stats = await promptLogService.getStatistics(timeRange)
       setStatistics(stats)
     } catch (error) {
-      console.error('Failed to load statistics:', error)
+      logger.error('Failed to load statistics:', error)
     }
   }, [filters.timeRange])
 

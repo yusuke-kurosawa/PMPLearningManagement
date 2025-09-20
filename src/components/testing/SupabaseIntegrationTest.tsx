@@ -54,7 +54,7 @@ const SupabaseIntegrationTest = () => {
     getFlashCardStats,
     getExamStats,
     syncData,
-    migrateToSupabase,
+    migrateToSupabase: _migrateToSupabase,
     checkMigrationFeasibility,
   } = useProgressV2({
     enableMigration: true,

@@ -10,19 +10,15 @@ import React, { useState, useEffect } from 'react'
 import {
   Database,
   Upload,
-  Download,
   RefreshCw,
   AlertTriangle,
   CheckCircle,
   XCircle,
   Settings,
   Shield,
-  Clock,
-  HardDrive,
   Wifi,
   WifiOff,
   Play,
-  Pause,
   X,
 } from 'lucide-react'
 import { useProgressV2 } from '../../hooks/useProgressV2'
@@ -93,6 +89,7 @@ const DataMigrationDashboard: React.FC<DataMigrationDashboardProps> = ({ isOpen,
   // エフェクト
   // ========================================
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       handleCheckFeasibility()

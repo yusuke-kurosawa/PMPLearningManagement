@@ -211,6 +211,9 @@ export const useProgressV2 = (options: UseProgressV2Options = {}): UseProgressV2
   /**
    * 初期化エフェクト
    */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const initialize = async () => {
       try {

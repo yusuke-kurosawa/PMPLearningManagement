@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { logger } from '../services/logger'
 
 interface OfflineState {
   isOnline: boolean
@@ -64,7 +65,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
         }
       }
     } catch (error) {
-      console.error('Failed to initialize IndexedDB:', error)
+      logger.error('Failed to initialize IndexedDB:', error)
     }
   }, [])
 
@@ -98,7 +99,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
         }))
       }
     } catch (error) {
-      console.error('Failed to check offline data size:', error)
+      logger.error('Failed to check offline data size:', error)
     }
   }, [])
 
@@ -119,7 +120,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'activated') {
-                console.log('Service Worker updated')
+                logger.info('Service Worker updated')
                 // Optionally reload the page or notify the user
               }
             })
@@ -128,7 +129,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
 
         return registration
       } catch (error) {
-        console.error('Service Worker registration failed:', error)
+        logger.error('Service Worker registration failed:', error)
       }
     }
   }, [])
@@ -136,13 +137,13 @@ export function useOffline(options: UseOfflineOptions = {}) {
   // Trigger background sync
   const triggerSync = useCallback(async (tag: string = 'offline-queue') => {
     if (!('serviceWorker' in navigator) || !('sync' in ServiceWorkerRegistration.prototype)) {
-      console.warn('Background sync not supported')
+      logger.warn('Background sync not supported')
       return false
     }
 
     try {
       const registration = await navigator.serviceWorker.ready
-      // @ts-ignore - sync is not in TypeScript types yet
+      // @ts-expect-error - sync is not in TypeScript types yet
       await registration.sync.register(tag)
 
       setState((prev) => ({
@@ -152,7 +153,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
 
       return true
     } catch (error) {
-      console.error('Failed to trigger sync:', error)
+      logger.error('Failed to trigger sync:', error)
       return false
     }
   }, [])
@@ -166,7 +167,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
       body?: any
     }) => {
       if (!dbRef.current) {
-        console.error('Database not initialized')
+        logger.error('Database not initialized')
         return false
       }
 
@@ -186,12 +187,12 @@ export function useOffline(options: UseOfflineOptions = {}) {
             resolve(true)
           }
           request.onerror = () => {
-            console.error('Failed to add to offline queue')
+            logger.error('Failed to add to offline queue')
             resolve(false)
           }
         })
       } catch (error) {
-        console.error('Failed to add to offline queue:', error)
+        logger.error('Failed to add to offline queue:', error)
         return false
       }
     },
@@ -216,7 +217,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
       checkOfflineDataSize()
       return true
     } catch (error) {
-      console.error('Failed to clear offline data:', error)
+      logger.error('Failed to clear offline data:', error)
       return false
     }
   }, [checkOfflineDataSize])
@@ -238,12 +239,15 @@ export function useOffline(options: UseOfflineOptions = {}) {
       }
       return false
     } catch (error) {
-      console.error('Failed to prefetch data:', error)
+      logger.error('Failed to prefetch data:', error)
       return false
     }
   }, [])
 
   // Setup event listeners
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleOnline = () => {
       setState((prev) => ({ ...prev, isOnline: true }))
@@ -363,7 +367,7 @@ export function useNetworkStatus() {
 
   useEffect(() => {
     const updateStatus = () => {
-      // @ts-ignore - connection is not standard yet
+      // @ts-expect-error - connection is not standard yet
       const connection =
         navigator.connection || navigator.mozConnection || navigator.webkitConnection
 
@@ -381,9 +385,9 @@ export function useNetworkStatus() {
     window.addEventListener('online', updateStatus)
     window.addEventListener('offline', updateStatus)
 
-    // @ts-ignore
+    // @ts-expect-error - Navigator.connection is not typed in TypeScript
     if (navigator.connection) {
-      // @ts-ignore
+      // @ts-expect-error - Navigator.connection is not typed in TypeScript
       navigator.connection.addEventListener('change', updateStatus)
     }
 
@@ -391,9 +395,9 @@ export function useNetworkStatus() {
       window.removeEventListener('online', updateStatus)
       window.removeEventListener('offline', updateStatus)
 
-      // @ts-ignore
+      // @ts-expect-error - Navigator.connection is not typed in TypeScript
       if (navigator.connection) {
-        // @ts-ignore
+        // @ts-expect-error - Navigator.connection is not typed in TypeScript
         navigator.connection.removeEventListener('change', updateStatus)
       }
     }

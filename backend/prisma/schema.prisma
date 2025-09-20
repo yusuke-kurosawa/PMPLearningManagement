@@ -1,0 +1,1178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector"), pg_trgm, btree_gin]
+}
+
+// ==========================================
+// Core User and Authentication Models
+// ==========================================
+
+model User {
+  id                String      @id @default(cuid())
+  email             String      @unique
+  username          String?     @unique
+  password          String?
+  firstName         String?
+  lastName          String?
+  avatarUrl         String?
+  role              UserRole    @default(STUDENT)
+  status            UserStatus  @default(ACTIVE)
+  emailVerified     Boolean     @default(false)
+  twoFactorEnabled  Boolean     @default(false)
+  
+  // OAuth providers
+  googleId          String?     @unique
+  githubId          String?     @unique
+  linkedinId        String?     @unique
+  
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  lastLoginAt       DateTime?
+  deletedAt         DateTime?
+  
+  // Relations
+  sessions          Session[]
+  profiles          UserProfile[]
+  progressRecords   UserProgress[]
+  examAttempts      ExamAttempt[]
+  studyGroups       StudyGroupMember[]
+  mentorships       Mentorship[]
+  mentoringRequests MentoringRequest[]
+  notes             Note[]
+  flashcardProgress FlashcardProgress[]
+  achievements      UserAchievement[]
+  preferences       UserPreference?
+  auditLogs         AuditLog[]
+  
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  MENTOR
+  STUDENT
+  GUEST
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  refreshToken String?  @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+}
+
+model UserProfile {
+  id               String   @id @default(cuid())
+  userId           String
+  pmbokVersion     PmbokVersion @default(V7)
+  experienceLevel  ExperienceLevel
+  certificationGoal String?
+  targetExamDate   DateTime?
+  studyHoursPerWeek Int?
+  timezone         String?
+  language         String   @default("ja")
+  bio              String?
+  linkedIn         String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, pmbokVersion])
+  @@index([userId])
+}
+
+enum PmbokVersion {
+  V6
+  V7
+  BOTH
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// ==========================================
+// PMBOK 7th Edition Core Models
+// ==========================================
+
+model Principle {
+  id               String   @id @default(cuid())
+  code             String   @unique // e.g., "stewardship", "team"
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  descriptionEn    String   @db.Text
+  details          String   @db.Text
+  detailsEn        String   @db.Text
+  order            Int
+  iconUrl          String?
+  
+  // Metadata
+  version          PmbokVersion @default(V7)
+  complexity       ComplexityLevel @default(MEDIUM)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  keyActions       KeyAction[]
+  domainMappings   PrincipleDomainMapping[]
+  resources        LearningResource[] @relation("PrincipleResources")
+  assessments      Assessment[] @relation("PrincipleAssessments")
+  userProgress     UserProgress[]
+  examples         PrincipleExample[]
+  
+  // Full-text search
+  @@index([name])
+  @@index([code])
+}
+
+model KeyAction {
+  id               String   @id @default(cuid())
+  principleId      String
+  action           String   @db.Text
+  actionEn         String   @db.Text
+  description      String?  @db.Text
+  order            Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  principle        Principle @relation(fields: [principleId], references: [id], onDelete: Cascade)
+  
+  @@index([principleId])
+}
+
+model PerformanceDomain {
+  id               String   @id @default(cuid())
+  code             String   @unique // e.g., "stakeholder", "team"
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  descriptionEn    String   @db.Text
+  order            Int
+  iconUrl          String?
+  
+  // Metadata
+  version          PmbokVersion @default(V7)
+  complexity       ComplexityLevel @default(MEDIUM)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  focusAreas       FocusArea[]
+  outcomes         DomainOutcome[]
+  interactions     DomainInteraction[] @relation("FromDomain")
+  interactedBy     DomainInteraction[] @relation("ToDomain")
+  principleMappings PrincipleDomainMapping[]
+  processMappings  ProcessDomainMapping[]
+  resources        LearningResource[] @relation("DomainResources")
+  assessments      Assessment[] @relation("DomainAssessments")
+  userProgress     UserProgress[]
+  examples         DomainExample[]
+  
+  @@index([name])
+  @@index([code])
+}
+
+model FocusArea {
+  id               String   @id @default(cuid())
+  domainId         String
+  area             String   @db.Text
+  areaEn           String   @db.Text
+  description      String?  @db.Text
+  order            Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  domain           PerformanceDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  
+  @@index([domainId])
+}
+
+model DomainOutcome {
+  id               String   @id @default(cuid())
+  domainId         String
+  outcome          String   @db.Text
+  outcomeEn        String   @db.Text
+  description      String?  @db.Text
+  measurementCriteria String? @db.Text
+  order            Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  domain           PerformanceDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  indicators       PerformanceIndicator[]
+  
+  @@index([domainId])
+}
+
+model DomainInteraction {
+  id               String   @id @default(cuid())
+  fromDomainId     String
+  toDomainId       String
+  interactionType  InteractionType
+  description      String?  @db.Text
+  strength         Int      @default(5) // 1-10 scale
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  fromDomain       PerformanceDomain @relation("FromDomain", fields: [fromDomainId], references: [id])
+  toDomain         PerformanceDomain @relation("ToDomain", fields: [toDomainId], references: [id])
+  
+  @@unique([fromDomainId, toDomainId])
+  @@index([fromDomainId])
+  @@index([toDomainId])
+}
+
+enum InteractionType {
+  STRONG
+  MODERATE
+  WEAK
+  CONDITIONAL
+}
+
+// ==========================================
+// Mapping Models (6th to 7th Edition)
+// ==========================================
+
+model PrincipleDomainMapping {
+  id               String   @id @default(cuid())
+  principleId      String
+  domainId         String
+  mappingType      MappingType
+  relevanceScore   Int      @default(5) // 1-10 scale
+  description      String?  @db.Text
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  principle        Principle @relation(fields: [principleId], references: [id])
+  domain           PerformanceDomain @relation(fields: [domainId], references: [id])
+  
+  @@unique([principleId, domainId])
+  @@index([principleId])
+  @@index([domainId])
+}
+
+model Process {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  knowledgeAreaId  String
+  processGroupId   String
+  
+  // PMBOK 6th Edition specific
+  version          PmbokVersion @default(V6)
+  processNumber    String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  knowledgeArea    KnowledgeArea @relation(fields: [knowledgeAreaId], references: [id])
+  processGroup     ProcessGroup @relation(fields: [processGroupId], references: [id])
+  inputs           ITTO[] @relation("ProcessInputs")
+  tools            ITTO[] @relation("ProcessTools")
+  outputs          ITTO[] @relation("ProcessOutputs")
+  domainMappings   ProcessDomainMapping[]
+  
+  @@index([knowledgeAreaId])
+  @@index([processGroupId])
+}
+
+model KnowledgeArea {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  order            Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  processes        Process[]
+  
+  @@index([name])
+}
+
+model ProcessGroup {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  order            Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  processes        Process[]
+  
+  @@index([name])
+}
+
+model ITTO {
+  id               String   @id @default(cuid())
+  type             ITTOType
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  category         String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Many-to-many relations
+  inputProcesses   Process[] @relation("ProcessInputs")
+  toolProcesses    Process[] @relation("ProcessTools")
+  outputProcesses  Process[] @relation("ProcessOutputs")
+  
+  @@index([type])
+  @@index([name])
+}
+
+enum ITTOType {
+  INPUT
+  TOOL
+  TECHNIQUE
+  OUTPUT
+}
+
+model ProcessDomainMapping {
+  id               String   @id @default(cuid())
+  processId        String
+  domainId         String
+  mappingType      MappingType
+  relevanceScore   Int      @default(5) // 1-10 scale
+  description      String?  @db.Text
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  process          Process @relation(fields: [processId], references: [id])
+  domain           PerformanceDomain @relation(fields: [domainId], references: [id])
+  
+  @@unique([processId, domainId])
+  @@index([processId])
+  @@index([domainId])
+}
+
+enum MappingType {
+  PRIMARY
+  SECONDARY
+  SUPPORTING
+  RELATED
+}
+
+enum ComplexityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+// ==========================================
+// Learning and Progress Models
+// ==========================================
+
+model LearningPath {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  nameEn           String
+  description      String   @db.Text
+  level            ExperienceLevel
+  estimatedHours   Int
+  pmbokVersion     PmbokVersion
+  isActive         Boolean  @default(true)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  steps            LearningStep[]
+  enrollments      PathEnrollment[]
+  
+  @@index([level])
+  @@index([pmbokVersion])
+}
+
+model LearningStep {
+  id               String   @id @default(cuid())
+  pathId           String
+  stepType         StepType
+  targetId         String   // Can reference Principle, Domain, Process, etc.
+  order            Int
+  name             String
+  description      String?  @db.Text
+  estimatedMinutes Int
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  path             LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  prerequisites    StepPrerequisite[] @relation("Step")
+  prerequisiteFor  StepPrerequisite[] @relation("PrerequisiteStep")
+  progress         StepProgress[]
+  
+  @@index([pathId])
+  @@index([targetId])
+}
+
+model StepPrerequisite {
+  id               String   @id @default(cuid())
+  stepId           String
+  prerequisiteId   String
+  isRequired       Boolean  @default(true)
+  
+  step             LearningStep @relation("Step", fields: [stepId], references: [id])
+  prerequisite     LearningStep @relation("PrerequisiteStep", fields: [prerequisiteId], references: [id])
+  
+  @@unique([stepId, prerequisiteId])
+  @@index([stepId])
+  @@index([prerequisiteId])
+}
+
+enum StepType {
+  PRINCIPLE
+  DOMAIN
+  PROCESS
+  KNOWLEDGE_AREA
+  ASSESSMENT
+  PRACTICE
+  VIDEO
+  READING
+}
+
+model PathEnrollment {
+  id               String   @id @default(cuid())
+  userId           String
+  pathId           String
+  status           EnrollmentStatus @default(ACTIVE)
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  progressPercent  Float    @default(0)
+  
+  user             User     @relation(fields: [userId], references: [id])
+  path             LearningPath @relation(fields: [pathId], references: [id])
+  stepProgress     StepProgress[]
+  
+  @@unique([userId, pathId])
+  @@index([userId])
+  @@index([pathId])
+  @@index([status])
+}
+
+model StepProgress {
+  id               String   @id @default(cuid())
+  enrollmentId     String
+  stepId           String
+  status           ProgressStatus @default(NOT_STARTED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  timeSpentMinutes Int      @default(0)
+  score            Float?
+  attempts         Int      @default(0)
+  
+  enrollment       PathEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  step             LearningStep @relation(fields: [stepId], references: [id])
+  
+  @@unique([enrollmentId, stepId])
+  @@index([enrollmentId])
+  @@index([stepId])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  DROPPED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+model UserProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  entityType       ProgressEntityType
+  entityId         String
+  progressPercent  Float    @default(0)
+  masteryLevel     MasteryLevel @default(NOVICE)
+  lastAccessedAt   DateTime @default(now())
+  timeSpentMinutes Int      @default(0)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id])
+  principle        Principle? @relation(fields: [entityId], references: [id])
+  domain           PerformanceDomain? @relation(fields: [entityId], references: [id])
+  
+  @@unique([userId, entityType, entityId])
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+enum ProgressEntityType {
+  PRINCIPLE
+  DOMAIN
+  PROCESS
+  KNOWLEDGE_AREA
+  PROCESS_GROUP
+}
+
+enum MasteryLevel {
+  NOVICE
+  BEGINNER
+  COMPETENT
+  PROFICIENT
+  EXPERT
+}
+
+// ==========================================
+// Assessment and Exam Models
+// ==========================================
+
+model Assessment {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  description      String?  @db.Text
+  type             AssessmentType
+  pmbokVersion     PmbokVersion
+  difficulty       DifficultyLevel
+  timeLimit        Int?     // in minutes
+  passingScore     Float    @default(70)
+  isActive         Boolean  @default(true)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  questions        Question[]
+  attempts         ExamAttempt[]
+  principles       Principle[] @relation("PrincipleAssessments")
+  domains          PerformanceDomain[] @relation("DomainAssessments")
+  
+  @@index([type])
+  @@index([pmbokVersion])
+}
+
+model Question {
+  id               String   @id @default(cuid())
+  assessmentId     String
+  type             QuestionType
+  question         String   @db.Text
+  questionEn       String?  @db.Text
+  explanation      String?  @db.Text
+  difficulty       DifficultyLevel
+  points           Float    @default(1)
+  order            Int
+  
+  // For categorization
+  principleId      String?
+  domainId         String?
+  processId        String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  assessment       Assessment @relation(fields: [assessmentId], references: [id])
+  options          QuestionOption[]
+  answers          Answer[]
+  
+  @@index([assessmentId])
+  @@index([principleId])
+  @@index([domainId])
+  @@index([processId])
+}
+
+model QuestionOption {
+  id               String   @id @default(cuid())
+  questionId       String
+  option           String   @db.Text
+  optionEn         String?  @db.Text
+  isCorrect        Boolean  @default(false)
+  order            Int
+  
+  question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@index([questionId])
+}
+
+model ExamAttempt {
+  id               String   @id @default(cuid())
+  userId           String
+  assessmentId     String
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  timeSpent        Int?     // in seconds
+  score            Float?
+  passed           Boolean  @default(false)
+  
+  user             User     @relation(fields: [userId], references: [id])
+  assessment       Assessment @relation(fields: [assessmentId], references: [id])
+  answers          Answer[]
+  
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([completedAt])
+}
+
+model Answer {
+  id               String   @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptions  String[] // Array of option IDs
+  textAnswer       String?  @db.Text
+  isCorrect        Boolean?
+  points           Float?
+  answeredAt       DateTime @default(now())
+  
+  attempt          ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question         Question @relation(fields: [questionId], references: [id])
+  
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+enum AssessmentType {
+  PRACTICE_QUIZ
+  CHAPTER_TEST
+  MOCK_EXAM
+  CERTIFICATION_PREP
+  DIAGNOSTIC
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_BLANK
+  MATCHING
+  ORDERING
+  ESSAY
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+// ==========================================
+// Learning Resources and Content
+// ==========================================
+
+model LearningResource {
+  id               String   @id @default(cuid())
+  title            String
+  titleEn          String?
+  description      String?  @db.Text
+  type             ResourceType
+  url              String?
+  content          String?  @db.Text
+  duration         Int?     // in minutes
+  difficulty       DifficultyLevel
+  pmbokVersion     PmbokVersion
+  isPublic         Boolean  @default(true)
+  isPremium        Boolean  @default(false)
+  
+  // Metadata
+  author           String?
+  publishedDate    DateTime?
+  tags             String[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  principles       Principle[] @relation("PrincipleResources")
+  domains          PerformanceDomain[] @relation("DomainResources")
+  
+  @@index([type])
+  @@index([pmbokVersion])
+  @@index([tags], type: Gin)
+}
+
+enum ResourceType {
+  VIDEO
+  ARTICLE
+  EBOOK
+  PODCAST
+  INFOGRAPHIC
+  TEMPLATE
+  CASE_STUDY
+  SIMULATION
+}
+
+model Flashcard {
+  id               String   @id @default(cuid())
+  deckId           String
+  front            String   @db.Text
+  frontEn          String?  @db.Text
+  back             String   @db.Text
+  backEn           String?  @db.Text
+  hint             String?
+  difficulty       DifficultyLevel
+  tags             String[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  deck             FlashcardDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  progress         FlashcardProgress[]
+  
+  @@index([deckId])
+  @@index([tags], type: Gin)
+}
+
+model FlashcardDeck {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?  @db.Text
+  category         String
+  pmbokVersion     PmbokVersion
+  isPublic         Boolean  @default(true)
+  createdBy        String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  cards            Flashcard[]
+  
+  @@index([category])
+  @@index([pmbokVersion])
+}
+
+model FlashcardProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  cardId           String
+  ease             Float    @default(2.5) // Anki-style ease factor
+  interval         Int      @default(1)   // Days until next review
+  repetitions      Int      @default(0)
+  lastReviewedAt   DateTime?
+  nextReviewAt     DateTime?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id])
+  card             Flashcard @relation(fields: [cardId], references: [id])
+  
+  @@unique([userId, cardId])
+  @@index([userId])
+  @@index([nextReviewAt])
+}
+
+// ==========================================
+// Collaboration Models
+// ==========================================
+
+model StudyGroup {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?  @db.Text
+  code             String   @unique @default(cuid())
+  maxMembers       Int      @default(10)
+  isPublic         Boolean  @default(true)
+  pmbokVersion     PmbokVersion
+  createdBy        String
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  members          StudyGroupMember[]
+  discussions      Discussion[]
+  sharedNotes      Note[]
+  
+  @@index([isPublic])
+  @@index([pmbokVersion])
+}
+
+model StudyGroupMember {
+  id               String   @id @default(cuid())
+  groupId          String
+  userId           String
+  role             GroupRole @default(MEMBER)
+  joinedAt         DateTime @default(now())
+  
+  group            StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user             User @relation(fields: [userId], references: [id])
+  
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+enum GroupRole {
+  OWNER
+  MODERATOR
+  MEMBER
+}
+
+model Discussion {
+  id               String   @id @default(cuid())
+  groupId          String?
+  title            String
+  content          String   @db.Text
+  authorId         String
+  isPinned         Boolean  @default(false)
+  isLocked         Boolean  @default(false)
+  viewCount        Int      @default(0)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  group            StudyGroup? @relation(fields: [groupId], references: [id])
+  comments         Comment[]
+  
+  @@index([groupId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id               String   @id @default(cuid())
+  discussionId     String
+  authorId         String
+  content          String   @db.Text
+  parentId         String?
+  isAnswer         Boolean  @default(false)
+  upvotes          Int      @default(0)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  discussion       Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  parent           Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies          Comment[] @relation("CommentReplies")
+  
+  @@index([discussionId])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+model Note {
+  id               String   @id @default(cuid())
+  userId           String
+  groupId          String?
+  title            String
+  content          String   @db.Text
+  contentVector    Unsupported("vector(1536)")? // For semantic search
+  category         String?
+  tags             String[]
+  isPublic         Boolean  @default(false)
+  
+  // Relations to PMBOK entities
+  principleId      String?
+  domainId         String?
+  processId        String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User @relation(fields: [userId], references: [id])
+  group            StudyGroup? @relation(fields: [groupId], references: [id])
+  
+  @@index([userId])
+  @@index([groupId])
+  @@index([tags], type: Gin)
+  @@index([principleId])
+  @@index([domainId])
+  @@index([processId])
+}
+
+// ==========================================
+// Mentorship Models
+// ==========================================
+
+model Mentorship {
+  id               String   @id @default(cuid())
+  mentorId         String
+  menteeId         String
+  status           MentorshipStatus @default(ACTIVE)
+  startDate        DateTime @default(now())
+  endDate          DateTime?
+  meetingFrequency String?  // e.g., "weekly", "biweekly"
+  goals            String?  @db.Text
+  notes            String?  @db.Text
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  mentor           User @relation(fields: [mentorId], references: [id])
+  sessions         MentorSession[]
+  
+  @@unique([mentorId, menteeId])
+  @@index([mentorId])
+  @@index([menteeId])
+  @@index([status])
+}
+
+model MentorSession {
+  id               String   @id @default(cuid())
+  mentorshipId     String
+  scheduledAt      DateTime
+  duration         Int      // in minutes
+  status           SessionStatus @default(SCHEDULED)
+  meetingUrl       String?
+  agenda           String?  @db.Text
+  notes            String?  @db.Text
+  feedback         String?  @db.Text
+  rating           Int?     // 1-5 scale
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  mentorship       Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+  
+  @@index([mentorshipId])
+  @@index([scheduledAt])
+}
+
+model MentoringRequest {
+  id               String   @id @default(cuid())
+  menteeId         String
+  message          String   @db.Text
+  focusAreas       String[]
+  preferredSchedule String?
+  status           RequestStatus @default(PENDING)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  mentee           User @relation(fields: [menteeId], references: [id])
+  
+  @@index([menteeId])
+  @@index([status])
+}
+
+enum MentorshipStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+// ==========================================
+// Performance and Analytics Models
+// ==========================================
+
+model PerformanceIndicator {
+  id               String   @id @default(cuid())
+  outcomeId        String
+  name             String
+  description      String?  @db.Text
+  metric           String   // e.g., "completion_rate", "quality_score"
+  targetValue      Float
+  unit             String   // e.g., "percentage", "count", "score"
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  outcome          DomainOutcome @relation(fields: [outcomeId], references: [id])
+  measurements     PerformanceMeasurement[]
+  
+  @@index([outcomeId])
+  @@index([metric])
+}
+
+model PerformanceMeasurement {
+  id               String   @id @default(cuid())
+  indicatorId      String
+  userId           String
+  value            Float
+  measuredAt       DateTime @default(now())
+  context          Json?    // Additional context data
+  
+  indicator        PerformanceIndicator @relation(fields: [indicatorId], references: [id])
+  
+  @@index([indicatorId])
+  @@index([userId])
+  @@index([measuredAt])
+}
+
+model UserAchievement {
+  id               String   @id @default(cuid())
+  userId           String
+  achievementId    String
+  unlockedAt       DateTime @default(now())
+  progress         Float    @default(100)
+  
+  user             User @relation(fields: [userId], references: [id])
+  achievement      Achievement @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+model Achievement {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  description      String   @db.Text
+  category         String
+  iconUrl          String?
+  points           Int      @default(10)
+  tier             AchievementTier @default(BRONZE)
+  criteria         Json     // Criteria for unlocking
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  users            UserAchievement[]
+  
+  @@index([category])
+  @@index([tier])
+}
+
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+// ==========================================
+// System and Utility Models
+// ==========================================
+
+model UserPreference {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  theme            String   @default("light")
+  language         String   @default("ja")
+  emailNotifications Boolean @default(true)
+  pushNotifications Boolean @default(false)
+  studyReminders   Boolean  @default(true)
+  reminderTime     String?  // e.g., "09:00"
+  weeklyGoalHours  Int?
+  preferredDifficulty DifficultyLevel?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id               String   @id @default(cuid())
+  userId           String?
+  action           String
+  entityType       String
+  entityId         String?
+  oldValues        Json?
+  newValues        Json?
+  ipAddress        String?
+  userAgent        String?
+  timestamp        DateTime @default(now())
+  
+  user             User? @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+}
+
+model PrincipleExample {
+  id               String   @id @default(cuid())
+  principleId      String
+  title            String
+  scenario         String   @db.Text
+  application      String   @db.Text
+  outcome          String   @db.Text
+  industry         String?
+  projectType      String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  principle        Principle @relation(fields: [principleId], references: [id])
+  
+  @@index([principleId])
+  @@index([industry])
+}
+
+model DomainExample {
+  id               String   @id @default(cuid())
+  domainId         String
+  title            String
+  scenario         String   @db.Text
+  implementation   String   @db.Text
+  benefits         String   @db.Text
+  challenges       String?  @db.Text
+  industry         String?
+  projectType      String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  domain           PerformanceDomain @relation(fields: [domainId], references: [id])
+  
+  @@index([domainId])
+  @@index([industry])
+}

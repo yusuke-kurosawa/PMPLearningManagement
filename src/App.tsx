@@ -54,6 +54,44 @@ const MobileOptimizedApp = React.lazy(() => import('./components/mobile/MobileOp
 // PWA Optimization Dashboard
 const PWAOptimizationDashboard = React.lazy(() => import('./components/PWAOptimizationDashboard'))
 
+// PMO Learning Hub
+const PMOLearningHub = React.lazy(() => import('./components/learning/PMOLearningHub'))
+
+// OPM Learning Components
+const OPMLearningHub = React.lazy(() => import('./components/learning/OPMLearningHub'))
+const OrganizationStructureComparison = React.lazy(
+  () => import('./components/learning/OrganizationStructureComparison')
+)
+const OPMHierarchyDiagram = React.lazy(
+  () => import('./components/visualizations/OPMHierarchyDiagram')
+)
+
+// Agile Learning Components
+const AgileManifestoHub = React.lazy(() => import('./components/learning/AgileManifestoHub'))
+const AgilePrinciplesExplorer = React.lazy(
+  () => import('./components/learning/AgilePrinciplesExplorer')
+)
+const AgilePracticesLibrary = React.lazy(
+  () => import('./components/learning/AgilePracticesLibrary')
+)
+const AgileValueComparison = React.lazy(
+  () => import('./components/visualizations/AgileValueComparison')
+)
+
+// Agile Mindset & Tailoring Components
+const AgileMindsetExplorer = React.lazy(() => import('./components/learning/AgileMindsetExplorer'))
+const TailoringGuide = React.lazy(() => import('./components/learning/TailoringGuide'))
+const AgileHybridIntegration = React.lazy(
+  () => import('./components/learning/AgileHybridIntegration')
+)
+const ECOMappingDashboard = React.lazy(() => import('./components/learning/ECOMappingDashboard'))
+
+// PMI Talent Triangle and Strategic Alignment Components
+const PMITalentTriangle = React.lazy(() => import('./components/learning/PMITalentTriangle'))
+const StrategicAlignment = React.lazy(() => import('./components/learning/StrategicAlignment'))
+const BusinessEnvironmentAnalysis = React.lazy(() => import('./components/learning/BusinessEnvironmentAnalysis'))
+const StrategicAlignmentToolkit = React.lazy(() => import('./components/learning/StrategicAlignmentToolkit'))
+
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
 const NetworkLoading = () => <NetworkLoader />
@@ -142,6 +180,21 @@ function App() {
                             }
                           />
                           <Route path='/flashcards' element={<FlashCardLearning />} />
+                          <Route path='/pmo-learning' element={<PMOLearningHub />} />
+                          <Route path='/opm-learning' element={<OPMLearningHub />} />
+                          <Route
+                            path='/organization-structure'
+                            element={<OrganizationStructureComparison />}
+                          />
+                          <Route path='/opm-hierarchy' element={<OPMHierarchyDiagram />} />
+                          <Route path='/agile-manifesto' element={<AgileManifestoHub />} />
+                          <Route path='/agile-principles' element={<AgilePrinciplesExplorer />} />
+                          <Route path='/agile-practices' element={<AgilePracticesLibrary />} />
+                          <Route path='/agile-values' element={<AgileValueComparison />} />
+                          <Route path='/agile-mindset' element={<AgileMindsetExplorer />} />
+                          <Route path='/tailoring-guide' element={<TailoringGuide />} />
+                          <Route path='/agile-hybrid' element={<AgileHybridIntegration />} />
+                          <Route path='/eco-mapping' element={<ECOMappingDashboard />} />
                           <Route
                             path='/mock-exam'
                             element={
@@ -187,6 +240,13 @@ function App() {
                             }
                           />
                           <Route path='/pmbok-versions' element={<PMBOKVersionSelector />} />
+                          
+                          {/* PMI Talent Triangle and Strategic Alignment Routes */}
+                          <Route path='/talent-triangle' element={<PMITalentTriangle />} />
+                          <Route path='/strategic-alignment' element={<StrategicAlignment />} />
+                          <Route path='/business-environment' element={<BusinessEnvironmentAnalysis />} />
+                          <Route path='/strategic-toolkit' element={<StrategicAlignmentToolkit />} />
+                          
                           <Route
                             path='/ai-coaching'
                             element={
@@ -334,6 +394,137 @@ function App() {
                             </Suspense>
                           }
                         />
+                        <Route
+                          path='/pmo-learning'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <PMOLearningHub />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/opm-learning'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <OPMLearningHub />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/organization-structure'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <OrganizationStructureComparison />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/opm-hierarchy'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <OPMHierarchyDiagram />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-manifesto'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgileManifestoHub />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-principles'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgilePrinciplesExplorer />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-practices'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgilePracticesLibrary />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-values'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgileValueComparison />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-mindset'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgileMindsetExplorer />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/tailoring-guide'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <TailoringGuide />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/agile-hybrid'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <AgileHybridIntegration />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/eco-mapping'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <ECOMappingDashboard />
+                            </Suspense>
+                          }
+                        />
+                        
+                        {/* PMI Talent Triangle and Strategic Alignment Routes */}
+                        <Route
+                          path='/talent-triangle'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <PMITalentTriangle />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/strategic-alignment'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <StrategicAlignment />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/business-environment'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <BusinessEnvironmentAnalysis />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/strategic-toolkit'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <StrategicAlignmentToolkit />
+                            </Suspense>
+                          }
+                        />
+                        
                         <Route
                           path='/mock-exam'
                           element={

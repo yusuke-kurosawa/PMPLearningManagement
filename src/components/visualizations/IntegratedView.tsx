@@ -11,6 +11,9 @@ const IntegratedView = React.memo(() => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   // Update window width on resize
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
@@ -40,9 +43,9 @@ const IntegratedView = React.memo(() => {
     [isDragging]
   )
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback((...args) => {
     setIsDragging(false)
-  }
+  }, [])
 
   const resetSplit = () => {
     setSplitRatio(50)

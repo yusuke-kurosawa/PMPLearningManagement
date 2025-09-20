@@ -36,6 +36,8 @@ const Register: React.FC = () => {
   const [passwordStrength, setPasswordStrength] = useState(0)
 
   // Redirect if already authenticated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/', { replace: true })

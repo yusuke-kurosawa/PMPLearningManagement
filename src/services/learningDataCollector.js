@@ -1,3 +1,5 @@
+const { logger } = require('/logger')
+
 /**
  * 学習データ収集・分析サービス
  * ユーザーの学習進捗、効果、パフォーマンスを測定し、最適な学習体験を提供
@@ -23,7 +25,7 @@ class LearningDataCollector {
       const stored = localStorage.getItem(this.storageKey)
       return stored ? JSON.parse(stored) : this.getDefaultData()
     } catch (error) {
-      console.error('学習データの読み込みエラー:', error)
+      logger.error('学習データの読み込みエラー:', error)
       return this.getDefaultData()
     }
   }
@@ -120,7 +122,7 @@ class LearningDataCollector {
       localStorage.setItem(this.storageKey, JSON.stringify(this.data))
       return true
     } catch (error) {
-      console.error('学習データの保存エラー:', error)
+      logger.error('学習データの保存エラー:', error)
       return false
     }
   }

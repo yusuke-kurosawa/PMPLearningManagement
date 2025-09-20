@@ -1,3 +1,5 @@
+import { logger } from '../services/logger'
+
 /**
  * Claude AI Integration Verification
  *
@@ -15,25 +17,13 @@ export const verifyClaudeAIIntegration = (): void => {
   }
 
   // 検証実行
-  /* eslint-disable-next-line no-console */
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Claude AI Integration Verification:')
-  }
-  /* eslint-disable-next-line no-console */
-  if (process.env.NODE_ENV === 'development') {
-    console.log('- ESLint errors resolved:', improvements.eslintErrors.after === 0)
-  }
-  /* eslint-disable-next-line no-console */
-  if (process.env.NODE_ENV === 'development') {
-    console.log('- TypeScript migration:', improvements.typeScriptFiles, 'files')
-  }
-  /* eslint-disable-next-line no-console */
-  if (process.env.NODE_ENV === 'development') {
-    console.log(
-      '- Workflow optimization:',
-      `${improvements.githubWorkflows.before} → ${improvements.githubWorkflows.after}`
-    )
-  }
+  logger.info('Claude AI Integration Verification:')
+  logger.info('- ESLint errors resolved:', improvements.eslintErrors.after === 0)
+  logger.info('- TypeScript migration:', improvements.typeScriptFiles, 'files')
+  logger.info(
+    '- Workflow optimization:',
+    `${improvements.githubWorkflows.before} → ${improvements.githubWorkflows.after}`
+  )
 }
 
 export default verifyClaudeAIIntegration

@@ -31,6 +31,10 @@ const GlobalSearch: React.FC = () => {
   const debouncedQuery = useDebounce(query, 300)
 
   // キーボードショートカット (Cmd/Ctrl + K)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {

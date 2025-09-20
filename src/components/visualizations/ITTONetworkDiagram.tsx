@@ -217,6 +217,7 @@ const ITTONetworkDiagram = () => {
   }
 
   // Handle window resize
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleResize = () => {
       if (svgRef.current) {

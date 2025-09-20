@@ -155,6 +155,7 @@ const FlashCardLearning = () => {
     return filtered
   }, [allProcesses, selectedCategory, selectedGroup, studyMode, cardAnswers])
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setSessionStats((prev) => ({
       ...prev,

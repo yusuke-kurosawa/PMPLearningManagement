@@ -8,6 +8,7 @@
 import React, { createContext, useContext, ReactNode } from 'react'
 import { useOffline } from '@/hooks/useOffline'
 import { OfflineIndicator, OfflineBanner } from '@/components/offline/OfflineIndicator'
+import { logger } from '../services/logger'
 
 interface OfflineContextValue {
   isOnline: boolean
@@ -48,10 +49,10 @@ export function OfflineProvider({
     enableAutoSync,
     syncInterval,
     onStatusChange: (isOnline) => {
-      console.log('Network status changed:', isOnline ? 'Online' : 'Offline')
+      logger.info('Network status changed:', isOnline ? 'Online' : 'Offline')
     },
     onSyncComplete: () => {
-      console.log('Background sync completed')
+      logger.info('Background sync completed')
     },
   })
 
