@@ -6,6 +6,30 @@
 import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 
+/**
+ * Logger for migration operations
+ * Uses appropriate logging based on environment
+ */
+const logger = {
+  info: (message: string, ...args: any[]) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(`[MIGRATION INFO] ${message}`, ...args)
+    }
+    // In production, this could be replaced with a proper logging service
+  },
+  error: (message: string, error?: any) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error(`[MIGRATION ERROR] ${message}`, error)
+    } else {
+      // In production, this could be replaced with error tracking service
+      // e.g., Sentry, DataDog, etc.
+      throw new Error(`Migration error: ${message}`)
+    }
+  }
+}
+
 interface MigrationContext {
   pool: Pool
   knowledgeAreaMap: Map<string, string>
@@ -23,7 +47,7 @@ export async function up(pool: Pool): Promise<void> {
     ittoMap: new Map(),
   }
 
-  console.log('Starting PMBOK data migration...')
+  logger.info('Starting PMBOK data migration...')
 
   try {
     await pool.query('BEGIN')
@@ -50,10 +74,10 @@ export async function up(pool: Pool): Promise<void> {
     await createLearningPaths(context)
 
     await pool.query('COMMIT')
-    console.log('PMBOK data migration completed successfully')
+    logger.info('PMBOK data migration completed successfully')
   } catch (error) {
     await pool.query('ROLLBACK')
-    console.error('Migration failed:', error)
+    logger.error('Migration failed:', error)
     throw error
   }
 }
@@ -102,7 +126,7 @@ async function seedProcessGroups(context: MigrationContext): Promise<void> {
     context.processGroupMap.set(pg.code, id)
   }
 
-  console.log(`Seeded ${processGroups.length} process groups`)
+  logger.info(`Seeded ${processGroups.length} process groups`)
 }
 
 async function seedKnowledgeAreas(context: MigrationContext): Promise<void> {
@@ -204,7 +228,7 @@ async function seedKnowledgeAreas(context: MigrationContext): Promise<void> {
     context.knowledgeAreaMap.set(ka.code, id)
   }
 
-  console.log(`Seeded ${knowledgeAreas.length} knowledge areas`)
+  logger.info(`Seeded ${knowledgeAreas.length} knowledge areas`)
 }
 
 async function seedProcesses(context: MigrationContext): Promise<void> {
@@ -695,7 +719,7 @@ async function seedProcesses(context: MigrationContext): Promise<void> {
     context.processMap.set(process.code, id)
   }
 
-  console.log(`Seeded ${processes.length} processes`)
+  logger.info(`Seeded ${processes.length} processes`)
 }
 
 async function seedITTOItems(context: MigrationContext): Promise<void> {
@@ -798,7 +822,7 @@ async function seedITTOItems(context: MigrationContext): Promise<void> {
     context.ittoMap.set(key, id)
   }
 
-  console.log(`Seeded ${ittoItems.length} ITTO items`)
+  logger.info(`Seeded ${ittoItems.length} ITTO items`)
 }
 
 async function mapProcessITTO(context: MigrationContext): Promise<void> {
@@ -918,7 +942,7 @@ async function mapProcessITTO(context: MigrationContext): Promise<void> {
     }
   }
 
-  console.log('Mapped ITTO items to processes')
+  logger.info('Mapped ITTO items to processes')
 }
 
 async function createProcessRelationships(context: MigrationContext): Promise<void> {
@@ -1031,7 +1055,7 @@ async function createProcessRelationships(context: MigrationContext): Promise<vo
     }
   }
 
-  console.log(`Created ${relationships.length} process relationships`)
+  logger.info(`Created ${relationships.length} process relationships`)
 }
 
 async function createLearningPaths(context: MigrationContext): Promise<void> {
@@ -1116,7 +1140,7 @@ async function createLearningPaths(context: MigrationContext): Promise<void> {
     }
   }
 
-  console.log(`Created ${learningPaths.length} learning paths`)
+  logger.info(`Created ${learningPaths.length} learning paths`)
 }
 
 export async function down(pool: Pool): Promise<void> {
@@ -1134,10 +1158,10 @@ export async function down(pool: Pool): Promise<void> {
     await pool.query('DELETE FROM process_groups')
 
     await pool.query('COMMIT')
-    console.log('PMBOK data migration rolled back successfully')
+    logger.info('PMBOK data migration rolled back successfully')
   } catch (error) {
     await pool.query('ROLLBACK')
-    console.error('Rollback failed:', error)
+    logger.error('Rollback failed:', error)
     throw error
   }
 }

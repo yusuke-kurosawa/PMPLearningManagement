@@ -94,7 +94,18 @@
     "serena:deploy:pre": "node scripts/serena-deploy-validator.js pre-deploy",
     "serena:deploy:post-build": "node scripts/serena-deploy-validator.js post-build",
     "serena:deploy:post-deploy": "node scripts/serena-deploy-validator.js post-deploy",
-    "deploy:serena": "npm run serena:deploy:pre && npm run build && npm run serena:deploy:post-build && gh-pages -d dist && npm run serena:deploy:post-deploy"
+    "deploy:serena": "npm run serena:deploy:pre && npm run build && npm run serena:deploy:post-build && gh-pages -d dist && npm run serena:deploy:post-deploy",
+    "context7:setup": "node scripts/context7-api-setup.js setup",
+    "context7:test": "node scripts/context7-api-setup.js test",
+    "context7:optimize": "node scripts/context7-api-setup.js optimize",
+    "context7:compare": "node scripts/context7-api-setup.js compare",
+    "context7:status": "node scripts/context7-api-setup.js status",
+    "context7:monitor:start": "node scripts/context7-monitor.js start",
+    "context7:monitor:stop": "node scripts/context7-monitor.js stop",
+    "context7:monitor:status": "node scripts/context7-monitor.js status",
+    "context7:monitor:health": "node scripts/context7-monitor.js health",
+    "context7:monitor:diagnostics": "node scripts/context7-monitor.js diagnostics",
+    "dev:with-context7": "npm run context7:monitor:start && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

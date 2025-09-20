@@ -1,0 +1,23 @@
+{
+  "currentConfiguration": "Free Tier",
+  "performance": {
+    "Rate Limit": "10 req/min",
+    "Concurrent Requests": "2",
+    "Cache Performance": "Standard",
+    "Documentation Access": "Basic",
+    "Response Priority": "Standard"
+  },
+  "features": {
+    "Real-time Analytics": "❌",
+    "Custom Sources": "❌",
+    "Priority Support": "❌",
+    "Advanced Caching": "❌",
+    "Bulk Operations": "❌"
+  },
+  "estimatedPerformance": {
+    "Response Time": "5-10 seconds",
+    "Success Rate": ">85%",
+    "Cache Hit Rate": ">70%",
+    "Memory Usage": "Standard"
+  }
+}

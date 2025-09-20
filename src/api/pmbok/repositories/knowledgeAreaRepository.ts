@@ -12,7 +12,37 @@ import {
   PaginatedResponse,
   ProcessRelationship,
 } from '../types'
-import { BaseRepository } from './baseRepository'
+// Note: BaseRepository is referenced but not implemented yet
+// import { BaseRepository } from './baseRepository'
+
+abstract class BaseRepository<_T> {
+  protected pool: Pool
+  protected tableName: string
+
+  constructor(pool: Pool, tableName: string) {
+    this.pool = pool
+    this.tableName = tableName
+  }
+
+  protected toSnakeCase(str: string): string {
+    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+  }
+
+  async transaction<R>(fn: (client: PoolClient) => Promise<R>): Promise<R> {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      const result = await fn(client)
+      await client.query('COMMIT')
+      return result
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  }
+}
 
 export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
   constructor(pool: Pool) {
@@ -44,7 +74,7 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
       WHERE 1=1
     `
 
-    const params: any[] = []
+    const params: unknown[] = []
     let paramIndex = 1
 
     // Apply filters
@@ -192,7 +222,7 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
     const conn = client || this.pool
 
     const updates: string[] = []
-    const params: any[] = []
+    const params: unknown[] = []
     let paramIndex = 1
 
     // Build dynamic update query
@@ -315,7 +345,16 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
   /**
    * Get statistics for all knowledge areas
    */
-  async getStatistics(): Promise<any> {
+  async getStatistics(): Promise<
+    Array<{
+      id: string
+      name: string
+      pmbokVersion: PMBOKVersion
+      processCount: number
+      ittoCount: number
+      avgLearningTime: number
+    }>
+  > {
     const query = `
       SELECT 
         ka.id,
@@ -335,12 +374,12 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
     const result = await this.pool.query(query)
 
     return result.rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      pmbokVersion: row.pmbok_version,
-      processCount: parseInt(row.process_count),
-      ittoCount: parseInt(row.itto_count),
-      avgLearningTime: parseFloat(row.avg_learning_time) || 0,
+      id: row.id as string,
+      name: row.name as string,
+      pmbokVersion: row.pmbok_version as PMBOKVersion,
+      processCount: parseInt(row.process_count as string),
+      ittoCount: parseInt(row.itto_count as string),
+      avgLearningTime: parseFloat(row.avg_learning_time as string) || 0,
     }))
   }
 
@@ -395,17 +434,21 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
 
       const result = await this.pool.query(query, [areaIds])
 
-      const processMap = new Map<string, any[]>()
+      const processMap = new Map<string, Record<string, unknown>[]>()
       result.rows.forEach((row) => {
-        const kaId = row.knowledge_area_id
+        const kaId = row.knowledge_area_id as string
         if (!processMap.has(kaId)) {
           processMap.set(kaId, [])
         }
-        processMap.get(kaId)!.push(this.mapProcessRow(row))
+        const processes = processMap.get(kaId)
+        if (processes) {
+          processes.push(this.mapProcessRow(row))
+        }
       })
 
       areas.forEach((area) => {
-        ;(area as any).processes = processMap.get(area.id) || []
+        const extendedArea = area as KnowledgeArea & { processes?: Record<string, unknown>[] }
+        extendedArea.processes = processMap.get(area.id) || []
       })
     }
 
@@ -418,18 +461,19 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
 
       const result = await this.pool.query(query, [areaIds])
 
-      const metricsMap = new Map<string, any>()
+      const metricsMap = new Map<string, unknown>()
       result.rows.forEach((row) => {
-        metricsMap.set(row.id, {
-          totalProcesses: parseInt(row.total_processes),
-          totalIttoItems: parseInt(row.total_itto_items),
-          avgLearningTime: parseFloat(row.avg_learning_time),
-          totalRelationships: parseInt(row.total_relationships),
+        metricsMap.set(row.id as string, {
+          totalProcesses: parseInt(row.total_processes as string),
+          totalIttoItems: parseInt(row.total_itto_items as string),
+          avgLearningTime: parseFloat(row.avg_learning_time as string),
+          totalRelationships: parseInt(row.total_relationships as string),
         })
       })
 
       areas.forEach((area) => {
-        ;(area as any).metrics = metricsMap.get(area.id) || null
+        const extendedArea = area as KnowledgeArea & { metrics?: unknown }
+        extendedArea.metrics = metricsMap.get(area.id) || null
       })
     }
   }
@@ -437,40 +481,40 @@ export class KnowledgeAreaRepository extends BaseRepository<KnowledgeArea> {
   /**
    * Map database row to entity
    */
-  private mapRowToEntity(row: any): KnowledgeArea {
+  private mapRowToEntity(row: Record<string, unknown>): KnowledgeArea {
     return {
-      id: row.id,
-      name: row.name,
-      code: row.code,
-      description: row.description,
-      pmbokVersion: row.pmbok_version,
-      processCount: parseInt(row.process_count),
-      color: row.color,
-      icon: row.icon,
-      displayOrder: parseInt(row.display_order),
-      metadata: row.metadata,
-      isActive: row.is_active,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      createdBy: row.created_by,
-      updatedBy: row.updated_by,
+      id: row.id as string,
+      name: row.name as string,
+      code: row.code as string,
+      description: row.description as string,
+      pmbokVersion: row.pmbok_version as PMBOKVersion,
+      processCount: parseInt(row.process_count as string),
+      color: row.color as string | undefined,
+      icon: row.icon as string | undefined,
+      displayOrder: parseInt(row.display_order as string),
+      metadata: row.metadata as Record<string, unknown> | undefined,
+      isActive: row.is_active as boolean,
+      createdAt: row.created_at as Date,
+      updatedAt: row.updated_at as Date,
+      createdBy: row.created_by as string | undefined,
+      updatedBy: row.updated_by as string | undefined,
     }
   }
 
   /**
    * Map process row to entity
    */
-  private mapProcessRow(row: any): any {
+  private mapProcessRow(row: Record<string, unknown>): Record<string, unknown> {
     return {
-      id: row.id,
-      name: row.name,
-      code: row.code,
-      knowledgeAreaId: row.knowledge_area_id,
-      processGroupId: row.process_group_id,
-      description: row.description,
-      complexity: row.complexity,
-      estimatedLearningTime: row.estimated_learning_time,
-      displayOrder: row.display_order,
+      id: row.id as string,
+      name: row.name as string,
+      code: row.code as string,
+      knowledgeAreaId: row.knowledge_area_id as string,
+      processGroupId: row.process_group_id as string,
+      description: row.description as string,
+      complexity: row.complexity as string,
+      estimatedLearningTime: row.estimated_learning_time as number,
+      displayOrder: row.display_order as number,
     }
   }
 }

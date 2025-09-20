@@ -17,11 +17,47 @@ import {
   ApiError,
 } from '../types'
 import { KnowledgeAreaRepository } from '../repositories/knowledgeAreaRepository'
-import { ProcessRepository } from '../repositories/processRepository'
-import { UserProgressRepository } from '../repositories/userProgressRepository'
-import { CacheService } from './cacheService'
-import { ValidationService } from './validationService'
-import { AuditService } from './auditService'
+// Note: These services are referenced but not implemented yet
+// import { ProcessRepository } from '../repositories/processRepository'
+// import { UserProgressRepository } from '../repositories/userProgressRepository'
+// import { CacheService } from './cacheService'
+// import { ValidationService } from './validationService'
+// import { AuditService } from './auditService'
+
+// Mock types for unimplemented dependencies
+interface ProcessRepository {
+  findByKnowledgeArea(id: string): Promise<unknown[]>
+  countByKnowledgeArea(id: string): Promise<number>
+}
+
+interface UserProgressRepository {
+  findByUserAndProcesses(userId: string, processIds: string[]): Promise<unknown[]>
+  getUserSummary(userId: string): Promise<unknown[]>
+}
+
+interface CacheService {
+  get<T>(key: string): Promise<T | null>
+  set<T>(key: string, value: T, ttl: number): Promise<void>
+  invalidate(pattern: string): Promise<void>
+}
+
+interface ValidationService {
+  validateKnowledgeArea(dto: CreateKnowledgeAreaDto): Promise<ValidationResult>
+  validateKnowledgeAreaUpdate(dto: UpdateKnowledgeAreaDto): Promise<ValidationResult>
+}
+
+interface AuditService {
+  log(
+    entry: {
+      action: string
+      entityType: string
+      entityId: string
+      userId: string
+      data: unknown
+    },
+    client?: unknown
+  ): Promise<void>
+}
 import { EventEmitter } from 'events'
 
 export class KnowledgeAreaService extends EventEmitter {
@@ -131,7 +167,7 @@ export class KnowledgeAreaService extends EventEmitter {
       const detail: KnowledgeAreaDetail = { ...knowledgeArea }
 
       // Load additional data in parallel
-      const promises: Promise<any>[] = []
+      const promises: Promise<unknown>[] = []
 
       if (includeProcesses) {
         promises.push(
@@ -378,16 +414,22 @@ export class KnowledgeAreaService extends EventEmitter {
 
         if (progressData.length > 0) {
           metrics.completedProcesses = progressData.filter(
-            (p) => p.completionPercentage >= 100
+            (p) => (p as { completionPercentage: number }).completionPercentage >= 100
           ).length
 
-          const totalScore = progressData.reduce((sum, p) => sum + (p.score || 0), 0)
+          const totalScore = progressData.reduce(
+            (sum, p) => sum + ((p as { score?: number }).score || 0),
+            0
+          )
           metrics.averageScore = totalScore / progressData.length
 
-          metrics.totalLearningTime = progressData.reduce((sum, p) => sum + p.timeSpent, 0)
+          metrics.totalLearningTime = progressData.reduce(
+            (sum, p) => sum + (p as { timeSpent: number }).timeSpent,
+            0
+          )
 
           // Calculate mastery level (weighted average)
-          const masteryWeights = {
+          const masteryWeights: Record<string, number> = {
             beginner: 0.25,
             intermediate: 0.5,
             advanced: 0.75,
@@ -395,15 +437,15 @@ export class KnowledgeAreaService extends EventEmitter {
           }
 
           const totalMastery = progressData.reduce(
-            (sum, p) => sum + masteryWeights[p.masteryLevel],
+            (sum, p) => sum + (masteryWeights[(p as { masteryLevel: string }).masteryLevel] || 0),
             0
           )
           metrics.masteryLevel = (totalMastery / processes.length) * 100
 
           // Get last activity
           const lastActivities = progressData
-            .filter((p) => p.lastAccessed)
-            .map((p) => p.lastAccessed!)
+            .filter((p) => (p as { lastAccessed?: Date }).lastAccessed)
+            .map((p) => (p as { lastAccessed: Date }).lastAccessed)
 
           if (lastActivities.length > 0) {
             metrics.lastActivity = new Date(Math.max(...lastActivities.map((d) => d.getTime())))
@@ -437,8 +479,13 @@ export class KnowledgeAreaService extends EventEmitter {
       // Sort by recommendation score
       const recommendations = allAreas.data
         .map((area) => {
-          const progress = progressSummary.find((p) => p.knowledgeAreaId === area.id)
-          const score = this.calculateRecommendationScore(area, progress)
+          const progress = progressSummary.find(
+            (p) => (p as { knowledgeAreaId: string }).knowledgeAreaId === area.id
+          )
+          const score = this.calculateRecommendationScore(
+            area,
+            progress as Record<string, unknown> | undefined
+          )
           return { area, score }
         })
         .sort((a, b) => b.score - a.score)
@@ -455,7 +502,10 @@ export class KnowledgeAreaService extends EventEmitter {
   /**
    * Calculate recommendation score for a knowledge area
    */
-  private calculateRecommendationScore(area: KnowledgeArea, progress?: any): number {
+  private calculateRecommendationScore(
+    area: KnowledgeArea,
+    progress?: Record<string, unknown>
+  ): number {
     let score = 100
 
     if (!progress) {
@@ -464,12 +514,12 @@ export class KnowledgeAreaService extends EventEmitter {
     }
 
     // Reduce score based on completion
-    score -= progress.avgCompletion || 0
+    score -= (progress.avgCompletion as number) || 0
 
     // Adjust based on last activity (boost recently active areas)
     if (progress.lastActivity) {
       const daysSinceActivity = Math.floor(
-        (Date.now() - new Date(progress.lastActivity).getTime()) / (1000 * 60 * 60 * 24)
+        (Date.now() - new Date(progress.lastActivity as string).getTime()) / (1000 * 60 * 60 * 24)
       )
       if (daysSinceActivity < 7) {
         score += 20 // Recent activity bonus
@@ -479,7 +529,7 @@ export class KnowledgeAreaService extends EventEmitter {
     }
 
     // Adjust based on mastery level
-    if (progress.avgScore < 70) {
+    if ((progress.avgScore as number) < 70) {
       score += 15 // Needs improvement bonus
     }
 
@@ -492,22 +542,22 @@ export class KnowledgeAreaService extends EventEmitter {
   async bulkImport(
     areas: CreateKnowledgeAreaDto[],
     userId: string
-  ): Promise<{ successful: number; failed: number; errors: any[] }> {
+  ): Promise<{ successful: number; failed: number; errors: { area: string; error: string }[] }> {
     const results = {
       successful: 0,
       failed: 0,
-      errors: [] as any[],
+      errors: [] as { area: string; error: string }[],
     }
 
     for (const area of areas) {
       try {
         await this.createKnowledgeArea(area, userId)
         results.successful++
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.failed++
         results.errors.push({
           area: area.code,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         })
       }
     }
@@ -521,7 +571,7 @@ export class KnowledgeAreaService extends EventEmitter {
   /**
    * Generate cache key
    */
-  private generateCacheKey(prefix: string, params: any): string {
+  private generateCacheKey(prefix: string, params: Record<string, unknown>): string {
     const paramStr = Object.entries(params)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}:${JSON.stringify(v)}`)
@@ -560,7 +610,7 @@ export class KnowledgeAreaService extends EventEmitter {
   /**
    * Handle and log errors
    */
-  private handleError(context: string, error: any): void {
+  private handleError(context: string, error: unknown): void {
     console.error(`[KnowledgeAreaService] ${context}:`, error)
     this.emit('error', { context, error })
   }

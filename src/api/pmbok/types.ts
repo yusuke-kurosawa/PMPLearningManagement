@@ -80,7 +80,7 @@ export interface KnowledgeArea extends BaseEntity, AuditFields {
   color?: string
   icon?: string
   displayOrder: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive: boolean
 }
 
@@ -98,7 +98,7 @@ export interface CreateKnowledgeAreaDto {
   color?: string
   icon?: string
   displayOrder?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface UpdateKnowledgeAreaDto {
@@ -107,7 +107,7 @@ export interface UpdateKnowledgeAreaDto {
   color?: string
   icon?: string
   displayOrder?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive?: boolean
 }
 
@@ -120,7 +120,7 @@ export interface ProcessGroup extends BaseEntity {
   processCount: number
   color?: string
   icon?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive: boolean
 }
 
@@ -142,7 +142,7 @@ export interface Process extends BaseEntity, AuditFields {
   complexity: ProcessComplexity
   estimatedLearningTime?: number // in minutes
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive: boolean
   version: number
 }
@@ -167,7 +167,7 @@ export interface CreateProcessDto {
   complexity?: ProcessComplexity
   estimatedLearningTime?: number
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface UpdateProcessDto {
@@ -179,7 +179,7 @@ export interface UpdateProcessDto {
   complexity?: ProcessComplexity
   estimatedLearningTime?: number
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive?: boolean
 }
 
@@ -192,7 +192,7 @@ export interface ITTOItem extends BaseEntity {
   isEnterprise: boolean
   isOrganizational: boolean
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ProcessITTO {
@@ -225,7 +225,7 @@ export interface ProcessRelationship extends BaseEntity {
   relationshipType: RelationshipType
   strength?: number // 0-1
   description?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ProcessRelationships {
@@ -246,7 +246,7 @@ export interface UserProgress extends BaseEntity {
   timeSpent: number // in minutes
   lastAccessed?: Date
   notes?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface UserProgressSummary {
@@ -269,7 +269,7 @@ export interface LearningPath extends BaseEntity, AuditFields {
   prerequisites?: string[]
   targetRoles?: string[]
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isActive: boolean
   steps?: LearningPathStep[]
 }
@@ -282,7 +282,7 @@ export interface LearningPathStep {
   isOptional: boolean
   estimatedTime?: number // in minutes
   description?: string
-  successCriteria?: Record<string, any>
+  successCriteria?: Record<string, unknown>
   process?: Process
 }
 
@@ -434,7 +434,7 @@ export interface AnalyticsEvent {
   eventType: string
   entityType: string
   entityId: string
-  eventData?: Record<string, any>
+  eventData?: Record<string, unknown>
   sessionId?: string
   ipAddress?: string
   userAgent?: string
@@ -452,7 +452,7 @@ export interface ApiResponse<T> {
 export interface ApiError {
   code: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: Date
 }
 
@@ -468,28 +468,26 @@ export interface ValidationResult {
   errors?: ValidationError[]
 }
 
-// Export all types as namespace for easier imports
-export namespace PMBOKTypes {
-  export type {
-    KnowledgeArea,
-    KnowledgeAreaDetail,
-    ProcessGroup,
-    ProcessGroupDetail,
-    Process,
-    ProcessDetail,
-    ITTOItem,
-    ITTO,
-    ProcessRelationship,
-    UserProgress,
-    LearningPath,
-    LearningPathStep,
-    KnowledgeAreaMetrics,
-    KnowledgeAreaAnalytics,
-    ProcessMasteryAnalytics,
-    SearchResult,
-    SearchResponse,
-    PaginatedResponse,
-    ApiResponse,
-    ApiError,
-  }
+// Export all types as a module for easier imports
+export type PMBOKTypesCollection = {
+  KnowledgeArea: KnowledgeArea
+  KnowledgeAreaDetail: KnowledgeAreaDetail
+  ProcessGroup: ProcessGroup
+  ProcessGroupDetail: ProcessGroupDetail
+  Process: Process
+  ProcessDetail: ProcessDetail
+  ITTOItem: ITTOItem
+  ITTO: ITTO
+  ProcessRelationship: ProcessRelationship
+  UserProgress: UserProgress
+  LearningPath: LearningPath
+  LearningPathStep: LearningPathStep
+  KnowledgeAreaMetrics: KnowledgeAreaMetrics
+  KnowledgeAreaAnalytics: KnowledgeAreaAnalytics
+  ProcessMasteryAnalytics: ProcessMasteryAnalytics
+  SearchResult: SearchResult
+  SearchResponse: SearchResponse
+  PaginatedResponse: PaginatedResponse<unknown>
+  ApiResponse: ApiResponse<unknown>
+  ApiError: ApiError
 }

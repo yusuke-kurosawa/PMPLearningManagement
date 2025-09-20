@@ -1,0 +1,454 @@
+{
+  "name": "PMP Learning Management - Custom Documentation Sources",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-20",
+  "project": {
+    "name": "pmp-learning-management",
+    "type": "react-spa",
+    "framework": "react@18.2",
+    "language": "typescript@5.3",
+    "buildTool": "vite@7.1"
+  },
+  "documentationSources": {
+    "primary": [
+      {
+        "name": "React Documentation",
+        "url": "https://react.dev",
+        "priority": 1,
+        "category": "framework",
+        "sections": [
+          "learn/describing-the-ui",
+          "learn/adding-interactivity",
+          "learn/managing-state",
+          "learn/escape-hatches",
+          "reference/react",
+          "reference/react-dom"
+        ],
+        "searchPaths": [
+          "/learn/describing-the-ui",
+          "/learn/adding-interactivity",
+          "/learn/managing-state",
+          "/reference/react",
+          "/reference/react-dom/hooks"
+        ],
+        "relevance": "Core framework for component development",
+        "features": ["hooks", "context", "router", "testing", "performance"],
+        "cacheStrategy": {
+          "ttl": 172800,
+          "priority": "high"
+        }
+      },
+      {
+        "name": "TypeScript Handbook",
+        "url": "https://www.typescriptlang.org",
+        "priority": 1,
+        "category": "language",
+        "sections": [
+          "docs/handbook",
+          "docs/reference",
+          "docs/declaration-files"
+        ],
+        "searchPaths": [
+          "/docs/handbook/2/basic-types.html",
+          "/docs/handbook/2/objects.html",
+          "/docs/handbook/interfaces.html",
+          "/docs/handbook/advanced-types.html",
+          "/docs/handbook/react.html"
+        ],
+        "relevance": "Type system and advanced TypeScript patterns",
+        "features": ["strict-mode", "jsx", "decorators", "modules"],
+        "cacheStrategy": {
+          "ttl": 172800,
+          "priority": "high"
+        }
+      },
+      {
+        "name": "Vite Documentation",
+        "url": "https://vitejs.dev",
+        "priority": 1,
+        "category": "build-tool",
+        "sections": [
+          "guide",
+          "config",
+          "plugins"
+        ],
+        "searchPaths": [
+          "/guide/features.html",
+          "/guide/build.html",
+          "/config/",
+          "/guide/env-and-mode.html"
+        ],
+        "relevance": "Build tool configuration and optimization",
+        "features": ["dev-server", "hmr", "plugins", "build-optimization"],
+        "cacheStrategy": {
+          "ttl": 86400,
+          "priority": "high"
+        }
+      }
+    ],
+    "secondary": [
+      {
+        "name": "Tailwind CSS",
+        "url": "https://tailwindcss.com",
+        "priority": 2,
+        "category": "styling",
+        "sections": [
+          "docs/installation",
+          "docs/utility-first",
+          "docs/responsive-design",
+          "docs/customization"
+        ],
+        "searchPaths": [
+          "/docs/utility-first",
+          "/docs/responsive-design",
+          "/docs/dark-mode",
+          "/docs/customizing-colors"
+        ],
+        "relevance": "CSS framework for responsive design",
+        "features": ["responsive", "dark-mode", "custom-colors", "animations"],
+        "cacheStrategy": {
+          "ttl": 86400,
+          "priority": "medium"
+        }
+      },
+      {
+        "name": "Radix UI Primitives",
+        "url": "https://www.radix-ui.com",
+        "priority": 2,
+        "category": "ui-components",
+        "sections": [
+          "primitives/docs/overview/introduction",
+          "primitives/docs/components",
+          "colors/docs"
+        ],
+        "searchPaths": [
+          "/primitives/docs/components/accordion",
+          "/primitives/docs/components/dialog",
+          "/primitives/docs/components/dropdown-menu",
+          "/primitives/docs/components/tooltip"
+        ],
+        "relevance": "Accessible UI components and design system",
+        "features": ["accessibility", "unstyled", "composable", "keyboard-navigation"],
+        "cacheStrategy": {
+          "ttl": 86400,
+          "priority": "medium"
+        }
+      },
+      {
+        "name": "D3.js Documentation",
+        "url": "https://d3js.org",
+        "priority": 2,
+        "category": "data-visualization",
+        "sections": [
+          "d3-selection",
+          "d3-scale",
+          "d3-shape",
+          "d3-force",
+          "d3-hierarchy"
+        ],
+        "searchPaths": [
+          "/d3-selection",
+          "/d3-scale",
+          "/d3-shape",
+          "/d3-force",
+          "/d3-sankey"
+        ],
+        "relevance": "Data visualization library for PMBOK visualizations",
+        "features": ["svg-manipulation", "data-binding", "transitions", "force-simulation"],
+        "cacheStrategy": {
+          "ttl": 86400,
+          "priority": "medium"
+        }
+      }
+    ],
+    "tertiary": [
+      {
+        "name": "Zustand",
+        "url": "https://zustand.docs.pmnd.rs",
+        "priority": 3,
+        "category": "state-management",
+        "sections": [
+          "getting-started/introduction",
+          "guides/typescript",
+          "guides/practice-with-no-store-actions"
+        ],
+        "relevance": "State management for application state",
+        "features": ["typescript", "devtools", "persistence", "slices"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "medium"
+        }
+      },
+      {
+        "name": "TanStack Query",
+        "url": "https://tanstack.com/query",
+        "priority": 3,
+        "category": "data-fetching",
+        "sections": [
+          "v5/docs/framework/react/overview",
+          "v5/docs/framework/react/guides"
+        ],
+        "relevance": "Server state management and caching",
+        "features": ["caching", "background-updates", "optimistic-updates"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "medium"
+        }
+      },
+      {
+        "name": "Playwright Testing",
+        "url": "https://playwright.dev",
+        "priority": 3,
+        "category": "testing",
+        "sections": [
+          "docs/intro",
+          "docs/writing-tests",
+          "docs/best-practices"
+        ],
+        "relevance": "E2E testing framework",
+        "features": ["cross-browser", "visual-testing", "accessibility-testing"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "Vitest",
+        "url": "https://vitest.dev",
+        "priority": 3,
+        "category": "testing",
+        "sections": [
+          "guide",
+          "api",
+          "config"
+        ],
+        "relevance": "Unit testing framework",
+        "features": ["vite-integration", "typescript", "coverage"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "Supabase",
+        "url": "https://supabase.com/docs",
+        "priority": 3,
+        "category": "backend",
+        "sections": [
+          "guides/auth",
+          "guides/database",
+          "reference/javascript"
+        ],
+        "relevance": "Authentication and database integration",
+        "features": ["auth", "realtime", "edge-functions"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "Framer Motion",
+        "url": "https://www.framer.com/motion",
+        "priority": 3,
+        "category": "animation",
+        "sections": [
+          "introduction",
+          "api"
+        ],
+        "relevance": "Animation library for interactive components",
+        "features": ["gestures", "layout-animations", "scroll-animations"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "Zod",
+        "url": "https://zod.dev",
+        "priority": 3,
+        "category": "validation",
+        "sections": [""],
+        "relevance": "Schema validation library",
+        "features": ["typescript-first", "composable", "async-validation"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "React Hook Form",
+        "url": "https://react-hook-form.com",
+        "priority": 3,
+        "category": "forms",
+        "sections": [
+          "get-started",
+          "api"
+        ],
+        "relevance": "Form handling and validation",
+        "features": ["performance", "validation", "typescript"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      },
+      {
+        "name": "Lucide Icons",
+        "url": "https://lucide.dev",
+        "priority": 3,
+        "category": "icons",
+        "sections": [
+          "icons"
+        ],
+        "relevance": "Icon library for UI components",
+        "features": ["svg", "customizable", "tree-shakable"],
+        "cacheStrategy": {
+          "ttl": 43200,
+          "priority": "low"
+        }
+      }
+    ],
+    "projectSpecific": [
+      {
+        "name": "PMBOK Guide 7th Edition",
+        "url": "https://www.pmi.org/pmbok-guide-standards/foundational/pmbok",
+        "priority": 4,
+        "category": "domain-knowledge",
+        "sections": [
+          "pmbok-guide-seventh-edition",
+          "performance-domains",
+          "project-management-principles"
+        ],
+        "relevance": "Core project management knowledge base",
+        "features": ["performance-domains", "principles", "tailoring"],
+        "cacheStrategy": {
+          "ttl": 604800,
+          "priority": "high"
+        }
+      },
+      {
+        "name": "PMI Standards",
+        "url": "https://www.pmi.org/pmbok-guide-standards",
+        "priority": 4,
+        "category": "domain-knowledge",
+        "sections": [
+          "foundational",
+          "practice-standards"
+        ],
+        "relevance": "Project management standards and practices",
+        "features": ["agile", "risk-management", "scheduling"],
+        "cacheStrategy": {
+          "ttl": 604800,
+          "priority": "medium"
+        }
+      },
+      {
+        "name": "Agile Practice Guide",
+        "url": "https://www.pmi.org/pmbok-guide-standards/practice-guides/agile",
+        "priority": 4,
+        "category": "domain-knowledge",
+        "sections": [
+          "agile-practice-guide"
+        ],
+        "relevance": "Agile project management methodologies",
+        "features": ["scrum", "kanban", "lean"],
+        "cacheStrategy": {
+          "ttl": 604800,
+          "priority": "medium"
+        }
+      }
+    ]
+  },
+  "contextAwareness": {
+    "primaryDomains": [
+      "react-development",
+      "typescript-programming",
+      "project-management",
+      "pmbok-methodology",
+      "data-visualization",
+      "web-performance"
+    ],
+    "codePatterns": [
+      "react-hooks",
+      "typescript-interfaces",
+      "component-patterns",
+      "state-management",
+      "data-fetching",
+      "form-handling",
+      "testing-patterns",
+      "performance-optimization"
+    ],
+    "preferredAPIs": [
+      "react-hooks-api",
+      "typescript-utility-types",
+      "vite-plugin-api",
+      "d3-selection-api",
+      "zustand-store-api",
+      "react-query-hooks",
+      "radix-ui-primitives"
+    ],
+    "searchOptimization": {
+      "commonQueries": [
+        "react hooks typescript",
+        "vite build optimization",
+        "d3 force simulation",
+        "tailwind responsive design",
+        "zustand typescript patterns",
+        "pmbok performance domains",
+        "radix ui accessibility"
+      ],
+      "queryExpansion": {
+        "react": ["hooks", "components", "state", "effects", "context"],
+        "typescript": ["types", "interfaces", "generics", "utility-types"],
+        "vite": ["config", "plugins", "build", "dev-server"],
+        "d3": ["selection", "scale", "shape", "force", "hierarchy"],
+        "pmbok": ["processes", "domains", "principles", "itto"]
+      }
+    }
+  },
+  "optimizationSettings": {
+    "caching": {
+      "defaultTTL": 86400,
+      "maxCacheSize": "100MB",
+      "compressionEnabled": true,
+      "strategyByCategory": {
+        "framework": 172800,
+        "language": 172800,
+        "build-tool": 86400,
+        "styling": 86400,
+        "ui-components": 86400,
+        "testing": 43200,
+        "domain-knowledge": 604800
+      }
+    },
+    "requestOptimization": {
+      "maxConcurrent": 5,
+      "batchSize": 10,
+      "timeout": 30000,
+      "retries": 3,
+      "priorityLevels": {
+        "high": ["react", "typescript", "vite"],
+        "medium": ["tailwind", "radix-ui", "d3"],
+        "low": ["testing", "icons", "validation"]
+      }
+    },
+    "contentFiltering": {
+      "relevanceThreshold": 0.7,
+      "maxResultsPerSource": 10,
+      "preferLatestVersions": true,
+      "excludeDeprecated": true
+    }
+  },
+  "monitoring": {
+    "metricsCollection": {
+      "responseTime": true,
+      "cacheHitRate": true,
+      "sourceReliability": true,
+      "queryPatterns": true
+    },
+    "alerting": {
+      "slowResponse": 10000,
+      "lowCacheHit": 0.6,
+      "sourceFailure": 3
+    }
+  }
+}
