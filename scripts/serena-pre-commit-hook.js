@@ -181,8 +181,8 @@ class SerenaPreCommitHook {
       const criticalFiles = [
         'README.md',
         'package.json',
-        'vite.config.js',
-        'src/App.jsx'
+        'vite.config.mjs',
+        'src/App.tsx'
       ];
       
       for (const file of criticalFiles) {
