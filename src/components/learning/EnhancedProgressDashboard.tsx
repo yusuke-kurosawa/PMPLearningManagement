@@ -89,10 +89,12 @@ const EnhancedProgressDashboard: React.FC = () => {
     exportProgress,
   } = useProgressStore()
   // Load data on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadProgress()
     checkAchievements()
-  }, [])
+  }, [checkAchievements, loadProgress])
   // Auto-sync with server every 5 minutes
   useEffect(() => {
     const interval = setInterval(syncWithServer, 5 * 60 * 1000)

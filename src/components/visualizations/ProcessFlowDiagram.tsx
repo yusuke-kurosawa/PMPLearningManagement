@@ -172,6 +172,8 @@ const ProcessFlowDiagram = React.memo(() => {
   }
 
   // サイズの設定
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {

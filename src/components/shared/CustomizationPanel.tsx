@@ -169,12 +169,13 @@ const CustomizationPanel: React.FC = () => {
           {/* その他の設定 */}
           <div className='space-y-3'>
             {/* コンパクトモード */}
-            <label className='flex items-center justify-between'>
+            <label htmlFor='compact-mode' className='flex items-center justify-between'>
               <span className='flex items-center gap-2'>
                 <Layout className='h-4 w-4' />
                 コンパクト表示
               </span>
               <input
+                id='compact-mode'
                 type='checkbox'
                 checked={settings.compactMode}
                 onChange={(e) => updateSettings({ compactMode: e.target.checked })}
@@ -183,12 +184,13 @@ const CustomizationPanel: React.FC = () => {
             </label>
 
             {/* アニメーション */}
-            <label className='flex items-center justify-between'>
+            <label htmlFor='animations' className='flex items-center justify-between'>
               <span className='flex items-center gap-2'>
                 <Zap className='h-4 w-4' />
                 アニメーション
               </span>
               <input
+                id='animations'
                 type='checkbox'
                 checked={settings.animations}
                 onChange={(e) => updateSettings({ animations: e.target.checked })}
@@ -197,12 +199,13 @@ const CustomizationPanel: React.FC = () => {
             </label>
 
             {/* 高コントラスト */}
-            <label className='flex items-center justify-between'>
+            <label htmlFor='high-contrast' className='flex items-center justify-between'>
               <span className='flex items-center gap-2'>
                 <Eye className='h-4 w-4' />
                 高コントラスト
               </span>
               <input
+                id='high-contrast'
                 type='checkbox'
                 checked={settings.highContrast}
                 onChange={(e) => updateSettings({ highContrast: e.target.checked })}

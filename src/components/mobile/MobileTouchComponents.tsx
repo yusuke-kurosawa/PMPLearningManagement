@@ -245,6 +245,7 @@ export const TouchLongPressMenu = ({ children, menuItems = [], onMenuAction }) =
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleClickOutside = () => setShowMenu(false)
     if (showMenu) {

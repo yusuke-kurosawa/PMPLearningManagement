@@ -155,6 +155,7 @@ const FlashCardLearning = () => {
     return filtered
   }, [allProcesses, selectedCategory, selectedGroup, studyMode, cardAnswers])
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setSessionStats((prev) => ({
       ...prev,
@@ -287,8 +288,11 @@ const FlashCardLearning = () => {
             {/* フィルターコントロール */}
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
               <div>
-                <label className='mb-1 block text-sm font-medium text-gray-700'>知識エリア</label>
+                <label htmlFor='-input' className='mb-1 block text-sm font-medium text-gray-700'>
+                  知識エリア
+                </label>
                 <select
+                  id='-input'
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -303,8 +307,11 @@ const FlashCardLearning = () => {
               </div>
 
               <div>
-                <label className='mb-1 block text-sm font-medium text-gray-700'>プロセス群</label>
+                <label htmlFor='-input' className='mb-1 block text-sm font-medium text-gray-700'>
+                  プロセス群
+                </label>
                 <select
+                  id='-input'
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
                   className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -319,8 +326,11 @@ const FlashCardLearning = () => {
               </div>
 
               <div>
-                <label className='mb-1 block text-sm font-medium text-gray-700'>学習モード</label>
+                <label htmlFor='-input' className='mb-1 block text-sm font-medium text-gray-700'>
+                  学習モード
+                </label>
                 <select
+                  id='-input'
                   value={studyMode}
                   onChange={(e) => setStudyMode(e.target.value)}
                   className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'

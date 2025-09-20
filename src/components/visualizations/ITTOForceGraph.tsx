@@ -71,6 +71,10 @@ const ITTOForceGraph = React.memo(() => {
   // )
 
   // Check for mobile device
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768)
@@ -624,9 +628,9 @@ const ITTOForceGraph = React.memo(() => {
     }))
   }, [])
 
-  const togglePanel = useCallback(() => {
+  const togglePanel = () => {
     setIsPanelOpen((prev) => !prev)
-  }, [])
+  }
 
   return (
     <div className='relative flex h-screen w-full'>

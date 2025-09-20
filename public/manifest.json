@@ -103,5 +103,21 @@
   "prefer_related_applications": false,
   "edge_side_panel": {
     "preferred_width": 400
+  },
+  "features": [
+    "background-sync",
+    "periodic-background-sync",
+    "offline-capabilities"
+  ],
+  "offline_enabled": true,
+  "service_worker": {
+    "src": "/PMPLearningManagement/sw.js",
+    "scope": "/PMPLearningManagement/",
+    "use_cache": true
+  },
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "focus-existing"
   }
 }

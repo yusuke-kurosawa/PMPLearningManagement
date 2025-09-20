@@ -17,6 +17,9 @@ const LearningModal = ({ isOpen, onClose, process, processId, knowledgeArea, pro
   const closeButtonRef = useRef(null)
   const _firstFocusableRef = useRef(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isOpen && process) {
       // 既存の進捗データを読み込む

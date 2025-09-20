@@ -6,6 +6,12 @@
 import React, { useState, useEffect } from 'react'
 import { useContextMonitoring } from '../contexts/ContextManagerContext'
 import { logger } from '../services/logger'
+import type {
+  ContextStats,
+  MonitoringData,
+  PerformanceMetrics,
+  ContextManagerDashboardProps,
+} from '../types/context'
 import {
   Activity,
   Database,
@@ -16,16 +22,17 @@ import {
   XCircle,
 } from 'lucide-react'
 
-const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
+const ContextManagerDashboard = ({ isOpen = false, onClose }: ContextManagerDashboardProps) => {
   const { getStats, getMonitoringData, getPerformanceMetrics, getDiagnostics, setRotationPolicy } =
     useContextMonitoring()
 
-  const [stats, setStats] = useState(null)
-  const [monitoring, setMonitoring] = useState(null)
-  const [performance, setPerformance] = useState(null)
+  const [stats, setStats] = useState<ContextStats | null>(null)
+  const [monitoring, setMonitoring] = useState<MonitoringData | null>(null)
+  const [performance, setPerformance] = useState<PerformanceMetrics | null>(null)
   const [refreshInterval, setRefreshInterval] = useState(5000) // 5 seconds
 
   // Auto-refresh data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isOpen) {
       return
@@ -43,7 +50,7 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     return () => clearInterval(interval)
   }, [isOpen, refreshInterval, getStats, getMonitoringData, getPerformanceMetrics])
 
-  const getHealthStatusIcon = (status) => {
+  const getHealthStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
         return <CheckCircle className='h-5 w-5 text-green-500' />
@@ -56,11 +63,11 @@ const ContextManagerDashboard = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const formatPercentage = (value) => {
+  const formatPercentage = (value: number) => {
     return (value * 100).toFixed(1) + '%'
   }
 
-  const handlePolicyChange = (policy) => {
+  const handlePolicyChange = (policy: 'normal' | 'aggressive' | 'conservative') => {
     setRotationPolicy(policy)
   }
 

@@ -1,51 +1,48 @@
-# GitHub Actions Rules & Guidelines 📋
+# GitHub Actions 統合ガイドライン 📋
 
 ## 概要
 
-このドキュメントは、ClaudeがGitHub Actionsワークフローを作成・修正する際に**必ず従うべき**ルールと指針を定義します。これらのルールは、プロジェクトの品質、セキュリティ、パフォーマンスを維持するために厳格に適用されます。
+このドキュメントは、PMPLearningManagementプロジェクトにおけるGitHub Actionsワークフローとカスタムアクションの包括的なガイドラインです。開発者とClaudeが一貫性のある高品質なワークフローを作成するための絶対的なルールを定義します。
 
 ## 🎯 絶対的ルール（MUST FOLLOW）
 
 ### 1. 命名規則
 
 #### ワークフロー名
-
 ```yaml
 name: {絵文字} {カテゴリ名} {具体的な処理内容}
 ```
 
 **カテゴリ別絵文字マッピング:**
-
-- 📦 デプロイメント
-- 🧪 テスト
+- 🎯 メタ・検証
+- 📦 CI/CD・ビルド・デプロイ
+- 🧪 品質・テスト
 - 🔒 セキュリティ
-- 📊 監視・パフォーマンス
+- 📊 監視・パフォーマンス・統合
 - 🤖 自動化・AI支援
-- ⚖️ コンプライアンス
-- 🔔 通知・レポート
+- ♻️ 自己修復
 - 🔧 開発支援
+- 🔄 再利用可能
 
 #### ファイル名
-
 ```
 {数字2桁}-{カテゴリ英語}-{具体的処理英語}.yml
 ```
 
-**カテゴリ番号体系:**
-
-- `01-deploy-*`: デプロイメント
-- `02-test-*`: テスト
+**実際のカテゴリ番号体系:**
+- `00-meta-*`: メタ検証・オーケストレーション
+- `01-{ci|core|deploy}-*`: CI/CD・ビルド・デプロイ
+- `02-{quality|test|cd|performance}-*`: 品質・テスト・CD・パフォーマンス
 - `03-security-*`: セキュリティ
-- `04-monitoring-*`: 監視
-- `05-automation-*`: 自動化
-- `06-compliance-*`: コンプライアンス
-- `07-notification-*`: 通知
+- `04-{monitoring|integration|deployment|security}-*`: 監視・統合・追加デプロイ・セキュリティ
+- `05-{automation|performance}-*`: 自動化・パフォーマンス
+- `07-self-healing-*`: 自己修復
 - `08-developer-*`: 開発支援
+- `09-reusable-*`: 再利用可能コンポーネント
 
 ### 2. 必須構造要素
 
 #### ファイルヘッダー（必須）
-
 ```yaml
 # ====================================================================
 # {ワークフロー名} - {用途・目的}
@@ -63,21 +60,20 @@ name: {絵文字} {カテゴリ名} {具体的な処理内容}
 #
 # 依存関係: {他のワークフローとの関係}
 # 実行時間目安: 約{X}分
+# 最終更新: {YYYY-MM-DD}
 # ====================================================================
 ```
 
 #### 権限設定（必須）
-
 ```yaml
 permissions:
   contents: read # 最小権限の原則
-  actions: write # 必要な場合のみ
+  actions: read # 必要な場合のみ
   checks: write # 必要な場合のみ
   pull-requests: write # 必要な場合のみ
 ```
 
 #### 並行実行制御（必須）
-
 ```yaml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -85,17 +81,25 @@ concurrency:
 ```
 
 #### 手動実行トリガー（必須）
-
 ```yaml
 on:
   workflow_dispatch: # 必ず含める
   # その他のトリガー
 ```
 
+#### タイムアウト設定（必須）
+```yaml
+jobs:
+  build:
+    timeout-minutes: 30 # 必須
+    steps:
+      - name: 長時間処理
+        timeout-minutes: 10 # 推奨
+```
+
 ### 3. セキュリティルール
 
 #### シークレット管理
-
 ```yaml
 # ✅ 正しい使用方法
 env:
@@ -107,11 +111,10 @@ env:
 ```
 
 #### 外部アクション使用
-
 ```yaml
 # ✅ 正しい使用方法
 - uses: actions/checkout@v4
-- uses: actions/setup-node@8e5e7e5ab8b370c6 # commit SHA
+- uses: actions/setup-node@v4
 
 # ❌ 禁止事項
 - uses: actions/checkout@main # ブランチ指定禁止
@@ -119,7 +122,6 @@ env:
 ```
 
 #### インジェクション対策
-
 ```yaml
 # ✅ 正しい使用方法
 - name: 安全な入力処理
@@ -131,68 +133,109 @@ env:
 - run: echo "${{ github.event.inputs.data }}" # 直接使用禁止
 ```
 
-### 4. パフォーマンス要件
+## 🔧 カスタムアクション
 
-#### タイムアウト設定（必須）
+### アクション一覧（実在するもの）
 
-```yaml
-jobs:
-  build:
-    timeout-minutes: 30 # 必須
-    steps:
-      - name: 長時間処理
-        timeout-minutes: 10 # 推奨
+```
+actions/
+├── cache-dependencies/       # 依存関係キャッシュ
+├── checkout-code/           # コードチェックアウト
+├── composite/
+│   ├── build-optimize/      # ビルド最適化
+│   ├── quality-gate/        # 品質ゲート
+│   └── setup-node-cache/    # Node.jsキャッシュ設定
+├── deploy-preview/          # プレビューデプロイ
+├── idd-validator/           # IDD準拠検証
+├── notification/            # 通知
+├── performance-audit/       # パフォーマンス監査
+├── quality-check/           # コード品質チェック
+├── report-generator/        # レポート生成
+├── security-audit/          # セキュリティ監査
+├── security-scan/           # セキュリティスキャン
+├── setup-environment/       # 環境構築
+├── setup-node/              # Node.js環境設定
+└── setup-project/           # プロジェクト設定
 ```
 
-#### キャッシュ戦略（推奨）
+### 主要カスタムアクション
 
+#### 1. Setup Node (`setup-node/`)
+**目的**: Node.js環境の標準化された構築
+
+**使用例**:
 ```yaml
-- name: Setup Node with cache
-  uses: actions/setup-node@v4
+- name: 🏗️ Node.js環境構築
+  uses: ./.github/actions/setup-node
   with:
     node-version: '18'
-    cache: 'npm'
-
-- name: Cache build artifacts
-  uses: actions/cache@v4
-  with:
-    path: dist/
-    key: build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
-    restore-keys: |
-      build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-      build-${{ runner.os }}-
+    install-deps: 'true'
+    production-only: 'false'
 ```
 
-### 5. エラーハンドリング
+#### 2. IDD Validator (`idd-validator/`)
+**目的**: Issue-Driven Development の準拠を検証
 
-#### 失敗時の処理（必須）
-
+**使用例**:
 ```yaml
-- name: 重要な処理
-  id: critical-step
-  run: |
-    command || {
-      echo "❌ エラーが発生しました: 詳細メッセージ"
-      exit 1
-    }
-
-- name: エラー通知
-  if: failure()
-  run: |
-    echo "⚠️ ワークフローが失敗しました"
-    # 通知処理
+- name: 📋 IDD準拠チェック
+  uses: ./.github/actions/idd-validator
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    strict-mode: true
 ```
 
-#### リトライロジック（推奨）
+#### 3. Quality Check (`quality-check/`)
+**目的**: コード品質の自動チェック
 
+**使用例**:
 ```yaml
-- name: API呼び出し（リトライ付き）
-  uses: nick-invision/retry@v2
+- name: 🔍 品質チェック
+  uses: ./.github/actions/quality-check
   with:
-    timeout_minutes: 2
-    max_attempts: 3
-    command: |
-      curl -f https://api.example.com/endpoint
+    node-version: '18'
+    coverage-threshold: 80
+```
+
+#### 4. Security Audit (`security-audit/`)
+**目的**: セキュリティ脆弱性の検出
+
+**使用例**:
+```yaml
+- name: 🔐 セキュリティ監査
+  uses: ./.github/actions/security-audit
+  with:
+    severity-threshold: high
+    create-issues: true
+```
+
+### カスタムアクション作成ガイド
+
+#### 基本構造
+```yaml
+# action.yml
+name: 'アクション名'
+description: 'アクションの説明'
+author: 'PMPLearningManagement Team'
+
+inputs:
+  parameter-name:
+    description: 'パラメータの説明'
+    required: true
+    default: 'デフォルト値'
+
+outputs:
+  output-name:
+    description: '出力の説明'
+    value: ${{ steps.step-id.outputs.value }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: ステップ名
+      shell: bash
+      run: |
+        echo "実行内容"
 ```
 
 ## 🚫 禁止事項（MUST NOT）
@@ -208,7 +251,6 @@ jobs:
 ## ✅ 品質チェックリスト
 
 ### 新規作成時
-
 - [ ] 命名規則に従っている
 - [ ] ファイルヘッダーが完備されている
 - [ ] 権限設定が最小限である
@@ -219,7 +261,6 @@ jobs:
 - [ ] キャッシュ戦略が実装されている
 
 ### 修正時
-
 - [ ] 既存の命名規則を維持している
 - [ ] 変更内容がコメントに反映されている
 - [ ] セキュリティが損なわれていない
@@ -237,30 +278,9 @@ jobs:
 | セキュリティスキャン | 5分          | 15分         |
 | パフォーマンステスト | 10分         | 20分         |
 
-## 🔄 ワークフロー改善プロセス
-
-### 1. 分析フェーズ
-
-- 現状の実行時間とリソース使用量を測定
-- ボトルネックの特定
-- 改善ポイントの洗い出し
-
-### 2. 最適化フェーズ
-
-- 並列化可能な処理の特定
-- キャッシュ戦略の見直し
-- 不要なステップの削除
-
-### 3. 検証フェーズ
-
-- 改善前後の比較
-- 安定性の確認
-- ドキュメントの更新
-
 ## 🎯 ベストプラクティス
 
 ### 1. ジョブの分割
-
 ```yaml
 jobs:
   # 独立したジョブは並列実行
@@ -279,7 +299,6 @@ jobs:
 ```
 
 ### 2. マトリクス戦略
-
 ```yaml
 strategy:
   matrix:
@@ -289,7 +308,6 @@ strategy:
 ```
 
 ### 3. 条件付き実行
-
 ```yaml
 - name: Production only step
   if: github.ref == 'refs/heads/main'
@@ -298,7 +316,6 @@ strategy:
 ```
 
 ### 4. アーティファクト管理
-
 ```yaml
 - name: Upload test results
   if: always() # 失敗時も実行
@@ -309,12 +326,24 @@ strategy:
     retention-days: 7 # 保持期間を適切に設定
 ```
 
-## 📝 トラブルシューティングガイド
+## 🔍 監視とメトリクス
+
+### 追跡すべき指標
+1. **成功率**: 過去30日間の成功率 > 95%
+2. **実行時間**: P95 < 目標時間
+3. **リソース使用**: 前月比改善
+4. **キャッシュヒット率**: > 80%
+
+### アラート設定
+- 3回連続失敗時
+- 実行時間が目標の2倍を超過時
+- セキュリティスキャンで高リスク検出時
+
+## 📝 トラブルシューティング
 
 ### よくある問題と解決策
 
 #### 1. 権限エラー
-
 ```yaml
 # 問題: "Resource not accessible by integration"
 # 解決: 適切な権限を追加
@@ -323,7 +352,6 @@ permissions:
 ```
 
 #### 2. キャッシュミス
-
 ```yaml
 # 問題: キャッシュが効かない
 # 解決: restore-keysを活用
@@ -333,7 +361,6 @@ restore-keys: |
 ```
 
 #### 3. タイムアウト
-
 ```yaml
 # 問題: ジョブがタイムアウト
 # 解決: 処理を分割または並列化
@@ -344,28 +371,41 @@ jobs:
     # ...
 ```
 
-## 🔍 監視とメトリクス
+## 🔄 継続的改善
 
-### 追跡すべき指標
+### ワークフロー改善プロセス
 
-1. **成功率**: 過去30日間の成功率 > 95%
-2. **実行時間**: P95 < 目標時間
-3. **リソース使用**: 前月比改善
-4. **キャッシュヒット率**: > 80%
+1. **分析フェーズ**
+   - 現状の実行時間とリソース使用量を測定
+   - ボトルネックの特定
+   - 改善ポイントの洗い出し
 
-### アラート設定
+2. **最適化フェーズ**
+   - 並列化可能な処理の特定
+   - キャッシュ戦略の見直し
+   - 不要なステップの削除
 
-- 3回連続失敗時
-- 実行時間が目標の2倍を超過時
-- セキュリティスキャンで高リスク検出時
+3. **検証フェーズ**
+   - 改善前後の比較
+   - 安定性の確認
+   - ドキュメントの更新
 
-## 📚 参考資料
+## 📚 関連ドキュメント
 
+### 内部ドキュメント
+- [カスタムアクション一覧](./../actions/README.md)
+- [ワークフロー実装サマリー](./../../.github/workflows/REFACTORING_SUMMARY.md)
+- [準拠性レポート](./../../.github/workflows/COMPLIANCE_REPORT.md)
+
+### 外部リソース
 - [GitHub Actions公式ドキュメント](https://docs.github.com/actions)
-- [WORKFLOW_STANDARDS.md](../../.github/workflows/WORKFLOW_STANDARDS.md)
 - [セキュリティベストプラクティス](https://docs.github.com/actions/security-guides)
 - [パフォーマンス最適化ガイド](https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions)
 
 ---
 
-_このドキュメントは、Claudeが一貫性のある高品質なGitHub Actionsワークフローを作成するための絶対的なガイドラインです。これらのルールは例外なく適用されます。_
+**最終更新**: 2025-08-17  
+**管理者**: PMPLearningManagement Team  
+**Issue**: #80 - GitHub Actions完全準拠化
+
+_このドキュメントは、一貫性のある高品質なGitHub Actionsワークフローとカスタムアクションを作成するための統合ガイドラインです。これらのルールは例外なく適用されます。_

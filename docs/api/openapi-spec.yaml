@@ -1,0 +1,2439 @@
+openapi: 3.1.0
+info:
+  title: PMP Learning Management API
+  description: |
+    Comprehensive API for PMP (Project Management Professional) Learning Management System.
+    
+    This API provides complete access to PMP exam preparation resources, including:
+    - PMBOK 6th & 7th Edition content management
+    - Learning progress tracking and analytics
+    - AI-powered coaching and recommendations
+    - Collaboration features (study groups, discussions)
+    - Mock exams and assessments
+    - User management and authentication
+    
+    ## Key Features
+    - **PMBOK Integration**: Complete coverage of 49 processes, 12 principles, and 8 performance domains
+    - **AI-Enhanced Learning**: Personalized study recommendations and coaching
+    - **Progress Analytics**: Detailed learning metrics and performance tracking
+    - **Collaboration Tools**: Study groups, shared notes, and discussion forums
+    - **Assessment Engine**: Mock exams with detailed scoring and analysis
+    - **Mobile Optimized**: Full PWA support for offline learning
+    
+    ## Authentication
+    This API uses JWT-based authentication with refresh tokens. Most endpoints require authentication.
+    
+    ## Rate Limiting
+    API requests are rate-limited based on user subscription plan:
+    - Free: 100 requests/hour
+    - Premium: 1000 requests/hour  
+    - Enterprise: 10000 requests/hour
+    
+    ## SDKs Available
+    - TypeScript/JavaScript
+    - Python
+    - Java
+    - C#
+    
+  version: 2.1.0
+  contact:
+    name: PMP Learning Management Support
+    email: support@pmplearning.com
+    url: https://pmplearning.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://pmplearning.com/terms
+
+servers:
+  - url: https://api.pmplearning.com/v2
+    description: Production server
+  - url: https://staging-api.pmplearning.com/v2
+    description: Staging server
+  - url: https://dev-api.pmplearning.com/v2
+    description: Development server
+  - url: http://localhost:3000/api/trpc
+    description: Local development
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+paths:
+  # Authentication endpoints
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and receive JWT tokens
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              standard_login:
+                summary: Standard email/password login
+                value:
+                  email: "user@example.com"
+                  password: "securepassword123"
+                  rememberMe: true
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    success: true
+                    user:
+                      id: "clp1234567890"
+                      email: "user@example.com"
+                      name: "John Doe"
+                      role: "PREMIUM"
+                      subscriptionPlan: "PREMIUM"
+                      subscriptionActive: true
+                    tokens:
+                      accessToken: "eyJhbGciOiJIUzI1NiIs..."
+                      refreshToken: "eyJhbGciOiJIUzI1NiIs..."
+                      expiresIn: 3600
+                    permissions: ["LEARNING_BASIC", "AI_COACHING_ADVANCED"]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: User registration
+      description: Register new user account
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # User Management endpoints
+  /user/me:
+    get:
+      tags: [User Management]
+      summary: Get current user profile
+      description: Retrieve detailed information about the authenticated user
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                premium_user:
+                  summary: Premium user profile
+                  value:
+                    id: "clp1234567890"
+                    email: "user@example.com"
+                    name: "John Doe"
+                    image: "https://avatar.example.com/john.jpg"
+                    role: "PREMIUM"
+                    subscriptionPlan: "PREMIUM"
+                    subscriptionActive: true
+                    profileComplete: true
+                    emailVerified: true
+                    createdAt: "2024-01-15T10:30:00Z"
+                    updatedAt: "2024-01-20T15:45:00Z"
+                    learningProgress:
+                      totalProcessesStudied: 35
+                      completionPercentage: 71.4
+                      currentStreak: 7
+                      longestStreak: 14
+                    permissions: ["LEARNING_BASIC", "AI_COACHING_ADVANCED", "COLLABORATION_PREMIUM"]
+                    canUseAI:
+                      basic: true
+                      advanced: true
+                      unlimited: false
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /user/profile:
+    put:
+      tags: [User Management]
+      summary: Update user profile
+      description: Update current user's profile information
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserProfile'
+                  message:
+                    type: string
+                    example: "プロフィールが正常に更新されました"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # PMBOK Knowledge Areas endpoints
+  /pmbok/knowledge-areas:
+    get:
+      tags: [PMBOK Knowledge Areas]
+      summary: Get all knowledge areas
+      description: Retrieve all 10 PMBOK knowledge areas with processes
+      operationId: getKnowledgeAreas
+      parameters:
+        - name: version
+          in: query
+          description: PMBOK version (6 or 7)
+          schema:
+            type: string
+            enum: ['6', '7']
+            default: '6'
+        - name: includeProcesses
+          in: query
+          description: Include detailed process information
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Knowledge areas retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  knowledgeAreas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KnowledgeArea'
+                  version:
+                    type: string
+                  totalAreas:
+                    type: integer
+              examples:
+                basic_response:
+                  summary: Basic knowledge areas
+                  value:
+                    knowledgeAreas:
+                      - id: "integration"
+                        name: "Integration Management"
+                        description: "統合管理は、プロジェクトの様々な要素を調整し統合する"
+                        processCount: 7
+                        color: "#1f77b4"
+                      - id: "scope"
+                        name: "Scope Management"
+                        description: "スコープ管理は、プロジェクトの作業範囲を定義し管理する"
+                        processCount: 6
+                        color: "#ff7f0e"
+                    version: "6"
+                    totalAreas: 10
+
+  /pmbok/knowledge-areas/{areaId}:
+    get:
+      tags: [PMBOK Knowledge Areas]
+      summary: Get specific knowledge area
+      description: Retrieve detailed information about a specific knowledge area
+      operationId: getKnowledgeArea
+      parameters:
+        - name: areaId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Knowledge area identifier
+          example: "integration"
+        - name: includeProcesses
+          in: query
+          description: Include processes within the knowledge area
+          schema:
+            type: boolean
+            default: true
+        - name: includeITTO
+          in: query
+          description: Include ITTO details for processes
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Knowledge area retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeAreaDetail'
+        '404':
+          description: Knowledge area not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  # Process Management endpoints
+  /pmbok/processes:
+    get:
+      tags: [Process Management]
+      summary: Get all PMBOK processes
+      description: Retrieve all 49 PMBOK processes with filtering and pagination
+      operationId: getProcesses
+      parameters:
+        - name: knowledgeArea
+          in: query
+          description: Filter by knowledge area
+          schema:
+            type: string
+          example: "integration"
+        - name: processGroup
+          in: query
+          description: Filter by process group
+          schema:
+            type: string
+            enum: ["Initiating", "Planning", "Executing", "Monitoring and Controlling", "Closing"]
+        - name: search
+          in: query
+          description: Search processes by name or description
+          schema:
+            type: string
+        - name: includeITTO
+          in: query
+          description: Include ITTO details
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Processes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Process'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  filters:
+                    type: object
+                    properties:
+                      knowledgeArea:
+                        type: string
+                      processGroup:
+                        type: string
+                      search:
+                        type: string
+
+  /pmbok/processes/{processId}:
+    get:
+      tags: [Process Management]
+      summary: Get specific process
+      description: Retrieve detailed information about a specific PMBOK process including ITTO
+      operationId: getProcess
+      parameters:
+        - name: processId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Process identifier
+          example: "develop-project-charter"
+        - name: includeITTO
+          in: query
+          description: Include ITTO details
+          schema:
+            type: boolean
+            default: true
+        - name: includeRelated
+          in: query
+          description: Include related processes
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Process retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessDetail'
+              examples:
+                process_with_itto:
+                  summary: Process with full ITTO details
+                  value:
+                    id: "develop-project-charter"
+                    name: "Develop Project Charter"
+                    description: "プロジェクト憲章を作成し、プロジェクトを正式に承認する"
+                    knowledgeArea: "integration"
+                    processGroup: "Initiating"
+                    inputs:
+                      - name: "Business documents"
+                        description: "ビジネス文書"
+                        type: "document"
+                      - name: "Agreements"
+                        description: "合意書"
+                        type: "legal"
+                    toolsAndTechniques:
+                      - name: "Expert judgment"
+                        description: "専門家の判断"
+                        category: "analytical"
+                      - name: "Data gathering"
+                        description: "データ収集"
+                        category: "information"
+                    outputs:
+                      - name: "Project charter"
+                        description: "プロジェクト憲章"
+                        type: "document"
+                      - name: "Assumption log"
+                        description: "前提条件ログ"
+                        type: "log"
+                    relatedProcesses:
+                      - id: "identify-stakeholders"
+                        name: "Identify Stakeholders"
+                        relationship: "parallel"
+        '404':
+          description: Process not found
+
+  # Learning Progress endpoints
+  /learning/progress:
+    get:
+      tags: [Learning Progress]
+      summary: Get learning progress
+      description: Retrieve comprehensive learning progress for the authenticated user
+      operationId: getLearningProgress
+      parameters:
+        - name: includeStats
+          in: query
+          description: Include detailed statistics
+          schema:
+            type: boolean
+            default: true
+        - name: includeRecommendations
+          in: query
+          description: Include AI-generated study recommendations
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Learning progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningProgress'
+              examples:
+                comprehensive_progress:
+                  summary: Comprehensive learning progress
+                  value:
+                    overallProgress: 72.5
+                    knowledgeAreaProgress:
+                      - knowledgeArea: "Integration"
+                        completedProcesses: 6
+                        totalProcesses: 7
+                        completionRate: 85.7
+                        averageScore: 87
+                        totalStudyTime: 4.5
+                      - knowledgeArea: "Scope"
+                        completedProcesses: 4
+                        totalProcesses: 6
+                        completionRate: 66.7
+                        averageScore: 82
+                        totalStudyTime: 3.2
+                    processGroupProgress:
+                      - processGroup: "Initiating"
+                        completedProcesses: 2
+                        totalProcesses: 2
+                        completionRate: 100
+                        averageScore: 90
+                      - processGroup: "Planning"
+                        completedProcesses: 18
+                        totalProcesses: 24
+                        completionRate: 75
+                        averageScore: 85
+                    studyStats:
+                      totalStudyTime: 45.7
+                      totalSessions: 124
+                      currentStreak: 7
+                      longestStreak: 14
+                      lastStudyDate: "2024-01-20T09:30:00Z"
+                    examStats:
+                      totalExams: 5
+                      passed: 3
+                      averageScore: 83.2
+                      bestScore: 92
+                      lastExamDate: "2024-01-18T14:00:00Z"
+
+  /learning/sessions:
+    post:
+      tags: [Learning Progress]
+      summary: Record study session
+      description: Record a completed study session for a specific process
+      operationId: recordStudySession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudySessionRequest'
+            examples:
+              completed_session:
+                summary: Completed study session
+                value:
+                  processId: "develop-project-charter"
+                  processName: "Develop Project Charter"
+                  knowledgeArea: "Integration"
+                  processGroup: "Initiating"
+                  duration: 1800
+                  completed: true
+                  notes: "Focused on understanding business case and benefits management plan"
+      responses:
+        '201':
+          description: Study session recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/StudySession'
+                  message:
+                    type: string
+                  progressUpdate:
+                    type: object
+                    properties:
+                      newCompletionRate:
+                        type: number
+                      streakUpdated:
+                        type: boolean
+
+    get:
+      tags: [Learning Progress]
+      summary: Get study history
+      description: Retrieve paginated study session history with filtering
+      operationId: getStudyHistory
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: knowledgeArea
+          in: query
+          description: Filter by knowledge area
+          schema:
+            type: string
+        - name: processGroup
+          in: query
+          description: Filter by process group
+          schema:
+            type: string
+        - name: completedOnly
+          in: query
+          description: Show only completed sessions
+          schema:
+            type: boolean
+            default: false
+        - name: dateFrom
+          in: query
+          description: Filter sessions from this date
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          description: Filter sessions until this date
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Study history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudySession'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  # Assessment endpoints
+  /exams/mock:
+    post:
+      tags: [Assessments]
+      summary: Start mock exam
+      description: Initialize a new mock PMP exam session
+      operationId: startMockExam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExamStartRequest'
+            examples:
+              full_exam:
+                summary: Full 180-question mock exam
+                value:
+                  examType: "full"
+                  questionCount: 180
+                  timeLimit: 13800
+                  focusAreas: []
+                  difficulty: "mixed"
+              focused_exam:
+                summary: Focused knowledge area exam
+                value:
+                  examType: "focused"
+                  questionCount: 50
+                  timeLimit: 3600
+                  focusAreas: ["integration", "scope"]
+                  difficulty: "intermediate"
+      responses:
+        '201':
+          description: Mock exam started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamSession'
+        '402':
+          description: Premium subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /exams/mock/{examId}:
+    get:
+      tags: [Assessments]
+      summary: Get exam session
+      description: Retrieve current state of an ongoing exam session
+      operationId: getExamSession
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Exam session identifier
+      responses:
+        '200':
+          description: Exam session retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamSession'
+
+    put:
+      tags: [Assessments]
+      summary: Submit exam answers
+      description: Submit answers for exam questions
+      operationId: submitExamAnswers
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExamAnswersRequest'
+      responses:
+        '200':
+          description: Answers submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answersSubmitted:
+                    type: integer
+                  questionsRemaining:
+                    type: integer
+                  timeRemaining:
+                    type: integer
+
+  /exams/mock/{examId}/complete:
+    post:
+      tags: [Assessments]
+      summary: Complete mock exam
+      description: Finalize mock exam and generate results
+      operationId: completeMockExam
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Exam completed and results generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamResult'
+              examples:
+                passing_result:
+                  summary: Passing exam result
+                  value:
+                    id: "exam_result_123"
+                    examId: "exam_session_456"
+                    score: 142
+                    totalQuestions: 180
+                    correctAnswers: 142
+                    passed: true
+                    passingScore: 106
+                    completedAt: "2024-01-20T16:30:00Z"
+                    duration: 11400
+                    knowledgeAreaScores:
+                      Integration: 85
+                      Scope: 90
+                      Schedule: 78
+                      Cost: 82
+                      Quality: 88
+                      Resource: 76
+                      Communications: 85
+                      Risk: 91
+                      Procurement: 79
+                      Stakeholder: 87
+                    processGroupScores:
+                      Initiating: 92
+                      Planning: 78
+                      Executing: 85
+                      "Monitoring and Controlling": 80
+                      Closing: 88
+                    detailedAnalysis:
+                      strengths: ["Risk Management", "Stakeholder Management"]
+                      weaknesses: ["Resource Management", "Schedule Management"]
+                      recommendations:
+                        - "Focus additional study on Resource Management processes"
+                        - "Practice more scheduling techniques and tools"
+
+  # AI Services endpoints
+  /ai/coaching/recommendations:
+    get:
+      tags: [AI Services]
+      summary: Get AI study recommendations
+      description: Receive personalized AI-generated study recommendations based on learning progress
+      operationId: getAIRecommendations
+      parameters:
+        - name: includeReasons
+          in: query
+          description: Include reasoning for recommendations
+          schema:
+            type: boolean
+            default: true
+        - name: maxRecommendations
+          in: query
+          description: Maximum number of recommendations to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+      responses:
+        '200':
+          description: AI recommendations generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIRecommendations'
+              examples:
+                personalized_recommendations:
+                  summary: Personalized study recommendations
+                  value:
+                    recommendations:
+                      - id: "rec_001"
+                        type: "process_focus"
+                        priority: "high"
+                        title: "Focus on Cost Management Processes"
+                        description: "Your exam results show weaker performance in cost management. Focus on these 4 processes."
+                        processes: ["plan-cost-management", "estimate-costs", "determine-budget", "control-costs"]
+                        estimatedStudyTime: 8
+                        reasoning: "Recent exam scores in Cost Management averaged 72%, below the 80% target"
+                        confidence: 0.87
+                      - id: "rec_002"
+                        type: "practice_exam"
+                        priority: "medium"
+                        title: "Take Focused Risk Management Exam"
+                        description: "Strengthen your risk management knowledge with a targeted practice exam"
+                        examConfig:
+                          type: "focused"
+                          knowledgeAreas: ["risk"]
+                          questionCount: 30
+                        reasoning: "It's been 5 days since your last risk management practice"
+                        confidence: 0.76
+                    generatedAt: "2024-01-20T10:15:00Z"
+                    personalizedFor: "clp1234567890"
+                    nextUpdateIn: 86400
+        '402':
+          description: Premium subscription required for AI coaching
+        '429':
+          description: AI usage quota exceeded
+
+  /ai/coaching/chat:
+    post:
+      tags: [AI Services]
+      summary: Chat with AI coach
+      description: Interactive chat session with AI PMP coach for questions and guidance
+      operationId: chatWithAICoach
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIChatRequest'
+            examples:
+              process_question:
+                summary: Question about PMBOK process
+                value:
+                  message: "Can you explain the difference between Estimate Costs and Determine Budget processes?"
+                  context:
+                    currentProcess: "estimate-costs"
+                    knowledgeArea: "cost"
+                  sessionId: "chat_session_789"
+              study_planning:
+                summary: Study planning request
+                value:
+                  message: "I have 2 weeks to prepare for the exam and I'm weak in risk management. Can you create a study plan?"
+                  context:
+                    timeAvailable: 14
+                    weeklyStudyHours: 10
+                    weakAreas: ["risk", "procurement"]
+                  sessionId: "chat_session_790"
+      responses:
+        '200':
+          description: AI coach response generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIChatResponse'
+        '402':
+          description: Premium subscription required for AI coaching
+
+  # Analytics endpoints
+  /analytics/learning-metrics:
+    get:
+      tags: [Analytics]
+      summary: Get learning analytics
+      description: Retrieve comprehensive learning analytics and KPIs
+      operationId: getLearningMetrics
+      parameters:
+        - name: period
+          in: query
+          description: Analytics time period
+          schema:
+            type: string
+            enum: ["week", "month", "quarter", "year", "all"]
+            default: "month"
+        - name: groupBy
+          in: query
+          description: Group metrics by dimension
+          schema:
+            type: string
+            enum: ["day", "week", "month", "knowledgeArea", "processGroup"]
+            default: "week"
+      responses:
+        '200':
+          description: Learning metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningMetrics'
+        '403':
+          description: Analytics access not available in current subscription
+
+  /analytics/performance-trends:
+    get:
+      tags: [Analytics]
+      summary: Get performance trends
+      description: Analyze learning performance trends and predictions
+      operationId: getPerformanceTrends
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: ["3months", "6months", "1year", "all"]
+            default: "6months"
+        - name: includeProjections
+          in: query
+          description: Include future performance projections
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Performance trends retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceTrends'
+
+  # Collaboration endpoints
+  /collaboration/study-groups:
+    get:
+      tags: [Collaboration]
+      summary: Get study groups
+      description: Retrieve available study groups and user's memberships
+      operationId: getStudyGroups
+      parameters:
+        - name: membershipType
+          in: query
+          description: Filter by membership status
+          schema:
+            type: string
+            enum: ["all", "member", "not_member", "owned"]
+            default: "all"
+        - name: search
+          in: query
+          description: Search groups by name or description
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Study groups retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudyGroup'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Collaboration]
+      summary: Create study group
+      description: Create a new study group
+      operationId: createStudyGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudyGroupRequest'
+      responses:
+        '201':
+          description: Study group created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    $ref: '#/components/schemas/StudyGroup'
+                  message:
+                    type: string
+
+  /collaboration/study-groups/{groupId}/join:
+    post:
+      tags: [Collaboration]
+      summary: Join study group
+      description: Join an existing study group
+      operationId: joinStudyGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully joined study group
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group:
+                    $ref: '#/components/schemas/StudyGroup'
+                  message:
+                    type: string
+        '409':
+          description: Already a member of the group
+
+  /collaboration/discussions/{groupId}:
+    get:
+      tags: [Collaboration]
+      summary: Get group discussions
+      description: Retrieve discussion threads for a study group
+      operationId: getGroupDiscussions
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Discussions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Discussion'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Collaboration]
+      summary: Create discussion thread
+      description: Start a new discussion thread in a study group
+      operationId: createDiscussion
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDiscussionRequest'
+      responses:
+        '201':
+          description: Discussion created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussion:
+                    $ref: '#/components/schemas/Discussion'
+                  message:
+                    type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service authentication
+
+  schemas:
+    # Authentication schemas
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: User password
+        rememberMe:
+          type: boolean
+          description: Keep user logged in for extended period
+          default: false
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: User full name
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
+          description: Strong password with mixed case, number, and special character
+        subscriptionPlan:
+          type: string
+          enum: ["FREE", "PREMIUM", "ENTERPRISE"]
+          default: "FREE"
+        marketingConsent:
+          type: boolean
+          description: Consent to receive marketing communications
+          default: false
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/TokenResponse'
+        permissions:
+          type: array
+          items:
+            type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        expiresIn:
+          type: integer
+          description: Token expiry time in seconds
+        tokenType:
+          type: string
+          default: "Bearer"
+
+    # User schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+          example: "clp1234567890"
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          type: string
+          enum: ["FREE", "PREMIUM", "INSTRUCTOR", "ADMIN"]
+        subscriptionPlan:
+          type: string
+          enum: ["FREE", "PREMIUM", "ENTERPRISE"]
+        subscriptionActive:
+          type: boolean
+        profileComplete:
+          type: boolean
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            learningProgress:
+              type: object
+              properties:
+                totalProcessesStudied:
+                  type: integer
+                completionPercentage:
+                  type: number
+                  format: float
+                currentStreak:
+                  type: integer
+                longestStreak:
+                  type: integer
+            permissions:
+              type: array
+              items:
+                type: string
+            canUseAI:
+              type: object
+              properties:
+                basic:
+                  type: boolean
+                advanced:
+                  type: boolean
+                unlimited:
+                  type: boolean
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        image:
+          type: string
+          format: uri
+        timezone:
+          type: string
+          description: User timezone (IANA format)
+          example: "Asia/Tokyo"
+        preferences:
+          type: object
+          properties:
+            language:
+              type: string
+              enum: ["ja", "en"]
+              default: "ja"
+            studyReminders:
+              type: boolean
+              default: true
+            emailNotifications:
+              type: boolean
+              default: true
+            darkMode:
+              type: boolean
+              default: false
+
+    # PMBOK schemas
+    KnowledgeArea:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Knowledge area identifier
+          example: "integration"
+        name:
+          type: string
+          description: Knowledge area name
+          example: "Integration Management"
+        description:
+          type: string
+          description: Detailed description of the knowledge area
+        processCount:
+          type: integer
+          description: Number of processes in this knowledge area
+        color:
+          type: string
+          description: Hex color code for visualization
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        processes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Process'
+          description: List of processes (if includeProcesses=true)
+
+    KnowledgeAreaDetail:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeArea'
+        - type: object
+          properties:
+            learningObjectives:
+              type: array
+              items:
+                type: string
+              description: Key learning objectives for this knowledge area
+            keyTerms:
+              type: array
+              items:
+                type: object
+                properties:
+                  term:
+                    type: string
+                  definition:
+                    type: string
+            relatedDomains:
+              type: array
+              items:
+                type: string
+              description: Related PMBOK 7 performance domains
+
+    Process:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Process identifier
+          example: "develop-project-charter"
+        name:
+          type: string
+          description: Process name
+          example: "Develop Project Charter"
+        description:
+          type: string
+          description: Process description
+        knowledgeArea:
+          type: string
+          description: Parent knowledge area
+        processGroup:
+          type: string
+          enum: ["Initiating", "Planning", "Executing", "Monitoring and Controlling", "Closing"]
+        complexity:
+          type: string
+          enum: ["Low", "Medium", "High"]
+          description: Process complexity level
+        studyPriority:
+          type: string
+          enum: ["Essential", "Important", "Supplementary"]
+          description: Recommended study priority
+
+    ProcessDetail:
+      allOf:
+        - $ref: '#/components/schemas/Process'
+        - type: object
+          properties:
+            inputs:
+              type: array
+              items:
+                $ref: '#/components/schemas/ITTO'
+              description: Process inputs
+            toolsAndTechniques:
+              type: array
+              items:
+                $ref: '#/components/schemas/ITTO'
+              description: Tools and techniques
+            outputs:
+              type: array
+              items:
+                $ref: '#/components/schemas/ITTO'
+              description: Process outputs
+            relatedProcesses:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  relationship:
+                    type: string
+                    enum: ["predecessor", "successor", "parallel", "dependent"]
+            examTips:
+              type: array
+              items:
+                type: string
+              description: PMP exam tips for this process
+
+    ITTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: ITTO item name
+        description:
+          type: string
+          description: Detailed description
+        type:
+          type: string
+          description: Item type or category
+        frequency:
+          type: string
+          enum: ["Always", "Often", "Sometimes", "Rarely"]
+          description: How often this appears in exams
+        keyPoints:
+          type: array
+          items:
+            type: string
+          description: Key points to remember
+
+    # Learning schemas
+    LearningProgress:
+      type: object
+      properties:
+        overallProgress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Overall completion percentage
+        knowledgeAreaProgress:
+          type: array
+          items:
+            type: object
+            properties:
+              knowledgeArea:
+                type: string
+              completedProcesses:
+                type: integer
+              totalProcesses:
+                type: integer
+              completionRate:
+                type: number
+                format: float
+              averageScore:
+                type: integer
+              totalStudyTime:
+                type: number
+                format: float
+                description: Total study time in hours
+        processGroupProgress:
+          type: array
+          items:
+            type: object
+            properties:
+              processGroup:
+                type: string
+              completedProcesses:
+                type: integer
+              totalProcesses:
+                type: integer
+              completionRate:
+                type: number
+                format: float
+              averageScore:
+                type: integer
+        studyStats:
+          type: object
+          properties:
+            totalStudyTime:
+              type: number
+              format: float
+              description: Total study time in hours
+            totalSessions:
+              type: integer
+            currentStreak:
+              type: integer
+              description: Current consecutive study days
+            longestStreak:
+              type: integer
+              description: Longest streak achieved
+            lastStudyDate:
+              type: string
+              format: date-time
+        examStats:
+          type: object
+          properties:
+            totalExams:
+              type: integer
+            passed:
+              type: integer
+            averageScore:
+              type: number
+              format: float
+            bestScore:
+              type: integer
+            lastExamDate:
+              type: string
+              format: date-time
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: AI-generated study recommendations (if requested)
+
+    StudySessionRequest:
+      type: object
+      required: [processId, processName, knowledgeArea, processGroup, duration]
+      properties:
+        processId:
+          type: string
+          description: Process being studied
+        processName:
+          type: string
+          description: Human-readable process name
+        knowledgeArea:
+          type: string
+          description: Knowledge area of the process
+        processGroup:
+          type: string
+          description: Process group
+        duration:
+          type: integer
+          minimum: 0
+          description: Study duration in seconds
+        completed:
+          type: boolean
+          description: Whether the study session was completed
+          default: true
+        notes:
+          type: string
+          maxLength: 500
+          description: Optional study notes
+        confidence:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Self-assessed confidence level (1-5)
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Perceived difficulty level (1-5)
+
+    StudySession:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        processId:
+          type: string
+        processName:
+          type: string
+        knowledgeArea:
+          type: string
+        processGroup:
+          type: string
+        duration:
+          type: integer
+        completed:
+          type: boolean
+        notes:
+          type: string
+        confidence:
+          type: integer
+        difficulty:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Exam schemas
+    ExamStartRequest:
+      type: object
+      required: [examType]
+      properties:
+        examType:
+          type: string
+          enum: ["full", "focused", "practice"]
+          description: Type of exam to start
+        questionCount:
+          type: integer
+          minimum: 10
+          maximum: 200
+          description: Number of questions (overrides examType default)
+        timeLimit:
+          type: integer
+          minimum: 600
+          maximum: 14400
+          description: Time limit in seconds
+        focusAreas:
+          type: array
+          items:
+            type: string
+          description: Knowledge areas to focus on (for focused exams)
+        difficulty:
+          type: string
+          enum: ["easy", "intermediate", "hard", "mixed"]
+          default: "mixed"
+        includeExplanations:
+          type: boolean
+          description: Include explanations with questions
+          default: true
+
+    ExamSession:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        examType:
+          type: string
+        status:
+          type: string
+          enum: ["active", "paused", "completed", "abandoned"]
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExamQuestion'
+        currentQuestion:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        timeLimit:
+          type: integer
+        timeRemaining:
+          type: integer
+        settings:
+          type: object
+          properties:
+            showExplanations:
+              type: boolean
+            allowReview:
+              type: boolean
+            shuffleQuestions:
+              type: boolean
+
+    ExamQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        question:
+          type: string
+          description: Question text
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              text:
+                type: string
+        knowledgeArea:
+          type: string
+        processGroup:
+          type: string
+        difficulty:
+          type: string
+          enum: ["easy", "intermediate", "hard"]
+        explanation:
+          type: string
+          description: Correct answer explanation (shown after answering)
+        references:
+          type: array
+          items:
+            type: string
+          description: PMBOK references for further study
+
+    ExamAnswersRequest:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              selectedOption:
+                type: string
+              timeSpent:
+                type: integer
+                description: Time spent on question in seconds
+
+    ExamResult:
+      type: object
+      properties:
+        id:
+          type: string
+        examId:
+          type: string
+        userId:
+          type: string
+        score:
+          type: integer
+          description: Number of correct answers
+        totalQuestions:
+          type: integer
+        correctAnswers:
+          type: integer
+        passed:
+          type: boolean
+        passingScore:
+          type: integer
+        completedAt:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: Actual exam duration in seconds
+        knowledgeAreaScores:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Scores by knowledge area
+        processGroupScores:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Scores by process group
+        detailedAnalysis:
+          type: object
+          properties:
+            strengths:
+              type: array
+              items:
+                type: string
+              description: Knowledge areas where user performed well
+            weaknesses:
+              type: array
+              items:
+                type: string
+              description: Areas needing improvement
+            recommendations:
+              type: array
+              items:
+                type: string
+              description: Study recommendations based on results
+            timeAnalysis:
+              type: object
+              properties:
+                averageQuestionTime:
+                  type: number
+                  format: float
+                fastestQuestion:
+                  type: number
+                slowestQuestion:
+                  type: number
+                timeManagementScore:
+                  type: string
+                  enum: ["excellent", "good", "needs_improvement"]
+
+    # AI Services schemas
+    AIRecommendations:
+      type: object
+      properties:
+        recommendations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: ["process_focus", "knowledge_area_review", "practice_exam", "weak_area_drill", "time_management"]
+              priority:
+                type: string
+                enum: ["high", "medium", "low"]
+              title:
+                type: string
+              description:
+                type: string
+              processes:
+                type: array
+                items:
+                  type: string
+                description: Recommended processes to study
+              estimatedStudyTime:
+                type: number
+                format: float
+                description: Estimated study time in hours
+              reasoning:
+                type: string
+                description: AI explanation for the recommendation
+              confidence:
+                type: number
+                format: float
+                minimum: 0
+                maximum: 1
+                description: AI confidence in recommendation (0-1)
+              resources:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: ["video", "article", "practice", "flashcard"]
+                    title:
+                      type: string
+                    url:
+                      type: string
+              actions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: ["study_process", "take_exam", "review_notes", "watch_video"]
+                    label:
+                      type: string
+                    data:
+                      type: object
+        generatedAt:
+          type: string
+          format: date-time
+        personalizedFor:
+          type: string
+          description: User ID for whom recommendations were generated
+        nextUpdateIn:
+          type: integer
+          description: Seconds until next recommendation refresh
+
+    AIChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          maxLength: 2000
+          description: User message to AI coach
+        context:
+          type: object
+          properties:
+            currentProcess:
+              type: string
+              description: Currently studying process
+            knowledgeArea:
+              type: string
+              description: Current knowledge area focus
+            timeAvailable:
+              type: integer
+              description: Available study time in days
+            weeklyStudyHours:
+              type: integer
+              description: Hours available for study per week
+            weakAreas:
+              type: array
+              items:
+                type: string
+              description: Known weak knowledge areas
+            examDate:
+              type: string
+              format: date
+              description: Target exam date
+        sessionId:
+          type: string
+          description: Chat session identifier for context continuity
+
+    AIChatResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: AI coach response text
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: Suggested follow-up questions or actions
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              type:
+                type: string
+                enum: ["process", "article", "video", "practice"]
+              url:
+                type: string
+        studyPlan:
+          type: object
+          description: AI-generated study plan (if requested)
+          properties:
+            duration:
+              type: integer
+              description: Plan duration in days
+            dailyGoals:
+              type: array
+              items:
+                type: object
+                properties:
+                  day:
+                    type: integer
+                  topics:
+                    type: array
+                    items:
+                      type: string
+                  estimatedTime:
+                    type: integer
+        sessionId:
+          type: string
+        messageId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # Analytics schemas
+    LearningMetrics:
+      type: object
+      properties:
+        period:
+          type: string
+          description: Time period for metrics
+        totalStudyTime:
+          type: number
+          format: float
+          description: Total study time in hours
+        studySessionCount:
+          type: integer
+        averageSessionLength:
+          type: number
+          format: float
+          description: Average session length in minutes
+        processesStudied:
+          type: integer
+        processesCompleted:
+          type: integer
+        completionRate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        knowledgeAreaDistribution:
+          type: array
+          items:
+            type: object
+            properties:
+              knowledgeArea:
+                type: string
+              studyTime:
+                type: number
+                format: float
+              sessions:
+                type: integer
+              completion:
+                type: number
+                format: float
+        streakData:
+          type: object
+          properties:
+            current:
+              type: integer
+            longest:
+              type: integer
+            daysActive:
+              type: integer
+            daysInPeriod:
+              type: integer
+            consistencyScore:
+              type: number
+              format: float
+        timeSeriesData:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              studyTime:
+                type: number
+                format: float
+              sessions:
+                type: integer
+              processesStudied:
+                type: integer
+        benchmarks:
+          type: object
+          properties:
+            percentileRank:
+              type: integer
+              description: User's percentile rank vs other users
+            averageCompletion:
+              type: number
+              format: float
+              description: Average completion rate for similar users
+            recommendedPace:
+              type: number
+              format: float
+              description: Recommended study hours per week
+
+    PerformanceTrends:
+      type: object
+      properties:
+        period:
+          type: string
+        overallTrend:
+          type: string
+          enum: ["improving", "stable", "declining"]
+        trendScore:
+          type: number
+          format: float
+          minimum: -100
+          maximum: 100
+          description: Trend score (-100 to +100)
+        knowledgeAreaTrends:
+          type: array
+          items:
+            type: object
+            properties:
+              knowledgeArea:
+                type: string
+              trend:
+                type: string
+                enum: ["improving", "stable", "declining"]
+              trendScore:
+                type: number
+                format: float
+              recentAverage:
+                type: number
+                format: float
+              historicalAverage:
+                type: number
+                format: float
+        examPerformanceTrends:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              score:
+                type: integer
+              passed:
+                type: boolean
+              improvement:
+                type: number
+                format: float
+        projections:
+          type: object
+          properties:
+            examReadinessDate:
+              type: string
+              format: date
+              description: Projected exam readiness date
+            confidenceLevel:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            recommendedExamDate:
+              type: string
+              format: date
+            areasNeedingFocus:
+              type: array
+              items:
+                type: string
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: ["strength", "weakness", "opportunity", "risk"]
+              title:
+                type: string
+              description:
+                type: string
+              actionable:
+                type: boolean
+              recommendations:
+                type: array
+                items:
+                  type: string
+
+    # Collaboration schemas
+    StudyGroup:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        isPrivate:
+          type: boolean
+        maxMembers:
+          type: integer
+        currentMembers:
+          type: integer
+        owner:
+          $ref: '#/components/schemas/User'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        focusAreas:
+          type: array
+          items:
+            type: string
+          description: Knowledge areas this group focuses on
+        studySchedule:
+          type: object
+          properties:
+            meetingDays:
+              type: array
+              items:
+                type: string
+                enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+            meetingTime:
+              type: string
+              pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'
+            timezone:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastActivity:
+          type: string
+          format: date-time
+        stats:
+          type: object
+          properties:
+            totalDiscussions:
+              type: integer
+            totalMessages:
+              type: integer
+            averageActivity:
+              type: number
+              format: float
+
+    CreateStudyGroupRequest:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        isPrivate:
+          type: boolean
+          default: false
+        maxMembers:
+          type: integer
+          minimum: 2
+          maximum: 50
+          default: 10
+        focusAreas:
+          type: array
+          items:
+            type: string
+        studySchedule:
+          type: object
+          properties:
+            meetingDays:
+              type: array
+              items:
+                type: string
+            meetingTime:
+              type: string
+            timezone:
+              type: string
+
+    Discussion:
+      type: object
+      properties:
+        id:
+          type: string
+        groupId:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/User'
+        tags:
+          type: array
+          items:
+            type: string
+        relatedProcesses:
+          type: array
+          items:
+            type: string
+        isPinned:
+          type: boolean
+        isResolved:
+          type: boolean
+        messageCount:
+          type: integer
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastMessageAt:
+          type: string
+          format: date-time
+
+    CreateDiscussionRequest:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+        content:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        relatedProcesses:
+          type: array
+          items:
+            type: string
+          description: PMBOK processes related to this discussion
+
+    # Common schemas
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+        hasMore:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Additional error details
+            timestamp:
+              type: string
+              format: date-time
+            path:
+              type: string
+              description: API endpoint path
+            traceId:
+              type: string
+              description: Request trace ID for debugging
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            token_expired:
+              summary: Expired token
+              value:
+                error:
+                  code: "TOKEN_EXPIRED"
+                  message: "Access token has expired"
+                  details:
+                    expiredAt: "2024-01-20T10:30:00Z"
+                    currentTime: "2024-01-20T11:30:00Z"
+                  timestamp: "2024-01-20T11:30:00Z"
+                  path: "/api/v2/learning/progress"
+
+    BadRequestError:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            validation_error:
+              summary: Validation failed
+              value:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Request validation failed"
+                  details:
+                    fieldErrors:
+                      email: "Invalid email format"
+                      password: "Password must be at least 8 characters"
+                  timestamp: "2024-01-20T11:30:00Z"
+                  path: "/api/v2/auth/register"
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    RateLimitError:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per hour
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "Too many requests. Rate limit: 100 requests per hour for free plan."
+              details:
+                limit: 100
+                remaining: 0
+                resetTime: 1705759800
+                upgradeUrl: "https://pmplearning.com/pricing"
+              timestamp: "2024-01-20T11:30:00Z"
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: User Management
+    description: User profile and account management
+  - name: PMBOK Knowledge Areas
+    description: PMBOK 6th edition knowledge areas and processes
+  - name: Process Management
+    description: Individual process management with ITTO details
+  - name: Learning Progress
+    description: Study session tracking and progress analytics
+  - name: Assessments
+    description: Mock exams and practice tests
+  - name: AI Services
+    description: AI-powered coaching and recommendations
+  - name: Analytics
+    description: Learning metrics and performance analysis
+  - name: Collaboration
+    description: Study groups and discussion forums
+
+externalDocs:
+  description: PMP Learning Management Documentation
+  url: https://docs.pmplearning.com

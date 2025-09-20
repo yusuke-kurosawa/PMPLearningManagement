@@ -1,0 +1,614 @@
+# 📚 PMP Terminology Consistency Checker
+# Automated PR review for PMBOK-compliant terminology usage
+# Ensures consistent use of project management terms across the codebase
+
+name: 📚 PMP Terminology Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.md'
+      - 'docs/**'
+      - 'src/**'
+  workflow_dispatch:
+    inputs:
+      strict_mode:
+        description: 'Enable strict mode (check all contexts)'
+        type: boolean
+        default: false
+      pmbok_version:
+        description: 'PMBOK version to check against'
+        type: choice
+        options:
+          - '7'
+          - '6'
+          - 'both'
+        default: '7'
+
+# 最小権限の原則
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
+# 並行実行制御
+concurrency:
+  group: terminology-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 📋 設定と準備
+  setup:
+    name: 📋 設定と準備
+    runs-on: ubuntu-latest
+    outputs:
+      files_to_check: ${{ steps.get_files.outputs.files }}
+      check_required: ${{ steps.get_files.outputs.required }}
+    
+    steps:
+      - name: 📥 チェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完全な履歴を取得
+
+      - name: 📝 変更ファイルの取得
+        id: get_files
+        run: |
+          # PR の変更ファイルを取得
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | \
+                    grep -E '\.(ts|tsx|js|jsx|md)$' | \
+                    jq -R -s -c 'split("\n")[:-1]')
+          else
+            # workflow_dispatch の場合は全ファイルをチェック
+            FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.md" \) | \
+                    grep -v node_modules | \
+                    jq -R -s -c 'split("\n")[:-1]')
+          fi
+          
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          
+          # チェックが必要かどうかを判定
+          if [ "$FILES" = "[]" ]; then
+            echo "required=false" >> $GITHUB_OUTPUT
+          else
+            echo "required=true" >> $GITHUB_OUTPUT
+          fi
+
+  # 🔍 用語チェック実行
+  terminology-check:
+    name: 🔍 PMP用語チェック
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.check_required == 'true'
+    
+    steps:
+      - name: 📥 チェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🔧 Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 依存関係インストール
+        run: |
+          npm ci --prefer-offline --no-audit
+          
+      - name: 🏗️ チェッカービルド
+        run: |
+          # TypeScript コンパイル
+          npx tsc src/services/terminology/terminology-analyzer.ts \
+                  src/data/terminology/pmp-terminology-database.ts \
+                  --outDir dist/terminology \
+                  --module commonjs \
+                  --target es2020 \
+                  --esModuleInterop \
+                  --skipLibCheck
+
+      - name: 🔍 用語分析実行
+        id: analyze
+        run: |
+          # 分析スクリプトの作成
+          cat > run-analysis.js << 'EOF'
+          const { TerminologyAnalyzer } = require('./dist/terminology/terminology-analyzer');
+          const fs = require('fs').promises;
+          const path = require('path');
+
+          async function runAnalysis() {
+            const analyzer = new TerminologyAnalyzer({
+              region: 'US',
+              pmbokVersion: ${{ github.event.inputs.pmbok_version || '7' }} === 'both' ? 7 : parseInt('${{ github.event.inputs.pmbok_version || '7' }}'),
+              strictMode: ${{ github.event.inputs.strict_mode || 'false' }},
+              learningMode: true
+            });
+
+            const files = ${{ needs.setup.outputs.files_to_check }};
+            const allResults = [];
+            let totalErrors = 0;
+            let totalWarnings = 0;
+            let totalSuggestions = 0;
+
+            for (const file of files) {
+              try {
+                const content = await fs.readFile(file, 'utf-8');
+                const analysis = await analyzer.analyzeFile(file, content, {
+                  contextAware: true,
+                  semanticAnalysis: true
+                });
+                
+                allResults.push(analysis);
+                totalErrors += analysis.errors.length;
+                totalWarnings += analysis.warnings.length;
+                totalSuggestions += analysis.suggestions.length;
+
+                // 結果をコンソールに出力（GitHub Actions アノテーション形式）
+                for (const error of analysis.errors) {
+                  console.log(`::error file=${file},line=${error.line},col=${error.column}::${error.message}`);
+                }
+                for (const warning of analysis.warnings) {
+                  console.log(`::warning file=${file},line=${warning.line},col=${warning.column}::${warning.message}`);
+                }
+                for (const suggestion of analysis.suggestions) {
+                  console.log(`::notice file=${file},line=${suggestion.line},col=${suggestion.column}::${suggestion.message}`);
+                }
+              } catch (error) {
+                console.error(`Error analyzing ${file}:`, error);
+              }
+            }
+
+            // 結果をファイルに保存
+            await fs.writeFile('terminology-report.json', JSON.stringify({
+              timestamp: new Date().toISOString(),
+              totalFiles: files.length,
+              totalErrors,
+              totalWarnings,
+              totalSuggestions,
+              results: allResults
+            }, null, 2));
+
+            // サマリーの生成
+            const summary = {
+              errors: totalErrors,
+              warnings: totalWarnings,
+              suggestions: totalSuggestions,
+              score: Math.max(0, 100 - (totalErrors * 10) - (totalWarnings * 5) - (totalSuggestions * 2))
+            };
+
+            await fs.writeFile('terminology-summary.json', JSON.stringify(summary, null, 2));
+
+            // Exit code based on errors
+            process.exit(totalErrors > 0 ? 1 : 0);
+          }
+
+          runAnalysis().catch(console.error);
+          EOF
+
+          # 分析実行
+          node run-analysis.js || echo "ANALYSIS_FAILED=true" >> $GITHUB_ENV
+
+      - name: 📊 レポート生成
+        if: always()
+        run: |
+          # Markdown レポートの生成
+          cat > generate-report.js << 'EOF'
+          const fs = require('fs').promises;
+
+          async function generateReport() {
+            try {
+              const report = JSON.parse(await fs.readFile('terminology-report.json', 'utf-8'));
+              const summary = JSON.parse(await fs.readFile('terminology-summary.json', 'utf-8'));
+
+              let markdown = `# 📚 PMP Terminology Check Report\n\n`;
+              markdown += `**Date:** ${new Date(report.timestamp).toLocaleString()}\n`;
+              markdown += `**Files Checked:** ${report.totalFiles}\n\n`;
+              
+              markdown += `## 📊 Summary\n\n`;
+              markdown += `| Metric | Count | Status |\n`;
+              markdown += `|--------|-------|--------|\n`;
+              markdown += `| ❌ Errors | ${summary.errors} | ${summary.errors === 0 ? '✅' : '⚠️'} |\n`;
+              markdown += `| ⚠️ Warnings | ${summary.warnings} | ${summary.warnings < 5 ? '✅' : '⚠️'} |\n`;
+              markdown += `| 💡 Suggestions | ${summary.suggestions} | ℹ️ |\n`;
+              markdown += `| 🎯 Compliance Score | ${summary.score}/100 | ${summary.score >= 80 ? '✅' : '⚠️'} |\n\n`;
+
+              if (report.totalErrors > 0) {
+                markdown += `## ❌ Errors (Must Fix)\n\n`;
+                for (const file of report.results) {
+                  if (file.errors.length > 0) {
+                    markdown += `### 📄 ${file.file}\n\n`;
+                    for (const error of file.errors) {
+                      markdown += `- **Line ${error.line}:** "${error.term}" → Use "${error.suggestion || 'correct term'}"\n`;
+                      markdown += `  - ${error.message}\n`;
+                      if (error.learningResources && error.learningResources.length > 0) {
+                        markdown += `  - 📚 [Learn more](${error.learningResources[0]})\n`;
+                      }
+                    }
+                    markdown += '\n';
+                  }
+                }
+              }
+
+              if (report.totalWarnings > 0) {
+                markdown += `## ⚠️ Warnings (Should Fix)\n\n`;
+                for (const file of report.results) {
+                  if (file.warnings.length > 0) {
+                    markdown += `### 📄 ${file.file}\n\n`;
+                    for (const warning of file.warnings.slice(0, 5)) {
+                      markdown += `- **Line ${warning.line}:** "${warning.term}" → Consider "${warning.suggestion || 'standard term'}"\n`;
+                    }
+                    if (file.warnings.length > 5) {
+                      markdown += `- ... and ${file.warnings.length - 5} more warnings\n`;
+                    }
+                    markdown += '\n';
+                  }
+                }
+              }
+
+              // メトリクス分析
+              markdown += `## 📈 Terminology Metrics\n\n`;
+              
+              // 共通の間違いを集計
+              const mistakes = new Map();
+              for (const file of report.results) {
+                for (const issue of [...file.errors, ...file.warnings]) {
+                  const count = mistakes.get(issue.term) || 0;
+                  mistakes.set(issue.term, count + 1);
+                }
+              }
+
+              if (mistakes.size > 0) {
+                markdown += `### 🔄 Common Terminology Issues\n\n`;
+                markdown += `| Incorrect Term | Frequency | Correct Term |\n`;
+                markdown += `|----------------|-----------|---------------|\n`;
+                
+                const sorted = Array.from(mistakes.entries())
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 10);
+                
+                for (const [term, count] of sorted) {
+                  // Find correct term from first occurrence
+                  let correctTerm = 'See documentation';
+                  for (const file of report.results) {
+                    const issue = [...file.errors, ...file.warnings].find(i => i.term === term);
+                    if (issue?.suggestion) {
+                      correctTerm = issue.suggestion;
+                      break;
+                    }
+                  }
+                  markdown += `| ${term} | ${count} | ${correctTerm} |\n`;
+                }
+              }
+
+              // Knowledge gaps
+              const knowledgeAreas = new Map();
+              for (const file of report.results) {
+                if (file.metrics?.knowledgeGaps) {
+                  for (const gap of file.metrics.knowledgeGaps) {
+                    const count = knowledgeAreas.get(gap) || 0;
+                    knowledgeAreas.set(gap, count + 1);
+                  }
+                }
+              }
+
+              if (knowledgeAreas.size > 0) {
+                markdown += `\n### 📚 Knowledge Areas Requiring Attention\n\n`;
+                for (const [area, count] of knowledgeAreas) {
+                  markdown += `- **${area}**: ${count} files with issues\n`;
+                }
+              }
+
+              markdown += `\n## 🎯 Recommendations\n\n`;
+              if (summary.errors > 0) {
+                markdown += `1. **Fix all errors** before merging - these are violations of standard PMP terminology\n`;
+              }
+              if (summary.warnings > 10) {
+                markdown += `2. **Review warnings** - consider updating to standard terminology for consistency\n`;
+              }
+              if (summary.score < 80) {
+                markdown += `3. **Improve compliance** - aim for a score of 80+ for professional quality\n`;
+              }
+              markdown += `4. **Review PMBOK Guide** - familiarize yourself with standard project management terminology\n`;
+              markdown += `5. **Use the glossary** - refer to /glossary for correct PMP terms\n`;
+
+              await fs.writeFile('terminology-report.md', markdown);
+              
+              // GitHub step summary
+              await fs.appendFile(process.env.GITHUB_STEP_SUMMARY || 'summary.md', markdown);
+              
+            } catch (error) {
+              console.error('Error generating report:', error);
+            }
+          }
+
+          generateReport();
+          EOF
+
+          node generate-report.js
+
+      - name: 💬 PR コメント投稿
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs').promises;
+            
+            try {
+              const report = await fs.readFile('terminology-report.md', 'utf-8');
+              const summary = JSON.parse(await fs.readFile('terminology-summary.json', 'utf-8'));
+              
+              // 既存のコメントを検索
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const botComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('PMP Terminology Check Report')
+              );
+              
+              const commentBody = report.length > 65000 
+                ? report.substring(0, 65000) + '\n\n... (truncated)'
+                : report;
+              
+              if (botComment) {
+                // 既存コメントを更新
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: commentBody
+                });
+              } else {
+                // 新規コメントを作成
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+              }
+              
+              // チェックステータスの更新
+              if (summary.errors > 0) {
+                core.setFailed(`Found ${summary.errors} terminology errors that must be fixed`);
+              } else if (summary.warnings > 20) {
+                core.warning(`Found ${summary.warnings} terminology warnings - consider fixing for better consistency`);
+              }
+              
+            } catch (error) {
+              console.error('Error posting comment:', error);
+            }
+
+      - name: 📤 アーティファクト保存
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminology-report-${{ github.run_id }}
+          path: |
+            terminology-report.json
+            terminology-report.md
+            terminology-summary.json
+          retention-days: 30
+
+  # 🔧 自動修正提案
+  autofix:
+    name: 🔧 自動修正提案
+    runs-on: ubuntu-latest
+    needs: [setup, terminology-check]
+    if: |
+      always() && 
+      needs.setup.outputs.check_required == 'true' &&
+      github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 チェックアウト
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: 🔧 Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 依存関係インストール
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 📥 レポートダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: terminology-report-${{ github.run_id }}
+
+      - name: 🔧 自動修正実行
+        id: autofix
+        run: |
+          # TypeScript コンパイル
+          npx tsc src/services/terminology/terminology-analyzer.ts \
+                  src/data/terminology/pmp-terminology-database.ts \
+                  --outDir dist/terminology \
+                  --module commonjs \
+                  --target es2020 \
+                  --esModuleInterop \
+                  --skipLibCheck
+
+          # 自動修正スクリプト
+          cat > autofix.js << 'EOF'
+          const { TerminologyAnalyzer } = require('./dist/terminology/terminology-analyzer');
+          const fs = require('fs').promises;
+          const path = require('path');
+
+          async function applyAutofix() {
+            const report = JSON.parse(await fs.readFile('terminology-report.json', 'utf-8'));
+            const analyzer = new TerminologyAnalyzer({
+              region: 'US',
+              pmbokVersion: 7,
+              strictMode: false,
+              learningMode: true
+            });
+
+            let fixedCount = 0;
+            const fixedFiles = [];
+
+            for (const fileAnalysis of report.results) {
+              if (fileAnalysis.autofixAvailable) {
+                try {
+                  const content = await fs.readFile(fileAnalysis.file, 'utf-8');
+                  const fixed = analyzer.generateAutofix(fileAnalysis, content);
+                  
+                  if (fixed !== content) {
+                    await fs.writeFile(fileAnalysis.file, fixed);
+                    fixedFiles.push(fileAnalysis.file);
+                    fixedCount += fileAnalysis.errors.length + fileAnalysis.warnings.length;
+                  }
+                } catch (error) {
+                  console.error(`Error fixing ${fileAnalysis.file}:`, error);
+                }
+              }
+            }
+
+            console.log(`Fixed ${fixedCount} issues in ${fixedFiles.length} files`);
+            
+            // 修正結果を保存
+            await fs.writeFile('autofix-summary.json', JSON.stringify({
+              fixedCount,
+              fixedFiles
+            }, null, 2));
+          }
+
+          applyAutofix().catch(console.error);
+          EOF
+
+          node autofix.js
+
+      - name: 📝 修正内容コミット
+        run: |
+          # 修正があるかチェック
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            
+            # 修正内容をコミット
+            git add -A
+            git commit -m "🔧 fix: Auto-fix PMP terminology issues
+
+            Automated terminology corrections based on PMBOK standards:
+            - Fixed deprecated terms
+            - Standardized acronym usage
+            - Corrected knowledge area references
+            - Updated process group terminology
+
+            Co-authored-by: PMP Terminology Checker <action@github.com>"
+            
+            git push
+            
+            echo "AUTOFIX_APPLIED=true" >> $GITHUB_ENV
+          else
+            echo "No changes to commit"
+            echo "AUTOFIX_APPLIED=false" >> $GITHUB_ENV
+          fi
+
+      - name: 💬 自動修正コメント
+        if: env.AUTOFIX_APPLIED == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs').promises;
+            const summary = JSON.parse(await fs.readFile('autofix-summary.json', 'utf-8'));
+            
+            const comment = `## 🔧 Auto-fix Applied
+            
+            I've automatically fixed **${summary.fixedCount}** terminology issues in **${summary.fixedFiles.length}** files.
+            
+            ### Files Updated:
+            ${summary.fixedFiles.map(f => `- \`${f}\``).join('\n')}
+            
+            Please review the changes to ensure they maintain the intended meaning.
+            
+            **Note:** Some issues may require manual review and cannot be auto-fixed.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+  # 📊 メトリクス収集
+  collect-metrics:
+    name: 📊 メトリクス収集
+    runs-on: ubuntu-latest
+    needs: [terminology-check]
+    if: always() && needs.terminology-check.result != 'skipped'
+    
+    steps:
+      - name: 📥 レポートダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: terminology-report-${{ github.run_id }}
+
+      - name: 📊 メトリクス送信
+        run: |
+          # メトリクスを収集して保存（将来のダッシュボード用）
+          cat > collect-metrics.js << 'EOF'
+          const fs = require('fs').promises;
+
+          async function collectMetrics() {
+            const report = JSON.parse(await fs.readFile('terminology-report.json', 'utf-8'));
+            const summary = JSON.parse(await fs.readFile('terminology-summary.json', 'utf-8'));
+
+            const metrics = {
+              timestamp: new Date().toISOString(),
+              repository: process.env.GITHUB_REPOSITORY,
+              pr_number: process.env.GITHUB_EVENT_NAME === 'pull_request' ? 
+                        parseInt(process.env.GITHUB_REF.match(/\d+/)?.[0] || '0') : null,
+              branch: process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME,
+              commit: process.env.GITHUB_SHA,
+              files_checked: report.totalFiles,
+              errors: summary.errors,
+              warnings: summary.warnings,
+              suggestions: summary.suggestions,
+              compliance_score: summary.score,
+              common_mistakes: {},
+              knowledge_gaps: []
+            };
+
+            // 共通の間違いを集計
+            for (const file of report.results) {
+              for (const issue of [...file.errors, ...file.warnings]) {
+                metrics.common_mistakes[issue.term] = 
+                  (metrics.common_mistakes[issue.term] || 0) + 1;
+              }
+              
+              if (file.metrics?.knowledgeGaps) {
+                metrics.knowledge_gaps.push(...file.metrics.knowledgeGaps);
+              }
+            }
+
+            // メトリクスを保存（将来的にはデータベースに送信）
+            await fs.writeFile('terminology-metrics.json', JSON.stringify(metrics, null, 2));
+            
+            console.log('Metrics collected:', metrics);
+          }
+
+          collectMetrics().catch(console.error);
+          EOF
+
+          node collect-metrics.js
+
+      - name: 📤 メトリクス保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminology-metrics-${{ github.run_id }}
+          path: terminology-metrics.json
+          retention-days: 90

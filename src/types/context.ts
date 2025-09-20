@@ -13,15 +13,16 @@ export interface ContextStats {
   cacheHitRate: number
   averageAccessCount: number
   compressionRatio: number
+  memoryUsage: number
 }
 
 // Monitoring Data
 export interface MonitoringData {
   status: 'healthy' | 'warning' | 'critical'
   policy: 'normal' | 'aggressive' | 'conservative'
-  metrics: Record<string, any>
+  metrics: Record<string, unknown>
   lastCleanup: number
-  nextCleanup?: number
+  nextCleanup: number
 }
 
 // Performance Metrics
@@ -47,8 +48,8 @@ export interface StoreOptions {
 // Context Manager API
 export interface ContextManagerAPI {
   // Storage operations
-  store: (key: string, data: any, options?: StoreOptions) => void
-  retrieve: (key: string) => any
+  store: (key: string, data: unknown, options?: StoreOptions) => void
+  retrieve: (key: string) => unknown
 
   // Cleanup operations
   cleanup: () => Promise<void>
@@ -56,15 +57,18 @@ export interface ContextManagerAPI {
   clear: () => void
 
   // Performance operations
-  optimizeComponent: (Component: React.ComponentType, options?: any) => React.ComponentType
-  lazyLoad: (componentKey: string, loader: () => Promise<any>) => Promise<any>
+  optimizeComponent: (
+    Component: React.ComponentType,
+    options?: Record<string, unknown>
+  ) => React.ComponentType
+  lazyLoad: (componentKey: string, loader: () => Promise<unknown>) => Promise<unknown>
   observeForLazyLoading: (element: Element, loadHandler: () => void) => void
-  debounce: <T extends (...args: any[]) => any>(func: T, wait: number) => T
-  throttle: <T extends (...args: any[]) => any>(func: T, limit: number) => T
+  debounce: <T extends (...args: unknown[]) => unknown>(func: T, wait: number) => T
+  throttle: <T extends (...args: unknown[]) => unknown>(func: T, limit: number) => T
 
   // Monitoring operations
   setRotationPolicy: (policy: 'normal' | 'aggressive' | 'conservative') => void
-  getDiagnostics: () => any
+  getDiagnostics: () => Record<string, unknown>
 
   // Statistics
   getStats: () => ContextStats
@@ -75,7 +79,7 @@ export interface ContextManagerAPI {
 // Context Monitoring Hook Return Type
 export interface ContextMonitoringReturn {
   setRotationPolicy: (policy: 'normal' | 'aggressive' | 'conservative') => void
-  getDiagnostics: () => any
+  getDiagnostics: () => Record<string, unknown>
   getStats: () => ContextStats
   getMonitoringData: () => MonitoringData
   getPerformanceMetrics: () => PerformanceMetrics
@@ -85,8 +89,8 @@ export interface ContextMonitoringReturn {
 
 // Context Storage Hook Return Type
 export interface ContextStorageReturn {
-  store: (key: string, data: any, options?: StoreOptions) => void
-  retrieve: (key: string) => any
+  store: (key: string, data: unknown, options?: StoreOptions) => void
+  retrieve: (key: string) => unknown
   cleanup: () => Promise<void>
   archive: (maxAge: number) => Promise<void>
   clear: () => void
@@ -94,9 +98,18 @@ export interface ContextStorageReturn {
 
 // Performance Optimizer Hook Return Type
 export interface PerformanceOptimizerReturn {
-  optimizeComponent: (Component: React.ComponentType, options?: any) => React.ComponentType
-  lazyLoad: (componentKey: string, loader: () => Promise<any>) => Promise<any>
+  optimizeComponent: (
+    Component: React.ComponentType,
+    options?: Record<string, unknown>
+  ) => React.ComponentType
+  lazyLoad: (componentKey: string, loader: () => Promise<unknown>) => Promise<unknown>
   observeForLazyLoading: (element: Element, loadHandler: () => void) => void
-  debounce: <T extends (...args: any[]) => any>(func: T, wait: number) => T
-  throttle: <T extends (...args: any[]) => any>(func: T, limit: number) => T
+  debounce: <T extends (...args: unknown[]) => unknown>(func: T, wait: number) => T
+  throttle: <T extends (...args: unknown[]) => unknown>(func: T, limit: number) => T
+}
+
+// Context Manager Dashboard Props
+export interface ContextManagerDashboardProps {
+  isOpen?: boolean
+  onClose: () => void
 }

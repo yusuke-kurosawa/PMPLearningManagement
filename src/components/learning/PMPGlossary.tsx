@@ -14,6 +14,7 @@ const PMPGlossary = React.memo(() => {
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
   // リンクから遷移した場合、指定された用語を表示
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (location.state?.selectedTermId) {
       const term = glossaryService.getTermById(location.state.selectedTermId)

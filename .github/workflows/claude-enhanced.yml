@@ -1,0 +1,457 @@
+# ====================================================================
+# 🤖 Enhanced Claude Code Assistant
+# ====================================================================
+# 目的: リアルタイムClaude支援とスマート応答
+#
+# 実行タイミング:
+#   - @claude メンション時 (即座に応答)
+#   - プルリクエストレビュー時 (自動分析)
+#   - Issue作成時 (自動トリアージ)
+#   - コードプッシュ時 (スマート分析)
+#
+# 主な処理:
+#   1. 🚀 リアルタイム応答: @claudeメンション即座対応
+#   2. 🔍 スマート分析: コンテキスト理解型分析
+#   3. 💡 提案生成: アクション可能な改善提案
+#   4. 📝 ドキュメント生成: 自動ドキュメント更新
+#   5. 🎯 テスト支援: テスト戦略提案
+#
+# 依存関係: Claude API, GitHub Actions, Node.js
+# 実行時間目安: 2-5分 (高速応答重視)
+# 最終更新: 2025-08-30
+# ====================================================================
+
+name: "🤖 Enhanced Claude Code Assistant"
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]  
+  issues:
+    types: [opened, assigned, labeled]
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches:
+      - main
+      - develop
+      - 'feature/*'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+  workflow_dispatch:
+    inputs:
+      action-type:
+        description: 'Claude assistant action to perform'
+        required: true
+        type: choice
+        options:
+          - 'smart-review'
+          - 'test-strategy'
+          - 'documentation-update'
+          - 'performance-audit'
+          - 'security-scan'
+          - 'refactoring-suggestions'
+        default: 'smart-review'
+      target-scope:
+        description: 'Analysis scope'
+        required: false
+        type: choice
+        options:
+          - 'changed-files'
+          - 'full-codebase'
+          - 'specific-component'
+        default: 'changed-files'
+
+env:
+  CLAUDE_MODEL: 'claude-3-5-sonnet-20241022'
+  CLAUDE_MAX_TOKENS: 4096
+  CLAUDE_TEMPERATURE: 0.2
+  NODE_VERSION: '18'
+  
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: 'claude-assistant-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  claude-context-analyzer:
+    name: "🧠 Context Analysis"
+    runs-on: ubuntu-latest
+    if: github.event_name != 'issue_comment' || contains(github.event.comment.body, '@claude')
+    outputs:
+      analysis-type: ${{ steps.context.outputs.analysis-type }}
+      priority: ${{ steps.context.outputs.priority }}
+      scope: ${{ steps.context.outputs.scope }}
+      files-changed: ${{ steps.context.outputs.files-changed }}
+      complexity-level: ${{ steps.context.outputs.complexity-level }}
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: "🧠 Context Analysis"
+        id: context
+        run: |
+          echo "🧠 Analyzing context and determining Claude action..."
+          
+          # Determine analysis type based on trigger
+          if [[ "${{ github.event_name }}" == "issue_comment" && "${{ github.event.comment.body }}" == *"@claude"* ]]; then
+            if [[ "${{ github.event.comment.body }}" == *"review"* ]]; then
+              echo "analysis-type=comment-review" >> $GITHUB_OUTPUT
+            elif [[ "${{ github.event.comment.body }}" == *"test"* ]]; then
+              echo "analysis-type=test-assistance" >> $GITHUB_OUTPUT
+            elif [[ "${{ github.event.comment.body }}" == *"refactor"* ]]; then
+              echo "analysis-type=refactor-suggestions" >> $GITHUB_OUTPUT
+            else
+              echo "analysis-type=general-assistance" >> $GITHUB_OUTPUT
+            fi
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "analysis-type=pr-review" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "issues" ]]; then
+            echo "analysis-type=issue-triage" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "analysis-type=push-analysis" >> $GITHUB_OUTPUT
+          else
+            echo "analysis-type=${{ inputs.action-type || 'smart-review' }}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Analyze changed files for PR/push events
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "push" ]]; then
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD | head -20)
+            else
+              changed_files=$(git diff --name-only HEAD~1 HEAD | head -20)
+            fi
+            
+            files_count=$(echo "$changed_files" | wc -l)
+            echo "files-changed=$changed_files" >> $GITHUB_OUTPUT
+            
+            # Determine scope and complexity
+            if [[ $files_count -le 3 ]]; then
+              echo "scope=focused" >> $GITHUB_OUTPUT
+              echo "complexity-level=low" >> $GITHUB_OUTPUT
+            elif [[ $files_count -le 8 ]]; then
+              echo "scope=moderate" >> $GITHUB_OUTPUT
+              echo "complexity-level=medium" >> $GITHUB_OUTPUT
+            else
+              echo "scope=comprehensive" >> $GITHUB_OUTPUT
+              echo "complexity-level=high" >> $GITHUB_OUTPUT
+            fi
+            
+            # Determine priority based on file types
+            if echo "$changed_files" | grep -q -E "\.(test|spec)\.(js|ts|jsx|tsx)$"; then
+              echo "priority=high" >> $GITHUB_OUTPUT
+            elif echo "$changed_files" | grep -q -E "src/(components|pages|services)"; then
+              echo "priority=medium" >> $GITHUB_OUTPUT
+            else
+              echo "priority=low" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "scope=contextual" >> $GITHUB_OUTPUT
+            echo "priority=medium" >> $GITHUB_OUTPUT
+            echo "complexity-level=medium" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "✅ Context analysis completed"
+
+  claude-smart-assistant:
+    name: "🤖 Claude Smart Assistant"
+    runs-on: ubuntu-latest
+    needs: [claude-context-analyzer]
+    if: needs.claude-context-analyzer.outputs.analysis-type != ''
+    steps:
+      - name: "📥 Checkout Repository" 
+        uses: actions/checkout@v4
+        
+      - name: "⚙️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: "🔍 Collect Context Data"
+        id: collect-context
+        run: |
+          echo "🔍 Collecting relevant context for Claude..."
+          
+          analysis_type="${{ needs.claude-context-analyzer.outputs.analysis-type }}"
+          files_changed="${{ needs.claude-context-analyzer.outputs.files-changed }}"
+          
+          # Create context file
+          context_data="{"
+          context_data+='"project":"PMPLearningManagement",'
+          context_data+='"trigger":"${{ github.event_name }}",'
+          context_data+='"analysis_type":"'$analysis_type'",'
+          context_data+='"scope":"${{ needs.claude-context-analyzer.outputs.scope }}",'
+          context_data+='"complexity":"${{ needs.claude-context-analyzer.outputs.complexity-level }}",'
+          
+          # Add event-specific context
+          if [[ "${{ github.event_name }}" == "issue_comment" ]]; then
+            comment_body="${{ github.event.comment.body }}"
+            context_data+='"comment":"'$(echo "$comment_body" | jq -Rs .)",'
+            context_data+='"issue_title":"${{ github.event.issue.title }}",'
+          elif [[ "${{ github.event_name }}" == "issues" ]]; then
+            context_data+='"issue_title":"${{ github.event.issue.title }}",'
+            context_data+='"issue_body":"'$(echo "${{ github.event.issue.body }}" | jq -Rs .)",'
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            context_data+='"pr_title":"${{ github.event.pull_request.title }}",'
+            context_data+='"pr_body":"'$(echo "${{ github.event.pull_request.body }}" | jq -Rs .)",'
+          fi
+          
+          # Add file contents for code analysis
+          if [[ -n "$files_changed" && "$files_changed" != "null" ]]; then
+            context_data+='"changed_files":['
+            first_file=true
+            echo "$files_changed" | head -10 | while IFS= read -r file; do
+              if [[ -f "$file" && $(wc -c < "$file") -lt 50000 ]]; then
+                if [[ "$first_file" != true ]]; then
+                  context_data+=','
+                fi
+                context_data+='{"path":"'$file'","content":'$(cat "$file" | jq -Rs .)'}'
+                first_file=false
+              fi
+            done
+            context_data+='],'
+          fi
+          
+          context_data+='"timestamp":"'$(date -Iseconds)'"'
+          context_data+='}'
+          
+          echo "$context_data" > claude-context.json
+          echo "context-file=claude-context.json" >> $GITHUB_OUTPUT
+          
+          echo "✅ Context collected ($(wc -c < claude-context.json) bytes)"
+          
+      - name: "🤖 Claude Analysis & Response"
+        id: claude-response
+        if: secrets.ANTHROPIC_API_KEY
+        run: |
+          echo "🤖 Generating Claude response..."
+          
+          analysis_type="${{ needs.claude-context-analyzer.outputs.analysis-type }}"
+          api_key="${{ secrets.ANTHROPIC_API_KEY }}"
+          
+          # Generate appropriate prompt based on analysis type
+          case "$analysis_type" in
+            "comment-review")
+              prompt="You are a senior code reviewer and mentor. A developer has mentioned @claude in a comment asking for help. Based on the context provided, give practical, actionable advice. Be concise but thorough. Focus on immediate next steps and code improvements."
+              ;;
+            "pr-review")
+              prompt="You are conducting a code review for the PMPLearningManagement project (a React-based PMP learning platform). Analyze the changed files and provide: 1) Code quality assessment 2) Potential bugs or issues 3) Performance considerations 4) Best practices recommendations 5) Testing suggestions. Be constructive and specific."
+              ;;
+            "issue-triage")
+              prompt="You are helping triage a new issue for the PMPLearningManagement project. Analyze the issue and provide: 1) Classification (bug/feature/enhancement) 2) Priority assessment 3) Technical approach suggestions 4) Implementation complexity estimate 5) Related components that might be affected."
+              ;;
+            "push-analysis")
+              prompt="You are analyzing recent code changes pushed to the PMPLearningManagement project. Provide a quick assessment of: 1) Code quality of changes 2) Potential impact on the application 3) Any immediate concerns 4) Suggestions for follow-up actions."
+              ;;
+            "test-assistance")
+              prompt="You are helping improve testing for the PMPLearningManagement project. Based on the context, provide: 1) Test strategy recommendations 2) Missing test coverage areas 3) Test implementation suggestions 4) Testing best practices for React components."
+              ;;
+            *)
+              prompt="You are a helpful coding assistant for the PMPLearningManagement project. Analyze the provided context and give practical, actionable advice to help improve code quality and development efficiency."
+              ;;
+          esac
+          
+          # Create Claude API request
+          cat > claude-request.json << EOF
+          {
+            "model": "${{ env.CLAUDE_MODEL }}",
+            "max_tokens": ${{ env.CLAUDE_MAX_TOKENS }},
+            "temperature": ${{ env.CLAUDE_TEMPERATURE }},
+            "messages": [
+              {
+                "role": "user",
+                "content": "$prompt\n\nContext: $(cat claude-context.json | jq -c .)"
+              }
+            ]
+          }
+          EOF
+          
+          # Make API request
+          response=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $api_key" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @claude-request.json)
+          
+          echo "$response" > claude-response.json
+          
+          # Extract response content
+          if echo "$response" | jq -e '.content[0].text' > /dev/null 2>&1; then
+            claude_text=$(echo "$response" | jq -r '.content[0].text')
+            echo "$claude_text" > claude-analysis.md
+            echo "response-available=true" >> $GITHUB_OUTPUT
+            echo "✅ Claude analysis completed ($(echo "$claude_text" | wc -w) words)"
+          else
+            error_msg=$(echo "$response" | jq -r '.error.message // "Unknown error"')
+            echo "❌ Claude API error: $error_msg"
+            echo "response-available=false" >> $GITHUB_OUTPUT
+            echo "API Error: $error_msg" > claude-analysis.md
+          fi
+          
+      - name: "💬 Post Response"
+        if: steps.claude-response.outputs.response-available == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const analysis = fs.readFileSync('claude-analysis.md', 'utf8');
+            const analysisType = '${{ needs.claude-context-analyzer.outputs.analysis-type }}';
+            const complexity = '${{ needs.claude-context-analyzer.outputs.complexity-level }}';
+            
+            let title = '';
+            switch (analysisType) {
+              case 'comment-review':
+                title = '🤖 Claude Assistant Response';
+                break;
+              case 'pr-review':
+                title = '🔍 Claude Code Review';
+                break;
+              case 'issue-triage':
+                title = '🎯 Claude Issue Analysis';
+                break;
+              case 'push-analysis':
+                title = '📊 Claude Push Analysis';
+                break;
+              case 'test-assistance':
+                title = '🧪 Claude Testing Guidance';
+                break;
+              default:
+                title = '🤖 Claude Analysis';
+            }
+            
+            const commentBody = `## ${title}
+            
+            **Analysis Scope**: ${{ needs.claude-context-analyzer.outputs.scope }}
+            **Complexity**: ${complexity}
+            **Timestamp**: ${new Date().toISOString()}
+            
+            ${analysis}
+            
+            ---
+            *Powered by Enhanced Claude Assistant v2.1.0 | [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+            
+            // Post comment based on event type
+            if (context.eventName === 'issue_comment' || context.eventName === 'issues') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            } else if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody
+              });
+            }
+            
+            console.log(`✅ Posted ${analysisType} response`);
+            
+      - name: "📊 Generate Summary Report"
+        if: always()
+        run: |
+          echo "📊 Generating execution summary..."
+          
+          cat > claude-execution-summary.md << EOF
+          # 🤖 Claude Assistant Execution Report
+          
+          **Execution Date**: $(date -Iseconds)
+          **Trigger**: ${{ github.event_name }}
+          **Analysis Type**: ${{ needs.claude-context-analyzer.outputs.analysis-type }}
+          **Scope**: ${{ needs.claude-context-analyzer.outputs.scope }}
+          **Complexity**: ${{ needs.claude-context-analyzer.outputs.complexity-level }}
+          **Priority**: ${{ needs.claude-context-analyzer.outputs.priority }}
+          
+          ## Execution Results
+          - Context Analysis: ✅
+          - Claude Response: ${{ steps.claude-response.outputs.response-available == 'true' && '✅' || '❌' }}
+          - Response Posted: ${{ steps.claude-response.outputs.response-available == 'true' && '✅' || '❌' }}
+          
+          ## Performance Metrics
+          - Execution Time: ${{ github.job }}
+          - Files Analyzed: $(echo "${{ needs.claude-context-analyzer.outputs.files-changed }}" | wc -w)
+          - Context Size: $([ -f claude-context.json ] && wc -c < claude-context.json || echo "0") bytes
+          
+          ## Next Actions
+          $([ -f claude-analysis.md ] && echo "- Review Claude's recommendations" || echo "- Check API configuration")
+          - Monitor for follow-up questions
+          - Apply suggested improvements
+          
+          ---
+          *Enhanced Claude Assistant v2.1.0*
+          EOF
+          
+          echo "✅ Summary report generated"
+          
+      - name: "📤 Upload Artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'claude-assistant-${{ github.run_number }}'
+          path: |
+            claude-analysis.md
+            claude-context.json
+            claude-request.json
+            claude-response.json
+            claude-execution-summary.md
+          retention-days: 30
+
+  # Smart Label Management (runs in parallel)
+  smart-labeling:
+    name: "🏷️ Smart Labeling"
+    runs-on: ubuntu-latest
+    needs: [claude-context-analyzer]
+    if: github.event_name == 'issues' || github.event_name == 'pull_request'
+    steps:
+      - name: "🏷️ Apply Smart Labels"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const analysisType = '${{ needs.claude-context-analyzer.outputs.analysis-type }}';
+            const complexity = '${{ needs.claude-context-analyzer.outputs.complexity-level }}';
+            const priority = '${{ needs.claude-context-analyzer.outputs.priority }}';
+            
+            const labels = [];
+            
+            // Add complexity labels
+            if (complexity === 'high') labels.push('complex');
+            if (complexity === 'low') labels.push('simple');
+            
+            // Add priority labels
+            if (priority === 'high') labels.push('high-priority');
+            if (priority === 'low') labels.push('low-priority');
+            
+            // Add analysis type labels
+            if (analysisType.includes('test')) labels.push('testing');
+            if (analysisType.includes('review')) labels.push('code-review');
+            
+            // Add Claude processing label
+            labels.push('claude-processed');
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+              
+              console.log(`Applied labels: ${labels.join(', ')}`);
+            }

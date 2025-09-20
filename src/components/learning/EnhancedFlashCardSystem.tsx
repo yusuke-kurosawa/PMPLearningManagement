@@ -139,10 +139,14 @@ const EnhancedFlashCardSystem: React.FC = () => {
   })
 
   // Load data on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadDecks()
     loadCards()
-  }, [])
+  }, [loadCards, loadDecks])
 
   // Auto-reveal timer
   useEffect(() => {

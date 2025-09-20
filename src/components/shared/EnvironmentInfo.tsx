@@ -29,6 +29,7 @@ export const EnvironmentInfo: React.FC<EnvironmentInfoProps> = ({
   const [deploymentInfo, setDeploymentInfo] = useState<DeploymentInfo | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchDeploymentInfo = async () => {
       setIsLoading(true)

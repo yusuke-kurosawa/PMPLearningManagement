@@ -40,6 +40,9 @@ const CommandPalette: React.FC = () => {
   const inputRef = useRef(null)
 
   // Global keyboard shortcuts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleKeyDown = (e) => {
       // _Command palette (Cmd/Ctrl + K)

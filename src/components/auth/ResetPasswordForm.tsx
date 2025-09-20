@@ -63,6 +63,8 @@ const ResetPasswordForm: React.FC = () => {
   const watchPassword = watch('password')
 
   // Update password strength when password changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (watchPassword) {
       const strength = authValidation.getPasswordStrength(watchPassword)

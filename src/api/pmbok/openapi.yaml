@@ -1,0 +1,1160 @@
+openapi: 3.1.0
+info:
+  title: PMBOK Knowledge Area Management API
+  description: Comprehensive API for managing PMBOK 6th and 7th edition knowledge areas, process groups, and ITTO framework
+  version: 2.0.0
+  contact:
+    name: PMP Learning Management
+    email: support@pmplearning.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.pmplearning.com/v2
+    description: Production server
+  - url: https://staging-api.pmplearning.com/v2
+    description: Staging server
+  - url: http://localhost:3000/api/v2
+    description: Development server
+
+tags:
+  - name: Knowledge Areas
+    description: Operations for PMBOK knowledge areas
+  - name: Process Groups
+    description: Operations for process groups
+  - name: Processes
+    description: Individual process management
+  - name: ITTO
+    description: Inputs, Tools & Techniques, and Outputs management
+  - name: Analytics
+    description: Learning analytics and insights
+  - name: Bulk Operations
+    description: Batch processing operations
+
+paths:
+  /knowledge-areas:
+    get:
+      tags: [Knowledge Areas]
+      summary: List all knowledge areas
+      operationId: listKnowledgeAreas
+      parameters:
+        - $ref: '#/components/parameters/PMBOKVersion'
+        - $ref: '#/components/parameters/IncludeProcesses'
+        - $ref: '#/components/parameters/IncludeMetrics'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeAreaListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags: [Knowledge Areas]
+      summary: Create a new knowledge area
+      operationId: createKnowledgeArea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeAreaRequest'
+      responses:
+        '201':
+          description: Knowledge area created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeArea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /knowledge-areas/{areaId}:
+    get:
+      tags: [Knowledge Areas]
+      summary: Get knowledge area by ID
+      operationId: getKnowledgeArea
+      parameters:
+        - $ref: '#/components/parameters/AreaId'
+        - $ref: '#/components/parameters/IncludeProcesses'
+        - $ref: '#/components/parameters/IncludeITTO'
+        - $ref: '#/components/parameters/IncludeRelationships'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeAreaDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags: [Knowledge Areas]
+      summary: Update knowledge area
+      operationId: updateKnowledgeArea
+      parameters:
+        - $ref: '#/components/parameters/AreaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeAreaRequest'
+      responses:
+        '200':
+          description: Knowledge area updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeArea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags: [Knowledge Areas]
+      summary: Delete knowledge area
+      operationId: deleteKnowledgeArea
+      parameters:
+        - $ref: '#/components/parameters/AreaId'
+      responses:
+        '204':
+          description: Knowledge area deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /knowledge-areas/{areaId}/processes:
+    get:
+      tags: [Processes]
+      summary: List processes in a knowledge area
+      operationId: listAreaProcesses
+      parameters:
+        - $ref: '#/components/parameters/AreaId'
+        - $ref: '#/components/parameters/ProcessGroup'
+        - $ref: '#/components/parameters/IncludeITTO'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessListResponse'
+
+  /process-groups:
+    get:
+      tags: [Process Groups]
+      summary: List all process groups
+      operationId: listProcessGroups
+      parameters:
+        - $ref: '#/components/parameters/PMBOKVersion'
+        - $ref: '#/components/parameters/IncludeProcesses'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessGroupListResponse'
+
+  /processes:
+    get:
+      tags: [Processes]
+      summary: List all processes
+      operationId: listProcesses
+      parameters:
+        - $ref: '#/components/parameters/PMBOKVersion'
+        - $ref: '#/components/parameters/KnowledgeArea'
+        - $ref: '#/components/parameters/ProcessGroup'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/IncludeITTO'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessListResponse'
+    
+    post:
+      tags: [Processes]
+      summary: Create a new process
+      operationId: createProcess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcessRequest'
+      responses:
+        '201':
+          description: Process created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+
+  /processes/{processId}:
+    get:
+      tags: [Processes]
+      summary: Get process details
+      operationId: getProcess
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/IncludeITTO'
+        - $ref: '#/components/parameters/IncludeRelationships'
+        - $ref: '#/components/parameters/IncludeLearningPaths'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /processes/{processId}/itto:
+    get:
+      tags: [ITTO]
+      summary: Get ITTO for a process
+      operationId: getProcessITTO
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/ITTOType'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ITTOResponse'
+    
+    put:
+      tags: [ITTO]
+      summary: Update ITTO for a process
+      operationId: updateProcessITTO
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateITTORequest'
+      responses:
+        '200':
+          description: ITTO updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ITTOResponse'
+
+  /processes/{processId}/relationships:
+    get:
+      tags: [Processes]
+      summary: Get process relationships
+      operationId: getProcessRelationships
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/RelationshipType'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessRelationshipsResponse'
+
+  /analytics/knowledge-areas:
+    get:
+      tags: [Analytics]
+      summary: Get knowledge area analytics
+      operationId: getKnowledgeAreaAnalytics
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeAreaAnalytics'
+
+  /analytics/process-mastery:
+    get:
+      tags: [Analytics]
+      summary: Get process mastery analytics
+      operationId: getProcessMasteryAnalytics
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/KnowledgeArea'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessMasteryAnalytics'
+
+  /bulk/processes:
+    post:
+      tags: [Bulk Operations]
+      summary: Bulk create/update processes
+      operationId: bulkUpsertProcesses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkProcessRequest'
+      responses:
+        '200':
+          description: Bulk operation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkOperationResponse'
+
+  /search:
+    get:
+      tags: [Processes]
+      summary: Full-text search across all PMBOK content
+      operationId: searchPMBOK
+      parameters:
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/SearchScope'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  parameters:
+    PMBOKVersion:
+      name: version
+      in: query
+      description: PMBOK version (6 or 7)
+      schema:
+        type: string
+        enum: ['6', '7', 'all']
+        default: '6'
+    
+    AreaId:
+      name: areaId
+      in: path
+      required: true
+      description: Knowledge area ID
+      schema:
+        type: string
+        format: uuid
+    
+    ProcessId:
+      name: processId
+      in: path
+      required: true
+      description: Process ID
+      schema:
+        type: string
+        format: uuid
+    
+    KnowledgeArea:
+      name: knowledgeArea
+      in: query
+      description: Filter by knowledge area
+      schema:
+        type: string
+        enum: [integration, scope, schedule, cost, quality, resource, communications, risk, procurement, stakeholder]
+    
+    ProcessGroup:
+      name: processGroup
+      in: query
+      description: Filter by process group
+      schema:
+        type: string
+        enum: [initiating, planning, executing, monitoring_controlling, closing]
+    
+    IncludeProcesses:
+      name: includeProcesses
+      in: query
+      description: Include processes in response
+      schema:
+        type: boolean
+        default: false
+    
+    IncludeITTO:
+      name: includeITTO
+      in: query
+      description: Include ITTO details
+      schema:
+        type: boolean
+        default: false
+    
+    IncludeRelationships:
+      name: includeRelationships
+      in: query
+      description: Include process relationships
+      schema:
+        type: boolean
+        default: false
+    
+    IncludeMetrics:
+      name: includeMetrics
+      in: query
+      description: Include learning metrics
+      schema:
+        type: boolean
+        default: false
+    
+    IncludeLearningPaths:
+      name: includeLearningPaths
+      in: query
+      description: Include recommended learning paths
+      schema:
+        type: boolean
+        default: false
+    
+    ITTOType:
+      name: type
+      in: query
+      description: Filter ITTO by type
+      schema:
+        type: string
+        enum: [inputs, tools, outputs, all]
+        default: all
+    
+    RelationshipType:
+      name: type
+      in: query
+      description: Filter relationships by type
+      schema:
+        type: string
+        enum: [dependencies, prerequisites, related, all]
+        default: all
+    
+    SearchQuery:
+      name: q
+      in: query
+      description: Search query
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 100
+    
+    SearchScope:
+      name: scope
+      in: query
+      description: Search scope
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [processes, itto, descriptions, all]
+        default: [all]
+    
+    UserId:
+      name: userId
+      in: query
+      description: User ID for analytics
+      schema:
+        type: string
+        format: uuid
+    
+    DateFrom:
+      name: from
+      in: query
+      description: Start date for analytics
+      schema:
+        type: string
+        format: date-time
+    
+    DateTo:
+      name: to
+      in: query
+      description: End date for analytics
+      schema:
+        type: string
+        format: date-time
+    
+    Sort:
+      name: sort
+      in: query
+      description: Sort field and order
+      schema:
+        type: string
+        pattern: '^[a-zA-Z_]+:(asc|desc)$'
+        default: 'name:asc'
+    
+    Page:
+      name: page
+      in: query
+      description: Page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    Limit:
+      name: limit
+      in: query
+      description: Page size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    KnowledgeArea:
+      type: object
+      required:
+        - id
+        - name
+        - code
+        - description
+        - pmbokVersion
+        - processCount
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 500
+        pmbokVersion:
+          type: string
+          enum: ['6', '7']
+        processCount:
+          type: integer
+          minimum: 0
+        color:
+          type: string
+          pattern: '^#[0-9A-F]{6}$'
+        icon:
+          type: string
+        order:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProcessGroup:
+      type: object
+      required:
+        - id
+        - name
+        - code
+        - description
+        - order
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 500
+        order:
+          type: integer
+        processCount:
+          type: integer
+        color:
+          type: string
+          pattern: '^#[0-9A-F]{6}$'
+
+    Process:
+      type: object
+      required:
+        - id
+        - name
+        - code
+        - knowledgeAreaId
+        - processGroupId
+        - description
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 200
+        code:
+          type: string
+          maxLength: 50
+        knowledgeAreaId:
+          type: string
+          format: uuid
+        processGroupId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        purpose:
+          type: string
+        keyBenefits:
+          type: array
+          items:
+            type: string
+        order:
+          type: integer
+        complexity:
+          type: string
+          enum: [low, medium, high]
+        estimatedLearningTime:
+          type: integer
+          description: Learning time in minutes
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ITTO:
+      type: object
+      properties:
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+
+    ITTOItem:
+      type: object
+      required:
+        - id
+        - name
+        - category
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        isEnterprise:
+          type: boolean
+          default: false
+        relatedProcessIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        tags:
+          type: array
+          items:
+            type: string
+
+    ProcessRelationship:
+      type: object
+      required:
+        - id
+        - sourceProcessId
+        - targetProcessId
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        sourceProcessId:
+          type: string
+          format: uuid
+        targetProcessId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [dependency, prerequisite, related, successor]
+        strength:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        description:
+          type: string
+
+    KnowledgeAreaDetail:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeArea'
+        - type: object
+          properties:
+            processes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Process'
+            relationships:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProcessRelationship'
+            metrics:
+              $ref: '#/components/schemas/KnowledgeAreaMetrics'
+
+    ProcessDetail:
+      allOf:
+        - $ref: '#/components/schemas/Process'
+        - type: object
+          properties:
+            knowledgeArea:
+              $ref: '#/components/schemas/KnowledgeArea'
+            processGroup:
+              $ref: '#/components/schemas/ProcessGroup'
+            itto:
+              $ref: '#/components/schemas/ITTO'
+            relationships:
+              type: object
+              properties:
+                dependencies:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProcessRelationship'
+                prerequisites:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProcessRelationship'
+                successors:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProcessRelationship'
+            learningPaths:
+              type: array
+              items:
+                $ref: '#/components/schemas/LearningPath'
+
+    LearningPath:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+              processId:
+                type: string
+                format: uuid
+              estimatedTime:
+                type: integer
+              isOptional:
+                type: boolean
+
+    KnowledgeAreaMetrics:
+      type: object
+      properties:
+        totalProcesses:
+          type: integer
+        completedProcesses:
+          type: integer
+        masteryLevel:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        averageScore:
+          type: number
+          format: float
+        totalLearningTime:
+          type: integer
+        lastActivity:
+          type: string
+          format: date-time
+
+    KnowledgeAreaAnalytics:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            totalAreas:
+              type: integer
+            averageMastery:
+              type: number
+            strongestArea:
+              type: string
+            weakestArea:
+              type: string
+        areas:
+          type: array
+          items:
+            type: object
+            properties:
+              areaId:
+                type: string
+              name:
+                type: string
+              metrics:
+                $ref: '#/components/schemas/KnowledgeAreaMetrics'
+              trend:
+                type: string
+                enum: [improving, stable, declining]
+
+    ProcessMasteryAnalytics:
+      type: object
+      properties:
+        processId:
+          type: string
+        mastery:
+          type: number
+        attempts:
+          type: integer
+        averageScore:
+          type: number
+        timeSpent:
+          type: integer
+        lastAttempt:
+          type: string
+          format: date-time
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    CreateKnowledgeAreaRequest:
+      type: object
+      required:
+        - name
+        - code
+        - description
+        - pmbokVersion
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        pmbokVersion:
+          type: string
+          enum: ['6', '7']
+        color:
+          type: string
+        icon:
+          type: string
+        order:
+          type: integer
+
+    UpdateKnowledgeAreaRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+        order:
+          type: integer
+        metadata:
+          type: object
+
+    CreateProcessRequest:
+      type: object
+      required:
+        - name
+        - code
+        - knowledgeAreaId
+        - processGroupId
+        - description
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        knowledgeAreaId:
+          type: string
+        processGroupId:
+          type: string
+        description:
+          type: string
+        purpose:
+          type: string
+        keyBenefits:
+          type: array
+          items:
+            type: string
+        complexity:
+          type: string
+        estimatedLearningTime:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    UpdateITTORequest:
+      type: object
+      properties:
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITTOItem'
+
+    BulkProcessRequest:
+      type: object
+      required:
+        - operations
+      properties:
+        operations:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required:
+              - action
+              - data
+            properties:
+              action:
+                type: string
+                enum: [create, update, delete]
+              data:
+                $ref: '#/components/schemas/Process'
+
+    BulkOperationResponse:
+      type: object
+      properties:
+        successful:
+          type: integer
+        failed:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              success:
+                type: boolean
+              id:
+                type: string
+              error:
+                type: string
+
+    SearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        totalResults:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [knowledge_area, process, itto_item]
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              score:
+                type: number
+              highlights:
+                type: array
+                items:
+                  type: string
+
+    KnowledgeAreaListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeArea'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ProcessGroupListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessGroup'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ProcessListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Process'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ITTOResponse:
+      type: object
+      properties:
+        processId:
+          type: string
+        itto:
+          $ref: '#/components/schemas/ITTO'
+        lastUpdated:
+          type: string
+          format: date-time
+
+    ProcessRelationshipsResponse:
+      type: object
+      properties:
+        processId:
+          type: string
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessRelationship'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []

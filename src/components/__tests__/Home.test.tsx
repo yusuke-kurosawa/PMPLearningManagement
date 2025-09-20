@@ -42,14 +42,14 @@ describe('Home', () => {
   it('has working navigation links', () => {
     render(<Home />)
 
-    const matrixLink = screen.getByRole('link', { name: /PMBOKマトリックスビュー/i })
-    expect(matrixLink).toHaveAttribute('href', '/matrix')
+    const matrixLinks = screen.getAllByRole('link', { name: /PMBOKマトリックスビュー/i })
+    expect(matrixLinks[0]).toHaveAttribute('href', '/matrix')
 
-    const networkLink = screen.getByRole('link', { name: /ネットワークダイアグラム/i })
-    expect(networkLink).toHaveAttribute('href', '/network')
+    const networkLinks = screen.getAllByRole('link', { name: /ネットワークダイアグラム/i })
+    expect(networkLinks[0]).toHaveAttribute('href', '/network')
 
-    const glossaryLink = screen.getByRole('link', { name: /PMP用語集/i })
-    expect(glossaryLink).toHaveAttribute('href', '/glossary')
+    const glossaryLinks = screen.getAllByRole('link', { name: /PMP用語集/i })
+    expect(glossaryLinks[0]).toHaveAttribute('href', '/glossary')
   })
 
   it('displays feature icons', () => {

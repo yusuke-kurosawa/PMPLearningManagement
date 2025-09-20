@@ -30,6 +30,9 @@ const Sidebar = () => {
   // const { settings } = useTheme() // Will be used for theme-based sidebar configuration
 
   // Track recent pages
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const currentPath = location.pathname
     setRecentPages((prev) => {

@@ -678,7 +678,7 @@ class AuthService {
     } catch (error) {
       // 暗号化失敗時はアラート出力（開発時のみ）
       if (process.env.NODE_ENV === 'development') {
-        console.warn('暗号化に失敗しました。平文でフォールバック:', error)
+        logger.warn('暗号化に失敗しました。平文でフォールバック:', error)
       }
       // フォールバック: 最低限の難読化
       return btoa(JSON.stringify(data))
@@ -726,7 +726,7 @@ class AuthService {
     } catch (error) {
       // 復号化失敗時はBase64デコードでフォールバック
       if (process.env.NODE_ENV === 'development') {
-        console.warn('復号化に失敗しました。フォールバック復号化:', error)
+        logger.warn('復号化に失敗しました。フォールバック復号化:', error)
       }
       return JSON.parse(atob(encryptedData))
     }

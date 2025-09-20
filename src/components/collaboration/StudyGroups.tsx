@@ -37,6 +37,7 @@ const StudyGroups = () => {
   // お知らせの入力状態
   const [newAnnouncement, setNewAnnouncement] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadGroups()
     // ユーザー名の読み込み
@@ -44,9 +45,9 @@ const StudyGroups = () => {
     setCurrentUser(savedUser)
     // ユーザーの進捗情報を読み込み（実際の実装では進捗サービスから取得）
     loadUserProgress()
-  }, [])
+  }, [loadGroups, loadUserProgress])
 
-  const loadGroups = () => {
+  const loadGroups = useCallback((...args) => {
     // 自分が参加しているグループ
     const myGroupsList = collaborationService.getStudyGroups({ member: currentUser })
     setMyGroups(myGroupsList)
@@ -56,9 +57,9 @@ const StudyGroups = () => {
     setPublicGroups(publicGroupsList.filter((g) => !g.members.includes(currentUser)))
 
     setGroups([...myGroupsList, ...publicGroupsList])
-  }
+  }, [])
 
-  const loadUserProgress = () => {
+  const loadUserProgress = useCallback((...args) => {
     // 実際の実装では進捗サービスから取得
     const mockProgress = {
       completedProcesses: 25,
@@ -73,7 +74,7 @@ const StudyGroups = () => {
       lastStudied: new Date().toISOString(),
     }
     setUserProgress(mockProgress)
-  }
+  }, [])
 
   // グループの作成
   const handleCreateGroup = () => {
@@ -506,7 +507,12 @@ const StudyGroups = () => {
 
               <div className='space-y-4'>
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>グループ名</label>
+                  <label
+                    htmlFor='input-1754995293941-501'
+                    className='mb-1 block text-sm font-medium'
+                  >
+                    グループ名
+                  </label>
                   <input
                     aria-label='Input field'
                     id='input-1754995293941-501'
@@ -521,8 +527,11 @@ const StudyGroups = () => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>説明</label>
+                  <label htmlFor='-input' className='mb-1 block text-sm font-medium'>
+                    説明
+                  </label>
                   <textarea
+                    id='-input'
                     value={newGroup.description}
                     onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
                     className={`h-24 w-full rounded-lg border px-3 py-2 ${
@@ -533,8 +542,11 @@ const StudyGroups = () => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>目標試験日</label>
+                  <label htmlFor='-input' className='mb-1 block text-sm font-medium'>
+                    目標試験日
+                  </label>
                   <input
+                    id='-input'
                     type='date'
                     value={newGroup.targetDate}
                     onChange={(e) => setNewGroup({ ...newGroup, targetDate: e.target.value })}

@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import { logger } from './services/logger.js'
+
 import './index.css'
 
 // Performance monitoring
@@ -9,10 +11,10 @@ if (process.env.NODE_ENV === 'production') {
   import('./utils/performance-monitor')
     .then(({ performanceMonitor }) => {
       performanceMonitor.startMonitoring()
-      console.log('🚀 Performance monitoring system loaded')
+      logger.info('🚀 Performance monitoring system loaded')
     })
     .catch((error) => {
-      console.warn('Performance monitoring system failed to load:', error)
+      logger.warn('Performance monitoring system failed to load:', error)
     })
 }
 

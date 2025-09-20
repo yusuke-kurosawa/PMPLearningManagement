@@ -3,6 +3,19 @@
 
 echo "🔍 Running pre-commit hooks..."
 
+# Serena MCP Server Integration Check
+echo "🧠 Running Serena MCP integration check..."
+if command -v node >/dev/null 2>&1; then
+  node scripts/serena-pre-commit-hook.js
+  SERENA_EXIT_CODE=$?
+  if [ $SERENA_EXIT_CODE -ne 0 ]; then
+    echo "❌ Serena pre-commit check failed with exit code $SERENA_EXIT_CODE"
+    exit $SERENA_EXIT_CODE
+  fi
+else
+  echo "⚠️  Node.js not found, skipping Serena check"
+fi
+
 # Run linting
 echo "📋 Running ESLint..."
 npm run lint

@@ -1,0 +1,394 @@
+# 🧠 Serena MCP Server 統合ワークフロー
+#
+# 目的: Serenaメモリファイルの自動更新とCI/CD統合
+# 実行タイミング: プッシュ、PR、定期実行
+# 主な処理: メモリ更新、品質チェック、レポート生成
+
+name: 🧠 Serena MCP Integration
+
+on:
+  push:
+    branches: [main, develop, 'feat/**']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # 毎日06:00 UTC (15:00 JST)に実行
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      full_memory_update:
+        description: '完全メモリ更新を実行'
+        required: false
+        default: 'false'
+        type: boolean
+      generate_report:
+        description: '詳細レポートを生成'
+        required: false
+        default: 'true'
+        type: boolean
+
+# 同一ブランチでの並行実行を制御
+concurrency:
+  group: serena-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+# セキュリティ: 最小権限の原則
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  # ジョブ1: Serenaメモリ更新
+  serena-memory-update:
+    name: 📝 Serenaメモリ更新
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      memory-updated: ${{ steps.memory-check.outputs.updated }}
+      changes-count: ${{ steps.memory-check.outputs.changes }}
+      performance-score: ${{ steps.memory-check.outputs.performance }}
+    
+    steps:
+      - name: 📦 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # 変更検出のため前回コミットも取得
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      
+      - name: 📚 依存関係のインストール
+        run: |
+          npm ci --prefer-offline --no-audit
+          # Serena関連の追加依存関係がある場合はここでインストール
+      
+      - name: 🔍 プロジェクト変更の検出
+        id: detect-changes
+        run: |
+          # Git変更ファイルの検出
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.sha }})
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          fi
+          
+          echo "changed-files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # 重要ファイルの変更チェック
+          CRITICAL_CHANGES=0
+          while IFS= read -r file; do
+            case "$file" in
+              src/*|package.json|README.md|docs/*|.github/workflows/*)
+                CRITICAL_CHANGES=$((CRITICAL_CHANGES + 1))
+                ;;
+            esac
+          done <<< "$CHANGED_FILES"
+          
+          echo "critical-changes=$CRITICAL_CHANGES" >> $GITHUB_OUTPUT
+          echo "🔍 検出された重要な変更: $CRITICAL_CHANGES ファイル"
+      
+      - name: 🧠 Serenaメモリファイルの更新
+        id: memory-check
+        env:
+          SERENA_VERBOSE: 'true'
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "🚀 Serenaメモリ更新プロセス開始"
+          
+          # Serenaディレクトリの確認・作成
+          mkdir -p .serena/{memories,logs,cache}
+          
+          # メモリ更新スクリプトの実行
+          node scripts/serena-memory-updater.js 2>&1 | tee serena-update.log
+          
+          # 更新結果の解析
+          if grep -q "✅ Serena Memory Updater 完了" serena-update.log; then
+            echo "updated=true" >> $GITHUB_OUTPUT
+            CHANGES=$(grep -o '[0-9]*件の変更' serena-update.log | head -1 | grep -o '[0-9]*' || echo "0")
+            echo "changes=$CHANGES" >> $GITHUB_OUTPUT
+            
+            # パフォーマンススコアの計算
+            if [[ -f .serena/cache/memory-cache.json ]]; then
+              CACHE_EFFICIENCY=$(jq -r '.performance.cacheHits / .performance.filesScanned * 100' .serena/cache/memory-cache.json 2>/dev/null || echo "0")
+              echo "performance=${CACHE_EFFICIENCY}%" >> $GITHUB_OUTPUT
+            else
+              echo "performance=N/A" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "updated=false" >> $GITHUB_OUTPUT
+            echo "changes=0" >> $GITHUB_OUTPUT
+            echo "performance=0%" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 📊 メモリファイル品質チェック
+        if: steps.memory-check.outputs.updated == 'true'
+        run: |
+          echo "🔍 メモリファイル品質チェック開始"
+          
+          # メモリファイルのサイズチェック
+          find .serena/memories -name "*.md" -exec wc -c {} + | sort -n
+          
+          # 内容の妥当性チェック
+          for memory in .serena/memories/*.md; do
+            if [[ -f "$memory" ]]; then
+              echo "✓ チェック中: $(basename "$memory")"
+              
+              # ファイルサイズチェック (50KB制限)
+              SIZE=$(wc -c < "$memory")
+              if [[ $SIZE -gt 51200 ]]; then
+                echo "⚠️ 警告: $memory が大きすぎます ($SIZE bytes)"
+              fi
+              
+              # 必須セクションの存在チェック
+              if ! grep -q "^#" "$memory"; then
+                echo "⚠️ 警告: $memory にヘッダーがありません"
+              fi
+            fi
+          done
+      
+      - name: 🗃️ メモリアーティファクトのアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serena-memories-${{ github.sha }}
+          path: |
+            .serena/memories/
+            .serena/logs/
+            serena-update.log
+          retention-days: 30
+          if-no-files-found: warn
+      
+      - name: 💾 メモリキャッシュの保存
+        if: steps.memory-check.outputs.updated == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .serena/cache/
+          key: serena-cache-${{ github.sha }}-${{ hashFiles('.serena/cache/memory-cache.json') }}
+          restore-keys: |
+            serena-cache-${{ github.sha }}-
+            serena-cache-
+
+  # ジョブ2: Serena品質検証
+  serena-quality-check:
+    name: 🔍 Serena品質検証
+    runs-on: ubuntu-latest
+    needs: serena-memory-update
+    if: needs.serena-memory-update.outputs.memory-updated == 'true'
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📦 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+      
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📚 依存関係のインストール
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: 🗃️ メモリアーティファクトのダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: serena-memories-${{ github.sha }}
+          path: .serena/
+      
+      - name: 🔍 メモリ整合性チェック
+        run: |
+          echo "🔍 Serenaメモリ整合性チェック開始"
+          
+          # メモリファイルの存在確認
+          EXPECTED_MEMORIES=("project_overview" "development_workflow_optimization" "performance_optimization" "testing_strategy" "security_guidelines" "code_style_conventions" "architecture_analysis_guidelines")
+          
+          MISSING_COUNT=0
+          for memory in "${EXPECTED_MEMORIES[@]}"; do
+            if [[ ! -f ".serena/memories/${memory}.md" ]]; then
+              echo "❌ 不足: ${memory}.md"
+              MISSING_COUNT=$((MISSING_COUNT + 1))
+            else
+              echo "✅ 存在: ${memory}.md"
+            fi
+          done
+          
+          if [[ $MISSING_COUNT -gt 0 ]]; then
+            echo "⚠️ $MISSING_COUNT 個のメモリファイルが不足しています"
+            exit 1
+          fi
+          
+          echo "✅ 全てのメモリファイルが正常に存在します"
+      
+      - name: 📊 メモリ統計の生成
+        run: |
+          echo "📊 Serenaメモリ統計"
+          echo "===================="
+          
+          TOTAL_SIZE=0
+          FILE_COUNT=0
+          
+          for memory in .serena/memories/*.md; do
+            if [[ -f "$memory" ]]; then
+              SIZE=$(wc -c < "$memory")
+              LINES=$(wc -l < "$memory")
+              TOTAL_SIZE=$((TOTAL_SIZE + SIZE))
+              FILE_COUNT=$((FILE_COUNT + 1))
+              
+              echo "$(basename "$memory"): $SIZE bytes, $LINES lines"
+            fi
+          done
+          
+          echo "===================="
+          echo "総ファイル数: $FILE_COUNT"
+          echo "総サイズ: $TOTAL_SIZE bytes"
+          echo "平均サイズ: $((TOTAL_SIZE / FILE_COUNT)) bytes/file"
+          
+          # GitHub Actions Summary に追加
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🧠 Serena Memory Statistics
+          
+          | メトリクス | 値 |
+          |-----------|-----|
+          | 更新されたメモリ数 | $FILE_COUNT |
+          | 総サイズ | $TOTAL_SIZE bytes |
+          | 平均サイズ | $((TOTAL_SIZE / FILE_COUNT)) bytes |
+          | 変更ファイル数 | ${{ needs.serena-memory-update.outputs.changes-count }} |
+          | パフォーマンス | ${{ needs.serena-memory-update.outputs.performance-score }} |
+          EOF
+
+  # ジョブ3: 定期レポート生成
+  serena-reporting:
+    name: 📋 Serenaレポート生成
+    runs-on: ubuntu-latest
+    needs: [serena-memory-update, serena-quality-check]
+    if: |
+      always() && 
+      (github.event_name == 'schedule' || 
+       github.event.inputs.generate_report == 'true' ||
+       needs.serena-memory-update.outputs.changes-count > '5')
+    timeout-minutes: 8
+    
+    steps:
+      - name: 📦 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+      
+      - name: 🏗️ Node.js環境のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📚 依存関係のインストール
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: 🗃️ メモリアーティファクトのダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: serena-memories-${{ github.sha }}
+          path: .serena/
+        continue-on-error: true
+      
+      - name: 📋 包括的レポートの生成
+        run: |
+          echo "📋 Serena包括的レポート生成開始"
+          
+          # レポート生成スクリプトの実行
+          node scripts/serena-cli.js report --format=markdown --output=serena-comprehensive-report.md
+          
+          # GitHub Issues用のサマリー生成
+          cat > serena-summary.md << EOF
+          # 🧠 Serena MCP Server 統合レポート
+          
+          **生成日時**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **ブランチ**: ${{ github.ref_name }}
+          **コミット**: ${{ github.sha }}
+          
+          ## 📊 メモリ更新サマリー
+          
+          - **更新状態**: ${{ needs.serena-memory-update.outputs.memory-updated }}
+          - **変更ファイル数**: ${{ needs.serena-memory-update.outputs.changes-count }}
+          - **パフォーマンス**: ${{ needs.serena-memory-update.outputs.performance-score }}
+          
+          ## 🎯 アクションアイテム
+          
+          - [ ] メモリファイルの定期レビュー
+          - [ ] パフォーマンス最適化の継続
+          - [ ] 開発者向けドキュメントの更新
+          
+          ## 🔗 関連リンク
+          
+          - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [Commit Diff](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          EOF
+      
+      - name: 📊 レポートアーティファクトのアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: serena-reports-${{ github.sha }}
+          path: |
+            serena-comprehensive-report.md
+            serena-summary.md
+          retention-days: 90
+
+  # ジョブ4: 失敗時の通知とリカバリ
+  serena-failure-recovery:
+    name: 🚨 失敗時リカバリ
+    runs-on: ubuntu-latest
+    needs: [serena-memory-update, serena-quality-check]
+    if: failure()
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📦 リポジトリのチェックアウト
+        uses: actions/checkout@v4
+      
+      - name: 🚨 失敗通知の準備
+        run: |
+          echo "🚨 Serena統合で問題が発生しました"
+          
+          # 失敗原因の分析
+          cat > failure-analysis.md << EOF
+          # 🚨 Serena Integration Failure Report
+          
+          **Workflow**: ${{ github.workflow }}
+          **Run ID**: ${{ github.run_id }}
+          **Branch**: ${{ github.ref_name }}
+          **Trigger**: ${{ github.event_name }}
+          
+          ## 失敗したジョブ
+          
+          - Memory Update: ${{ needs.serena-memory-update.result }}
+          - Quality Check: ${{ needs.serena-quality-check.result }}
+          
+          ## 推奨アクション
+          
+          1. ワークフローログの確認
+          2. Serenaメモリ更新スクリプトの手動実行
+          3. 依存関係の確認
+          4. 必要に応じてIssueの作成
+          
+          ## 自動リカバリ
+          
+          - [ ] メモリキャッシュのクリア
+          - [ ] 依存関係の再インストール
+          - [ ] 部分的メモリ更新の実行
+          EOF
+      
+      - name: 🗃️ 失敗レポートのアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: serena-failure-report-${{ github.sha }}
+          path: failure-analysis.md
+          retention-days: 30
+
+# ワークフロー完了後のクリーンアップは自動実行される

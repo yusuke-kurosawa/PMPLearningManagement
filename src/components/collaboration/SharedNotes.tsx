@@ -33,14 +33,15 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
   })
 
   // ノートの読み込み
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadNotes()
     // ユーザー名の読み込み（簡易実装）
     const savedUser = localStorage.getItem('username') || 'Anonymous'
     setCurrentUser(savedUser)
-  }, [processId, knowledgeArea, filterTag])
+  }, [processId, knowledgeArea, filterTag, loadNotes])
 
-  const loadNotes = () => {
+  const loadNotes = useCallback((...args) => {
     const filters = {
       processId,
       knowledgeArea,
@@ -48,7 +49,7 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
     }
     const loadedNotes = collaborationService.getNotes(filters)
     setNotes(loadedNotes)
-  }
+  }, [])
 
   // ノートの作成
   const handleCreateNote = () => {
@@ -251,7 +252,12 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
 
               <div className='space-y-4'>
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>タイトル</label>
+                  <label
+                    htmlFor='input-1754995293939-254'
+                    className='mb-1 block text-sm font-medium'
+                  >
+                    タイトル
+                  </label>
                   <input
                     aria-label='Input field'
                     id='input-1754995293939-254'
@@ -266,8 +272,11 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>内容</label>
+                  <label htmlFor='-input' className='mb-1 block text-sm font-medium'>
+                    内容
+                  </label>
                   <textarea
+                    id='-input'
                     value={newNote.content}
                     onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                     className={`h-32 w-full rounded-lg border px-3 py-2 ${
@@ -278,7 +287,12 @@ const SharedNotes = ({ processId = null, knowledgeArea = null }) => {
                 </div>
 
                 <div>
-                  <label className='mb-1 block text-sm font-medium'>タグ（カンマ区切り）</label>
+                  <label
+                    htmlFor='input-1754995293939-279'
+                    className='mb-1 block text-sm font-medium'
+                  >
+                    タグ（カンマ区切り）
+                  </label>
                   <input
                     aria-label='Input field'
                     id='input-1754995293939-279'
