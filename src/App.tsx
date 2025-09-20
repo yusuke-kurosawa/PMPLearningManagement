@@ -89,15 +89,25 @@ const ECOMappingDashboard = React.lazy(() => import('./components/learning/ECOMa
 // PMI Talent Triangle and Strategic Alignment Components
 const PMITalentTriangle = React.lazy(() => import('./components/learning/PMITalentTriangle'))
 const StrategicAlignment = React.lazy(() => import('./components/learning/StrategicAlignment'))
-const BusinessEnvironmentAnalysis = React.lazy(() => import('./components/learning/BusinessEnvironmentAnalysis'))
-const StrategicAlignmentToolkit = React.lazy(() => import('./components/learning/StrategicAlignmentToolkit'))
+const BusinessEnvironmentAnalysis = React.lazy(
+  () => import('./components/learning/BusinessEnvironmentAnalysis')
+)
+const StrategicAlignmentToolkit = React.lazy(
+  () => import('./components/learning/StrategicAlignmentToolkit')
+)
 
 // Project Benefit Learning Components
-const ProjectBenefitLearning = React.lazy(() => import('./components/learning/benefit/ProjectBenefitLearning'))
-const IncrementalValueVisualization = React.lazy(() => import('./components/learning/benefit/IncrementalValueVisualization'))
+const ProjectBenefitLearning = React.lazy(
+  () => import('./components/learning/benefit/ProjectBenefitLearning')
+)
+const IncrementalValueVisualization = React.lazy(
+  () => import('./components/learning/benefit/IncrementalValueVisualization')
+)
 
 // Project Governance Learning Components
-const ProjectGovernanceLearning = React.lazy(() => import('./components/learning/governance/ProjectGovernanceLearning'))
+const ProjectGovernanceLearning = React.lazy(
+  () => import('./components/learning/governance/ProjectGovernanceLearning')
+)
 
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
@@ -247,20 +257,29 @@ function App() {
                             }
                           />
                           <Route path='/pmbok-versions' element={<PMBOKVersionSelector />} />
-                          
+
                           {/* PMI Talent Triangle and Strategic Alignment Routes */}
                           <Route path='/talent-triangle' element={<PMITalentTriangle />} />
                           <Route path='/strategic-alignment' element={<StrategicAlignment />} />
-                          <Route path='/business-environment' element={<BusinessEnvironmentAnalysis />} />
-                          <Route path='/strategic-toolkit' element={<StrategicAlignmentToolkit />} />
-                          
+                          <Route
+                            path='/business-environment'
+                            element={<BusinessEnvironmentAnalysis />}
+                          />
+                          <Route
+                            path='/strategic-toolkit'
+                            element={<StrategicAlignmentToolkit />}
+                          />
+
                           {/* Project Benefit and Value Learning Routes */}
                           <Route path='/project-benefits' element={<ProjectBenefitLearning />} />
-                          <Route path='/incremental-value' element={<IncrementalValueVisualization />} />
-                          
+                          <Route
+                            path='/incremental-value'
+                            element={<IncrementalValueVisualization />}
+                          />
+
                           {/* Project Governance Learning Routes */}
                           <Route path='/governance' element={<ProjectGovernanceLearning />} />
-                          
+
                           <Route
                             path='/ai-coaching'
                             element={
@@ -504,7 +523,7 @@ function App() {
                             </Suspense>
                           }
                         />
-                        
+
                         {/* PMI Talent Triangle and Strategic Alignment Routes */}
                         <Route
                           path='/talent-triangle'
@@ -538,7 +557,7 @@ function App() {
                             </Suspense>
                           }
                         />
-                        
+
                         {/* Project Benefit and Value Learning Routes */}
                         <Route
                           path='/project-benefits'
@@ -556,7 +575,7 @@ function App() {
                             </Suspense>
                           }
                         />
-                        
+
                         {/* Project Governance Learning Routes */}
                         <Route
                           path='/governance'
@@ -566,7 +585,7 @@ function App() {
                             </Suspense>
                           }
                         />
-                        
+
                         <Route
                           path='/mock-exam'
                           element={

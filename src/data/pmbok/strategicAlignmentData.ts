@@ -7,48 +7,48 @@
  * 企業環境要因（Enterprise Environmental Factors - EEF）
  */
 export interface EnterpriseEnvironmentalFactor {
-  id: string;
-  name: string;
-  category: 'internal' | 'external';
-  description: string;
-  examples: string[];
-  impact: 'high' | 'medium' | 'low';
-  projectPhases: string[];
-  managementTips: string[];
+  id: string
+  name: string
+  category: 'internal' | 'external'
+  description: string
+  examples: string[]
+  impact: 'high' | 'medium' | 'low'
+  projectPhases: string[]
+  managementTips: string[]
 }
 
 /**
  * 組織プロセス資産（Organizational Process Assets - OPA）
  */
 export interface OrganizationalProcessAsset {
-  id: string;
-  name: string;
-  type: 'processes' | 'knowledge' | 'guidelines' | 'templates';
-  description: string;
-  examples: string[];
-  benefits: string[];
-  updateFrequency: string;
-  owner: string;
+  id: string
+  name: string
+  type: 'processes' | 'knowledge' | 'guidelines' | 'templates'
+  description: string
+  examples: string[]
+  benefits: string[]
+  updateFrequency: string
+  owner: string
 }
 
 /**
  * 戦略分析フレームワーク
  */
 export interface AnalysisFramework {
-  id: string;
-  name: string;
-  acronym: string;
-  description: string;
-  purpose: string;
+  id: string
+  name: string
+  acronym: string
+  description: string
+  purpose: string
   components: {
-    name: string;
-    description: string;
-    examples: string[];
-  }[];
-  applicationSteps: string[];
-  pros: string[];
-  cons: string[];
-  bestUseCases: string[];
+    name: string
+    description: string
+    examples: string[]
+  }[]
+  applicationSteps: string[]
+  pros: string[]
+  cons: string[]
+  bestUseCases: string[]
 }
 
 /**
@@ -66,7 +66,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'リスク回避型 vs 革新指向型文化',
       '個人主義 vs チーム志向',
       '短期志向 vs 長期志向',
-      '形式重視 vs 柔軟性重視'
+      '形式重視 vs 柔軟性重視',
     ],
     impact: 'high',
     projectPhases: ['立ち上げ', '計画', '実行', '監視・制御', '終結'],
@@ -74,8 +74,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '組織文化を理解し、プロジェクト運営に反映する',
       '文化的な障壁を早期に特定し、対策を立てる',
       'ステークホルダーの行動パターンを文化の観点から分析する',
-      '変革プロジェクトでは文化変革も考慮する'
-    ]
+      '変革プロジェクトでは文化変革も考慮する',
+    ],
   },
   {
     id: 'resource-availability',
@@ -87,7 +87,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '予算制約と承認プロセス',
       '設備・機器の利用可能性',
       '外部リソースの調達可能性',
-      'マルチプロジェクト環境でのリソース競合'
+      'マルチプロジェクト環境でのリソース競合',
     ],
     impact: 'high',
     projectPhases: ['立ち上げ', '計画'],
@@ -95,8 +95,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'リソース制約を早期に特定し、計画に反映する',
       '代替リソースの確保策を準備する',
       'リソース競合の解決策を事前に検討する',
-      'リソース効率を最大化する方法を模索する'
-    ]
+      'リソース効率を最大化する方法を模索する',
+    ],
   },
   {
     id: 'infrastructure',
@@ -108,7 +108,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'オフィス環境とワークスペース',
       '製造設備と生産能力',
       'セキュリティシステム',
-      'コミュニケーションツール'
+      'コミュニケーションツール',
     ],
     impact: 'medium',
     projectPhases: ['計画', '実行'],
@@ -116,8 +116,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'インフラの制約を技術要件に反映する',
       'インフラ更新の必要性を評価する',
       'セキュリティ要件を満たすインフラを確保する',
-      'リモートワーク対応のインフラを検討する'
-    ]
+      'リモートワーク対応のインフラを検討する',
+    ],
   },
   {
     id: 'stakeholder-tolerance',
@@ -129,7 +129,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '品質重視 vs スピード重視',
       '安定性重視 vs 成長重視',
       '実績重視 vs 新技術採用',
-      'コンプライアンス重視度'
+      'コンプライアンス重視度',
     ],
     impact: 'high',
     projectPhases: ['立ち上げ', '計画'],
@@ -137,8 +137,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'ステークホルダーのリスク許容度を明確に把握する',
       'リスク管理戦略を許容度に合わせて調整する',
       'リスク情報の伝達方法を工夫する',
-      '段階的なリスク軽減策を提案する'
-    ]
+      '段階的なリスク軽減策を提案する',
+    ],
   },
 
   // 外部要因
@@ -152,7 +152,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '顧客の嗜好とニーズの変化',
       '新技術の普及と業界標準の変化',
       'サプライチェーンの状況',
-      '価格競争と付加価値競争'
+      '価格競争と付加価値競争',
     ],
     impact: 'high',
     projectPhases: ['立ち上げ', '計画', '監視・制御'],
@@ -160,8 +160,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '市場調査を定期的に実施し、戦略を調整する',
       '競合他社の動向を監視し、差別化を図る',
       '顧客フィードバックを積極的に収集する',
-      '市場変化に柔軟に対応できる計画を立てる'
-    ]
+      '市場変化に柔軟に対応できる計画を立てる',
+    ],
   },
   {
     id: 'regulatory-environment',
@@ -173,7 +173,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'データ保護法（GDPR、個人情報保護法）',
       '労働法と安全基準',
       '環境規制と持続可能性要件',
-      '国際取引に関する法規制'
+      '国際取引に関する法規制',
     ],
     impact: 'high',
     projectPhases: ['立ち上げ', '計画', '実行'],
@@ -181,8 +181,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '関連法規制を早期に特定し、コンプライアンス計画を立てる',
       '規制変更の監視体制を構築する',
       '法務部門や外部専門家との連携を強化する',
-      '規制遵守のためのチェックリストを作成する'
-    ]
+      '規制遵守のためのチェックリストを作成する',
+    ],
   },
   {
     id: 'economic-conditions',
@@ -194,7 +194,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'インフレと原材料価格上昇',
       '為替変動と海外取引への影響',
       '景気変動と設備投資の動向',
-      '雇用情勢と人材確保の困難さ'
+      '雇用情勢と人材確保の困難さ',
     ],
     impact: 'medium',
     projectPhases: ['立ち上げ', '計画', '監視・制御'],
@@ -202,8 +202,8 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '経済指標を監視し、予算とスケジュールに反映する',
       '為替リスクのヘッジ戦略を検討する',
       '経済状況の変化に対する感度分析を実施する',
-      '複数のシナリオを想定した計画を立てる'
-    ]
+      '複数のシナリオを想定した計画を立てる',
+    ],
   },
   {
     id: 'technology-trends',
@@ -215,7 +215,7 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       'クラウドコンピューティングの普及',
       'IoTとエッジコンピューティング',
       'ブロックチェーン技術の活用',
-      'サイバーセキュリティ技術の進歩'
+      'サイバーセキュリティ技術の進歩',
     ],
     impact: 'medium',
     projectPhases: ['立ち上げ', '計画'],
@@ -223,10 +223,10 @@ export const enterpriseEnvironmentalFactors: EnterpriseEnvironmentalFactor[] = [
       '技術トレンドを継続的に監視する',
       '新技術の採用リスクと機会を評価する',
       '技術者のスキルアップ計画を立てる',
-      '技術的な実現可能性を定期的に見直す'
-    ]
-  }
-];
+      '技術的な実現可能性を定期的に見直す',
+    ],
+  },
+]
 
 /**
  * 組織プロセス資産（OPA）データ
@@ -242,16 +242,16 @@ export const organizationalProcessAssets: OrganizationalProcessAsset[] = [
       'アジャイル開発手法（スクラム、カンバン）',
       'ステージゲート・プロセス',
       'PMO標準プロセス',
-      '品質管理プロセス'
+      '品質管理プロセス',
     ],
     benefits: [
       'プロジェクト実行の標準化',
       'ベストプラクティスの共有',
       'リスクの早期発見',
-      '効率性と品質の向上'
+      '効率性と品質の向上',
     ],
     updateFrequency: '年1回',
-    owner: 'PMO（プロジェクトマネジメントオフィス）'
+    owner: 'PMO（プロジェクトマネジメントオフィス）',
   },
   {
     id: 'templates',
@@ -263,16 +263,16 @@ export const organizationalProcessAssets: OrganizationalProcessAsset[] = [
       'WBS（作業分解構造）テンプレート',
       'リスク登録簿テンプレート',
       '変更要求フォーム',
-      'プロジェクト完了報告書'
+      'プロジェクト完了報告書',
     ],
     benefits: [
       '文書作成時間の短縮',
       '必要情報の漏れ防止',
       '文書品質の標準化',
-      'レビュー効率の向上'
+      'レビュー効率の向上',
     ],
     updateFrequency: '必要に応じて',
-    owner: 'PMO・品質管理部門'
+    owner: 'PMO・品質管理部門',
   },
   {
     id: 'historical-data',
@@ -284,16 +284,16 @@ export const organizationalProcessAssets: OrganizationalProcessAsset[] = [
       '見積もり精度データ',
       '問題・課題の事例集',
       '成功・失敗要因分析',
-      'ベンダー評価データ'
+      'ベンダー評価データ',
     ],
     benefits: [
       '見積もり精度の向上',
       'リスク予測の精度向上',
       '経験則の活用',
-      '同種プロジェクトとの比較'
+      '同種プロジェクトとの比較',
     ],
     updateFrequency: 'プロジェクト完了時',
-    owner: 'PMO・各事業部門'
+    owner: 'PMO・各事業部門',
   },
   {
     id: 'governance',
@@ -305,16 +305,16 @@ export const organizationalProcessAssets: OrganizationalProcessAsset[] = [
       '予算管理ガイドライン',
       'リスク管理ポリシー',
       '品質基準と評価基準',
-      'コンプライアンス要件'
+      'コンプライアンス要件',
     ],
     benefits: [
       'プロジェクト統制の強化',
       'リスク管理の徹底',
       'コンプライアンス確保',
-      '透明性の向上'
+      '透明性の向上',
     ],
     updateFrequency: '年1-2回',
-    owner: '経営陣・法務部門'
+    owner: '経営陣・法務部門',
   },
   {
     id: 'hr-policies',
@@ -326,18 +326,18 @@ export const organizationalProcessAssets: OrganizationalProcessAsset[] = [
       'スキル評価基準',
       '研修・教育プログラム',
       '評価・報酬制度',
-      '労働時間管理ポリシー'
+      '労働時間管理ポリシー',
     ],
     benefits: [
       'チーム管理の効率化',
       'メンバーのモチベーション向上',
       'スキル開発の促進',
-      '適切な労働環境の確保'
+      '適切な労働環境の確保',
     ],
     updateFrequency: '年1回',
-    owner: '人事部門'
-  }
-];
+    owner: '人事部門',
+  },
+]
 
 /**
  * 戦略分析フレームワーク
@@ -353,13 +353,7 @@ export const analysisFrameworks: AnalysisFramework[] = [
       {
         name: 'Strengths（強み）',
         description: '組織が持つ内部の優位性や競争力',
-        examples: [
-          '高い技術力・専門知識',
-          '強固な顧客基盤',
-          '優秀な人材',
-          'ブランド力',
-          '資金力'
-        ]
+        examples: ['高い技術力・専門知識', '強固な顧客基盤', '優秀な人材', 'ブランド力', '資金力'],
       },
       {
         name: 'Weaknesses（弱み）',
@@ -369,57 +363,45 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '老朽化したシステム',
           '限られた予算',
           '組織の硬直性',
-          '市場シェアの低さ'
-        ]
+          '市場シェアの低さ',
+        ],
       },
       {
         name: 'Opportunities（機会）',
         description: '外部環境から得られるビジネスチャンス',
-        examples: [
-          '市場の成長',
-          '新技術の出現',
-          '規制緩和',
-          '競合他社の撤退',
-          '顧客ニーズの変化'
-        ]
+        examples: ['市場の成長', '新技術の出現', '規制緩和', '競合他社の撤退', '顧客ニーズの変化'],
       },
       {
         name: 'Threats（脅威）',
         description: '外部環境からの潜在的なリスクや障害',
-        examples: [
-          '新規参入者',
-          '代替技術の登場',
-          '規制強化',
-          '経済悪化',
-          '原材料価格上昇'
-        ]
-      }
+        examples: ['新規参入者', '代替技術の登場', '規制強化', '経済悪化', '原材料価格上昇'],
+      },
     ],
     applicationSteps: [
       '内部環境の分析（強み・弱みの特定）',
       '外部環境の分析（機会・脅威の特定）',
       'SWOT マトリックスの作成',
       'クロス分析による戦略オプションの生成',
-      '優先順位付けと戦略選択'
+      '優先順位付けと戦略選択',
     ],
     pros: [
       'シンプルで理解しやすい',
       '包括的な環境分析が可能',
       'チームでの議論に適している',
-      '戦略策定の出発点として有効'
+      '戦略策定の出発点として有効',
     ],
     cons: [
       '表面的な分析になりがち',
       '動的な環境変化を捉えにくい',
       '要因間の相互関係が不明確',
-      '実行可能性の評価が不十分'
+      '実行可能性の評価が不十分',
     ],
     bestUseCases: [
       'プロジェクト立ち上げ時の環境分析',
       '戦略見直しのワークショップ',
       '新市場参入の検討',
-      'M&A案件の評価'
-    ]
+      'M&A案件の評価',
+    ],
   },
   {
     id: 'pestle',
@@ -431,24 +413,12 @@ export const analysisFrameworks: AnalysisFramework[] = [
       {
         name: 'Political（政治的要因）',
         description: '政治的安定性、政策、規制環境',
-        examples: [
-          '政権交代と政策変更',
-          '税制改正',
-          '国際関係の変化',
-          '政治的安定性',
-          '貿易政策'
-        ]
+        examples: ['政権交代と政策変更', '税制改正', '国際関係の変化', '政治的安定性', '貿易政策'],
       },
       {
         name: 'Economic（経済的要因）',
         description: '経済成長、金利、インフレ、雇用情勢',
-        examples: [
-          'GDP成長率',
-          '金利動向',
-          'インフレ率',
-          '為替レート',
-          '雇用率'
-        ]
+        examples: ['GDP成長率', '金利動向', 'インフレ率', '為替レート', '雇用率'],
       },
       {
         name: 'Social（社会的要因）',
@@ -458,8 +428,8 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '働き方の変化',
           '健康意識の高まり',
           '環境意識の向上',
-          'デジタルネイティブ世代'
-        ]
+          'デジタルネイティブ世代',
+        ],
       },
       {
         name: 'Technological（技術的要因）',
@@ -469,19 +439,13 @@ export const analysisFrameworks: AnalysisFramework[] = [
           'IoT・5G',
           'ブロックチェーン',
           '自動化技術',
-          'バイオテクノロジー'
-        ]
+          'バイオテクノロジー',
+        ],
       },
       {
         name: 'Legal（法的要因）',
         description: '法律、規制、コンプライアンス要件',
-        examples: [
-          'データ保護法',
-          '労働法改正',
-          '業界規制',
-          '知的財産権',
-          '環境法'
-        ]
+        examples: ['データ保護法', '労働法改正', '業界規制', '知的財産権', '環境法'],
       },
       {
         name: 'Environmental（環境要因）',
@@ -491,35 +455,30 @@ export const analysisFrameworks: AnalysisFramework[] = [
           'カーボンニュートラル',
           '資源枯渇',
           '再生可能エネルギー',
-          '廃棄物管理'
-        ]
-      }
+          '廃棄物管理',
+        ],
+      },
     ],
     applicationSteps: [
       '分析対象の明確化',
       '各要素の現状分析',
       'トレンドと将来予測',
       'ビジネスへのインパクト評価',
-      '対応戦略の策定'
+      '対応戦略の策定',
     ],
     pros: [
       '外部環境の包括的な分析',
       '長期的な視点での分析',
       '見落としがちな要因の発見',
-      '戦略的思考の促進'
+      '戦略的思考の促進',
     ],
     cons: [
       '情報収集に時間がかかる',
       '要因間の相互作用が複雑',
       '短期的な変化への対応が困難',
-      '分析結果の解釈が主観的'
+      '分析結果の解釈が主観的',
     ],
-    bestUseCases: [
-      '新市場参入の検討',
-      '長期事業計画の策定',
-      'リスク評価',
-      '業界動向分析'
-    ]
+    bestUseCases: ['新市場参入の検討', '長期事業計画の策定', 'リスク評価', '業界動向分析'],
   },
   {
     id: 'vuca',
@@ -536,8 +495,8 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '顧客需要の急激な変化',
           '技術革新のスピード',
           '競合環境の変化',
-          '為替・金利の変動'
-        ]
+          '為替・金利の変動',
+        ],
       },
       {
         name: 'Uncertainty（不確実性）',
@@ -547,8 +506,8 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '規制変更のタイミング',
           '競合他社の戦略',
           'パンデミックなどの外的ショック',
-          '消費者行動の変化'
-        ]
+          '消費者行動の変化',
+        ],
       },
       {
         name: 'Complexity（複雑性）',
@@ -558,8 +517,8 @@ export const analysisFrameworks: AnalysisFramework[] = [
           'サプライチェーンの複雑化',
           'ステークホルダーの多様化',
           '規制の複雑化',
-          'テクノロジーの相互連関'
-        ]
+          'テクノロジーの相互連関',
+        ],
       },
       {
         name: 'Ambiguity（曖昧性）',
@@ -569,35 +528,35 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '成功要因の特定困難',
           '複数の解釈が可能な情報',
           '前例のない状況',
-          '文化的な認識の違い'
-        ]
-      }
+          '文化的な認識の違い',
+        ],
+      },
     ],
     applicationSteps: [
       '現在の環境のVUCA特性を評価',
       '各特性に対する現在の対応能力を分析',
       'ギャップと改善領域の特定',
       'VUCA対応戦略の策定',
-      '実行と継続的改善'
+      '実行と継続的改善',
     ],
     pros: [
       '現代の環境特性を的確に表現',
       '適応力向上の指針を提供',
       'リーダーシップ開発に有効',
-      '組織の危機管理に役立つ'
+      '組織の危機管理に役立つ',
     ],
     cons: [
       '具体的な解決策が不明確',
       '測定が困難',
       '悲観的な印象を与えがち',
-      '実行レベルでの指針が不足'
+      '実行レベルでの指針が不足',
     ],
     bestUseCases: [
       '危機管理戦略の策定',
       'リーダーシップ研修',
       '組織変革の推進',
-      'イノベーション戦略'
-    ]
+      'イノベーション戦略',
+    ],
   },
   {
     id: 'tecop',
@@ -614,79 +573,50 @@ export const analysisFrameworks: AnalysisFramework[] = [
           'マイルストーン',
           '市場投入タイミング',
           '法規制対応期限',
-          'リソース利用可能期間'
-        ]
+          'リソース利用可能期間',
+        ],
       },
       {
         name: 'Economy（経済性）',
         description: '予算制約とコスト効率',
-        examples: [
-          'プロジェクト予算',
-          'ROI要件',
-          'コスト削減目標',
-          '価格競争力',
-          '投資回収期間'
-        ]
+        examples: ['プロジェクト予算', 'ROI要件', 'コスト削減目標', '価格競争力', '投資回収期間'],
       },
       {
         name: 'Content（内容）',
         description: 'スコープと品質要件',
-        examples: [
-          '機能要件',
-          '性能要件',
-          '品質基準',
-          'ユーザビリティ',
-          'セキュリティ要件'
-        ]
+        examples: ['機能要件', '性能要件', '品質基準', 'ユーザビリティ', 'セキュリティ要件'],
       },
       {
         name: 'Organization（組織）',
         description: '組織能力と人的リソース',
-        examples: [
-          'スキル・専門知識',
-          'チーム体制',
-          '組織文化',
-          'ガバナンス',
-          'ステークホルダー'
-        ]
+        examples: ['スキル・専門知識', 'チーム体制', '組織文化', 'ガバナンス', 'ステークホルダー'],
       },
       {
         name: 'Politics（政治）',
         description: '政治的・社会的環境',
-        examples: [
-          '組織内政治',
-          'ステークホルダーの利害',
-          '規制環境',
-          '社会的責任',
-          '業界動向'
-        ]
-      }
+        examples: ['組織内政治', 'ステークホルダーの利害', '規制環境', '社会的責任', '業界動向'],
+      },
     ],
     applicationSteps: [
       '各要素の現状分析',
       '制約の特定と優先順位付け',
       '要素間のトレードオフ分析',
       '最適解の探索',
-      '継続的な監視と調整'
+      '継続的な監視と調整',
     ],
     pros: [
       'プロジェクト制約の体系的管理',
       'トレードオフの明確化',
       'リスク要因の早期発見',
-      'ステークホルダーとの合意形成'
+      'ステークホルダーとの合意形成',
     ],
     cons: [
       '要素間の相互作用が複雑',
       '最適解の発見が困難',
       '動的な環境変化への対応',
-      '主観的な判断に依存'
+      '主観的な判断に依存',
     ],
-    bestUseCases: [
-      'プロジェクト計画策定',
-      '制約管理',
-      'リスク分析',
-      'ステークホルダー管理'
-    ]
+    bestUseCases: ['プロジェクト計画策定', '制約管理', 'リスク分析', 'ステークホルダー管理'],
   },
   {
     id: 'okr',
@@ -703,8 +633,8 @@ export const analysisFrameworks: AnalysisFramework[] = [
           '顧客満足度の向上',
           'イノベーションの推進',
           '組織能力の強化',
-          'デジタル変革の実現'
-        ]
+          'デジタル変革の実現',
+        ],
       },
       {
         name: 'Key Results（主要成果）',
@@ -714,56 +644,51 @@ export const analysisFrameworks: AnalysisFramework[] = [
           'NPS（ネットプロモータースコア）70以上',
           '新製品5個の市場投入',
           '従業員エンゲージメント85%以上',
-          'デジタルプロセス80%自動化'
-        ]
-      }
+          'デジタルプロセス80%自動化',
+        ],
+      },
     ],
     applicationSteps: [
       '組織レベルのOKR設定',
       'チーム・個人レベルへの展開',
       '定期的な進捗確認',
       '四半期レビューと調整',
-      '学習と改善'
+      '学習と改善',
     ],
     pros: [
       '目標の明確化と共有',
       '成果の定量的測定',
       '組織の整合性向上',
       '透明性とアカウンタビリティ',
-      '継続的改善の促進'
+      '継続的改善の促進',
     ],
     cons: [
       '設定の難易度が高い',
       '短期思考に陥るリスク',
       '創造性の阻害可能性',
       '過度な競争の誘発',
-      'ゲーミングのリスク'
+      'ゲーミングのリスク',
     ],
-    bestUseCases: [
-      '戦略実行管理',
-      'パフォーマンス管理',
-      '組織変革の推進',
-      'イノベーション促進'
-    ]
-  }
-];
+    bestUseCases: ['戦略実行管理', 'パフォーマンス管理', '組織変革の推進', 'イノベーション促進'],
+  },
+]
 
 /**
  * 戦略適合性評価
  */
 export interface StrategicAlignment {
-  id: string;
-  projectId: string;
-  organizationStrategy: string;
-  alignmentScore: number; // 0-100
+  id: string
+  projectId: string
+  organizationStrategy: string
+  alignmentScore: number // 0-100
   alignmentAreas: {
-    area: string;
-    score: number;
-    comments: string;
-  }[];
-  recommendations: string[];
-  riskFactors: string[];
-  successFactors: string[];
+    area: string
+    score: number
+    comments: string
+  }[]
+  recommendations: string[]
+  riskFactors: string[]
+  successFactors: string[]
 }
 
 /**
@@ -779,8 +704,8 @@ export const strategicAlignmentCriteria = {
       'コスト削減効果',
       '市場競争力の強化',
       '新規事業機会の創出',
-      'ブランド価値の向上'
-    ]
+      'ブランド価値の向上',
+    ],
   },
   strategicFit: {
     name: '戦略適合性',
@@ -791,8 +716,8 @@ export const strategicAlignmentCriteria = {
       '戦略的優先事項との一致',
       '組織能力との適合',
       '市場戦略との整合',
-      'ポートフォリオとの整合'
-    ]
+      'ポートフォリオとの整合',
+    ],
   },
   feasibility: {
     name: '実現可能性',
@@ -803,8 +728,8 @@ export const strategicAlignmentCriteria = {
       'リソース確保の可能性',
       '組織変革の必要性',
       'スケジュールの現実性',
-      'リスクの管理可能性'
-    ]
+      'リスクの管理可能性',
+    ],
   },
   urgency: {
     name: '緊急性',
@@ -815,8 +740,8 @@ export const strategicAlignmentCriteria = {
       '競合対応の必要性',
       '規制対応の期限',
       '技術的優位性の維持',
-      '組織課題の深刻度'
-    ]
+      '組織課題の深刻度',
+    ],
   },
   impact: {
     name: '組織への影響',
@@ -827,14 +752,14 @@ export const strategicAlignmentCriteria = {
       '組織変革の程度',
       'スキル・能力への影響',
       '文化・風土への影響',
-      'ステークホルダーへの影響'
-    ]
-  }
-};
+      'ステークホルダーへの影響',
+    ],
+  },
+}
 
 export default {
   enterpriseEnvironmentalFactors,
   organizationalProcessAssets,
   analysisFrameworks,
-  strategicAlignmentCriteria
-};
+  strategicAlignmentCriteria,
+}

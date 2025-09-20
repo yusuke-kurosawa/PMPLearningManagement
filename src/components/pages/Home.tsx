@@ -189,17 +189,82 @@ const Home: React.FC = () => {
               PMIタレント・トライアングルの重要な要素である戦略的思考とビジネススキルを強化
             </p>
             <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>
-              {features.filter(f => f.link === '/talent-triangle' || f.link === '/strategic-alignment' || f.link === '/business-environment' || f.link === '/strategic-toolkit').map((feature) => {
+              {features
+                .filter(
+                  (f) =>
+                    f.link === '/talent-triangle' ||
+                    f.link === '/strategic-alignment' ||
+                    f.link === '/business-environment' ||
+                    f.link === '/strategic-toolkit'
+                )
+                .map((feature) => {
+                  const Icon = feature.icon
+                  return (
+                    <Link
+                      key={feature.link}
+                      to={feature.link}
+                      className={`relative overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/50`}
+                    >
+                      {feature.isNew && (
+                        <div className='absolute right-0 top-0 translate-x-8 translate-y-4 rotate-45 transform bg-red-500 px-4 py-1 text-xs text-white'>
+                          NEW
+                        </div>
+                      )}
+                      <div className='p-6'>
+                        <div
+                          className={`${feature.color} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
+                        >
+                          <Icon className='h-6 w-6 text-white' />
+                        </div>
+                        <h3 className='mb-2 text-xl font-semibold dark:text-white'>
+                          {feature.title}
+                        </h3>
+                        <p className='mb-4 text-gray-600 dark:text-gray-300'>
+                          {feature.description}
+                        </p>
+                        <div className='flex items-center font-medium text-blue-600 dark:text-blue-400'>
+                          <span>詳しく見る</span>
+                          <ArrowRight className='ml-1 h-4 w-4' />
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+            </div>
+          </div>
+
+          {/* Other Features Section */}
+          <h2 className='mb-6 text-2xl font-bold text-gray-900 dark:text-white'>
+            学習ツールと機能
+          </h2>
+          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            {features
+              .filter(
+                (f) =>
+                  f.link !== '/talent-triangle' &&
+                  f.link !== '/strategic-alignment' &&
+                  f.link !== '/business-environment' &&
+                  f.link !== '/strategic-toolkit'
+              )
+              .map((feature) => {
                 const Icon = feature.icon
                 return (
                   <Link
                     key={feature.link}
                     to={feature.link}
-                    className={`relative overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/50`}
+                    className={`relative overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/50 ${
+                      feature.highlight
+                        ? 'ring-2 ring-purple-300 ring-offset-2 dark:ring-purple-500'
+                        : ''
+                    }`}
                   >
                     {feature.isNew && (
-                      <div className='absolute right-0 top-0 translate-x-8 translate-y-4 rotate-45 transform bg-red-500 px-4 py-1 text-xs text-white'>
-                        NEW
+                      <div
+                        className={`absolute right-0 top-0 translate-x-8 translate-y-4 rotate-45 transform px-4 py-1 text-xs text-white ${
+                          feature.highlight ? 'bg-purple-500' : 'bg-red-500'
+                        }`}
+                      >
+                        {feature.highlight ? 'AI' : 'NEW'}
                       </div>
                     )}
                     <div className='p-6'>
@@ -208,7 +273,9 @@ const Home: React.FC = () => {
                       >
                         <Icon className='h-6 w-6 text-white' />
                       </div>
-                      <h3 className='mb-2 text-xl font-semibold dark:text-white'>{feature.title}</h3>
+                      <h3 className='mb-2 text-xl font-semibold dark:text-white'>
+                        {feature.title}
+                      </h3>
                       <p className='mb-4 text-gray-600 dark:text-gray-300'>{feature.description}</p>
                       <div className='flex items-center font-medium text-blue-600 dark:text-blue-400'>
                         <span>詳しく見る</span>
@@ -218,51 +285,6 @@ const Home: React.FC = () => {
                   </Link>
                 )
               })}
-            </div>
-          </div>
-
-          {/* Other Features Section */}
-          <h2 className='mb-6 text-2xl font-bold text-gray-900 dark:text-white'>
-            学習ツールと機能
-          </h2>
-          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-            {features.filter(f => f.link !== '/talent-triangle' && f.link !== '/strategic-alignment' && f.link !== '/business-environment' && f.link !== '/strategic-toolkit').map((feature) => {
-              const Icon = feature.icon
-              return (
-              <Link
-                key={feature.link}
-                to={feature.link}
-                className={`relative overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/50 ${
-                  feature.highlight
-                    ? 'ring-2 ring-purple-300 ring-offset-2 dark:ring-purple-500'
-                    : ''
-                }`}
-              >
-                {feature.isNew && (
-                  <div
-                    className={`absolute right-0 top-0 translate-x-8 translate-y-4 rotate-45 transform px-4 py-1 text-xs text-white ${
-                      feature.highlight ? 'bg-purple-500' : 'bg-red-500'
-                    }`}
-                  >
-                    {feature.highlight ? 'AI' : 'NEW'}
-                  </div>
-                )}
-                <div className='p-6'>
-                  <div
-                    className={`${feature.color} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
-                  >
-                    <Icon className='h-6 w-6 text-white' />
-                  </div>
-                  <h3 className='mb-2 text-xl font-semibold dark:text-white'>{feature.title}</h3>
-                  <p className='mb-4 text-gray-600 dark:text-gray-300'>{feature.description}</p>
-                  <div className='flex items-center font-medium text-blue-600 dark:text-blue-400'>
-                    <span>詳しく見る</span>
-                    <ArrowRight className='ml-1 h-4 w-4' />
-                  </div>
-                </div>
-              </Link>
-              )
-            })}
           </div>
         </div>
 

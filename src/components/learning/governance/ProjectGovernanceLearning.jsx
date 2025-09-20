@@ -141,7 +141,7 @@ const ProjectGovernanceLearning = () => {
   }, [completedSections])
 
   const markSectionComplete = (sectionId) => {
-    setCompletedSections(prev => new Set([...prev, sectionId]))
+    setCompletedSections((prev) => new Set([...prev, sectionId]))
   }
 
   const CategoryBadge = ({ category }) => {
@@ -151,7 +151,7 @@ const ProjectGovernanceLearning = () => {
       transparency: 'bg-amber-100 text-amber-800',
       value: 'bg-green-100 text-green-800',
     }
-    
+
     const categoryNames = {
       foundation: '基盤',
       control: '統制',
@@ -160,143 +160,146 @@ const ProjectGovernanceLearning = () => {
     }
 
     return (
-      <Badge variant="secondary" className={categoryStyles[category]}>
+      <Badge variant='secondary' className={categoryStyles[category]}>
         {categoryNames[category]}
       </Badge>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="mx-auto max-w-7xl">
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4'>
+      <div className='mx-auto max-w-7xl'>
         {/* ヘッダー */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex items-center justify-center rounded-full bg-blue-600 p-3 text-white">
-            <Shield className="h-8 w-8" />
+        <div className='mb-8 text-center'>
+          <div className='mb-4 inline-flex items-center justify-center rounded-full bg-blue-600 p-3 text-white'>
+            <Shield className='h-8 w-8' />
           </div>
-          <h1 className="mb-2 text-4xl font-bold text-gray-900">
+          <h1 className='mb-2 text-4xl font-bold text-gray-900'>
             プロジェクト・ガバナンス学習ハブ
           </h1>
-          <p className="text-lg text-gray-600">
-            効果的なプロジェクトガバナンスの理論と実践を学習
-          </p>
-          
+          <p className='text-lg text-gray-600'>効果的なプロジェクトガバナンスの理論と実践を学習</p>
+
           {/* 進捗表示 */}
-          <div className="mx-auto mt-6 max-w-md">
-            <div className="mb-2 flex justify-between text-sm text-gray-600">
+          <div className='mx-auto mt-6 max-w-md'>
+            <div className='mb-2 flex justify-between text-sm text-gray-600'>
               <span>学習進捗</span>
               <span>{Math.round(learningProgress)}%</span>
             </div>
-            <Progress value={learningProgress} className="h-2" />
+            <Progress value={learningProgress} className='h-2' />
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="introduction">基礎概念</TabsTrigger>
-            <TabsTrigger value="components">構成要素</TabsTrigger>
-            <TabsTrigger value="comparison">タイプ比較</TabsTrigger>
-            <TabsTrigger value="framework">フレームワーク</TabsTrigger>
-            <TabsTrigger value="gates">ゲート管理</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-6'>
+          <TabsList className='grid w-full grid-cols-5'>
+            <TabsTrigger value='introduction'>基礎概念</TabsTrigger>
+            <TabsTrigger value='components'>構成要素</TabsTrigger>
+            <TabsTrigger value='comparison'>タイプ比較</TabsTrigger>
+            <TabsTrigger value='framework'>フレームワーク</TabsTrigger>
+            <TabsTrigger value='gates'>ゲート管理</TabsTrigger>
           </TabsList>
 
           {/* 基礎概念タブ */}
-          <TabsContent value="introduction" className="space-y-6">
+          <TabsContent value='introduction' className='space-y-6'>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
+                <CardTitle className='flex items-center gap-2'>
+                  <BookOpen className='h-5 w-5 text-blue-600' />
                   プロジェクト・ガバナンスとは
                 </CardTitle>
                 <CardDescription>
                   プロジェクトガバナンスの基本概念と重要性を理解しましょう
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className='space-y-6'>
                 <Alert>
-                  <Lightbulb className="h-4 w-4" />
+                  <Lightbulb className='h-4 w-4' />
                   <AlertDescription>
                     <strong>ガバナンス vs マネジメント：</strong>
                     ガバナンスは「何をすべきか」を決定し、マネジメントは「どのように実行するか」を担当します。
                   </AlertDescription>
                 </Alert>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Card className="border-blue-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg text-blue-700">ガバナンスの役割</CardTitle>
+                <div className='grid gap-4 md:grid-cols-2'>
+                  <Card className='border-blue-200'>
+                    <CardHeader className='pb-3'>
+                      <CardTitle className='text-lg text-blue-700'>ガバナンスの役割</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">戦略的方向性の設定</span>
+                    <CardContent className='space-y-2'>
+                      <div className='flex items-center gap-2'>
+                        <Target className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>戦略的方向性の設定</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">監督と統制</span>
+                      <div className='flex items-center gap-2'>
+                        <Eye className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>監督と統制</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">リスク管理</span>
+                      <div className='flex items-center gap-2'>
+                        <Shield className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>リスク管理</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">説明責任の確保</span>
+                      <div className='flex items-center gap-2'>
+                        <Award className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>説明責任の確保</span>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-green-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg text-green-700">マネジメントの役割</CardTitle>
+                  <Card className='border-green-200'>
+                    <CardHeader className='pb-3'>
+                      <CardTitle className='text-lg text-green-700'>マネジメントの役割</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">日常的な運営管理</span>
+                    <CardContent className='space-y-2'>
+                      <div className='flex items-center gap-2'>
+                        <Settings className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>日常的な運営管理</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">チーム管理</span>
+                      <div className='flex items-center gap-2'>
+                        <Users className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>チーム管理</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">プロセス実行</span>
+                      <div className='flex items-center gap-2'>
+                        <Activity className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>プロセス実行</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">進捗監視</span>
+                      <div className='flex items-center gap-2'>
+                        <BarChart3 className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>進捗監視</span>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">学習モジュール</h3>
-                  <div className="grid gap-4">
+                <div className='space-y-4'>
+                  <h3 className='text-lg font-semibold'>学習モジュール</h3>
+                  <div className='grid gap-4'>
                     {learningModules.map((module, index) => (
-                      <Card key={module.id} className={`transition-all ${completedSections.has(module.id) ? 'border-green-500 bg-green-50' : 'hover:shadow-md'}`}>
-                        <CardContent className="flex items-center justify-between p-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${completedSections.has(module.id) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                      <Card
+                        key={module.id}
+                        className={`transition-all ${completedSections.has(module.id) ? 'border-green-500 bg-green-50' : 'hover:shadow-md'}`}
+                      >
+                        <CardContent className='flex items-center justify-between p-4'>
+                          <div className='flex items-center gap-3'>
+                            <div
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ${completedSections.has(module.id) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}
+                            >
                               {completedSections.has(module.id) ? (
-                                <CheckCircle2 className="h-4 w-4" />
+                                <CheckCircle2 className='h-4 w-4' />
                               ) : (
-                                <span className="text-sm font-medium">{index + 1}</span>
+                                <span className='text-sm font-medium'>{index + 1}</span>
                               )}
                             </div>
                             <div>
-                              <h4 className="font-medium">{module.title}</h4>
-                              <p className="text-sm text-gray-600">{module.description}</p>
-                              <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                                <Clock className="h-3 w-3" />
+                              <h4 className='font-medium'>{module.title}</h4>
+                              <p className='text-sm text-gray-600'>{module.description}</p>
+                              <div className='mt-1 flex items-center gap-2 text-xs text-gray-500'>
+                                <Clock className='h-3 w-3' />
                                 {module.duration}
                               </div>
                             </div>
                           </div>
                           <Button
-                            variant={completedSections.has(module.id) ? "default" : "outline"}
-                            size="sm"
+                            variant={completedSections.has(module.id) ? 'default' : 'outline'}
+                            size='sm'
                             onClick={() => markSectionComplete(module.id)}
                             disabled={completedSections.has(module.id)}
                           >
@@ -312,11 +315,11 @@ const ProjectGovernanceLearning = () => {
           </TabsContent>
 
           {/* 構成要素タブ */}
-          <TabsContent value="components" className="space-y-6">
+          <TabsContent value='components' className='space-y-6'>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-purple-600" />
+                <CardTitle className='flex items-center gap-2'>
+                  <Building className='h-5 w-5 text-purple-600' />
                   ガバナンス構成要素（13要素）
                 </CardTitle>
                 <CardDescription>
@@ -324,104 +327,104 @@ const ProjectGovernanceLearning = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
                   {governanceComponents.map((component) => {
                     const IconComponent = component.icon
                     return (
-                      <Card key={component.id} className="transition-transform hover:scale-105">
-                        <CardContent className="p-4">
-                          <div className="mb-3 flex items-center justify-between">
-                            <IconComponent className="h-6 w-6 text-purple-600" />
+                      <Card key={component.id} className='transition-transform hover:scale-105'>
+                        <CardContent className='p-4'>
+                          <div className='mb-3 flex items-center justify-between'>
+                            <IconComponent className='h-6 w-6 text-purple-600' />
                             <CategoryBadge category={component.category} />
                           </div>
-                          <h3 className="font-medium text-gray-900">{component.name}</h3>
+                          <h3 className='font-medium text-gray-900'>{component.name}</h3>
                         </CardContent>
                       </Card>
                     )
                   })}
                 </div>
 
-                <div className="mt-8 grid gap-6 md:grid-cols-2">
-                  <Card className="border-blue-200">
+                <div className='mt-8 grid gap-6 md:grid-cols-2'>
+                  <Card className='border-blue-200'>
                     <CardHeader>
-                      <CardTitle className="text-lg text-blue-700">基盤要素</CardTitle>
+                      <CardTitle className='text-lg text-blue-700'>基盤要素</CardTitle>
                       <CardDescription>ガバナンスの土台となる構造とプロセス</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">組織構造とロール定義</span>
+                    <CardContent className='space-y-3'>
+                      <div className='flex items-center gap-2'>
+                        <Building className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>組織構造とロール定義</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">標準化されたプロセス</span>
+                      <div className='flex items-center gap-2'>
+                        <Settings className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>標準化されたプロセス</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">明確な意思決定権限</span>
+                      <div className='flex items-center gap-2'>
+                        <Target className='h-4 w-4 text-blue-600' />
+                        <span className='text-sm'>明確な意思決定権限</span>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-purple-200">
+                  <Card className='border-purple-200'>
                     <CardHeader>
-                      <CardTitle className="text-lg text-purple-700">統制要素</CardTitle>
+                      <CardTitle className='text-lg text-purple-700'>統制要素</CardTitle>
                       <CardDescription>プロジェクトの監督と管理機能</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm">継続的な監督機能</span>
+                    <CardContent className='space-y-3'>
+                      <div className='flex items-center gap-2'>
+                        <Eye className='h-4 w-4 text-purple-600' />
+                        <span className='text-sm'>継続的な監督機能</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm">効果的な管理体制</span>
+                      <div className='flex items-center gap-2'>
+                        <Users className='h-4 w-4 text-purple-600' />
+                        <span className='text-sm'>効果的な管理体制</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm">適切な統制メカニズム</span>
+                      <div className='flex items-center gap-2'>
+                        <Shield className='h-4 w-4 text-purple-600' />
+                        <span className='text-sm'>適切な統制メカニズム</span>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-amber-200">
+                  <Card className='border-amber-200'>
                     <CardHeader>
-                      <CardTitle className="text-lg text-amber-700">透明性要素</CardTitle>
+                      <CardTitle className='text-lg text-amber-700'>透明性要素</CardTitle>
                       <CardDescription>情報共有と説明責任の確保</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm">定期的なレポーティング</span>
+                    <CardContent className='space-y-3'>
+                      <div className='flex items-center gap-2'>
+                        <BarChart3 className='h-4 w-4 text-amber-600' />
+                        <span className='text-sm'>定期的なレポーティング</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm">情報の透明性</span>
+                      <div className='flex items-center gap-2'>
+                        <FileText className='h-4 w-4 text-amber-600' />
+                        <span className='text-sm'>情報の透明性</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm">明確な説明責任</span>
+                      <div className='flex items-center gap-2'>
+                        <Award className='h-4 w-4 text-amber-600' />
+                        <span className='text-sm'>明確な説明責任</span>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-green-200">
+                  <Card className='border-green-200'>
                     <CardHeader>
-                      <CardTitle className="text-lg text-green-700">価値要素</CardTitle>
+                      <CardTitle className='text-lg text-green-700'>価値要素</CardTitle>
                       <CardDescription>価値実現とステークホルダー満足</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">プロアクティブなリスク管理</span>
+                    <CardContent className='space-y-3'>
+                      <div className='flex items-center gap-2'>
+                        <Activity className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>プロアクティブなリスク管理</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">継続的な品質確保</span>
+                      <div className='flex items-center gap-2'>
+                        <CheckCircle2 className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>継続的な品質確保</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">価値実現の最大化</span>
+                      <div className='flex items-center gap-2'>
+                        <TrendingUp className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>価値実現の最大化</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -431,11 +434,11 @@ const ProjectGovernanceLearning = () => {
           </TabsContent>
 
           {/* タイプ比較タブ */}
-          <TabsContent value="comparison" className="space-y-6">
+          <TabsContent value='comparison' className='space-y-6'>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GitBranch className="h-5 w-5 text-indigo-600" />
+                <CardTitle className='flex items-center gap-2'>
+                  <GitBranch className='h-5 w-5 text-indigo-600' />
                   予測型 vs 適応型ガバナンス
                 </CardTitle>
                 <CardDescription>
@@ -443,57 +446,57 @@ const ProjectGovernanceLearning = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-6 flex justify-center">
-                  <div className="flex rounded-lg bg-gray-100 p-1">
+                <div className='mb-6 flex justify-center'>
+                  <div className='flex rounded-lg bg-gray-100 p-1'>
                     <Button
                       variant={selectedGovernanceType === 'prescriptive' ? 'default' : 'ghost'}
-                      size="sm"
+                      size='sm'
                       onClick={() => setSelectedGovernanceType('prescriptive')}
-                      className="rounded-md"
+                      className='rounded-md'
                     >
                       予測型
                     </Button>
                     <Button
                       variant={selectedGovernanceType === 'adaptive' ? 'default' : 'ghost'}
-                      size="sm"
+                      size='sm'
                       onClick={() => setSelectedGovernanceType('adaptive')}
-                      className="rounded-md"
+                      className='rounded-md'
                     >
                       適応型
                     </Button>
                   </div>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className='grid gap-6 lg:grid-cols-2'>
                   {Object.entries(governanceTypes).map(([key, type]) => (
-                    <Card 
-                      key={key} 
+                    <Card
+                      key={key}
                       className={`transition-all ${selectedGovernanceType === key ? `border-${type.color}-500 shadow-lg` : 'border-gray-200'}`}
                     >
                       <CardHeader>
                         <CardTitle className={`text-${type.color}-700`}>{type.name}</CardTitle>
                         <CardDescription>{type.description}</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className='space-y-4'>
                         <div>
-                          <h4 className="mb-2 font-medium">主な特徴</h4>
-                          <div className="space-y-2">
+                          <h4 className='mb-2 font-medium'>主な特徴</h4>
+                          <div className='space-y-2'>
                             {type.characteristics.map((char, index) => (
-                              <div key={index} className="flex items-center gap-2">
+                              <div key={index} className='flex items-center gap-2'>
                                 <CheckCircle2 className={`h-4 w-4 text-${type.color}-600`} />
-                                <span className="text-sm">{char}</span>
+                                <span className='text-sm'>{char}</span>
                               </div>
                             ))}
                           </div>
                         </div>
 
                         <div>
-                          <h4 className="mb-2 font-medium">適用場面</h4>
-                          <div className="space-y-2">
+                          <h4 className='mb-2 font-medium'>適用場面</h4>
+                          <div className='space-y-2'>
                             {type.suitableFor.map((situation, index) => (
-                              <div key={index} className="flex items-center gap-2">
+                              <div key={index} className='flex items-center gap-2'>
                                 <ArrowRight className={`h-4 w-4 text-${type.color}-600`} />
-                                <span className="text-sm">{situation}</span>
+                                <span className='text-sm'>{situation}</span>
                               </div>
                             ))}
                           </div>
@@ -503,8 +506,8 @@ const ProjectGovernanceLearning = () => {
                   ))}
                 </div>
 
-                <Alert className="mt-6">
-                  <Zap className="h-4 w-4" />
+                <Alert className='mt-6'>
+                  <Zap className='h-4 w-4' />
                   <AlertDescription>
                     <strong>ハイブリッドアプローチ：</strong>
                     実際のプロジェクトでは、予測型と適応型の要素を組み合わせることが多く、
@@ -516,12 +519,12 @@ const ProjectGovernanceLearning = () => {
           </TabsContent>
 
           {/* フレームワークタブ */}
-          <TabsContent value="framework">
+          <TabsContent value='framework'>
             <GovernanceFramework />
           </TabsContent>
 
           {/* ゲート管理タブ */}
-          <TabsContent value="gates">
+          <TabsContent value='gates'>
             <PhaseGateManagement />
           </TabsContent>
         </Tabs>

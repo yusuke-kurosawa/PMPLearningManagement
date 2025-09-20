@@ -294,13 +294,13 @@ const PhaseGateManagement = () => {
   }
 
   const makeGateDecision = (gateId, decision) => {
-    setGateDecisions(prev => ({
+    setGateDecisions((prev) => ({
       ...prev,
       [gateId]: {
         decision,
         timestamp: new Date().toISOString(),
         rationale: '',
-      }
+      },
     }))
   }
 
@@ -309,17 +309,17 @@ const PhaseGateManagement = () => {
       case '継続':
       case 'リリース':
       case '完了':
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />
+        return <CheckCircle2 className='h-4 w-4 text-green-600' />
       case '修正':
       case 'ピボット':
       case '継続開発':
       case '延長':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+        return <AlertTriangle className='h-4 w-4 text-yellow-600' />
       case '中止':
       case '停止':
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <XCircle className='h-4 w-4 text-red-600' />
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />
+        return <Clock className='h-4 w-4 text-gray-400' />
     }
   }
 
@@ -343,25 +343,25 @@ const PhaseGateManagement = () => {
   }
 
   const addCustomDodItem = () => {
-    setCustomDodItems(prev => [...prev, ''])
+    setCustomDodItems((prev) => [...prev, ''])
   }
 
   const updateCustomDodItem = (index, value) => {
-    setCustomDodItems(prev => prev.map((item, i) => i === index ? value : item))
+    setCustomDodItems((prev) => prev.map((item, i) => (i === index ? value : item)))
   }
 
   const removeCustomDodItem = (index) => {
-    setCustomDodItems(prev => prev.filter((_, i) => i !== index))
+    setCustomDodItems((prev) => prev.filter((_, i) => i !== index))
   }
 
   const currentGates = activeApproach === 'predictive' ? predictiveGates : adaptiveIterations
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-indigo-600" />
+          <CardTitle className='flex items-center gap-2'>
+            <GitBranch className='h-5 w-5 text-indigo-600' />
             フェーズゲート管理システム
           </CardTitle>
           <CardDescription>
@@ -369,15 +369,15 @@ const PhaseGateManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeApproach} onValueChange={setActiveApproach} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="predictive">予測型フェーズゲート</TabsTrigger>
-              <TabsTrigger value="adaptive">適応型イテレーション</TabsTrigger>
+          <Tabs value={activeApproach} onValueChange={setActiveApproach} className='space-y-6'>
+            <TabsList className='grid w-full grid-cols-2'>
+              <TabsTrigger value='predictive'>予測型フェーズゲート</TabsTrigger>
+              <TabsTrigger value='adaptive'>適応型イテレーション</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="predictive" className="space-y-6">
+            <TabsContent value='predictive' className='space-y-6'>
               <Alert>
-                <Info className="h-4 w-4" />
+                <Info className='h-4 w-4' />
                 <AlertDescription>
                   <strong>予測型アプローチ：</strong>
                   段階的なフェーズゲートレビューにより、プロジェクトの進行可否を厳格に判定します。
@@ -385,28 +385,32 @@ const PhaseGateManagement = () => {
                 </AlertDescription>
               </Alert>
 
-              <div className="grid gap-4">
+              <div className='grid gap-4'>
                 {predictiveGates.map((gate, index) => (
-                  <Card 
-                    key={gate.id} 
+                  <Card
+                    key={gate.id}
                     className={`transition-all ${
-                      gateDecisions[gate.id] 
+                      gateDecisions[gate.id]
                         ? getDecisionColor(gateDecisions[gate.id].decision)
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                            gateDecisions[gate.id] ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-                          }`}>
+                    <CardHeader className='pb-3'>
+                      <div className='flex items-center justify-between'>
+                        <CardTitle className='flex items-center gap-2 text-lg'>
+                          <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                              gateDecisions[gate.id]
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 text-gray-600'
+                            }`}
+                          >
                             {index + 1}
                           </div>
                           {gate.name}
                         </CardTitle>
                         {gateDecisions[gate.id] && (
-                          <Badge variant="outline" className="flex items-center gap-1">
+                          <Badge variant='outline' className='flex items-center gap-1'>
                             {getDecisionIcon(gateDecisions[gate.id].decision)}
                             {gateDecisions[gate.id].decision}
                           </Badge>
@@ -414,53 +418,57 @@ const PhaseGateManagement = () => {
                       </div>
                       <CardDescription>{gate.description}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className='space-y-4'>
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">ゲート判定基準</h4>
-                        <div className="grid gap-2 md:grid-cols-2">
+                        <h4 className='mb-2 font-medium text-gray-900'>ゲート判定基準</h4>
+                        <div className='grid gap-2 md:grid-cols-2'>
                           {gate.criteria.map((criterion, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm">{criterion}</span>
+                            <div key={idx} className='flex items-center gap-2'>
+                              <CheckCircle2 className='h-4 w-4 text-blue-600' />
+                              <span className='text-sm'>{criterion}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">主要成果物</h4>
-                        <div className="grid gap-2 md:grid-cols-2">
+                        <h4 className='mb-2 font-medium text-gray-900'>主要成果物</h4>
+                        <div className='grid gap-2 md:grid-cols-2'>
                           {gate.deliverables.map((deliverable, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-green-600" />
-                              <span className="text-sm">{deliverable}</span>
+                            <div key={idx} className='flex items-center gap-2'>
+                              <FileText className='h-4 w-4 text-green-600' />
+                              <span className='text-sm'>{deliverable}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">重要な質問</h4>
-                        <div className="space-y-1">
+                        <h4 className='mb-2 font-medium text-gray-900'>重要な質問</h4>
+                        <div className='space-y-1'>
                           {gate.keyQuestions.map((question, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Target className="mt-0.5 h-4 w-4 text-purple-600" />
-                              <span className="text-sm">{question}</span>
+                            <div key={idx} className='flex items-start gap-2'>
+                              <Target className='mt-0.5 h-4 w-4 text-purple-600' />
+                              <span className='text-sm'>{question}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="border-t pt-4">
-                        <h4 className="mb-3 font-medium text-gray-900">ゲート判定</h4>
-                        <div className="flex gap-2">
+                      <div className='border-t pt-4'>
+                        <h4 className='mb-3 font-medium text-gray-900'>ゲート判定</h4>
+                        <div className='flex gap-2'>
                           {gate.decisions.map((decision) => (
                             <Button
                               key={decision}
-                              variant={gateDecisions[gate.id]?.decision === decision ? "default" : "outline"}
-                              size="sm"
+                              variant={
+                                gateDecisions[gate.id]?.decision === decision
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              size='sm'
                               onClick={() => makeGateDecision(gate.id, decision)}
-                              className="flex items-center gap-1"
+                              className='flex items-center gap-1'
                             >
                               {getDecisionIcon(decision)}
                               {decision}
@@ -468,18 +476,20 @@ const PhaseGateManagement = () => {
                           ))}
                         </div>
                         {gateDecisions[gate.id] && (
-                          <div className="mt-3">
+                          <div className='mt-3'>
                             <Textarea
-                              placeholder="判定理由を入力してください..."
-                              className="h-20"
+                              placeholder='判定理由を入力してください...'
+                              className='h-20'
                               value={gateDecisions[gate.id].rationale || ''}
-                              onChange={(e) => setGateDecisions(prev => ({
-                                ...prev,
-                                [gate.id]: {
-                                  ...prev[gate.id],
-                                  rationale: e.target.value
-                                }
-                              }))}
+                              onChange={(e) =>
+                                setGateDecisions((prev) => ({
+                                  ...prev,
+                                  [gate.id]: {
+                                    ...prev[gate.id],
+                                    rationale: e.target.value,
+                                  },
+                                }))
+                              }
                             />
                           </div>
                         )}
@@ -490,9 +500,9 @@ const PhaseGateManagement = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="adaptive" className="space-y-6">
+            <TabsContent value='adaptive' className='space-y-6'>
               <Alert>
-                <Lightbulb className="h-4 w-4" />
+                <Lightbulb className='h-4 w-4' />
                 <AlertDescription>
                   <strong>適応型アプローチ：</strong>
                   短いイテレーションごとにレビューを実施し、継続的なフィードバックと改善を通じて
@@ -500,28 +510,32 @@ const PhaseGateManagement = () => {
                 </AlertDescription>
               </Alert>
 
-              <div className="grid gap-4">
+              <div className='grid gap-4'>
                 {adaptiveIterations.map((iteration, index) => (
-                  <Card 
-                    key={iteration.id} 
+                  <Card
+                    key={iteration.id}
                     className={`transition-all ${
-                      gateDecisions[iteration.id] 
+                      gateDecisions[iteration.id]
                         ? getDecisionColor(gateDecisions[iteration.id].decision)
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                            gateDecisions[iteration.id] ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'
-                          }`}>
+                    <CardHeader className='pb-3'>
+                      <div className='flex items-center justify-between'>
+                        <CardTitle className='flex items-center gap-2 text-lg'>
+                          <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                              gateDecisions[iteration.id]
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-200 text-gray-600'
+                            }`}
+                          >
                             {index + 1}
                           </div>
                           {iteration.name}
                         </CardTitle>
                         {gateDecisions[iteration.id] && (
-                          <Badge variant="outline" className="flex items-center gap-1">
+                          <Badge variant='outline' className='flex items-center gap-1'>
                             {getDecisionIcon(gateDecisions[iteration.id].decision)}
                             {gateDecisions[iteration.id].decision}
                           </Badge>
@@ -529,53 +543,57 @@ const PhaseGateManagement = () => {
                       </div>
                       <CardDescription>{iteration.description}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className='space-y-4'>
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">レビュー基準</h4>
-                        <div className="grid gap-2 md:grid-cols-2">
+                        <h4 className='mb-2 font-medium text-gray-900'>レビュー基準</h4>
+                        <div className='grid gap-2 md:grid-cols-2'>
                           {iteration.criteria.map((criterion, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <Activity className="h-4 w-4 text-green-600" />
-                              <span className="text-sm">{criterion}</span>
+                            <div key={idx} className='flex items-center gap-2'>
+                              <Activity className='h-4 w-4 text-green-600' />
+                              <span className='text-sm'>{criterion}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">主要成果物</h4>
-                        <div className="grid gap-2 md:grid-cols-2">
+                        <h4 className='mb-2 font-medium text-gray-900'>主要成果物</h4>
+                        <div className='grid gap-2 md:grid-cols-2'>
                           {iteration.deliverables.map((deliverable, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm">{deliverable}</span>
+                            <div key={idx} className='flex items-center gap-2'>
+                              <TrendingUp className='h-4 w-4 text-blue-600' />
+                              <span className='text-sm'>{deliverable}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="mb-2 font-medium text-gray-900">レビュー質問</h4>
-                        <div className="space-y-1">
+                        <h4 className='mb-2 font-medium text-gray-900'>レビュー質問</h4>
+                        <div className='space-y-1'>
                           {iteration.keyQuestions.map((question, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Eye className="mt-0.5 h-4 w-4 text-indigo-600" />
-                              <span className="text-sm">{question}</span>
+                            <div key={idx} className='flex items-start gap-2'>
+                              <Eye className='mt-0.5 h-4 w-4 text-indigo-600' />
+                              <span className='text-sm'>{question}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="border-t pt-4">
-                        <h4 className="mb-3 font-medium text-gray-900">レビュー結果</h4>
-                        <div className="flex gap-2">
+                      <div className='border-t pt-4'>
+                        <h4 className='mb-3 font-medium text-gray-900'>レビュー結果</h4>
+                        <div className='flex gap-2'>
                           {iteration.decisions.map((decision) => (
                             <Button
                               key={decision}
-                              variant={gateDecisions[iteration.id]?.decision === decision ? "default" : "outline"}
-                              size="sm"
+                              variant={
+                                gateDecisions[iteration.id]?.decision === decision
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              size='sm'
                               onClick={() => makeGateDecision(iteration.id, decision)}
-                              className="flex items-center gap-1"
+                              className='flex items-center gap-1'
                             >
                               {getDecisionIcon(decision)}
                               {decision}
@@ -583,18 +601,20 @@ const PhaseGateManagement = () => {
                           ))}
                         </div>
                         {gateDecisions[iteration.id] && (
-                          <div className="mt-3">
+                          <div className='mt-3'>
                             <Textarea
-                              placeholder="レビュー結果と改善点を入力してください..."
-                              className="h-20"
+                              placeholder='レビュー結果と改善点を入力してください...'
+                              className='h-20'
                               value={gateDecisions[iteration.id].rationale || ''}
-                              onChange={(e) => setGateDecisions(prev => ({
-                                ...prev,
-                                [iteration.id]: {
-                                  ...prev[iteration.id],
-                                  rationale: e.target.value
-                                }
-                              }))}
+                              onChange={(e) =>
+                                setGateDecisions((prev) => ({
+                                  ...prev,
+                                  [iteration.id]: {
+                                    ...prev[iteration.id],
+                                    rationale: e.target.value,
+                                  },
+                                }))
+                              }
                             />
                           </div>
                         )}
@@ -611,43 +631,41 @@ const PhaseGateManagement = () => {
       {/* Definition of Done管理 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <CardTitle className='flex items-center gap-2'>
+            <CheckCircle2 className='h-5 w-5 text-green-600' />
             Definition of Done (完了の定義) 管理
           </CardTitle>
-          <CardDescription>
-            品質基準と完了条件の明確化と管理
-          </CardDescription>
+          <CardDescription>品質基準と完了条件の明確化と管理</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-3">
+        <CardContent className='space-y-6'>
+          <div className='grid gap-4 md:grid-cols-3'>
             {Object.entries(dodTemplates).map(([key, template]) => (
-              <Card key={key} className="border-blue-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-blue-700">{template.name}</CardTitle>
+              <Card key={key} className='border-blue-200'>
+                <CardHeader className='pb-3'>
+                  <CardTitle className='text-lg text-blue-700'>{template.name}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
+                <CardContent className='space-y-3'>
+                  <div className='space-y-2'>
                     {template.items.slice(0, 5).map((item, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">{item}</span>
+                      <div key={index} className='flex items-center gap-2'>
+                        <CheckCircle2 className='h-4 w-4 text-green-600' />
+                        <span className='text-sm'>{item}</span>
                       </div>
                     ))}
                     {template.items.length > 5 && (
-                      <div className="text-sm text-gray-500">
-                        +{template.items.length - 5} 項目
-                      </div>
+                      <div className='text-sm text-gray-500'>+{template.items.length - 5} 項目</div>
                     )}
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setDefinitionOfDone(prev => ({
-                      ...prev,
-                      [key]: new Set(template.items)
-                    }))}
-                    className="w-full"
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() =>
+                      setDefinitionOfDone((prev) => ({
+                        ...prev,
+                        [key]: new Set(template.items),
+                      }))
+                    }
+                    className='w-full'
                   >
                     このテンプレートを使用
                   </Button>
@@ -656,46 +674,36 @@ const PhaseGateManagement = () => {
             ))}
           </div>
 
-          <Card className="border-dashed border-gray-300">
+          <Card className='border-dashed border-gray-300'>
             <CardHeader>
-              <CardTitle className="text-lg">カスタム Definition of Done</CardTitle>
-              <CardDescription>
-                プロジェクト固有の完了基準を追加できます
-              </CardDescription>
+              <CardTitle className='text-lg'>カスタム Definition of Done</CardTitle>
+              <CardDescription>プロジェクト固有の完了基準を追加できます</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
                 {customDodItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
+                  <div key={index} className='flex items-center gap-2'>
                     <Input
                       value={item}
                       onChange={(e) => updateCustomDodItem(index, e.target.value)}
-                      placeholder="完了基準を入力..."
-                      className="flex-1"
+                      placeholder='完了基準を入力...'
+                      className='flex-1'
                     />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeCustomDodItem(index)}
-                    >
-                      <XCircle className="h-4 w-4" />
+                    <Button variant='outline' size='sm' onClick={() => removeCustomDodItem(index)}>
+                      <XCircle className='h-4 w-4' />
                     </Button>
                   </div>
                 ))}
               </div>
-              <Button
-                variant="outline"
-                onClick={addCustomDodItem}
-                className="w-full"
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4" />
+              <Button variant='outline' onClick={addCustomDodItem} className='w-full'>
+                <CheckCircle2 className='mr-2 h-4 w-4' />
                 基準を追加
               </Button>
             </CardContent>
           </Card>
 
           <Alert>
-            <Shield className="h-4 w-4" />
+            <Shield className='h-4 w-4' />
             <AlertDescription>
               <strong>Definition of Done の重要性：</strong>
               明確な完了基準により、品質の一貫性を保ち、ステークホルダー間の期待値を
@@ -709,69 +717,74 @@ const PhaseGateManagement = () => {
       {Object.keys(gateDecisions).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-purple-600" />
+            <CardTitle className='flex items-center gap-2'>
+              <BarChart3 className='h-5 w-5 text-purple-600' />
               ゲートレビュー進捗概要
             </CardTitle>
-            <CardDescription>
-              プロジェクトのゲートレビュー状況と判定結果
-            </CardDescription>
+            <CardDescription>プロジェクトのゲートレビュー状況と判定結果</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-lg bg-blue-50 p-4">
-                <div className="text-2xl font-bold text-blue-700">
+          <CardContent className='space-y-4'>
+            <div className='grid gap-4 md:grid-cols-4'>
+              <div className='rounded-lg bg-blue-50 p-4'>
+                <div className='text-2xl font-bold text-blue-700'>
                   {Object.keys(gateDecisions).length}
                 </div>
-                <div className="text-sm text-blue-600">レビュー完了</div>
+                <div className='text-sm text-blue-600'>レビュー完了</div>
               </div>
-              <div className="rounded-lg bg-green-50 p-4">
-                <div className="text-2xl font-bold text-green-700">
-                  {Object.values(gateDecisions).filter(d => 
-                    ['継続', 'リリース', '完了'].includes(d.decision)
-                  ).length}
+              <div className='rounded-lg bg-green-50 p-4'>
+                <div className='text-2xl font-bold text-green-700'>
+                  {
+                    Object.values(gateDecisions).filter((d) =>
+                      ['継続', 'リリース', '完了'].includes(d.decision)
+                    ).length
+                  }
                 </div>
-                <div className="text-sm text-green-600">承認済み</div>
+                <div className='text-sm text-green-600'>承認済み</div>
               </div>
-              <div className="rounded-lg bg-yellow-50 p-4">
-                <div className="text-2xl font-bold text-yellow-700">
-                  {Object.values(gateDecisions).filter(d => 
-                    ['修正', 'ピボット', '継続開発', '延長'].includes(d.decision)
-                  ).length}
+              <div className='rounded-lg bg-yellow-50 p-4'>
+                <div className='text-2xl font-bold text-yellow-700'>
+                  {
+                    Object.values(gateDecisions).filter((d) =>
+                      ['修正', 'ピボット', '継続開発', '延長'].includes(d.decision)
+                    ).length
+                  }
                 </div>
-                <div className="text-sm text-yellow-600">要修正</div>
+                <div className='text-sm text-yellow-600'>要修正</div>
               </div>
-              <div className="rounded-lg bg-red-50 p-4">
-                <div className="text-2xl font-bold text-red-700">
-                  {Object.values(gateDecisions).filter(d => 
-                    ['中止', '停止'].includes(d.decision)
-                  ).length}
+              <div className='rounded-lg bg-red-50 p-4'>
+                <div className='text-2xl font-bold text-red-700'>
+                  {
+                    Object.values(gateDecisions).filter((d) =>
+                      ['中止', '停止'].includes(d.decision)
+                    ).length
+                  }
                 </div>
-                <div className="text-sm text-red-600">中止・停止</div>
+                <div className='text-sm text-red-600'>中止・停止</div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="font-medium">最近の判定</h4>
+            <div className='space-y-2'>
+              <h4 className='font-medium'>最近の判定</h4>
               {Object.entries(gateDecisions)
-                .sort(([,a], [,b]) => new Date(b.timestamp) - new Date(a.timestamp))
+                .sort(([, a], [, b]) => new Date(b.timestamp) - new Date(a.timestamp))
                 .slice(0, 3)
                 .map(([gateId, decision]) => {
-                  const gate = currentGates.find(g => g.id === gateId)
+                  const gate = currentGates.find((g) => g.id === gateId)
                   return gate ? (
-                    <div key={gateId} className="flex items-center justify-between rounded-lg border p-3">
-                      <div className="flex items-center gap-3">
+                    <div
+                      key={gateId}
+                      className='flex items-center justify-between rounded-lg border p-3'
+                    >
+                      <div className='flex items-center gap-3'>
                         {getDecisionIcon(decision.decision)}
                         <div>
-                          <div className="font-medium">{gate.name}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className='font-medium'>{gate.name}</div>
+                          <div className='text-sm text-gray-600'>
                             {new Date(decision.timestamp).toLocaleDateString('ja-JP')}
                           </div>
                         </div>
                       </div>
-                      <Badge variant="outline">
-                        {decision.decision}
-                      </Badge>
+                      <Badge variant='outline'>{decision.decision}</Badge>
                     </div>
                   ) : null
                 })}

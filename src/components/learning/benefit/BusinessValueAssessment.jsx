@@ -31,7 +31,7 @@ const BusinessValueAssessment = () => {
     compliance: { impact: 50, confidence: 50, timeline: 'medium' },
     market: { impact: 50, confidence: 50, timeline: 'medium' },
   })
-  
+
   const [selectedStakeholder, setSelectedStakeholder] = useState('all')
   const [assessmentResults, setAssessmentResults] = useState(null)
   const [showResults, setShowResults] = useState(false)
@@ -110,12 +110,12 @@ const BusinessValueAssessment = () => {
   ]
 
   const updateAssessment = (category, field, value) => {
-    setAssessmentData(prev => ({
+    setAssessmentData((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [field]: value
-      }
+        [field]: value,
+      },
     }))
   }
 
@@ -125,10 +125,11 @@ const BusinessValueAssessment = () => {
     let totalWeight = 0
 
     Object.entries(assessmentData).forEach(([category, data]) => {
-      const timelineMultiplier = timelineOptions.find(t => t.value === data.timeline)?.multiplier || 1.0
-      const categoryScore = (data.impact * data.confidence / 100) * timelineMultiplier
+      const timelineMultiplier =
+        timelineOptions.find((t) => t.value === data.timeline)?.multiplier || 1.0
+      const categoryScore = ((data.impact * data.confidence) / 100) * timelineMultiplier
       const weight = data.impact / 100
-      
+
       results[category] = {
         score: categoryScore,
         normalizedScore: Math.min(100, categoryScore),
@@ -136,7 +137,7 @@ const BusinessValueAssessment = () => {
         risk: 100 - data.confidence,
         timeline: data.timeline,
       }
-      
+
       totalScore += categoryScore * weight
       totalWeight += weight
     })
@@ -203,7 +204,9 @@ const BusinessValueAssessment = () => {
   }
 
   const exportResults = () => {
-    if (!assessmentResults) return
+    if (!assessmentResults) {
+      return
+    }
 
     const exportData = {
       timestamp: new Date().toISOString(),
@@ -224,23 +227,23 @@ const BusinessValueAssessment = () => {
   }
 
   return (
-    <Card className="h-full">
+    <Card className='h-full'>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-6 w-6 text-blue-600" />
+        <CardTitle className='flex items-center gap-2'>
+          <Calculator className='h-6 w-6 text-blue-600' />
           ビジネス価値評価ツール
         </CardTitle>
         <CardDescription>
           プロジェクトの多面的な価値を定量的に評価し、意思決定を支援
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className='space-y-6'>
         {/* ステークホルダー選択 */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">評価視点</label>
+        <div className='space-y-2'>
+          <label className='text-sm font-medium text-gray-700'>評価視点</label>
           <Select value={selectedStakeholder} onValueChange={setSelectedStakeholder}>
             <SelectTrigger>
-              <SelectValue placeholder="ステークホルダーを選択" />
+              <SelectValue placeholder='ステークホルダーを選択' />
             </SelectTrigger>
             <SelectContent>
               {stakeholders.map((stakeholder) => (
@@ -253,28 +256,31 @@ const BusinessValueAssessment = () => {
         </div>
 
         {/* 価値カテゴリー評価 */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">価値カテゴリー評価</h3>
+        <div className='space-y-4'>
+          <h3 className='text-lg font-semibold text-gray-900'>価値カテゴリー評価</h3>
           {valueCategories.map((category) => {
             const IconComponent = category.icon
             const data = assessmentData[category.id]
-            
+
             return (
-              <Card key={category.id} className={`${category.bgColor} border-l-4 border-l-current ${category.color}`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
+              <Card
+                key={category.id}
+                className={`${category.bgColor} border-l-4 border-l-current ${category.color}`}
+              >
+                <CardHeader className='pb-3'>
+                  <div className='flex items-center gap-3'>
                     <IconComponent className={`h-5 w-5 ${category.color}`} />
                     <div>
-                      <CardTitle className="text-sm">{category.name}</CardTitle>
-                      <CardDescription className="text-xs">{category.description}</CardDescription>
+                      <CardTitle className='text-sm'>{category.name}</CardTitle>
+                      <CardDescription className='text-xs'>{category.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <CardContent className='space-y-4'>
+                  <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                     {/* インパクト */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-600">
+                    <div className='space-y-2'>
+                      <label className='text-xs font-medium text-gray-600'>
                         インパクト: {data.impact}%
                       </label>
                       <Slider
@@ -282,32 +288,34 @@ const BusinessValueAssessment = () => {
                         onValueChange={(value) => updateAssessment(category.id, 'impact', value[0])}
                         max={100}
                         step={5}
-                        className="w-full"
+                        className='w-full'
                       />
                     </div>
-                    
+
                     {/* 確信度 */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-600">
+                    <div className='space-y-2'>
+                      <label className='text-xs font-medium text-gray-600'>
                         確信度: {data.confidence}%
                       </label>
                       <Slider
                         value={[data.confidence]}
-                        onValueChange={(value) => updateAssessment(category.id, 'confidence', value[0])}
+                        onValueChange={(value) =>
+                          updateAssessment(category.id, 'confidence', value[0])
+                        }
                         max={100}
                         step={5}
-                        className="w-full"
+                        className='w-full'
                       />
                     </div>
-                    
+
                     {/* タイムライン */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-600">実現時期</label>
+                    <div className='space-y-2'>
+                      <label className='text-xs font-medium text-gray-600'>実現時期</label>
                       <Select
                         value={data.timeline}
                         onValueChange={(value) => updateAssessment(category.id, 'timeline', value)}
                       >
-                        <SelectTrigger className="h-8">
+                        <SelectTrigger className='h-8'>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -327,18 +335,18 @@ const BusinessValueAssessment = () => {
         </div>
 
         {/* アクションボタン */}
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={calculateAssessment} className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
+        <div className='flex flex-wrap gap-2'>
+          <Button onClick={calculateAssessment} className='flex items-center gap-2'>
+            <BarChart3 className='h-4 w-4' />
             評価実行
           </Button>
-          <Button variant="outline" onClick={resetAssessment} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
+          <Button variant='outline' onClick={resetAssessment} className='flex items-center gap-2'>
+            <RefreshCw className='h-4 w-4' />
             リセット
           </Button>
           {showResults && (
-            <Button variant="outline" onClick={exportResults} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
+            <Button variant='outline' onClick={exportResults} className='flex items-center gap-2'>
+              <Download className='h-4 w-4' />
               結果エクスポート
             </Button>
           )}
@@ -346,23 +354,23 @@ const BusinessValueAssessment = () => {
 
         {/* 評価結果 */}
         {showResults && assessmentResults && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">評価結果</h3>
-            
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold text-gray-900'>評価結果</h3>
+
             {/* 総合スコア */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className='flex items-center justify-between'>
                   <span>総合価値スコア</span>
-                  <Badge variant="outline" className="text-lg px-3 py-1">
+                  <Badge variant='outline' className='px-3 py-1 text-lg'>
                     {Math.round(assessmentResults.overallScore)}点
                   </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Progress value={assessmentResults.overallScore} className="h-3 mb-4" />
+                <Progress value={assessmentResults.overallScore} className='mb-4 h-3' />
                 <Alert className={assessmentResults.recommendation.bgColor}>
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className='h-4 w-4' />
                   <AlertDescription>
                     <strong className={assessmentResults.recommendation.color}>
                       {assessmentResults.recommendation.title}
@@ -377,32 +385,35 @@ const BusinessValueAssessment = () => {
             {/* カテゴリー別結果 */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-5 w-5" />
+                <CardTitle className='flex items-center gap-2'>
+                  <PieChart className='h-5 w-5' />
                   カテゴリー別スコア
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {Object.entries(assessmentResults.categories).map(([categoryId, result]) => {
-                    const category = valueCategories.find(c => c.id === categoryId)
+                    const category = valueCategories.find((c) => c.id === categoryId)
                     const IconComponent = category.icon
-                    
+
                     return (
-                      <div key={categoryId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
+                      <div
+                        key={categoryId}
+                        className='flex items-center justify-between rounded-lg bg-gray-50 p-3'
+                      >
+                        <div className='flex items-center gap-3'>
                           <IconComponent className={`h-4 w-4 ${category.color}`} />
-                          <span className="text-sm font-medium">{category.name}</span>
+                          <span className='text-sm font-medium'>{category.name}</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-24">
-                            <Progress value={result.normalizedScore} className="h-2" />
+                        <div className='flex items-center gap-3'>
+                          <div className='w-24'>
+                            <Progress value={result.normalizedScore} className='h-2' />
                           </div>
-                          <Badge variant="outline" className="min-w-12 text-center">
+                          <Badge variant='outline' className='min-w-12 text-center'>
                             {Math.round(result.normalizedScore)}
                           </Badge>
                           {result.risk > 50 && (
-                            <AlertTriangle className="h-3 w-3 text-yellow-500" />
+                            <AlertTriangle className='h-3 w-3 text-yellow-500' />
                           )}
                         </div>
                       </div>
@@ -418,16 +429,26 @@ const BusinessValueAssessment = () => {
                 <CardTitle>リスクプロファイル</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4">
-                  <Progress value={assessmentResults.riskProfile} className="flex-1 h-3" />
-                  <Badge variant={assessmentResults.riskProfile > 60 ? "destructive" : assessmentResults.riskProfile > 30 ? "secondary" : "default"}>
+                <div className='flex items-center gap-4'>
+                  <Progress value={assessmentResults.riskProfile} className='h-3 flex-1' />
+                  <Badge
+                    variant={
+                      assessmentResults.riskProfile > 60
+                        ? 'destructive'
+                        : assessmentResults.riskProfile > 30
+                          ? 'secondary'
+                          : 'default'
+                    }
+                  >
                     {Math.round(assessmentResults.riskProfile)}% リスク
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  {assessmentResults.riskProfile > 60 ? "高リスク - リスク軽減策の検討が必要" :
-                   assessmentResults.riskProfile > 30 ? "中リスク - 慎重な監視が推奨" :
-                   "低リスク - リスクは管理可能"}
+                <p className='mt-2 text-sm text-gray-600'>
+                  {assessmentResults.riskProfile > 60
+                    ? '高リスク - リスク軽減策の検討が必要'
+                    : assessmentResults.riskProfile > 30
+                      ? '中リスク - 慎重な監視が推奨'
+                      : '低リスク - リスクは管理可能'}
                 </p>
               </CardContent>
             </Card>

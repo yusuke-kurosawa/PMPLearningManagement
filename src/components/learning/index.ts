@@ -20,3 +20,6 @@ export { default as StrategicAlignmentToolkit } from './StrategicAlignmentToolki
 
 // Organization Culture and Change Management
 export { default as OrganizationChangeManagement } from './OrganizationChangeManagement.tsx'
+
+// Compliance Management
+export { default as ProjectCompliance } from './ProjectCompliance.tsx'
