@@ -1,0 +1,53 @@
+# Context7 MCP Server Configuration for PMP Learning Management
+# Project-specific optimizations for React/TypeScript/Vite stack
+
+# Performance Configuration
+CONTEXT7_CACHE_TTL=86400
+CONTEXT7_MAX_CACHE_SIZE=100MB
+CONTEXT7_REQUEST_TIMEOUT=30000
+CONTEXT7_RETRY_ATTEMPTS=3
+CONTEXT7_RETRY_DELAY=1000
+CONTEXT7_RATE_LIMIT=100
+CONTEXT7_BATCH_SIZE=10
+CONTEXT7_CONCURRENT_REQUESTS=5
+
+# Logging and Debugging
+CONTEXT7_LOG_LEVEL=info
+CONTEXT7_DEBUG_MODE=false
+CONTEXT7_PERFORMANCE_MONITORING=true
+CONTEXT7_MEMORY_MONITORING=true
+
+# Compression and Optimization
+CONTEXT7_ENABLE_COMPRESSION=true
+CONTEXT7_COMPRESSION_LEVEL=6
+CONTEXT7_ENABLE_STREAMING=true
+CONTEXT7_ENABLE_PERSISTENT_CACHE=true
+
+# Project-specific settings
+CONTEXT7_PROJECT_TYPE=react-typescript
+CONTEXT7_PROJECT_NAME=pmp-learning-management
+CONTEXT7_FRAMEWORK_VERSION=react@18.2,typescript@5.3,vite@7.1
+
+# API Key Configuration (optional for enhanced features)
+# UPSTASH_API_KEY=your_api_key_here
+# UPSTASH_API_ENDPOINT=https://api.upstash.com
+
+# Custom Documentation Sources Priority
+CONTEXT7_PRIMARY_SOURCES=react.dev,vitejs.dev,typescript.org
+CONTEXT7_SECONDARY_SOURCES=tailwindcss.com,d3js.org,radix-ui.com
+CONTEXT7_TERTIARY_SOURCES=zustand.docs.pmnd.rs,tanstack.com,playwright.dev
+
+# Memory and Resource Management
+NODE_OPTIONS=--max-old-space-size=4096
+CONTEXT7_MEMORY_LIMIT=2GB
+CONTEXT7_DISK_CACHE_SIZE=500MB
+
+# Security Settings
+CONTEXT7_SECURE_MODE=true
+CONTEXT7_VALIDATE_CERTIFICATES=true
+CONTEXT7_ALLOW_REDIRECTS=true
+
+# Development vs Production Settings
+CONTEXT7_ENV=development
+CONTEXT7_VERBOSE_ERRORS=true
+CONTEXT7_INCLUDE_SOURCE_MAPS=true
