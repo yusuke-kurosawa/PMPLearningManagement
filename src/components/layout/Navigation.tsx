@@ -32,6 +32,8 @@ import {
   Heart,
   GitMerge,
   Bookmark,
+  DollarSign,
+  Activity,
 } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -221,6 +223,20 @@ const Navigation = () => {
       icon: Zap,
       isNew: true,
       category: 'strategic',
+    },
+    {
+      path: '/project-benefits',
+      label: 'プロジェクトベネフィット',
+      icon: DollarSign,
+      isNew: true,
+      category: 'benefit',
+    },
+    {
+      path: '/incremental-value',
+      label: '漸進型価値実現',
+      icon: Activity,
+      isNew: true,
+      category: 'benefit',
     },
     {
       path: '/pmbok-versions',

@@ -92,6 +92,10 @@ const StrategicAlignment = React.lazy(() => import('./components/learning/Strate
 const BusinessEnvironmentAnalysis = React.lazy(() => import('./components/learning/BusinessEnvironmentAnalysis'))
 const StrategicAlignmentToolkit = React.lazy(() => import('./components/learning/StrategicAlignmentToolkit'))
 
+// Project Benefit Learning Components
+const ProjectBenefitLearning = React.lazy(() => import('./components/learning/benefit/ProjectBenefitLearning'))
+const IncrementalValueVisualization = React.lazy(() => import('./components/learning/benefit/IncrementalValueVisualization'))
+
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />
 const NetworkLoading = () => <NetworkLoader />
@@ -246,6 +250,10 @@ function App() {
                           <Route path='/strategic-alignment' element={<StrategicAlignment />} />
                           <Route path='/business-environment' element={<BusinessEnvironmentAnalysis />} />
                           <Route path='/strategic-toolkit' element={<StrategicAlignmentToolkit />} />
+                          
+                          {/* Project Benefit and Value Learning Routes */}
+                          <Route path='/project-benefits' element={<ProjectBenefitLearning />} />
+                          <Route path='/incremental-value' element={<IncrementalValueVisualization />} />
                           
                           <Route
                             path='/ai-coaching'
@@ -521,6 +529,24 @@ function App() {
                           element={
                             <Suspense fallback={<LoadingSpinner />}>
                               <StrategicAlignmentToolkit />
+                            </Suspense>
+                          }
+                        />
+                        
+                        {/* Project Benefit and Value Learning Routes */}
+                        <Route
+                          path='/project-benefits'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <ProjectBenefitLearning />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/incremental-value'
+                          element={
+                            <Suspense fallback={<LoadingSpinner />}>
+                              <IncrementalValueVisualization />
                             </Suspense>
                           }
                         />
