@@ -2,12 +2,26 @@
 // Version: 2.1.0
 // Mobile-optimized PWA with advanced caching and IndexedDB integration
 
-const CACHE_VERSION = '2.1.0';
+const CACHE_VERSION = '2.1.1';
 const CACHE_NAME = `pmp-learning-v${CACHE_VERSION}`;
 const OFFLINE_CACHE = `pmp-learning-offline-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pmp-learning-runtime-v${CACHE_VERSION}`;
 const IMAGE_CACHE = `pmp-learning-images-v${CACHE_VERSION}`;
 const DATA_CACHE = `pmp-learning-data-v${CACHE_VERSION}`;
+
+// Development mode detection
+const IS_DEVELOPMENT = self.location.hostname === 'localhost' ||
+                        self.location.hostname === '127.0.0.1' ||
+                        self.location.port === '5173';
+
+// Rate limiting for cache operations
+const CACHE_RATE_LIMIT = new Map();
+const RATE_LIMIT_WINDOW = 5000; // 5 seconds
+const MAX_RETRIES_PER_WINDOW = 3;
+
+// Failed URLs tracking to avoid repeated attempts
+const FAILED_URLS = new Map();
+const FAILED_URL_RETRY_DELAY = 60000; // 1 minute
 
 // IndexedDB configuration
 const DB_NAME = 'PMPLearningOfflineDB';
@@ -568,8 +582,52 @@ self.addEventListener('message', event => {
   }
 });
 
+// Helper function to check rate limiting
+function isRateLimited(url) {
+  const now = Date.now();
+  const attempts = CACHE_RATE_LIMIT.get(url) || [];
+
+  // Remove old attempts outside the window
+  const recentAttempts = attempts.filter(time => now - time < RATE_LIMIT_WINDOW);
+
+  if (recentAttempts.length >= MAX_RETRIES_PER_WINDOW) {
+    return true;
+  }
+
+  // Add current attempt
+  recentAttempts.push(now);
+  CACHE_RATE_LIMIT.set(url, recentAttempts);
+  return false;
+}
+
+// Helper function to check if URL recently failed
+function isRecentlyFailed(url) {
+  const failedTime = FAILED_URLS.get(url);
+  if (!failedTime) return false;
+
+  const now = Date.now();
+  if (now - failedTime < FAILED_URL_RETRY_DELAY) {
+    return true;
+  }
+
+  // Enough time has passed, remove from failed list
+  FAILED_URLS.delete(url);
+  return false;
+}
+
+// Helper function to mark URL as failed
+function markUrlAsFailed(url) {
+  FAILED_URLS.set(url, Date.now());
+}
+
 // Cache additional URLs on demand
 async function cacheUrls(urls) {
+  // In development mode, disable aggressive caching
+  if (IS_DEVELOPMENT) {
+    console.log('[SW] Development mode: Skipping aggressive caching');
+    return;
+  }
+
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
     console.warn('[SW] No valid URLs provided for caching');
     return;
@@ -577,44 +635,87 @@ async function cacheUrls(urls) {
 
   try {
     const cache = await caches.open(RUNTIME_CACHE);
-
-    // Validate and filter URLs before caching
     const validUrls = [];
+    const skippedUrls = [];
+
     for (const url of urls) {
       try {
+        // Check if URL is rate limited
+        if (isRateLimited(url)) {
+          skippedUrls.push({ url, reason: 'rate-limited' });
+          continue;
+        }
+
+        // Check if URL recently failed
+        if (isRecentlyFailed(url)) {
+          skippedUrls.push({ url, reason: 'recently-failed' });
+          continue;
+        }
+
         // Validate URL format
         const parsedUrl = new URL(url, self.location.origin);
 
         // Skip chrome-extension and other non-http(s) protocols
         if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-          console.warn('[SW] Skipping invalid protocol:', url);
+          skippedUrls.push({ url, reason: 'invalid-protocol' });
           continue;
         }
 
-        // Check if resource exists
-        const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
-        if (response.ok) {
-          validUrls.push(url);
-        } else {
-          console.warn('[SW] Skipping non-existent resource:', url, response.status);
+        // Skip external URLs (different origin)
+        if (parsedUrl.origin !== self.location.origin) {
+          skippedUrls.push({ url, reason: 'external-url' });
+          continue;
+        }
+
+        // Check if resource exists using HEAD request with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+        try {
+          const response = await fetch(url, {
+            method: 'HEAD',
+            cache: 'no-cache',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            validUrls.push(url);
+          } else {
+            skippedUrls.push({ url, reason: `status-${response.status}` });
+            markUrlAsFailed(url);
+          }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          if (fetchError.name === 'AbortError') {
+            skippedUrls.push({ url, reason: 'timeout' });
+          } else {
+            skippedUrls.push({ url, reason: fetchError.message });
+          }
+          markUrlAsFailed(url);
         }
       } catch (err) {
-        console.warn('[SW] Skipping invalid URL:', url, err.message);
+        skippedUrls.push({ url, reason: err.message });
+        markUrlAsFailed(url);
       }
+    }
+
+    // Log skipped URLs only in development or if there are many failures
+    if (IS_DEVELOPMENT || skippedUrls.length > 0) {
+      console.log('[SW] Skipped URLs:', skippedUrls.length, skippedUrls.slice(0, 5));
     }
 
     if (validUrls.length > 0) {
       // Cache URLs individually to prevent one failure from blocking all
       const cachePromises = validUrls.map(url =>
         cache.add(url).catch(err => {
-          console.error('[SW] Failed to cache URL:', url, err);
+          console.error('[SW] Failed to cache URL:', url, err.message);
+          markUrlAsFailed(url);
         })
       );
 
       await Promise.allSettled(cachePromises);
-      console.log('[SW] URLs cached on demand:', validUrls.length, '/', urls.length);
-    } else {
-      console.warn('[SW] No valid URLs to cache');
+      console.log('[SW] Successfully cached:', validUrls.length, '/', urls.length);
     }
   } catch (error) {
     console.error('[SW] On-demand caching failed:', error);

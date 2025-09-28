@@ -1,67 +1,97 @@
-# Security and Performance Headers for PWA Deployment
-# These headers enhance security and performance for the PMP Learning Management System
+# Performance and Security Headers for GitHub Pages
+# Optimized to avoid 429 errors and improve caching strategy
 
 # Global headers for all routes
 /*
   # Security Headers
   X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
+  X-Frame-Options: SAMEORIGIN
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  
-  # Content Security Policy for PWA
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; manifest-src 'self'; worker-src 'self'
-  
-  # Performance Headers
-  Cache-Control: public, max-age=31536000, immutable
-  
+
+  # Content Security Policy for PWA (relaxed for GitHub Pages)
+  Content-Security-Policy: default-src 'self' https://yusuke-kurosawa.github.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://yusuke-kurosawa.github.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; manifest-src 'self'; worker-src 'self'
+
+  # Performance Headers - Balanced for GitHub Pages
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
   # PWA Headers
   X-Robots-Tag: index, follow
-  
+
   # Mobile Optimization
   Viewport: width=device-width, initial-scale=1.0
 
-# Specific caching for static assets
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-  Access-Control-Allow-Origin: *
+# Static JavaScript assets - moderate caching with stale-while-revalidate
+/assets/*.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Content-Type: application/javascript
+  X-Content-Type-Options: nosniff
 
-# Service Worker specific headers
+# Static CSS assets - moderate caching with stale-while-revalidate
+/assets/*.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Content-Type: text/css
+  X-Content-Type-Options: nosniff
+
+# Service Worker - no cache
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
   Content-Type: application/javascript
 
-# PWA Manifest
+# PWA Manifest - short cache
 /manifest.json
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=3600
   Content-Type: application/manifest+json
 
-# HTML pages - shorter cache for updates
-*.html
-  Cache-Control: public, max-age=3600
+# HTML pages - very short cache for updates
+/*.html
+  Cache-Control: public, max-age=600, must-revalidate
+  Content-Type: text/html
   X-Content-Type-Options: nosniff
+
+# Index HTML - minimal cache
+/index.html
+  Cache-Control: public, max-age=300, must-revalidate
+  Content-Type: text/html
+
+# Font files - long cache
+/*.woff
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+  Access-Control-Allow-Origin: *
+
+/*.woff2
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+  Access-Control-Allow-Origin: *
+
+# Image files - moderate cache with stale-while-revalidate
+/*.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Content-Type: image/png
+
+/*.jpg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Content-Type: image/jpeg
+
+/*.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Content-Type: image/svg+xml
+  Access-Control-Allow-Origin: *
+
+# Icon files specifically
+/icon-192x192.png
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+  Content-Type: image/png
+
+/icon-512x512.png
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+  Content-Type: image/png
 
 # API routes (if any)
 /api/*
   Cache-Control: no-cache, no-store, must-revalidate
   Content-Type: application/json
 
-# Font files
-*.woff
-  Cache-Control: public, max-age=31536000
-  Access-Control-Allow-Origin: *
-
-*.woff2  
-  Cache-Control: public, max-age=31536000
-  Access-Control-Allow-Origin: *
-
-# Image files
-*.png
-  Cache-Control: public, max-age=31536000
-  
-*.jpg
-  Cache-Control: public, max-age=31536000
-  
-*.svg
-  Cache-Control: public, max-age=31536000
-  Access-Control-Allow-Origin: *
+# 404 page
+/404.html
+  Cache-Control: public, max-age=3600
+  Content-Type: text/html
