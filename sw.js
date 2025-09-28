@@ -1,8 +1,8 @@
 // PMP Learning Management System - Service Worker
-// Version: 2.1.0
+// Version: 2.1.2
 // Mobile-optimized PWA with advanced caching and IndexedDB integration
 
-const CACHE_VERSION = '2.1.1';
+const CACHE_VERSION = '2.1.2';
 const CACHE_NAME = `pmp-learning-v${CACHE_VERSION}`;
 const OFFLINE_CACHE = `pmp-learning-offline-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pmp-learning-runtime-v${CACHE_VERSION}`;
@@ -12,7 +12,8 @@ const DATA_CACHE = `pmp-learning-data-v${CACHE_VERSION}`;
 // Development mode detection
 const IS_DEVELOPMENT = self.location.hostname === 'localhost' ||
                         self.location.hostname === '127.0.0.1' ||
-                        self.location.port === '5173';
+                        self.location.port === '5173' ||
+                        self.location.port === '5175';
 
 // Rate limiting for cache operations
 const CACHE_RATE_LIMIT = new Map();
@@ -571,13 +572,18 @@ self.addEventListener('notificationclick', event => {
 
 // Handle message events
 self.addEventListener('message', event => {
-  console.log('[SW] Message received:', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return;
+
+  // Only log in non-development mode to reduce console noise
+  if (!IS_DEVELOPMENT) {
+    console.log('[SW] Message received:', event.data);
+  }
+
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
-  if (event.data && event.data.type === 'CACHE_URLS') {
+
+  if (event.data.type === 'CACHE_URLS') {
     event.waitUntil(cacheUrls(event.data.payload));
   }
 });
@@ -624,7 +630,7 @@ function markUrlAsFailed(url) {
 async function cacheUrls(urls) {
   // In development mode, disable aggressive caching
   if (IS_DEVELOPMENT) {
-    console.log('[SW] Development mode: Skipping aggressive caching');
+    // Silently skip in development mode to avoid console spam
     return;
   }
 
@@ -718,6 +724,9 @@ async function cacheUrls(urls) {
       console.log('[SW] Successfully cached:', validUrls.length, '/', urls.length);
     }
   } catch (error) {
-    console.error('[SW] On-demand caching failed:', error);
+    // Only log errors in production mode
+    if (!IS_DEVELOPMENT) {
+      console.error('[SW] On-demand caching failed:', error);
+    }
   }
 }
