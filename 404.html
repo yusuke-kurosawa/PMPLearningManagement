@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PMBOK学習管理システム - リダイレクト中...</title>
+    <script>
+      // GitHub Pages 404 handler for Single Page Applications (SPA)
+      // This script redirects 404 pages to index.html with the full path preserved as a hash route
+      // Works with HashRouter in React Router
+
+      (function() {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+
+        // GitHub Pages base path
+        const basePath = '/PMPLearningManagement';
+
+        // Remove base path from current path
+        let relativePath = path.replace(basePath, '');
+
+        // If we're not at the root, redirect to index.html with hash route
+        if (relativePath && relativePath !== '/' && relativePath !== '/index.html') {
+          // Construct the new URL with hash routing
+          const newUrl = basePath + '/#' + relativePath + search + hash;
+
+          // Redirect immediately
+          window.location.replace(newUrl);
+        } else {
+          // If we're at root or index.html, just redirect to index.html
+          window.location.replace(basePath + '/');
+        }
+      })();
+    </script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      .loading-container {
+        text-align: center;
+        padding: 20px;
+      }
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid white;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 10px;
+      }
+      p {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <h1>リダイレクト中...</h1>
+      <p>PMBOK学習管理システムに移動しています</p>
+    </div>
+  </body>
+</html>
