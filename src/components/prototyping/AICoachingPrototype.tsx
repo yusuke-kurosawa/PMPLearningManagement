@@ -173,7 +173,9 @@ const AICoachingPrototype: React.FC = () => {
 
   // AI応答シミュレーション
   const sendMessage = () => {
-    if (!userInput.trim()) return
+    if (!userInput.trim()) {
+      return
+    }
 
     // ユーザーメッセージを追加
     const userMessage: ChatMessage = {
@@ -242,8 +244,12 @@ const AICoachingPrototype: React.FC = () => {
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 70) return 'text-green-600'
-    if (score >= 50) return 'text-orange-600'
+    if (score >= 70) {
+      return 'text-green-600'
+    }
+    if (score >= 50) {
+      return 'text-orange-600'
+    }
     return 'text-red-600'
   }
 

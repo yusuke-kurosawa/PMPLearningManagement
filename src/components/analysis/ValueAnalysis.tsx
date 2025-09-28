@@ -165,8 +165,12 @@ export const ValueAnalysis: React.FC = () => {
 
   const getRiskLevel = (probability: number, impact: number) => {
     const risk = (probability * impact) / 100
-    if (risk > 50) return { level: 'High', color: 'bg-red-100 text-red-800' }
-    if (risk > 20) return { level: 'Medium', color: 'bg-yellow-100 text-yellow-800' }
+    if (risk > 50) {
+      return { level: 'High', color: 'bg-red-100 text-red-800' }
+    }
+    if (risk > 20) {
+      return { level: 'Medium', color: 'bg-yellow-100 text-yellow-800' }
+    }
     return { level: 'Low', color: 'bg-green-100 text-green-800' }
   }
 

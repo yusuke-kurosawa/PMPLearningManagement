@@ -17,8 +17,7 @@ if (useMockCredentials) {
 
 // Use real credentials or mock ones for development
 const finalSupabaseUrl = supabaseUrl || 'https://mock-project.supabase.co'
-const finalSupabaseAnonKey =
-  supabaseAnonKey || 'mock-anon-key-for-development-only'
+const finalSupabaseAnonKey = supabaseAnonKey || 'mock-anon-key-for-development-only'
 
 // Only throw error in production when credentials are missing
 if (!useMockCredentials && (!supabaseUrl || !supabaseAnonKey)) {

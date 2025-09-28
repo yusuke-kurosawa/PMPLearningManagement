@@ -100,7 +100,9 @@ export const BacklogRefinementWorkshop: React.FC = () => {
 
   // Calculate readiness score
   const readinessScore = useMemo(() => {
-    if (!selectedStory) return 0
+    if (!selectedStory) {
+      return 0
+    }
     const checks = [
       selectedStory.description.length > 20,
       selectedStory.acceptanceCriteria.length >= 3,
@@ -135,11 +137,15 @@ export const BacklogRefinementWorkshop: React.FC = () => {
   // Calculate average estimation
   const averageEstimation = useMemo(() => {
     const votes = Object.values(estimationVotes)
-    if (votes.length === 0) return 0
+    if (votes.length === 0) {
+      return 0
+    }
     return Math.round(votes.reduce((sum, v) => sum + v, 0) / votes.length)
   }, [estimationVotes])
 
-  if (!selectedStory) return null
+  if (!selectedStory) {
+    return null
+  }
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>

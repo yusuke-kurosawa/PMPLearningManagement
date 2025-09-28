@@ -63,7 +63,7 @@ export const UserStoryBacklog: React.FC = () => {
 
   // Filter and sort stories
   const filteredStories = useMemo(() => {
-    let filtered = userStories.filter((story) => {
+    const filtered = userStories.filter((story) => {
       const matchesSearch =
         story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         story.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -113,23 +113,33 @@ export const UserStoryBacklog: React.FC = () => {
     let score = 0
 
     // Independent: Has few dependencies
-    if (story.dependencies.length <= 1) score += 16.67
+    if (story.dependencies.length <= 1) {
+      score += 16.67
+    }
 
     // Negotiable: Can be refined
     score += 16.67
 
     // Valuable: Based on epic business value
     const epic = epics.find((e) => e.id === story.epicId)
-    if (epic && epic.businessValue >= 7) score += 16.67
+    if (epic && epic.businessValue >= 7) {
+      score += 16.67
+    }
 
     // Estimable: Has story points
-    if (story.storyPoints > 0) score += 16.67
+    if (story.storyPoints > 0) {
+      score += 16.67
+    }
 
     // Small: Story points <= 8
-    if (story.storyPoints <= 8) score += 16.67
+    if (story.storyPoints <= 8) {
+      score += 16.67
+    }
 
     // Testable: Has acceptance criteria
-    if (story.acceptanceCriteria.length >= 2) score += 16.67
+    if (story.acceptanceCriteria.length >= 2) {
+      score += 16.67
+    }
 
     return Math.round(score)
   }

@@ -59,7 +59,7 @@
   ],
   "offline_enabled": true,
   "service_worker": {
-    "src": "/PMPLearningManagement/sw.js",
+    "src": "/PMPLearningManagement/sw-lite.js",
     "scope": "/PMPLearningManagement/",
     "use_cache": true
   },

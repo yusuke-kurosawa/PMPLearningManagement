@@ -32,7 +32,7 @@ export default defineConfig({
   // GitHub Pages configuration
   base: '/PMPLearningManagement/',
   
-  // Build configuration optimized for mobile PWA
+  // Build configuration optimized for mobile PWA and GitHub Pages rate limiting
   build: {
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
@@ -40,32 +40,46 @@ export default defineConfig({
     target: ['es2015', 'edge88', 'chrome88', 'safari14'], // Modern browser support
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React chunk (priority loading)
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          // D3 visualization chunk (lazy loaded)
-          d3: ['d3', 'd3-sankey'],
-          // UI component library chunk
-          ui: ['lucide-react', 'framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-progress'],
-          // Radix UI components (separate chunk for tree shaking)
-          radix: [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-select',
-            '@radix-ui/react-dropdown-menu'
-          ],
-          // Chart libraries (optional loading)
-          charts: ['recharts']
+        manualChunks(id) {
+          // More granular chunking to reduce individual file sizes and avoid 429 errors
+          if (id.includes('node_modules')) {
+            // Split React ecosystem
+            if (id.includes('react-dom')) return 'react-dom';
+            if (id.includes('react-router')) return 'react-router';
+            if (id.includes('react')) return 'react';
+
+            // Split D3 libraries
+            if (id.includes('d3-sankey')) return 'd3-sankey';
+            if (id.includes('d3')) return 'd3-core';
+
+            // Split UI libraries
+            if (id.includes('framer-motion')) return 'framer-motion';
+            if (id.includes('lucide-react')) return 'lucide-icons';
+
+            // Split Radix UI into smaller chunks
+            if (id.includes('@radix-ui/react-dialog')) return 'radix-dialog';
+            if (id.includes('@radix-ui/react-accordion')) return 'radix-accordion';
+            if (id.includes('@radix-ui/react-tabs')) return 'radix-tabs';
+            if (id.includes('@radix-ui')) return 'radix-core';
+
+            // Split other large dependencies
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('zustand')) return 'zustand';
+            if (id.includes('zod')) return 'validation';
+            if (id.includes('react-hook-form')) return 'forms';
+
+            // All other vendor modules
+            return 'vendor';
+          }
         },
-        // Optimize chunk names for mobile caching
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        // Optimize chunk names for mobile caching with shorter hashes
+        chunkFileNames: 'assets/[name]-[hash:8].js',
+        entryFileNames: 'assets/[name]-[hash:8].js',
+        assetFileNames: 'assets/[name]-[hash:8].[ext]'
       }
     },
-    // Aggressive bundle size limits for mobile
-    chunkSizeWarningLimit: 500,
+    // Adjusted bundle size limits to create more, smaller chunks
+    chunkSizeWarningLimit: 250,
     // Terser options for better mobile performance
     terserOptions: {
       compress: {

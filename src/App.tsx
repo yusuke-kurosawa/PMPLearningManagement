@@ -118,16 +118,12 @@ const BusinessContextDiagram = React.lazy(
 )
 
 // Backlog Management Components
-const ProductBacklogManager = React.lazy(
-  () => import('./components/backlog/ProductBacklogManager')
-)
+const ProductBacklogManager = React.lazy(() => import('./components/backlog/ProductBacklogManager'))
 const SprintBacklogBoard = React.lazy(() => import('./components/backlog/SprintBacklogBoard'))
 const BacklogRefinementWorkshop = React.lazy(
   () => import('./components/backlog/BacklogRefinementWorkshop')
 )
-const ProductOwnerDashboard = React.lazy(
-  () => import('./components/backlog/ProductOwnerDashboard')
-)
+const ProductOwnerDashboard = React.lazy(() => import('./components/backlog/ProductOwnerDashboard'))
 
 // Feature-specific loading components
 const MatrixLoading = () => <MatrixLoader />

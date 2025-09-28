@@ -13,40 +13,40 @@
  * @module ITTOForceGraph
  */
 
-import React, { useRef, useState, useMemo, useCallback, memo } from 'react';
-import * as d3 from 'd3';
-import { Filter, RotateCcw, ZoomIn, ZoomOut, Menu, X } from 'lucide-react';
-import { glossaryService } from '../../services/glossaryService';
-import GlossaryDialog from '../learning/GlossaryDialog';
-import { useNavigate } from 'react-router-dom';
+import React, { useRef, useState, useMemo, useCallback, memo } from 'react'
+import * as d3 from 'd3'
+import { Filter, RotateCcw, ZoomIn, ZoomOut, Menu, X } from 'lucide-react'
+import { glossaryService } from '../../services/glossaryService'
+import GlossaryDialog from '../learning/GlossaryDialog'
+import { useNavigate } from 'react-router-dom'
 import {
   useD3ForceSimulation,
   ForceNode,
   ForceLink,
   type ForceSimulationConfig,
   type RenderCallbacks,
-} from '../../hooks/useD3ForceSimulation';
-import { useWindowSize } from '../../hooks/useWindowSize';
+} from '../../hooks/useD3ForceSimulation'
+import { useWindowSize } from '../../hooks/useWindowSize'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface FilterState {
-  processGroups: string[];
-  knowledgeAreas: string[];
+  processGroups: string[]
+  knowledgeAreas: string[]
 }
 
 interface GraphData {
-  nodes: ForceNode[];
-  links: ForceLink[];
+  nodes: ForceNode[]
+  links: ForceLink[]
 }
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-const PROCESS_GROUPS = ['立ち上げ', '計画', '実行', '監視・コントロール', '終結'] as const;
+const PROCESS_GROUPS = ['立ち上げ', '計画', '実行', '監視・コントロール', '終結'] as const
 
 const KNOWLEDGE_AREAS = [
   '統合',
@@ -59,7 +59,7 @@ const KNOWLEDGE_AREAS = [
   'リスク',
   '調達',
   'ステークホルダー',
-] as const;
+] as const
 
 const KNOWLEDGE_AREA_COLORS: Record<string, string> = {
   統合: '#8B5CF6',
@@ -72,17 +72,17 @@ const KNOWLEDGE_AREA_COLORS: Record<string, string> = {
   リスク: '#6366F1',
   調達: '#84CC16',
   ステークホルダー: '#F97316',
-};
+}
 
 const NODE_TYPE_COLORS = {
   process: (area: string) => KNOWLEDGE_AREA_COLORS[area] || '#gray',
   input: '#3B82F6',
   tool: '#10B981',
   output: '#F59E0B',
-};
+}
 
 // Mobile breakpoint
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 768
 
 // ============================================================================
 // Sub-components
@@ -92,66 +92,72 @@ const MOBILE_BREAKPOINT = 768;
  * Legend component showing node type representations
  */
 const Legend = memo(() => (
-  <div className="mb-4 md:mb-6">
-    <h3 className="mb-2 text-sm font-semibold md:text-base">凡例</h3>
-    <div className="space-y-1 text-xs md:space-y-2 md:text-sm">
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 flex-shrink-0 rounded-full bg-blue-500 md:h-6 md:w-6" aria-hidden="true" />
+  <div className='mb-4 md:mb-6'>
+    <h3 className='mb-2 text-sm font-semibold md:text-base'>凡例</h3>
+    <div className='space-y-1 text-xs md:space-y-2 md:text-sm'>
+      <div className='flex items-center gap-2'>
+        <div
+          className='h-4 w-4 flex-shrink-0 rounded-full bg-blue-500 md:h-6 md:w-6'
+          aria-hidden='true'
+        />
         <span>プロセス（知識エリア別）</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 flex-shrink-0 rotate-45 transform bg-blue-500 md:h-6 md:w-6" aria-hidden="true" />
+      <div className='flex items-center gap-2'>
+        <div
+          className='h-4 w-4 flex-shrink-0 rotate-45 transform bg-blue-500 md:h-6 md:w-6'
+          aria-hidden='true'
+        />
         <span>インプット</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 flex-shrink-0 bg-green-500 md:h-6 md:w-6" aria-hidden="true" />
+      <div className='flex items-center gap-2'>
+        <div className='h-4 w-4 flex-shrink-0 bg-green-500 md:h-6 md:w-6' aria-hidden='true' />
         <span>ツールと技法</span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         <div
-          className="h-0 w-0 flex-shrink-0 border-b-[14px] border-l-[8px] border-r-[8px] border-b-amber-500 border-l-transparent border-r-transparent md:border-b-[20px] md:border-l-[12px] md:border-r-[12px]"
-          aria-hidden="true"
+          className='h-0 w-0 flex-shrink-0 border-b-[14px] border-l-[8px] border-r-[8px] border-b-amber-500 border-l-transparent border-r-transparent md:border-b-[20px] md:border-l-[12px] md:border-r-[12px]'
+          aria-hidden='true'
         />
         <span>アウトプット</span>
       </div>
     </div>
   </div>
-));
+))
 
-Legend.displayName = 'Legend';
+Legend.displayName = 'Legend'
 
 /**
  * Filter section component
  */
 interface FilterSectionProps {
-  selectedFilters: FilterState;
-  onFilterChange: (type: keyof FilterState, value: string) => void;
+  selectedFilters: FilterState
+  onFilterChange: (type: keyof FilterState, value: string) => void
 }
 
 const FilterSection = memo<FilterSectionProps>(({ selectedFilters, onFilterChange }) => (
-  <div className="mb-4 md:mb-6">
-    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold md:text-base">
-      <Filter className="h-3 w-3 md:h-4 md:w-4" aria-hidden="true" />
+  <div className='mb-4 md:mb-6'>
+    <h3 className='mb-2 flex items-center gap-2 text-sm font-semibold md:text-base'>
+      <Filter className='h-3 w-3 md:h-4 md:w-4' aria-hidden='true' />
       フィルター
     </h3>
 
     {/* Process Groups Filter */}
-    <fieldset className="mb-3 md:mb-4">
-      <legend className="mb-2 text-xs font-medium md:text-sm">プロセス群</legend>
-      <div className="space-y-1">
+    <fieldset className='mb-3 md:mb-4'>
+      <legend className='mb-2 text-xs font-medium md:text-sm'>プロセス群</legend>
+      <div className='space-y-1'>
         {PROCESS_GROUPS.map((group) => (
           <label
             key={group}
-            className="flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm"
+            className='flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm'
           >
             <input
-              type="checkbox"
+              type='checkbox'
               checked={selectedFilters.processGroups.includes(group)}
               onChange={() => onFilterChange('processGroups', group)}
-              className="h-3 w-3 rounded md:h-4 md:w-4"
+              className='h-3 w-3 rounded md:h-4 md:w-4'
               aria-label={`${group}プロセス群をフィルタリング`}
             />
-            <span className="truncate">{group}</span>
+            <span className='truncate'>{group}</span>
           </label>
         ))}
       </div>
@@ -159,86 +165,86 @@ const FilterSection = memo<FilterSectionProps>(({ selectedFilters, onFilterChang
 
     {/* Knowledge Areas Filter */}
     <fieldset>
-      <legend className="mb-2 text-xs font-medium md:text-sm">知識エリア</legend>
-      <div className="space-y-1">
+      <legend className='mb-2 text-xs font-medium md:text-sm'>知識エリア</legend>
+      <div className='space-y-1'>
         {KNOWLEDGE_AREAS.map((area) => (
           <label
             key={area}
-            className="flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm"
+            className='flex cursor-pointer items-center gap-2 rounded p-1 text-xs hover:bg-gray-50 md:text-sm'
           >
             <input
-              type="checkbox"
+              type='checkbox'
               checked={selectedFilters.knowledgeAreas.includes(area)}
               onChange={() => onFilterChange('knowledgeAreas', area)}
-              className="h-3 w-3 rounded md:h-4 md:w-4"
+              className='h-3 w-3 rounded md:h-4 md:w-4'
               aria-label={`${area}知識エリアをフィルタリング`}
             />
-            <div className="flex items-center gap-1 md:gap-2">
+            <div className='flex items-center gap-1 md:gap-2'>
               <div
-                className="h-2 w-2 flex-shrink-0 rounded-full md:h-3 md:w-3"
+                className='h-2 w-2 flex-shrink-0 rounded-full md:h-3 md:w-3'
                 style={{ backgroundColor: KNOWLEDGE_AREA_COLORS[area] }}
-                aria-hidden="true"
+                aria-hidden='true'
               />
-              <span className="truncate">{area}</span>
+              <span className='truncate'>{area}</span>
             </div>
           </label>
         ))}
       </div>
     </fieldset>
   </div>
-));
+))
 
-FilterSection.displayName = 'FilterSection';
+FilterSection.displayName = 'FilterSection'
 
 /**
  * Zoom controls component
  */
 interface ZoomControlsProps {
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onReset: () => void;
-  isMobile: boolean;
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onReset: () => void
+  isMobile: boolean
 }
 
 const ZoomControls = memo<ZoomControlsProps>(({ onZoomIn, onZoomOut, onReset, isMobile }) => (
-  <div className="border-t pt-3 md:pt-4">
-    <h3 className="mb-2 text-sm font-semibold md:text-base">コントロール</h3>
-    <div className="flex flex-wrap gap-2">
+  <div className='border-t pt-3 md:pt-4'>
+    <h3 className='mb-2 text-sm font-semibold md:text-base'>コントロール</h3>
+    <div className='flex flex-wrap gap-2'>
       <button
         onClick={onZoomIn}
-        className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm"
-        aria-label="グラフを拡大"
+        className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm'
+        aria-label='グラフを拡大'
       >
-        <ZoomIn className="h-3 w-3 md:h-4 md:w-4" aria-hidden="true" />
-        <span className="hidden md:inline">拡大</span>
+        <ZoomIn className='h-3 w-3 md:h-4 md:w-4' aria-hidden='true' />
+        <span className='hidden md:inline'>拡大</span>
       </button>
       <button
         onClick={onZoomOut}
-        className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm"
-        aria-label="グラフを縮小"
+        className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm'
+        aria-label='グラフを縮小'
       >
-        <ZoomOut className="h-3 w-3 md:h-4 md:w-4" aria-hidden="true" />
-        <span className="hidden md:inline">縮小</span>
+        <ZoomOut className='h-3 w-3 md:h-4 md:w-4' aria-hidden='true' />
+        <span className='hidden md:inline'>縮小</span>
       </button>
       <button
         onClick={onReset}
-        className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm"
-        aria-label="ズームをリセット"
+        className='flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 md:px-3 md:text-sm'
+        aria-label='ズームをリセット'
       >
-        <RotateCcw className="h-3 w-3 md:h-4 md:w-4" aria-hidden="true" />
-        <span className="hidden md:inline">リセット</span>
+        <RotateCcw className='h-3 w-3 md:h-4 md:w-4' aria-hidden='true' />
+        <span className='hidden md:inline'>リセット</span>
       </button>
     </div>
-    <p className="mt-2 text-xs text-gray-600">
+    <p className='mt-2 text-xs text-gray-600'>
       • ノードを{isMobile ? 'タッチ' : 'クリック'}してフォーカス
       <br />
       • ノードをドラッグして位置変更
       <br />• {isMobile ? 'ピンチでズーム、ドラッグでパン' : 'スクロールでズーム、ドラッグでパン'}
     </p>
   </div>
-));
+))
 
-ZoomControls.displayName = 'ZoomControls';
+ZoomControls.displayName = 'ZoomControls'
 
 // ============================================================================
 // Data Loading Hook
@@ -249,8 +255,8 @@ ZoomControls.displayName = 'ZoomControls';
  * In production, this would fetch from an API
  */
 const useGraphData = () => {
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [graphData, setGraphData] = useState<GraphData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   React.useEffect(() => {
     // Simulate data loading
@@ -258,25 +264,109 @@ const useGraphData = () => {
       const data: GraphData = {
         nodes: [
           // Integration Management Processes
-          { id: 'p1', name: 'プロジェクト憲章の作成', type: 'process', group: '立ち上げ', area: '統合' },
-          { id: 'p2', name: 'プロジェクトマネジメント計画書の作成', type: 'process', group: '計画', area: '統合' },
-          { id: 'p3', name: 'プロジェクト作業の指揮・マネジメント', type: 'process', group: '実行', area: '統合' },
-          { id: 'p4', name: 'プロジェクト知識のマネジメント', type: 'process', group: '実行', area: '統合' },
-          { id: 'p5', name: 'プロジェクト作業の監視・コントロール', type: 'process', group: '監視・コントロール', area: '統合' },
-          { id: 'p6', name: '統合変更管理', type: 'process', group: '監視・コントロール', area: '統合' },
-          { id: 'p7', name: 'プロジェクトやフェーズの終結', type: 'process', group: '終結', area: '統合' },
+          {
+            id: 'p1',
+            name: 'プロジェクト憲章の作成',
+            type: 'process',
+            group: '立ち上げ',
+            area: '統合',
+          },
+          {
+            id: 'p2',
+            name: 'プロジェクトマネジメント計画書の作成',
+            type: 'process',
+            group: '計画',
+            area: '統合',
+          },
+          {
+            id: 'p3',
+            name: 'プロジェクト作業の指揮・マネジメント',
+            type: 'process',
+            group: '実行',
+            area: '統合',
+          },
+          {
+            id: 'p4',
+            name: 'プロジェクト知識のマネジメント',
+            type: 'process',
+            group: '実行',
+            area: '統合',
+          },
+          {
+            id: 'p5',
+            name: 'プロジェクト作業の監視・コントロール',
+            type: 'process',
+            group: '監視・コントロール',
+            area: '統合',
+          },
+          {
+            id: 'p6',
+            name: '統合変更管理',
+            type: 'process',
+            group: '監視・コントロール',
+            area: '統合',
+          },
+          {
+            id: 'p7',
+            name: 'プロジェクトやフェーズの終結',
+            type: 'process',
+            group: '終結',
+            area: '統合',
+          },
           // Scope Management Processes
-          { id: 'p8', name: 'スコープ・マネジメントの計画', type: 'process', group: '計画', area: 'スコープ' },
+          {
+            id: 'p8',
+            name: 'スコープ・マネジメントの計画',
+            type: 'process',
+            group: '計画',
+            area: 'スコープ',
+          },
           { id: 'p9', name: '要求事項の収集', type: 'process', group: '計画', area: 'スコープ' },
           { id: 'p10', name: 'スコープの定義', type: 'process', group: '計画', area: 'スコープ' },
           { id: 'p11', name: 'WBSの作成', type: 'process', group: '計画', area: 'スコープ' },
-          { id: 'p12', name: 'スコープの妥当性確認', type: 'process', group: '監視・コントロール', area: 'スコープ' },
-          { id: 'p13', name: 'スコープのコントロール', type: 'process', group: '監視・コントロール', area: 'スコープ' },
+          {
+            id: 'p12',
+            name: 'スコープの妥当性確認',
+            type: 'process',
+            group: '監視・コントロール',
+            area: 'スコープ',
+          },
+          {
+            id: 'p13',
+            name: 'スコープのコントロール',
+            type: 'process',
+            group: '監視・コントロール',
+            area: 'スコープ',
+          },
           // Stakeholder Management Processes
-          { id: 'p14', name: 'ステークホルダーの特定', type: 'process', group: '立ち上げ', area: 'ステークホルダー' },
-          { id: 'p15', name: 'ステークホルダー・エンゲージメントの計画', type: 'process', group: '計画', area: 'ステークホルダー' },
-          { id: 'p16', name: 'ステークホルダー・エンゲージメントのマネジメント', type: 'process', group: '実行', area: 'ステークホルダー' },
-          { id: 'p17', name: 'ステークホルダー・エンゲージメントの監視', type: 'process', group: '監視・コントロール', area: 'ステークホルダー' },
+          {
+            id: 'p14',
+            name: 'ステークホルダーの特定',
+            type: 'process',
+            group: '立ち上げ',
+            area: 'ステークホルダー',
+          },
+          {
+            id: 'p15',
+            name: 'ステークホルダー・エンゲージメントの計画',
+            type: 'process',
+            group: '計画',
+            area: 'ステークホルダー',
+          },
+          {
+            id: 'p16',
+            name: 'ステークホルダー・エンゲージメントのマネジメント',
+            type: 'process',
+            group: '実行',
+            area: 'ステークホルダー',
+          },
+          {
+            id: 'p17',
+            name: 'ステークホルダー・エンゲージメントの監視',
+            type: 'process',
+            group: '監視・コントロール',
+            area: 'ステークホルダー',
+          },
           // Key Inputs
           { id: 'i1', name: 'ビジネス文書', type: 'input' },
           { id: 'i2', name: '合意書', type: 'input' },
@@ -364,17 +454,17 @@ const useGraphData = () => {
           { source: 'o5', target: 'i9', type: 'flow' },
           { source: 'o6', target: 'i10', type: 'flow' },
         ],
-      };
+      }
 
-      setGraphData(data);
-      setIsLoading(false);
-    }, 500);
+      setGraphData(data)
+      setIsLoading(false)
+    }, 500)
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => clearTimeout(timer)
+  }, [])
 
-  return { graphData, isLoading };
-};
+  return { graphData, isLoading }
+}
 
 // ============================================================================
 // Main Component
@@ -386,36 +476,36 @@ const useGraphData = () => {
  * Displays PMBOK ITTO relationships as an interactive force-directed graph
  */
 const ITTOForceGraph: React.FC = () => {
-  const navigate = useNavigate();
-  const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate()
+  const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // State
   const [selectedFilters, setSelectedFilters] = useState<FilterState>({
     processGroups: [],
     knowledgeAreas: [],
-  });
-  const [focusedNode, setFocusedNode] = useState<string | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState<any>(null);
+  })
+  const [focusedNode, setFocusedNode] = useState<string | null>(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState<any>(null)
 
   // Custom hooks
-  const { graphData, isLoading } = useGraphData();
-  const { width, height } = useWindowSize();
-  const isMobile = width <= MOBILE_BREAKPOINT;
+  const { graphData, isLoading } = useGraphData()
+  const { width, height } = useWindowSize()
+  const isMobile = width <= MOBILE_BREAKPOINT
 
   // Responsive configuration
-  const nodeRadius = isMobile ? 15 : 25;
-  const fontSize = isMobile ? 10 : 12;
+  const nodeRadius = isMobile ? 15 : 25
+  const fontSize = isMobile ? 10 : 12
 
   // Memoized filtered data
   const { filteredNodes, filteredLinks } = useMemo(() => {
     if (!graphData) {
-      return { filteredNodes: [], filteredLinks: [] };
+      return { filteredNodes: [], filteredLinks: [] }
     }
 
-    let nodes = [...graphData.nodes];
-    let links = [...graphData.links];
+    let nodes = [...graphData.nodes]
+    let links = [...graphData.links]
 
     if (selectedFilters.processGroups.length > 0 || selectedFilters.knowledgeAreas.length > 0) {
       const processNodeIds = new Set(
@@ -423,34 +513,36 @@ const ITTOForceGraph: React.FC = () => {
           .filter(
             (n) =>
               n.type === 'process' &&
-              (selectedFilters.processGroups.length === 0 || selectedFilters.processGroups.includes(n.group!)) &&
-              (selectedFilters.knowledgeAreas.length === 0 || selectedFilters.knowledgeAreas.includes(n.area!))
+              (selectedFilters.processGroups.length === 0 ||
+                selectedFilters.processGroups.includes(n.group!)) &&
+              (selectedFilters.knowledgeAreas.length === 0 ||
+                selectedFilters.knowledgeAreas.includes(n.area!))
           )
           .map((n) => n.id)
-      );
+      )
 
       // Include related nodes
-      const relatedNodeIds = new Set(processNodeIds);
+      const relatedNodeIds = new Set(processNodeIds)
       graphData.links.forEach((link) => {
-        const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-        const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+        const sourceId = typeof link.source === 'string' ? link.source : link.source.id
+        const targetId = typeof link.target === 'string' ? link.target : link.target.id
 
         if (processNodeIds.has(sourceId) || processNodeIds.has(targetId)) {
-          relatedNodeIds.add(sourceId);
-          relatedNodeIds.add(targetId);
+          relatedNodeIds.add(sourceId)
+          relatedNodeIds.add(targetId)
         }
-      });
+      })
 
-      nodes = graphData.nodes.filter((n) => relatedNodeIds.has(n.id));
+      nodes = graphData.nodes.filter((n) => relatedNodeIds.has(n.id))
       links = graphData.links.filter((l) => {
-        const sourceId = typeof l.source === 'string' ? l.source : l.source.id;
-        const targetId = typeof l.target === 'string' ? l.target : l.target.id;
-        return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId);
-      });
+        const sourceId = typeof l.source === 'string' ? l.source : l.source.id
+        const targetId = typeof l.target === 'string' ? l.target : l.target.id
+        return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId)
+      })
     }
 
-    return { filteredNodes: nodes, filteredLinks: links };
-  }, [graphData, selectedFilters]);
+    return { filteredNodes: nodes, filteredLinks: links }
+  }, [graphData, selectedFilters])
 
   // Simulation configuration
   const simulationConfig: ForceSimulationConfig = useMemo(
@@ -463,31 +555,31 @@ const ITTOForceGraph: React.FC = () => {
       collisionRadius: nodeRadius + 5,
     }),
     [nodeRadius, isMobile]
-  );
+  )
 
   // Render callbacks for D3 visualization
   const renderCallbacks: RenderCallbacks = useMemo(
     () => ({
       onNodeClick: (event, node) => {
-        setFocusedNode(node.id);
+        setFocusedNode(node.id)
 
         // Check if node name matches glossary term
-        const term = glossaryService.getTermByName(node.name);
+        const term = glossaryService.getTermByName(node.name)
         if (term) {
-          setSelectedGlossaryTerm(term);
+          setSelectedGlossaryTerm(term)
         }
 
         // Highlight connected nodes
-        simulationControls.highlightConnectedNodes(node.id);
+        simulationControls.highlightConnectedNodes(node.id)
       },
       onNodeShape: (node, nodeGroup) => {
         if (node.type === 'process') {
           nodeGroup
             .append('circle')
             .attr('r', nodeRadius)
-            .attr('fill', NODE_TYPE_COLORS.process(node.area || ''));
+            .attr('fill', NODE_TYPE_COLORS.process(node.area || ''))
         } else if (node.type === 'input') {
-          const size = nodeRadius * 1.6;
+          const size = nodeRadius * 1.6
           nodeGroup
             .append('rect')
             .attr('width', size)
@@ -495,22 +587,25 @@ const ITTOForceGraph: React.FC = () => {
             .attr('x', -size / 2)
             .attr('y', -size / 2)
             .attr('transform', 'rotate(45)')
-            .attr('fill', NODE_TYPE_COLORS.input);
+            .attr('fill', NODE_TYPE_COLORS.input)
         } else if (node.type === 'tool') {
-          const size = nodeRadius * 1.6;
+          const size = nodeRadius * 1.6
           nodeGroup
             .append('rect')
             .attr('width', size)
             .attr('height', size)
             .attr('x', -size / 2)
             .attr('y', -size / 2)
-            .attr('fill', NODE_TYPE_COLORS.tool);
+            .attr('fill', NODE_TYPE_COLORS.tool)
         } else if (node.type === 'output') {
-          const scale = nodeRadius / 25;
+          const scale = nodeRadius / 25
           nodeGroup
             .append('polygon')
-            .attr('points', `0,${-25 * scale} ${22 * scale},${12 * scale} ${-22 * scale},${12 * scale}`)
-            .attr('fill', NODE_TYPE_COLORS.output);
+            .attr(
+              'points',
+              `0,${-25 * scale} ${22 * scale},${12 * scale} ${-22 * scale},${12 * scale}`
+            )
+            .attr('fill', NODE_TYPE_COLORS.output)
         }
       },
       onLinkStyle: (link) => ({
@@ -520,13 +615,13 @@ const ITTOForceGraph: React.FC = () => {
       }),
       getNodeLabel: (node) => {
         if (isMobile && node.name.length > 15) {
-          return node.name.substring(0, 15) + '...';
+          return node.name.substring(0, 15) + '...'
         }
-        return node.name;
+        return node.name
       },
     }),
     [nodeRadius, isMobile]
-  );
+  )
 
   // Use D3 force simulation hook
   const simulationControls = useD3ForceSimulation(
@@ -535,55 +630,57 @@ const ITTOForceGraph: React.FC = () => {
     filteredLinks,
     simulationConfig,
     renderCallbacks
-  );
+  )
 
   // Event handlers
   const handleFilterChange = useCallback((type: keyof FilterState, value: string) => {
     setSelectedFilters((prev) => ({
       ...prev,
-      [type]: prev[type].includes(value) ? prev[type].filter((v) => v !== value) : [...prev[type], value],
-    }));
-  }, []);
+      [type]: prev[type].includes(value)
+        ? prev[type].filter((v) => v !== value)
+        : [...prev[type], value],
+    }))
+  }, [])
 
   const togglePanel = useCallback(() => {
-    setIsPanelOpen((prev) => !prev);
-  }, []);
+    setIsPanelOpen((prev) => !prev)
+  }, [])
 
   const handleGlossaryNavigate = useCallback(
     (termId: string) => {
-      navigate('/glossary', { state: { selectedTermId: termId } });
+      navigate('/glossary', { state: { selectedTermId: termId } })
     },
     [navigate]
-  );
+  )
 
   // Mobile panel management
   React.useEffect(() => {
-    setIsPanelOpen(!isMobile);
-  }, [isMobile]);
+    setIsPanelOpen(!isMobile)
+  }, [isMobile])
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500" />
-          <p className="mt-4 text-gray-600">ITTO ビジュアライゼーションを読み込み中...</p>
+      <div className='flex h-screen w-full items-center justify-center bg-gray-50'>
+        <div className='text-center'>
+          <div className='inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500' />
+          <p className='mt-4 text-gray-600'>ITTO ビジュアライゼーションを読み込み中...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="relative flex h-screen w-full">
+    <div className='relative flex h-screen w-full'>
       {/* Mobile Menu Button */}
       {isMobile && (
         <button
           onClick={togglePanel}
-          className="absolute left-4 top-4 z-20 rounded-lg bg-white p-2 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className='absolute left-4 top-4 z-20 rounded-lg bg-white p-2 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
           aria-label={isPanelOpen ? 'メニューを閉じる' : 'メニューを開く'}
           aria-expanded={isPanelOpen}
         >
-          {isPanelOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isPanelOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
         </button>
       )}
 
@@ -596,10 +693,10 @@ const ITTOForceGraph: React.FC = () => {
               }`
             : 'w-80'
         } overflow-y-auto bg-white shadow-lg`}
-        aria-label="コントロールパネル"
+        aria-label='コントロールパネル'
       >
-        <div className="p-4 md:p-6">
-          <h1 className="mb-4 text-lg font-bold md:text-xl">PMBOK ITTOフォースグラフ</h1>
+        <div className='p-4 md:p-6'>
+          <h1 className='mb-4 text-lg font-bold md:text-xl'>PMBOK ITTOフォースグラフ</h1>
 
           <Legend />
           <FilterSection selectedFilters={selectedFilters} onFilterChange={handleFilterChange} />
@@ -613,12 +710,17 @@ const ITTOForceGraph: React.FC = () => {
       </aside>
 
       {/* Graph Container */}
-      <main ref={containerRef} className="relative flex-1 bg-gray-50" role="main" aria-label="フォースグラフ">
+      <main
+        ref={containerRef}
+        className='relative flex-1 bg-gray-50'
+        role='main'
+        aria-label='フォースグラフ'
+      >
         <svg
           ref={svgRef}
-          className="h-full w-full"
-          role="img"
-          aria-label="PMBOK ITTO 関係性を示すフォースグラフ"
+          className='h-full w-full'
+          role='img'
+          aria-label='PMBOK ITTO 関係性を示すフォースグラフ'
         />
       </main>
 
@@ -631,9 +733,9 @@ const ITTOForceGraph: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-ITTOForceGraph.displayName = 'ITTOForceGraph';
+ITTOForceGraph.displayName = 'ITTOForceGraph'
 
-export default memo(ITTOForceGraph);
+export default memo(ITTOForceGraph)

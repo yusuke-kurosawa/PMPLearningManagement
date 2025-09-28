@@ -1,7 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://yusuke-kurosawa.github.io" />
+    <link rel="dns-prefetch" href="https://yusuke-kurosawa.github.io" />
+
     <!-- PWA Icons - Using absolute paths for GitHub Pages -->
     <link rel="icon" type="image/png" sizes="192x192" href="/PMPLearningManagement/icon-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/PMPLearningManagement/icon-512x512.png" />
@@ -11,9 +16,21 @@
     <title>PMBOK学習管理システム</title>
     <meta name="description" content="PMBOK第6版のプロセス、ITTO関係、プロジェクトマネジメント知識エリアのインタラクティブな可視化ツール" />
 
+    <!-- Performance hints -->
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/PMPLearningManagement/manifest.json" />
     <meta name="theme-color" content="#2563eb" />
+
+    <!-- Mobile optimizations -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PMP Learning">
+
+    <!-- Cache control hints -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600, must-revalidate" />
+    <meta http-equiv="Pragma" content="cache" />
   </head>
   <body>
     <div id="root"></div>

@@ -118,7 +118,9 @@ export const ProductBacklogManager: React.FC = () => {
   }
 
   const handleDrop = (targetStoryId: string) => {
-    if (!draggedStory || draggedStory === targetStoryId) return
+    if (!draggedStory || draggedStory === targetStoryId) {
+      return
+    }
 
     const newStories = [...stories]
     const draggedIndex = newStories.findIndex((s) => s.id === draggedStory)

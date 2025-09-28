@@ -349,7 +349,9 @@ const BusinessContextDiagram: React.FC = () => {
 
   // Export as PNG
   const handleExport = () => {
-    if (!svgRef.current) return
+    if (!svgRef.current) {
+      return
+    }
 
     const svgData = new XMLSerializer().serializeToString(svgRef.current)
     const canvas = document.createElement('canvas')
@@ -515,7 +517,9 @@ const BusinessContextDiagram: React.FC = () => {
     const source = allElements.find((e) => e.id === flow.from)
     const target = allElements.find((e) => e.id === flow.to)
 
-    if (!source || !target) return null
+    if (!source || !target) {
+      return null
+    }
 
     // Calculate positions
     const sourcePos =
@@ -753,7 +757,9 @@ const BusinessContextDiagram: React.FC = () => {
               const element = [...actors, ...externalSystems, ...subsystems].find(
                 (e) => e.id === selectedElement
               )
-              if (!element) return null
+              if (!element) {
+                return null
+              }
 
               return (
                 <div className='space-y-2'>

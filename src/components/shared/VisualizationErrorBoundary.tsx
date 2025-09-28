@@ -102,32 +102,32 @@ class VisualizationErrorBoundary extends Component<Props, State> {
 
       // Default fallback UI
       return (
-        <Card className="mx-auto my-8 max-w-2xl border-red-200 bg-red-50">
+        <Card className='mx-auto my-8 max-w-2xl border-red-200 bg-red-50'>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-900">
-              <AlertTriangle className="h-6 w-6" />
+            <CardTitle className='flex items-center gap-2 text-red-900'>
+              <AlertTriangle className='h-6 w-6' />
               Visualization Error
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg bg-white p-4">
-              <h3 className="mb-2 font-semibold text-gray-900">
+          <CardContent className='space-y-4'>
+            <div className='rounded-lg bg-white p-4'>
+              <h3 className='mb-2 font-semibold text-gray-900'>
                 {componentName
                   ? `An error occurred in ${componentName}`
                   : 'An error occurred while rendering the visualization'}
               </h3>
               {process.env.NODE_ENV === 'development' && error && (
-                <div className="mt-4 space-y-2">
-                  <details className="cursor-pointer">
-                    <summary className="font-medium text-gray-700">Error Details</summary>
-                    <pre className="mt-2 overflow-auto rounded bg-gray-100 p-3 text-xs text-red-800">
+                <div className='mt-4 space-y-2'>
+                  <details className='cursor-pointer'>
+                    <summary className='font-medium text-gray-700'>Error Details</summary>
+                    <pre className='mt-2 overflow-auto rounded bg-gray-100 p-3 text-xs text-red-800'>
                       {error.toString()}
                     </pre>
                   </details>
                   {errorInfo && (
-                    <details className="cursor-pointer">
-                      <summary className="font-medium text-gray-700">Component Stack</summary>
-                      <pre className="mt-2 overflow-auto rounded bg-gray-100 p-3 text-xs text-gray-700">
+                    <details className='cursor-pointer'>
+                      <summary className='font-medium text-gray-700'>Component Stack</summary>
+                      <pre className='mt-2 overflow-auto rounded bg-gray-100 p-3 text-xs text-gray-700'>
                         {errorInfo.componentStack}
                       </pre>
                     </details>
@@ -136,9 +136,9 @@ class VisualizationErrorBoundary extends Component<Props, State> {
               )}
             </div>
 
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-              <h4 className="mb-2 font-semibold text-yellow-900">Troubleshooting Tips:</h4>
-              <ul className="list-inside list-disc space-y-1 text-sm text-yellow-800">
+            <div className='rounded-lg border border-yellow-200 bg-yellow-50 p-4'>
+              <h4 className='mb-2 font-semibold text-yellow-900'>Troubleshooting Tips:</h4>
+              <ul className='list-inside list-disc space-y-1 text-sm text-yellow-800'>
                 <li>Try refreshing the visualization using the button below</li>
                 <li>Check your browser console for additional error information</li>
                 <li>Ensure your browser supports modern JavaScript features</li>
@@ -147,25 +147,25 @@ class VisualizationErrorBoundary extends Component<Props, State> {
               </ul>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={this.handleReset} className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
+            <div className='flex flex-wrap gap-3'>
+              <Button onClick={this.handleReset} className='flex items-center gap-2'>
+                <RefreshCw className='h-4 w-4' />
                 Retry Visualization
               </Button>
               <Button
                 onClick={this.handleGoHome}
-                variant="outline"
-                className="flex items-center gap-2"
+                variant='outline'
+                className='flex items-center gap-2'
               >
-                <Home className="h-4 w-4" />
+                <Home className='h-4 w-4' />
                 Go to Home
               </Button>
             </div>
 
             {process.env.NODE_ENV === 'production' && (
-              <p className="text-sm text-gray-600">
+              <p className='text-sm text-gray-600'>
                 Error ID: {Date.now().toString(36)}
-                <span className="ml-2 text-xs text-gray-500">
+                <span className='ml-2 text-xs text-gray-500'>
                   (Include this when reporting the issue)
                 </span>
               </p>

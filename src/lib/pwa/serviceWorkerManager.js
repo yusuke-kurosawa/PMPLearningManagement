@@ -321,9 +321,31 @@ class ServiceWorkerManager {
   }
 
   cacheUrls(urls) {
+    // Validate URLs before sending to service worker
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      logger.warn('Invalid URLs provided for caching')
+      return
+    }
+
+    // Filter out invalid URLs
+    const validUrls = urls.filter(url => {
+      try {
+        new URL(url, window.location.origin)
+        return true
+      } catch {
+        logger.warn('Invalid URL format:', url)
+        return false
+      }
+    })
+
+    if (validUrls.length === 0) {
+      logger.warn('No valid URLs to cache')
+      return
+    }
+
     this.postMessage({
       type: 'CACHE_URLS',
-      payload: urls,
+      payload: validUrls,
     })
   }
 
@@ -416,23 +438,37 @@ class ServiceWorkerManager {
 
   async optimizeForRoute(route) {
     // Route-specific optimizations
+    // Note: Only cache URLs that actually exist in production
     const routeOptimizations = {
       '/flashcards': () => {
-        // Preload flashcard data
-        this.cacheUrls(['/api/flashcards', '/data/pmbok-processes.json'])
+        // Only cache existing assets
+        const urls = [
+          '/PMPLearningManagement/',
+          '/PMPLearningManagement/#/flashcards'
+        ]
+        this.cacheUrls(urls)
       },
       '/visualizations': () => {
-        // Preload visualization assets
-        this.cacheUrls(['/assets/d3.js', '/data/network-data.json'])
+        // Only cache existing assets
+        const urls = [
+          '/PMPLearningManagement/',
+          '/PMPLearningManagement/#/visualizations'
+        ]
+        this.cacheUrls(urls)
       },
       '/mock-exam': () => {
-        // Preload exam questions
-        this.cacheUrls(['/api/exam-questions', '/data/exam-pool.json'])
+        // Only cache existing assets
+        const urls = [
+          '/PMPLearningManagement/',
+          '/PMPLearningManagement/#/mock-exam'
+        ]
+        this.cacheUrls(urls)
       },
     }
 
     const optimization = routeOptimizations[route]
     if (optimization) {
+      logger.info('Optimizing for route:', route)
       optimization()
     }
   }

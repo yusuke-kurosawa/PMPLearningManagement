@@ -240,12 +240,34 @@ export function useOffline(options: UseOfflineOptions = {}) {
       return false
     }
 
+    // Validate URLs before sending to service worker
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      logger.warn('Invalid URLs provided for prefetching')
+      return false
+    }
+
+    // Filter out invalid URLs
+    const validUrls = urls.filter(url => {
+      try {
+        new URL(url, window.location.origin)
+        return true
+      } catch {
+        logger.warn('Invalid URL format:', url)
+        return false
+      }
+    })
+
+    if (validUrls.length === 0) {
+      logger.warn('No valid URLs to prefetch')
+      return false
+    }
+
     try {
       const controller = navigator.serviceWorker.controller
       if (controller) {
         controller.postMessage({
           type: 'CACHE_URLS',
-          payload: urls,
+          payload: validUrls,
         })
         return true
       }

@@ -71,8 +71,12 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   }
 
   const cancel = () => {
-    if (timeoutId) clearTimeout(timeoutId)
-    if (maxTimeoutId) clearTimeout(maxTimeoutId)
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+    if (maxTimeoutId) {
+      clearTimeout(maxTimeoutId)
+    }
     timeoutId = maxTimeoutId = null
     lastArgs = lastThis = lastCallTime = null
   }
@@ -94,7 +98,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       lastCallTime = now
     }
 
-    if (timeoutId) clearTimeout(timeoutId)
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
 
     if (immediate && !timeoutId) {
       func.apply(this, args)
@@ -296,7 +302,7 @@ export function calculateVirtualScroll(options: VirtualScrollOptions): VirtualSc
     startIndex,
     endIndex,
     offsetY: heights[startIndex] || 0,
-    totalHeight
+    totalHeight,
   }
 }
 
@@ -315,7 +321,7 @@ export const requestIdleCallback: (
         return window.setTimeout(() => {
           callback({
             didTimeout: false,
-            timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
+            timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
           } as IdleDeadline)
         }, timeout)
       }

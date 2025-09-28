@@ -151,7 +151,9 @@ const ProgressiveLoadingPrototype: React.FC = () => {
     // プログレス更新シミュレーション
     let progress = 0
     const module = modules.find((m) => m.id === moduleId)
-    if (!module) return
+    if (!module) {
+      return
+    }
 
     const interval = setInterval(() => {
       progress += 10

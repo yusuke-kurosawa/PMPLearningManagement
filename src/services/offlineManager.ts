@@ -24,10 +24,7 @@
 // Type-safe wrapper for IndexedDB
 // If 'idb' package is not available, we use native IndexedDB types
 type IDBPDatabase<T = unknown> = IDBDatabase & {
-  transaction<K extends keyof T>(
-    storeNames: K | K[],
-    mode?: IDBTransactionMode
-  ): IDBTransaction
+  transaction<K extends keyof T>(storeNames: K | K[], mode?: IDBTransactionMode): IDBTransaction
 }
 
 // Dynamic import of idb if available, otherwise use native IndexedDB
@@ -442,7 +439,9 @@ class OfflineManager {
    * @returns {Promise<PendingSyncItem[]>}
    */
   private async getPendingSyncItems(): Promise<PendingSyncItem[]> {
-    if (!this.db) return []
+    if (!this.db) {
+      return []
+    }
     const tx = this.db.transaction(STORES.PENDING_SYNC, 'readonly')
     const store = tx.objectStore(STORES.PENDING_SYNC)
     return promisifyRequest(store.getAll())
@@ -486,7 +485,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   private async removePendingSyncItem(id: number): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.PENDING_SYNC, 'readwrite')
     const store = tx.objectStore(STORES.PENDING_SYNC)
     await store.delete(id)
@@ -549,7 +550,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   async cacheResponse(url: string, data: unknown, ttl: number = 3600000): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
     // 1 hour default
     const tx = this.db.transaction(STORES.CACHED_RESPONSES, 'readwrite')
     const store = tx.objectStore(STORES.CACHED_RESPONSES)
@@ -569,7 +572,9 @@ class OfflineManager {
    * @returns {Promise<unknown | null>}
    */
   async getCachedResponse(url: string): Promise<unknown | null> {
-    if (!this.db) return null
+    if (!this.db) {
+      return null
+    }
     const tx = this.db.transaction(STORES.CACHED_RESPONSES, 'readonly')
     const store = tx.objectStore(STORES.CACHED_RESPONSES)
     const cached = await promisifyRequest(store.get(url))
@@ -593,7 +598,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   private async removeCachedResponse(url: string): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.CACHED_RESPONSES, 'readwrite')
     const store = tx.objectStore(STORES.CACHED_RESPONSES)
     await store.delete(url)
@@ -637,18 +644,21 @@ class OfflineManager {
     })
 
     // Stale-while-revalidate strategy
-    this.cacheStrategies.set('stale-while-revalidate', async (request: Request): Promise<Response> => {
-      const cached = await caches.match(request)
+    this.cacheStrategies.set(
+      'stale-while-revalidate',
+      async (request: Request): Promise<Response> => {
+        const cached = await caches.match(request)
 
-      const fetchPromise = fetch(request).then((response) => {
-        if (response.ok) {
-          void caches.open(CACHE_NAME).then((c) => c.put(request, response.clone()))
-        }
-        return response
-      })
+        const fetchPromise = fetch(request).then((response) => {
+          if (response.ok) {
+            void caches.open(CACHE_NAME).then((c) => c.put(request, response.clone()))
+          }
+          return response
+        })
 
-      return cached || fetchPromise
-    })
+        return cached || fetchPromise
+      }
+    )
   }
 
   /**
@@ -657,8 +667,12 @@ class OfflineManager {
    * @param {Omit<ProgressData, 'lastUpdated' | 'syncStatus'>} progressData - Progress data
    * @returns {Promise<void>}
    */
-  async saveProgressOffline(progressData: Omit<ProgressData, 'lastUpdated' | 'syncStatus'>): Promise<void> {
-    if (!this.db) return
+  async saveProgressOffline(
+    progressData: Omit<ProgressData, 'lastUpdated' | 'syncStatus'>
+  ): Promise<void> {
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.PROGRESS, 'readwrite')
     const store = tx.objectStore(STORES.PROGRESS)
 
@@ -685,7 +699,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   private async addToPendingSync(item: Omit<PendingSyncItem, 'timestamp'>): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.PENDING_SYNC, 'readwrite')
     const store = tx.objectStore(STORES.PENDING_SYNC)
 
@@ -701,8 +717,12 @@ class OfflineManager {
    * @param {Omit<StudySession, 'date' | 'syncStatus' | 'type'>} examResult - Exam result data
    * @returns {Promise<void>}
    */
-  async saveExamResultOffline(examResult: Omit<StudySession, 'date' | 'syncStatus' | 'type'>): Promise<void> {
-    if (!this.db) return
+  async saveExamResultOffline(
+    examResult: Omit<StudySession, 'date' | 'syncStatus' | 'type'>
+  ): Promise<void> {
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.STUDY_SESSIONS, 'readwrite')
     const store = tx.objectStore(STORES.STUDY_SESSIONS)
 
@@ -730,7 +750,9 @@ class OfflineManager {
    * @returns {Promise<ExamQuestion[]>}
    */
   async getOfflineExamQuestions(filters: ExamQuestionFilters = {}): Promise<ExamQuestion[]> {
-    if (!this.db) return []
+    if (!this.db) {
+      return []
+    }
     const tx = this.db.transaction(STORES.EXAM_QUESTIONS, 'readonly')
     const store = tx.objectStore(STORES.EXAM_QUESTIONS)
 
@@ -759,7 +781,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   async cacheExamQuestions(questions: ExamQuestion[]): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
     const tx = this.db.transaction(STORES.EXAM_QUESTIONS, 'readwrite')
     const store = tx.objectStore(STORES.EXAM_QUESTIONS)
 
@@ -784,7 +808,9 @@ class OfflineManager {
       lastStudyDate: null,
     }
 
-    if (!this.db) return stats
+    if (!this.db) {
+      return stats
+    }
 
     const tx = this.db.transaction(STORES.STUDY_SESSIONS, 'readonly')
     const store = tx.objectStore(STORES.STUDY_SESSIONS)
@@ -797,7 +823,8 @@ class OfflineManager {
 
       const examSessions = sessions.filter((s) => s.type === 'exam' && s.score)
       if (examSessions.length > 0) {
-        stats.averageScore = examSessions.reduce((sum, s) => sum + (s.score || 0), 0) / examSessions.length
+        stats.averageScore =
+          examSessions.reduce((sum, s) => sum + (s.score || 0), 0) / examSessions.length
       }
 
       stats.lastStudyDate = Math.max(...sessions.map((s) => s.date))
@@ -813,7 +840,9 @@ class OfflineManager {
    * @returns {Promise<void>}
    */
   async clearOfflineData(storeName: keyof typeof STORES | null = null): Promise<void> {
-    if (!this.db) return
+    if (!this.db) {
+      return
+    }
 
     if (storeName && STORES[storeName]) {
       const tx = this.db.transaction(STORES[storeName], 'readwrite')

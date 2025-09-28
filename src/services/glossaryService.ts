@@ -160,7 +160,8 @@ export const searchTerms = (query: string): GlossaryTerm[] => glossaryService.se
 
 export const getAllTerms = (): readonly GlossaryTerm[] => glossaryService.getAllTerms()
 
-export const getAllCategories = (): readonly GlossaryCategory[] => glossaryService.getAllCategories()
+export const getAllCategories = (): readonly GlossaryCategory[] =>
+  glossaryService.getAllCategories()
 
 // 型をエクスポート
 export type { GlossaryTerm, GlossaryCategory, TermIndex }

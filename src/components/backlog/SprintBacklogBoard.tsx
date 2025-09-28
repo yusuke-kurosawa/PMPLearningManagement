@@ -198,7 +198,9 @@ export const SprintBacklogBoard: React.FC = () => {
 
   // Get team member name
   const getTeamMemberName = (id?: string): string => {
-    if (!id) return 'Unassigned'
+    if (!id) {
+      return 'Unassigned'
+    }
     const member = mockTeamMembers.find((m) => m.id === id)
     return member ? member.name : 'Unknown'
   }
@@ -267,7 +269,9 @@ export const SprintBacklogBoard: React.FC = () => {
             value={selectedSprint.id}
             onChange={(e) => {
               const sprint = mockSprints.find((s) => s.id === e.target.value)
-              if (sprint) setSelectedSprint(sprint)
+              if (sprint) {
+                setSelectedSprint(sprint)
+              }
             }}
             className='rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none'
           >
