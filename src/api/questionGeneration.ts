@@ -116,8 +116,22 @@ const cacheManager: CacheManager = {
   async set<T>(_key: string, _value: T, _ttl: number): Promise<void> {},
 }
 const logger: Logger = {
-  info: (message: string) => console.log(message),
-  error: (message: string, error?: unknown) => console.error(message, error),
+  info: (message: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(message)
+    }
+    // In production, use proper logging service
+  },
+  error: (message: string, error?: unknown) => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error(message, error)
+    } else {
+      // In production, use error tracking service (e.g., Sentry)
+      throw new Error(`Error: ${message}`)
+    }
+  },
 }
 
 // Input validation schemas
@@ -298,10 +312,16 @@ export const questionGenerationRouter = createTRPCRouter({
           })
 
           // Assess quality
-          const qualityReport = await qualityAssessment!.assessQuestion(question)
+          if (!qualityAssessment) {
+            throw new Error('Quality assessment service not available')
+          }
+          const qualityReport = await qualityAssessment.assessQuestion(question)
 
           // Save to database
-          const questionId = await databaseManager!.saveQuestion(
+          if (!databaseManager) {
+            throw new Error('Database manager not available')
+          }
+          const questionId = await databaseManager.saveQuestion(
             question,
             'mock-user-id', // ctx.user.id would be available in real implementation
             qualityReport.overallScore
@@ -321,8 +341,14 @@ export const questionGenerationRouter = createTRPCRouter({
           })
 
           for (const question of generatedQuestions) {
-            const qualityReport = await qualityAssessment!.assessQuestion(question)
-            const questionId = await databaseManager!.saveQuestion(
+            if (!qualityAssessment) {
+              throw new Error('Quality assessment service not available')
+            }
+            if (!databaseManager) {
+              throw new Error('Database manager not available')
+            }
+            const qualityReport = await qualityAssessment.assessQuestion(question)
+            const questionId = await databaseManager.saveQuestion(
               question,
               'mock-user-id', // ctx.user.id would be available in real implementation
               qualityReport.overallScore

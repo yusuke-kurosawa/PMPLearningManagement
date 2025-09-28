@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from 'react'
 import { authService, UserRoles } from '../services/authService'
-import { supabase, authHelpers, sessionManager } from '../lib/supabase'
+import { supabase, authHelpers, sessionManager } from '../lib/auth/supabase'
 import { auditLogger } from '../services/auditService'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'

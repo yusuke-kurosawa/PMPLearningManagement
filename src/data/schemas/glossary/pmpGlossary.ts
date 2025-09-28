@@ -1,5 +1,37 @@
 // PMP用語集データ
-export const glossaryCategories = [
+
+/**
+ * 用語集カテゴリーの型定義
+ */
+export interface GlossaryCategory {
+  id: string
+  name: string
+  color: string
+}
+
+/**
+ * 用語集用語の型定義
+ */
+export interface GlossaryTerm {
+  id: number
+  term: string
+  japanese: string
+  description: string
+  categories: string[]
+  relatedTerms?: string[]
+}
+
+/**
+ * 用語インデックスの型定義（英語名・日本語名でアクセス）
+ */
+export type TermIndex = Record<string, GlossaryTerm>
+
+/**
+ * 検索インデックスの型定義
+ */
+export type SearchIndex = Record<number, string>
+
+export const glossaryCategories: readonly GlossaryCategory[] = [
   { id: 'general', name: '一般', color: 'bg-gray-500' },
   { id: 'scope', name: 'スコープ', color: 'bg-blue-500' },
   { id: 'schedule', name: 'スケジュール', color: 'bg-cyan-500' },
@@ -15,7 +47,7 @@ export const glossaryCategories = [
   { id: 'organization', name: '組織', color: 'bg-amber-500' },
 ]
 
-export const glossaryTerms = [
+export const glossaryTerms: readonly GlossaryTerm[] = [
   // 一般用語
   {
     id: 1,
@@ -919,7 +951,7 @@ export const glossaryTerms = [
 ]
 
 // 検索用のインデックスを作成
-export const __searchIndex = glossaryTerms.reduce((acc, term) => {
+export const __searchIndex: SearchIndex = glossaryTerms.reduce<SearchIndex>((acc, term) => {
   const searchText = `${term.term} ${term.japanese} ${term.description}`.toLowerCase()
   acc[term.id] = searchText
   return acc

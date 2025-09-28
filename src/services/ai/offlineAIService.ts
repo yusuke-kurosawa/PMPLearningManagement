@@ -8,7 +8,7 @@ import { conversationExamples, questionTemplates } from './prompts/conversationE
 import { completeProcesses } from '../../data/pmbok/completeProcesses';
 import { pmpGlossary } from '../../data/pmpGlossary';
 
-interface AICache DBSchema {
+interface AICacheDBSchema {
   responses: {
     key: string;
     value: {

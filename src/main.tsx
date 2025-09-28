@@ -110,12 +110,16 @@ try {
       >
         ページをリロード
       </button>
-      ${process.env.NODE_ENV === 'development' ? `
+      ${
+        process.env.NODE_ENV === 'development'
+          ? `
         <details style="margin-top: 2rem; text-align: left; max-width: 600px; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
           <summary style="cursor: pointer; font-weight: 600;">エラー詳細</summary>
           <pre style="margin-top: 1rem; font-size: 0.9rem; overflow: auto;">${error instanceof Error ? error.stack : String(error)}</pre>
         </details>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `
 

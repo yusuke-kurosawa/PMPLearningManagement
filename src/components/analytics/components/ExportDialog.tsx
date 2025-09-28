@@ -4,18 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
-import {
-  Download,
-  Calendar,
-  FileText,
-  Image,
-  Database,
-  Mail,
-  Clock,
-  Settings,
-  CheckCircle,
-  X,
-} from 'lucide-react'
+import { Download, FileText, Database, Mail, Clock, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -29,10 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from '../../ui/checkbox'
 import { Label } from '../../ui/label'
 import { Input } from '../../ui/input'
-import { Textarea } from '../../ui/textarea'
 import { Switch } from '../../ui/switch'
 import { Badge } from '../../ui/badge'
-import { Separator } from '../../ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card'
 import { useToast } from '../../../hooks/use-toast'
 import type { ExportSettings } from '../types/dashboard'
@@ -120,7 +107,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [recipientEmail, setRecipientEmail] = useState('')
   const [isExporting, setIsExporting] = useState(false)
 
-  const handleSettingChange = useCallback((key: keyof ExportSettings, value: any) => {
+  const handleSettingChange = useCallback((key: keyof ExportSettings, value: unknown) => {
     setSettings((prev) => ({
       ...prev,
       [key]: value,
@@ -141,7 +128,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       setSettings((prev) => ({
         ...prev,
         schedule: {
-          ...prev.schedule!,
+          ...(prev.schedule ?? {}),
           recipients: [...(prev.schedule?.recipients || []), recipientEmail],
         },
       }))
@@ -153,7 +140,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     setSettings((prev) => ({
       ...prev,
       schedule: {
-        ...prev.schedule!,
+        ...(prev.schedule ?? {}),
         recipients: prev.schedule?.recipients?.filter((e) => e !== email) || [],
       },
     }))

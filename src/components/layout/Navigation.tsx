@@ -34,6 +34,11 @@ import {
   Bookmark,
   DollarSign,
   Activity,
+  Box,
+  ListTodo,
+  KanbanSquare,
+  RefreshCw,
+  Crown,
 } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -72,6 +77,13 @@ const Navigation = () => {
 
   const navItems = [
     { path: '/', label: 'ホーム', icon: Home, category: 'main' },
+    {
+      path: '/architecture/business-context',
+      label: 'ビジネスコンテキスト図',
+      icon: Box,
+      isNew: true,
+      category: 'architecture',
+    },
     { path: '/matrix', label: 'マトリックス', icon: Grid, category: 'pmbok' },
     { path: '/network', label: 'ネットワーク図', icon: Network, category: 'pmbok' },
     { path: '/integrated', label: '統合ビュー', icon: Layers, category: 'pmbok' },
@@ -246,6 +258,34 @@ const Navigation = () => {
       category: 'governance',
     },
     {
+      path: '/backlog/product',
+      label: 'プロダクトバックログ',
+      icon: ListTodo,
+      isNew: true,
+      category: 'backlog',
+    },
+    {
+      path: '/backlog/sprint',
+      label: 'スプリントバックログ',
+      icon: KanbanSquare,
+      isNew: true,
+      category: 'backlog',
+    },
+    {
+      path: '/backlog/refinement',
+      label: 'バックログリファインメント',
+      icon: RefreshCw,
+      isNew: true,
+      category: 'backlog',
+    },
+    {
+      path: '/backlog/owner',
+      label: 'プロダクトオーナー',
+      icon: Crown,
+      isNew: true,
+      category: 'backlog',
+    },
+    {
       path: '/pmbok-versions',
       label: 'PMBOK版',
       icon: ToggleLeft,
@@ -316,7 +356,7 @@ const Navigation = () => {
 
               {/* Core Navigation Items */}
               {navItems
-                .filter((item) => !['agile'].includes(item.category))
+                .filter((item) => !['agile', 'backlog'].includes(item.category))
                 .map(({ path, label, icon: Icon, isNew }) => {
                   const isActive = location.pathname === path
                   return (
@@ -342,6 +382,51 @@ const Navigation = () => {
                     </Link>
                   )
                 })}
+
+              {/* Backlog Management Dropdown */}
+              <div className='group relative'>
+                <button className='relative flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'>
+                  <ListTodo className='h-4 w-4' />
+                  バックログ管理
+                  <span className='absolute -right-1 -top-1 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
+                    NEW
+                  </span>
+                  <ChevronRight className='h-3 w-3 transition-transform group-hover:rotate-90' />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div className='invisible absolute left-0 top-full z-50 mt-1 w-56 translate-y-2 transform opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100'>
+                  <div className='rounded-lg border bg-white py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800'>
+                    {navItems
+                      .filter((item) => item.category === 'backlog')
+                      .map(({ path, label, icon: Icon, isNew }) => {
+                        const isActive = location.pathname === path
+                        return (
+                          <Link
+                            key={path}
+                            to={path}
+                            className={`
+                            relative flex items-center gap-3 px-4 py-2 text-sm transition-all duration-200
+                            ${
+                              isActive
+                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }
+                          `}
+                          >
+                            <Icon className='h-4 w-4' />
+                            {label}
+                            {isNew && (
+                              <span className='ml-auto rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
+                                NEW
+                              </span>
+                            )}
+                          </Link>
+                        )
+                      })}
+                  </div>
+                </div>
+              </div>
 
               {/* Agile Learning Dropdown */}
               <div className='group relative'>
@@ -600,7 +685,7 @@ const Navigation = () => {
             >
               {/* Main Navigation Items */}
               {navItems
-                .filter((item) => !['agile'].includes(item.category))
+                .filter((item) => !['agile', 'backlog'].includes(item.category))
                 .map(({ path, label, icon: Icon, isNew }) => {
                   const isActive = location.pathname === path
                   return (
@@ -629,6 +714,47 @@ const Navigation = () => {
                     </Link>
                   )
                 })}
+
+              {/* Backlog Management Section */}
+              <div className='mt-2 border-t border-gray-200 pt-2 dark:border-gray-700'>
+                <div className='px-4 py-2'>
+                  <div className='flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400'>
+                    <ListTodo className='h-3 w-3' />
+                    バックログ管理
+                    <span className='rounded-full bg-red-500 px-1.5 py-0.5 text-white'>NEW</span>
+                  </div>
+                </div>
+                {navItems
+                  .filter((item) => item.category === 'backlog')
+                  .map(({ path, label, icon: Icon, isNew }) => {
+                    const isActive = location.pathname === path
+                    return (
+                      <Link
+                        key={path}
+                        to={path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`
+                        relative ml-4 flex items-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-all
+                        ${
+                          isActive
+                            ? 'bg-blue-500 text-white dark:bg-blue-600'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }
+                      `}
+                        role='menuitem'
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <Icon className='h-4 w-4' />
+                        {label}
+                        {isNew && (
+                          <span className='ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs text-white'>
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                    )
+                  })}
+              </div>
 
               {/* Agile Learning Section */}
               <div className='mt-2 border-t border-gray-200 pt-2 dark:border-gray-700'>

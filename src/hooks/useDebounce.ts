@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 
-export function useDebounce(value, delay) {
-  const [debouncedValue, setDebouncedValue] = useState(value)
+/**
+ * Custom hook that debounces a value
+ * @template T - The type of the value to debounce
+ * @param value - The value to debounce
+ * @param delay - The debounce delay in milliseconds
+ * @returns The debounced value
+ */
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value)

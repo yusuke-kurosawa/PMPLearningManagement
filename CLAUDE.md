@@ -103,14 +103,20 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
 
 ### テスト・品質管理
 
-- **単体テスト**: Vitest v1.6 + @testing-library/react
+- **単体テスト**: Vitest v3.2 + @testing-library/react
 - **E2Eテスト**: Playwright v1.40
+  - クロスブラウザテスト（Chromium/Firefox/WebKit）
+  - モバイルテスト
+  - ビジュアルリグレッションテスト
+  - アクセシビリティテスト
+  - パフォーマンステスト
 - **高度なテスト**:
   - Stryker（ミューテーションテスト）
   - fast-check（プロパティベーステスト）
+  - jest-axe（アクセシビリティテスト）
 - **モック**: MSW v2, Sinon, Nock
 - **リンティング**: ESLint + Prettier
-- **型チェック**: TypeScript v5.3（部分導入）
+- **型チェック**: TypeScript v5.3（移行中）
 
 ### パフォーマンス最適化
 
@@ -122,12 +128,19 @@ PMPLearningManagementは、PMBOK（プロジェクトマネジメント知識体
   - 自動圧縮（1KB以上のファイル）
   - TTLベース有効期限（24時間）
   - メモリ監視と自動クリーンアップ
+- **外部統合**:
+  - Upstash Redis（Context7キャッシング）
+  - Serena MCP（コードベース分析）
 
 ### デプロイメント・インフラ
 
 - **ホスティング**: GitHub Pages（HashRouter使用）
-- **CI/CD**: GitHub Actions（複数ワークフロー実装）
-- **パッケージ管理**: npm v8+
+- **CI/CD**: GitHub Actions（40+ワークフロー実装）
+  - CI: 並列パイプライン、品質チェック
+  - CD: 自動デプロイ、Serena検証
+  - Security: 包括的セキュリティスキャン
+  - Monitoring: パフォーマンス監視
+- **パッケージ管理**: npm v10+
 - **デプロイ**: gh-pages v6
 
 ## Issue-Driven Development (IDD) 実装
@@ -162,148 +175,219 @@ npm run idd:quality        # 品質チェック
 
 詳細は[IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md)を参照してください。
 
+## プロダクトバックログ管理
+
+### 📋 GitHub統合バックログシステム
+
+本プロジェクトは完全なGitHub統合バックログ管理システムを実装しています。
+
+#### バックログ構成
+
+- **プロダクトバックログ**: [PRODUCT_BACKLOG.md](PRODUCT_BACKLOG.md)
+  - 82ユーザーストーリー（Phase 1-4全体）
+  - ストーリーフォーマット: As a / I want to / So that
+  - Given/When/Then受入基準
+  - ストーリーポイント見積もり（Fibonacci）
+  - 依存関係マッピング
+
+#### GitHub Issue テンプレート
+
+- `.github/ISSUE_TEMPLATE/07_user_story.yml`: ユーザーストーリー作成用
+- `.github/ISSUE_TEMPLATE/08_technical_task.yml`: 技術タスク作成用
+
+#### Agile開発ガイド
+
+- [GitHub バックログ管理ガイド](docs/agile/GITHUB_BACKLOG_MANAGEMENT.md)
+  - ラベルシステム（40+ラベル）
+  - マイルストーン構造
+  - 自動化ワークフロー
+  - CLI スクリプト
+
+- [スプリント計画ガイド](docs/agile/SPRINT_PLANNING_GUIDE.md)
+  - スプリントプランニング Part 1/2
+  - チームキャパシティ計算
+  - ベストプラクティス
+
+- [Agileドキュメント概要](docs/agile/README.md)
+  - クイックスタートガイド
+  - メトリクス・KPI追跡
+
+#### バックログ管理コマンド
+
+```bash
+# GitHub Issueの一括作成（手動実行）
+gh issue create --template 07_user_story.yml
+
+# バックログステータス確認
+gh issue list --label user-story --state open
+
+# スプリントプランニング用Issue抽出
+gh issue list --label phase-1 --label P0-critical
+```
+
 ## プロジェクト構造（実装ベース）
 
 ```
 PMPLearningManagement/
 ├── src/
-│   ├── components/
-│   │   ├── auth/                       # 認証関連コンポーネント
-│   │   │   ├── AuthPage.jsx
-│   │   │   ├── LoginForm.jsx
-│   │   │   ├── RegisterForm.jsx
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   └── UserProfile.jsx
+│   ├── api/                            # APIエンドポイント
+│   │   ├── pmbok/                      # PMBOKデータAPI
+│   │   └── terminology/                # 用語管理API
+│   │
+│   ├── components/                     # コンポーネント（32ディレクトリ）
+│   │   ├── accessibility/              # アクセシビリティ
+│   │   ├── ai/                         # AI機能
+│   │   ├── analytics/                  # 分析機能
+│   │   ├── auth/                       # 認証
 │   │   ├── coaching/                   # AIコーチング
-│   │   │   └── AICoachingDashboard.jsx
-│   │   ├── collaboration/              # コラボレーション機能
-│   │   │   ├── CollaborationHub.jsx
-│   │   │   ├── DataManagement.jsx
-│   │   │   ├── DiscussionThread.jsx
-│   │   │   ├── SharedNotes.jsx
-│   │   │   └── StudyGroups.jsx
-│   │   ├── layout/                     # レイアウトコンポーネント
-│   │   │   ├── AppLayout.jsx
-│   │   │   ├── Navigation.jsx
-│   │   │   ├── Footer.jsx
-│   │   │   ├── LoadingStates.jsx
-│   │   │   └── MobileBottomNavigation.jsx
+│   │   ├── collaboration/              # コラボレーション
+│   │   ├── exam/                       # 試験機能
+│   │   ├── layout/                     # レイアウト
 │   │   ├── learning/                   # 学習機能
-│   │   │   ├── ExamResults.jsx
-│   │   │   ├── FlashCard.jsx
-│   │   │   ├── FlashCardLearning.jsx
-│   │   │   ├── LearningProgressDashboard.jsx
-│   │   │   ├── MockExam.jsx
-│   │   │   └── PMPGlossary.jsx
 │   │   ├── mentorship/                 # メンターシップ
-│   │   │   └── MentorshipHub.jsx
-│   │   ├── mobile/                     # モバイル専用
-│   │   │   ├── MobileTouchComponents.jsx
-│   │   │   └── MobileOptimizedApp.jsx
-│   │   ├── pages/                      # ページコンポーネント
-│   │   │   ├── Home.jsx
-│   │   │   ├── PMBOK7PerformanceDomains.jsx
-│   │   │   ├── PMBOK7Principles.jsx
-│   │   │   └── PMBOKMatrix.jsx
+│   │   ├── mobile/                     # モバイル最適化
+│   │   ├── pages/                      # ページ
+│   │   ├── pmbok/                      # PMBOK関連
+│   │   ├── serena/                     # Serena統合
 │   │   ├── shared/                     # 共通コンポーネント
-│   │   │   ├── CommandPalette.jsx
-│   │   │   ├── CustomizationPanel.jsx
-│   │   │   ├── GlobalSearch.jsx
-│   │   │   ├── PMBOKVersionSelector.jsx
-│   │   │   └── UserSettingsPanel.jsx
 │   │   ├── simulator/                  # シミュレーター
-│   │   │   └── ProjectSimulator.jsx
-│   │   ├── visualizations/             # 視覚化コンポーネント
-│   │   │   ├── EnhancedNetworkGraph.jsx
-│   │   │   ├── ITTOForceGraph.jsx
-│   │   │   ├── IntegratedView.jsx
-│   │   │   ├── KnowledgeAreaHeatmap.jsx
-│   │   │   ├── MindMapView.jsx
-│   │   │   ├── ProcessFlowDiagram.jsx
-│   │   │   ├── ProcessHeatmap.jsx
-│   │   │   ├── SankeyDiagram.jsx
-│   │   │   └── VisualizationHub.jsx
-│   │   └── ContextManagerDashboard.jsx # コンテキスト管理UI
+│   │   ├── terminology/                # 用語管理
+│   │   ├── ui/                         # UIコンポーネント（Radix UI）
+│   │   └── visualizations/             # 視覚化
 │   │
 │   ├── contexts/                       # React Context
 │   │   ├── AuthContext.jsx
 │   │   ├── ContextManagerContext.jsx
 │   │   └── ThemeContext.jsx
 │   │
-│   ├── services/                       # サービス層
-│   │   ├── aiCoachingService.js
-│   │   ├── auditService.js
-│   │   ├── authService.js
-│   │   ├── collaborationService.js
-│   │   ├── contextManager.js          # コンテキスト管理
-│   │   ├── contextMonitor.js          # メモリ監視
-│   │   ├── exportService.js
-│   │   ├── glossaryService.js
-│   │   ├── importService.js
-│   │   ├── performanceOptimizer.js    # パフォーマンス最適化
-│   │   ├── progressService.js
-│   │   └── searchService.js
+│   ├── services/                       # サービス層（50+ファイル）
+│   │   ├── ai/                         # AIサービス
+│   │   │   ├── aiLearningService.ts
+│   │   │   ├── conversationMemoryService.ts
+│   │   │   ├── langchainAgent.ts
+│   │   │   ├── questionGenerationAgent.ts
+│   │   │   └── vectorStoreService.ts
+│   │   ├── analytics/                  # 分析サービス
+│   │   │   ├── BusinessIntelligence.ts
+│   │   │   ├── KPIFramework.ts
+│   │   │   ├── MachineLearningModels.ts
+│   │   │   ├── RealTimeAnalyticsEngine.ts
+│   │   │   └── StatisticalAnalysis.ts
+│   │   ├── ml/                         # 機械学習
+│   │   │   └── LearningPredictionPipeline.ts
+│   │   ├── mlops/                      # MLOps
+│   │   │   └── ModelMonitoringService.ts
+│   │   ├── pipeline/                   # データパイプライン
+│   │   │   └── DataPipelineService.ts
+│   │   ├── pwa/                        # PWA機能
+│   │   │   └── cacheStrategyAPI.ts
+│   │   ├── statistics/                 # 統計分析
+│   │   │   └── StatisticalAnalysisFramework.ts
+│   │   ├── sync/                       # 同期管理
+│   │   │   └── offlineSyncManager.ts
+│   │   ├── terminology/                # 用語サービス
+│   │   │   └── terminology-analyzer.ts
+│   │   ├── authService.ts
+│   │   ├── contextManager.ts
+│   │   ├── progressService.ts
+│   │   └── ... (その他40+ファイル)
 │   │
 │   ├── data/                           # データ定義
-│   │   ├── pmpGlossary.js
-│   │   └── pmbok7Data.js
+│   │   ├── fixtures/                   # テストデータ
+│   │   ├── mock/                       # モックデータ
+│   │   ├── pmbok/                      # PMBOKデータ
+│   │   ├── schemas/                    # スキーマ定義
+│   │   └── terminology/                # 用語データベース
 │   │
-│   ├── lib/                            # ライブラリ設定
-│   │   └── auth/
-│   │       └── supabase.js
+│   ├── lib/                            # ライブラリ・設定
+│   │   ├── api/                        # API設定
+│   │   ├── auth/                       # 認証設定
+│   │   ├── cache/                      # キャッシュ
+│   │   ├── database/                   # データベース
+│   │   ├── db/                         # DB接続
+│   │   ├── middleware/                 # ミドルウェア
+│   │   ├── monitoring/                 # モニタリング
+│   │   ├── pwa/                        # PWA設定
+│   │   ├── security/                   # セキュリティ
+│   │   ├── storage/                    # ストレージ
+│   │   └── trpc/                       # tRPC設定
+│   │
+│   ├── ml/                             # 機械学習（準備中）
+│   │   ├── features/                   # 特徴量
+│   │   ├── models/                     # モデル
+│   │   ├── monitoring/                 # 監視
+│   │   ├── pipelines/                  # パイプライン
+│   │   └── serving/                    # サービング
+│   │
+│   ├── server/                         # サーバーサイド（準備中）
+│   │   ├── auth/                       # サーバー認証
+│   │   ├── health/                     # ヘルスチェック
+│   │   ├── monitoring/                 # サーバー監視
+│   │   ├── repositories/               # リポジトリ
+│   │   ├── routers/                    # tRPCルーター
+│   │   └── services/                   # サーバーサービス
 │   │
 │   ├── hooks/                          # カスタムフック
-│   │   └── useDebounce.js
-│   │
+│   ├── interfaces/                     # TypeScript型定義
+│   ├── stores/                         # 状態管理ストア
+│   ├── styles/                         # スタイル
+│   ├── test/                           # テストユーティリティ
+│   ├── types/                          # 型定義
 │   ├── utils/                          # ユーティリティ
-│   │   └── performance.js
 │   │
 │   ├── App.jsx                         # メインアプリケーション
-│   ├── main.jsx                        # エントリーポイント
+│   ├── main.tsx                        # エントリーポイント
 │   └── index.css                       # グローバルスタイル
 │
 ├── .github/
-│   ├── workflows/                      # GitHub Actions
-│   │   ├── deploy.yml
-│   │   ├── issue-driven-development.yml
-│   │   ├── idd-compliance.yml
-│   │   └── idd-metrics-collector.yml
+│   ├── workflows/                      # GitHub Actions（40+ワークフロー）
+│   │   ├── 01-ci-continuous-integration.yml
+│   │   ├── 02-cd-continuous-deployment.yml
+│   │   ├── 02-quality-idd-compliance.yml
+│   │   ├── 03-security-comprehensive-scan.yml
+│   │   ├── 04-monitoring-perf--comprehensive.yml
+│   │   ├── claude-enhanced.yml         # Claude統合
+│   │   ├── serena-integration.yml      # Serena統合
+│   │   ├── pmp-terminology-check.yml   # 用語チェック
+│   │   └── ... (その他30+ファイル)
 │   ├── ISSUE_TEMPLATE/                # Issue テンプレート
-│   │   ├── bug_report.md
-│   │   ├── feature_request.md
-│   │   └── database_issue.md
 │   └── hooks/                         # Git Hooks
-│       ├── pre-commit
-│       ├── commit-msg
-│       └── pre-push
 │
 ├── .claude/                           # Claude コンテキスト管理
 │   ├── context/                       # プロジェクトコンテキスト
-│   │   ├── current-status.md
-│   │   ├── implementation-status.md
-│   │   ├── architecture-summary.md
-│   │   └── key-decisions.md
-│   ├── agents/                        # エージェント定義（18ファイル）
+│   ├── agents/                        # エージェント定義
 │   ├── prompts/                       # プロンプトテンプレート
 │   ├── quick-ref/                     # クイックリファレンス
 │   └── scripts/                       # 自動化スクリプト
 │
-├── docs/                              # プロジェクトドキュメント
-│   ├── IDD_IMPLEMENTATION_STATUS.md
-│   ├── IDD_AGENT_GUIDELINES.md
-│   └── IDD_AUTOMATION_IMPLEMENTATION_REPORT.md
+├── docs/                              # ドキュメント（整理済み）
+│   ├── api/                           # APIドキュメント
+│   ├── architecture/                  # アーキテクチャ文書
+│   ├── development/                   # 開発ガイド
+│   ├── scripts/                       # スクリプトドキュメント
+│   └── ... (その他20+ディレクトリ)
 │
-├── scripts/                           # 自動化スクリプト
-│   ├── consolidate-docs.js           # ドキュメント統合
-│   ├── issue-report-generator.js     # IDD レポート生成
-│   ├── issue-quality-checker.js      # Issue 品質チェック
-│   └── issue-kpi-analyzer.js         # KPI 分析
+├── reports/                           # レポート（新規追加）
+│   ├── idd/                           # IDD レポート
+│   ├── optimization/                  # 最適化レポート
+│   ├── performance/                   # パフォーマンスレポート
+│   └── quality/                       # 品質レポート
+│
+├── scripts/                           # 自動化スクリプト（120+ファイル）
+│   ├── auto-fix/                      # 自動修正
+│   ├── idd/                           # IDD自動化
+│   ├── maintenance/                   # メンテナンス
+│   ├── workers/                       # ワーカースクリプト
+│   ├── serena-cli.js                  # SerenaメインCLI
+│   ├── context7-monitor.js            # Context7監視
+│   ├── upstash-quick-start.sh         # Upstashセットアップ
+│   └── ... (その他110+ファイル)
 │
 ├── public/                            # 静的ファイル
 ├── index.html                         # HTMLテンプレート
 ├── vite.config.js                     # Vite設定
 ├── tailwind.config.js                 # Tailwind設定
-├── package.json                       # 依存関係とスクリプト
+├── package.json                       # 依存関係とスクリプト（110+スクリプト）
 └── CLAUDE.md                          # このファイル
 ```
 
@@ -377,37 +461,61 @@ npm run idd:hooks:install
 ### 開発コマンド
 
 ```bash
-# 開発サーバーの起動
-npm run dev
+# 基本開発
+npm run dev                 # 開発サーバーの起動
+npm run build              # プロダクションビルド
+npm run preview            # プロダクションプレビュー
+npm run deploy             # GitHub Pagesへのデプロイ
+npm run deploy:serena      # Serena検証付きデプロイ
 
-# プロダクションビルド
-npm run build
-
-# プロダクションプレビュー
-npm run preview
-
-# GitHub Pagesへのデプロイ
-npm run deploy
-
-# テストの実行
-npm run test          # 単体テスト
-npm run test:e2e      # E2Eテスト
-npm run test:coverage # カバレッジレポート
+# テスト実行
+npm run test               # 単体テスト
+npm run test:e2e           # E2Eテスト
+npm run test:coverage      # カバレッジレポート
+npm run test:e2e:auth      # 認証E2Eテスト
+npm run test:e2e:learning  # 学習機能E2Eテスト
+npm run test:a11y          # アクセシビリティテスト
+npm run test:mutation      # ミューテーションテスト
 
 # コード品質
-npm run lint          # ESLint実行
-npm run lint:fix      # ESLint自動修正
-npm run format        # Prettier実行
-
-# コンテキスト管理
-npm run context:update      # コンテキスト同期
-npm run context:consolidate # ドキュメント統合
-npm run context:cleanup     # クリーンアップ
+npm run lint               # ESLint実行
+npm run lint:fix           # ESLint自動修正
+npm run format             # Prettier実行
+npm run typecheck          # TypeScript型チェック
+npm run quality:check      # コンテンツ品質チェック
 
 # IDD関連
-npm run idd:check    # 準拠チェック
-npm run idd:status   # ステータス表示
-npm run idd:report   # レポート生成
+npm run idd:check          # 準拠チェック
+npm run idd:report         # レポート生成
+
+# 用語管理
+npm run terminology:check  # PMP用語チェック
+npm run terminology:validate # 用語検証
+npm run terminology:dashboard # 用語ダッシュボード
+
+# Serena統合（Serena MCP）
+npm run serena:init        # Serena初期化
+npm run serena:update      # メモリ更新
+npm run serena:validate    # プロジェクト検証
+npm run serena:report      # レポート生成
+npm run serena:diagnose    # 診断実行
+npm run serena:interactive # 対話モード
+
+# Context7統合（Upstash + Context7 MCP）
+npm run context7:setup     # セットアップ
+npm run context7:test      # 接続テスト
+npm run context7:monitor   # 監視開始
+npm run context7:cache:clear # キャッシュクリア
+npm run context7:health    # ヘルスチェック
+
+# APIドキュメント
+npm run api-docs:generate  # SDKコード生成
+npm run api-docs:validate  # ドキュメント検証
+npm run api-docs:serve     # ドキュメントサーバー起動
+
+# セキュリティ
+npm run security:audit     # セキュリティ監査
+npm run security:check     # セキュリティチェック
 ```
 
 ### 環境
@@ -475,22 +583,32 @@ chore: 雑務 #901
 ### 優先度：高
 
 - [ ] バックエンドAPI統合（tRPC + Prisma）
+  - サーバーサイド実装完了準備
+  - データベーススキーマ設計済み
+  - tRPCルーター構造準備完了
 - [ ] WebSocket リアルタイム通信
-- [ ] 決済システム（Stripe）統合
-- [ ] PWA完全対応（オフライン機能）
+- [ ] Upstash Redis完全統合（Context7最適化）
+- [ ] PWA完全対応（オフライン機能強化）
 
 ### 優先度：中
 
 - [ ] 多言語対応（i18n）
-- [ ] AI学習アドバイザー（GPT-4統合）
+- [ ] AI学習アドバイザー（LangChain統合）
+  - 基盤実装済み（aiLearningService.ts）
+  - Question Generation Agent実装済み
+  - Vector Store準備完了
 - [ ] 音声読み上げ機能
 - [ ] PDFエクスポート機能
+- [ ] MLOps パイプライン完全稼働
+  - モデル監視サービス実装済み
+  - 学習予測パイプライン準備完了
 
 ### 優先度：低
 
 - [ ] ゲーミフィケーション要素
 - [ ] ソーシャル共有機能
 - [ ] カスタムテーマ作成機能
+- [ ] 決済システム（Stripe）統合
 
 ## 関連ドキュメント
 
@@ -499,6 +617,10 @@ chore: 雑務 #901
 - [IDD実装ステータス](docs/IDD_IMPLEMENTATION_STATUS.md)
 - [IIDエージェントガイドライン](docs/IDD_AGENT_GUIDELINES.md)
 - [IDD自動化実装レポート](docs/IDD_AUTOMATION_IMPLEMENTATION_REPORT.md)
+- [プロダクトバックログ](PRODUCT_BACKLOG.md)
+- [GitHubバックログ管理ガイド](docs/agile/GITHUB_BACKLOG_MANAGEMENT.md)
+- [スプリント計画ガイド](docs/agile/SPRINT_PLANNING_GUIDE.md)
+- [Agileドキュメント概要](docs/agile/README.md)
 
 ### コンテキスト管理
 
@@ -594,9 +716,9 @@ MIT
 
 ---
 
-最終更新: 2025-08-10
+最終更新: 2025-09-28
 
-## 📈 高度プロジェクト分析メトリクス（自動更新: 2025-08-10）
+## 📈 高度プロジェクト分析メトリクス（自動更新: 2025-09-28）
 
 ### 🎯 プロジェクト健全度スコア
 
@@ -628,11 +750,13 @@ MIT
 
 ### 📁 コードベース統計
 
-- 📁 コンポーネント数: 92個
-- 🔧 サービス数: 13個
-- 🎣 カスタムフック数: 3個
+- 📁 コンポーネントディレクトリ数: 32個
+- 🔧 サービス数: 50+ファイル
+- 🎣 カスタムフック: 複数実装
 - 🧪 テストファイル数: 329個
-- 📊 総コード行数: 74,047行
+- 📊 総コード行数: 26,584行（srcディレクトリ）
+- 🤖 自動化スクリプト: 120+ファイル
+- 📝 ドキュメント: 25+ディレクトリ
 
 ### 🚨 アラート・推奨事項
 

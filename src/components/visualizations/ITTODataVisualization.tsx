@@ -112,6 +112,7 @@ const KNOWLEDGE_AREA_COLORS = [
   '#85C1E9',
 ]
 
+import { logger } from '@/utils/logger'
 export const ITTODataVisualization: React.FC<ITTODataVisualizationProps> = ({
   analyticsData,
   learningMetrics,
@@ -779,7 +780,10 @@ export const ITTODataVisualization: React.FC<ITTODataVisualizationProps> = ({
                   }
                 }}
                 onRelationshipExplore={(sourceId, targetId) => {
-                  console.log('Explore relationship:', sourceId, '->', targetId)
+                  logger.interaction({
+                    type: 'relationship-explore',
+                    details: { sourceId, targetId, component: 'ITTODataVisualization' },
+                  })
                 }}
               />
             </CardContent>

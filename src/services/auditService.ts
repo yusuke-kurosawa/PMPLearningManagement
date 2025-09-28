@@ -6,7 +6,7 @@
  * @since 2025-08-14
  */
 
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/auth'
 import { logger } from './logger'
 
 // ========================================

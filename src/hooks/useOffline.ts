@@ -54,14 +54,26 @@ export function useOffline(options: UseOfflineOptions = {}) {
         checkOfflineDataSize()
       }
 
+      request.onerror = (event) => {
+        logger.error('IndexedDB connection error:', (event.target as IDBOpenDBRequest).error)
+      }
+
+      request.onblocked = () => {
+        logger.warn('IndexedDB connection blocked. Close other tabs accessing this database.')
+      }
+
       request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
         const db = (event.target as IDBOpenDBRequest).result
 
-        if (!db.objectStoreNames.contains('syncQueue')) {
-          db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true })
-        }
-        if (!db.objectStoreNames.contains('offlineData')) {
-          db.createObjectStore('offlineData', { keyPath: 'key' })
+        try {
+          if (!db.objectStoreNames.contains('syncQueue')) {
+            db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true })
+          }
+          if (!db.objectStoreNames.contains('offlineData')) {
+            db.createObjectStore('offlineData', { keyPath: 'key' })
+          }
+        } catch (error) {
+          logger.error('Failed to create object stores:', error)
         }
       }
     } catch (error) {

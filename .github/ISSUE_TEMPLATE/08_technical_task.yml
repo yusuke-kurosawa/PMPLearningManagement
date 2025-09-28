@@ -1,0 +1,256 @@
+name: 🔧 Technical Task
+description: Create a technical task (non-user-facing work)
+title: "[TASK]: "
+labels: ["technical-task", "engineering"]
+assignees:
+  - yusuke-kurosawa
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 技術的タスク作成
+
+        ユーザーに直接価値を提供しない技術的作業のためのタスクです。
+        リファクタリング、技術的負債の解消、インフラ整備などに使用します。
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: 技術的重要度を選択
+      options:
+        - P0 (緊急 - すぐに対応が必要)
+        - P1 (高 - 次スプリント内に対応)
+        - P2 (中 - 計画的に対応)
+        - P3 (低 - 余裕があれば対応)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: カテゴリ
+      description: タスクのカテゴリ
+      options:
+        - Refactoring (リファクタリング)
+        - Technical Debt (技術的負債)
+        - Infrastructure (インフラ)
+        - Performance (パフォーマンス)
+        - Security (セキュリティ)
+        - Testing (テスト)
+        - Documentation (ドキュメント)
+        - Tooling (ツール整備)
+        - Dependencies (依存関係更新)
+        - Migration (マイグレーション)
+        - Optimization (最適化)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: タスク概要
+      description: 何を行う必要があるか、明確に記載
+      placeholder: |
+        このタスクで実施する技術的作業の概要を記載してください。
+        - 現状の問題
+        - 実施する内容
+        - 期待される結果
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_background
+    attributes:
+      label: 技術的背景
+      description: なぜこのタスクが必要か、技術的な理由を説明
+      placeholder: |
+        - 現在の技術的課題
+        - パフォーマンス問題
+        - 保守性の問題
+        - セキュリティリスク
+        - スケーラビリティの制約
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: 完了条件
+      description: タスク完了の定義を明確に記載
+      placeholder: |
+        - [ ] 条件1
+        - [ ] 条件2
+        - [ ] 条件3
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: 工数見積もり
+      description: 実装にかかる時間を見積もり
+      options:
+        - "1-2時間"
+        - "半日 (3-4時間)"
+        - "1日"
+        - "2-3日"
+        - "1週間"
+        - "1-2週間"
+        - "2週間以上 (分割推奨)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: 影響範囲
+      description: このタスクが影響を与える範囲
+      options:
+        - 局所的 (単一ファイル/モジュール)
+        - 中規模 (複数ファイル/モジュール)
+        - 大規模 (複数コンポーネント/システム)
+        - システム全体
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk_level
+    attributes:
+      label: リスクレベル
+      description: 実装のリスク評価
+      options:
+        - 低 (既存機能への影響なし)
+        - 中 (一部機能に影響の可能性)
+        - 高 (広範囲に影響の可能性)
+        - 非常に高い (システム全体に影響)
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_plan
+    attributes:
+      label: 実装計画
+      description: 実装のステップを記載
+      placeholder: |
+        1. [準備作業]
+        2. [実装ステップ1]
+        3. [実装ステップ2]
+        4. [テスト]
+        5. [デプロイ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing_strategy
+    attributes:
+      label: テスト戦略
+      description: どのようにテストするか記載
+      placeholder: |
+        - 単体テスト: [内容]
+        - 統合テスト: [内容]
+        - リグレッションテスト: [内容]
+        - パフォーマンステスト: [内容]
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: ロールバック計画
+      description: 問題発生時の巻き戻し手順
+      placeholder: |
+        1. [ロールバックステップ1]
+        2. [ロールバックステップ2]
+        3. [検証方法]
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依存関係
+      description: 他のタスクやストーリーへの依存
+      placeholder: |
+        - #123 (APIリファクタリング)
+        - #456 (データベースマイグレーション)
+
+  - type: textarea
+    id: related_issues
+    attributes:
+      label: 関連Issue
+      description: 関連するバグやストーリー
+      placeholder: |
+        - Fixes #789
+        - Related to #012
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: 前提条件
+      description: 開始前に満たすべき条件
+      options:
+        - label: 影響範囲の調査が完了している
+        - label: 必要なツール・環境が準備されている
+        - label: チームメンバーにレビューされている
+        - label: バックアップ計画が立てられている
+
+  - type: checkboxes
+    id: definition_of_done
+    attributes:
+      label: Definition of Done
+      description: 完了の定義
+      options:
+        - label: 完了条件がすべて満たされている
+          required: true
+        - label: コードレビューが完了している
+          required: true
+        - label: テストが実装され、通過している
+          required: true
+        - label: ドキュメントが更新されている
+          required: true
+        - label: リグレッションテストが通過している
+          required: true
+        - label: パフォーマンステストが通過している（該当する場合）
+          required: false
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: 技術的メモ
+      description: 実装時の注意点や参考情報
+      placeholder: |
+        - 使用する技術・ライブラリ
+        - 参考記事・ドキュメント
+        - アーキテクチャ上の考慮点
+        - パフォーマンス要件
+
+  - type: textarea
+    id: monitoring
+    attributes:
+      label: モニタリング計画
+      description: 実装後の監視方法（該当する場合）
+      placeholder: |
+        - 監視する指標
+        - アラート設定
+        - ログ収集
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🔍 レビューポイント
+
+        技術的タスクのレビュー時に確認すべき点:
+
+        1. **技術的正確性**: 実装が技術的に正しいか
+        2. **保守性**: コードが保守しやすいか
+        3. **パフォーマンス**: パフォーマンスが劣化していないか
+        4. **セキュリティ**: セキュリティリスクがないか
+        5. **テスト**: 適切にテストされているか
+        6. **ドキュメント**: 技術ドキュメントが更新されているか
+
+        詳細は [開発ガイドライン](../../docs/development/GUIDELINES.md) を参照してください。

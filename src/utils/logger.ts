@@ -11,6 +11,12 @@ interface LogContext {
   [key: string]: unknown
 }
 
+interface InteractionEvent {
+  type: string
+  details?: Record<string, unknown>
+  timestamp?: number
+}
+
 class Logger {
   private isDevelopment = process.env.NODE_ENV === 'development'
   private isTest = process.env.NODE_ENV === 'test'
@@ -23,19 +29,19 @@ class Logger {
 
   debug(message: string, context?: LogContext): void {
     if (this.isDevelopment && !this.isTest) {
-      logger.debug(this.formatMessage('debug', message, context))
+      console.log(this.formatMessage('debug', message, context))
     }
   }
 
   info(message: string, context?: LogContext): void {
     if (!this.isTest) {
-      logger.info(this.formatMessage('info', message, context))
+      console.log(this.formatMessage('info', message, context))
     }
   }
 
   warn(message: string, context?: LogContext): void {
     if (!this.isTest) {
-      logger.warn(this.formatMessage('warn', message, context))
+      console.warn(this.formatMessage('warn', message, context))
     }
   }
 
@@ -44,10 +50,10 @@ class Logger {
     const fullMessage = error ? `${message}: ${errorMessage}` : message
 
     if (!this.isTest) {
-      logger.error(this.formatMessage('error', fullMessage, context))
+      console.error(this.formatMessage('error', fullMessage, context))
 
       if (error instanceof Error && error.stack && this.isDevelopment) {
-        logger.error(error.stack)
+        console.error(error.stack)
       }
     }
 
@@ -63,6 +69,20 @@ class Logger {
   logIf(condition: boolean, level: LogLevel, message: string, context?: LogContext): void {
     if (condition) {
       this[level](message, context)
+    }
+  }
+
+  /**
+   * Log user interaction events (gestures, clicks, etc.)
+   */
+  interaction(event: InteractionEvent): void {
+    if (this.isDevelopment && !this.isTest) {
+      const eventData = {
+        type: event.type,
+        timestamp: event.timestamp || Date.now(),
+        ...event.details,
+      }
+      console.log(this.formatMessage('debug', `User Interaction: ${event.type}`, eventData))
     }
   }
 
@@ -85,6 +105,9 @@ class Logger {
       },
       error: (message: string, error?: Error | unknown, context?: LogContext) => {
         this.error(message, error, { ...defaultContext, ...context })
+      },
+      interaction: (event: InteractionEvent) => {
+        this.interaction(event)
       },
       logIf: this.logIf.bind(this),
       child: this.child.bind(this),

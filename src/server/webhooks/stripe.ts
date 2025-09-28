@@ -9,7 +9,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/db'
 import { StripeService } from '@/server/services/stripeService'
 import { SubscriptionPlan } from '@prisma/client'
-import { logger } from '@/utils/logger'
+import { logger } from '../../services/logger'
 
 // Stripe WebHookイベント型定義
 type StripeWebHookEvent =

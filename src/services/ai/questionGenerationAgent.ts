@@ -6,7 +6,7 @@
 import { ChatOpenAI } from '@langchain/openai'
 import { ChatAnthropic } from '@langchain/anthropic'
 import { ChatOllama } from '@langchain/ollama'
-import { SystemMessage, HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages'
+import { AIMessage, BaseMessage } from '@langchain/core/messages'
 import {
   PromptTemplate,
   ChatPromptTemplate,

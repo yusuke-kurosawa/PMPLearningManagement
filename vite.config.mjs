@@ -1,10 +1,33 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'public/sw.js',
+          dest: ''
+        },
+        {
+          src: 'public/manifest.json',
+          dest: ''
+        },
+        {
+          src: 'public/icon-192x192.png',
+          dest: ''
+        },
+        {
+          src: 'public/icon-512x512.png',
+          dest: ''
+        }
+      ]
+    })
+  ],
   
   // GitHub Pages configuration
   base: '/PMPLearningManagement/',
@@ -27,7 +50,7 @@ export default defineConfig({
           // Radix UI components (separate chunk for tree shaking)
           radix: [
             '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog', 
+            '@radix-ui/react-alert-dialog',
             '@radix-ui/react-tabs',
             '@radix-ui/react-select',
             '@radix-ui/react-dropdown-menu'

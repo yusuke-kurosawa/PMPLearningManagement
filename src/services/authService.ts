@@ -6,7 +6,7 @@
  * @since 2025-08-14
  */
 
-import { supabase, authHelpers } from '../lib/supabase'
+import { supabase, authHelpers } from '../lib/auth'
 import { auditLogger } from './auditService'
 import { logger } from './logger'
 

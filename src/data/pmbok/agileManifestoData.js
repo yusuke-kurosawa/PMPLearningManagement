@@ -3,7 +3,7 @@
  * PMBOK第7版アジャイル手法との関連性を含む
  */
 
-import { AgileManifestoData } from '../schemas/pmbok/agileTypes'
+// AgileManifestoData type is defined inline in this file
 
 export const agileManifestoData = {
   manifesto: {

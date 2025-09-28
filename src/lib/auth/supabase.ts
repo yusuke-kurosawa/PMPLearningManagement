@@ -5,14 +5,30 @@ import { logger } from '../../services/logger'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// In development mode, use mock/placeholder credentials to allow app to run without Supabase
+const isDevelopment = import.meta.env.MODE === 'development'
+const useMockCredentials = isDevelopment && (!supabaseUrl || !supabaseAnonKey)
+
+if (useMockCredentials) {
+  console.warn(
+    '⚠️ Development Mode: Using mock Supabase credentials. Authentication features will be disabled.'
+  )
+}
+
+// Use real credentials or mock ones for development
+const finalSupabaseUrl = supabaseUrl || 'https://mock-project.supabase.co'
+const finalSupabaseAnonKey =
+  supabaseAnonKey || 'mock-anon-key-for-development-only'
+
+// Only throw error in production when credentials are missing
+if (!useMockCredentials && (!supabaseUrl || !supabaseAnonKey)) {
   throw new Error(
     'Missing Supabase environment variables. Please check your .env.local file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
   )
 }
 
 // Create Supabase client with enhanced configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
   auth: {
     // Configure auth settings
     storage: localStorage, // Use localStorage for persistence
@@ -210,39 +226,30 @@ export const authHelpers = {
     const role = await authHelpers.getUserRole()
     return checkRolePermission(role, permission)
   },
+
+  /**
+   * Check permission for a specific user ID
+   */
+  hasUserPermission: async (userId, permission) => {
+    const { data, error } = await supabase.rpc('check_permission', {
+      user_id: userId,
+      permission_name: permission,
+    })
+
+    if (error) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Error checking permission:', error)
+      }
+      return false
+    }
+
+    return data
+  },
 }
 
-// Role-based access control
-export const ROLES = {
-  ADMIN: 'admin',
-  INSTRUCTOR: 'instructor',
-  STUDENT: 'student',
-  GUEST: 'guest',
-}
-
-export const PERMISSIONS = {
-  // Learning permissions
-  VIEW_CONTENT: 'view_content',
-  TAKE_EXAMS: 'take_exams',
-  VIEW_PROGRESS: 'view_progress',
-  EXPORT_DATA: 'export_data',
-
-  // Collaboration permissions
-  CREATE_STUDY_GROUPS: 'create_study_groups',
-  PARTICIPATE_DISCUSSIONS: 'participate_discussions',
-  SHARE_NOTES: 'share_notes',
-
-  // Administrative permissions
-  MANAGE_USERS: 'manage_users',
-  MANAGE_CONTENT: 'manage_content',
-  VIEW_ANALYTICS: 'view_analytics',
-  MANAGE_SYSTEM: 'manage_system',
-
-  // Instructor permissions
-  CREATE_EXAMS: 'create_exams',
-  GRADE_EXAMS: 'grade_exams',
-  MANAGE_COURSES: 'manage_courses',
-}
+// Role-based access control - import from constants/roles.js instead of re-exporting
+// This avoids circular dependency and tree-shaking issues in production builds
+import { ROLES, PERMISSIONS } from '../../constants/roles'
 
 // Role permission mapping
 const rolePermissions = {
@@ -325,6 +332,105 @@ export const setupAuthListeners = (onAuthStateChange) => {
   })
 
   return subscription
+}
+
+// Utility functions for form validation
+// Session management
+export const sessionManager = {
+  /**
+   * Start session monitoring
+   */
+  startSessionMonitoring: (callback) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (callback) {
+        callback(event, session)
+      }
+
+      // Handle different auth events
+      switch (event) {
+        case 'SIGNED_IN':
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('User signed in')
+          }
+          break
+        case 'SIGNED_OUT':
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('User signed out')
+          }
+          // Clear any cached data
+          localStorage.removeItem('user_profile')
+          localStorage.removeItem('user_role')
+          localStorage.removeItem('pmp-user-preferences')
+          break
+        case 'TOKEN_REFRESHED':
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Token refreshed')
+          }
+          break
+        case 'USER_UPDATED':
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('User updated')
+          }
+          break
+        default:
+          break
+      }
+    })
+
+    return subscription
+  },
+
+  /**
+   * Stop session monitoring
+   */
+  stopSessionMonitoring: (subscription) => {
+    if (subscription) {
+      subscription.unsubscribe()
+    }
+  },
+
+  /**
+   * Check session expiry
+   */
+  isSessionExpired: async () => {
+    try {
+      const session = await authHelpers.getCurrentSession()
+      if (!session) {
+        return true
+      }
+
+      const expiresAt = session.expires_at
+      const now = Math.floor(Date.now() / 1000)
+
+      return now >= expiresAt
+    } catch {
+      return true
+    }
+  },
+
+  /**
+   * Auto refresh token before expiry
+   */
+  setupAutoRefresh: () => {
+    setInterval(async () => {
+      const expired = await sessionManager.isSessionExpired()
+      if (!expired) {
+        const session = await authHelpers.getCurrentSession()
+        if (session) {
+          const expiresAt = session.expires_at
+          const now = Math.floor(Date.now() / 1000)
+          const timeUntilExpiry = (expiresAt - now) * 1000
+
+          // Refresh if less than 5 minutes until expiry
+          if (timeUntilExpiry < 300000) {
+            await authHelpers.refreshSession()
+          }
+        }
+      }
+    }, 60000) // Check every minute
+  },
 }
 
 // Utility functions for form validation

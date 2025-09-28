@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -41,23 +40,15 @@ import {
 import {
   Activity,
   TrendingUp,
-  TrendingDown,
   Users,
   Clock,
   Target,
-  AlertTriangle,
-  CheckCircle,
   Zap,
   Brain,
   BookOpen,
   Award,
-  BarChart3,
   RefreshCw,
   Download,
-  Filter,
-  Calendar,
-  Eye,
-  Gauge,
   ArrowUp,
   ArrowDown,
   Minus,
@@ -70,14 +61,14 @@ import LearningMetricsCalculator, {
 const RealTimeAnalyticsDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<LearningMetrics | null>(null)
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h')
-  const [selectedMetric, setSelectedMetric] = useState('engagement')
+  const [_selectedMetric, _setSelectedMetric] = useState('engagement')
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null)
   const [isLive, setIsLive] = useState(true)
   const [metricsCalculator] = useState(() => new LearningMetricsCalculator())
-  const chartRef = useRef<HTMLDivElement>(null)
+  const _chartRef = useRef<HTMLDivElement>(null)
 
   // Real-time data simulation
-  const [realtimeData, setRealtimeData] = useState<any[]>([])
+  const [realtimeData, setRealtimeData] = useState<Array<Record<string, unknown>>>([])
   const [activeUsers, setActiveUsers] = useState(342)
   const [sessionsCount, setSessionsCount] = useState(1205)
   const [questionsAnswered, setQuestionsAnswered] = useState(15432)

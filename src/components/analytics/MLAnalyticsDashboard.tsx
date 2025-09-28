@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -14,10 +14,6 @@ import { Progress } from '@/components/ui/progress'
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
   PieChart,
   Pie,
   RadarChart,
@@ -41,26 +37,16 @@ import {
   TrendingDown,
   AlertTriangle,
   CheckCircle,
-  XCircle,
-  Brain,
   Target,
   Users,
-  Clock,
-  Activity,
-  Award,
-  BookOpen,
-  BarChart3,
   RefreshCw,
   Download,
-  Filter,
-  Calendar,
   Info,
 } from 'lucide-react'
-import { format, subDays, startOfWeek, endOfWeek } from 'date-fns'
 
 // ML Analytics Dashboard Component
 const MLAnalyticsDashboard = () => {
-  const [selectedModel, setSelectedModel] = useState('exam_success')
+  const [_selectedModel, _setSelectedModel] = useState('exam_success')
   const [timeRange, setTimeRange] = useState('7d')
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')

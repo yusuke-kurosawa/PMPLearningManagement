@@ -11,14 +11,14 @@ import { v4 as uuidv4 } from 'uuid'
  * Uses appropriate logging based on environment
  */
 const logger = {
-  info: (message: string, ...args: any[]) => {
+  info: (message: string, ...args: unknown[]) => {
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.log(`[MIGRATION INFO] ${message}`, ...args)
     }
     // In production, this could be replaced with a proper logging service
   },
-  error: (message: string, error?: any) => {
+  error: (message: string, error?: unknown) => {
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.error(`[MIGRATION ERROR] ${message}`, error)
@@ -27,7 +27,7 @@ const logger = {
       // e.g., Sentry, DataDog, etc.
       throw new Error(`Migration error: ${message}`)
     }
-  }
+  },
 }
 
 interface MigrationContext {

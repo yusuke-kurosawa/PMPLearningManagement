@@ -3,14 +3,12 @@
  * Main interface for AI-powered personalized learning
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-  MessageCircle,
   Send,
   Bot,
   User,
   Sparkles,
-  BookOpen,
   Target,
   TrendingUp,
   Calendar,
@@ -18,9 +16,6 @@ import {
   X,
   Maximize2,
   Minimize2,
-  Settings,
-  Download,
-  RefreshCw,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
@@ -33,7 +28,6 @@ import { Badge } from '../ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { ScrollArea } from '../ui/scroll-area'
 import { Avatar, AvatarFallback } from '../ui/avatar'
-import { Progress } from '../ui/progress'
 import { useToast } from '../../hooks/use-toast'
 
 interface Message {
@@ -43,7 +37,7 @@ interface Message {
   timestamp: Date
   metadata?: {
     type?: 'text' | 'recommendation' | 'plan' | 'analysis' | 'quiz'
-    data?: any
+    data?: Record<string, unknown>
   }
 }
 
@@ -67,8 +61,8 @@ export const AILearningAssistant: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState('chat')
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [studyPlan, setStudyPlan] = useState<any>(null)
-  const [learningInsights, setLearningInsights] = useState<any>(null)
+  const [studyPlan, setStudyPlan] = useState<Record<string, unknown> | null>(null)
+  const [learningInsights, setLearningInsights] = useState<Record<string, unknown> | null>(null)
   const [streamingMessage, setStreamingMessage] = useState('')
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -143,7 +137,7 @@ What would you like to work on today?`,
       return
     }
 
-    const userMessage = addMessage({
+    addMessage({
       role: 'user',
       content: input,
     })
@@ -249,7 +243,7 @@ What would you like to work on today?`,
     return null
   }
 
-  const handleCommand = async (command: string, context: any) => {
+  const handleCommand = async (command: string, context: Record<string, unknown>) => {
     switch (command) {
       case 'study_plan':
         await generateStudyPlan(context)
@@ -275,7 +269,7 @@ What would you like to work on today?`,
     }
   }
 
-  const generateStudyPlan = async (context: any) => {
+  const generateStudyPlan = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -301,7 +295,7 @@ What would you like to work on today?`,
     }
   }
 
-  const analyzeProgress = async (context: any) => {
+  const analyzeProgress = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -322,7 +316,7 @@ What would you like to work on today?`,
     }
   }
 
-  const generateQuiz = async (context: any) => {
+  const generateQuiz = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -344,7 +338,7 @@ What would you like to work on today?`,
     }
   }
 
-  const getRecommendations = async (context: any) => {
+  const getRecommendations = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -363,7 +357,7 @@ What would you like to work on today?`,
     }
   }
 
-  const getLearningInsights = async (context: any) => {
+  const getLearningInsights = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -384,7 +378,7 @@ What would you like to work on today?`,
     }
   }
 
-  const analyzeWeaknesses = async (context: any) => {
+  const analyzeWeaknesses = async (context: Record<string, unknown>) => {
     if (!aiService.current) {
       return
     }
@@ -480,7 +474,7 @@ You can also ask questions naturally:
     )
   }
 
-  const QuizDisplay: React.FC<{ quiz: any }> = ({ quiz }) => {
+  const QuizDisplay: React.FC<{ quiz: Array<Record<string, unknown>> }> = ({ quiz }) => {
     const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({})
     const [showResults, setShowResults] = useState(false)
 
@@ -497,7 +491,7 @@ You can also ask questions naturally:
 
     return (
       <div className='mt-4 space-y-4'>
-        {quiz.map((question: any, qIndex: number) => (
+        {quiz.map((question: Record<string, unknown>, qIndex: number) => (
           <Card key={qIndex}>
             <CardContent className='p-4'>
               <p className='mb-3 font-medium'>{question.question}</p>
@@ -781,7 +775,7 @@ You can also ask questions naturally:
 
 // Sub-components for displaying complex data
 
-const StudyPlanDisplay: React.FC<{ plan: any }> = ({ plan }) => {
+const StudyPlanDisplay: React.FC<{ plan: Record<string, unknown> }> = ({ plan }) => {
   return (
     <div className='space-y-6'>
       <div>
@@ -804,36 +798,42 @@ const StudyPlanDisplay: React.FC<{ plan: any }> = ({ plan }) => {
 
       <div>
         <h3 className='mb-3 font-semibold'>Weekly Schedule</h3>
-        {plan.dailySchedule?.slice(0, 7).map((day: any, index: number) => (
-          <Card key={index} className='mb-2'>
-            <CardContent className='p-3'>
-              <div className='flex items-center justify-between'>
-                <span className='font-medium'>Day {day.day}</span>
-                <Badge variant='outline'>{day.duration} min</Badge>
-              </div>
-              <p className='mt-1 text-sm text-muted-foreground'>Topics: {day.topics.join(', ')}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {(plan.dailySchedule as Array<Record<string, unknown>>)
+          ?.slice(0, 7)
+          .map((day: Record<string, unknown>, index: number) => (
+            <Card key={index} className='mb-2'>
+              <CardContent className='p-3'>
+                <div className='flex items-center justify-between'>
+                  <span className='font-medium'>Day {day.day}</span>
+                  <Badge variant='outline'>{day.duration} min</Badge>
+                </div>
+                <p className='mt-1 text-sm text-muted-foreground'>
+                  Topics: {day.topics.join(', ')}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
       </div>
 
       <div>
         <h3 className='mb-3 font-semibold'>Milestones</h3>
-        {plan.milestones?.map((milestone: any, index: number) => (
-          <div key={index} className='mb-3 flex items-center gap-3'>
-            <div className='h-2 w-2 rounded-full bg-primary' />
-            <div className='flex-1'>
-              <p className='text-sm font-medium'>Week {milestone.week}</p>
-              <p className='text-xs text-muted-foreground'>Target: {milestone.targetScore}%</p>
+        {(plan.milestones as Array<Record<string, unknown>>)?.map(
+          (milestone: Record<string, unknown>, index: number) => (
+            <div key={index} className='mb-3 flex items-center gap-3'>
+              <div className='h-2 w-2 rounded-full bg-primary' />
+              <div className='flex-1'>
+                <p className='text-sm font-medium'>Week {milestone.week}</p>
+                <p className='text-xs text-muted-foreground'>Target: {milestone.targetScore}%</p>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   )
 }
 
-const InsightsDisplay: React.FC<{ insights: any }> = ({ insights }) => {
+const InsightsDisplay: React.FC<{ insights: Record<string, unknown> }> = ({ insights }) => {
   return (
     <div className='space-y-6'>
       <div>

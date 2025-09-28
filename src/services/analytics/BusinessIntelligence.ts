@@ -813,7 +813,7 @@ export class ExecutiveReportGenerator {
   private generateAppendix(metrics: ComprehensiveKPIs): any {
     return {
       methodology: 'Comprehensive KPI analysis using statistical methods',
-      dataSource 'Multiple integrated data sources',
+      dataSource: 'Multiple integrated data sources',
       glossary: this.generateGlossary(),
       detailedMetrics: metrics
     };

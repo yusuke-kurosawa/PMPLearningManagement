@@ -7,8 +7,6 @@ import { Progress } from '@/components/ui/progress'
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,

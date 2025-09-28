@@ -166,7 +166,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
       const data = await api.pmbok.getProcesses.query({
         version: selectedVersion === 'both' ? undefined : selectedVersion,
         includeDetails: true,
-      }, []))
+      })
 
       setProcesses(data)
     } catch (error) {
@@ -182,14 +182,14 @@ const EnhancedPMBOKMatrix: React.FC = () => {
     }
   }
 
-  const loadUserProgress = useCallback(async (...args) => {
+  const loadUserProgress = useCallback(async () => {
     try {
       const progress = await api.pmbok.getUserProgress.query()
       const progressMap = progress.reduce(
         (acc, p) => {
           acc[p.processId] = p
           return acc
-        }, []),
+        },
         {} as Record<string, UserProgress>
       )
 
@@ -199,7 +199,7 @@ const EnhancedPMBOKMatrix: React.FC = () => {
         logger.error('Failed to load user progress:', error)
       }
     }
-  }
+  }, [])
 
   // Filter processes
   const filteredProcesses = useMemo(() => {

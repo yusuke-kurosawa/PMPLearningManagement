@@ -8,6 +8,44 @@
 
 import { useState, useEffect } from 'react'
 import { logger } from './logger'
+import type {
+  ProcessCategory,
+  ProcessGroup,
+  KnowledgeArea,
+  ProcessGroupDefinition,
+  PMBOKProcess,
+  ProcessProgress,
+  FlashCardSession,
+  ExamResult,
+  StudySession,
+  LearningGoal,
+  ProgressData,
+  FlashCardStats,
+  ExamStats,
+  StudyStats,
+  ProgressStatistics,
+} from '../types/progress'
+
+// Re-export for backward compatibility
+export {
+  processCategories,
+  processGroups,
+  type ProcessCategory,
+  type ProcessGroup,
+  type KnowledgeArea,
+  type ProcessGroupDefinition,
+  type PMBOKProcess,
+  type ProcessProgress,
+  type FlashCardSession,
+  type ExamResult,
+  type StudySession,
+  type LearningGoal,
+  type ProgressData,
+  type FlashCardStats,
+  type ExamStats,
+  type StudyStats,
+  type ProgressStatistics,
+} from '../types/progress'
 
 // ========================================
 // 定数定義
@@ -16,38 +54,9 @@ import { logger } from './logger'
 /** LocalStorage保存キー */
 const STORAGE_KEY = 'pmp_learning_progress'
 
-/** プロセスカテゴリー（知識エリア）のマッピング */
-export const processCategories = {
-  integration: '統合管理',
-  scope: 'スコープ管理',
-  schedule: 'スケジュール管理',
-  cost: 'コスト管理',
-  quality: '品質管理',
-  resource: '資源管理',
-  communications: 'コミュニケーション管理',
-  risk: 'リスク管理',
-  procurement: '調達管理',
-  stakeholder: 'ステークホルダー管理',
-} as const
-
-/** プロセス群のマッピング */
-export const processGroups = {
-  initiating: '立ち上げ',
-  planning: '計画',
-  executing: '実行',
-  monitoring: '監視・コントロール',
-  closing: '終結',
-} as const
-
 // ========================================
-// 型定義
+// 型定義 (Service-specific)
 // ========================================
-
-/** プロセスカテゴリー（知識エリア）の型 */
-export type ProcessCategory = keyof typeof processCategories
-
-/** プロセス群の型 */
-export type ProcessGroup = keyof typeof processGroups
 
 /**
  * 知識エリア定義インターフェース

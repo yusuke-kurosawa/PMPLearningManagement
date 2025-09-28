@@ -15,9 +15,9 @@ import {
   validationRules,
   learningResources,
   getTermById,
-  getTermsByKnowledgeArea,
-  getTermsByProcessGroup,
-  getDeprecatedTerms,
+  getTermsByKnowledgeArea as _getTermsByKnowledgeArea,
+  getTermsByProcessGroup as _getTermsByProcessGroup,
+  getDeprecatedTerms as _getDeprecatedTerms,
 } from '../../data/terminology/pmp-terminology-database'
 
 // API Response Types
@@ -114,7 +114,7 @@ export interface TeamMetrics {
 // Singleton instance
 let analyzerInstance: TerminologyAnalyzer | null = null
 
-function getAnalyzer(options?: any): TerminologyAnalyzer {
+function _getAnalyzer(options?: Record<string, unknown>): TerminologyAnalyzer {
   if (!analyzerInstance) {
     analyzerInstance = new TerminologyAnalyzer(options)
   } else if (options) {
@@ -122,6 +122,9 @@ function getAnalyzer(options?: any): TerminologyAnalyzer {
   }
   return analyzerInstance
 }
+
+// Alias for backward compatibility
+const getAnalyzer = _getAnalyzer
 
 /**
  * Terminology API Class
@@ -248,13 +251,19 @@ export class TerminologyAPI {
       if (request.filters) {
         if (request.filters.knowledgeArea?.length) {
           results = results.filter((term) =>
-            term.knowledgeArea?.some((ka) => request.filters!.knowledgeArea!.includes(ka))
+            term.knowledgeArea?.some((ka) => {
+              const filters = request.filters
+              return filters?.knowledgeArea?.includes(ka) ?? false
+            })
           )
         }
 
         if (request.filters.processGroup?.length) {
           results = results.filter((term) =>
-            term.processGroup?.some((pg) => request.filters!.processGroup!.includes(pg))
+            term.processGroup?.some((pg) => {
+              const filters = request.filters
+              return filters?.processGroup?.includes(pg) ?? false
+            })
           )
         }
 
@@ -409,7 +418,13 @@ export class TerminologyAPI {
   /**
    * Get learning resources for a topic
    */
-  static async getLearningResources(topic: string): Promise<ApiResponse<any>> {
+  static async getLearningResources(topic: string): Promise<
+    ApiResponse<{
+      glossaryIds: number[]
+      links: string[]
+      suggestedReading: string[]
+    }>
+  > {
     try {
       const resources = learningResources[topic] || {
         glossaryIds: [],
@@ -546,7 +561,10 @@ export class TerminologyAPI {
   /**
    * Helper: Estimate learning time
    */
-  private static estimateLearningTime(resources: any): string {
+  private static estimateLearningTime(resources: {
+    links?: string[]
+    suggestedReading?: string[]
+  }): string {
     const linkCount = (resources.links || []).length
     const readingCount = (resources.suggestedReading || []).length
     const totalItems = linkCount + readingCount
@@ -564,61 +582,91 @@ export class TerminologyAPI {
 // Express.js route handlers (if using Express)
 export const terminologyRoutes = {
   // POST /api/terminology/validate
-  validate: async (req: any, res: any) => {
+  validate: async (
+    req: { body: ValidationRequest },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.validate(req.body)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // POST /api/terminology/batch-validate
-  batchValidate: async (req: any, res: any) => {
+  batchValidate: async (
+    req: { body: BatchValidationRequest },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.batchValidate(req.body)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // POST /api/terminology/autofix
-  autofix: async (req: any, res: any) => {
+  autofix: async (
+    req: { body: { content: string; analysis: FileAnalysis } },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.autofix(req.body.content, req.body.analysis)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // GET /api/terminology/search
-  search: async (req: any, res: any) => {
+  search: async (
+    req: { query: TermSearchRequest },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.searchTerms(req.query)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // GET /api/terminology/:id
-  getTerm: async (req: any, res: any) => {
+  getTerm: async (
+    req: { params: { id: string } },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.getTerm(req.params.id)
     res.status(result.success ? 200 : 404).json(result)
   },
 
   // GET /api/terminology/rules
-  getRules: async (req: any, res: any) => {
+  getRules: async (
+    req: unknown,
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.getValidationRules()
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // POST /api/terminology/rules
-  addRule: async (req: any, res: any) => {
+  addRule: async (
+    req: { body: ValidationRule },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.addCustomRule(req.body)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // GET /api/terminology/metrics
-  getMetrics: async (req: any, res: any) => {
+  getMetrics: async (
+    req: { query: TeamMetricsRequest },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.getTeamMetrics(req.query)
     res.status(result.success ? 200 : 400).json(result)
   },
 
   // GET /api/terminology/learning/:topic
-  getLearning: async (req: any, res: any) => {
+  getLearning: async (
+    req: { params: { topic: string } },
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.getLearningResources(req.params.topic)
     res.status(result.success ? 200 : 404).json(result)
   },
 
   // DELETE /api/terminology/cache
-  clearCache: async (req: any, res: any) => {
+  clearCache: async (
+    req: unknown,
+    res: { status: (code: number) => { json: (data: unknown) => void } }
+  ) => {
     const result = await TerminologyAPI.clearCache()
     res.status(result.success ? 200 : 400).json(result)
   },

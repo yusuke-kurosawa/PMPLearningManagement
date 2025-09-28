@@ -1,0 +1,244 @@
+name: 📖 User Story
+description: Create a user story for the product backlog
+title: "[STORY]: "
+labels: ["user-story", "backlog"]
+assignees:
+  - yusuke-kurosawa
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ユーザーストーリー作成
+
+        プロダクト・バックログに追加するユーザーストーリーを作成します。
+        ビジネス価値と受入基準を明確に記載してください。
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: MoSCoW分析に基づく優先度を選択
+      options:
+        - P0 (Must Have - 最優先)
+        - P1 (Should Have - 重要)
+        - P2 (Could Have - あれば良い)
+        - P3 (Won't Have - 今回は対象外)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: 実装フェーズ
+      description: 実装予定のフェーズを選択
+      options:
+        - Phase 1 (2-4週間)
+        - Phase 2 (4-8週間)
+        - Phase 3 (8-12週間)
+        - Phase 4 (12-16週間)
+        - 未定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: ユーザータイプ
+      description: このストーリーの対象ユーザー
+      options:
+        - PMP受験者
+        - 学習者（一般）
+        - インストラクター
+        - メンター
+        - システム管理者
+        - 開発者
+        - プロダクトマネージャー
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: ユーザーストーリー
+      description: "As a / I want to / So that"形式で記載
+      placeholder: |
+        As a [ユーザータイプ]
+        I want to [やりたいこと]
+        So that [ビジネス価値/理由]
+      value: |
+        As a
+        I want to
+        So that
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: 受入基準
+      description: "Given / When / Then"形式で具体的に記載
+      placeholder: |
+        - Given [前提条件]
+        - When [アクション]
+        - Then [期待される結果]
+        - And [追加の期待結果]
+      value: |
+        - Given
+        - When
+        - Then
+        - And
+    validations:
+      required: true
+
+  - type: dropdown
+    id: story_points
+    attributes:
+      label: ストーリーポイント見積もり
+      description: 実装の複雑さと時間を見積もり
+      options:
+        - "1 (数時間)"
+        - "2 (半日)"
+        - "3 (1日)"
+        - "5 (2-3日)"
+        - "8 (3-5日)"
+        - "13 (1週間)"
+        - "21 (1.5-2週間)"
+        - "34 (2-3週間 - 分割推奨)"
+        - "55 (3週間以上 - 分割必須)"
+        - "未見積もり"
+    validations:
+      required: true
+
+  - type: textarea
+    id: business_value
+    attributes:
+      label: ビジネス価値
+      description: このストーリーがもたらすビジネス価値を説明
+      placeholder: |
+        - ユーザー満足度向上
+        - 収益増加
+        - コスト削減
+        - リスク軽減
+        - 市場競争力強化
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: 技術的メモ
+      description: 実装に関する技術的考慮事項（任意）
+      placeholder: |
+        - 使用技術・ライブラリ
+        - アーキテクチャ上の考慮点
+        - パフォーマンス要件
+        - セキュリティ要件
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依存関係
+      description: このストーリーが依存する他のストーリーやタスク
+      placeholder: |
+        - #123 (バックエンドAPI構築)
+        - #456 (認証システム実装)
+
+  - type: input
+    id: epic
+    attributes:
+      label: 関連Epic
+      description: このストーリーが属するEpic（任意）
+      placeholder: "例: バックエンド統合, AI機能, PWA対応"
+
+  - type: textarea
+    id: test_scenarios
+    attributes:
+      label: テストシナリオ
+      description: 主要なテストケース（任意）
+      placeholder: |
+        1. 正常系: [シナリオ]
+        2. 異常系: [シナリオ]
+        3. 境界値: [シナリオ]
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: カテゴリ
+      description: ストーリーのカテゴリ
+      options:
+        - Frontend
+        - Backend
+        - API
+        - Database
+        - UI/UX
+        - Performance
+        - Security
+        - Testing
+        - Infrastructure
+        - Content
+        - Analytics
+        - Integration
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: definition_of_done
+    attributes:
+      label: Definition of Done
+      description: 完了の定義（すべて満たす必要がある）
+      options:
+        - label: 受入基準がすべて満たされている
+          required: true
+        - label: コードレビューが完了している
+          required: true
+        - label: 単体テストが実装され、通過している
+          required: true
+        - label: E2Eテスト（必要に応じて）が実装されている
+          required: false
+        - label: ドキュメントが更新されている
+          required: true
+        - label: プロダクトオーナーが受入テストを完了している
+          required: true
+        - label: リグレッションテストが通過している
+          required: true
+
+  - type: checkboxes
+    id: quality_checklist
+    attributes:
+      label: 品質チェックリスト
+      description: 品質基準（該当するものをチェック）
+      options:
+        - label: アクセシビリティ要件を満たしている
+        - label: モバイル対応が完了している
+        - label: パフォーマンス要件を満たしている
+        - label: セキュリティ要件を満たしている
+        - label: GDPR/プライバシー要件を満たしている
+        - label: エラーハンドリングが適切に実装されている
+        - label: ローディング状態が適切に処理されている
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 追加コンテキスト
+      description: その他の関連情報（任意）
+      placeholder: |
+        - スクリーンショット
+        - モックアップ
+        - 参考リンク
+        - ユーザーフィードバック
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 📋 次のステップ
+
+        1. **バックログリファインメント**: チームでストーリーを議論
+        2. **見積もり**: プランニングポーカーで見積もり
+        3. **スプリント計画**: スプリント・バックログに移動
+        4. **実装**: Definition of Doneに従って実装
+        5. **レビュー**: プロダクトオーナーが受入テスト
+
+        詳細は [PRODUCT_BACKLOG.md](../../PRODUCT_BACKLOG.md) を参照してください。

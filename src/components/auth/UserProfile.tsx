@@ -18,7 +18,8 @@ import {
   Settings,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { authValidation, ROLES } from '../../lib/auth/supabase'
+import { authValidation } from '../../lib/auth/supabase'
+import { ROLES } from '../../constants/roles'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'

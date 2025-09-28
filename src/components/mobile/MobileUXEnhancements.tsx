@@ -69,6 +69,7 @@ interface FilterOptions {
   sortOrder: 'asc' | 'desc'
 }
 
+import { logger } from '../../utils/logger'
 const MobileUXEnhancements: React.FC = () => {
   const { toast } = useToast()
   const { isOnline, isStandalone, capabilities, vibrate, requestWakeLock, releaseWakeLock } =
@@ -331,10 +332,10 @@ const MobileUXEnhancements: React.FC = () => {
     // Implement zoom functionality if needed
     if (scale > 1.2) {
       // Zoom in - could expand content
-      console.log('Pinch zoom in:', scale)
+      logger.interaction({ type: 'pinch-zoom-in', details: { scale } })
     } else if (scale < 0.8) {
       // Zoom out - could compress content
-      console.log('Pinch zoom out:', scale)
+      logger.interaction({ type: 'pinch-zoom-out', details: { scale } })
     }
   }
 
