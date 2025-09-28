@@ -1,8 +1,9 @@
 // PMP Learning Management System - Service Worker
-// Version: 2.1.2
+// Version: 2.1.3
 // Mobile-optimized PWA with advanced caching and IndexedDB integration
+// Updated: 2025-09-28 - Force cache refresh for deployment
 
-const CACHE_VERSION = '2.1.2';
+const CACHE_VERSION = '2.1.3';
 const CACHE_NAME = `pmp-learning-v${CACHE_VERSION}`;
 const OFFLINE_CACHE = `pmp-learning-offline-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pmp-learning-runtime-v${CACHE_VERSION}`;
@@ -600,7 +601,9 @@ self.addEventListener('message', event => {
   }
 
   // Only log in non-development mode to reduce console noise
-  console.log('[SW] Message received:', event.data);
+  if (!IS_DEVELOPMENT) {
+    console.log('[SW] Message received:', event.data);
+  }
 
   if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
