@@ -12,8 +12,7 @@ const DATA_CACHE = `pmp-learning-data-v${CACHE_VERSION}`;
 // Development mode detection
 const IS_DEVELOPMENT = self.location.hostname === 'localhost' ||
                         self.location.hostname === '127.0.0.1' ||
-                        self.location.port === '5173' ||
-                        self.location.port === '5175';
+                        self.location.port.startsWith('517'); // Match any Vite dev server port (5173, 5174, 5175, etc.)
 
 // Rate limiting for cache operations
 const CACHE_RATE_LIMIT = new Map();
@@ -77,10 +76,18 @@ const MAX_CACHE_SIZE = {
 
 // Install event - precache essential resources
 self.addEventListener('install', event => {
-  console.log('[SW] Install event');
-  
+  if (!IS_DEVELOPMENT) {
+    console.log('[SW] Install event');
+  }
+
   event.waitUntil(
     (async () => {
+      // Skip precaching entirely in development
+      if (IS_DEVELOPMENT) {
+        self.skipWaiting();
+        return;
+      }
+
       try {
         const cache = await caches.open(CACHE_NAME);
         console.log('[SW] Caching shell resources');
@@ -109,7 +116,9 @@ self.addEventListener('install', event => {
 
 // Activate event - cleanup old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate event');
+  if (!IS_DEVELOPMENT) {
+    console.log('[SW] Activate event');
+  }
   
   event.waitUntil(
     (async () => {
@@ -141,15 +150,18 @@ self.addEventListener('activate', event => {
 
 // Fetch event - implement caching strategies
 self.addEventListener('fetch', event => {
+  // CRITICAL: Skip ALL fetch handling in development
+  if (IS_DEVELOPMENT) return;
+
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') return;
-  
+
   // Skip chrome-extension requests
   if (url.protocol === 'chrome-extension:') return;
-  
+
   event.respondWith(handleFetch(request));
 });
 
@@ -574,10 +586,21 @@ self.addEventListener('notificationclick', event => {
 self.addEventListener('message', event => {
   if (!event.data) return;
 
-  // Only log in non-development mode to reduce console noise
-  if (!IS_DEVELOPMENT) {
-    console.log('[SW] Message received:', event.data);
+  // CRITICAL: Skip ALL message handling in development except unregister
+  if (IS_DEVELOPMENT) {
+    // Only handle unregister command in development
+    if (event.data.type === 'UNREGISTER') {
+      self.registration.unregister().then(() => {
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => client.navigate(client.url));
+        });
+      });
+    }
+    return;
   }
+
+  // Only log in non-development mode to reduce console noise
+  console.log('[SW] Message received:', event.data);
 
   if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -628,15 +651,13 @@ function markUrlAsFailed(url) {
 
 // Cache additional URLs on demand
 async function cacheUrls(urls) {
-  // In development mode, disable aggressive caching
+  // In development mode, completely skip caching without any logging
   if (IS_DEVELOPMENT) {
-    // Silently skip in development mode to avoid console spam
-    return;
+    return Promise.resolve();
   }
 
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
-    console.warn('[SW] No valid URLs provided for caching');
-    return;
+    return Promise.resolve();
   }
 
   try {
@@ -706,25 +727,29 @@ async function cacheUrls(urls) {
       }
     }
 
-    // Log skipped URLs only in development or if there are many failures
-    if (IS_DEVELOPMENT || skippedUrls.length > 0) {
-      console.log('[SW] Skipped URLs:', skippedUrls.length, skippedUrls.slice(0, 5));
+    // Only log in production and if there are significant failures
+    if (!IS_DEVELOPMENT && skippedUrls.length > 10) {
+      console.log('[SW] Skipped URLs:', skippedUrls.length);
     }
 
     if (validUrls.length > 0) {
       // Cache URLs individually to prevent one failure from blocking all
       const cachePromises = validUrls.map(url =>
         cache.add(url).catch(err => {
-          console.error('[SW] Failed to cache URL:', url, err.message);
+          if (!IS_DEVELOPMENT) {
+            console.error('[SW] Failed to cache URL:', url, err.message);
+          }
           markUrlAsFailed(url);
         })
       );
 
       await Promise.allSettled(cachePromises);
-      console.log('[SW] Successfully cached:', validUrls.length, '/', urls.length);
+      if (!IS_DEVELOPMENT) {
+        console.log('[SW] Successfully cached:', validUrls.length, '/', urls.length);
+      }
     }
   } catch (error) {
-    // Only log errors in production mode
+    // Silently fail in development mode
     if (!IS_DEVELOPMENT) {
       console.error('[SW] On-demand caching failed:', error);
     }

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開発環境クリーンアップ - PMP Learning Management</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .btn-group {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 開発環境クリーンアップツール</h1>
+
+        <div class="info status">
+            このツールは開発環境のService Workerとキャッシュをクリーンアップするためのツールです。
+        </div>
+
+        <div class="btn-group">
+            <button onclick="checkServiceWorkers()">Service Worker確認</button>
+            <button onclick="unregisterAll()">全てアンレジスター</button>
+            <button onclick="clearAllCaches()">全キャッシュクリア</button>
+            <button onclick="fullCleanup()">完全クリーンアップ</button>
+        </div>
+
+        <div id="results" class="results" style="display: none;">
+            <h3>実行結果:</h3>
+            <div id="resultContent"></div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h3>手動クリーンアップ手順:</h3>
+            <ol>
+                <li>開発ツール（F12）を開く</li>
+                <li>Application タブを開く</li>
+                <li>Service Workers セクションを開く</li>
+                <li>"Unregister" をクリック</li>
+                <li>Storage セクションで "Clear site data" をクリック</li>
+                <li>ページを完全リロード（Ctrl+Shift+R / Cmd+Shift+R）</li>
+            </ol>
+
+            <h3>コンソールで実行:</h3>
+            <pre>// Service Workerをアンレジスター
+navigator.serviceWorker.getRegistrations()
+  .then(r => r.forEach(w => w.unregister()));
+
+// キャッシュをクリア
+caches.keys()
+  .then(k => Promise.all(k.map(n => caches.delete(n))));</pre>
+        </div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+            results.style.display = 'block';
+
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            resultContent.appendChild(div);
+        }
+
+        function clearResults() {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = '';
+        }
+
+        async function checkServiceWorkers() {
+            clearResults();
+
+            if (!('serviceWorker' in navigator)) {
+                showResult('❌ Service Workerはサポートされていません', 'error');
+                return;
+            }
+
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length === 0) {
+                    showResult('✅ 登録されているService Workerはありません', 'success');
+                } else {
+                    showResult(`⚠️ ${registrations.length}個のService Workerが登録されています`, 'info');
+                    registrations.forEach((reg, index) => {
+                        showResult(`  ${index + 1}. ${reg.scope}`, 'info');
+                    });
+                }
+            } catch (error) {
+                showResult(`❌ エラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function unregisterAll() {
+            clearResults();
+
+            if (!('serviceWorker' in navigator)) {
+                showResult('❌ Service Workerはサポートされていません', 'error');
+                return;
+            }
+
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+
+                if (registrations.length === 0) {
+                    showResult('✅ アンレジスターするService Workerはありません', 'success');
+                    return;
+                }
+
+                let unregisteredCount = 0;
+                for (const registration of registrations) {
+                    const success = await registration.unregister();
+                    if (success) {
+                        unregisteredCount++;
+                        showResult(`✅ アンレジスター成功: ${registration.scope}`, 'success');
+                    } else {
+                        showResult(`❌ アンレジスター失敗: ${registration.scope}`, 'error');
+                    }
+                }
+
+                showResult(`✅ ${unregisteredCount}/${registrations.length}個のService Workerをアンレジスターしました`, 'success');
+            } catch (error) {
+                showResult(`❌ エラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearAllCaches() {
+            clearResults();
+
+            if (!('caches' in window)) {
+                showResult('❌ Cache APIはサポートされていません', 'error');
+                return;
+            }
+
+            try {
+                const cacheNames = await caches.keys();
+
+                if (cacheNames.length === 0) {
+                    showResult('✅ クリアするキャッシュはありません', 'success');
+                    return;
+                }
+
+                let clearedCount = 0;
+                for (const cacheName of cacheNames) {
+                    const success = await caches.delete(cacheName);
+                    if (success) {
+                        clearedCount++;
+                        showResult(`✅ キャッシュクリア成功: ${cacheName}`, 'success');
+                    } else {
+                        showResult(`❌ キャッシュクリア失敗: ${cacheName}`, 'error');
+                    }
+                }
+
+                showResult(`✅ ${clearedCount}/${cacheNames.length}個のキャッシュをクリアしました`, 'success');
+            } catch (error) {
+                showResult(`❌ エラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function fullCleanup() {
+            clearResults();
+            showResult('🧹 完全クリーンアップを開始...', 'info');
+
+            await unregisterAll();
+            await clearAllCaches();
+
+            // LocalStorageクリア
+            try {
+                const localStorageSize = localStorage.length;
+                localStorage.clear();
+                showResult(`✅ LocalStorageをクリアしました（${localStorageSize}項目）`, 'success');
+            } catch (error) {
+                showResult(`❌ LocalStorageクリア失敗: ${error.message}`, 'error');
+            }
+
+            // SessionStorageクリア
+            try {
+                const sessionStorageSize = sessionStorage.length;
+                sessionStorage.clear();
+                showResult(`✅ SessionStorageをクリアしました（${sessionStorageSize}項目）`, 'success');
+            } catch (error) {
+                showResult(`❌ SessionStorageクリア失敗: ${error.message}`, 'error');
+            }
+
+            showResult('✅ 完全クリーンアップが完了しました！', 'success');
+            showResult('ℹ️ ページを完全リロードしてください（Ctrl+Shift+R / Cmd+Shift+R）', 'info');
+        }
+
+        // ページロード時にチェック
+        window.addEventListener('load', () => {
+            checkServiceWorkers();
+        });
+    </script>
+</body>
+</html>
