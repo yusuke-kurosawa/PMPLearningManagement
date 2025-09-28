@@ -1,1 +1,0 @@
-const o={integration:"統合管理",scope:"スコープ管理",schedule:"スケジュール管理",cost:"コスト管理",quality:"品質管理",resource:"資源管理",communications:"コミュニケーション管理",risk:"リスク管理",procurement:"調達管理",stakeholder:"ステークホルダー管理"},s={initiating:"立ち上げ",planning:"計画",executing:"実行",monitoring:"監視・コントロール",closing:"終結"};export{s as a,o as p};
