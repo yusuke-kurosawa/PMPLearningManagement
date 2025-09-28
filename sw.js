@@ -69,12 +69,24 @@ self.addEventListener('install', event => {
       try {
         const cache = await caches.open(CACHE_NAME);
         console.log('[SW] Caching shell resources');
-        await cache.addAll(PRECACHE_ASSETS);
-        
+
+        // Cache assets individually to prevent one failure from blocking all
+        const cachePromises = PRECACHE_ASSETS.map(url =>
+          cache.add(url).catch(err => {
+            console.error('[SW] Failed to precache:', url, err);
+            return null; // Continue despite individual failures
+          })
+        );
+
+        await Promise.allSettled(cachePromises);
+        console.log('[SW] Precaching completed');
+
         // Skip waiting to activate immediately
         self.skipWaiting();
       } catch (error) {
         console.error('[SW] Precaching failed:', error);
+        // Still skip waiting to allow SW to activate
+        self.skipWaiting();
       }
     })()
   );
@@ -504,8 +516,8 @@ self.addEventListener('push', event => {
   
   const options = {
     body: event.data ? event.data.text() : 'Study reminder from PMP Learning',
-    icon: '/PMPLearningManagement/icons/icon-192x192.png',
-    badge: '/PMPLearningManagement/icons/icon-72x72.png',
+    icon: '/PMPLearningManagement/icon-192x192.png',
+    badge: '/PMPLearningManagement/icon-192x192.png',
     vibrate: [200, 100, 200],
     data: {
       dateOfArrival: Date.now(),
@@ -515,12 +527,12 @@ self.addEventListener('push', event => {
       {
         action: 'open-app',
         title: 'Open App',
-        icon: '/PMPLearningManagement/icons/icon-96x96.png'
+        icon: '/PMPLearningManagement/icon-192x192.png'
       },
       {
         action: 'close',
         title: 'Dismiss',
-        icon: '/PMPLearningManagement/icons/icon-96x96.png'
+        icon: '/PMPLearningManagement/icon-192x192.png'
       }
     ]
   };
@@ -558,10 +570,52 @@ self.addEventListener('message', event => {
 
 // Cache additional URLs on demand
 async function cacheUrls(urls) {
+  if (!urls || !Array.isArray(urls) || urls.length === 0) {
+    console.warn('[SW] No valid URLs provided for caching');
+    return;
+  }
+
   try {
     const cache = await caches.open(RUNTIME_CACHE);
-    await cache.addAll(urls);
-    console.log('[SW] URLs cached on demand:', urls);
+
+    // Validate and filter URLs before caching
+    const validUrls = [];
+    for (const url of urls) {
+      try {
+        // Validate URL format
+        const parsedUrl = new URL(url, self.location.origin);
+
+        // Skip chrome-extension and other non-http(s) protocols
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+          console.warn('[SW] Skipping invalid protocol:', url);
+          continue;
+        }
+
+        // Check if resource exists
+        const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
+        if (response.ok) {
+          validUrls.push(url);
+        } else {
+          console.warn('[SW] Skipping non-existent resource:', url, response.status);
+        }
+      } catch (err) {
+        console.warn('[SW] Skipping invalid URL:', url, err.message);
+      }
+    }
+
+    if (validUrls.length > 0) {
+      // Cache URLs individually to prevent one failure from blocking all
+      const cachePromises = validUrls.map(url =>
+        cache.add(url).catch(err => {
+          console.error('[SW] Failed to cache URL:', url, err);
+        })
+      );
+
+      await Promise.allSettled(cachePromises);
+      console.log('[SW] URLs cached on demand:', validUrls.length, '/', urls.length);
+    } else {
+      console.warn('[SW] No valid URLs to cache');
+    }
   } catch (error) {
     console.error('[SW] On-demand caching failed:', error);
   }
