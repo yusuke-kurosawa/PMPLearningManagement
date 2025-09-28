@@ -6,7 +6,10 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Ensure single React instance
+      jsxRuntime: 'automatic'
+    }),
     viteStaticCopy({
       targets: [
         {
@@ -39,14 +42,19 @@ export default defineConfig({
     minify: 'terser', // Better compression for mobile
     target: ['es2015', 'edge88', 'chrome88', 'safari14'], // Modern browser support
     rollupOptions: {
+      // Ensure correct module loading order to prevent useLayoutEffect errors
+      external: [],
       output: {
         manualChunks(id) {
           // More granular chunking to reduce individual file sizes and avoid 429 errors
           if (id.includes('node_modules')) {
-            // Split React ecosystem
+            // IMPORTANT: Order matters! Check react-dom and react-router before react
+            // to prevent mismatches in module resolution
             if (id.includes('react-dom')) return 'react-dom';
             if (id.includes('react-router')) return 'react-router';
-            if (id.includes('react')) return 'react';
+            if (id.includes('react') && !id.includes('react-dom') && !id.includes('react-router')) {
+              return 'react';
+            }
 
             // Split D3 libraries
             if (id.includes('d3-sankey')) return 'd3-sankey';
@@ -114,18 +122,6 @@ export default defineConfig({
     host: true
   },
   
-  // Path resolution
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-      '@components': resolve(__dirname, './src/components'),
-      '@services': resolve(__dirname, './src/services'),
-      '@data': resolve(__dirname, './src/data'),
-      '@hooks': resolve(__dirname, './src/hooks'),
-      '@contexts': resolve(__dirname, './src/contexts'),
-      '@utils': resolve(__dirname, './src/utils')
-    }
-  },
   
   // CSS configuration
   css: {
@@ -159,6 +155,20 @@ export default defineConfig({
       'zod'
     ],
     exclude: ['@stryker-mutator/core']
+  },
+
+  // Path resolution and React duplication prevention
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@components': resolve(__dirname, './src/components'),
+      '@services': resolve(__dirname, './src/services'),
+      '@data': resolve(__dirname, './src/data'),
+      '@hooks': resolve(__dirname, './src/hooks'),
+      '@contexts': resolve(__dirname, './src/contexts'),
+      '@utils': resolve(__dirname, './src/utils')
+    },
+    dedupe: ['react', 'react-dom']
   },
 
   // Performance optimizations
