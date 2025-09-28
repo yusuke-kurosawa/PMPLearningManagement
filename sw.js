@@ -1,10 +1,17 @@
 // PMP Learning Management System - Service Worker
-// Version: 2.0.0
-// Mobile-optimized PWA with advanced caching strategies
+// Version: 2.1.0
+// Mobile-optimized PWA with advanced caching and IndexedDB integration
 
-const CACHE_NAME = 'pmp-learning-v2.0.0';
-const OFFLINE_CACHE = 'pmp-learning-offline-v2.0.0';
-const RUNTIME_CACHE = 'pmp-learning-runtime-v2.0.0';
+const CACHE_VERSION = '2.1.0';
+const CACHE_NAME = `pmp-learning-v${CACHE_VERSION}`;
+const OFFLINE_CACHE = `pmp-learning-offline-v${CACHE_VERSION}`;
+const RUNTIME_CACHE = `pmp-learning-runtime-v${CACHE_VERSION}`;
+const IMAGE_CACHE = `pmp-learning-images-v${CACHE_VERSION}`;
+const DATA_CACHE = `pmp-learning-data-v${CACHE_VERSION}`;
+
+// IndexedDB configuration
+const DB_NAME = 'PMPLearningOfflineDB';
+const DB_VERSION = 1;
 
 // Assets to cache immediately (shell resources)
 const PRECACHE_ASSETS = [
@@ -14,15 +21,22 @@ const PRECACHE_ASSETS = [
   // Core routes for offline access
   '/PMPLearningManagement/#/',
   '/PMPLearningManagement/#/matrix',
+  '/PMPLearningManagement/#/network',
+  '/PMPLearningManagement/#/integrated',
+  '/PMPLearningManagement/#/visualizations',
   '/PMPLearningManagement/#/flashcards',
-  '/PMPLearningManagement/#/glossary'
+  '/PMPLearningManagement/#/glossary',
+  '/PMPLearningManagement/#/pmbok7-principles',
+  '/PMPLearningManagement/#/pmbok7-domains'
 ];
 
 // Network-first resources (dynamic content)
 const NETWORK_FIRST = [
   '/api/',
   '/PMPLearningManagement/#/mock-exam',
-  '/PMPLearningManagement/#/progress'
+  '/PMPLearningManagement/#/progress',
+  '/PMPLearningManagement/#/collaboration',
+  '/PMPLearningManagement/#/ai-coaching'
 ];
 
 // Cache-first resources (static assets)
@@ -35,8 +49,16 @@ const CACHE_FIRST = [
   '.svg',
   '.woff',
   '.woff2',
-  '.ttf'
+  '.ttf',
+  '.ico'
 ];
+
+// Maximum cache sizes (in entries)
+const MAX_CACHE_SIZE = {
+  [RUNTIME_CACHE]: 50,
+  [IMAGE_CACHE]: 100,
+  [DATA_CACHE]: 30
+};
 
 // Install event - precache essential resources
 self.addEventListener('install', event => {
@@ -258,20 +280,81 @@ self.addEventListener('sync', event => {
     case 'exam-results-sync':
       event.waitUntil(syncExamResults());
       break;
+    case 'flashcard-sync':
+      event.waitUntil(syncFlashcardProgress());
+      break;
+    case 'notes-sync':
+      event.waitUntil(syncUserNotes());
+      break;
+    case 'offline-queue':
+      event.waitUntil(processOfflineQueue());
+      break;
     default:
       console.log('[SW] Unknown sync tag:', event.tag);
   }
 });
 
+// IndexedDB helper functions
+async function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      
+      // Create object stores if they don't exist
+      if (!db.objectStoreNames.contains('syncQueue')) {
+        db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains('offlineData')) {
+        db.createObjectStore('offlineData', { keyPath: 'key' });
+      }
+      if (!db.objectStoreNames.contains('progress')) {
+        db.createObjectStore('progress', { keyPath: 'userId' });
+      }
+      if (!db.objectStoreNames.contains('examResults')) {
+        db.createObjectStore('examResults', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+  });
+}
+
 // Sync progress data when online
 async function syncProgress() {
   try {
     console.log('[SW] Syncing progress data');
-    // This would sync with a backend API if available
-    // For now, just ensure localStorage data integrity
+    
+    const db = await openDatabase();
+    const tx = db.transaction(['progress'], 'readonly');
+    const store = tx.objectStore('progress');
+    const allProgress = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    // Sync each progress record
+    for (const progressData of allProgress) {
+      await syncToServer('/api/progress', progressData);
+    }
+    
+    // Notify clients of successful sync
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_COMPLETE',
+        data: { syncType: 'progress', timestamp: Date.now() }
+      });
+    });
+    
     return Promise.resolve();
   } catch (error) {
     console.error('[SW] Progress sync failed:', error);
+    // Re-throw to trigger retry
+    throw error;
   }
 }
 
@@ -279,10 +362,139 @@ async function syncProgress() {
 async function syncExamResults() {
   try {
     console.log('[SW] Syncing exam results');
-    // This would sync exam results with a backend API if available
+    
+    const db = await openDatabase();
+    const tx = db.transaction(['examResults'], 'readwrite');
+    const store = tx.objectStore('examResults');
+    const allResults = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    // Sync each exam result
+    for (const examResult of allResults) {
+      const synced = await syncToServer('/api/exam-results', examResult);
+      if (synced) {
+        // Remove from local store after successful sync
+        await store.delete(examResult.id);
+      }
+    }
+    
     return Promise.resolve();
   } catch (error) {
     console.error('[SW] Exam results sync failed:', error);
+    throw error;
+  }
+}
+
+// Sync flashcard progress
+async function syncFlashcardProgress() {
+  try {
+    console.log('[SW] Syncing flashcard progress');
+    
+    const db = await openDatabase();
+    const tx = db.transaction(['offlineData'], 'readonly');
+    const store = tx.objectStore('offlineData');
+    const flashcardData = await new Promise((resolve, reject) => {
+      const request = store.get('flashcard-progress');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    if (flashcardData && flashcardData.value) {
+      await syncToServer('/api/flashcards/progress', flashcardData.value);
+    }
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('[SW] Flashcard sync failed:', error);
+    throw error;
+  }
+}
+
+// Sync user notes
+async function syncUserNotes() {
+  try {
+    console.log('[SW] Syncing user notes');
+    
+    const db = await openDatabase();
+    const tx = db.transaction(['offlineData'], 'readonly');
+    const store = tx.objectStore('offlineData');
+    const notesData = await new Promise((resolve, reject) => {
+      const request = store.get('user-notes');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    if (notesData && notesData.value) {
+      await syncToServer('/api/notes', notesData.value);
+    }
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('[SW] Notes sync failed:', error);
+    throw error;
+  }
+}
+
+// Process offline queue
+async function processOfflineQueue() {
+  try {
+    console.log('[SW] Processing offline queue');
+    
+    const db = await openDatabase();
+    const tx = db.transaction(['syncQueue'], 'readwrite');
+    const store = tx.objectStore('syncQueue');
+    const queue = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    
+    // Process each queued request
+    for (const queueItem of queue) {
+      try {
+        const response = await fetch(queueItem.url, {
+          method: queueItem.method || 'POST',
+          headers: queueItem.headers || { 'Content-Type': 'application/json' },
+          body: JSON.stringify(queueItem.data)
+        });
+        
+        if (response.ok) {
+          // Remove from queue after successful sync
+          await store.delete(queueItem.id);
+        }
+      } catch (error) {
+        console.error('[SW] Failed to sync queue item:', queueItem.id, error);
+      }
+    }
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error('[SW] Queue processing failed:', error);
+    throw error;
+  }
+}
+
+// Helper function to sync data to server
+async function syncToServer(endpoint, data) {
+  try {
+    // For now, just simulate the sync since we don't have a backend
+    // In production, this would make actual API calls
+    console.log('[SW] Would sync to:', endpoint, data);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Store in localStorage as fallback for now
+    const syncKey = `sync_${endpoint}_${Date.now()}`;
+    localStorage.setItem(syncKey, JSON.stringify(data));
+    
+    return true;
+  } catch (error) {
+    console.error('[SW] Server sync failed:', error);
+    return false;
   }
 }
 
