@@ -13,49 +13,13 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-192x192.png",
+      "src": "/PMPLearningManagement/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-512x512.png",
+      "src": "/PMPLearningManagement/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
@@ -67,37 +31,21 @@
       "short_name": "Matrix",
       "description": "View PMBOK process matrix",
       "url": "/PMPLearningManagement/#/matrix",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/PMPLearningManagement/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Mock Exam",
       "short_name": "Exam",
       "description": "Take PMP practice exam",
       "url": "/PMPLearningManagement/#/mock-exam",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/PMPLearningManagement/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Flash Cards",
       "short_name": "Cards",
       "description": "Study with flash cards",
       "url": "/PMPLearningManagement/#/flashcards",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/mobile-home.png",
-      "sizes": "375x667",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Home screen on mobile"
-    },
-    {
-      "src": "screenshots/desktop-matrix.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "PMBOK Matrix view on desktop"
+      "icons": [{ "src": "/PMPLearningManagement/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "prefer_related_applications": false,
