@@ -92,24 +92,24 @@ const MAX_CACHE_SIZE = {
 
 // Install event - CLEANUP MODE: No caching
 self.addEventListener('install', event => {
-  console.log('[SW v2.2.0] CLEANUP MODE - Installing');
+  swLog.info('[SW v2.2.0] CLEANUP MODE - Installing');
   event.waitUntil(self.skipWaiting());
 });
 
 // Activate event - DELETE ALL CACHES
 self.addEventListener('activate', event => {
-  console.log('[SW v2.2.0] CLEANUP MODE - Deleting ALL caches');
+  swLog.info('[SW v2.2.0] CLEANUP MODE - Deleting ALL caches');
 
   event.waitUntil(
     (async () => {
       const cacheNames = await caches.keys();
       await Promise.all(cacheNames.map(cacheName => {
-        console.log('[SW v2.2.0] Deleting cache:', cacheName);
+        swLog.info('[SW v2.2.0] Deleting cache:', cacheName);
         return caches.delete(cacheName);
       }));
 
       await self.clients.claim();
-      console.log('[SW v2.2.0] All caches deleted, claimed clients');
+      swLog.info('[SW v2.2.0] All caches deleted, claimed clients');
     })()
   );
 });
@@ -146,7 +146,7 @@ async function handleFetch(request) {
     return await networkWithCacheFallback(request);
     
   } catch (error) {
-    console.error('[SW] Fetch error:', error);
+    swLog.error('[SW] Fetch error:', error);
     return await getOfflineFallback(request);
   }
 }
@@ -346,7 +346,7 @@ async function syncProgress() {
     
     return Promise.resolve();
   } catch (error) {
-    console.error('[SW] Progress sync failed:', error);
+    swLog.error('[SW] Progress sync failed:', error);
     // Re-throw to trigger retry
     throw error;
   }
@@ -377,7 +377,7 @@ async function syncExamResults() {
     
     return Promise.resolve();
   } catch (error) {
-    console.error('[SW] Exam results sync failed:', error);
+    swLog.error('[SW] Exam results sync failed:', error);
     throw error;
   }
 }
@@ -402,7 +402,7 @@ async function syncFlashcardProgress() {
     
     return Promise.resolve();
   } catch (error) {
-    console.error('[SW] Flashcard sync failed:', error);
+    swLog.error('[SW] Flashcard sync failed:', error);
     throw error;
   }
 }
@@ -427,7 +427,7 @@ async function syncUserNotes() {
     
     return Promise.resolve();
   } catch (error) {
-    console.error('[SW] Notes sync failed:', error);
+    swLog.error('[SW] Notes sync failed:', error);
     throw error;
   }
 }
@@ -435,7 +435,7 @@ async function syncUserNotes() {
 // Process offline queue
 async function processOfflineQueue() {
   try {
-    console.log('[SW] Processing offline queue');
+    swLog.info('[SW] Processing offline queue');
     
     const db = await openDatabase();
     const tx = db.transaction(['syncQueue'], 'readwrite');
@@ -460,13 +460,13 @@ async function processOfflineQueue() {
           await store.delete(queueItem.id);
         }
       } catch (error) {
-        console.error('[SW] Failed to sync queue item:', queueItem.id, error);
+        swLog.error('[SW] Failed to sync queue item:', queueItem.id, error);
       }
     }
     
     return Promise.resolve();
   } catch (error) {
-    console.error('[SW] Queue processing failed:', error);
+    swLog.error('[SW] Queue processing failed:', error);
     throw error;
   }
 }
@@ -476,7 +476,7 @@ async function syncToServer(endpoint, data) {
   try {
     // For now, just simulate the sync since we don't have a backend
     // In production, this would make actual API calls
-    console.log('[SW] Would sync to:', endpoint, data);
+    swLog.info('[SW] Would sync to:', endpoint, data);
     
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -487,14 +487,14 @@ async function syncToServer(endpoint, data) {
     
     return true;
   } catch (error) {
-    console.error('[SW] Server sync failed:', error);
+    swLog.error('[SW] Server sync failed:', error);
     return false;
   }
 }
 
 // Handle push notifications (for future use)
 self.addEventListener('push', event => {
-  console.log('[SW] Push received:', event);
+  swLog.info('[SW] Push received:', event);
   
   const options = {
     body: event.data ? event.data.text() : 'Study reminder from PMP Learning',
@@ -526,7 +526,7 @@ self.addEventListener('push', event => {
 
 // Handle notification clicks
 self.addEventListener('notificationclick', event => {
-  console.log('[SW] Notification clicked:', event);
+  swLog.info('[SW] Notification clicked:', event);
   
   event.notification.close();
   
@@ -556,7 +556,7 @@ self.addEventListener('message', event => {
 
   // Only log verbose messages if enabled (disabled in production)
   if (ENABLE_VERBOSE_LOGS) {
-    console.log('[SW] Message received:', event.data);
+    swLog.info('[SW] Message received:', event.data);
   }
 
   if (event.data.type === 'SKIP_WAITING') {
@@ -686,7 +686,7 @@ async function cacheUrls(urls) {
 
     // Only log in production and if there are significant failures
     if (!IS_DEVELOPMENT && skippedUrls.length > 10) {
-      console.log('[SW] Skipped URLs:', skippedUrls.length);
+      swLog.info('[SW] Skipped URLs:', skippedUrls.length);
     }
 
     if (validUrls.length > 0) {
@@ -694,7 +694,7 @@ async function cacheUrls(urls) {
       const cachePromises = validUrls.map(url =>
         cache.add(url).catch(err => {
           if (!IS_DEVELOPMENT) {
-            console.error('[SW] Failed to cache URL:', url, err.message);
+            swLog.error('[SW] Failed to cache URL:', url, err.message);
           }
           markUrlAsFailed(url);
         })
@@ -702,13 +702,13 @@ async function cacheUrls(urls) {
 
       await Promise.allSettled(cachePromises);
       if (!IS_DEVELOPMENT) {
-        console.log('[SW] Successfully cached:', validUrls.length, '/', urls.length);
+        swLog.info('[SW] Successfully cached:', validUrls.length, '/', urls.length);
       }
     }
   } catch (error) {
     // Silently fail in development mode
     if (!IS_DEVELOPMENT) {
-      console.error('[SW] On-demand caching failed:', error);
+      swLog.error('[SW] On-demand caching failed:', error);
     }
   }
 }
