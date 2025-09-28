@@ -8,6 +8,7 @@ import { ROLES, PERMISSIONS } from './lib/auth/supabase'
 import AppLayout from './components/layout/AppLayout'
 import PageTransition from './components/layout/PageTransition'
 import CustomizationPanel from './components/shared/CustomizationPanel'
+import ErrorBoundary from './components/layout/ErrorBoundary'
 import {
   LoadingSpinner,
   MatrixLoader,
@@ -155,16 +156,17 @@ function App() {
   const isMobile = useIsMobile()
 
   return (
-    <ContextManagerProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <OfflineProvider
-            showIndicator={true}
-            showBanner={true}
-            enableAutoSync={true}
-            syncInterval={60000}
-          >
-            <Router>
+    <ErrorBoundary>
+      <ContextManagerProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <OfflineProvider
+              showIndicator={true}
+              showBanner={true}
+              enableAutoSync={true}
+              syncInterval={60000}
+            >
+              <Router>
               <Suspense fallback={<LoadingSpinner />}>
                 {isMobile ? (
                   // Mobile-optimized version with PWA features
@@ -737,6 +739,7 @@ function App() {
         </AuthProvider>
       </ThemeProvider>
     </ContextManagerProvider>
+    </ErrorBoundary>
   )
 }
 
