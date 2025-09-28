@@ -1,19 +1,34 @@
 // PMP Learning Management System - Service Worker
-// Version: 2.1.3
-// Mobile-optimized PWA with advanced caching and IndexedDB integration
-// Updated: 2025-09-28 - Force cache refresh for deployment
+// Version: 2.2.0 - CACHE CLEANUP MODE
+// This version clears all caches and deactivates the service worker
+// Updated: 2025-09-28 - Force complete cache cleanup
 
-const CACHE_VERSION = '2.1.3';
-const CACHE_NAME = `pmp-learning-v${CACHE_VERSION}`;
-const OFFLINE_CACHE = `pmp-learning-offline-v${CACHE_VERSION}`;
-const RUNTIME_CACHE = `pmp-learning-runtime-v${CACHE_VERSION}`;
-const IMAGE_CACHE = `pmp-learning-images-v${CACHE_VERSION}`;
-const DATA_CACHE = `pmp-learning-data-v${CACHE_VERSION}`;
+const CACHE_VERSION = '2.2.0';
 
 // Development mode detection
 const IS_DEVELOPMENT = self.location.hostname === 'localhost' ||
                         self.location.hostname === '127.0.0.1' ||
                         self.location.port.startsWith('517'); // Match any Vite dev server port (5173, 5174, 5175, etc.)
+
+// Logging configuration - disable verbose logs in production
+const ENABLE_VERBOSE_LOGS = IS_DEVELOPMENT; // Only enable detailed logs in development
+
+// Logging helper functions
+const swLog = {
+  info: (...args) => {
+    if (ENABLE_VERBOSE_LOGS) {
+      console.log(...args);
+    }
+  },
+  warn: (...args) => {
+    // Always show warnings
+    console.warn(...args);
+  },
+  error: (...args) => {
+    // Always show errors
+    console.error(...args);
+  }
+};
 
 // Rate limiting for cache operations
 const CACHE_RATE_LIMIT = new Map();
@@ -75,95 +90,34 @@ const MAX_CACHE_SIZE = {
   [DATA_CACHE]: 30
 };
 
-// Install event - precache essential resources
+// Install event - CLEANUP MODE: No caching
 self.addEventListener('install', event => {
-  if (!IS_DEVELOPMENT) {
-    console.log('[SW] Install event');
-  }
-
-  event.waitUntil(
-    (async () => {
-      // Skip precaching entirely in development
-      if (IS_DEVELOPMENT) {
-        self.skipWaiting();
-        return;
-      }
-
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        console.log('[SW] Caching shell resources');
-
-        // Cache assets individually to prevent one failure from blocking all
-        const cachePromises = PRECACHE_ASSETS.map(url =>
-          cache.add(url).catch(err => {
-            console.error('[SW] Failed to precache:', url, err);
-            return null; // Continue despite individual failures
-          })
-        );
-
-        await Promise.allSettled(cachePromises);
-        console.log('[SW] Precaching completed');
-
-        // Skip waiting to activate immediately
-        self.skipWaiting();
-      } catch (error) {
-        console.error('[SW] Precaching failed:', error);
-        // Still skip waiting to allow SW to activate
-        self.skipWaiting();
-      }
-    })()
-  );
+  console.log('[SW v2.2.0] CLEANUP MODE - Installing');
+  event.waitUntil(self.skipWaiting());
 });
 
-// Activate event - cleanup old caches
+// Activate event - DELETE ALL CACHES
 self.addEventListener('activate', event => {
-  if (!IS_DEVELOPMENT) {
-    console.log('[SW] Activate event');
-  }
-  
+  console.log('[SW v2.2.0] CLEANUP MODE - Deleting ALL caches');
+
   event.waitUntil(
     (async () => {
-      try {
-        // Clean up old caches
-        const cacheNames = await caches.keys();
-        const oldCaches = cacheNames.filter(cacheName => 
-          (cacheName.startsWith('pmp-learning-') && 
-           cacheName !== CACHE_NAME && 
-           cacheName !== OFFLINE_CACHE && 
-           cacheName !== RUNTIME_CACHE)
-        );
-        
-        await Promise.all(
-          oldCaches.map(cacheName => {
-            console.log('[SW] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-        );
-        
-        // Claim all clients
-        self.clients.claim();
-      } catch (error) {
-        console.error('[SW] Cache cleanup failed:', error);
-      }
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(cacheName => {
+        console.log('[SW v2.2.0] Deleting cache:', cacheName);
+        return caches.delete(cacheName);
+      }));
+
+      await self.clients.claim();
+      console.log('[SW v2.2.0] All caches deleted, claimed clients');
     })()
   );
 });
 
-// Fetch event - implement caching strategies
+// Fetch event - CLEANUP MODE: No caching, pass through to network
 self.addEventListener('fetch', event => {
-  // CRITICAL: Skip ALL fetch handling in development
-  if (IS_DEVELOPMENT) return;
-
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== 'GET') return;
-
-  // Skip chrome-extension requests
-  if (url.protocol === 'chrome-extension:') return;
-
-  event.respondWith(handleFetch(request));
+  // Always pass through to network, no caching
+  event.respondWith(fetch(event.request));
 });
 
 // Handle fetch requests with appropriate caching strategy
@@ -209,7 +163,7 @@ async function networkFirst(request) {
     
     return networkResponse;
   } catch (error) {
-    console.log('[SW] Network failed, trying cache:', request.url);
+    swLog.info('[SW] Network failed, trying cache:', request.url);
     const cachedResponse = await caches.match(request);
     if (cachedResponse) return cachedResponse;
     throw error;
@@ -311,7 +265,7 @@ async function getOfflineFallback(request) {
 
 // Background sync for offline actions
 self.addEventListener('sync', event => {
-  console.log('[SW] Background sync:', event.tag);
+  swLog.info('[SW] Background sync:', event.tag);
   
   switch (event.tag) {
     case 'progress-sync':
@@ -330,7 +284,7 @@ self.addEventListener('sync', event => {
       event.waitUntil(processOfflineQueue());
       break;
     default:
-      console.log('[SW] Unknown sync tag:', event.tag);
+      swLog.info('[SW] Unknown sync tag:', event.tag);
   }
 });
 
@@ -365,7 +319,7 @@ async function openDatabase() {
 // Sync progress data when online
 async function syncProgress() {
   try {
-    console.log('[SW] Syncing progress data');
+    swLog.info('[SW] Syncing progress data');
     
     const db = await openDatabase();
     const tx = db.transaction(['progress'], 'readonly');
@@ -401,7 +355,7 @@ async function syncProgress() {
 // Sync exam results when online
 async function syncExamResults() {
   try {
-    console.log('[SW] Syncing exam results');
+    swLog.info('[SW] Syncing exam results');
     
     const db = await openDatabase();
     const tx = db.transaction(['examResults'], 'readwrite');
@@ -431,7 +385,7 @@ async function syncExamResults() {
 // Sync flashcard progress
 async function syncFlashcardProgress() {
   try {
-    console.log('[SW] Syncing flashcard progress');
+    swLog.info('[SW] Syncing flashcard progress');
     
     const db = await openDatabase();
     const tx = db.transaction(['offlineData'], 'readonly');
@@ -456,7 +410,7 @@ async function syncFlashcardProgress() {
 // Sync user notes
 async function syncUserNotes() {
   try {
-    console.log('[SW] Syncing user notes');
+    swLog.info('[SW] Syncing user notes');
     
     const db = await openDatabase();
     const tx = db.transaction(['offlineData'], 'readonly');
@@ -600,8 +554,8 @@ self.addEventListener('message', event => {
     return;
   }
 
-  // Only log in non-development mode to reduce console noise
-  if (!IS_DEVELOPMENT) {
+  // Only log verbose messages if enabled (disabled in production)
+  if (ENABLE_VERBOSE_LOGS) {
     console.log('[SW] Message received:', event.data);
   }
 
