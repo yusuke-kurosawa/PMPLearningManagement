@@ -1,0 +1,51 @@
+rules:
+  - id: pmbok-terminology-accuracy
+    severity: warning
+    description: PMBOKの用語（プロセス群/知識エリア/ITTO）の正確性チェック
+    pattern: |
+      PMBOKの標準用語と異なる表記を検出
+    examples:
+      - "Initiation Group → 立ち上げプロセス群"
+      - "Closing Process → 終結プロセス群"
+      - "Integration Management → 統合マネジメント"
+    files:
+      - "src/data/pmbok/**"
+      - "src/components/pmbok/**"
+
+  - id: pwa-offline-compatibility
+    severity: error
+    description: PWAオフライン互換性チェック
+    pattern: |
+      Service Worker変更時のオフライン動作保証を確認
+    files:
+      - "src/lib/pwa/**"
+      - "src/services/sync/**"
+      - "public/service-worker.js"
+
+  - id: react-18-best-practices
+    severity: info
+    description: React 18のベストプラクティス遵守
+    pattern: |
+      Suspense/ErrorBoundary/Lazy Loadingの適切な使用
+    checks:
+      - Suspense境界の適切な配置
+      - ErrorBoundaryの実装
+      - React.lazy()の使用
+
+  - id: supabase-security
+    severity: high
+    description: Supabase統合のセキュリティベストプラクティス
+    pattern: |
+      Row Level Security (RLS)の適切な設定確認
+    files:
+      - "src/services/authService.ts"
+      - "src/lib/supabase/**"
+
+  - id: sensitive-data-exposure
+    severity: critical
+    description: 機密情報の露出チェック
+    pattern: |
+      APIキー、シークレット、パスワードの平文保存を検出
+    exclude:
+      - "*.test.*"
+      - "*.spec.*"

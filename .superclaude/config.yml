@@ -1,0 +1,75 @@
+version: 1.0
+project:
+  name: PMPLearningManagement
+  type: react-pwa
+  description: PMBOK Learning Management System - Static Site with Modern Features
+
+integration:
+  serena:
+    enabled: true
+    memory_path: .serena/memories/
+    priority: high
+    fallback: true
+
+  context7:
+    enabled: true
+    cache_strategy: aggressive
+    redis_url: ${UPSTASH_REDIS_REST_URL}
+
+  sequential:
+    enabled: true
+    reasoning_depth: standard
+
+  playwright:
+    enabled: false  # 既存E2Eテストと重複回避
+
+  tavily:
+    enabled: false  # Web検索不要（静的コンテンツ）
+
+  magic:
+    enabled: false  # Radix UI既存
+
+  morphllm:
+    enabled: false  # 必要時のみ有効化
+
+analysis:
+  depth: standard
+  focus:
+    - code-quality
+    - architecture
+    - security
+    - performance
+    - pmbok-compliance
+
+  exclude:
+    - node_modules/
+    - dist/
+    - coverage/
+    - .git/
+    - reports/
+    - playwright-report/
+    - test-results/
+    - .venv/
+
+output:
+  format: json
+  path: .superclaude/reports/
+  verbose: true
+
+cache:
+  enabled: true
+  ttl: 3600  # 1時間
+  max_size: 500MB
+  use_redis: true
+
+performance:
+  timeout: 300  # 5分
+  parallel: true
+  incremental: true
+
+security:
+  mask_secrets: true
+  exclude_patterns:
+    - "*.env*"
+    - "*.key"
+    - "*secret*"
