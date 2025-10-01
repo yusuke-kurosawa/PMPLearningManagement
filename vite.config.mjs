@@ -12,6 +12,7 @@ export default defineConfig({
     }),
     viteStaticCopy({
       targets: [
+        // PWA manifest and icons
         {
           src: 'public/manifest.json',
           dest: ''
@@ -36,7 +37,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
     minify: 'terser', // Better compression for mobile
-    target: ['es2015', 'edge88', 'chrome88', 'safari14'], // Modern browser support
+    target: ['es2020', 'edge88', 'chrome88', 'safari14'], // Modern browser support (updated to es2020)
     rollupOptions: {
       // Ensure correct module loading order to prevent useLayoutEffect errors
       external: [],
@@ -83,14 +84,14 @@ export default defineConfig({
       }
     },
     // Adjusted bundle size limits to create more, smaller chunks
-    chunkSizeWarningLimit: 250,
+    chunkSizeWarningLimit: 500, // Increased to reduce warnings for legitimate large chunks
     // Terser options for better mobile performance
     terserOptions: {
       compress: {
         drop_console: true, // Remove console logs in production
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
-        passes: 2 // Multiple compression passes
+        passes: 1 // Reduced to 1 pass to prevent segmentation fault
       },
       mangle: {
         safari10: true // Safari compatibility
@@ -108,7 +109,11 @@ export default defineConfig({
     host: true,
     cors: true,
     hmr: {
-      overlay: false
+      overlay: true // Re-enabled for better development experience
+    },
+    watch: {
+      // Performance optimization for file watching
+      ignored: ['**/node_modules/**', '**/dist/**', '**/reports/**', '**/.git/**']
     }
   },
   
