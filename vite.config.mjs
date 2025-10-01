@@ -45,12 +45,12 @@ export default defineConfig({
         manualChunks(id) {
           // More granular chunking to reduce individual file sizes and avoid 429 errors
           if (id.includes('node_modules')) {
-            // IMPORTANT: Order matters! Check react-dom and react-router before react
-            // to prevent mismatches in module resolution
-            if (id.includes('react-dom')) return 'react-dom';
-            if (id.includes('react-router')) return 'react-router';
-            if (id.includes('react') && !id.includes('react-dom') && !id.includes('react-router')) {
-              return 'react';
+            // CRITICAL FIX: Bundle React, React-DOM, and React-Router together
+            // to prevent multiple React instances and "Cannot set properties of undefined" error
+            if (id.includes('react-dom') ||
+                id.includes('react-router') ||
+                (id.includes('react') && !id.includes('@radix-ui') && !id.includes('lucide-react'))) {
+              return 'react-vendor';
             }
 
             // Split D3 libraries
@@ -140,7 +140,9 @@ export default defineConfig({
       'react-hook-form',
       'zod'
     ],
-    exclude: ['@stryker-mutator/core']
+    exclude: ['@stryker-mutator/core'],
+    // Force clear cache and rebuild to ensure single React instance
+    force: false
   },
 
   // Path resolution and React duplication prevention
@@ -152,9 +154,12 @@ export default defineConfig({
       '@data': resolve(__dirname, './src/data'),
       '@hooks': resolve(__dirname, './src/hooks'),
       '@contexts': resolve(__dirname, './src/contexts'),
-      '@utils': resolve(__dirname, './src/utils')
+      '@utils': resolve(__dirname, './src/utils'),
+      // Explicit React aliases to prevent duplication
+      'react': resolve(__dirname, './node_modules/react'),
+      'react-dom': resolve(__dirname, './node_modules/react-dom')
     },
-    dedupe: ['react', 'react-dom']
+    dedupe: ['react', 'react-dom', 'react-router-dom']
   },
 
   // Performance optimizations
