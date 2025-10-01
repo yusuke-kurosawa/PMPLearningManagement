@@ -45,9 +45,11 @@ export default defineConfig({
         manualChunks(id) {
           // More granular chunking to reduce individual file sizes and avoid 429 errors
           if (id.includes('node_modules')) {
-            // CRITICAL FIX: Bundle React, React-DOM, and React-Router together
+            // CRITICAL FIX: Bundle React, React-DOM, Scheduler, and React-Router together
             // to prevent multiple React instances and "Cannot set properties of undefined" error
-            if (id.includes('react-dom') ||
+            // scheduler MUST be bundled with React to avoid initialization conflicts
+            if (id.includes('scheduler') ||
+                id.includes('react-dom') ||
                 id.includes('react-router') ||
                 (id.includes('react') && !id.includes('@radix-ui') && !id.includes('lucide-react'))) {
               return 'react-vendor';
@@ -130,6 +132,7 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
+      'scheduler', // Explicitly include scheduler with React
       'd3',
       'd3-sankey',
       'lucide-react',
@@ -157,9 +160,10 @@ export default defineConfig({
       '@utils': resolve(__dirname, './src/utils'),
       // Explicit React aliases to prevent duplication
       'react': resolve(__dirname, './node_modules/react'),
-      'react-dom': resolve(__dirname, './node_modules/react-dom')
+      'react-dom': resolve(__dirname, './node_modules/react-dom'),
+      'scheduler': resolve(__dirname, './node_modules/scheduler')
     },
-    dedupe: ['react', 'react-dom', 'react-router-dom']
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'scheduler']
   },
 
   // Performance optimizations
