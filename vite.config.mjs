@@ -36,7 +36,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
-    minify: 'terser', // Better compression for mobile
+    minify: 'esbuild', // Using esbuild to prevent segmentation faults
     target: ['es2020', 'edge88', 'chrome88', 'safari14'], // Modern browser support (updated to es2020)
     rollupOptions: {
       // Ensure correct module loading order to prevent useLayoutEffect errors
@@ -84,22 +84,7 @@ export default defineConfig({
       }
     },
     // Adjusted bundle size limits to create more, smaller chunks
-    chunkSizeWarningLimit: 500, // Increased to reduce warnings for legitimate large chunks
-    // Terser options for better mobile performance
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console logs in production
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-        passes: 1 // Reduced to 1 pass to prevent segmentation fault
-      },
-      mangle: {
-        safari10: true // Safari compatibility
-      },
-      format: {
-        comments: false // Remove comments
-      }
-    }
+    chunkSizeWarningLimit: 500 // Increased to reduce warnings for legitimate large chunks
   },
   
   // Development server configuration
