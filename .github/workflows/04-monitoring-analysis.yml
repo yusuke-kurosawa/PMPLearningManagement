@@ -55,7 +55,6 @@ jobs:
         run: |
           npm install -g webpack-bundle-analyzer
           npm install --save-dev @bundle-analyzer/webpack-plugin
-          npm install --save-dev bundlesize
       - name: Analyze bundle
         run: "echo \"\U0001F50D Analyzing bundle composition...\"\nnode ./scripts/analyze-bundle.js\n"
       - name: Check bundle size limits

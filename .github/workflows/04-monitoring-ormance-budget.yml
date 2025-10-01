@@ -78,7 +78,7 @@ jobs:
       - name: Install performance testing tools
         run: |
           npm install -g @lhci/cli lighthouse
-          npm install -g bundlesize webpack-bundle-analyzer
+          npm install -g webpack-bundle-analyzer
       - name: Start preview server
         run: |
           npm run preview &
