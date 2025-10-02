@@ -167,11 +167,15 @@ export default defineConfig({
   },
 
   // Performance optimizations
+  // CRITICAL FIX: Disable minifyIdentifiers to prevent TDZ (Temporal Dead Zone) errors
+  // Issue: "Cannot access 'un' before initialization" in react-vendor chunk
+  // Cause: Aggressive identifier minification breaks React/Scheduler initialization order
   esbuild: {
     target: 'es2020',
     treeShaking: true,
-    minifyIdentifiers: true,
+    minifyIdentifiers: false, // Disabled to prevent variable initialization conflicts
     minifySyntax: true,
-    minifyWhitespace: true
+    minifyWhitespace: true,
+    keepNames: true // Preserve function/variable names for safer minification
   }
 })
