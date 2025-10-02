@@ -1,0 +1,567 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+import { r as reactExports, j as jsxRuntimeExports } from "./react-vendor-Uy5hwzow.js";
+import { C as Card, a as CardHeader, b as CardTitle, d as CardDescription, c as CardContent } from "./card-DxIMXhob.js";
+import { B as Badge } from "./badge-ClOHT5Zy.js";
+import { B as Button } from "./button-C-u1QTim.js";
+import { S as Separator } from "./separator-Cd8fry1p.js";
+import { a as agileManifestoData } from "./agileManifestoData-Dl5TDcZS.js";
+import { m as motion, A as AnimatePresence } from "./framer-motion-f1HlQ5oK.js";
+import { n as BookOpen, S as Search, G as Grid3x3, ay as List, y as Bookmark, c as Clock, s as Users, e as Settings, av as CheckCircle, ai as AlertTriangle, ar as Award, a3 as Star, t as Target, T as TrendingUp, V as ChevronRight } from "./lucide-icons-B7slfWYt.js";
+import "./vendor-iUsVqwEv.js";
+import "./index-CZZZnLRW.js";
+import "./radix-core-BMsYm0jb.js";
+const AgilePracticesLibrary = /* @__PURE__ */ __name(() => {
+  const [filters, setFilters] = reactExports.useState({
+    category: "all",
+    framework: "all",
+    difficulty: "all",
+    search: ""
+  });
+  const [viewMode, setViewMode] = reactExports.useState("grid");
+  const [selectedPractice, setSelectedPractice] = reactExports.useState(null);
+  const [expandedSections, setExpandedSections] = reactExports.useState(/* @__PURE__ */ new Set());
+  const [favorites, setFavorites] = reactExports.useState(/* @__PURE__ */ new Set());
+  const practices = agileManifestoData.practices;
+  const categories = [
+    { key: "all", label: "すべて", count: practices.length },
+    { key: "scrum", label: "Scrum", count: practices.filter((p) => p.category === "scrum").length },
+    {
+      key: "kanban",
+      label: "Kanban",
+      count: practices.filter((p) => p.category === "kanban").length
+    },
+    { key: "xp", label: "XP", count: practices.filter((p) => p.category === "xp").length },
+    { key: "lean", label: "Lean", count: practices.filter((p) => p.category === "lean").length },
+    {
+      key: "planning",
+      label: "計画",
+      count: practices.filter((p) => p.category === "planning").length
+    },
+    {
+      key: "development",
+      label: "開発",
+      count: practices.filter((p) => p.category === "development").length
+    },
+    {
+      key: "testing",
+      label: "テスト",
+      count: practices.filter((p) => p.category === "testing").length
+    },
+    {
+      key: "collaboration",
+      label: "コラボレーション",
+      count: practices.filter((p) => p.category === "collaboration").length
+    }
+  ];
+  const frameworks = [
+    { key: "all", label: "すべて" },
+    { key: "Scrum", label: "Scrum" },
+    { key: "Kanban", label: "Kanban" },
+    { key: "XP", label: "XP" },
+    { key: "Lean", label: "Lean" },
+    { key: "SAFe", label: "SAFe" },
+    { key: "Generic", label: "Generic" }
+  ];
+  const difficulties = [
+    { key: "all", label: "すべて" },
+    { key: "beginner", label: "初級" },
+    { key: "intermediate", label: "中級" },
+    { key: "advanced", label: "上級" }
+  ];
+  const filteredPractices = reactExports.useMemo(() => {
+    return practices.filter((practice) => {
+      if (filters.category !== "all" && practice.category !== filters.category) {
+        return false;
+      }
+      if (filters.framework !== "all" && !practice.framework.includes(filters.framework)) {
+        return false;
+      }
+      if (filters.difficulty !== "all" && practice.difficulty !== filters.difficulty) {
+        return false;
+      }
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        return practice.name.toLowerCase().includes(searchTerm) || practice.description.toLowerCase().includes(searchTerm) || practice.purpose.toLowerCase().includes(searchTerm);
+      }
+      return true;
+    });
+  }, [practices, filters]);
+  const toggleFavorite = /* @__PURE__ */ __name((practiceId) => {
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(practiceId)) {
+      newFavorites.delete(practiceId);
+    } else {
+      newFavorites.add(practiceId);
+    }
+    setFavorites(newFavorites);
+  }, "toggleFavorite");
+  const toggleSection = /* @__PURE__ */ __name((section) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(section)) {
+      newExpanded.delete(section);
+    } else {
+      newExpanded.add(section);
+    }
+    setExpandedSections(newExpanded);
+  }, "toggleSection");
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      }
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto max-w-7xl space-y-8 p-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0, y: -20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.6 },
+        className: "space-y-4 text-center",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-xl bg-gradient-to-r from-green-500 to-blue-600 p-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-8 w-8 text-white" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-4xl font-bold text-transparent", children: "アジャイル・プラクティス・ライブラリ" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mx-auto max-w-3xl text-xl text-muted-foreground", children: "51のアジャイル・プラクティスを探索し、実践的な知識を身につける" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { delay: 0.3 },
+        className: "space-y-4",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mx-auto max-w-md", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "text",
+                placeholder: "プラクティスを検索...",
+                value: filters.search,
+                onChange: /* @__PURE__ */ __name((e) => setFilters((prev) => ({ ...prev, search: e.target.value })), "onChange"),
+                className: "w-full rounded-lg border border-input bg-background py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-ring"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center justify-between space-y-4 md:flex-row md:space-x-4 md:space-y-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: categories.map(({ key, label, count }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                variant: filters.category === key ? "default" : "outline",
+                size: "sm",
+                onClick: /* @__PURE__ */ __name(() => setFilters((prev) => ({ ...prev, category: key })), "onClick"),
+                className: "flex items-center space-x-2",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: label }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", className: "text-xs", children: count })
+                ]
+              },
+              key
+            )) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "select",
+                {
+                  value: filters.framework,
+                  onChange: /* @__PURE__ */ __name((e) => setFilters((prev) => ({ ...prev, framework: e.target.value })), "onChange"),
+                  className: "rounded-lg border border-input bg-background px-3 py-2 text-sm",
+                  children: frameworks.map(({ key, label }) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: key, children: label }, key))
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "select",
+                {
+                  value: filters.difficulty,
+                  onChange: /* @__PURE__ */ __name((e) => setFilters((prev) => ({ ...prev, difficulty: e.target.value })), "onChange"),
+                  className: "rounded-lg border border-input bg-background px-3 py-2 text-sm",
+                  children: difficulties.map(({ key, label }) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: key, children: label }, key))
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-1 rounded-lg bg-muted p-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: viewMode === "grid" ? "default" : "ghost",
+                    size: "sm",
+                    onClick: /* @__PURE__ */ __name(() => setViewMode("grid"), "onClick"),
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Grid3x3, { className: "h-4 w-4" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: viewMode === "list" ? "default" : "ghost",
+                    size: "sm",
+                    onClick: /* @__PURE__ */ __name(() => setViewMode("list"), "onClick"),
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(List, { className: "h-4 w-4" })
+                  }
+                )
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-sm text-muted-foreground", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              filteredPractices.length,
+              " 件のプラクティスが見つかりました"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              favorites.size,
+              " 件をブックマーク済み"
+            ] })
+          ] })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: viewMode === "grid" ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        variants: containerVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "hidden",
+        className: "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3",
+        children: filteredPractices.map((practice, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { variants: itemVariants, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          PracticeGridCard,
+          {
+            practice,
+            isFavorite: favorites.has(practice.id),
+            onToggleFavorite: /* @__PURE__ */ __name(() => toggleFavorite(practice.id), "onToggleFavorite"),
+            onSelect: /* @__PURE__ */ __name(() => setSelectedPractice(practice), "onSelect")
+          }
+        ) }, practice.id))
+      },
+      "grid"
+    ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        variants: containerVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "hidden",
+        className: "space-y-4",
+        children: filteredPractices.map((practice, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { variants: itemVariants, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          PracticeListCard,
+          {
+            practice,
+            isFavorite: favorites.has(practice.id),
+            onToggleFavorite: /* @__PURE__ */ __name(() => toggleFavorite(practice.id), "onToggleFavorite"),
+            onSelect: /* @__PURE__ */ __name(() => setSelectedPractice(practice), "onSelect")
+          }
+        ) }, practice.id))
+      },
+      "list"
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: selectedPractice && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        className: "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4",
+        onClick: /* @__PURE__ */ __name(() => setSelectedPractice(null), "onClick"),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            initial: { scale: 0.9, opacity: 0 },
+            animate: { scale: 1, opacity: 1 },
+            exit: { scale: 0.9, opacity: 0 },
+            className: "max-h-[90vh] max-w-4xl overflow-y-auto rounded-lg bg-background",
+            onClick: /* @__PURE__ */ __name((e) => e.stopPropagation(), "onClick"),
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              PracticeDetailCard,
+              {
+                practice: selectedPractice,
+                expandedSections,
+                onToggleSection: toggleSection,
+                onClose: /* @__PURE__ */ __name(() => setSelectedPractice(null), "onClose")
+              }
+            )
+          }
+        )
+      }
+    ) })
+  ] });
+}, "AgilePracticesLibrary");
+const PracticeGridCard = /* @__PURE__ */ __name(({ practice, isFavorite, onToggleFavorite, onSelect }) => {
+  const CategoryIcon = getCategoryIcon(practice.category);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "group h-full cursor-pointer transition-all duration-300 hover:shadow-lg", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(CardHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 items-center space-x-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-lg bg-gradient-to-r from-blue-500 to-green-500 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryIcon, { className: "h-5 w-5 text-white" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "truncate text-lg transition-colors group-hover:text-primary", children: practice.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { className: "line-clamp-2 text-sm", children: practice.description })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "ghost",
+          size: "sm",
+          onClick: /* @__PURE__ */ __name((e) => {
+            e.stopPropagation();
+            onToggleFavorite();
+          }, "onClick"),
+          className: "p-1",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(Bookmark, { className: `h-4 w-4 ${isFavorite ? "fill-current text-yellow-500" : ""}` })
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { onClick: onSelect, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1", children: practice.framework.slice(0, 2).map((framework) => /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "outline", className: "text-xs", children: framework }, framework)) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { className: `text-xs ${getDifficultyColor(practice.difficulty)}`, children: practice.difficulty === "beginner" ? "初級" : practice.difficulty === "intermediate" ? "中級" : "上級" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4 text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate text-xs text-muted-foreground", children: practice.duration })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "h-4 w-4 text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate text-xs text-muted-foreground", children: practice.teamSize })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "line-clamp-3 text-sm text-muted-foreground", children: practice.purpose }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          size: "sm",
+          className: "w-full group-hover:bg-primary group-hover:text-primary-foreground",
+          children: "詳細を見る"
+        }
+      )
+    ] }) })
+  ] });
+}, "PracticeGridCard");
+const PracticeListCard = /* @__PURE__ */ __name(({ practice, isFavorite, onToggleFavorite, onSelect }) => {
+  const CategoryIcon = getCategoryIcon(practice.category);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { className: "cursor-pointer transition-all duration-300 hover:shadow-md", onClick: onSelect, children: /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { className: "pt-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-lg bg-gradient-to-r from-blue-500 to-green-500 p-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryIcon, { className: "h-6 w-6 text-white" }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-2 flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "truncate text-lg font-semibold", children: practice.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Button,
+          {
+            variant: "ghost",
+            size: "sm",
+            onClick: /* @__PURE__ */ __name((e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }, "onClick"),
+            className: "p-1",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Bookmark,
+              {
+                className: `h-4 w-4 ${isFavorite ? "fill-current text-yellow-500" : ""}`
+              }
+            )
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-3 line-clamp-2 text-sm text-muted-foreground", children: practice.description }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1", children: practice.framework.slice(0, 3).map((framework) => /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "outline", className: "text-xs", children: framework }, framework)) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { className: `text-xs ${getDifficultyColor(practice.difficulty)}`, children: practice.difficulty === "beginner" ? "初級" : practice.difficulty === "intermediate" ? "中級" : "上級" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1 text-muted-foreground", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-3 w-3" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", children: practice.duration })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1 text-muted-foreground", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "h-3 w-3" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", children: practice.teamSize })
+        ] })
+      ] })
+    ] })
+  ] }) }) });
+}, "PracticeListCard");
+const PracticeDetailCard = /* @__PURE__ */ __name(({ practice, expandedSections, onToggleSection, onClose }) => {
+  const CategoryIcon = getCategoryIcon(practice.category);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 p-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-lg bg-gradient-to-r from-blue-500 to-green-500 p-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryIcon, { className: "h-8 w-8 text-white" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold", children: practice.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground", children: practice.description })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "ghost", onClick: onClose, children: "×" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "カテゴリ" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "secondary", children: practice.category }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "フレームワーク" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1", children: practice.framework.map((framework) => /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { variant: "outline", className: "text-xs", children: framework }, framework)) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "難易度" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Badge, { className: getDifficultyColor(practice.difficulty), children: practice.difficulty === "beginner" ? "初級" : practice.difficulty === "intermediate" ? "中級" : "上級" }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "所要時間" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4 text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm", children: practice.duration })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Separator, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 text-lg font-semibold", children: "目的" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground", children: practice.purpose })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CollapsibleSection,
+        {
+          title: "実装方法",
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Settings, { className: "h-4 w-4" }),
+          isExpanded: expandedSections.has(`${practice.id}-implementation`),
+          onToggle: /* @__PURE__ */ __name(() => onToggleSection(`${practice.id}-implementation`), "onToggle"),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: practice.howToImplement.map((step, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-start space-x-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-medium text-blue-800 dark:text-blue-200", children: index + 1 }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm", children: step })
+          ] }, index)) })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CollapsibleSection,
+        {
+          title: "利点",
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CheckCircle, { className: "h-4 w-4" }),
+          isExpanded: expandedSections.has(`${practice.id}-benefits`),
+          onToggle: /* @__PURE__ */ __name(() => onToggleSection(`${practice.id}-benefits`), "onToggle"),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 gap-2 md:grid-cols-2", children: practice.benefits.map((benefit, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(CheckCircle, { className: "mt-1 h-4 w-4 flex-shrink-0 text-green-500" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm", children: benefit })
+          ] }, index)) })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CollapsibleSection,
+        {
+          title: "課題と対策",
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(AlertTriangle, { className: "h-4 w-4" }),
+          isExpanded: expandedSections.has(`${practice.id}-challenges`),
+          onToggle: /* @__PURE__ */ __name(() => onToggleSection(`${practice.id}-challenges`), "onToggle"),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "mb-2 font-medium text-orange-600", children: "課題" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1", children: practice.challenges.map((challenge, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "text-sm text-muted-foreground", children: [
+                "• ",
+                challenge
+              ] }, index)) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "mb-2 font-medium text-red-600", children: "一般的な落とし穴" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1", children: practice.commonPitfalls.map((pitfall, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "text-sm text-red-600 dark:text-red-400", children: [
+                "• ",
+                pitfall
+              ] }, index)) })
+            ] })
+          ] })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CollapsibleSection,
+        {
+          title: "成功要因",
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Award, { className: "h-4 w-4" }),
+          isExpanded: expandedSections.has(`${practice.id}-success`),
+          onToggle: /* @__PURE__ */ __name(() => onToggleSection(`${practice.id}-success`), "onToggle"),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 gap-2 md:grid-cols-2", children: practice.successFactors.map((factor, index) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-lg bg-green-50 p-3 dark:bg-green-950", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-green-800 dark:text-green-200", children: factor }) }, index)) })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CollapsibleSection,
+        {
+          title: "実世界の事例",
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Star, { className: "h-4 w-4" }),
+          isExpanded: expandedSections.has(`${practice.id}-examples`),
+          onToggle: /* @__PURE__ */ __name(() => onToggleSection(`${practice.id}-examples`), "onToggle"),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 gap-3 md:grid-cols-2", children: practice.realWorldExamples.map((example, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950",
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-blue-800 dark:text-blue-200", children: example })
+            },
+            index
+          )) })
+        }
+      )
+    ] })
+  ] });
+}, "PracticeDetailCard");
+const CollapsibleSection = /* @__PURE__ */ __name(({ title, icon, children, isExpanded, onToggle }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg border border-border", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      Button,
+      {
+        variant: "ghost",
+        onClick: onToggle,
+        className: "flex w-full items-center justify-between p-4 font-medium hover:bg-muted",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+            icon,
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: title })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: `h-4 w-4 transition-transform ${isExpanded ? "rotate-90" : ""}` })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0, height: 0 },
+        animate: { opacity: 1, height: "auto" },
+        exit: { opacity: 0, height: 0 },
+        transition: { duration: 0.3 },
+        className: "overflow-hidden",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 pt-0", children })
+      }
+    ) })
+  ] });
+}, "CollapsibleSection");
+const getCategoryIcon = /* @__PURE__ */ __name((category) => {
+  const iconMap = {
+    scrum: Users,
+    kanban: TrendingUp,
+    xp: CheckCircle,
+    lean: Target,
+    planning: Clock,
+    development: Settings,
+    testing: AlertTriangle,
+    collaboration: Users
+  };
+  return iconMap[category] || BookOpen;
+}, "getCategoryIcon");
+export {
+  AgilePracticesLibrary as default
+};

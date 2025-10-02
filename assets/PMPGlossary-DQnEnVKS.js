@@ -1,0 +1,237 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+import { R as React, w as useLocation, r as reactExports, j as jsxRuntimeExports } from "./react-vendor-Uy5hwzow.js";
+import { g as glossaryService } from "./glossaryService-DZ07_k-f.js";
+import { u as useDebounce } from "./index-CZZZnLRW.js";
+import { S as Search, X, am as Tag, V as ChevronRight, an as Book } from "./lucide-icons-B7slfWYt.js";
+import "./vendor-iUsVqwEv.js";
+const PMPGlossary = React.memo(() => {
+  const location = useLocation();
+  const [searchQuery, setSearchQuery] = reactExports.useState("");
+  const [selectedCategories, setSelectedCategories] = reactExports.useState(/* @__PURE__ */ new Set());
+  const [selectedTerm, setSelectedTerm] = reactExports.useState(null);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  reactExports.useEffect(() => {
+    var _a;
+    if ((_a = location.state) == null ? void 0 : _a.selectedTermId) {
+      const term = glossaryService.getTermById(location.state.selectedTermId);
+      if (term) {
+        setSelectedTerm(term);
+        setTimeout(() => {
+          const element = document.getElementById(`term-${term.id}`);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
+      }
+    }
+  }, [location]);
+  const toggleCategory = reactExports.useCallback((categoryId) => {
+    setSelectedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  }, []);
+  const clearAllCategories = reactExports.useCallback(() => {
+    setSelectedCategories(/* @__PURE__ */ new Set());
+  }, []);
+  const filteredTerms = reactExports.useMemo(() => {
+    let results = glossaryService.getAllTerms();
+    if (selectedCategories.size > 0) {
+      results = glossaryService.filterByCategories(Array.from(selectedCategories));
+    }
+    if (debouncedSearchQuery) {
+      results = glossaryService.searchTerms(debouncedSearchQuery).filter(
+        (term) => selectedCategories.size === 0 || term.categories.some((cat) => selectedCategories.has(cat))
+      );
+    }
+    return results;
+  }, [debouncedSearchQuery, selectedCategories]);
+  const groupedTerms = reactExports.useMemo(() => {
+    const groups = {};
+    filteredTerms.forEach((term) => {
+      const firstLetter = term.term[0].toUpperCase();
+      if (!groups[firstLetter]) {
+        groups[firstLetter] = [];
+      }
+      groups[firstLetter].push(term);
+    });
+    Object.keys(groups).forEach((letter) => {
+      groups[letter].sort((a, b) => a.term.localeCompare(b.term));
+    });
+    return groups;
+  }, [filteredTerms]);
+  const getRelatedTerms = reactExports.useCallback((relatedTermNames) => {
+    return relatedTermNames.map((name) => glossaryService.getTermByName(name)).filter((term) => term);
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto max-w-7xl p-2 sm:p-4 md:p-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-white shadow-lg", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-b p-4 sm:p-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mb-4 text-xl font-bold text-gray-800 sm:text-2xl", children: "PMP用語集" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mb-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              "aria-label": "Input field",
+              id: "input-1754995293943-108",
+              type: "text",
+              placeholder: "用語を検索...",
+              className: "w-full rounded-lg border px-4 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-base",
+              value: searchQuery,
+              onChange: /* @__PURE__ */ __name((e) => setSearchQuery(e.target.value), "onChange")
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "absolute left-3 top-2.5 h-5 w-5 text-gray-400" }),
+          searchQuery && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              onClick: /* @__PURE__ */ __name(() => setSearchQuery(""), "onClick"),
+              className: "absolute right-3 top-2.5 text-gray-400 hover:text-gray-600",
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-5 w-5" })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-700", children: "カテゴリー" }),
+            selectedCategories.size > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: clearAllCategories,
+                className: "text-xs text-blue-600 hover:text-blue-800",
+                children: "すべてクリア"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: glossaryService.getAllCategories().map((category) => {
+            const isSelected = selectedCategories.has(category.id);
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                onClick: /* @__PURE__ */ __name(() => toggleCategory(category.id), "onClick"),
+                className: `inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors ${isSelected ? `${category.color} text-white` : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`,
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Tag, { className: "mr-1 h-3 w-3" }),
+                  category.name
+                ]
+              },
+              category.id
+            );
+          }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-600", children: [
+          filteredTerms.length,
+          "件の用語が見つかりました"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "custom-scrollbar max-h-[600px] overflow-y-auto p-4 sm:p-6", children: [
+        Object.keys(groupedTerms).sort().map((letter) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "sticky top-0 z-10 mb-3 bg-white py-2 text-lg font-bold text-gray-800", children: letter }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-3", children: groupedTerms[letter].map((term) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              id: `term-${term.id}`,
+              className: "cursor-pointer rounded-lg border p-4 transition-shadow hover:shadow-md",
+              onClick: /* @__PURE__ */ __name(() => setSelectedTerm(term), "onClick"),
+              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "font-semibold text-gray-900", children: [
+                    term.term,
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "ml-2 font-normal text-gray-600", children: [
+                      "(",
+                      term.japanese,
+                      ")"
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 line-clamp-2 text-sm text-gray-600", children: term.description }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-2 flex flex-wrap gap-1", children: term.categories.map((catId) => {
+                    const category = glossaryService.getCategoryById(catId);
+                    return category ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "span",
+                      {
+                        className: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${category.color} text-white`,
+                        children: category.name
+                      },
+                      catId
+                    ) : null;
+                  }) })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "ml-4 h-5 w-5 flex-shrink-0 text-gray-400" })
+              ] })
+            },
+            term.id
+          )) })
+        ] }, letter)),
+        filteredTerms.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-12 text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Book, { className: "mx-auto mb-4 h-12 w-12 text-gray-400" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-500", children: "該当する用語が見つかりませんでした" })
+        ] })
+      ] })
+    ] }),
+    selectedTerm && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-h-[80vh] w-full max-w-2xl overflow-auto rounded-lg bg-white shadow-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4 flex items-start justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-gray-800", children: selectedTerm.term }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-gray-600", children: selectedTerm.japanese })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: /* @__PURE__ */ __name(() => setSelectedTerm(null), "onClick"),
+            className: "text-gray-400 hover:text-gray-600",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-6 w-6" })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-1 text-sm font-semibold text-gray-700", children: "説明" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600", children: selectedTerm.description })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-1 text-sm font-semibold text-gray-700", children: "カテゴリー" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: selectedTerm.categories.map((catId) => {
+            const category = glossaryService.getCategoryById(catId);
+            return category ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "span",
+              {
+                className: `inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${category.color} text-white`,
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Tag, { className: "mr-1 h-4 w-4" }),
+                  category.name
+                ]
+              },
+              catId
+            ) : null;
+          }) })
+        ] }),
+        selectedTerm.relatedTerms && selectedTerm.relatedTerms.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-1 text-sm font-semibold text-gray-700", children: "関連用語" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: getRelatedTerms(selectedTerm.relatedTerms).map((relatedTerm) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              onClick: /* @__PURE__ */ __name(() => setSelectedTerm(relatedTerm), "onClick"),
+              className: "inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 transition-colors hover:bg-blue-200",
+              children: [
+                relatedTerm.term,
+                " (",
+                relatedTerm.japanese,
+                ")"
+              ]
+            },
+            relatedTerm.id
+          )) })
+        ] })
+      ] })
+    ] }) }) })
+  ] });
+});
+PMPGlossary.displayName = "PMPGlossary";
+export {
+  PMPGlossary as default
+};

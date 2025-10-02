@@ -1,0 +1,1370 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+import { R as React, r as reactExports, j as jsxRuntimeExports, v as useNavigate } from "./react-vendor-Uy5hwzow.js";
+import { g as glossaryTerms } from "./index-CZZZnLRW.js";
+import { G as GlossaryDialog } from "./GlossaryDialog-C_TOA3GO.js";
+import { u as useProgress, p as progressService } from "./progressService-B-LomPlh.js";
+import { X, n as BookOpen, ax as Pause, aj as Play, aq as CheckCircle2, f as Save, aL as Info, S as Search, L as Loader2, a4 as ChevronDown, V as ChevronRight } from "./lucide-icons-B7slfWYt.js";
+import "./vendor-iUsVqwEv.js";
+const LearningModal = /* @__PURE__ */ __name(({ isOpen, onClose, process, processId, knowledgeArea, processGroup }) => {
+  const { updateProgress, updateStudyTime } = useProgress();
+  const [progress, setProgress] = reactExports.useState({
+    completed: false,
+    understanding: 0,
+    notes: ""
+  });
+  const [isTimerRunning, setIsTimerRunning] = reactExports.useState(false);
+  const [studyTime, setStudyTime] = reactExports.useState(0);
+  const [startTime, setStartTime] = reactExports.useState(null);
+  const modalRef = reactExports.useRef(null);
+  const closeButtonRef = reactExports.useRef(null);
+  reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (isOpen && process) {
+      const existingProgress = progressService.getProcessProgress(processId);
+      setProgress(
+        existingProgress || {
+          completed: false,
+          understanding: 0,
+          notes: ""
+        }
+      );
+      if (closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      }
+    }
+  }, [isOpen, processId, process]);
+  reactExports.useEffect(() => {
+    const handleKeyDown = /* @__PURE__ */ __name((event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+      if (event.key === "Tab" && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }, "handleKeyDown");
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
+  reactExports.useEffect(() => {
+    let interval;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setStudyTime((prev) => prev + 1);
+      }, 1e3);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+  const handleTimerToggle = /* @__PURE__ */ __name(() => {
+    if (isTimerRunning) {
+      setIsTimerRunning(false);
+      const endTime = Date.now();
+      const sessionTime = Math.floor((endTime - startTime) / 6e4);
+      updateStudyTime(sessionTime);
+    } else {
+      setIsTimerRunning(true);
+      setStartTime(Date.now());
+    }
+  }, "handleTimerToggle");
+  const handleSave = /* @__PURE__ */ __name(async () => {
+    await updateProgress(processId, progress);
+    if (isTimerRunning) {
+      handleTimerToggle();
+    }
+    onClose();
+  }, "handleSave");
+  const handleBackdropClick = /* @__PURE__ */ __name((event) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  }, "handleBackdropClick");
+  const formatTime = /* @__PURE__ */ __name((seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }, "formatTime");
+  if (!isOpen || !process) {
+    return null;
+  }
+  return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4",
+        onClick: handleBackdropClick,
+        onKeyDown: /* @__PURE__ */ __name((e) => {
+          if (e.key === "Escape") {
+            onClose();
+          }
+        }, "onKeyDown"),
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-labelledby": "modal-title",
+        "aria-describedby": "modal-description",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            ref: modalRef,
+            className: "max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-lg bg-white shadow-2xl",
+            onClick: /* @__PURE__ */ __name((e) => e.stopPropagation(), "onClick"),
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between border-b p-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { id: "modal-title", className: "text-xl font-bold text-gray-900", children: process.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    ref: closeButtonRef,
+                    onClick: onClose,
+                    className: "rounded-lg p-2 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                    "aria-label": "Close modal",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-5 w-5" })
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "modal-description", className: "max-h-[calc(90vh-180px)] overflow-y-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 gap-6 lg:grid-cols-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4 rounded-lg bg-blue-50 p-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 font-semibold text-blue-900", children: "プロセス情報" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-blue-700", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: "知識エリア:" }),
+                      " ",
+                      knowledgeArea
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-blue-700", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium", children: "プロセス群:" }),
+                      " ",
+                      processGroup
+                    ] })
+                  ] }),
+                  process.inputs && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "mb-2 flex items-center gap-2 font-semibold text-gray-900", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-4 w-4" }),
+                      "インプット"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-inside list-disc space-y-1 text-sm text-gray-700", children: process.inputs.map((input, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: input }, idx)) })
+                  ] }),
+                  process.tools && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 font-semibold text-gray-900", children: "ツールと技法" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-inside list-disc space-y-1 text-sm text-gray-700", children: process.tools.map((tool, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: tool }, idx)) })
+                  ] }),
+                  process.outputs && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 font-semibold text-gray-900", children: "アウトプット" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-inside list-disc space-y-1 text-sm text-gray-700", children: process.outputs.map((output, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: output }, idx)) })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-gray-50 p-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4 flex items-center justify-between", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold text-gray-900", children: "学習タイマー" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        "button",
+                        {
+                          onClick: handleTimerToggle,
+                          className: `flex items-center gap-2 rounded-lg px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${isTimerRunning ? "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500" : "bg-green-500 text-white hover:bg-green-600 focus:ring-green-500"}`,
+                          "aria-label": isTimerRunning ? "Stop study timer" : "Start study timer",
+                          children: [
+                            isTimerRunning ? /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-4 w-4" }),
+                            isTimerRunning ? "停止" : "開始"
+                          ]
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-mono text-3xl font-bold text-gray-700", children: formatTime(studyTime) }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-gray-500", children: "学習時間" })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex cursor-pointer items-center gap-3 rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        type: "checkbox",
+                        checked: progress.completed,
+                        onChange: /* @__PURE__ */ __name((e) => setProgress({ ...progress, completed: e.target.checked }), "onChange"),
+                        className: "h-5 w-5 rounded text-blue-600 focus:ring-blue-500",
+                        "aria-describedby": "completion-help"
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-gray-900", children: "学習完了" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "completion-help", className: "sr-only", children: "Mark this process as completed in your learning progress" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      CheckCircle2,
+                      {
+                        className: `ml-auto h-5 w-5 ${progress.completed ? "text-green-600" : "text-gray-400"}`
+                      }
+                    )
+                  ] }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "label",
+                      {
+                        htmlFor: "understanding-slider",
+                        className: "mb-2 block font-medium text-gray-900",
+                        children: [
+                          "理解度: ",
+                          progress.understanding,
+                          "%"
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        id: "understanding-slider",
+                        type: "range",
+                        min: "0",
+                        max: "100",
+                        value: progress.understanding,
+                        onChange: /* @__PURE__ */ __name((e) => setProgress({ ...progress, understanding: parseInt(e.target.value) }), "onChange"),
+                        className: "h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                        style: {
+                          background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${progress.understanding}%, #E5E7EB ${progress.understanding}%, #E5E7EB 100%)`
+                        },
+                        "aria-describedby": "understanding-help"
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "understanding-help", className: "sr-only", children: "Slide to set your understanding level from 0 to 100 percent" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-1 flex justify-between text-xs text-gray-500", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "0%" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "50%" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "100%" })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "learning-notes", className: "mb-2 block font-medium text-gray-900", children: "学習メモ" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "textarea",
+                      {
+                        id: "learning-notes",
+                        value: progress.notes,
+                        onChange: /* @__PURE__ */ __name((e) => setProgress({ ...progress, notes: e.target.value }), "onChange"),
+                        rows: 6,
+                        className: "w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                        placeholder: "このプロセスについての理解、重要なポイント、疑問点などを記録...",
+                        "aria-describedby": "notes-help"
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "notes-help", className: "sr-only", children: "Write your understanding, key points, and questions about this process" })
+                  ] })
+                ] })
+              ] }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-3 border-t bg-gray-50 p-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    onClick: onClose,
+                    className: "rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                    children: "キャンセル"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    onClick: handleSave,
+                    className: "flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Save, { className: "h-4 w-4" }),
+                      "保存"
+                    ]
+                  }
+                )
+              ] })
+            ]
+          }
+        )
+      }
+    )
+  );
+}, "LearningModal");
+const LearningModal$1 = React.memo(LearningModal);
+function generateProcessId(knowledgeArea, processGroup, processIndex) {
+  const kaCode = knowledgeArea.substring(0, 3).toUpperCase();
+  const pgCode = processGroup.substring(0, 2).toUpperCase();
+  return `${kaCode}_${pgCode}_${processIndex.toString().padStart(2, "0")}`;
+}
+__name(generateProcessId, "generateProcessId");
+const { logger } = require("../../services/logger");
+const completeKnowledgeAreas = [
+  { id: "integration", name: "プロジェクト統合マネジメント", processes: 7 },
+  { id: "scope", name: "プロジェクト・スコープ・マネジメント", processes: 6 },
+  { id: "schedule", name: "プロジェクト・スケジュール・マネジメント", processes: 6 },
+  { id: "cost", name: "プロジェクト・コスト・マネジメント", processes: 4 },
+  { id: "quality", name: "プロジェクト品質マネジメント", processes: 3 },
+  { id: "resource", name: "プロジェクト資源マネジメント", processes: 6 },
+  { id: "communications", name: "プロジェクト・コミュニケーション・マネジメント", processes: 3 },
+  { id: "risk", name: "プロジェクト・リスク・マネジメント", processes: 7 },
+  { id: "procurement", name: "プロジェクト調達マネジメント", processes: 3 },
+  { id: "stakeholder", name: "プロジェクト・ステークホルダー・マネジメント", processes: 4 }
+];
+const completeProcesses = {
+  // 統合マネジメント（7プロセス）
+  integration: {
+    立上げ: ["プロジェクト憲章の作成"],
+    計画: ["プロジェクトマネジメント計画書の作成"],
+    実行: ["プロジェクト作業の指揮・マネジメント", "プロジェクト知識のマネジメント"],
+    "監視・コントロール": ["プロジェクト作業の監視・コントロール", "統合変更管理"],
+    終結: ["プロジェクトやフェーズの終結"]
+  },
+  // スコープ・マネジメント（6プロセス）
+  scope: {
+    計画: ["スコープ・マネジメントの計画", "要求事項の収集", "スコープの定義", "WBSの作成"],
+    "監視・コントロール": ["スコープの妥当性確認", "スコープのコントロール"]
+  },
+  // スケジュール・マネジメント（6プロセス）
+  schedule: {
+    計画: [
+      "スケジュール・マネジメントの計画",
+      "アクティビティの定義",
+      "アクティビティの順序設定",
+      "アクティビティの所要期間見積り",
+      "スケジュールの作成"
+    ],
+    "監視・コントロール": ["スケジュールのコントロール"]
+  },
+  // コスト・マネジメント（4プロセス）
+  cost: {
+    計画: ["コスト・マネジメントの計画", "コストの見積り", "予算の設定"],
+    "監視・コントロール": ["コストのコントロール"]
+  },
+  // 品質マネジメント（3プロセス）
+  quality: {
+    計画: ["品質マネジメントの計画"],
+    実行: ["品質のマネジメント"],
+    "監視・コントロール": ["品質のコントロール"]
+  },
+  // 資源マネジメント（6プロセス）
+  resource: {
+    計画: ["資源マネジメントの計画", "アクティビティ資源の見積り"],
+    実行: ["資源の獲得", "チームの育成", "チームのマネジメント"],
+    "監視・コントロール": ["資源のコントロール"]
+  },
+  // コミュニケーション・マネジメント（3プロセス）
+  communications: {
+    計画: ["コミュニケーション・マネジメントの計画"],
+    実行: ["コミュニケーションのマネジメント"],
+    "監視・コントロール": ["コミュニケーションの監視"]
+  },
+  // リスク・マネジメント（7プロセス）
+  risk: {
+    計画: [
+      "リスク・マネジメントの計画",
+      "リスクの特定",
+      "定性的リスク分析",
+      "定量的リスク分析",
+      "リスク対応の計画"
+    ],
+    実行: ["リスク対応策の実行"],
+    "監視・コントロール": ["リスクの監視"]
+  },
+  // 調達マネジメント（3プロセス）
+  procurement: {
+    計画: ["調達マネジメントの計画"],
+    実行: ["調達の実行"],
+    "監視・コントロール": ["調達のコントロール"]
+  },
+  // ステークホルダー・マネジメント（4プロセス）
+  stakeholder: {
+    立上げ: ["ステークホルダーの特定"],
+    計画: ["ステークホルダー・エンゲージメントの計画"],
+    実行: ["ステークホルダー・エンゲージメントのマネジメント"],
+    "監視・コントロール": ["ステークホルダー・エンゲージメントの監視"]
+  }
+};
+const processITTO = {
+  // 統合マネジメント
+  プロジェクト憲章の作成: {
+    inputs: ["ビジネス文書", "合意書", "組織体の環境要因", "組織のプロセス資産"],
+    tools: ["専門家の判断", "データ収集", "対人関係とチームに関するスキル", "会議"],
+    outputs: ["プロジェクト憲章", "前提条件ログ"]
+  },
+  プロジェクトマネジメント計画書の作成: {
+    inputs: [
+      "プロジェクト憲章",
+      "他のプロセスからのアウトプット",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["専門家の判断", "データ収集", "対人関係とチームに関するスキル", "会議"],
+    outputs: ["プロジェクトマネジメント計画書"]
+  },
+  "プロジェクト作業の指揮・マネジメント": {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "承認済み変更要求",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["専門家の判断", "PMIS", "会議"],
+    outputs: ["成果物", "作業パフォーマンス・データ", "課題ログ", "変更要求"]
+  },
+  プロジェクト知識のマネジメント: {
+    inputs: ["プロジェクトマネジメント計画書", "成果物", "組織体の環境要因", "組織のプロセス資産"],
+    tools: [
+      "専門家の判断",
+      "知識マネジメント",
+      "情報マネジメント",
+      "対人関係とチームに関するスキル"
+    ],
+    outputs: ["教訓登録簿", "組織のプロセス資産更新版"]
+  },
+  "プロジェクト作業の監視・コントロール": {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "作業パフォーマンス情報",
+      "合意書",
+      "組織体の環境要因"
+    ],
+    tools: ["専門家の判断", "データ分析", "意思決定", "会議"],
+    outputs: ["作業パフォーマンス報告書", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  統合変更管理: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "変更要求",
+      "作業パフォーマンス報告書",
+      "組織体の環境要因"
+    ],
+    tools: ["専門家の判断", "変更管理ツール", "データ分析", "意思決定", "会議"],
+    outputs: ["承認済み変更要求", "変更ログ", "プロジェクトマネジメント計画書更新版"]
+  },
+  プロジェクトやフェーズの終結: {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "受入済み成果物",
+      "ビジネス文書"
+    ],
+    tools: ["専門家の判断", "データ分析", "会議"],
+    outputs: ["最終報告書", "組織のプロセス資産更新版"]
+  },
+  // スコープ・マネジメント
+  "スコープ・マネジメントの計画": {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["専門家の判断", "データ分析", "会議"],
+    outputs: ["スコープ・マネジメント計画書", "要求事項マネジメント計画書"]
+  },
+  要求事項の収集: {
+    inputs: ["プロジェクト憲章", "プロジェクトマネジメント計画書", "ビジネス文書", "合意書"],
+    tools: [
+      "専門家の判断",
+      "データ収集",
+      "データ分析",
+      "意思決定",
+      "データ表現",
+      "対人関係とチームに関するスキル"
+    ],
+    outputs: ["要求事項文書", "要求事項トレーサビリティ・マトリックス"]
+  },
+  スコープの定義: {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "要求事項文書",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "代替案分析",
+      "多基準意思決定分析",
+      "対人関係とチームに関するスキル",
+      "プロダクト分析"
+    ],
+    outputs: ["プロジェクト・スコープ記述書", "プロジェクト文書更新版"]
+  },
+  WBSの作成: {
+    inputs: ["プロジェクトマネジメント計画書", "プロジェクト・スコープ記述書", "要求事項文書"],
+    tools: ["専門家の判断", "分解"],
+    outputs: ["スコープ・ベースライン", "プロジェクト文書更新版"]
+  },
+  スコープの妥当性確認: {
+    inputs: ["プロジェクトマネジメント計画書", "検証済み成果物", "作業パフォーマンス・データ"],
+    tools: ["検査", "意思決定"],
+    outputs: ["受入済み成果物", "作業パフォーマンス情報", "変更要求"]
+  },
+  スコープのコントロール: {
+    inputs: ["プロジェクトマネジメント計画書", "作業パフォーマンス・データ", "組織のプロセス資産"],
+    tools: ["データ分析"],
+    outputs: ["作業パフォーマンス情報", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  // スケジュール・マネジメント
+  "スケジュール・マネジメントの計画": {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["専門家の判断", "データ分析", "会議"],
+    outputs: ["スケジュール・マネジメント計画書"]
+  },
+  アクティビティの定義: {
+    inputs: ["プロジェクトマネジメント計画書", "組織体の環境要因", "組織のプロセス資産"],
+    tools: ["専門家の判断", "分解", "ローリング・ウェーブ計画法", "会議"],
+    outputs: ["アクティビティ・リスト", "アクティビティ属性", "マイルストーン・リスト", "変更要求"]
+  },
+  アクティビティの順序設定: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "アクティビティ・リスト",
+      "アクティビティ属性",
+      "マイルストーン・リスト"
+    ],
+    tools: ["プレシデンス・ダイアグラム法", "依存関係の決定と統合", "リードとラグ", "PMIS"],
+    outputs: ["プロジェクト・スケジュール・ネットワーク図", "プロジェクト文書更新版"]
+  },
+  アクティビティの所要期間見積り: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "アクティビティ・リスト",
+      "アクティビティ属性",
+      "資源要求事項"
+    ],
+    tools: [
+      "専門家の判断",
+      "類推見積り",
+      "パラメトリック見積り",
+      "三点見積り",
+      "ボトムアップ見積り"
+    ],
+    outputs: ["所要期間見積り", "見積りの根拠", "プロジェクト文書更新版"]
+  },
+  スケジュールの作成: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "アクティビティ・リスト",
+      "アクティビティ属性",
+      "プロジェクト・スケジュール・ネットワーク図"
+    ],
+    tools: [
+      "スケジュール・ネットワーク分析",
+      "クリティカル・パス法",
+      "資源最適化",
+      "データ分析",
+      "スケジュール短縮"
+    ],
+    outputs: [
+      "スケジュール・ベースライン",
+      "プロジェクト・スケジュール",
+      "スケジュール・データ",
+      "プロジェクト・カレンダー"
+    ]
+  },
+  スケジュールのコントロール: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト・スケジュール",
+      "作業パフォーマンス・データ"
+    ],
+    tools: ["データ分析", "クリティカル・パス法", "PMIS", "資源最適化", "スケジュール短縮"],
+    outputs: ["作業パフォーマンス情報", "スケジュール予測", "変更要求"]
+  },
+  // コスト・マネジメント
+  "コスト・マネジメントの計画": {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["専門家の判断", "データ分析", "会議"],
+    outputs: ["コスト・マネジメント計画書"]
+  },
+  コストの見積り: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "類推見積り",
+      "パラメトリック見積り",
+      "ボトムアップ見積り",
+      "三点見積り"
+    ],
+    outputs: ["コスト見積り", "見積りの根拠", "プロジェクト文書更新版"]
+  },
+  予算の設定: {
+    inputs: ["プロジェクトマネジメント計画書", "ビジネス文書", "コスト見積り", "見積りの根拠"],
+    tools: ["専門家の判断", "コスト集約", "データ分析", "過去の情報レビュー", "資金限度額調整"],
+    outputs: ["コスト・ベースライン", "プロジェクト資金要求事項", "プロジェクト文書更新版"]
+  },
+  コストのコントロール: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト資金要求事項",
+      "作業パフォーマンス・データ"
+    ],
+    tools: ["専門家の判断", "データ分析", "完成時総コスト予測", "PMIS"],
+    outputs: ["作業パフォーマンス情報", "コスト予測", "変更要求"]
+  },
+  // 品質マネジメント
+  品質マネジメントの計画: {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因"
+    ],
+    tools: [
+      "専門家の判断",
+      "データ収集",
+      "データ分析",
+      "意思決定",
+      "データ表現",
+      "テストと検査の計画"
+    ],
+    outputs: ["品質マネジメント計画書", "品質尺度", "プロジェクトマネジメント計画書更新版"]
+  },
+  品質のマネジメント: {
+    inputs: ["プロジェクトマネジメント計画書", "プロジェクト文書", "組織のプロセス資産"],
+    tools: ["データ収集", "データ分析", "意思決定", "データ表現", "監査", "問題解決"],
+    outputs: ["品質報告書", "テストと評価の文書", "変更要求"]
+  },
+  品質のコントロール: {
+    inputs: ["プロジェクトマネジメント計画書", "プロジェクト文書", "作業パフォーマンス・データ"],
+    tools: ["データ収集", "データ分析", "検査", "テスト/製品評価", "データ表現", "会議"],
+    outputs: ["品質コントロール測定結果", "検証済み成果物", "作業パフォーマンス情報"]
+  },
+  // 資源マネジメント
+  資源マネジメントの計画: {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因"
+    ],
+    tools: ["専門家の判断", "データ表現", "組織論", "会議"],
+    outputs: ["資源マネジメント計画書", "チーム憲章", "プロジェクト文書更新版"]
+  },
+  アクティビティ資源の見積り: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "ボトムアップ見積り",
+      "類推見積り",
+      "パラメトリック見積り",
+      "データ分析"
+    ],
+    outputs: ["資源要求事項", "見積りの根拠", "資源ブレークダウン・ストラクチャー"]
+  },
+  資源の獲得: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: ["意思決定", "対人関係とチームに関するスキル", "事前割当て", "バーチャル・チーム"],
+    outputs: ["物的資源の割当て", "プロジェクト・チームの任命", "資源カレンダー"]
+  },
+  チームの育成: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "コロケーション",
+      "バーチャル・チーム",
+      "コミュニケーション技術",
+      "対人関係とチームに関するスキル"
+    ],
+    outputs: ["チーム・パフォーマンス評価", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  チームのマネジメント: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "作業パフォーマンス報告書",
+      "チーム・パフォーマンス評価"
+    ],
+    tools: ["対人関係とチームに関するスキル", "PMIS"],
+    outputs: ["変更要求", "プロジェクトマネジメント計画書更新版", "プロジェクト文書更新版"]
+  },
+  資源のコントロール: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "作業パフォーマンス・データ",
+      "合意書"
+    ],
+    tools: ["データ分析", "問題解決", "対人関係とチームに関するスキル", "PMIS"],
+    outputs: ["作業パフォーマンス情報", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  // コミュニケーション・マネジメント
+  "コミュニケーション・マネジメントの計画": {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因"
+    ],
+    tools: [
+      "専門家の判断",
+      "コミュニケーション要求事項分析",
+      "コミュニケーション技術",
+      "コミュニケーション・モデル"
+    ],
+    outputs: ["コミュニケーション・マネジメント計画書", "プロジェクトマネジメント計画書更新版"]
+  },
+  コミュニケーションのマネジメント: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "作業パフォーマンス報告書",
+      "組織体の環境要因"
+    ],
+    tools: [
+      "コミュニケーション技術",
+      "コミュニケーション方法",
+      "コミュニケーション・スキル",
+      "PMIS",
+      "報告"
+    ],
+    outputs: [
+      "プロジェクト・コミュニケーション",
+      "プロジェクトマネジメント計画書更新版",
+      "プロジェクト文書更新版"
+    ]
+  },
+  コミュニケーションの監視: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト・コミュニケーション",
+      "作業パフォーマンス・データ"
+    ],
+    tools: ["専門家の判断", "PMIS", "データ表現", "対人関係とチームに関するスキル", "会議"],
+    outputs: ["作業パフォーマンス情報", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  // リスク・マネジメント
+  "リスク・マネジメントの計画": {
+    inputs: [
+      "プロジェクト憲章",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因"
+    ],
+    tools: ["専門家の判断", "データ分析", "会議"],
+    outputs: ["リスク・マネジメント計画書"]
+  },
+  リスクの特定: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "合意書",
+      "調達文書",
+      "組織体の環境要因"
+    ],
+    tools: [
+      "専門家の判断",
+      "データ収集",
+      "データ分析",
+      "対人関係とチームに関するスキル",
+      "プロンプト・リスト"
+    ],
+    outputs: ["リスク登録簿", "リスク報告書", "プロジェクト文書更新版"]
+  },
+  定性的リスク分析: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "データ収集",
+      "データ分析",
+      "対人関係とチームに関するスキル",
+      "リスク分類"
+    ],
+    outputs: ["プロジェクト文書更新版"]
+  },
+  定量的リスク分析: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "データ収集",
+      "対人関係とチームに関するスキル",
+      "リスクの不確実性の表現",
+      "データ分析"
+    ],
+    outputs: ["プロジェクト文書更新版"]
+  },
+  リスク対応の計画: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "対人関係とチームに関するスキル",
+      "脅威への戦略",
+      "好機への戦略",
+      "コンティンジェンシー対応戦略"
+    ],
+    outputs: ["変更要求", "プロジェクトマネジメント計画書更新版", "プロジェクト文書更新版"]
+  },
+  リスク対応策の実行: {
+    inputs: ["プロジェクトマネジメント計画書", "プロジェクト文書", "組織のプロセス資産"],
+    tools: ["専門家の判断", "対人関係とチームに関するスキル", "PMIS"],
+    outputs: ["変更要求", "プロジェクト文書更新版"]
+  },
+  リスクの監視: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "作業パフォーマンス・データ",
+      "作業パフォーマンス報告書"
+    ],
+    tools: ["データ分析", "監査", "会議"],
+    outputs: ["作業パフォーマンス情報", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  // 調達マネジメント
+  調達マネジメントの計画: {
+    inputs: [
+      "プロジェクト憲章",
+      "ビジネス文書",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書"
+    ],
+    tools: ["専門家の判断", "市場調査", "会議"],
+    outputs: ["調達マネジメント計画書", "調達戦略", "入札文書", "調達作業範囲記述書"]
+  },
+  調達の実行: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "調達文書",
+      "納入者の提案",
+      "組織体の環境要因"
+    ],
+    tools: ["専門家の判断", "広告", "入札説明会", "データ分析", "対人関係とチームに関するスキル"],
+    outputs: ["選定された納入者", "合意書", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  調達のコントロール: {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "合意書",
+      "調達文書",
+      "承認済み変更要求"
+    ],
+    tools: ["専門家の判断", "クレーム対応", "データ分析", "検査", "監査"],
+    outputs: ["調達終結", "作業パフォーマンス情報", "調達文書更新版", "変更要求"]
+  },
+  // ステークホルダー・マネジメント
+  ステークホルダーの特定: {
+    inputs: [
+      "プロジェクト憲章",
+      "ビジネス文書",
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書"
+    ],
+    tools: ["専門家の判断", "データ収集", "データ分析", "データ表現", "会議"],
+    outputs: ["ステークホルダー登録簿", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  },
+  "ステークホルダー・エンゲージメントの計画": {
+    inputs: ["プロジェクト憲章", "プロジェクトマネジメント計画書", "プロジェクト文書", "合意書"],
+    tools: ["専門家の判断", "データ収集", "データ分析", "意思決定", "データ表現", "会議"],
+    outputs: ["ステークホルダー・エンゲージメント計画書"]
+  },
+  "ステークホルダー・エンゲージメントのマネジメント": {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "組織体の環境要因",
+      "組織のプロセス資産"
+    ],
+    tools: [
+      "専門家の判断",
+      "コミュニケーション・スキル",
+      "対人関係とチームに関するスキル",
+      "基本規則",
+      "会議"
+    ],
+    outputs: ["変更要求", "プロジェクトマネジメント計画書更新版", "プロジェクト文書更新版"]
+  },
+  "ステークホルダー・エンゲージメントの監視": {
+    inputs: [
+      "プロジェクトマネジメント計画書",
+      "プロジェクト文書",
+      "作業パフォーマンス・データ",
+      "組織体の環境要因"
+    ],
+    tools: [
+      "データ分析",
+      "意思決定",
+      "データ表現",
+      "コミュニケーション・スキル",
+      "対人関係とチームに関するスキル"
+    ],
+    outputs: ["作業パフォーマンス情報", "変更要求", "プロジェクトマネジメント計画書更新版"]
+  }
+};
+const PMBOKMatrix = reactExports.memo(() => {
+  const navigate = useNavigate();
+  const { progress } = useProgress();
+  const [loading, setLoading] = reactExports.useState(false);
+  const [expandedAreas, setExpandedAreas] = reactExports.useState(/* @__PURE__ */ new Set());
+  const [selectedProcess, setSelectedProcess] = reactExports.useState(null);
+  const [searchQuery, setSearchQuery] = reactExports.useState("");
+  const [selectedGlossaryTerm, setSelectedGlossaryTerm] = reactExports.useState(null);
+  const [learningModalOpen, setLearningModalOpen] = reactExports.useState(false);
+  const [selectedLearningProcess, setSelectedLearningProcess] = reactExports.useState(null);
+  const processGroups = ["立上げ", "計画", "実行", "監視・コントロール", "終結"];
+  const processGroupsShort = {
+    立上げ: "立上げ",
+    計画: "計画",
+    実行: "実行",
+    "監視・コントロール": "監視",
+    終結: "終結"
+  };
+  const termMapping = reactExports.useMemo(() => {
+    const mapping = {};
+    glossaryTerms.forEach((term) => {
+      if (term.japanese) {
+        mapping[term.japanese] = term;
+      }
+      mapping[term.term] = term;
+    });
+    return mapping;
+  }, []);
+  const renderTextWithLinks = reactExports.useCallback(
+    (text) => {
+      const sortedTerms = Object.keys(termMapping).sort((a, b) => b.length - a.length);
+      const result = [];
+      let remainingText = text;
+      let lastIndex = 0;
+      for (const term of sortedTerms) {
+        const index = remainingText.indexOf(term);
+        if (index !== -1) {
+          if (index > 0) {
+            result.push(remainingText.substring(0, index));
+          }
+          const termData = termMapping[term];
+          result.push(
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                onClick: /* @__PURE__ */ __name((e) => {
+                  e.stopPropagation();
+                  setSelectedGlossaryTerm(termData);
+                }, "onClick"),
+                className: "group inline-flex items-center font-medium text-blue-600 underline hover:text-blue-800",
+                children: [
+                  term,
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Info, { className: "ml-0.5 h-3 w-3 opacity-60 group-hover:opacity-100" })
+                ]
+              },
+              `${term}-${lastIndex}`
+            )
+          );
+          remainingText = remainingText.substring(index + term.length);
+          lastIndex += index + term.length;
+        }
+      }
+      if (remainingText) {
+        result.push(remainingText);
+      }
+      return result.length > 0 ? result : text;
+    },
+    [termMapping]
+  );
+  const toggleArea = reactExports.useCallback(
+    (areaId) => {
+      setLoading(true);
+      setTimeout(() => {
+        const newExpanded = new Set(expandedAreas);
+        if (newExpanded.has(areaId)) {
+          newExpanded.delete(areaId);
+        } else {
+          newExpanded.add(areaId);
+        }
+        setExpandedAreas(newExpanded);
+        setLoading(false);
+      }, 100);
+    },
+    [expandedAreas]
+  );
+  const handleProcessClick = reactExports.useCallback((process) => {
+    setLoading(true);
+    setTimeout(() => {
+      setSelectedProcess(process);
+      setLoading(false);
+    }, 100);
+  }, []);
+  const filteredProcesses = reactExports.useMemo(() => {
+    if (!searchQuery) {
+      return completeProcesses;
+    }
+    const filtered = {};
+    const query = searchQuery.toLowerCase();
+    Object.entries(completeProcesses).forEach(([area, groups]) => {
+      const filteredGroups = {};
+      Object.entries(groups).forEach(([group, processList]) => {
+        const filteredList = processList.filter((process) => process.toLowerCase().includes(query));
+        if (filteredList.length > 0) {
+          filteredGroups[group] = filteredList;
+        }
+      });
+      if (Object.keys(filteredGroups).length > 0) {
+        filtered[area] = filteredGroups;
+      }
+    });
+    return filtered;
+  }, [searchQuery]);
+  const getProcessCount = /* @__PURE__ */ __name((areaId) => {
+    const areaProcesses = filteredProcesses[areaId];
+    if (!areaProcesses) {
+      return 0;
+    }
+    return Object.values(areaProcesses).reduce((sum, group) => sum + group.length, 0);
+  }, "getProcessCount");
+  const getAreaProgress = /* @__PURE__ */ __name((areaId) => {
+    const areaProcesses = completeProcesses[areaId];
+    if (!areaProcesses || !(progress == null ? void 0 : progress.processes)) {
+      return { completed: 0, total: 0, percentage: 0 };
+    }
+    let completed = 0;
+    let total = 0;
+    Object.entries(areaProcesses).forEach(([group, processList]) => {
+      processList.forEach((process, index) => {
+        var _a;
+        const processId = generateProcessId(areaId, group, index);
+        if ((_a = progress.processes[processId]) == null ? void 0 : _a.completed) {
+          completed++;
+        }
+        total++;
+      });
+    });
+    return {
+      completed,
+      total,
+      percentage: total > 0 ? Math.round(completed / total * 100) : 0
+    };
+  }, "getAreaProgress");
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto w-full max-w-7xl p-2 sm:p-4 md:p-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "overflow-hidden rounded-lg bg-white shadow-lg", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-b p-4 sm:p-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mb-3 text-lg font-bold text-gray-800 sm:mb-4 sm:text-xl md:text-2xl", children: "PMBOK 第6版 - プロセス・マトリックス (49プロセス)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              "aria-label": "Input field",
+              id: "input-1754995293946-1054",
+              type: "text",
+              placeholder: "プロセスを検索...",
+              className: "w-full rounded-lg border px-3 py-2 pl-9 pr-10 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4 sm:pl-10 sm:text-base",
+              value: searchQuery,
+              onChange: /* @__PURE__ */ __name((e) => setSearchQuery(e.target.value), "onChange")
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 sm:left-3 sm:h-5 sm:w-5" }),
+          searchQuery && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              onClick: /* @__PURE__ */ __name(() => setSearchQuery(""), "onClick"),
+              className: "absolute right-2.5 top-2.5 text-gray-400 transition-colors hover:text-gray-600 sm:right-3",
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4 sm:h-5 sm:w-5" })
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "custom-scrollbar overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full min-w-[550px] sm:min-w-[700px] md:min-w-[900px]", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "sticky top-0 z-10 border-b bg-gray-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "w-32 px-1 py-2 text-left text-[9px] font-medium uppercase tracking-tight text-gray-500 sm:w-48 sm:px-3 sm:py-3 sm:text-xs sm:tracking-wider md:w-60 md:px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "truncate", children: "知識エリア" }) }),
+          processGroups.map((group) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "th",
+            {
+              className: "px-0.5 py-2 text-center text-[9px] font-medium uppercase tracking-tighter text-gray-500 sm:px-2 sm:py-3 sm:text-xs md:px-4",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "hidden sm:block", children: group }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "sm:hidden", children: processGroupsShort[group] })
+              ]
+            },
+            group
+          ))
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { className: "divide-y divide-gray-200 bg-white", children: completeKnowledgeAreas.map((area) => {
+          const isExpanded = expandedAreas.has(area.id);
+          const processCount = getProcessCount(area.id);
+          const hasFilteredProcesses = processCount > 0;
+          const areaProgress = getAreaProgress(area.id);
+          if (!hasFilteredProcesses && searchQuery) {
+            return null;
+          }
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(React.Fragment, { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "transition-colors hover:bg-gray-50", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-1 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  onClick: /* @__PURE__ */ __name(() => toggleArea(area.id), "onClick"),
+                  className: "flex w-full items-center space-x-1 text-left",
+                  disabled: loading,
+                  children: [
+                    loading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Loader2, { className: "h-3 w-3 flex-shrink-0 animate-spin text-gray-500 sm:h-4 sm:w-4" }) : isExpanded ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "h-3 w-3 flex-shrink-0 text-gray-500 sm:h-4 sm:w-4" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "block truncate text-[11px] font-medium text-gray-900 sm:text-sm md:text-base", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "sm:hidden", children: area.name.replace("プロジェクト・", "").replace("プロジェクト", "").replace("マネジメント", "") }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "hidden sm:inline", children: area.name })
+                        ] }),
+                        areaProgress.percentage > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                          "span",
+                          {
+                            className: `ml-2 text-[10px] font-medium sm:text-xs ${areaProgress.percentage === 100 ? "text-green-600" : areaProgress.percentage >= 50 ? "text-blue-600" : "text-gray-600"}`,
+                            children: [
+                              areaProgress.percentage,
+                              "%"
+                            ]
+                          }
+                        )
+                      ] }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-1 flex items-center gap-2", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[10px] text-gray-500 sm:text-xs", children: [
+                          "(",
+                          processCount,
+                          ")"
+                        ] }),
+                        areaProgress.completed > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-1.5 w-16 rounded-full bg-gray-200", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                            "div",
+                            {
+                              className: `h-1.5 rounded-full transition-all duration-500 ${areaProgress.percentage === 100 ? "bg-green-600" : areaProgress.percentage >= 50 ? "bg-blue-600" : "bg-gray-400"}`,
+                              style: { width: `${areaProgress.percentage}%` }
+                            }
+                          ) }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[10px] text-gray-500", children: [
+                            areaProgress.completed,
+                            "/",
+                            areaProgress.total
+                          ] })
+                        ] })
+                      ] })
+                    ] })
+                  ]
+                }
+              ) }),
+              processGroups.map((group) => {
+                var _a;
+                const groupProcesses = ((_a = filteredProcesses[area.id]) == null ? void 0 : _a[group]) || [];
+                return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "td",
+                  {
+                    className: "px-0.5 py-3 text-center sm:px-2 sm:py-4 md:px-4",
+                    children: groupProcesses.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-800 sm:h-7 sm:w-7 sm:text-xs md:h-8 md:w-8 md:text-sm", children: groupProcesses.length })
+                  },
+                  group
+                );
+              })
+            ] }),
+            isExpanded && filteredProcesses[area.id] && /* @__PURE__ */ jsxRuntimeExports.jsx("tr", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { colSpan: 6, className: "bg-gray-50 px-3 py-3 sm:px-6 sm:py-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3", children: processGroups.map((group) => {
+                const groupProcesses = filteredProcesses[area.id][group];
+                if (!groupProcesses || groupProcesses.length === 0) {
+                  return null;
+                }
+                return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1.5 sm:space-y-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "sticky top-0 bg-gray-50 py-1 text-xs font-semibold text-gray-700 sm:text-sm", children: group }),
+                  groupProcesses.map((process, index) => {
+                    var _a;
+                    const processId = generateProcessId(area.id, group, index);
+                    const processProgress = (_a = progress == null ? void 0 : progress.processes) == null ? void 0 : _a[processId];
+                    const isCompleted = (processProgress == null ? void 0 : processProgress.completed) || false;
+                    const understanding = (processProgress == null ? void 0 : processProgress.understanding) || 0;
+                    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        "button",
+                        {
+                          onClick: /* @__PURE__ */ __name(() => handleProcessClick(process), "onClick"),
+                          disabled: loading,
+                          className: `flex-1 rounded border px-2.5 py-1.5 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 sm:py-2 sm:text-sm ${selectedProcess === process ? "border-blue-400 bg-blue-100 font-semibold" : isCompleted ? "border-green-300 bg-green-50 hover:bg-green-100" : "bg-white hover:border-blue-300 hover:bg-blue-50"}`,
+                          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1", children: [
+                              isCompleted && /* @__PURE__ */ jsxRuntimeExports.jsx(CheckCircle2, { className: "h-3 w-3 flex-shrink-0 text-green-600" }),
+                              process
+                            ] }),
+                            understanding > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "ml-2 text-[10px] text-gray-500", children: [
+                              understanding,
+                              "%"
+                            ] })
+                          ] })
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        "button",
+                        {
+                          onClick: /* @__PURE__ */ __name(() => {
+                            setSelectedLearningProcess({
+                              id: processId,
+                              name: process,
+                              knowledgeArea: area.name,
+                              processGroup: group,
+                              ...processITTO[process]
+                            });
+                            setLearningModalOpen(true);
+                          }, "onClick"),
+                          className: "rounded p-1.5 text-blue-600 transition-colors hover:bg-blue-50",
+                          title: "学習する",
+                          children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-3.5 w-3.5" })
+                        }
+                      )
+                    ] }, process);
+                  })
+                ] }, group);
+              }) }),
+              selectedProcess && processITTO[selectedProcess] && (() => {
+                const currentAreaProcesses = completeProcesses[area.id];
+                if (!currentAreaProcesses) {
+                  return false;
+                }
+                const isInCurrentArea = Object.values(currentAreaProcesses).some(
+                  (groupProcesses) => groupProcesses && groupProcesses.includes(selectedProcess)
+                );
+                return isInCurrentArea;
+              })() && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 border-t pt-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-3 flex items-start justify-between", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-bold text-gray-800 sm:text-base", children: selectedProcess }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      onClick: /* @__PURE__ */ __name((e) => {
+                        e.stopPropagation();
+                        setSelectedProcess(null);
+                      }, "onClick"),
+                      className: "text-gray-400 hover:text-gray-600",
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4" })
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 gap-3 lg:grid-cols-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-blue-50 p-3", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "mb-2 flex items-center text-xs font-semibold text-blue-800 sm:text-sm", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "mr-1 h-4 w-4" }),
+                      "インプット"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1", children: processITTO[selectedProcess].inputs.map((input, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "li",
+                      {
+                        className: "flex items-start text-xs text-gray-700 sm:text-sm",
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-1 text-blue-600", children: "•" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: renderTextWithLinks(input) })
+                        ]
+                      },
+                      idx
+                    )) })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-green-50 p-3", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "mb-2 flex items-center text-xs font-semibold text-green-800 sm:text-sm", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "mr-1 h-4 w-4" }),
+                      "ツールと技法"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1", children: processITTO[selectedProcess].tools.map((tool, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "li",
+                      {
+                        className: "flex items-start text-xs text-gray-700 sm:text-sm",
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-1 text-green-600", children: "•" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: renderTextWithLinks(tool) })
+                        ]
+                      },
+                      idx
+                    )) })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-amber-50 p-3", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "mb-2 flex items-center text-xs font-semibold text-amber-800 sm:text-sm", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "mr-1 h-4 w-4" }),
+                      "アウトプット"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1", children: processITTO[selectedProcess].outputs.map(
+                      (output, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        "li",
+                        {
+                          className: "flex items-start text-xs text-gray-700 sm:text-sm",
+                          children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-1 text-amber-600", children: "•" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: renderTextWithLinks(output) })
+                          ]
+                        },
+                        idx
+                      )
+                    ) })
+                  ] })
+                ] })
+              ] })
+            ] }) })
+          ] }, area.id);
+        }) })
+      ] }) })
+    ] }),
+    selectedGlossaryTerm && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      GlossaryDialog,
+      {
+        term: selectedGlossaryTerm,
+        onClose: /* @__PURE__ */ __name(() => setSelectedGlossaryTerm(null), "onClose"),
+        onNavigateToGlossary: /* @__PURE__ */ __name((termId) => {
+          navigate("/glossary", { state: { selectedTermId: termId } });
+        }, "onNavigateToGlossary")
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      LearningModal$1,
+      {
+        isOpen: learningModalOpen,
+        onClose: /* @__PURE__ */ __name(() => {
+          setLearningModalOpen(false);
+          setSelectedLearningProcess(null);
+        }, "onClose"),
+        process: selectedLearningProcess,
+        processId: selectedLearningProcess == null ? void 0 : selectedLearningProcess.id,
+        knowledgeArea: selectedLearningProcess == null ? void 0 : selectedLearningProcess.knowledgeArea,
+        processGroup: selectedLearningProcess == null ? void 0 : selectedLearningProcess.processGroup
+      }
+    )
+  ] });
+});
+PMBOKMatrix.displayName = "PMBOKMatrix";
+export {
+  PMBOKMatrix as default
+};
