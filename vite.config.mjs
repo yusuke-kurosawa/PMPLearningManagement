@@ -36,7 +36,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
-    minify: false, // CRITICAL: Completely disable minification to prevent TDZ errors
+    minify: 'esbuild', // Using esbuild for fast minification (safe after chunk splitting fix)
     target: ['es2020', 'edge88', 'chrome88', 'safari14'], // Modern browser support (updated to es2020)
     rollupOptions: {
       // Ensure correct module loading order to prevent useLayoutEffect errors
@@ -48,10 +48,14 @@ export default defineConfig({
             // CRITICAL FIX: Bundle React, React-DOM, Scheduler, and React-Router together
             // to prevent multiple React instances and "Cannot set properties of undefined" error
             // scheduler MUST be bundled with React to avoid initialization conflicts
+            // react-hot-toast MUST be excluded to avoid TDZ error with goober dependency
             if (id.includes('scheduler') ||
                 id.includes('react-dom') ||
                 id.includes('react-router') ||
-                (id.includes('react') && !id.includes('@radix-ui') && !id.includes('lucide-react'))) {
+                (id.includes('react') &&
+                 !id.includes('@radix-ui') &&
+                 !id.includes('lucide-react') &&
+                 !id.includes('react-hot-toast'))) {
               return 'react-vendor';
             }
 
