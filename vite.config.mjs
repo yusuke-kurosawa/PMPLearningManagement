@@ -36,7 +36,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
-    minify: 'esbuild', // Using esbuild to prevent segmentation faults
+    minify: false, // CRITICAL: Completely disable minification to prevent TDZ errors
     target: ['es2020', 'edge88', 'chrome88', 'safari14'], // Modern browser support (updated to es2020)
     rollupOptions: {
       // Ensure correct module loading order to prevent useLayoutEffect errors
