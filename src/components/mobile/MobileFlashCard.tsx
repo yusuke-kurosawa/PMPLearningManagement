@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, RotateCw, Check, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { Button } from '../ui/button'
+import { Card } from '../ui/card'
+import { Progress } from '../ui/progress'
 import { useTouchGestures, useHapticFeedback } from '@/hooks/useTouchGestures'
 import { motion, AnimatePresence } from 'framer-motion'
 

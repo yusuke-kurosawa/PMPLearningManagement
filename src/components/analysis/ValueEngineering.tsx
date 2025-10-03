@@ -4,8 +4,8 @@
  */
 
 import React, { useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card'
+import { Badge } from '../ui/badge'
 import {
   BarChart,
   Bar,

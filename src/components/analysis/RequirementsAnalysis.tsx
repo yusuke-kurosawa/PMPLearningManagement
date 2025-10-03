@@ -4,10 +4,10 @@
  */
 
 import React, { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { Progress } from '../ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { CheckCircle2, Circle, AlertCircle, Target, Shield, Zap, Users } from 'lucide-react'
 
 interface Requirement {

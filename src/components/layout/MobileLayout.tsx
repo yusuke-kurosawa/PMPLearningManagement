@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import MobileNavigation from './MobileNavigation'
 import { pwaManager, isMobile, isStandalone } from '@/lib/pwa'
-import { Button } from '@/components/ui/button'
+import { Button } from '../ui/button'
 import { Download, X, Wifi, WifiOff } from 'lucide-react'
 
 interface MobileLayoutProps {

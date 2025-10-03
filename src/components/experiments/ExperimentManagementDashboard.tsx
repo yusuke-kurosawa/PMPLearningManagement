@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '../ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import {
   Table,
   TableBody,
@@ -18,9 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
+} from '../ui/table'
+import { Progress } from '../ui/progress'
+import { Badge } from '../ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '../ui/dialog'
 import {
   LineChart,
   Line,
@@ -69,13 +69,13 @@ import {
   Settings,
   Flask,
 } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 import ABTestingFramework, {
   Experiment,
   Variant,
   MetricDefinition,
   ExperimentResults,
-} from '@/services/abTesting/ABTestingFramework'
+} from '../../services/abTesting/ABTestingFramework'
 
 const ExperimentManagementDashboard: React.FC = () => {
   const [experiments, setExperiments] = useState<Experiment[]>([])

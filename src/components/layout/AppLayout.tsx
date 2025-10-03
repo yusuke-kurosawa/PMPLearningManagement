@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Navigation from './Navigation'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
-import CommandPalette from '../shared/CommandPalette'
-import QuickShortcuts from '../shared/QuickShortcuts'
-import SettingsTrigger from '../shared/SettingsTrigger'
-import SkipLinks from '../shared/SkipLinks'
+import { CommandPalette, QuickShortcuts, SettingsTrigger, SkipLinks } from '../shared'
 
 const AppLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)

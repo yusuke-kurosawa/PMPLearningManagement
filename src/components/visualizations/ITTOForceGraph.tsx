@@ -17,7 +17,7 @@ import React, { useRef, useState, useMemo, useCallback, memo } from 'react'
 import * as d3 from 'd3'
 import { Filter, RotateCcw, ZoomIn, ZoomOut, Menu, X } from 'lucide-react'
 import { glossaryService } from '../../services/glossaryService'
-import GlossaryDialog from '../learning/GlossaryDialog'
+import { GlossaryDialog } from '../learning'
 import { useNavigate } from 'react-router-dom'
 import {
   useD3ForceSimulation,

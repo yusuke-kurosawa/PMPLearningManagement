@@ -11,8 +11,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { glossaryTerms } from '../../data/schemas/glossary/pmpGlossary'
-import GlossaryDialog from '../learning/GlossaryDialog'
-import LearningModal from '../learning/LearningModal'
+import { GlossaryDialog, LearningModal } from '../learning'
 import { useProgress } from '../../services/progressService'
 import { generateProcessId } from '../../utils/processUtils'
 import {

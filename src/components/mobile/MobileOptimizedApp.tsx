@@ -79,7 +79,7 @@ import { useToast } from '../../hooks/use-toast'
 // import { Tabs } from '../ui/tabs' // TODO: Will be used in future
 import { Switch } from '../ui/switch'
 // import { Progress } from '../ui/progress' // TODO: Will be used in future
-import SkipLinks from '../shared/SkipLinks'
+import { SkipLinks } from '../shared'
 interface PWACapabilities {
   isInstalled: boolean
   isStandalone: boolean

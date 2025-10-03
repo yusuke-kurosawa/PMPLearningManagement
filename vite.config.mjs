@@ -36,24 +36,42 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // Disabled for production performance
-    minify: 'esbuild', // Using esbuild for fast minification (safe after chunk splitting fix)
+    minify: 'terser', // Using terser to avoid esbuild helper function conflicts across chunks
+    terserOptions: {
+      compress: {
+        passes: 2,
+        pure_getters: true,
+      },
+      mangle: {
+        safari10: true,
+      },
+      format: {
+        comments: false,
+      },
+    },
     target: ['es2020', 'edge88', 'chrome88', 'safari14'], // Modern browser support (updated to es2020)
     rollupOptions: {
       // Ensure correct module loading order to prevent useLayoutEffect errors
       external: [],
       output: {
+        // CRITICAL: Share esbuild helpers across chunks to prevent "__name is not a function" errors
+        inlineDynamicImports: false,
         manualChunks(id) {
           // More granular chunking to reduce individual file sizes and avoid 429 errors
           if (id.includes('node_modules')) {
-            // CRITICAL FIX: Bundle React, React-DOM, Scheduler, and React-Router together
+            // CRITICAL FIX: Bundle React, React-DOM, Scheduler, React-Router, and Radix UI together
             // to prevent multiple React instances and "Cannot set properties of undefined" error
             // scheduler MUST be bundled with React to avoid initialization conflicts
             // react-hot-toast MUST be excluded to avoid TDZ error with goober dependency
+            // @radix-ui MUST be with React to share esbuild helpers (__name, __assign, etc.)
+            // use-sidecar and react-remove-scroll (Radix dependencies) share same helpers
             if (id.includes('scheduler') ||
                 id.includes('react-dom') ||
                 id.includes('react-router') ||
+                id.includes('@radix-ui') ||
+                id.includes('use-sidecar') ||
+                id.includes('react-remove-scroll') ||
                 (id.includes('react') &&
-                 !id.includes('@radix-ui') &&
                  !id.includes('lucide-react') &&
                  !id.includes('react-hot-toast'))) {
               return 'react-vendor';
@@ -66,12 +84,6 @@ export default defineConfig({
             // Split UI libraries
             if (id.includes('framer-motion')) return 'framer-motion';
             if (id.includes('lucide-react')) return 'lucide-icons';
-
-            // Split Radix UI into smaller chunks
-            if (id.includes('@radix-ui/react-dialog')) return 'radix-dialog';
-            if (id.includes('@radix-ui/react-accordion')) return 'radix-accordion';
-            if (id.includes('@radix-ui/react-tabs')) return 'radix-tabs';
-            if (id.includes('@radix-ui')) return 'radix-core';
 
             // Split other large dependencies
             if (id.includes('recharts')) return 'recharts';

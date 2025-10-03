@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react'
 import * as d3 from 'd3'
 import { Play, Pause, RotateCcw, Filter } from 'lucide-react'
 import { glossaryService } from '../../services/glossaryService'
-import GlossaryDialog from '../learning/GlossaryDialog'
+import { GlossaryDialog } from '../learning'
 import { useNavigate } from 'react-router-dom'
 
 const ProcessFlowDiagram = React.memo(() => {
