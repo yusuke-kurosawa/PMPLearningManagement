@@ -1,0 +1,140 @@
+# ==========================================
+# 🤖 AI Analysis - SuperClaude Integration
+# ==========================================
+# 目的: SuperClaudeによるAI駆動コードレビューとセキュリティ分析
+# 実行タイミング: Pull Request作成・更新時、mainブランチへのpush時
+#
+# 主な処理:
+# 1. Pull Request差分分析
+# 2. セキュリティ脆弱性スキャン
+# 3. コード品質評価
+# 4. 自動PRコメント投稿
+# ==========================================
+
+name: 🤖 AI Analysis - SuperClaude Integration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      analysis_depth:
+        description: '分析深度 (quick/standard/deep)'
+        required: false
+        default: 'standard'
+
+concurrency:
+  group: superclaude-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-analysis:
+    name: 📊 PR差分分析
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 チェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Python環境セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Node.js環境セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📚 依存関係インストール
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install SuperClaude
+          npm ci
+
+      - name: 🔍 変更ファイル検出
+        id: changed_files
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(js|jsx|ts|tsx)$' || true)
+          FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: 🤖 SuperClaude分析実行
+        if: steps.changed_files.outputs.count > 0
+        run: |
+          source .venv/bin/activate
+          mkdir -p reports/superclaude
+          
+          # SuperClaude分析（エラー時も継続）
+          .venv/bin/SuperClaude analyze \
+            --config .superclaude/config.yml \
+            --files ${{ steps.changed_files.outputs.files }} \
+            --output reports/superclaude/pr-${{ github.event.pull_request.number }}.json \
+            || echo "SuperClaude実行失敗（継続）"
+
+      - name: 📝 PRコメント投稿
+        if: always() && steps.changed_files.outputs.count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = `reports/superclaude/pr-${{ github.event.pull_request.number }}.json`;
+            
+            let comment = '## 🤖 SuperClaude Analysis Report\n\n';
+            
+            if (fs.existsSync(reportPath)) {
+              try {
+                const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                comment += `**Overall Score:** ${report.score || 'N/A'}/100\n\n`;
+                comment += '### 🎯 Key Findings\n';
+                
+                if (report.findings && report.findings.length > 0) {
+                  report.findings.slice(0, 5).forEach(f => {
+                    const emoji = f.severity === 'critical' ? '🔴' : 
+                                  f.severity === 'high' ? '🟠' : 
+                                  f.severity === 'medium' ? '🟡' : '🟢';
+                    comment += `- ${emoji} **${f.severity}**: ${f.message}\n`;
+                  });
+                } else {
+                  comment += '✅ No significant issues found\n';
+                }
+              } catch (e) {
+                comment += '⚠️ レポート解析エラー\n';
+              }
+            } else {
+              comment += '⚠️ SuperClaude分析が完了しませんでした\n';
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: 📤 レポートアップロード
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: superclaude-report-pr-${{ github.event.pull_request.number }}
+          path: reports/superclaude/
+          retention-days: 30
