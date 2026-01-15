@@ -205,7 +205,7 @@
     "fast-check": "^3.15.1",
     "gh-pages": "^6.1.0",
     "glob": "^11.0.3",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.0.2",
     "husky": "^8.0.3",
     "jest-axe": "^8.0.0",
     "jest-mock-extended": "^4.0.0",
